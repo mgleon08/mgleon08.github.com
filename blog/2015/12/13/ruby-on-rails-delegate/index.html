@@ -5,13 +5,16 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>About - Leon's Blogging</title>
+  <title>Ruby on Rails-delegate - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="About Dec 12th, 2015 1:12 pm | Leon Ji Ruby on Rails Developer Github https://github.com/mgleon08
-Yourator www.yourator.co
-Rainbow-Balloons http:// &hellip;">
+  <meta name="description" content="神奇語法delegate，之前就看過這個語法，不過一直搞不懂在幹什麼？
+研究了之後，發現是個很magic的用法!! 說穿了其實是讓 class 的 object 可以直接呼叫到另一個 class 的 method 還是看範例比較快 1
+2
+3
+4
+class Cart &lt; &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +23,7 @@ Rainbow-Balloons http:// &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/about">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-delegate">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -98,51 +101,153 @@ Rainbow-Balloons http:// &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">About</h1>
     
-        <p class="meta">
-            
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time> |
-        </p>
+      
+        <h1 class="entry-title">Ruby on Rails-delegate</h1>
+      
     
-  </header>
-  
-  <h1>Leon Ji</h1>
-
-<h3>Ruby on Rails Developer</h3>
-
-<ul>
-<li> Github <a href="https://github.com/mgleon08">https://github.com/mgleon08</a></li>
-<li>Yourator <a href="http://www.yourator.co/">www.yourator.co</a></li>
-<li>Rainbow-Balloons <a href="http://www.rainbow-balloons.com/">http://www.rainbow-balloons.com/</a></li>
-<li>Email : <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#x3a;&#109;&#x67;&#x6c;&#x65;&#111;&#x6e;&#x30;&#x38;&#x40;&#x67;&#x6d;&#97;&#105;&#108;&#46;&#99;&#111;&#109;">&#109;&#103;&#x6c;&#x65;&#111;&#110;&#48;&#56;&#64;&#103;&#109;&#x61;&#105;&#x6c;&#46;&#x63;&#111;&#x6d;</a></li>
-</ul>
-
-
-  
-    <footer>
+    
       <p class="meta">
         
+
+
+
+
+<time class='entry-date' datetime='2015-12-13T12:25:16+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:25 pm</span></time>
         
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time>
+         | <a href="#disqus_thread">Comments</a>
         
         
       </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>神奇語法delegate，之前就看過這個語法，不過一直搞不懂在幹什麼？<br/>
+研究了之後，發現是個很magic的用法!!</p>
+
+<!-- more -->
+
+
+<blockquote><p>說穿了其實是讓 class 的 object 可以直接呼叫到另一個 class 的 method</p></blockquote>
+
+<p>還是看範例比較快</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Cart</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:cart_items</span>
+</span><span class='line'>  <span class="n">delegate</span> <span class="ss">:empty?</span><span class="p">,</span> <span class="ss">:clear</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:line_items</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CartItem</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:cart</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面有兩個 model 的關係是 one-to-many<br/>
+一般正常來說必須要<code>@cart.cart_items.empty?</code> 才能夠從 cart 關聯到 cart_items 在呼叫他的方法 <code>empty?</code></p>
+
+<p>不過因為加上了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">delegate</span> <span class="ss">:empty?</span><span class="p">,</span> <span class="ss">:clear</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:line_items</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p></p>
+
+<p>所以直接呼叫 <code>@cart.empty?</code> 就可以回傳 <code>@cart.cart_items.empty?</code><br/>
+仔細觀察後，其實也就等於下面的 method (但是可以一行解決下面的語法</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">empty?</span>
+</span><span class='line'>    <span class="n">cart_items</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另外還可以加上 <code>prefix: true</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">delegate</span> <span class="ss">:empty?</span><span class="p">,</span> <span class="ss">:clear</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:line_items</span><span class="p">,</span> <span class="ss">prefix</span><span class="p">:</span> <span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>變成直接呼叫 <code>@cart.cart_items_empty?</code> 字面上面的更加清楚!</p>
+
+<p>在官方API文件上甚至可以看到
+可以加上 <code>allow_nil: true</code> 允許 nil
+甚至是 prefix 可以加上別的字，變成</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">delegate</span> <span class="ss">:empty?</span><span class="p">,</span> <span class="ss">:clear</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:line_items</span><span class="p">,</span> <span class="ss">prefix</span><span class="p">:</span> <span class="n">mycart</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就變成 <code>@cart. mycart_empty?</code><br/>
+蠻酷的吧!</p>
+
+<p>官方文件：
+<a href="http://apidock.com/rails/Module/delegate">delegate</a></p>
+
+<ol>
+<li>:to - Specifies the target object</li>
+<li>:prefix - Prefixes the new method with the target name or a custom prefix</li>
+<li>:allow_nil - if set to true, prevents a NoMethodError to be raised</li>
+</ol>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
       
-        <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/about/index.html" data-via="" data-counturl="http://mgleon08.github.com/about/index.html" >Tweet</a>
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-12-13T12:25:16+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:25 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/railsyu-fa/'>rails語法</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-delegate/" data-via="" data-counturl="http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-delegate/" >Tweet</a>
   
   
   
@@ -150,9 +255,16 @@ Rainbow-Balloons http:// &hellip;">
   
 </div>
 
+    
+    <p class="meta">
       
-    </footer>
-  
+        <a class="basic-alignment left" href="/blog/2015/12/11/how-to-install-octopress/" title="Previous Post: 用 Octopress + Github Pages 來架設 blog">&laquo; 用 Octopress + Github Pages 來架設 blog</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/" title="Next Post: Ruby on Rails-accepts_nested_attributes_for">Ruby on Rails-accepts_nested_attributes_for &raquo;</a>
+      
+    </p>
+  </footer>
 </article>
 
   <section>
@@ -163,13 +275,6 @@ Rainbow-Balloons http:// &hellip;">
 
 
 </div>
-
-<aside class="sidebar">
-  
-    
-  
-</aside>
-
 
     </div>
   </div>
@@ -186,8 +291,8 @@ Rainbow-Balloons http:// &hellip;">
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/about/index.html';
-        var disqus_url = 'http://mgleon08.github.com/about/index.html';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-delegate/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-delegate/';
         var disqus_script = 'embed.js';
       
     (function () {
