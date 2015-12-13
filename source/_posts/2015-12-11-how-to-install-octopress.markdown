@@ -28,7 +28,8 @@ bundle install
 #開新的 Github Repository
 
 到 [Github](https://github.com/) 點選右上角 New repository, Repository name 輸入自己帳號的名稱  
->像筆者帳號是 mgleon08 就輸入 mgleon08.github.com
+>像筆者帳號是 mgleon08 就輸入 mgleon08.github.com  
+>之後網址就是 http://mgleon08.github.io/
 
 #佈署到Github上
 ```
