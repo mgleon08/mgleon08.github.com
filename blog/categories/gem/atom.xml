@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-13T21:32:07+08:00</updated>
+  <updated>2015-12-14T21:57:11+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -14,7 +14,127 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Ruby on Rails-accepts_nested_attributes_for]]></title>
+    <title type="html"><![CDATA[Ruby on Rails - 虛擬屬性Virtual Attribute]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/14/ruby-on-rails-virtual-attribute/"/>
+    <updated>2015-12-14T13:13:37+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/14/ruby-on-rails-virtual-attribute</id>
+    <content type="html"><![CDATA[<p>當要操作的屬性資料，和資料庫的欄位不相同的時候，就可以在 model 裡建立 Virtual Attribute 來取代。</p>
+
+<h3>範例1 - full_name</h3>
+
+<pre><code class="ruby">def full_name
+    "#{self.first_name} #{self.last_name}"
+end
+
+def full_name=(value)
+    self.first_name, self.last_name = value.to_s.split(" ", 2)
+end
+</code></pre>
+
+<!-- more -->
+
+
+<p>當資料庫欄位裡面有 <code>first_name</code> 和 <code>last_name</code> 分別去存取，但顯示的時候卻不可能只顯示一個，通常都一定是要連在一起</p>
+
+<p>這時候就能夠用 Virtual Attribute 做出一個虛擬的屬性 <code>full_name</code> ， 而它的值則是 <code>first_name</code> 和 <code>last_name</code> 合在一起</p>
+
+<p>這樣以後要取出名字，就只要用 <code>full_name</code> 即可，就不需要每次都在那邊相加。</p>
+
+<h3>範例2 - tag_list</h3>
+
+<pre><code class="ruby">def tag_list
+  self.tags.map{ |t| t.name }.join(",")
+end
+
+def tag_list=(str)
+  arr = str.split(",")
+
+  self.tags = arr.map do |t|
+    tag = CompanyTag.find_by_name(t)
+    unless tag
+      tag = CompanyTag.create!( :name =&gt; t )
+    end
+      tag  #沒有加這個的話，uless 最後一個回傳的會是 nil 就會爆錯
+  end
+
+end
+</code></pre>
+
+<p>取出時，先將所有 tag 透過 <code>map</code> 取出所有 name 變成一個 array，再用 <code>join</code> 轉成 string</p>
+
+<p>存取時，先用 <code>split</code> 將 string 轉 array，用 name 去判斷每個元素是否已經存在資料庫，若是沒有，就 <code>create</code> 一個新的</p>
+
+<blockquote><p>可以另外搭配 <a href="https://select2.github.io/">select2</a> 做出比較好看的 tag !!</p></blockquote>
+
+<p>Rails gem
+<a href="https://github.com/argerim/select2-rails">select2-rails</a></p>
+
+<p>```ruby</p>
+
+<script>
+  $("#tag_list").select2({
+    tags: <%=raw Tags.all.map{|t| t.name}%>,
+    tokenSeparators: [',', ' ']
+  });
+</script>
+
+
+<pre><code>
+
+#最後來介紹一下attr_accessor
+
+如果只要一般(沒有像上面還要取出來，單純只要讀取.存取)的虛擬屬性  
+（就是資料庫並不需要這個欄位，但可能要透過這個虛擬屬性，組成某個陣列裡的元素）
+
+則可以直接用 `attr_accessor` 直接產生以下的結果
+</code></pre>
+
+<p>class Girl
+  def initialize(age)
+    @age = age
+  end
+  # @age的getter方法
+  def age<br/>
+    @age<br/>
+  end<br/>
+  # @age的setter方法<br/>
+  def age=(x)<br/>
+    @age = x<br/>
+  end
+end
+```</p>
+
+<p><code>attr_accessor</code> 就是可以自動產生 getter 和 setter<br/>
+<code>attr_reader</code> 產生 getter<br/>
+<code>attr_writer</code> 產生 setter</p>
+
+<p>網路上有一篇講的很清楚，可以去看看<br/>
+<a href="http://blog.eddie.com.tw/2015/03/21/attr_accessor/">Ruby 語法放大鏡之「attr_accessor 是幹嘛的?」</a></p>
+
+<h1>attr_accessible 和 attr_protected</h1>
+
+<p>另外在網路上有發現兩個長個很相像的方法<br/>
+仔細研究發現，這兩個主要好像都是為了防止 Mass assignment (大量賦值)</p>
+
+<p><code>attr_accessible</code> 被設定的 attributes <code>以外</code> 不能夠被 Mass assignment<br/>
+<code>attr_protected</code> 被設定的 attributes <code>自己</code> 不能夠被 Mass assignment</p>
+
+<p>哈哈，一個是自己本身，一個是本身以外，蠻奇妙的。<br/>
+但目前還不太知道什時候會用上..有用上再來補吧(笑)</p>
+
+<p>官方文件：</p>
+
+<ul>
+<li><a href="http://apidock.com/rails/ActiveRecord/Base/attr_accessible/class">attr_accessible</a></li>
+<li><a href="http://apidock.com/rails/ActiveRecord/Base/attr_protected/class">attr_protected</a></li>
+<li><a href="http://stackoverflow.com/questions/2652907/what-is-the-difference-between-attr-accessibleattributes-attr-protectedat">stackoverflow</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Accepts_nested_attributes_for]]></title>
     <link href="http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/"/>
     <updated>2015-12-13T18:35:13+08:00</updated>
     <id>http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for</id>

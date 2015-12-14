@@ -1,0 +1,96 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Server | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/server/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2015-12-14T21:57:11+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[遠端 SSH 免密碼登入(key)]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/"/>
+    <updated>2015-12-14T19:12:27+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/14/ssh-no-password</id>
+    <content type="html"><![CDATA[<p>用 ssh 連線到遠端 server 的時候，一般都要輸入帳號密碼來登入，但這會有幾點缺點</p>
+
+<ol>
+<li>輸入帳號密碼的同時，也會增加帳密被竊取的可能</li>
+<li>當登入的頻率很高的時候，或是有很多台機器要登入的時候，就會覺得相當煩！！</li>
+</ol>
+
+
+<p>因此可以透過公開金鑰（Public Key）和私密金鑰（Private Key）對應的方式，去做登入，這樣以後就不用輸入密碼拉~</p>
+
+<!-- more -->
+
+
+<h3>Step 1.</h3>
+
+<pre><code>ssh root@123.123.12.1
+sudo adduser --disabled-password deploy
+sudo su deploy 
+</code></pre>
+
+<p>首先會先連到遠端 server 開新的帳號<br/>
+（因為root帳號權限很大，我們不希望每個人都用到root權限，而且root帳號是固定的，不夠安全）</p>
+
+<p>先開個新帳號 deploy，就會產生 <code>home/deploy</code></p>
+
+<ul>
+<li><code>--disabled-password</code> 讓 deploy 無法用密碼登入</li>
+<li><code>su</code> 就是切換身份</li>
+</ul>
+
+
+<h3>Step 2.</h3>
+
+<pre><code>ssh-keygen -t rsa
+
+#Enter file in which to save the key (/root/.ssh/id_rsa): (不輸入，直接按Enter)
+#Enter passphrase (empty for no passphrase): (不輸入，直接按Enter)
+#Enter same passphrase again: (不輸入，直接按Enter)
+</code></pre>
+
+<p>再換到 deploy 後產生出 <code>id_rsa（private key）</code> , <code>id_rsa.pub （public key）</code></p>
+
+<p>接著複製本機的 <code>~/.ssh/id_rsa.pub</code> 到 <code>/home/deploy/.ssh/authorized_keys</code></p>
+
+<blockquote><p>之後連線, 就會用本機的 <code>id_rsa（private key）</code> 與遠端電腦的 <code>authorized_keys(public key)</code> 做認證</p></blockquote>
+
+<ul>
+<li>可以先在 (本機) <code>cat ~/.ssh/id_rsa.pub</code> 將 &lsquo;所有&rsquo; 字串複製</li>
+<li>再到 (遠端)新增 <code>vi /home/deploy/.ssh/authorized_keys</code> ，將字串貼上去後 <code>:wq</code> 離開</li>
+</ul>
+
+
+<h3>Step 3.</h3>
+
+<pre><code> chmod 644 /home/deploy/.ssh/authorized_keys
+ chown deploy:deploy /home/deploy/.ssh/authorized_keys
+</code></pre>
+
+<p>更改權限，讓 group 和 other 可以讀<br/>
+<code>chmod</code> 改變權限<br/>
+<code>chown</code> 改變檔案擁有者</p>
+
+<pre><code>644 權限
+owner  = rw- = 4+2+0 = 6  
+group  = r-- = 4+0+0 = 4  
+others = r-- = 4+0+0 = 4
+</code></pre>
+
+<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#x61;&#x69;&#x6c;&#x74;&#x6f;&#x3a;&#x64;&#101;&#112;&#x6c;&#111;&#121;&#64;&#49;&#x32;&#x33;&#x2e;&#49;&#50;&#51;&#x2e;&#49;&#50;&#x2e;&#x31;">&#100;&#101;&#112;&#108;&#x6f;&#121;&#x40;&#49;&#x32;&#51;&#x2e;&#x31;&#x32;&#x33;&#x2e;&#49;&#x32;&#x2e;&#49;</a> 就連進去囉!!</p>
+
+<p>權限指令參考：
+<a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chown">鳥哥的私房菜</a></p>
+]]></content>
+  </entry>
+  
+</feed>
