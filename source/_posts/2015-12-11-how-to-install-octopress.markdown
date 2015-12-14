@@ -85,7 +85,8 @@ Octopress會幫你產生新的檔案 `2015-12-11-title.markdown` 到source/_post
 #發表文章
 
 *	撰寫好後先 `rake preview` 預覽一下畫面  
-*	確認好後就在 `rake deploy` 這樣網路上的就會更新了  
+*	確認先 `rake generate`
+*	再 `rake deploy` 這樣網路上的就會更新了  
 *	記得最後還是要 `git push` 到 Github
 
 這樣就可以開始寫文章囉~

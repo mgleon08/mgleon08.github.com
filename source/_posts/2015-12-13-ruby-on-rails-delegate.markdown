@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Ruby on rails-delegate"
+title: "Ruby on rails - delegate"
 date: 2015-12-13 12:25:16 +0800
 comments: true
 categories: rails語法 rails

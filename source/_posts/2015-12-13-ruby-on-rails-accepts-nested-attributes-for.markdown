@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Ruby on Rails-accepts_nested_attributes_for"
+title: "Ruby on Rails - accepts_nested_attributes_for"
 date: 2015-12-13 18:35:13 +0800
 comments: true
 categories: rails rails語法 gem
