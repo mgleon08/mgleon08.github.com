@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-14T21:57:11+08:00</updated>
+  <updated>2015-12-16T22:59:02+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,136 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[.nil? .empty? .blank? .present? 傻傻分不清楚？]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/"/>
+    <updated>2015-12-16T21:29:43+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present</id>
+    <content type="html"><![CDATA[<p>在學習ruby on rails的過程中，常常會有一些非常神奇的語法<br/>
+其中又有些語法非常的相像..所以常常會搞混</p>
+
+<p>今天就來介紹一下這幾個很相似的 method</p>
+
+<!-- more -->
+
+
+<h1>.nil?</h1>
+
+<pre><code class="ruby">nil.nil?       #true
+[].nil?        #false
+{}.nil?        #false
+"".nil?        #false
+" ".nil?       #false
+"abc".nil?     #false
+123.nil?       #false
+</code></pre>
+
+<ul>
+<li>ruby method</li>
+<li>任何物件都是false，只有nil是true</li>
+</ul>
+
+
+<h1>.empty? &amp; .any?</h1>
+
+<pre><code class="ruby">nil.empty?     #NoMethodError: undefined method `empty?' for nil:NilClass
+[].empty?      #true
+{}.empty?      #true
+"".empty?      #true
+" ".empty?     #false
+"abc".empty?   #false
+123.empty?     #NoMethodError: undefined method `empty?' for 123:Fixnum
+</code></pre>
+
+<ul>
+<li>ruby method</li>
+<li>只要是空值就是 true（<code>空白</code> 不算空值）</li>
+<li>相對的 method 是 <code>any?</code></li>
+</ul>
+
+
+<pre><code class="ruby">nil.any?       #NoMethodError: undefined method `any?' for nil:NilClass
+[].any?        #false
+{}.any?        #false
+"".any?        #NoMethodError: undefined method `any?' for "":String
+" ".any?       #NoMethodError: undefined method `any?' for "":String
+"abc".any?     #NoMethodError: undefined method `any?' for "":String
+123.any?       #NoMethodError: undefined method `any?' for 123:Fixnum
+</code></pre>
+
+<p>但是要注意，String 並沒有提供 <code>.any?</code> 這個 method</p>
+
+<h1>.blank? &amp; .present?</h1>
+
+<pre><code class="ruby">nil.blank?     #true 
+[].blank?      #true 
+{}.blank?      #true 
+"".blank?      #true
+" ".blank?     #true
+"abc".blank?   #false
+123.blank?     #false
+</code></pre>
+
+<ul>
+<li>Rails method</li>
+<li>只要是 nil，空值都是 true</li>
+<li>有點像是 <code>Object.nil? || Object.empty?</code> 的綜合體，但條件比 <code>.empty</code> 寬鬆一點，<code>空白</code> 也會是 true</li>
+<li>相對的 method 是 <code>present?</code></li>
+</ul>
+
+
+<pre><code class="ruby">nil.present?   #false 
+[].present?    #false 
+{}.present?    #false 
+"".present?    #false
+" ".present?   #false
+"abc".present? #true
+123.present?   #true
+</code></pre>
+
+<blockquote><p>經過上面這樣看來，只有 <code>.blank?</code> 和 <code>.present?</code> 不會爆錯 (所以我都用這個(誤))<br/>
+主要還是要看當時的情境拉XD</p></blockquote>
+
+<h1>.persisted? &amp; .new_record?</h1>
+
+<p>最後來介紹一下，如何判斷 Object 是否已經存在資料庫的 method。</p>
+
+<pre><code class="ruby">a = User.new   #還沒存入資料庫以前
+a.persisted?   #false
+a.new_record?  #true
+
+a.save         #存入資料庫
+a.persisted?   #true
+a.new_record?  #false
+</code></pre>
+
+<h1>如何看物件有哪些方法？或是上一層是誰？</h1>
+
+<pre><code class="ruby">Object.superclass       ＃查上一層是誰?
+Object.ancestors        ＃查祖宗十八代是誰?
+Object.methods          ＃查物件有哪些方法?
+Object.respond_to? :new ＃查物件是否有這個方法?
+</code></pre>
+
+<p>官方文件：</p>
+
+<ul>
+<li><a href="http://apidock.com/ruby/Object/nil%3F">.nil?</a></li>
+<li><a href="http://apidock.com/rails/ActiveRecord/Associations/CollectionProxy/empty%3F">.empty?</a></li>
+<li><a href="http://apidock.com/ruby/Enumerable/any%3F">.any?</a></li>
+<li><a href="http://apidock.com/rails/Object/blank%3F">.blank?</a></li>
+<li><a href="http://apidock.com/rails/Object/present%3F">.persisted?</a></li>
+<li><a href="http://apidock.com/rails/ActiveRecord/Base/new_record%3F">.new_record?</a></li>
+<li><a href="http://apidock.com/rails/ActiveRecord/Persistence/persisted%3F">.persisted?</a></li>
+<li><a href="http://apidock.com/ruby/Class/superclass">.superclass</a></li>
+<li><a href="http://apidock.com/rails/ActiveRecord/Acts/Tree/InstanceMethods/ancestors">.ancestors</a></li>
+<li><a href="http://apidock.com/ruby/Object/methods">.methods</a></li>
+<li><a href="http://apidock.com/ruby/Object/respond_to%3F">.respond_to?</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - 虛擬屬性Virtual Attribute]]></title>
