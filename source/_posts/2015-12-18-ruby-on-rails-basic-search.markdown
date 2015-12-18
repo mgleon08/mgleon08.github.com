@@ -3,7 +3,7 @@ layout: post
 title: "Ruby on Rails - 簡易搜尋功能"
 date: 2015-12-18 16:01:02 +0800
 comments: true
-categories: rails語法 rails
+categories: rails語法 rails gem
 ---
 
 在架設網站得時候，不免常常需要用到搜尋功能（增加使用者體驗)  
@@ -14,9 +14,9 @@ categories: rails語法 rails
 並不需要額外加 router，直接先在 view 裡面加上
 
 ```ruby
-<%= form_tag jobs_path, :method => :get do %>
+<%= form_tag books_path, :method => :get do %>
 	<%= text_field_tag "keyword", nil, placeholder: '請輸入關鍵字...', :class=>"form-control"%>
-	<%= submit_tag "Search", :class => "btn btn-default btn-sm" %>
+	<%= submit_tag "Search" %>
 <% end %>
 ```
 
@@ -24,11 +24,11 @@ categories: rails語法 rails
 
 ```ruby
 if params[:keyword]
-	@jobs = @jobs.where( [ "name like ? or content like", "%#{params[:keyword]}%", "%#{params[:keyword]}%"] )
+	@books = Book.where( [ "name like ? or content like", "%#{params[:keyword]}%", "%#{params[:keyword]}%"] )
 end
 ```
 
-用SQL的語法 `LIKE`，直接在資料庫裡面找尋相關的關鍵字，如果有多個欄位，再加上 `OR` 即可
+用SQL的語法 `LIKE`，直接在資料庫裡面找尋相關的關鍵字，如果有多個欄位，再加上 `OR` 即可，其中 `name` 和 `content` 就是要搜尋的欄位。
 
 記得前面後面要加上 `%` ，如果沒加上，就一定要完全跟輸入的關鍵字一樣。  
 加上去之後代表，前面後面都可以加上任意字組，就等於是說只有欄位裡有這個關鍵字就搜尋出來的意思。
@@ -43,7 +43,15 @@ end
 如果要更加複雜或是全文搜尋的話  
 可以用 gem 來取代  
 
-* [Solr](https://github.com/outoftime/sunspot) - [在 Rails 中使用 Solr 做全文搜尋](http://gogojimmy.net/2012/01/25/full-text-search-in-rails-with-solr/) 	
-* [Elasticsearch](https://github.com/elastic/elasticsearch-rails)
+* [ransack](https://github.com/activerecord-hackery/ransack)  
+比較不考慮效能
+
+* [Solr](https://github.com/outoftime/sunspot)  
+[在 Rails 中使用 Solr 做全文搜尋](http://gogojimmy.net/2012/01/25/full-text-search-in-rails-with-solr/) 	
+
+
+* [Elasticsearch](https://www.elastic.co/)  
+[elasticsearch-rails](https://github.com/elastic/elasticsearch-rails)  
+[第三方gem: Searchkick](https://github.com/ankane/searchkick)
 
 不過目前都還沒用過啊..改天要用到再來研究一下:D
