@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-18T16:56:11+08:00</updated>
+  <updated>2015-12-18T18:04:48+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,91 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - 用 Pow 當 HTTP Server]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-pow/"/>
+    <updated>2015-12-18T17:39:04+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-pow</id>
+    <content type="html"><![CDATA[<p>當要啟動一個專案的時候，通常都是打 <code>rails s</code><br/>
+就會跑在 port 3000 接著網址打 <code>http://localhost:3000/</code>，就可以打開了!</p>
+
+<p>那要啟動另一個勒？</p>
+
+<!-- more -->
+
+
+<ol>
+<li>先關掉第一個，再開啟另一個</li>
+<li>另一個打 <code>rails s -p 4000</code> ，換別的 port</li>
+</ol>
+
+
+<p>但是萬一facebook登入，已經設定是 <code>http://localhost:3000/</code>，那就悲劇了..</p>
+
+<p>因此有另一種方式來解決這種問題</p>
+
+<h1><a href="http://pow.cx/">pow</a></h1>
+
+<p>安裝方式也相當簡單，照著官方網站</p>
+
+<p>先下載到電腦上</p>
+
+<pre><code>curl get.pow.cx | sh
+</code></pre>
+
+<p>在指向到專案裡面</p>
+
+<pre><code>cd ~/.pow
+$ ln -s /path/to/myapp
+</code></pre>
+
+<p>接著在 <code>open http://myapp.dev</code><br/>
+就會啟動了!</p>
+
+<h1><a href="https://github.com/Rodreegez/powder">powder</a></h1>
+
+<p>powder 是一個整合好 pow 的 gem ，可以更方便快速的啟動一個專案</p>
+
+<h3>安裝方式</h3>
+
+<pre><code>gem install powder
+</code></pre>
+
+<h3>使用方式</h3>
+
+<p>在專案底下輸入</p>
+
+<pre><code>powder link
+</code></pre>
+
+<p>就會建立起連結，接著輸入</p>
+
+<pre><code>powder open
+</code></pre>
+
+<p>就打開了，超方便</p>
+
+<p>另外一定會問到，那要怎麼看 <code>Log</code></p>
+
+<ol>
+<li><code>tail -f log/development.log</code></li>
+<li><code>powder applog</code></li>
+</ol>
+
+
+<p>重新啟動</p>
+
+<ol>
+<li><code>touch tmp/restart.txt</code></li>
+<li><code>powder restart</code></li>
+</ol>
+
+
+<p>更多指令可以到 github 上面看<br/>
+<a href="https://github.com/Rodreegez/powder">powder</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - 簡易搜尋功能]]></title>
@@ -462,77 +547,6 @@ end
 </code></pre>
 
 <p>官方文件：<a href="http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html">accepts_nested_attributes_for </a> <a href="http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for">fields_for</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Delegate]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-delegate/"/>
-    <updated>2015-12-13T12:25:16+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-delegate</id>
-    <content type="html"><![CDATA[<p>神奇語法delegate，之前就看過這個語法，不過一直搞不懂在幹什麼？<br/>
-研究了之後，發現是個很magic的用法!!</p>
-
-<!-- more -->
-
-
-<blockquote><p>說穿了其實是讓 class 的 object 可以直接呼叫到另一個 class 的 method</p></blockquote>
-
-<p>還是看範例比較快</p>
-
-<pre><code class="ruby">class Cart &lt; ActiveRecord::Base
-  has_many :cart_items
-  delegate :empty?, :clear, to: :line_items
-end
-</code></pre>
-
-<pre><code class="ruby">class CartItem &lt; ActiveRecord::Base
-  belongs_to :cart
-end
-</code></pre>
-
-<p>上面有兩個 model 的關係是 one-to-many<br/>
-一般正常來說必須要<code>@cart.cart_items.empty?</code> 才能夠從 cart 關聯到 cart_items 在呼叫他的方法 <code>empty?</code></p>
-
-<p>不過因為加上了</p>
-
-<pre><code class="ruby">delegate :empty?, :clear, to: :line_items
-</code></pre>
-
-<p>所以直接呼叫 <code>@cart.empty?</code> 就可以回傳 <code>@cart.cart_items.empty?</code><br/>
-仔細觀察後，其實也就等於下面的 method (但是可以一行解決下面的語法</p>
-
-<pre><code class="ruby">def empty?
-    cart_items.empty?
-end
-</code></pre>
-
-<p>另外還可以加上 <code>prefix: true</code></p>
-
-<pre><code class="ruby">delegate :empty?, :clear, to: :line_items, prefix: true
-</code></pre>
-
-<p>變成直接呼叫 <code>@cart.cart_items_empty?</code> 字面上面的更加清楚!</p>
-
-<p>在官方API文件上甚至可以看到
-可以加上 <code>allow_nil: true</code> 允許 nil
-甚至是 prefix 可以加上別的字，變成</p>
-
-<pre><code class="ruby">delegate :empty?, :clear, to: :line_items, prefix: mycart
-</code></pre>
-
-<p>就變成 <code>@cart. mycart_empty?</code><br/>
-蠻酷的吧!</p>
-
-<p>官方文件：
-<a href="http://apidock.com/rails/Module/delegate">delegate</a></p>
-
-<ol>
-<li>:to - Specifies the target object</li>
-<li>:prefix - Prefixes the new method with the target name or a custom prefix</li>
-<li>:allow_nil - if set to true, prevents a NoMethodError to be raised</li>
-</ol>
-
 ]]></content>
   </entry>
   

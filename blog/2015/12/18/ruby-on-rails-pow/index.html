@@ -5,12 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>遠端 SSH 免密碼登入(key) - Leon's Blogging</title>
+  <title>Ruby on Rails - 用 Pow 當 HTTP Server - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="用 ssh 連線到遠端 server 的時候，一般都要輸入帳號密碼來登入，但這會有幾點缺點 輸入帳號密碼的同時，也會增加帳密被竊取的可能
-當登入的頻率很高的時候，或是有很多台機器要登入的時候，就會覺得相當煩！！ 因此可以透過公開金鑰（Public Key）和私密金鑰（Private Key） &hellip;">
+  <meta name="description" content="當要啟動一個專案的時候，通常都是打 rails s
+就會跑在 port 3000 接著網址打 http://localhost:3000/，就可以打開了! 那要啟動另一個勒？ 先關掉第一個，再開啟另一個
+另一個打 rails s -p 4000 ，換別的 port 但是萬一facebook登入， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +20,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-pow">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -102,7 +103,7 @@
   <header>
     
       
-        <h1 class="entry-title">遠端 SSH 免密碼登入(key)</h1>
+        <h1 class="entry-title">Ruby on Rails - 用 Pow 當 HTTP Server</h1>
       
     
     
@@ -112,7 +113,7 @@
 
 
 
-<time class='entry-date' datetime='2015-12-14T19:12:27+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>7:12 pm</span></time>
+<time class='entry-date' datetime='2015-12-18T17:39:04+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>5:39 pm</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -122,93 +123,89 @@
   </header>
 
 
-<div class="entry-content"><p>用 ssh 連線到遠端 server 的時候，一般都要輸入帳號密碼來登入，但這會有幾點缺點</p>
+<div class="entry-content"><p>當要啟動一個專案的時候，通常都是打 <code>rails s</code><br/>
+就會跑在 port 3000 接著網址打 <code>http://localhost:3000/</code>，就可以打開了!</p>
 
-<ol>
-<li>輸入帳號密碼的同時，也會增加帳密被竊取的可能</li>
-<li>當登入的頻率很高的時候，或是有很多台機器要登入的時候，就會覺得相當煩！！</li>
-</ol>
-
-
-<p>因此可以透過公開金鑰（Public Key）和私密金鑰（Private Key）對應的方式，去做登入，這樣以後就不用輸入密碼拉~</p>
+<p>那要啟動另一個勒？</p>
 
 <!-- more -->
 
 
-<h3>Step 1.</h3>
+<ol>
+<li>先關掉第一個，再開啟另一個</li>
+<li>另一個打 <code>rails s -p 4000</code> ，換別的 port</li>
+</ol>
+
+
+<p>但是萬一facebook登入，已經設定是 <code>http://localhost:3000/</code>，那就悲劇了..</p>
+
+<p>因此有另一種方式來解決這種問題</p>
+
+<h1><a href="http://pow.cx/">pow</a></h1>
+
+<p>安裝方式也相當簡單，照著官方網站</p>
+
+<p>先下載到電腦上</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>curl get.pow.cx | sh</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在指向到專案裡面</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh root@123.123.12.1
-</span><span class='line'>sudo adduser --disabled-password deploy
-</span><span class='line'>sudo su deploy </span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cd ~/.pow
+</span><span class='line'>$ ln -s /path/to/myapp</span></code></pre></td></tr></table></div></figure>
 
 
-<p>
-首先會先連到遠端 server 開新的帳號<br/>
-（因為root帳號權限很大，我們不希望每個人都用到root權限，而且root帳號是固定的，不夠安全）</p>
+<p>接著在 <code>open http://myapp.dev</code><br/>
+就會啟動了!</p>
 
-<p>先開個新帳號 deploy，就會產生 <code>home/deploy</code></p>
+<h1><a href="https://github.com/Rodreegez/powder">powder</a></h1>
 
-<ul>
-<li><code>--disabled-password</code> 讓 deploy 無法用密碼登入</li>
-<li><code>su</code> 就是切換身份</li>
-</ul>
+<p>powder 是一個整合好 pow 的 gem ，可以更方便快速的啟動一個專案</p>
 
-
-<h3>Step 2.</h3>
+<h3>安裝方式</h3>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh-keygen -t rsa
-</span><span class='line'>
-</span><span class='line'>#Enter file in which to save the key (/root/.ssh/id_rsa): (不輸入，直接按Enter)
-</span><span class='line'>#Enter passphrase (empty for no passphrase): (不輸入，直接按Enter)
-</span><span class='line'>#Enter same passphrase again: (不輸入，直接按Enter)</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gem install powder</span></code></pre></td></tr></table></div></figure>
 
 
-<p>再（本機）輸入 <code>ssh-keygen -t rsa</code> 產生出 <code>id_rsa（private key）</code> 和 <code>id_rsa.pub （public key）</code></p>
+<h3>使用方式</h3>
 
-<p>接著複製（本機）的 <code>~/.ssh/id_rsa.pub</code> 到 <code>/home/deploy/.ssh/authorized_keys</code>(自己新增 .ssh 資料夾和 authorized_keys 檔案)</p>
-
-<blockquote><p>之後連線, 就會用（本機）的 <code>id_rsa（private key）</code> 與遠端電腦的 <code>authorized_keys(public key)</code> 做認證</p></blockquote>
-
-<ul>
-<li>可以先在 (本機) <code>cat ~/.ssh/id_rsa.pub</code> 將 &lsquo;所有&rsquo; 字串複製</li>
-<li>再到 (遠端)新增 <code>vi /home/deploy/.ssh/authorized_keys</code> ，將字串貼上去後 <code>:wq</code> 離開</li>
-</ul>
-
-
-<h3>Step 3.</h3>
+<p>在專案底下輸入</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> chmod 644 /home/deploy/.ssh/authorized_keys
-</span><span class='line'> chown deploy:deploy /home/deploy/.ssh/authorized_keys</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>powder link</span></code></pre></td></tr></table></div></figure>
 
 
-<p>更改權限，讓 group 和 other 可以讀<br/>
-<code>chmod</code> 改變權限<br/>
-<code>chown</code> 改變檔案擁有者</p>
+<p>就會建立起連結，接著輸入</p>
 
 <figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>644 權限
-</span><span class='line'>owner  = rw- = 4+2+0 = 6  
-</span><span class='line'>group  = r-- = 4+0+0 = 4  
-</span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class=''><span class='line'>powder open</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#97;&#x69;&#x6c;&#116;&#x6f;&#x3a;&#100;&#x65;&#x70;&#108;&#111;&#x79;&#x40;&#x31;&#50;&#51;&#46;&#49;&#50;&#51;&#46;&#49;&#50;&#x2e;&#x31;">&#x64;&#x65;&#112;&#x6c;&#x6f;&#121;&#x40;&#49;&#x32;&#x33;&#x2e;&#49;&#50;&#51;&#x2e;&#49;&#50;&#46;&#x31;</a> 就連進去囉!!</p>
+<p>就打開了，超方便</p>
 
-<p>權限指令參考：
-<a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chown">鳥哥的私房菜</a></p>
+<p>另外一定會問到，那要怎麼看 <code>Log</code></p>
+
+<ol>
+<li><code>tail -f log/development.log</code></li>
+<li><code>powder applog</code></li>
+</ol>
+
+
+<p>重新啟動</p>
+
+<ol>
+<li><code>touch tmp/restart.txt</code></li>
+<li><code>powder restart</code></li>
+</ol>
+
+
+<p>更多指令可以到 github 上面看<br/>
+<a href="https://github.com/Rodreegez/powder">powder</a></p>
 </div>
 
 
@@ -231,13 +228,13 @@
 
 
 
-<time class='entry-date' datetime='2015-12-14T19:12:27+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>7:12 pm</span></time>
+<time class='entry-date' datetime='2015-12-18T17:39:04+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>5:39 pm</span></time>
       
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/server/'>server</a>, <a class='category' href='/blog/categories/she-ding/'>設定</a>
+    <a class='category' href='/blog/categories/gem/'>gem</a>, <a class='category' href='/blog/categories/rails/'>rails</a>
   
 </span>
 
@@ -246,7 +243,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/" data-via="" data-counturl="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-pow/" data-via="" data-counturl="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-pow/" >Tweet</a>
   
   
   
@@ -257,10 +254,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/12/14/ruby-on-rails-virtual-attribute/" title="Previous Post: Ruby on Rails - 虛擬屬性Virtual Attribute">&laquo; Ruby on Rails - 虛擬屬性Virtual Attribute</a>
+        <a class="basic-alignment left" href="/blog/2015/12/18/ruby-on-rails-basic-search/" title="Previous Post: Ruby on Rails - 簡易搜尋功能">&laquo; Ruby on Rails - 簡易搜尋功能</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/" title="Next Post: .nil? .empty? .blank? .present? 傻傻分不清楚？">.nil? .empty? .blank? .present? 傻傻分不清楚？ &raquo;</a>
       
     </p>
   </footer>
@@ -290,8 +285,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-pow/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-pow/';
         var disqus_script = 'embed.js';
       
     (function () {
