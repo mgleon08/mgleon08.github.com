@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-18T16:29:32+08:00</updated>
+  <updated>2015-12-18T16:56:11+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,63 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - 簡易搜尋功能]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-basic-search/"/>
+    <updated>2015-12-18T16:01:02+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-basic-search</id>
+    <content type="html"><![CDATA[<p>在架設網站得時候，不免常常需要用到搜尋功能（增加使用者體驗)<br/>
+所以在這邊介紹一個簡易的搜尋功能</p>
+
+<!-- more -->
+
+
+<p>並不需要額外加 router，直接先在 view 裡面加上</p>
+
+<pre><code class="ruby">&lt;%= form_tag books_path, :method =&gt; :get do %&gt;
+    &lt;%= text_field_tag "keyword", nil, placeholder: '請輸入關鍵字...', :class=&gt;"form-control"%&gt;
+    &lt;%= submit_tag "Search" %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>之後在 controller 加上</p>
+
+<pre><code class="ruby">if params[:keyword]
+    @books = Book.where( [ "name like ? or content like", "%#{params[:keyword]}%", "%#{params[:keyword]}%"] )
+end
+</code></pre>
+
+<p>用SQL的語法 <code>LIKE</code>，直接在資料庫裡面找尋相關的關鍵字，如果有多個欄位，再加上 <code>OR</code> 即可，其中 <code>name</code> 和 <code>content</code> 就是要搜尋的欄位。</p>
+
+<p>記得前面後面要加上 <code>%</code> ，如果沒加上，就一定要完全跟輸入的關鍵字一樣。<br/>
+加上去之後代表，前面後面都可以加上任意字組，就等於是說只有欄位裡有這個關鍵字就搜尋出來的意思。</p>
+
+<p><code>% (百分比符號)：代表零個、一個、或數個字母。</code></p>
+
+<p><a href="http://www.1keydata.com/tw/sql/sql-wildcard.html">SQL萬用字元</a></p>
+
+<p>以上是比較簡易的方式來達成</p>
+
+<h1>進階搜尋</h1>
+
+<p>如果要更加複雜或是全文搜尋的話<br/>
+可以用 gem 來取代</p>
+
+<ul>
+<li><p><a href="https://github.com/activerecord-hackery/ransack">ransack</a><br/>
+比較不考慮效能</p></li>
+<li><p><a href="https://github.com/outoftime/sunspot">Solr</a><br/>
+<a href="http://gogojimmy.net/2012/01/25/full-text-search-in-rails-with-solr/">在 Rails 中使用 Solr 做全文搜尋</a></p></li>
+<li><p><a href="https://www.elastic.co/">Elasticsearch</a><br/>
+<a href="https://github.com/elastic/elasticsearch-rails">elasticsearch-rails</a><br/>
+<a href="https://github.com/ankane/searchkick">第三方gem: Searchkick</a></p></li>
+</ul>
+
+
+<p>不過目前都還沒用過啊..改天要用到再來研究一下:D</p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - 虛擬屬性Virtual Attribute]]></title>
