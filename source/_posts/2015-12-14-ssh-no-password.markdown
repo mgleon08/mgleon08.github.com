@@ -39,9 +39,9 @@ ssh-keygen -t rsa
 #Enter passphrase (empty for no passphrase): (不輸入，直接按Enter)
 #Enter same passphrase again: (不輸入，直接按Enter)
 ```
-再（本機）產生出 `id_rsa（private key）` , `id_rsa.pub （public key）`
+再（本機）輸入 `ssh-keygen -t rsa` 產生出 `id_rsa（private key）` 和 `id_rsa.pub （public key）`
 
-接著複製（本機）的 `~/.ssh/id_rsa.pub` 到 `/home/deploy/.ssh/authorized_keys`
+接著複製（本機）的 `~/.ssh/id_rsa.pub` 到 `/home/deploy/.ssh/authorized_keys`(自己新增 .ssh 資料夾和 authorized_keys 檔案)
 
 >之後連線, 就會用（本機）的 `id_rsa（private key）` 與遠端電腦的 `authorized_keys(public key)` 做認證
 
