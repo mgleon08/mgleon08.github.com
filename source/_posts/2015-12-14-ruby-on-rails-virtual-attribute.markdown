@@ -109,7 +109,13 @@ end
 `attr_protected ` 被設定的 attributes `自己` 不能夠被 Mass assignment
 
 哈哈，一個是自己本身，一個是本身以外，蠻奇妙的。  
-但目前還不太知道什時候會用上..有用上再來補吧(笑)
+原來這是在還沒有 Strong Parameter 這個功能時的防禦機制!!
+
+詳情：  
+
+* [從 Github 被 hack，談 Rails 的安全性（ mass-assignment ）](http://blog.xdite.net/posts/2012/03/05/github-hacked-rails-security/)  
+* [Strong Parameter: Mass Assignment 機制的防彈衣](http://blog.xdite.net/posts/2012/08/12/strong-parameter-mass-assignment-solution)  
+
 
 官方文件：  
 
