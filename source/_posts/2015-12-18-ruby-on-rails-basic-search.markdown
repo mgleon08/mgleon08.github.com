@@ -37,10 +37,10 @@ end
 
 [SQL萬用字元](http://www.1keydata.com/tw/sql/sql-wildcard.html)
 
-以上是比較簡易的方式來達成  
+以上是比較簡易的方式來達成，相對的效能上可能也沒那麼好  
 
 #進階搜尋
-如果要更加複雜或是全文搜尋的話  
+如果要更加複雜，效能更好或是全文搜尋的話  
 可以用 gem 來取代  
 
 * [ransack](https://github.com/activerecord-hackery/ransack)  

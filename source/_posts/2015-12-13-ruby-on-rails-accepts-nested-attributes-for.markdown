@@ -147,4 +147,8 @@ end
 <% end %>
 ```
 
-官方文件：[accepts_nested_attributes_for ](http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html) [fields_for](http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for)
+官方文件：  
+[Guides](http://guides.rubyonrails.org/form_helpers.html#building-complex-forms)  
+[Guides 中文](http://rails.ruby.tw/form_helpers.html#%E6%89%93%E9%80%A0%E8%A4%87%E9%9B%9C%E8%A1%A8%E5%96%AE)  
+[accepts_nested_attributes_for ](http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html)   
+[fields_for](http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for)

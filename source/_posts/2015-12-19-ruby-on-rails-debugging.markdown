@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Ruby on Rails Debugging"
+title: "Ruby on Rails - Debugging"
 date: 2015-12-19 11:09:06 +0800
 comments: true
 categories: gem rails語法
