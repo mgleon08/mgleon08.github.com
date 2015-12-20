@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-19T21:10:35+08:00</updated>
+  <updated>2015-12-20T16:18:05+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -14,7 +14,402 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Ruby on Rails Debugging]]></title>
+    <title type="html"><![CDATA[Ruby on Rails - Polymorphic Associations and STI]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti/"/>
+    <updated>2015-12-20T14:47:50+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti</id>
+    <content type="html"><![CDATA[<p>Polymorphic Associations 和 STI，一開始實在不太懂這兩個的差別是什麼？<br/>
+感覺功能都差不多，但仔細研究後發現，其實兩個是完全不同的東西</p>
+
+<!-- more -->
+
+
+<h1>STI 單一表格繼承(Single-table inheritance)</h1>
+
+<p>簡單的來說，就是 <code>子類別</code> 繼承 <code>父類別</code> 的表格欄位和方法<br/>
+在 Rails 慣例中，只要在父類別加上 <code>type</code> 欄位，就可以使用了</p>
+
+<p>以下就是三個 model 共用 User 的表格，<code>Guest</code> 和 <code>Member</code> 不需要在建立自己的資料表</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">validates_presence_of</span> <span class="ss">:name</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Guest</span> <span class="o">&lt;</span> <span class="no">User</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Member</span> <span class="o">&lt;</span> <span class="no">User</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著到 console 實際看看</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">guest</span> <span class="o">=</span> <span class="no">Guest</span><span class="o">.</span><span class="n">create</span><span class="p">(</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">&quot;leon&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">guest</span><span class="o">.</span><span class="n">type</span> <span class="c1"># &quot;Guest&quot;</span>
+</span><span class='line'><span class="n">guest</span><span class="o">.</span><span class="n">id</span> <span class="c1"># 1</span>
+</span><span class='line'><span class="n">member</span> <span class="o">=</span> <span class="no">Member</span><span class="o">.</span><span class="n">create</span><span class="p">(</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">&quot;Rails Team&quot;</span> <span class="p">)</span>
+</span><span class='line'><span class="n">member</span><span class="o">.</span><span class="n">type</span> <span class="c1"># &quot;Member&quot;</span>
+</span><span class='line'><span class="n">member</span><span class="o">.</span><span class="n">id</span> <span class="c1"># 2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/h3vf6bE.png" alt="STI" />
+會發現自動就會在 type 記錄是哪個 model，並且 id 會繼續延續下來（因為是存在同一張資料表上）</p>
+
+<blockquote><p>建議繼承的欄位是一致的在使用這個功能，因為交集的欄位不多的話，就會使得很多空間被浪費掉</p></blockquote>
+
+<p>要關閉STI，在父類別加上self.abstract_class = true</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">validates_presence_of</span> <span class="ss">:name</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">abstract_class</span> <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Guest</span> <span class="o">&lt;</span> <span class="no">User</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Member</span> <span class="o">&lt;</span> <span class="no">User</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這樣 Guest 和 Member 就必須有自己的資料表了。</p>
+
+<p>官方文件：<br/>
+<a href="http://rails.ruby.tw/association_basics.html#%E5%96%AE%E8%A1%A8%E7%B9%BC%E6%89%BF">Guides 中文</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/activerecord-others.html">Ruby on Rails 實戰聖經</a></p>
+
+<h1>多型關聯(Polymorphic Associations)</h1>
+
+<p>看字面上的意思，就知道是用在關聯上的，例如 <code>留言</code> ，Article 上面可以留言，Photo 上面可以留言，通常都會直接分別建立 <code>ArticleComment</code>，<code>PhotoComment</code>的 Model。</p>
+
+<p>但如果用 Polymorphic Associations 只要在另外建立一個 <code>Comment model</code> ，並加上 integer 的 <em>id 外部鍵和 string 的 </em>type 欄位說明是哪一種 Model，即可將所有留言都儲存在這裡。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateComments</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:comments</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">text</span> <span class="ss">:content</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">integer</span> <span class="ss">:commentable_id</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:commentable_type</span>
+</span><span class='line'>      <span class="c1">#可改成 t.belongs_to :commentable, :polymorphic =&gt; true, index: true 取代</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>model 中的設定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:commentable</span><span class="p">,</span> <span class="ss">:polymorphic</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Article</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="ss">:commentable</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Photo</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="ss">:commentable</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之後再 console</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Article</span><span class="o">.</span><span class="n">create</span> <span class="c1">#id=&gt;1</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">comments</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:content</span> <span class="o">=&gt;</span> <span class="s2">&quot;First Comment&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">comments</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:content</span> <span class="o">=&gt;</span> <span class="s2">&quot;First Comment&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">b</span> <span class="o">=</span> <span class="no">Photo</span><span class="o">.</span><span class="n">create</span> <span class="c1">#id=&gt;1</span>
+</span><span class='line'><span class="n">b</span><span class="o">.</span><span class="n">comments</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:content</span> <span class="o">=&gt;</span> <span class="s2">&quot;First Comment&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">b</span> <span class="o">=</span> <span class="no">Photo</span><span class="o">.</span><span class="n">create</span> <span class="c1">#id=&gt;2</span>
+</span><span class='line'><span class="n">b</span><span class="o">.</span><span class="n">comments</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:content</span> <span class="o">=&gt;</span> <span class="s2">&quot;First Comment&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 也可以透過 commentable 反向回查關連的物件</span>
+</span><span class='line'><span class="n">comment</span><span class="o">.</span><span class="n">commentable</span> <span class="o">=&gt;</span> <span class="c1">#&lt;Article id: 1, ....&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://i.imgur.com/9t6JGzp.png" alt="Polymorphic Associations" /></p>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations">Guides</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF">Guides 中文</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">Ruby on Rails 實戰聖經</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Scopes]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes/"/>
+    <updated>2015-12-20T13:54:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes</id>
+    <content type="html"><![CDATA[<p>在 controller 經常會用到一些資料的查詢條件<br/>
+但有許多條件是同時會出現在很多地方，或是查詢條件比較複雜，無法一次就看懂在查詢什麼</p>
+
+<p>這時就可以用 Scope 讓程式變得乾淨易讀，而且也可以 <code>串接</code> 來使用。</p>
+
+<!-- more -->
+
+
+<h1>沒帶參數</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;create_at DESC&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>一般 controller 會這樣子撈出所有的資料，並且按照建立時間排序<br/>
+這時就可以在 model 寫下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>    <span class="n">scope</span> <span class="ss">:news_up</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s2">&quot;created_at DESC&quot;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>-> {&hellip;}是Ruby語法，等同於Proc.new{&hellip;}或lambda{&hellip;}，用來建立一個匿名方法物件</p></blockquote>
+
+<p>接著 controller 就只要</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">news_up</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就變得更加清楚明瞭</p>
+
+<h1>帶參數</h1>
+
+<p>找尋建立時間小於參數的資料</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:recent</span><span class="p">,</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="p">{</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;created_at &lt; ?&quot;</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">recent</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">where</span><span class="p">(</span><span class="s2">&quot;created_at &gt; ? &quot;</span><span class="p">,</span><span class="n">time</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上兩種方式皆可</p>
+
+<p>接著只要在controller</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">recent</span><span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>串接</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">news_up</span><span class="o">.</span><span class="n">recent</span><span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>default</h1>
+
+<p>設定所有 scope 的 default 值</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>    <span class="n">default_scope</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s1">&#39;id DESC&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html#scopes">Guides</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html#%E4%BD%9C%E7%94%A8%E5%9F%9F">Guides 中文</a><br/>
+<a href="http://apidock.com/rails/ActiveRecord/NamedScope/ClassMethods/scope">apidock</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/activerecord-query.html">Scopes 作用域</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Counter_cache]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/20/counter-cache/"/>
+    <updated>2015-12-20T12:16:23+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/20/counter-cache</id>
+    <content type="html"><![CDATA[<p>通常要計算 has_many 關聯資料的數量時，就會用以下方式。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@book</span><span class="o">.</span><span class="n">pages</span><span class="o">.</span><span class="n">size</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<p>但這樣就會產生很多SQL count查詢，造成效能上的問題</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">SELECT</span> <span class="o">*</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">LIMIT</span> <span class="mi">5</span> <span class="no">OFFSET</span> <span class="mi">0</span>
+</span><span class='line'><span class="no">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">AS</span> <span class="n">count_all</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="sb">`pages`</span><span class="o">.</span><span class="n">book_id</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">)</span>
+</span><span class='line'><span class="no">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">AS</span> <span class="n">count_all</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="sb">`pages`</span><span class="o">.</span><span class="n">book_id</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">)</span>
+</span><span class='line'><span class="no">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">AS</span> <span class="n">count_all</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="sb">`pages`</span><span class="o">.</span><span class="n">book_id</span> <span class="o">=</span> <span class="mi">3</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>因此可以在 Book Model 上新增一個欄位，<code>pages_count</code>，用來記錄該 book 的 page 數量，之後撈資料，就直接撈這個數字就可以了。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>  <span class="n">add_column</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:pages_count</span><span class="p">,</span> <span class="ss">:integer</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="mi">0</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#型態是 integer，記得設定 default 值</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著編輯兩邊的 model，Rails 內建有 counter_cache helper，可以直接去做計算!</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:pages</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Page</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:book</span><span class="p">,</span> <span class="ss">:counter_cache</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#設定成 ture，就會自動去找 pages_count 欄位，若要指定欄位則是 counter_cache: :count_of_pages</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這樣之後下 <code>@book.pages.size</code> 的指令時 Rails 就會預設去找 <code>pages_count</code> 的欄位，不用重新下 SQL指令計算。</p>
+
+<p>也可以直接下 <code>@book.pages_count</code></p>
+
+<p>最後注意，必須要用 <code>create</code> 和 <code>destroy</code> 才會 call back 更改數字，<code>delete</code> 則不會。</p>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/association_basics.html#detailed-association-reference">Guides</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Debugging]]></title>
     <link href="http://mgleon08.github.com/blog/2015/12/19/ruby-on-rails-debugging/"/>
     <updated>2015-12-19T11:09:06+08:00</updated>
     <id>http://mgleon08.github.com/blog/2015/12/19/ruby-on-rails-debugging</id>
@@ -264,11 +659,11 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 
 <p><a href="http://www.1keydata.com/tw/sql/sql-wildcard.html">SQL萬用字元</a></p>
 
-<p>以上是比較簡易的方式來達成</p>
+<p>以上是比較簡易的方式來達成，相對的效能上可能也沒那麼好</p>
 
 <h1>進階搜尋</h1>
 
-<p>如果要更加複雜或是全文搜尋的話<br/>
+<p>如果要更加複雜，效能更好或是全文搜尋的話<br/>
 可以用 gem 來取代</p>
 
 <ul>
@@ -557,7 +952,7 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 </span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#x61;&#x69;&#108;&#116;&#x6f;&#58;&#x64;&#x65;&#112;&#x6c;&#x6f;&#121;&#64;&#49;&#50;&#x33;&#46;&#x31;&#x32;&#x33;&#x2e;&#x31;&#50;&#46;&#49;">&#100;&#x65;&#x70;&#x6c;&#x6f;&#121;&#64;&#49;&#50;&#51;&#x2e;&#49;&#50;&#x33;&#46;&#x31;&#50;&#46;&#49;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#97;&#x69;&#108;&#x74;&#111;&#x3a;&#100;&#x65;&#112;&#x6c;&#x6f;&#121;&#x40;&#x31;&#x32;&#51;&#46;&#49;&#x32;&#x33;&#46;&#x31;&#x32;&#46;&#x31;">&#x64;&#101;&#112;&#108;&#111;&#x79;&#64;&#x31;&#x32;&#x33;&#46;&#x31;&#x32;&#x33;&#x2e;&#49;&#50;&#46;&#49;</a> 就連進去囉!!</p>
 
 <p>權限指令參考：
 <a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chown">鳥哥的私房菜</a></p>
@@ -947,7 +1342,11 @@ one-to-one 和 one-to-many 都要</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>官方文件：<a href="http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html">accepts_nested_attributes_for </a> <a href="http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for">fields_for</a></p>
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/form_helpers.html#building-complex-forms">Guides</a><br/>
+<a href="http://rails.ruby.tw/form_helpers.html#%E6%89%93%E9%80%A0%E8%A4%87%E9%9B%9C%E8%A1%A8%E5%96%AE">Guides 中文</a><br/>
+<a href="http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html">accepts_nested_attributes_for </a> <br/>
+<a href="http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for">fields_for</a></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails語法 | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/railsyu-fa/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-19T21:10:35+08:00</updated>
+  <updated>2015-12-20T16:18:05+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -14,7 +14,278 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Ruby on Rails Debugging]]></title>
+    <title type="html"><![CDATA[Ruby on Rails - Polymorphic Associations and STI]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti/"/>
+    <updated>2015-12-20T14:47:50+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti</id>
+    <content type="html"><![CDATA[<p>Polymorphic Associations 和 STI，一開始實在不太懂這兩個的差別是什麼？<br/>
+感覺功能都差不多，但仔細研究後發現，其實兩個是完全不同的東西</p>
+
+<!-- more -->
+
+
+<h1>STI 單一表格繼承(Single-table inheritance)</h1>
+
+<p>簡單的來說，就是 <code>子類別</code> 繼承 <code>父類別</code> 的表格欄位和方法<br/>
+在 Rails 慣例中，只要在父類別加上 <code>type</code> 欄位，就可以使用了</p>
+
+<p>以下就是三個 model 共用 User 的表格，<code>Guest</code> 和 <code>Member</code> 不需要在建立自己的資料表</p>
+
+<pre><code class="ruby">class User &lt; ActiveRecord::Base
+    validates_presence_of :name
+end
+
+class Guest &lt; User
+end
+
+class Member &lt; User
+end
+</code></pre>
+
+<p>接著到 console 實際看看</p>
+
+<pre><code class="ruby">guest = Guest.create( :name =&gt; "leon")
+guest.type # "Guest"
+guest.id # 1
+member = Member.create( :name =&gt; "Rails Team" )
+member.type # "Member"
+member.id # 2
+</code></pre>
+
+<p><img src="http://i.imgur.com/h3vf6bE.png" alt="STI" />
+會發現自動就會在 type 記錄是哪個 model，並且 id 會繼續延續下來（因為是存在同一張資料表上）</p>
+
+<blockquote><p>建議繼承的欄位是一致的在使用這個功能，因為交集的欄位不多的話，就會使得很多空間被浪費掉</p></blockquote>
+
+<p>要關閉STI，在父類別加上self.abstract_class = true</p>
+
+<pre><code class="ruby">class User &lt; ActiveRecord::Base
+    validates_presence_of :name
+    self.abstract_class = true
+end
+
+class Guest &lt; User
+end
+
+class Member &lt; User
+end
+</code></pre>
+
+<p>這樣 Guest 和 Member 就必須有自己的資料表了。</p>
+
+<p>官方文件：<br/>
+<a href="http://rails.ruby.tw/association_basics.html#%E5%96%AE%E8%A1%A8%E7%B9%BC%E6%89%BF">Guides 中文</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/activerecord-others.html">Ruby on Rails 實戰聖經</a></p>
+
+<h1>多型關聯(Polymorphic Associations)</h1>
+
+<p>看字面上的意思，就知道是用在關聯上的，例如 <code>留言</code> ，Article 上面可以留言，Photo 上面可以留言，通常都會直接分別建立 <code>ArticleComment</code>，<code>PhotoComment</code>的 Model。</p>
+
+<p>但如果用 Polymorphic Associations 只要在另外建立一個 <code>Comment model</code> ，並加上 integer 的 <em>id 外部鍵和 string 的 </em>type 欄位說明是哪一種 Model，即可將所有留言都儲存在這裡。</p>
+
+<pre><code class="ruby">class CreateComments &lt; ActiveRecord::Migration
+  def change
+    create_table :comments do |t|
+      t.text :content
+      t.integer :commentable_id
+      t.string :commentable_type
+      #可改成 t.belongs_to :commentable, :polymorphic =&gt; true, index: true 取代
+
+      t.timestamps
+    end
+  end
+end
+</code></pre>
+
+<p>model 中的設定</p>
+
+<pre><code class="ruby">class Comment &lt; ActiveRecord::Base
+  belongs_to :commentable, :polymorphic =&gt; true
+end
+
+class Article &lt; ActiveRecord::Base
+  has_many :comments, :as =&gt; :commentable
+end
+
+class Photo &lt; ActiveRecord::Base
+  has_many :comments, :as =&gt; :commentable
+end
+</code></pre>
+
+<p>之後再 console</p>
+
+<pre><code class="ruby">a = Article.create #id=&gt;1
+a.comments.create(:content =&gt; "First Comment")
+a.comments.create(:content =&gt; "First Comment")
+
+b = Photo.create #id=&gt;1
+b.comments.create(:content =&gt; "First Comment")
+b = Photo.create #id=&gt;2
+b.comments.create(:content =&gt; "First Comment")
+
+# 也可以透過 commentable 反向回查關連的物件
+comment.commentable =&gt; #&lt;Article id: 1, ....&gt;
+</code></pre>
+
+<p><img src="http://i.imgur.com/9t6JGzp.png" alt="Polymorphic Associations" /></p>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations">Guides</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF">Guides 中文</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">Ruby on Rails 實戰聖經</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Scopes]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes/"/>
+    <updated>2015-12-20T13:54:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes</id>
+    <content type="html"><![CDATA[<p>在 controller 經常會用到一些資料的查詢條件<br/>
+但有許多條件是同時會出現在很多地方，或是查詢條件比較複雜，無法一次就看懂在查詢什麼</p>
+
+<p>這時就可以用 Scope 讓程式變得乾淨易讀，而且也可以 <code>串接</code> 來使用。</p>
+
+<!-- more -->
+
+
+<h1>沒帶參數</h1>
+
+<pre><code class="ruby">def index
+    @books = Book.order("create_at DESC")
+end
+</code></pre>
+
+<p>一般 controller 會這樣子撈出所有的資料，並且按照建立時間排序<br/>
+這時就可以在 model 寫下</p>
+
+<pre><code class="ruby">class Book &lt; ActiveRecord::Base
+    scope :news_up, -&gt; { order("created_at DESC") } 
+end
+</code></pre>
+
+<blockquote><p>-> {&hellip;}是Ruby語法，等同於Proc.new{&hellip;}或lambda{&hellip;}，用來建立一個匿名方法物件</p></blockquote>
+
+<p>接著 controller 就只要</p>
+
+<pre><code class="ruby">def index
+    @books = Book.news_up
+end
+</code></pre>
+
+<p>就變得更加清楚明瞭</p>
+
+<h1>帶參數</h1>
+
+<p>找尋建立時間小於參數的資料</p>
+
+<pre><code class="ruby">class Book &lt; ActiveRecord::Base
+  scope :recent, -&gt;(time) {where("created_at &lt; ?", time) }
+end
+</code></pre>
+
+<pre><code class="ruby">class Book &lt; ActiveRecord::Base
+    def self.recent(time)
+        where("created_at &gt; ? ",time)
+    end
+end
+</code></pre>
+
+<p>以上兩種方式皆可</p>
+
+<p>接著只要在controller</p>
+
+<pre><code class="ruby">def index
+    @books = Book.recent(Time.now)
+end
+</code></pre>
+
+<h1>串接</h1>
+
+<pre><code class="ruby">def index
+    @books = Book.news_up.recent(Time.now)
+end
+</code></pre>
+
+<h1>default</h1>
+
+<p>設定所有 scope 的 default 值</p>
+
+<pre><code class="ruby">class Book &lt; ActiveRecord::Base
+    default_scope -&gt; { order('id DESC') }
+end
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html#scopes">Guides</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html#%E4%BD%9C%E7%94%A8%E5%9F%9F">Guides 中文</a><br/>
+<a href="http://apidock.com/rails/ActiveRecord/NamedScope/ClassMethods/scope">apidock</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/activerecord-query.html">Scopes 作用域</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Counter_cache]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/20/counter-cache/"/>
+    <updated>2015-12-20T12:16:23+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/20/counter-cache</id>
+    <content type="html"><![CDATA[<p>通常要計算 has_many 關聯資料的數量時，就會用以下方式。</p>
+
+<pre><code class="ruby">@book.pages.size
+</code></pre>
+
+<!-- more -->
+
+
+<p>但這樣就會產生很多SQL count查詢，造成效能上的問題</p>
+
+<pre><code class="ruby">SELECT * FROM `pages` LIMIT 5 OFFSET 0
+SELECT count(*) AS count_all FROM `pages` WHERE (`pages`.book_id = 1 )
+SELECT count(*) AS count_all FROM `pages` WHERE (`pages`.book_id = 2 )
+SELECT count(*) AS count_all FROM `pages` WHERE (`pages`.book_id = 3 )
+</code></pre>
+
+<p>因此可以在 Book Model 上新增一個欄位，<code>pages_count</code>，用來記錄該 book 的 page 數量，之後撈資料，就直接撈這個數字就可以了。</p>
+
+<pre><code class="ruby">def change
+    add_column :books, :pages_count, :integer, default: 0
+end
+
+#型態是 integer，記得設定 default 值
+</code></pre>
+
+<p>接著編輯兩邊的 model，Rails 內建有 counter_cache helper，可以直接去做計算!</p>
+
+<pre><code class="ruby">class Book &lt; ActiveRecord::Base
+  has_many :pages
+end
+
+class Page &lt; ActiveRecord::Base
+  belongs_to :book, :counter_cache =&gt; true
+end
+
+#設定成 ture，就會自動去找 pages_count 欄位，若要指定欄位則是 counter_cache: :count_of_pages
+</code></pre>
+
+<p>這樣之後下 <code>@book.pages.size</code> 的指令時 Rails 就會預設去找 <code>pages_count</code> 的欄位，不用重新下 SQL指令計算。</p>
+
+<p>也可以直接下 <code>@book.pages_count</code></p>
+
+<p>最後注意，必須要用 <code>create</code> 和 <code>destroy</code> 才會 call back 更改數字，<code>delete</code> 則不會。</p>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/association_basics.html#detailed-association-reference">Guides</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Debugging]]></title>
     <link href="http://mgleon08.github.com/blog/2015/12/19/ruby-on-rails-debugging/"/>
     <updated>2015-12-19T11:09:06+08:00</updated>
     <id>http://mgleon08.github.com/blog/2015/12/19/ruby-on-rails-debugging</id>
@@ -149,11 +420,11 @@ end
 
 <p><a href="http://www.1keydata.com/tw/sql/sql-wildcard.html">SQL萬用字元</a></p>
 
-<p>以上是比較簡易的方式來達成</p>
+<p>以上是比較簡易的方式來達成，相對的效能上可能也沒那麼好</p>
 
 <h1>進階搜尋</h1>
 
-<p>如果要更加複雜或是全文搜尋的話<br/>
+<p>如果要更加複雜，效能更好或是全文搜尋的話<br/>
 可以用 gem 來取代</p>
 
 <ul>
@@ -168,409 +439,6 @@ end
 
 
 <p>不過目前都還沒用過啊..改天要用到再來研究一下:D</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[.nil? .empty? .blank? .present? 傻傻分不清楚？]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/"/>
-    <updated>2015-12-16T21:29:43+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present</id>
-    <content type="html"><![CDATA[<p>在學習ruby on rails的過程中，常常會有一些非常神奇的語法<br/>
-其中又有些語法非常的相像..所以常常會搞混</p>
-
-<p>今天就來介紹一下這幾個很相似的 method</p>
-
-<!-- more -->
-
-
-<h1>.nil?</h1>
-
-<pre><code class="ruby">nil.nil?       #true
-[].nil?        #false
-{}.nil?        #false
-"".nil?        #false
-" ".nil?       #false
-"abc".nil?     #false
-123.nil?       #false
-</code></pre>
-
-<ul>
-<li>ruby method</li>
-<li>任何物件都是false，只有nil是true</li>
-</ul>
-
-
-<h1>.empty? &amp; .any?</h1>
-
-<pre><code class="ruby">nil.empty?     #NoMethodError: undefined method `empty?' for nil:NilClass
-[].empty?      #true
-{}.empty?      #true
-"".empty?      #true
-" ".empty?     #false
-"abc".empty?   #false
-123.empty?     #NoMethodError: undefined method `empty?' for 123:Fixnum
-</code></pre>
-
-<ul>
-<li>ruby method</li>
-<li>只要是空值就是 true（<code>空白</code> 不算空值）</li>
-<li>相對的 method 是 <code>any?</code></li>
-</ul>
-
-
-<pre><code class="ruby">nil.any?       #NoMethodError: undefined method `any?' for nil:NilClass
-[].any?        #false
-{}.any?        #false
-"".any?        #NoMethodError: undefined method `any?' for "":String
-" ".any?       #NoMethodError: undefined method `any?' for "":String
-"abc".any?     #NoMethodError: undefined method `any?' for "":String
-123.any?       #NoMethodError: undefined method `any?' for 123:Fixnum
-</code></pre>
-
-<p>但是要注意，String 並沒有提供 <code>.any?</code> 這個 method</p>
-
-<h1>.blank? &amp; .present?</h1>
-
-<pre><code class="ruby">nil.blank?     #true 
-[].blank?      #true 
-{}.blank?      #true 
-"".blank?      #true
-" ".blank?     #true
-"abc".blank?   #false
-123.blank?     #false
-</code></pre>
-
-<ul>
-<li>Rails method</li>
-<li>只要是 nil，空值都是 true</li>
-<li>有點像是 <code>Object.nil? || Object.empty?</code> 的綜合體，但條件比 <code>.empty</code> 寬鬆一點，<code>空白</code> 也會是 true</li>
-<li>相對的 method 是 <code>present?</code></li>
-</ul>
-
-
-<pre><code class="ruby">nil.present?   #false 
-[].present?    #false 
-{}.present?    #false 
-"".present?    #false
-" ".present?   #false
-"abc".present? #true
-123.present?   #true
-</code></pre>
-
-<blockquote><p>經過上面這樣看來，只有 <code>.blank?</code> 和 <code>.present?</code> 不會爆錯 (所以我都用這個(誤))<br/>
-主要還是要看當時的情境拉XD</p></blockquote>
-
-<h1>.persisted? &amp; .new_record?</h1>
-
-<p>最後來介紹一下，如何判斷 Object 是否已經存在資料庫的 method。</p>
-
-<pre><code class="ruby">a = User.new   #還沒存入資料庫以前
-a.persisted?   #false
-a.new_record?  #true
-
-a.save         #存入資料庫
-a.persisted?   #true
-a.new_record?  #false
-</code></pre>
-
-<h1>如何看物件有哪些方法？或是上一層是誰？</h1>
-
-<pre><code class="ruby">Object.superclass       ＃查上一層是誰?
-Object.ancestors        ＃查祖宗十八代是誰?
-Object.methods          ＃查物件有哪些方法?
-Object.respond_to? :new ＃查物件是否有這個方法?
-</code></pre>
-
-<p>官方文件：</p>
-
-<ul>
-<li><a href="http://apidock.com/ruby/Object/nil%3F">.nil?</a></li>
-<li><a href="http://apidock.com/rails/ActiveRecord/Associations/CollectionProxy/empty%3F">.empty?</a></li>
-<li><a href="http://apidock.com/ruby/Enumerable/any%3F">.any?</a></li>
-<li><a href="http://apidock.com/rails/Object/blank%3F">.blank?</a></li>
-<li><a href="http://apidock.com/rails/Object/present%3F">.persisted?</a></li>
-<li><a href="http://apidock.com/rails/ActiveRecord/Base/new_record%3F">.new_record?</a></li>
-<li><a href="http://apidock.com/rails/ActiveRecord/Persistence/persisted%3F">.persisted?</a></li>
-<li><a href="http://apidock.com/ruby/Class/superclass">.superclass</a></li>
-<li><a href="http://apidock.com/rails/ActiveRecord/Acts/Tree/InstanceMethods/ancestors">.ancestors</a></li>
-<li><a href="http://apidock.com/ruby/Object/methods">.methods</a></li>
-<li><a href="http://apidock.com/ruby/Object/respond_to%3F">.respond_to?</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - 虛擬屬性Virtual Attribute]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/14/ruby-on-rails-virtual-attribute/"/>
-    <updated>2015-12-14T13:13:37+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/14/ruby-on-rails-virtual-attribute</id>
-    <content type="html"><![CDATA[<p>當要操作的屬性資料，和資料庫的欄位不相同的時候，就可以在 model 裡建立 Virtual Attribute 來取代。</p>
-
-<h3>範例1 - full_name</h3>
-
-<pre><code class="ruby">def full_name
-    "#{self.first_name} #{self.last_name}"
-end
-
-def full_name=(value)
-    self.first_name, self.last_name = value.to_s.split(" ", 2)
-end
-</code></pre>
-
-<!-- more -->
-
-
-<p>當資料庫欄位裡面有 <code>first_name</code> 和 <code>last_name</code> 分別去存取，但顯示的時候卻不可能只顯示一個，通常都一定是要連在一起</p>
-
-<p>這時候就能夠用 Virtual Attribute 做出一個虛擬的屬性 <code>full_name</code> ， 而它的值則是 <code>first_name</code> 和 <code>last_name</code> 合在一起</p>
-
-<p>這樣以後要取出名字，就只要用 <code>full_name</code> 即可，就不需要每次都在那邊相加。</p>
-
-<h3>範例2 - tag_list</h3>
-
-<pre><code class="ruby">def tag_list
-  self.tags.map{ |t| t.name }.join(",")
-end
-
-def tag_list=(str)
-  arr = str.split(",")
-
-  self.tags = arr.map do |t|
-    tag = CompanyTag.find_by_name(t)
-    unless tag
-      tag = CompanyTag.create!( :name =&gt; t )
-    end
-      tag  #沒有加這個的話，uless 最後一個回傳的會是 nil 就會爆錯
-  end
-
-end
-</code></pre>
-
-<p>取出時，先將所有 tag 透過 <code>map</code> 取出所有 name 變成一個 array，再用 <code>join</code> 轉成 string</p>
-
-<p>存取時，先用 <code>split</code> 將 string 轉 array，用 name 去判斷每個元素是否已經存在資料庫，若是沒有，就 <code>create</code> 一個新的</p>
-
-<blockquote><p>可以另外搭配 <a href="https://select2.github.io/">select2</a> 做出比較好看的 tag !!</p></blockquote>
-
-<p>Rails gem
-<a href="https://github.com/argerim/select2-rails">select2-rails</a></p>
-
-<p>```ruby</p>
-
-<script>
-  $("#tag_list").select2({
-    tags: <%=raw Tags.all.map{|t| t.name}%>,
-    tokenSeparators: [',', ' ']
-  });
-</script>
-
-
-<pre><code>
-
-#最後來介紹一下attr_accessor
-
-如果只要一般(沒有像上面還要取出來，單純只要讀取.存取)的虛擬屬性  
-（就是資料庫並不需要這個欄位，但可能要透過這個虛擬屬性，組成某個陣列裡的元素）
-
-則可以直接用 `attr_accessor` 直接產生以下的結果
-</code></pre>
-
-<p>class Girl
-  def initialize(age)
-    @age = age
-  end
-  # @age的getter方法
-  def age<br/>
-    @age<br/>
-  end<br/>
-  # @age的setter方法<br/>
-  def age=(x)<br/>
-    @age = x<br/>
-  end
-end
-```</p>
-
-<p><code>attr_accessor</code> 就是可以自動產生 getter 和 setter<br/>
-<code>attr_reader</code> 產生 getter<br/>
-<code>attr_writer</code> 產生 setter</p>
-
-<p>網路上有一篇講的很清楚，可以去看看<br/>
-<a href="http://blog.eddie.com.tw/2015/03/21/attr_accessor/">Ruby 語法放大鏡之「attr_accessor 是幹嘛的?」</a></p>
-
-<h1>attr_accessible 和 attr_protected</h1>
-
-<p>另外在網路上有發現兩個長個很相像的方法<br/>
-仔細研究發現，這兩個主要好像都是為了防止 Mass assignment (大量賦值)</p>
-
-<p><code>attr_accessible</code> 被設定的 attributes <code>以外</code> 不能夠被 Mass assignment<br/>
-<code>attr_protected</code> 被設定的 attributes <code>自己</code> 不能夠被 Mass assignment</p>
-
-<p>哈哈，一個是自己本身，一個是本身以外，蠻奇妙的。<br/>
-原來這是在還沒有 Strong Parameter 這個功能時的防禦機制!!</p>
-
-<p>詳情：</p>
-
-<ul>
-<li><a href="http://blog.xdite.net/posts/2012/03/05/github-hacked-rails-security/">從 Github 被 hack，談 Rails 的安全性（ mass-assignment ）</a></li>
-<li><a href="http://blog.xdite.net/posts/2012/08/12/strong-parameter-mass-assignment-solution">Strong Parameter: Mass Assignment 機制的防彈衣</a></li>
-</ul>
-
-
-<p>官方文件：</p>
-
-<ul>
-<li><a href="http://apidock.com/rails/ActiveRecord/Base/attr_accessible/class">attr_accessible</a></li>
-<li><a href="http://apidock.com/rails/ActiveRecord/Base/attr_protected/class">attr_protected</a></li>
-<li><a href="http://stackoverflow.com/questions/2652907/what-is-the-difference-between-attr-accessibleattributes-attr-protectedat">stackoverflow</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Accepts_nested_attributes_for]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/"/>
-    <updated>2015-12-13T18:35:13+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for</id>
-    <content type="html"><![CDATA[<p><code>accepts_nested_attributes_for</code> 是一個蠻常會用到的語法</p>
-
-<p>簡單的來說，就是可以透過這個語法，在更新 data 的時候，同時更新其他 model 裡的 data<br/>
-所以並不是每個 model 都必須要有 controller 才能夠做更新的動作</p>
-
-<!-- more -->
-
-
-<p>這裏有兩種情境</p>
-
-<h1>One-to-one</h1>
-
-<pre><code class="ruby">class Book &lt; ActiveRecord::Base
-  has_one :author
-  accepts_nested_attributes_for :author
-end
-</code></pre>
-
-<pre><code class="ruby">params = { book: { name: 'Harry Potter', author_attributes: { name: 'J. K. Rowling' } } }
-
-book = Book.create(params[:book])
-book.author.name # =&gt; 'J. K. Rowling'
-</code></pre>
-
-<p>透過 params 更新 Book 的 name<br/>
-同時透過 <code>author_attributes: { name: 'J. K. Rowling' }</code> 更新 Author 的 name</p>
-
-<p>當然 update 同樣適用</p>
-
-<pre><code class="ruby">params = { book: { author_attributes: { name: 'J. K. Rowling' } } }
-book.update params[:book]
-book.author.name # =&gt; 'J. K. Rowling'
-</code></pre>
-
-<p>另外值得注意的是</p>
-
-<pre><code class="ruby">accepts_nested_attributes_for :author, :allow_destroy =&gt; true, :reject_if =&gt; :all_blank
-</code></pre>
-
-<p><code>:allow_destroy =&gt; true</code> 可以在表單增加一個 _destroy 核選塊來表示刪除<br/>
-<code>:reject_if =&gt; :all_blank</code> 表示在什麼條件下就當作沒有要動作， all_blank 表示如果資料都是空的，就不執行</p>
-
-<h1>One-to-many</h1>
-
-<pre><code class="ruby">class Book &lt; ActiveRecord::Base
-  has_many :pages
-  accepts_nested_attributes_for :page
-end
-</code></pre>
-
-<pre><code class="ruby">params = { book: { 
-    name: 'Harry Potter', page_attributes: [
-        { title: "Philosopher's Stone" }, 
-        { title: "Chamber of Secrets" }
-    ] 
-}}
-
-book = Book.create(params[:book])
-book.pages.length # =&gt; 2
-book.pages.first.title # =&gt; 'Philosopher's Stone'
-book.pages.last.title # =&gt; 'Chamber of Secrets'
-</code></pre>
-
-<h1>通常會搭配 fields_for 來嵌入到同一個表單</h1>
-
-<h3>One-to-one</h3>
-
-<pre><code class="ruby">&lt;%= form_for @book do |b| %&gt;
-  &lt;%= b.label :name %&gt;
-  &lt;%= b.text_field : name %&gt;
-
-  &lt;%= b.fields_for :author do |a| %&gt;
-      &lt;%= a.label :name %&gt;
-      &lt;%= a.text_field : name %&gt;
-
-      &lt;% unless a.object.new_record? %&gt;
-         &lt;%= a.label :_destroy, 'Remove:' %&gt;
-        &lt;%= a.check_box :_destroy %&gt;
-      &lt;% end %&gt;
-  &lt;% end %&gt;
-
-  &lt;%= b.submit %&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<p>這樣就能夠透過原本是 @book 的表單，裡面再放入 author 的欄位進行更新。</p>
-
-<h3>One-to-many</h3>
-
-<p>one-to-many 會比較麻煩，因為當新增的時候，並不知道要新增幾個，因此會動用到 jquery 的動態新增，就是可以在表單上面一直增加欄位。</p>
-
-<p>不過幸好有 gem 可以解決了，以下有幾個 gem</p>
-
-<ul>
-<li><a href="https://github.com/ryanb/nested_form">nested_form</a> ( <a href="http://motion-express.com/blog/20140722-ruby-gem-nested-form">網路上教學</a></li>
-<li><a href="https://github.com/nathanvda/cocoon">cocoon</a></li>
-<li><a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a></li>
-</ul>
-
-
-<h1>strong parameter</h1>
-
-<p>最後記得要加 strong parameter<br/>
-one-to-one 和 one-to-many 都要</p>
-
-<pre><code class="ruby">def book_params
-    params.require(:book)
-        .permit(:name, pages_attributes:[:title, :_destroy, :id])
-end
-</code></pre>
-
-<blockquote><p>每個 gem strong parameter 的方式都有點不太一樣，記得要看一下</p></blockquote>
-
-<h1>helper</h1>
-
-<p>book_helper.rb</p>
-
-<pre><code class="ruby">def setup_author(book)
-    book.build_author if book.author.blank? 
-    #one-to-one 用 build_author ， one-to-many 可以用 authors.build or authors.new 
-    book
-end
-</code></pre>
-
-<p>如果一開始沒設定的話，在 book 表單上是看不到 author 的欄位，因為一開始還沒 build  <br/>
-因此要給它一個判斷，如果是 nil 就先 build_author 給它</p>
-
-<p>接著用 <code>setup_author(@book)</code> 來置換 form_for 中的 @book</p>
-
-<pre><code class="ruby">&lt;%= form_for setup_author(@book), :url =&gt; books_path do |b| %&gt;
-
-...
-
-&lt;% end %&gt;
-</code></pre>
-
-<p>官方文件：<a href="http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html">accepts_nested_attributes_for </a> <a href="http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for">fields_for</a></p>
 ]]></content>
   </entry>
   

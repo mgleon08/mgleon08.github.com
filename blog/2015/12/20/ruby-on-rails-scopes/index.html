@@ -5,16 +5,15 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby on Rails - 簡易搜尋功能 - Leon's Blogging</title>
+  <title>Ruby on Rails - Scopes - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="在架設網站得時候，不免常常需要用到搜尋功能（增加使用者體驗)
-所以在這邊介紹一個簡易的搜尋功能 並不需要額外加 router，直接先在 view 裡面加上 1
+  <meta name="description" content="在 controller 經常會用到一些資料的查詢條件
+但有許多條件是同時會出現在很多地方，或是查詢條件比較複雜，無法一次就看懂在查詢什麼 這時就可以用 Scope 讓程式變得乾淨易讀，而且也可以 串接 來使用。 沒帶參數 1
 2
 3
-4
-&lt;%= form_tag books_path, :method =&gt; :get do %&gt; &lt;%= &hellip;">
+def index @books = Book.order(& &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -23,7 +22,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-basic-search">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -106,7 +105,7 @@
   <header>
     
       
-        <h1 class="entry-title">Ruby on Rails - 簡易搜尋功能</h1>
+        <h1 class="entry-title">Ruby on Rails - Scopes</h1>
       
     
     
@@ -116,7 +115,7 @@
 
 
 
-<time class='entry-date' datetime='2015-12-18T16:01:02+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:01 pm</span></time>
+<time class='entry-date' datetime='2015-12-20T13:54:35+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:54 pm</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -126,64 +125,124 @@
   </header>
 
 
-<div class="entry-content"><p>在架設網站得時候，不免常常需要用到搜尋功能（增加使用者體驗)<br/>
-所以在這邊介紹一個簡易的搜尋功能</p>
+<div class="entry-content"><p>在 controller 經常會用到一些資料的查詢條件<br/>
+但有許多條件是同時會出現在很多地方，或是查詢條件比較複雜，無法一次就看懂在查詢什麼</p>
+
+<p>這時就可以用 Scope 讓程式變得乾淨易讀，而且也可以 <code>串接</code> 來使用。</p>
 
 <!-- more -->
 
 
-<p>並不需要額外加 router，直接先在 view 裡面加上</p>
+<h1>沒帶參數</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;create_at DESC&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>一般 controller 會這樣子撈出所有的資料，並且按照建立時間排序<br/>
+這時就可以在 model 寫下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>    <span class="n">scope</span> <span class="ss">:news_up</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s2">&quot;created_at DESC&quot;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>-> {&hellip;}是Ruby語法，等同於Proc.new{&hellip;}或lambda{&hellip;}，用來建立一個匿名方法物件</p></blockquote>
+
+<p>接著 controller 就只要</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">news_up</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就變得更加清楚明瞭</p>
+
+<h1>帶參數</h1>
+
+<p>找尋建立時間小於參數的資料</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:recent</span><span class="p">,</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">time</span><span class="p">)</span> <span class="p">{</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;created_at &lt; ?&quot;</span><span class="p">,</span> <span class="n">time</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= form_tag books_path, :method =</span><span class="o">&gt;</span> <span class="ss">:get</span> <span class="k">do</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx"> &lt;%= text_field_tag &quot;keyword&quot;, nil, placeholder: &#39;請輸入關鍵字...&#39;, :class=&gt;</span><span class="s2">&quot;form-control&quot;</span><span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx"> &lt;%= submit_tag &quot;Search&quot; %&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>之後在 controller 加上</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">params</span><span class="o">[</span><span class="ss">:keyword</span><span class="o">]</span>
-</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">where</span><span class="p">(</span> <span class="o">[</span> <span class="s2">&quot;name like ? or content like&quot;</span><span class="p">,</span> <span class="s2">&quot;%</span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:keyword</span><span class="o">]</span><span class="si">}</span><span class="s2">%&quot;</span><span class="p">,</span> <span class="s2">&quot;%</span><span class="si">#{</span><span class="n">params</span><span class="o">[</span><span class="ss">:keyword</span><span class="o">]</span><span class="si">}</span><span class="s2">%&quot;</span><span class="o">]</span> <span class="p">)</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">recent</span><span class="p">(</span><span class="n">time</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">where</span><span class="p">(</span><span class="s2">&quot;created_at &gt; ? &quot;</span><span class="p">,</span><span class="n">time</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>用SQL的語法 <code>LIKE</code>，直接在資料庫裡面找尋相關的關鍵字，如果有多個欄位，再加上 <code>OR</code> 即可，其中 <code>name</code> 和 <code>content</code> 就是要搜尋的欄位。</p>
+<p>以上兩種方式皆可</p>
 
-<p>記得前面後面要加上 <code>%</code> ，如果沒加上，就一定要完全跟輸入的關鍵字一樣。<br/>
-加上去之後代表，前面後面都可以加上任意字組，就等於是說只有欄位裡有這個關鍵字就搜尋出來的意思。</p>
+<p>接著只要在controller</p>
 
-<p><code>% (百分比符號)：代表零個、一個、或數個字母。</code></p>
-
-<p><a href="http://www.1keydata.com/tw/sql/sql-wildcard.html">SQL萬用字元</a></p>
-
-<p>以上是比較簡易的方式來達成，相對的效能上可能也沒那麼好</p>
-
-<h1>進階搜尋</h1>
-
-<p>如果要更加複雜，效能更好或是全文搜尋的話<br/>
-可以用 gem 來取代</p>
-
-<ul>
-<li><p><a href="https://github.com/activerecord-hackery/ransack">ransack</a><br/>
-比較不考慮效能</p></li>
-<li><p><a href="https://github.com/outoftime/sunspot">Solr</a><br/>
-<a href="http://gogojimmy.net/2012/01/25/full-text-search-in-rails-with-solr/">在 Rails 中使用 Solr 做全文搜尋</a></p></li>
-<li><p><a href="https://www.elastic.co/">Elasticsearch</a><br/>
-<a href="https://github.com/elastic/elasticsearch-rails">elasticsearch-rails</a><br/>
-<a href="https://github.com/ankane/searchkick">第三方gem: Searchkick</a></p></li>
-</ul>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">recent</span><span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>不過目前都還沒用過啊..改天要用到再來研究一下:D</p>
+<h1>串接</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">news_up</span><span class="o">.</span><span class="n">recent</span><span class="p">(</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>default</h1>
+
+<p>設定所有 scope 的 default 值</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>    <span class="n">default_scope</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s1">&#39;id DESC&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html#scopes">Guides</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html#%E4%BD%9C%E7%94%A8%E5%9F%9F">Guides 中文</a><br/>
+<a href="http://apidock.com/rails/ActiveRecord/NamedScope/ClassMethods/scope">apidock</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/activerecord-query.html">Scopes 作用域</a></p>
 </div>
 
 
@@ -206,13 +265,13 @@
 
 
 
-<time class='entry-date' datetime='2015-12-18T16:01:02+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>4:01 pm</span></time>
+<time class='entry-date' datetime='2015-12-20T13:54:35+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:54 pm</span></time>
       
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/gem/'>gem</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/railsyu-fa/'>rails語法</a>
+    <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/railsyu-fa/'>rails語法</a>
   
 </span>
 
@@ -221,7 +280,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-basic-search/" data-via="" data-counturl="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-basic-search/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes/" data-via="" data-counturl="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes/" >Tweet</a>
   
   
   
@@ -232,10 +291,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/" title="Previous Post: .nil? .empty? .blank? .present? 傻傻分不清楚？">&laquo; .nil? .empty? .blank? .present? 傻傻分不清楚？</a>
+        <a class="basic-alignment left" href="/blog/2015/12/20/counter-cache/" title="Previous Post: Ruby on Rails - Counter_cache">&laquo; Ruby on Rails - Counter_cache</a>
       
       
-        <a class="basic-alignment right" href="/blog/2015/12/18/ruby-on-rails-pow/" title="Next Post: Ruby on Rails - 用 Pow 當 HTTP Server">Ruby on Rails - 用 Pow 當 HTTP Server &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti/" title="Next Post: Ruby on Rails - Polymorphic Associations and STI">Ruby on Rails - Polymorphic Associations and STI &raquo;</a>
       
     </p>
   </footer>
@@ -265,8 +324,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-basic-search/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-basic-search/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes/';
         var disqus_script = 'embed.js';
       
     (function () {

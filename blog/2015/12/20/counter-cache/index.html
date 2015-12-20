@@ -5,13 +5,17 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>About - Leon's Blogging</title>
+  <title>Ruby on Rails - Counter_cache - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="About Dec 12th, 2015 1:12 pm | Edit Leon Ji Ruby on Rails Developer Github https://github.com/mgleon08
-Yourator www.yourator.co
-Rainbow-Balloons &hellip;">
+  <meta name="description" content="通常要計算 has_many 關聯資料的數量時，就會用以下方式。 1
+@book.pages.size 但這樣就會產生很多SQL count查詢，造成效能上的問題 1
+2
+3
+4
+SELECT * FROM `pages` LIMIT 5 OFFSET 0
+SELECT count(*) AS &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +24,7 @@ Rainbow-Balloons &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/about">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2015/12/20/counter-cache">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -98,52 +102,138 @@ Rainbow-Balloons &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">About</h1>
     
-        <p class="meta">
-            
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time> | 
-            <a href="/about/index.markdown">Edit</a>
-        </p>
+      
+        <h1 class="entry-title">Ruby on Rails - Counter_cache</h1>
+      
     
-  </header>
-  
-  <h1>Leon Ji</h1>
-
-<h3>Ruby on Rails Developer</h3>
-
-<ul>
-<li> Github <a href="https://github.com/mgleon08">https://github.com/mgleon08</a></li>
-<li>Yourator <a href="http://www.yourator.co/">www.yourator.co</a></li>
-<li>Rainbow-Balloons <a href="http://www.rainbow-balloons.com/">http://www.rainbow-balloons.com/</a></li>
-<li>Email : <a href="&#x6d;&#x61;&#105;&#x6c;&#116;&#x6f;&#58;&#109;&#103;&#108;&#101;&#111;&#x6e;&#48;&#56;&#x40;&#103;&#x6d;&#97;&#x69;&#x6c;&#x2e;&#x63;&#111;&#x6d;">&#109;&#x67;&#x6c;&#101;&#x6f;&#x6e;&#x30;&#x38;&#x40;&#103;&#x6d;&#x61;&#x69;&#x6c;&#x2e;&#x63;&#x6f;&#x6d;</a></li>
-</ul>
-
-
-  
-    <footer>
+    
       <p class="meta">
         
+
+
+
+
+<time class='entry-date' datetime='2015-12-20T12:16:23+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:16 pm</span></time>
         
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time>
+         | <a href="#disqus_thread">Comments</a>
         
         
       </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>通常要計算 has_many 關聯資料的數量時，就會用以下方式。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@book</span><span class="o">.</span><span class="n">pages</span><span class="o">.</span><span class="n">size</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<!-- more -->
+
+
+<p>但這樣就會產生很多SQL count查詢，造成效能上的問題</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">SELECT</span> <span class="o">*</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">LIMIT</span> <span class="mi">5</span> <span class="no">OFFSET</span> <span class="mi">0</span>
+</span><span class='line'><span class="no">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">AS</span> <span class="n">count_all</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="sb">`pages`</span><span class="o">.</span><span class="n">book_id</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">)</span>
+</span><span class='line'><span class="no">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">AS</span> <span class="n">count_all</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="sb">`pages`</span><span class="o">.</span><span class="n">book_id</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">)</span>
+</span><span class='line'><span class="no">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">AS</span> <span class="n">count_all</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="sb">`pages`</span><span class="o">.</span><span class="n">book_id</span> <span class="o">=</span> <span class="mi">3</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>因此可以在 Book Model 上新增一個欄位，<code>pages_count</code>，用來記錄該 book 的 page 數量，之後撈資料，就直接撈這個數字就可以了。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>  <span class="n">add_column</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:pages_count</span><span class="p">,</span> <span class="ss">:integer</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="mi">0</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#型態是 integer，記得設定 default 值</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著編輯兩邊的 model，Rails 內建有 counter_cache helper，可以直接去做計算!</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:pages</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Page</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:book</span><span class="p">,</span> <span class="ss">:counter_cache</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#設定成 ture，就會自動去找 pages_count 欄位，若要指定欄位則是 counter_cache: :count_of_pages</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這樣之後下 <code>@book.pages.size</code> 的指令時 Rails 就會預設去找 <code>pages_count</code> 的欄位，不用重新下 SQL指令計算。</p>
+
+<p>也可以直接下 <code>@book.pages_count</code></p>
+
+<p>最後注意，必須要用 <code>create</code> 和 <code>destroy</code> 才會 call back 更改數字，<code>delete</code> 則不會。</p>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/association_basics.html#detailed-association-reference">Guides</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
       
-        <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/about/index.html" data-via="" data-counturl="http://mgleon08.github.com/about/index.html" >Tweet</a>
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2015-12-20T12:16:23+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>12:16 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/railsyu-fa/'>rails語法</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2015/12/20/counter-cache/" data-via="" data-counturl="http://mgleon08.github.com/blog/2015/12/20/counter-cache/" >Tweet</a>
   
   
   
@@ -151,9 +241,16 @@ Rainbow-Balloons &hellip;">
   
 </div>
 
+    
+    <p class="meta">
       
-    </footer>
-  
+        <a class="basic-alignment left" href="/blog/2015/12/19/ruby-on-rails-debugging/" title="Previous Post: Ruby on Rails - Debugging">&laquo; Ruby on Rails - Debugging</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2015/12/20/ruby-on-rails-scopes/" title="Next Post: Ruby on Rails - Scopes">Ruby on Rails - Scopes &raquo;</a>
+      
+    </p>
+  </footer>
 </article>
 
   <section>
@@ -164,13 +261,6 @@ Rainbow-Balloons &hellip;">
 
 
 </div>
-
-<aside class="sidebar">
-  
-    
-  
-</aside>
-
 
     </div>
   </div>
@@ -187,8 +277,8 @@ Rainbow-Balloons &hellip;">
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/about/index.html';
-        var disqus_url = 'http://mgleon08.github.com/about/index.html';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2015/12/20/counter-cache/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2015/12/20/counter-cache/';
         var disqus_script = 'embed.js';
       
     (function () {
