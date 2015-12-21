@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-20T16:18:05+08:00</updated>
+  <updated>2015-12-21T12:21:19+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,149 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Helper?partial?yield?]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/21/ruby-on-rails-view-helper-partial-yield/"/>
+    <updated>2015-12-21T11:08:08+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/21/ruby-on-rails-view-helper-partial-yield</id>
+    <content type="html"><![CDATA[<p>在 Rails 中 View 是負責放 html 的地方，因此會盡量讓它單純呈現畫面，邏輯的東西則是放在別的地方。<br/>
+但是有時候還是不免會有，許多重複的 html ，或是判斷和邏輯的東西必須擺放。<br/>
+這時 rails 就有提供了幾個方法可以解決這些問題。</p>
+
+<h1>helper</h1>
+
+<p>Helper 主要是來整理 view 中，包含邏輯的部份，指的是可以在 Template 中使用的輔助方法。</p>
+
+<p>像是</p>
+
+<ul>
+<li>link_to：可以轉換成，HTML 的 <code>&lt;a&gt;</code> 標籤</li>
+<li>image_tag：可以轉換成，HTML 的 <code>&lt;img&gt;</code> 標籤</li>
+<li>simple_format：可以將內容中 <code>\n</code> 換行字元換成HTML的 <code>&lt;br&gt;</code> 標籤</li>
+<li>truncate：可以將過長的內容，指定擷取前幾個字元，後面則變成 &hellip;</li>
+<li>strip_tags：移除HTML標籤</li>
+<li>..等等</li>
+</ul>
+
+
+<p>都是內建好的一些 helper<br/>
+當然我們也可以自訂自己的 helper 出來</p>
+
+<h3>範例</h3>
+
+<pre><code class="ruby"># 如果指定用户是當前用户，返回 true
+def current_user?(user)
+    user == current_user
+end
+</code></pre>
+
+<p>這樣在 view 中就可以</p>
+
+<pre><code class="ruby">&lt;% if current_user?(@post.user) %&gt;
+    &lt;%= link_to "delete", post_path, method: :delete, data: { confirm: "You sure?" } %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>來去判斷現在登入的使用者，是否為此篇文章的使用者。</p>
+
+<blockquote><p>注意 helper 檔案，會預設跟 controller 和 view 一樣的名稱，但是並沒有限制只有該名稱的 view 才能使用，而是所有 view 都能使用。controller 則無法使用。</p></blockquote>
+
+<p>若是希望 controller 可以使用，可以在 controller 檔案加上 <code>include SessionsHelper</code></p>
+
+<p>application_controller.rb</p>
+
+<pre><code class="ruby">class ApplicationController &lt; ActionController::Base
+  protect_from_forgery with: :exception
+  include SessionsHelper
+end
+</code></pre>
+
+<p>或是在 controller 加上 <code>view_context</code></p>
+
+<pre><code class="ruby">class ProductsController
+  def show
+    @post =  view_context.truncate(@product.desc, :lenght =&gt; 50 )
+  end
+end
+</code></pre>
+
+<h1>partial</h1>
+
+<p>partial 主要是來整理 view 中，重複出現的部分。</p>
+
+<h3>範例</h3>
+
+<p>_post_list.html.erb</p>
+
+<p>```ruby</p>
+
+<ul>
+<% @posts.each do |post| %>
+  <li><%= post.id %></li>
+  <li>Title: <%= link_to(post.title, post_path(post)) %></li>
+  <li>Content: <%= post.content %></li>
+<% end %>
+</ul>
+
+
+<pre><code>記得照 rails 的慣例，partial 檔案前面要加上 `_`
+
+之後再 view 中只要 `render` 指定的位置
+
+index.html.erb
+</code></pre>
+
+<p>&lt;%= render &lsquo;post_list&rsquo; %>
+```</p>
+
+<h3>collection partial</h3>
+
+<p>另外一種是直接傳遞參數進去的 collection partial，上述可改成</p>
+
+<p>_post_list.html.erb</p>
+
+<pre><code class="ruby">  &lt;li&gt;&lt;%= post.id %&gt;&lt;/li&gt;
+  &lt;li&gt;Title: &lt;%= link_to(post.title, post_path(post)) %&gt;&lt;/li&gt;
+  &lt;li&gt;Content: &lt;%= post.content %&gt;&lt;/li&gt;
+</code></pre>
+
+<p>index.html.erb</p>
+
+<p>```ruby</p>
+
+<ul><%= render :partial => "post_list", :collection => @posts, :as => :post %></ul>
+
+
+<pre><code>or
+</code></pre>
+
+<p>&lt;% @posts.each do |p|
+  &lt;%= render :partial => &ldquo;post_list&rdquo;, :locals => { :post => p } %>
+&lt;% end %>
+```</p>
+
+<h1>yield</h1>
+
+<pre><code class="ruby">  def full_title(page_title = '')
+    base_title = "Ruby on Rails"
+    if page_title.empty?
+      base_title
+    else
+      page_title + " | " + base_title
+    end
+  end
+</code></pre>
+
+<p>總結</p>
+
+<ul>
+<li>partial 負責經常性重複的東西，或是比較大片HTML的東西。</li>
+<li>helper  負責處理跟邏輯判斷有關的東西。</li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - Polymorphic Associations and STI]]></title>
@@ -365,63 +508,6 @@ $ ln -s /path/to/myapp
 
 <p>更多指令可以到 github 上面看<br/>
 <a href="https://github.com/Rodreegez/powder">powder</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - 簡易搜尋功能]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-basic-search/"/>
-    <updated>2015-12-18T16:01:02+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-basic-search</id>
-    <content type="html"><![CDATA[<p>在架設網站得時候，不免常常需要用到搜尋功能（增加使用者體驗)<br/>
-所以在這邊介紹一個簡易的搜尋功能</p>
-
-<!-- more -->
-
-
-<p>並不需要額外加 router，直接先在 view 裡面加上</p>
-
-<pre><code class="ruby">&lt;%= form_tag books_path, :method =&gt; :get do %&gt;
-    &lt;%= text_field_tag "keyword", nil, placeholder: '請輸入關鍵字...', :class=&gt;"form-control"%&gt;
-    &lt;%= submit_tag "Search" %&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<p>之後在 controller 加上</p>
-
-<pre><code class="ruby">if params[:keyword]
-    @books = Book.where( [ "name like ? or content like", "%#{params[:keyword]}%", "%#{params[:keyword]}%"] )
-end
-</code></pre>
-
-<p>用SQL的語法 <code>LIKE</code>，直接在資料庫裡面找尋相關的關鍵字，如果有多個欄位，再加上 <code>OR</code> 即可，其中 <code>name</code> 和 <code>content</code> 就是要搜尋的欄位。</p>
-
-<p>記得前面後面要加上 <code>%</code> ，如果沒加上，就一定要完全跟輸入的關鍵字一樣。<br/>
-加上去之後代表，前面後面都可以加上任意字組，就等於是說只有欄位裡有這個關鍵字就搜尋出來的意思。</p>
-
-<p><code>% (百分比符號)：代表零個、一個、或數個字母。</code></p>
-
-<p><a href="http://www.1keydata.com/tw/sql/sql-wildcard.html">SQL萬用字元</a></p>
-
-<p>以上是比較簡易的方式來達成，相對的效能上可能也沒那麼好</p>
-
-<h1>進階搜尋</h1>
-
-<p>如果要更加複雜，效能更好或是全文搜尋的話<br/>
-可以用 gem 來取代</p>
-
-<ul>
-<li><p><a href="https://github.com/activerecord-hackery/ransack">ransack</a><br/>
-比較不考慮效能</p></li>
-<li><p><a href="https://github.com/outoftime/sunspot">Solr</a><br/>
-<a href="http://gogojimmy.net/2012/01/25/full-text-search-in-rails-with-solr/">在 Rails 中使用 Solr 做全文搜尋</a></p></li>
-<li><p><a href="https://www.elastic.co/">Elasticsearch</a><br/>
-<a href="https://github.com/elastic/elasticsearch-rails">elasticsearch-rails</a><br/>
-<a href="https://github.com/ankane/searchkick">第三方gem: Searchkick</a></p></li>
-</ul>
-
-
-<p>不過目前都還沒用過啊..改天要用到再來研究一下:D</p>
 ]]></content>
   </entry>
   
