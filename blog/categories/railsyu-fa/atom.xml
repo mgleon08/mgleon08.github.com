@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails語法 | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/railsyu-fa/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-21T12:21:19+08:00</updated>
+  <updated>2015-12-21T14:01:58+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -19,8 +19,11 @@
     <updated>2015-12-21T11:08:08+08:00</updated>
     <id>http://mgleon08.github.com/blog/2015/12/21/ruby-on-rails-view-helper-partial-yield</id>
     <content type="html"><![CDATA[<p>在 Rails 中 View 是負責放 html 的地方，因此會盡量讓它單純呈現畫面，邏輯的東西則是放在別的地方。<br/>
-但是有時候還是不免會有，許多重複的 html ，或是判斷和邏輯的東西必須擺放。<br/>
-這時 rails 就有提供了幾個方法可以解決這些問題。</p>
+但是有時候還是不免會有許多重複的 html ，或是判斷和邏輯的東西必須擺放。<br/>
+因此 rails 就有提供了幾個方法可以解決這些問題。</p>
+
+<!-- more -->
+
 
 <h1>helper</h1>
 
@@ -34,14 +37,15 @@
 <li>simple_format：可以將內容中 <code>\n</code> 換行字元換成HTML的 <code>&lt;br&gt;</code> 標籤</li>
 <li>truncate：可以將過長的內容，指定擷取前幾個字元，後面則變成 &hellip;</li>
 <li>strip_tags：移除HTML標籤</li>
-<li>..等等</li>
 </ul>
 
 
-<p>都是內建好的一些 helper<br/>
+<p>以上這些都是內建好的一些 helper<br/>
 當然我們也可以自訂自己的 helper 出來</p>
 
 <h3>範例</h3>
+
+<p>判斷現在登入的使用者，是否為此篇文章的使用者，是的話才顯示刪除按鈕。</p>
 
 <pre><code class="ruby"># 如果指定用户是當前用户，返回 true
 def current_user?(user)
@@ -56,30 +60,48 @@ end
 &lt;% end %&gt;
 </code></pre>
 
-<p>來去判斷現在登入的使用者，是否為此篇文章的使用者。</p>
-
 <blockquote><p>注意 helper 檔案，會預設跟 controller 和 view 一樣的名稱，但是並沒有限制只有該名稱的 view 才能使用，而是所有 view 都能使用。controller 則無法使用。</p></blockquote>
 
-<p>若是希望 controller 可以使用，可以在 controller 檔案加上 <code>include SessionsHelper</code></p>
+<p>若是希望 controller 可以使用，可以在 controller 檔案加上 <code>include PostsHelper</code></p>
 
 <p>application_controller.rb</p>
 
 <pre><code class="ruby">class ApplicationController &lt; ActionController::Base
   protect_from_forgery with: :exception
-  include SessionsHelper
+  include PostsHelper
 end
 </code></pre>
 
 <p>或是在 controller 加上 <code>view_context</code></p>
 
-<pre><code class="ruby">class ProductsController
+<pre><code class="ruby">class PostsController
   def show
-    @post =  view_context.truncate(@product.desc, :lenght =&gt; 50 )
+    @post =  view_context.truncate(@post.desc, :lenght =&gt; 50 )
   end
 end
 </code></pre>
 
-<h1>partial</h1>
+<p>最後是 helper 也可以放 html 進去<br/>
+只要加上 <code>content_tag</code></p>
+
+<pre><code class="ruby">content_tag(:p, "Hello world!")
+ # =&gt; &lt;p&gt;Hello world!&lt;/p&gt;
+content_tag(:div, content_tag(:p, "Hello world!"), class: "strong")
+ # =&gt; &lt;div class="strong"&gt;&lt;p&gt;Hello world!&lt;/p&gt;&lt;/div&gt;
+content_tag(:div, "Hello world!", class: ["strong", "highlight"])
+ # =&gt; &lt;div class="strong highlight"&gt;Hello world!&lt;/div&gt;
+content_tag("select", options, multiple: true)
+ # =&gt; &lt;select multiple="multiple"&gt;...options...&lt;/select&gt;
+
+&lt;%= content_tag :div, class: "strong" do -%&gt;
+  Hello world!
+&lt;% end -%&gt;
+ # =&gt; &lt;div class="strong"&gt;Hello world!&lt;/div&gt;
+</code></pre>
+
+<p><a href="http://apidock.com/rails/ActionView/Helpers/TagHelper/content_tag">content_tag</a></p>
+
+<h1>partial(局部樣板)</h1>
 
 <p>partial 主要是來整理 view 中，重複出現的部分。</p>
 
@@ -87,26 +109,21 @@ end
 
 <p>_post_list.html.erb</p>
 
-<p>```ruby</p>
-
-<ul>
-<% @posts.each do |post| %>
-  <li><%= post.id %></li>
-  <li>Title: <%= link_to(post.title, post_path(post)) %></li>
-  <li>Content: <%= post.content %></li>
-<% end %>
-</ul>
-
-
-<pre><code>記得照 rails 的慣例，partial 檔案前面要加上 `_`
-
-之後再 view 中只要 `render` 指定的位置
-
-index.html.erb
+<pre><code class="ruby">&lt;% @posts.each do |post| %&gt;
+  &lt;li&gt;&lt;%= post.id %&gt;&lt;/li&gt;
+  &lt;li&gt;Title: &lt;%= link_to(post.title, post_path(post)) %&gt;&lt;/li&gt;
+  &lt;li&gt;Content: &lt;%= post.content %&gt;&lt;/li&gt;
+&lt;% end %&gt;
 </code></pre>
 
-<p>&lt;%= render &lsquo;post_list&rsquo; %>
-```</p>
+<p>記得照 rails 的慣例，partial 檔案前面要加上 <code>_</code></p>
+
+<p>之後再 view 中只要 <code>render</code> 指定的位置，就可以了</p>
+
+<p>index.html.erb</p>
+
+<pre><code class="ruby">&lt;%= render 'post_list' %&gt;
+</code></pre>
 
 <h3>collection partial</h3>
 
@@ -114,9 +131,9 @@ index.html.erb
 
 <p>_post_list.html.erb</p>
 
-<pre><code class="ruby">  &lt;li&gt;&lt;%= post.id %&gt;&lt;/li&gt;
-  &lt;li&gt;Title: &lt;%= link_to(post.title, post_path(post)) %&gt;&lt;/li&gt;
-  &lt;li&gt;Content: &lt;%= post.content %&gt;&lt;/li&gt;
+<pre><code class="ruby">&lt;li&gt;&lt;%= post.id %&gt;&lt;/li&gt;
+&lt;li&gt;Title: &lt;%= link_to(post.title, post_path(post)) %&gt;&lt;/li&gt;
+&lt;li&gt;Content: &lt;%= post.content %&gt;&lt;/li&gt;
 </code></pre>
 
 <p>index.html.erb</p>
@@ -134,7 +151,21 @@ index.html.erb
 &lt;% end %>
 ```</p>
 
+<p>將參數直接丟進去，就不用在 view 裡面包 block</p>
+
 <h1>yield</h1>
+
+<p>yield 主要是會被替換成樣板的地方。<br/>
+通常是使用在 layout 裡面的 <code>application.html.erb</code>。<br/>
+會將上下板固定，而中間有 <code>&lt;%= yield %&gt;</code> 的地方，就是顯示其他所有的 html.erb 檔案的內容</p>
+
+<p>好處是可以將網站的版型固定，只在需要出現內容的地方用 yield 引進來就可以了。</p>
+
+<p>另外的作用是像是，網站標題，或是fb的Open Graph設定等等，都可以使用這個方式。</p>
+
+<h3>網站標題</h3>
+
+<p>先在 <code>helper</code> 設定</p>
 
 <pre><code class="ruby">  def full_title(page_title = '')
     base_title = "Ruby on Rails"
@@ -146,13 +177,61 @@ index.html.erb
   end
 </code></pre>
 
+<p>接著在 <code>application.html.erb</code></p>
+
+<pre><code class="ruby"> &lt;title&gt;&lt;%= full_title(yield(:title)) %&gt;&lt;/title&gt;
+</code></pre>
+
+<p>之後就可以在每個想呈現不同標題的地方加上</p>
+
+<pre><code class="ruby">&lt;% provide(:title, "About") %&gt;
+# 也可以改 &lt;% content_for(:title, "About") %&gt;
+</code></pre>
+
+<h3>Facebook Open Graph</h3>
+
+<p>在 <code>application.html.erb</code></p>
+
+<pre><code class="ruby">&lt;%= yield :head %&gt;
+</code></pre>
+
+<p>再到要加 Open Graph 設定的頁面加上</p>
+
+<pre><code class="ruby">&lt;%= content_for :head do %&gt;
+    &lt;%= tag(:meta, :content =&gt; @post.name, :property =&gt; "og:title") %&gt;
+    &lt;%= tag(:meta, :content =&gt; truncate(@post.about, :length =&gt; 150 ), :property =&gt; "og:description") %&gt;
+    &lt;%= tag(:meta, :content =&gt; "post", :property =&gt; "og:type") %&gt;
+    &lt;%= tag(:meta, :content =&gt; post_url(@post), :property =&gt; "og:url") %&gt;
+&lt;% end %&gt;
+</code></pre>
+
 <p>總結</p>
 
 <ul>
 <li>partial 負責經常性重複的東西，或是比較大片HTML的東西。</li>
-<li>helper  負責處理跟邏輯判斷有關的東西。</li>
+<li>helper 負責處理跟邏輯判斷有關的東西。</li>
+<li>yield 負責替換樣板的東西。</li>
 </ul>
 
+
+<blockquote><p>建議在 Helper 與 Controller 的 code 不要互相混來呼叫來呼叫去。<br/>
+讓 View 歸 View，Controller 歸 Controller。<br/>
+若真有業務上的需求需要「到處都可以用」。建議寫 Module 掛在 lib 用 mixin 技巧混入。</p></blockquote>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/layouts_and_rendering.html#structuring-layouts">Guides</a><br/>
+<a href="http://rails.ruby.tw/layouts_and_rendering.html#%E7%B5%84%E7%B9%94%E7%89%88%E5%9E%8B">Guides 中文</a></p>
+
+<p>APIdock：<br/>
+<a href="http://apidock.com/rails/ActionView/Partials">partial</a><br/>
+<a href="http://apidock.com/rails/ActionController/Helpers">helper</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/actionview.html">Ruby on Rails 實戰聖經</a><br/>
+<a href="https://rocodev.gitbooks.io/rails-102/content/chapter1-mvc/v/what-is-view.html">rails102</a><br/>
+<a href="http://blog.xdite.net/posts/2011/12/09/how-to-design-helpers">如何運用 / 設計 Rails Helper (1)</a><br/>
+<a href="http://blog.xdite.net/posts/2011/12/10/how-to-design-helpers-2">如何運用 / 設計 Rails Helper (2)</a><br/>
+<a href="http://blog.xdite.net/posts/2012/01/16/how-to-design-helper-3">如何運用 / 設計 Rails Helper (3)</a></p>
 ]]></content>
   </entry>
   

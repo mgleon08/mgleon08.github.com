@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-20T16:18:05+08:00</updated>
+  <updated>2015-12-21T14:01:58+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,300 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Helper?partial?yield?]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/21/ruby-on-rails-view-helper-partial-yield/"/>
+    <updated>2015-12-21T11:08:08+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/21/ruby-on-rails-view-helper-partial-yield</id>
+    <content type="html"><![CDATA[<p>在 Rails 中 View 是負責放 html 的地方，因此會盡量讓它單純呈現畫面，邏輯的東西則是放在別的地方。<br/>
+但是有時候還是不免會有許多重複的 html ，或是判斷和邏輯的東西必須擺放。<br/>
+因此 rails 就有提供了幾個方法可以解決這些問題。</p>
+
+<!-- more -->
+
+
+<h1>helper</h1>
+
+<p>Helper 主要是來整理 view 中，包含邏輯的部份，指的是可以在 Template 中使用的輔助方法。</p>
+
+<p>像是</p>
+
+<ul>
+<li>link_to：可以轉換成，HTML 的 <code>&lt;a&gt;</code> 標籤</li>
+<li>image_tag：可以轉換成，HTML 的 <code>&lt;img&gt;</code> 標籤</li>
+<li>simple_format：可以將內容中 <code>\n</code> 換行字元換成HTML的 <code>&lt;br&gt;</code> 標籤</li>
+<li>truncate：可以將過長的內容，指定擷取前幾個字元，後面則變成 &hellip;</li>
+<li>strip_tags：移除HTML標籤</li>
+</ul>
+
+
+<p>以上這些都是內建好的一些 helper<br/>
+當然我們也可以自訂自己的 helper 出來</p>
+
+<h3>範例</h3>
+
+<p>判斷現在登入的使用者，是否為此篇文章的使用者，是的話才顯示刪除按鈕。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 如果指定用户是當前用户，返回 true</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">current_user?</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">user</span> <span class="o">==</span> <span class="n">current_user</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這樣在 view 中就可以</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="n">current_user?</span><span class="p">(</span><span class="vi">@post</span><span class="o">.</span><span class="n">user</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"> &lt;%= link_to &quot;delete&quot;, post_path, method: :delete, data: { confirm: &quot;You sure?&quot; } %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>注意 helper 檔案，會預設跟 controller 和 view 一樣的名稱，但是並沒有限制只有該名稱的 view 才能使用，而是所有 view 都能使用。controller 則無法使用。</p></blockquote>
+
+<p>若是希望 controller 可以使用，可以在 controller 檔案加上 <code>include PostsHelper</code></p>
+
+<p>application_controller.rb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">protect_from_forgery</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:exception</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">PostsHelper</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是在 controller 加上 <code>view_context</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostsController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span>  <span class="n">view_context</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span><span class="vi">@post</span><span class="o">.</span><span class="n">desc</span><span class="p">,</span> <span class="ss">:lenght</span> <span class="o">=&gt;</span> <span class="mi">50</span> <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最後是 helper 也可以放 html 進去<br/>
+只要加上 <code>content_tag</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">content_tag</span><span class="p">(</span><span class="ss">:p</span><span class="p">,</span> <span class="s2">&quot;Hello world!&quot;</span><span class="p">)</span>
+</span><span class='line'> <span class="c1"># =&gt; &lt;p&gt;Hello world!&lt;/p&gt;</span>
+</span><span class='line'><span class="n">content_tag</span><span class="p">(</span><span class="ss">:div</span><span class="p">,</span> <span class="n">content_tag</span><span class="p">(</span><span class="ss">:p</span><span class="p">,</span> <span class="s2">&quot;Hello world!&quot;</span><span class="p">),</span> <span class="ss">class</span><span class="p">:</span> <span class="s2">&quot;strong&quot;</span><span class="p">)</span>
+</span><span class='line'> <span class="c1"># =&gt; &lt;div class=&quot;strong&quot;&gt;&lt;p&gt;Hello world!&lt;/p&gt;&lt;/div&gt;</span>
+</span><span class='line'><span class="n">content_tag</span><span class="p">(</span><span class="ss">:div</span><span class="p">,</span> <span class="s2">&quot;Hello world!&quot;</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="o">[</span><span class="s2">&quot;strong&quot;</span><span class="p">,</span> <span class="s2">&quot;highlight&quot;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'> <span class="c1"># =&gt; &lt;div class=&quot;strong highlight&quot;&gt;Hello world!&lt;/div&gt;</span>
+</span><span class='line'><span class="n">content_tag</span><span class="p">(</span><span class="s2">&quot;select&quot;</span><span class="p">,</span> <span class="n">options</span><span class="p">,</span> <span class="ss">multiple</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
+</span><span class='line'> <span class="c1"># =&gt; &lt;select multiple=&quot;multiple&quot;&gt;...options...&lt;/select&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">%= content_tag :div, class: &quot;strong&quot; do -%&gt;</span>
+</span><span class='line'><span class="sx">  Hello world!</span>
+</span><span class='line'><span class="sx">&lt;% end -%&gt;</span>
+</span><span class='line'><span class="sx"> # =</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;strong&quot;</span><span class="o">&gt;</span><span class="no">Hello</span> <span class="n">world!</span><span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://apidock.com/rails/ActionView/Helpers/TagHelper/content_tag">content_tag</a></p>
+
+<h1>partial(局部樣板)</h1>
+
+<p>partial 主要是來整理 view 中，重複出現的部分。</p>
+
+<h3>範例</h3>
+
+<p>_post_list.html.erb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% @posts.each </span><span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;li&gt;</span><span class="o">&lt;</span><span class="sx">%= post.id %&gt;&lt;/li&gt;</span>
+</span><span class='line'><span class="sx">  &lt;li&gt;Title: &lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">post_path</span><span class="p">(</span><span class="n">post</span><span class="p">))</span> <span class="sx">%&gt;&lt;/li&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;</span><span class="ss">Content</span><span class="p">:</span> <span class="o">&lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">content</span> <span class="sx">%&gt;&lt;/li&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>記得照 rails 的慣例，partial 檔案前面要加上 <code>_</code></p>
+
+<p>之後再 view 中只要 <code>render</code> 指定的位置，就可以了</p>
+
+<p>index.html.erb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">render</span> <span class="s1">&#39;post_list&#39;</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>collection partial</h3>
+
+<p>另外一種是直接傳遞參數進去的 collection partial，上述可改成</p>
+
+<p>_post_list.html.erb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;&lt;</span><span class="sx">%= post.id %&gt;&lt;/li&gt;</span>
+</span><span class='line'><span class="sx">&lt;li&gt;Title: &lt;%=</span> <span class="n">link_to</span><span class="p">(</span><span class="n">post</span><span class="o">.</span><span class="n">title</span><span class="p">,</span> <span class="n">post_path</span><span class="p">(</span><span class="n">post</span><span class="p">))</span> <span class="sx">%&gt;&lt;/li&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">li</span><span class="o">&gt;</span><span class="ss">Content</span><span class="p">:</span> <span class="o">&lt;%=</span> <span class="n">post</span><span class="o">.</span><span class="n">content</span> <span class="sx">%&gt;&lt;/li&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>index.html.erb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">ul</span><span class="o">&gt;&lt;</span><span class="sx">%= render :partial =</span><span class="o">&gt;</span> <span class="s2">&quot;post_list&quot;</span><span class="p">,</span> <span class="ss">:collection</span> <span class="o">=&gt;</span> <span class="vi">@posts</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="ss">:post</span> <span class="sx">%&gt;&lt;/ul&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>or</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% @posts.each </span><span class="k">do</span> <span class="o">|</span><span class="nb">p</span><span class="o">|</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sx">%= render :partial =</span><span class="o">&gt;</span> <span class="s2">&quot;post_list&quot;</span><span class="p">,</span> <span class="ss">:locals</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:post</span> <span class="o">=&gt;</span> <span class="nb">p</span> <span class="p">}</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>將參數直接丟進去，就不用在 view 裡面包 block</p>
+
+<h1>yield</h1>
+
+<p>yield 主要是會被替換成樣板的地方。<br/>
+通常是使用在 layout 裡面的 <code>application.html.erb</code>。<br/>
+會將上下板固定，而中間有 <code>&lt;%= yield %&gt;</code> 的地方，就是顯示其他所有的 html.erb 檔案的內容</p>
+
+<p>好處是可以將網站的版型固定，只在需要出現內容的地方用 yield 引進來就可以了。</p>
+
+<p>另外的作用是像是，網站標題，或是fb的Open Graph設定等等，都可以使用這個方式。</p>
+
+<h3>網站標題</h3>
+
+<p>先在 <code>helper</code> 設定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="k">def</span> <span class="nf">full_title</span><span class="p">(</span><span class="n">page_title</span> <span class="o">=</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">base_title</span> <span class="o">=</span> <span class="s2">&quot;Ruby on Rails&quot;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">page_title</span><span class="o">.</span><span class="n">empty?</span>
+</span><span class='line'>      <span class="n">base_title</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="n">page_title</span> <span class="o">+</span> <span class="s2">&quot; | &quot;</span> <span class="o">+</span> <span class="n">base_title</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著在 <code>application.html.erb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="o">&lt;</span><span class="n">title</span><span class="o">&gt;&lt;%=</span> <span class="n">full_title</span><span class="p">(</span><span class="k">yield</span><span class="p">(</span><span class="ss">:title</span><span class="p">))</span> <span class="sx">%&gt;&lt;/title&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之後就可以在每個想呈現不同標題的地方加上</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">% provide(:title, </span><span class="s2">&quot;About&quot;</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"># 也可以改 &lt;% content_for(:title, &quot;About&quot;) %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Facebook Open Graph</h3>
+
+<p>在 <code>application.html.erb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="k">yield</span> <span class="ss">:head</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再到要加 Open Graph 設定的頁面加上</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= content_for :head do %&gt;</span>
+</span><span class='line'><span class="sx">    &lt;%=</span> <span class="n">tag</span><span class="p">(</span><span class="ss">:meta</span><span class="p">,</span> <span class="ss">:content</span> <span class="o">=&gt;</span> <span class="vi">@post</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="ss">:property</span> <span class="o">=&gt;</span> <span class="s2">&quot;og:title&quot;</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">    &lt;%= tag(:meta, :content =&gt;</span> <span class="n">truncate</span><span class="p">(</span><span class="vi">@post</span><span class="o">.</span><span class="n">about</span><span class="p">,</span> <span class="ss">:length</span> <span class="o">=&gt;</span> <span class="mi">150</span> <span class="p">),</span> <span class="ss">:property</span> <span class="o">=&gt;</span> <span class="s2">&quot;og:description&quot;</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">    &lt;%= tag(:meta, :content =&gt;</span> <span class="s2">&quot;post&quot;</span><span class="p">,</span> <span class="ss">:property</span> <span class="o">=&gt;</span> <span class="s2">&quot;og:type&quot;</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">    &lt;%= tag(:meta, :content =&gt;</span> <span class="n">post_url</span><span class="p">(</span><span class="vi">@post</span><span class="p">),</span> <span class="ss">:property</span> <span class="o">=&gt;</span> <span class="s2">&quot;og:url&quot;</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>總結</p>
+
+<ul>
+<li>partial 負責經常性重複的東西，或是比較大片HTML的東西。</li>
+<li>helper 負責處理跟邏輯判斷有關的東西。</li>
+<li>yield 負責替換樣板的東西。</li>
+</ul>
+
+
+<blockquote><p>建議在 Helper 與 Controller 的 code 不要互相混來呼叫來呼叫去。<br/>
+讓 View 歸 View，Controller 歸 Controller。<br/>
+若真有業務上的需求需要「到處都可以用」。建議寫 Module 掛在 lib 用 mixin 技巧混入。</p></blockquote>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/layouts_and_rendering.html#structuring-layouts">Guides</a><br/>
+<a href="http://rails.ruby.tw/layouts_and_rendering.html#%E7%B5%84%E7%B9%94%E7%89%88%E5%9E%8B">Guides 中文</a></p>
+
+<p>APIdock：<br/>
+<a href="http://apidock.com/rails/ActionView/Partials">partial</a><br/>
+<a href="http://apidock.com/rails/ActionController/Helpers">helper</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/actionview.html">Ruby on Rails 實戰聖經</a><br/>
+<a href="https://rocodev.gitbooks.io/rails-102/content/chapter1-mvc/v/what-is-view.html">rails102</a><br/>
+<a href="http://blog.xdite.net/posts/2011/12/09/how-to-design-helpers">如何運用 / 設計 Rails Helper (1)</a><br/>
+<a href="http://blog.xdite.net/posts/2011/12/10/how-to-design-helpers-2">如何運用 / 設計 Rails Helper (2)</a><br/>
+<a href="http://blog.xdite.net/posts/2012/01/16/how-to-design-helper-3">如何運用 / 設計 Rails Helper (3)</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - Polymorphic Associations and STI]]></title>
@@ -952,7 +1246,7 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 </span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#97;&#x69;&#108;&#x74;&#111;&#x3a;&#100;&#x65;&#112;&#x6c;&#x6f;&#121;&#x40;&#x31;&#x32;&#51;&#46;&#49;&#x32;&#x33;&#46;&#x31;&#x32;&#46;&#x31;">&#x64;&#101;&#112;&#108;&#111;&#x79;&#64;&#x31;&#x32;&#x33;&#46;&#x31;&#x32;&#x33;&#x2e;&#49;&#50;&#46;&#49;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#x61;&#x69;&#108;&#x74;&#111;&#58;&#100;&#x65;&#112;&#x6c;&#x6f;&#121;&#x40;&#x31;&#50;&#x33;&#46;&#49;&#x32;&#51;&#x2e;&#49;&#50;&#x2e;&#x31;">&#x64;&#x65;&#x70;&#108;&#111;&#121;&#x40;&#49;&#50;&#51;&#46;&#49;&#50;&#x33;&#x2e;&#x31;&#50;&#x2e;&#x31;</a> 就連進去囉!!</p>
 
 <p>權限指令參考：
 <a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chown">鳥哥的私房菜</a></p>
