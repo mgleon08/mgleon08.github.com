@@ -52,5 +52,17 @@ end
 
 最後注意，必須要用 `create` 和 `destroy` 才會 call back 更改數字，`delete` 則不會。
 
+另外如果想要將數字重新計算可以用以下，可以直接在 `rails c` 裡面跑  
+也可以在新增 counter 的 migration 裡面直接加上去，在 `db:migrat` 的時候就會刷新了
+
+```ruby
+Page.pluck(:id).each do |i|
+	Page.reset_counters(i, :books)
+end
+```
+
 官方文件：  
-[Guides](http://guides.rubyonrails.org/association_basics.html#detailed-association-reference)
+[Guides](http://guides.rubyonrails.org/association_basics.html#detailed-association-reference)  
+[Guides 中文](http://rails.ruby.tw/association_basics.html#%E9%97%9C%E8%81%AF%E5%AE%8C%E6%95%B4%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)  
+[pluck](http://apidock.com/rails/ActiveRecord/Calculations/pluck)  
+[reset_counters](http://apidock.com/rails/ActiveRecord/Base/reset_counters/class)
