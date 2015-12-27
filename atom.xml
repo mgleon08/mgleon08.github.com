@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-26T12:11:17+08:00</updated>
+  <updated>2015-12-27T21:05:26+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,338 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Git 指令操作手冊]]></title>
+    <link href="http://mgleon08.github.com/blog/2015/12/27/git-command/"/>
+    <updated>2015-12-27T20:56:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2015/12/27/git-command</id>
+    <content type="html"><![CDATA[<p>Git 博大精深，必須花很多時間去學習，從做中學會更快<br/>
+因此這篇主要用來記錄 Git 的指令和操作，增加記憶，也方便後續查詢。</p>
+
+<!-- more -->
+
+
+<h1>區域</h1>
+
+<ol>
+<li>工作目錄 Working tree</li>
+<li>暫存準備遞交區 Staging Area (index索引)</li>
+<li>儲存庫 Repository</li>
+</ol>
+
+
+<h1>狀態</h1>
+
+<ol>
+<li>沒有被追蹤的檔案 Untracked files</li>
+<li>有修改、還沒準備要被遞交 Changes not staged for commit</li>
+<li>有修改、準備要被遞交的檔案(在Staging Area) Changes to be committed</li>
+<li>已經被遞交的檔案 Committed</li>
+</ol>
+
+
+<h1>符號</h1>
+
+<ol>
+<li>HEAD
+
+<ul>
+<li>永遠會指向「工作目錄」中所設定的「分支」當中的「最新版」。</li>
+<li>所以當你在這個分支執行 git commit 後，這個 HEAD 符號參照也會更新成該分支最新版的那個 commit 物件。</li>
+</ul>
+</li>
+<li>ORIG_HEAD
+
+<ul>
+<li>簡單來說就是 HEAD 這個 commit 物件的「前一版」，經常用來復原上一次的版本變更。</li>
+<li><a href="http://stackoverflow.com/questions/964876/head-and-orig-head-in-git">HEAD and ORIG_HEAD in Git</a></li>
+</ul>
+</li>
+<li>FETCH_HEAD
+
+<ul>
+<li>使用遠端儲存庫時，可能會使用 git fetch 指令取回所有遠端儲存庫的物件。這個 FETCH_HEAD 符號參考則會記錄遠端儲存庫中每個分支的 HEAD (最新版) 的「絕對名稱」。</li>
+</ul>
+</li>
+<li>MERGE_HEAD
+
+<ul>
+<li>當你執行合併工作時 (關於合併的議題會在日後的文章中會提到)，「合併來源｣的 commit 物件絕對名稱會被記錄在 MERGE_HEAD 這個符號參照中。</li>
+</ul>
+</li>
+</ol>
+
+
+<h1>基本設定</h1>
+
+<ul>
+<li><code>git config --global user.name "&lt;使用者名字&gt;"</code></li>
+<li><code>git config --global user.email "&lt;電子信箱&gt;"</code></li>
+<li><code>git config --list</code>　看 Git 設定內容</li>
+<li><code>git config --global alias.st status</code>　縮短字串（將 git status 縮寫為 git st）</li>
+<li><code>git config --global color.ui true</code>　設定輸出顏色</li>
+<li><code>git config --global apply.whitespace nowarn</code> 空白對有些語言是有影響的(像是Ruby)，因此我們會希望 Git 去忽略空白的變化</li>
+</ul>
+
+
+<p>以上皆可直接 <code>vi .gitconfig</code> 去做修正</p>
+
+<h1>基本功能</h1>
+
+<h3>basic</h3>
+
+<ul>
+<li><code>git --version</code> 查看目前版本。</li>
+<li><code>git help [指令]</code> 查詢完整的文件。</li>
+<li><code>git init</code> 建立 Repository。</li>
+<li><code>git clone [url]</code> 複製遠端專案。</li>
+<li><code>git mv [filename] [new filename]</code> 更改檔案名稱。(此更改檔案的動作會列入版本控制中)</li>
+<li><code>git show [SHA1]</code> 查出該版本的相關資訊。(可搭配 <code>git log</code> 找出有問題的版本)</li>
+</ul>
+
+
+<h3>add</h3>
+
+<ul>
+<li><code>git add .</code> 將當前目錄<code>所有</code>檔案加入到 Staging Area。(雖然方便但很容易會不小心加入一些其他不必要的檔案)</li>
+<li><code>git add [filename]</code> 將檔案加入到 Staging Area。</li>
+<li><code>git add -p</code>，可以選擇只加入檔案中修改的其中一部分。</li>
+<li><code>git add -i</code>，會以互動方式詢問要加入到Staging Area裡的檔案。</li>
+<li><code>git add -u</code>，只註冊已提交過的檔案到索引。</li>
+</ul>
+
+
+<h3>rm</h3>
+
+<ul>
+<li><code>git rm [filename]</code> 刪除檔案，包括實體檔案。(此刪除檔案的動作會列入版本控制中)</li>
+<li><code>git rm --cached a.txt</code> 只想刪除索引檔中的該檔，又要保留工作目錄下的實體檔案。</li>
+</ul>
+
+
+<h3>commit</h3>
+
+<ul>
+<li><code>git commit</code> 將 Staging Area 檔案 commit。</li>
+<li><code>git commit -m [commit 訊息]</code> 直接寫入 commit 訊息。</li>
+<li><code>git commit -am [commit 訊息]</code> 等於 <code>git add .</code> + <code>git commit -m</code>。</li>
+<li><code>git commit --amend</code> 修改上一個 commit 訊息。</li>
+</ul>
+
+
+<h3>status</h3>
+
+<ul>
+<li><code>git status</code> 檢視檔案的狀態。</li>
+<li><code>git status -s</code> 顯示精簡的狀態。</li>
+<li><code>git status -b</code> 顯示分支的名稱。</li>
+</ul>
+
+
+<h1>分支</h1>
+
+<h3>branch</h3>
+
+<ul>
+<li><code>git branch</code> 列出所有本地端的 branch。</li>
+<li><code>git branch -r</code> 列出所有遠端的 branch。</li>
+<li><code>git branch -a</code> 列出所有本地及遠端的 branch。</li>
+<li><code>git branch [branch]</code> 建立一個新的 branch。</li>
+<li><code>git branch -m [oldbranch] [newbranch]</code> 修改分支的名稱， <code>-M</code> 強制。</li>
+<li><code>git branch -d [branchname]</code> 刪除 branch，未合併的無法刪除，必須改用 <code>-D</code> 強制刪除。</li>
+</ul>
+
+
+<h3>checkout</h3>
+
+<ul>
+<li><code>git checkout [branch]</code> 切換到該 branch。</li>
+<li><code>git checkout -b [branch]</code>建立一個新的 branch 並切換到該 branch。</li>
+</ul>
+
+
+<blockquote><p>切換 working tree 的 branch 時,如果有檔案，在 staging area 或是 modified，會無法切換。可以先 commit，只要不 push 出去，再 <code>reset</code> 回來即可。或是用 <code>stash</code> 的方式</p></blockquote>
+
+<h1>合併</h1>
+
+<h3>merge</h3>
+
+<ul>
+<li><code>git merge [branch]</code> 將指定 branch 合併到目前的 branch</li>
+<li><code>git merge [branch] --no-ff</code> 不使用 fast-forward 合併。可以保留分支合併的紀錄。</li>
+</ul>
+
+
+<h1>修正</h1>
+
+<h3>reset</h3>
+
+<ul>
+<li><code>git reset</code> 將所有檔案從 Staging Area 到 Working tree。</li>
+<li><code>git reset HEAD [filename]</code> 將檔案從 Staging Area 取消到 Working tree。</li>
+<li><code>git reset --hard HEAD</code> 放棄目前所有修改，返回到最新的commit。</li>
+<li><code>git reset HEAD^</code> 刪除最近一次的版本紀錄，但保留修改過的檔案。(回到working tree)</li>
+<li><code>git reset --soft HEAD^</code> 刪除最近一次的版本紀錄，但保留修改過的檔案。(回到staging area)</li>
+<li><code>git reset --hard HEAD^</code> 刪除最近一次的版本紀錄，清除修改過的檔案。(完全消失)</li>
+</ul>
+
+
+<blockquote><p>HEAD 後面可接 <code>^</code> 表示回到上個版本， <code>^^</code> 回到上兩個版本，以此類推<br/>
+也可以用 <code>~</code>，或是 <code>^2</code> or <code>~2</code>，都不加就是回到目前最新的版本</p></blockquote>
+
+<ul>
+<li><code>git reset --hard ORIG_HEAD</code> 刪除最近一次的版本，但保留最後一次的變更。</li>
+</ul>
+
+
+<h3>revert</h3>
+
+<blockquote><p>revert是新增一個commit來做還原，<code>git revert</code> 會用一個新的 commit 來回復所有的變更。(適合已經push出去給別人的情境)</p></blockquote>
+
+<h3>rebase</h3>
+
+<ul>
+<li><code>git rebase</code> 重新修改特定分支的「基礎版本」，把另外一個分支的變更，當成這個分支的基礎。(如果接著直接 merge，則是會直接 fast-forward ，若想保留資訊則加上  <code>--no-ff</code>)</li>
+<li><a href="https://blog.yorkxin.org/posts/2011/07/29/git-rebase/">Git-rebase 小筆記</a></li>
+<li><code>git rebase [SHA1] -i</code> 可以只接更改某個 commit 之後所有的紀錄。</li>
+<li><a href="https://github.com/doggy8088/Learn-Git-in-30-days/blob/master/docs/22%20%E4%BF%AE%E6%AD%A3%20commit%20%E9%81%8E%E7%9A%84%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2%E7%B4%80%E9%8C%84%20Part%204%20(rebase">rebase -i 1</a>.markdown)</li>
+<li><a href="https://github.com/doggy8088/Learn-Git-in-30-days/blob/master/docs/23%20%E4%BF%AE%E6%AD%A3%20commit%20%E9%81%8E%E7%9A%84%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2%E7%B4%80%E9%8C%84%20Part%205%20(rebase%202">rebase -i 2</a>.markdown)</li>
+</ul>
+
+
+<h3>cherry-pick</h3>
+
+<ul>
+<li><code>git cherry-pick</code> 手動挑出其他 branch 中的 commit，合併進來。</li>
+<li><code>git cherry-pick [SHA1] -e</code> 建立版本前先編輯訊息。</li>
+<li><code>git cherry-pick [SHA1] -n</code> 不建立版本，僅套用其變更。</li>
+</ul>
+
+
+<h3>checkout</h3>
+
+<ul>
+<li><code>git checkout [filename]</code> 取消 Working tree 檔案。</li>
+<li><code>git checkout master [filename]</code> 把 master 分支中最新版的檔案給還原。</li>
+</ul>
+
+
+<h1>暫存</h1>
+
+<ul>
+<li><code>git stash</code> 會將所有已列入追蹤(tracked)的檔案建立暫存版。</li>
+<li><code>git stash -u</code>　會包括所有已追蹤或未追蹤的檔案，全部都建立成暫存版。</li>
+<li><code>git stash list</code> 顯示出所有的暫存清單。</li>
+<li><code>git stash clear</code> 清除所有暫存。</li>
+<li><code>git stash pop</code> 復原最新的操作並將他從暫存清單中移除。</li>
+<li><code>git stash apply</code> 復原最新的操作，與<code>pop</code>唯一差別則是取回該版本 (其實是執行合併動作) 後，該暫存版還會留在 stash 清單上。</li>
+<li><code>git stash drop</code> 刪除最新的暫存操作。</li>
+</ul>
+
+
+<blockquote><p>指定stash ID（如：stash@{1}），則可以復原特定的操作</p></blockquote>
+
+<h1>遠端</h1>
+
+<ul>
+<li><code>git remote add origin [url]</code> 註冊遠端儲存庫。</li>
+<li><code>git clone [url]</code> 將遠端儲存庫複製到本地，並建立工作目錄與本地儲存庫。</li>
+<li><code>git push -u origin master</code> 將本地儲存庫中目前分支的所有相關物件推送到遠端儲存庫中。</li>
+<li><code>git fetch</code> 將遠端儲存庫的最新版下載回來，下載的內容包含完整的物件儲存庫(object storage)。 這個命令不包含「合併」分支的動作。</li>
+<li><code>git pull -u origin master</code> 將遠端資料庫拉下來，並且合併，相當於 <code>git fetch</code> + <code>git merge</code>。</li>
+</ul>
+
+
+<blockquote><p>加上 <code>-u</code> 後續就只要 <code>git push</code> 和 <code>git pull</code> 即可。</p></blockquote>
+
+<h1>差異</h1>
+
+<ul>
+<li><code>git diff</code> 比對「Working tree」與「Staging Area」之間的差異。</li>
+<li><code>git diff commit</code> 比對「Working tree」與「指定 commit 物件裡的那個 tree 物件」之間的差異。</li>
+<li><code>git diff HEAD</code> 比對「Working tree」與「HEAD」之間的差異。</li>
+<li><code>git diff --cached</code>比對「Staging Area」與「HEAD」之間的差異。(可改成 &ndash;staged)</li>
+<li><code>git diff commit1(SHA1) commit2(SHA1)</code> 比較兩個 commit 差異。</li>
+<li><code>git diff HEAD^ HEAD</code> 比較 HEAD 和 HEAD^ 差異。</li>
+</ul>
+
+
+<h1>記錄</h1>
+
+<h3>log</h3>
+
+<ul>
+<li><code>git log</code> 查詢歷史紀錄。</li>
+<li><code>git log -10</code> 限定輸出最近幾筆紀錄。</li>
+<li><code>git log --oneline --graph --all --decorate</code> 圖像化 log。</li>
+</ul>
+
+
+<h3>reflog</h3>
+
+<ul>
+<li><code>git reflog</code> 可列印出所有「歷史紀錄」的版本變化。</li>
+<li><code>git log -g</code> 顯示 reflog 的詳細版本記錄。</li>
+<li><code>git reflog delete HEAD@{1}</code> 刪除特定幾個版本的歷史紀錄。</li>
+</ul>
+
+
+<h1>標籤</h1>
+
+<ul>
+<li><code>git tag</code> 列出所有標籤。</li>
+<li><code>git tag -n</code> 顯示標籤的列表和註解。</li>
+<li><code>git tag [tagname]</code> 建立輕量標籤。</li>
+<li><code>git tag [tagname] -d</code> 刪除輕量標籤。</li>
+<li><code>git tag [tagname] -am [版本訊息]</code> 建立標示標籤</li>
+</ul>
+
+
+<blockquote><ol>
+<li>輕量標籤 (lightweight tag)
+
+<ul>
+<li>不可變更的暫時標籤</li>
+<li>可以添加名稱</li>
+</ul>
+</li>
+<li>標示標籤 (annotated tag)
+
+<ul>
+<li>可以添加打標簽者的名稱、email及日期</li>
+<li>可以添加名稱</li>
+<li>可以添加註解</li>
+<li>可以添加簽名</li>
+</ul>
+</li>
+</ol>
+</blockquote>
+
+<h1>其他</h1>
+
+<ul>
+<li><code>.gitkeep</code> 空目錄不會被 commit，必要時在目錄裡放 <code>.gitkeep</code>。</li>
+<li><code>vi .gitignore</code> 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。</li>
+<li><a href="https://github.com/github/gitignore">.gitignore ⼤集合</a></li>
+</ul>
+
+
+<p>官方文件：<br/>
+<a href="http://git-scm.com/book/zh-tw/v1">Git Pro</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/git/">Git 版本控制系統</a><br/>
+<a href="https://github.com/doggy8088/Learn-Git-in-30-days">30 天精通 Git 版本控管</a><br/>
+<a href="https://backlogtool.com/git-guide/tw/reference/">連猴子都能懂的git入門</a><br/>
+<a href="http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/">好麻煩部落格</a></p>
+
+<p>練習：<br/>
+<a href="https://try.github.io/levels/1/challenges/1">codeschool</a><br/>
+<a href="http://dylandy.github.io/Easy-Git-Tutorial/">Easy-Git-Tutorial</a><br/>
+<a href="http://pcottle.github.io/learnGitBranching/">learnGitBranching</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - Helper?partial?yield?]]></title>
@@ -1261,7 +1593,7 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 </span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#97;&#x69;&#x6c;&#116;&#x6f;&#58;&#x64;&#101;&#x70;&#108;&#111;&#121;&#x40;&#49;&#x32;&#51;&#46;&#49;&#x32;&#x33;&#x2e;&#49;&#50;&#46;&#49;">&#100;&#101;&#x70;&#108;&#111;&#121;&#64;&#x31;&#x32;&#51;&#x2e;&#49;&#x32;&#x33;&#x2e;&#x31;&#x32;&#46;&#x31;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#x61;&#105;&#108;&#116;&#x6f;&#58;&#100;&#x65;&#112;&#x6c;&#111;&#121;&#x40;&#x31;&#50;&#51;&#46;&#49;&#50;&#x33;&#x2e;&#49;&#50;&#x2e;&#49;">&#x64;&#x65;&#112;&#108;&#111;&#x79;&#x40;&#x31;&#50;&#x33;&#46;&#49;&#x32;&#x33;&#46;&#x31;&#x32;&#46;&#49;</a> 就連進去囉!!</p>
 
 <p>權限指令參考：
 <a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chown">鳥哥的私房菜</a></p>
