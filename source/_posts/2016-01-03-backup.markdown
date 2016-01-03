@@ -1,0 +1,161 @@
+---
+layout: post
+title: "用 backup 來備份資料庫"
+date: 2016-01-03 21:42:46 +0800
+comments: true
+categories: database gem rails
+---
+
+當網站上線之後，經常會提心吊膽的害怕網站資料不見。  
+這是很重要的動作就是 `備份` !
+
+<!-- more -->
+
+這次主要介紹用 [backup](http://backup.github.io/backup/v4/)來做備份 
+
+先到遠端的 server 上面
+
+`gem install backup`
+
+將 backup 安裝起來
+
+接著輸入
+
+`backup generate:model --trigger my_backup --archives --storages='s3' --compressor='gzip' --notifiers=‘mail'`
+
+之後會產生一個 `config.rb` 和一個 `my_backup.rb` 的檔案。
+
+打開 `my_backup.rb` 設定
+
+```ruby
+Model.new(:my_backup, '[describe]') do
+
+  ##
+  # MySQL [Database]
+  #
+  database MySQL do |db|
+    # To dump all databases, set `db.name = :all` (or leave blank)
+    db.name               = "[dbname]"
+    db.username           = "root"
+    db.password           = "xxxx"
+    db.host               = "localhost"
+    db.port               = 3306
+    # db.socket             = "/tmp/mysql.sock"
+    # Note: when using `skip_tables` with the `db.name = :all` option,
+    # table names should be prefixed with a database name.
+    # e.g. ["db_name.table_to_skip", ...]
+    # db.skip_tables        = ["skip", "these", "tables"]
+    # db.only_tables        = ["only", "these", "tables"]
+    db.additional_options = ["--quick", "--single-transaction"]
+  end
+
+  ##
+  # Amazon Simple Storage Service [Storage]
+  #
+
+ # 將備份檔案儲存到S3
+ store_with S3 do |s3|
+    # AWS Credentials
+    s3.access_key_id     = "xxxx"
+    s3.secret_access_key = "xxxx"
+    # Or, to use a IAM Profile:
+    # s3.use_iam_profile = true
+
+    s3.region            = "ap-northeast-1"
+    s3.bucket            = "[bucketname]"
+    s3.path              = "[path]"
+  end
+
+  # 額外的檔案壓縮，例如用戶上傳的圖片，就可以指定路徑
+  # archive.add “/home/deploy/xxxxxxx/shared/public/systems/
+  # archive :my_archive do |archive|
+    # Run the `tar` command using `sudo`
+    # archive.use_sudo
+    # archive.add "/srv"
+  # end
+
+  ##
+  # Gzip [Compressor]
+  #
+  compress_with Gzip
+
+  ##
+  # Mail [Notifier]
+  #
+  # The default delivery method for Mail Notifiers is 'SMTP'.
+  # See the documentation for other delivery options.
+  # 寄信通知，也有很多其他的通知方法，官方文件都有
+  notify_by Mail do |mail|
+    mail.on_success           = true
+    mail.on_warning           = true
+    mail.on_failure           = true
+
+    mail.from                 = "mail.from"
+    mail.to                   = "mail.to"
+    mail.address              = "smtp.mailgun.org"
+    mail.port                 = 587
+    mail.domain               = "mail.domain"
+    mail.user_name            = "mail.user_name"
+    mail.password             = "mail.password"
+
+    mail.authentication       = "plain"
+    mail.encryption           = :starttls
+  end
+end
+```
+
+接著打
+
+`backup perform --trigger my_backup`
+
+就可以做備份了
+
+#排程
+
+每次都要手動去備份相當麻煩，因此接下來就是要設定固定時間跑指令來做備份拉。
+
+這邊是用 [whenever](https://github.com/javan/whenever) 來跑 crontab
+
+先在 Gemfile. 加入
+
+`gem 'whenever', :require => false`
+
+接著打 `wheneverize .`
+
+就會產生檔案 `config/schedule.rb`
+
+打開檔案
+
+```ruby
+env :PATH, ENV['PATH']
+set :output, 'log/cron.log'
+
+every 1.day, :at => '4:30 am' do
+  command "backup perform --trigger my_backup"
+end
+```
+
+設定就完成囉!
+
+如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：
+
+`require "whenever/capistrano"`
+
+#匯入資料庫
+
+有了備份檔案，就能夠直接在本機端匯入檔案  
+匯入方式如下  
+
+`mysql -u root -p db_name < backup.sql`
+
+就會看到資料都匯入進去了，另外圖片都是存在 s3 ，如果希望圖片也顯示，就將 production 的圖片複製一份到 development 就可以了，因為兩邊設定的 bucket 是不一樣的。
+
+
+官方文件：  
+[backup](http://backup.github.io/backup/v4/)  
+[whenever](https://github.com/javan/whenever)
+
+參考文件：  
+[用Backup來備份你的網站](http://blog.eddie.com.tw/2011/05/24/backup-your-website/)  
+[Whenever 使用筆記](http://lemonup.logdown.com/posts/169422-rails-whenever-use-note)  
+[mysql匯入與匯出指令](http://programmer.shinchi.tw/2013/12/18/mysql%E5%8C%AF%E5%85%A5%E8%88%87%E5%8C%AF%E5%87%BA%E6%8C%87%E4%BB%A4/)

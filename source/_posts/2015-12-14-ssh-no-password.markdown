@@ -67,5 +67,18 @@ others = r-- = 4+0+0 = 4
   
 接著就可以在 (本機) 直接  ssh deploy@123.123.12.1 就連進去囉!!
 
+#設定快捷鍵
+
+可以直接 `sudo .ssh/config` 設定
+
+```
+Host [自訂名稱]
+    HostName [hostname 網址或ip]
+    Port 22
+    User deploy
+```
+接著就可以直接 `ssh [自訂名稱]` 就會登入 deploy 的帳號了。
+
+
 權限指令參考：
 [鳥哥的私房菜](http://linux.vbird.org/linux_basic/0210filepermission.php#chown)
