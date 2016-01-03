@@ -1,0 +1,481 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>用 Backup 來備份資料庫 - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="當網站上線之後，經常會提心吊膽的害怕網站資料不見。
+這是很重要的動作就是 備份 ! 這次主要介紹用 backup來做備份 先到遠端的 server 上面 gem install backup 將 backup 安裝起來 接著輸入 backup generate:model --trigger &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/01/03/backup">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">用 Backup 來備份資料庫</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-01-03T21:42:46+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>3</span><span class='date-suffix'>rd</span>, <span class='date-year'>2016</span></span> <span class='time'>9:42 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>當網站上線之後，經常會提心吊膽的害怕網站資料不見。<br/>
+這是很重要的動作就是 <code>備份</code> !</p>
+
+<!-- more -->
+
+
+<p>這次主要介紹用 <a href="http://backup.github.io/backup/v4/">backup</a>來做備份</p>
+
+<p>先到遠端的 server 上面</p>
+
+<p><code>gem install backup</code></p>
+
+<p>將 backup 安裝起來</p>
+
+<p>接著輸入</p>
+
+<p><code>backup generate:model --trigger my_backup --archives --storages='s3' --compressor='gzip' --notifiers=‘mail'</code></p>
+
+<p>之後會產生一個 <code>config.rb</code> 和一個 <code>my_backup.rb</code> 的檔案。</p>
+
+<p>打開 <code>my_backup.rb</code> 設定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Model</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:my_backup</span><span class="p">,</span> <span class="s1">&#39;[describe]&#39;</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">##</span>
+</span><span class='line'>  <span class="c1"># MySQL [Database]</span>
+</span><span class='line'>  <span class="c1">#</span>
+</span><span class='line'>  <span class="n">database</span> <span class="no">MySQL</span> <span class="k">do</span> <span class="o">|</span><span class="n">db</span><span class="o">|</span>
+</span><span class='line'>    <span class="c1"># To dump all databases, set `db.name = :all` (or leave blank)</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">name</span>               <span class="o">=</span> <span class="s2">&quot;[dbname]&quot;</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">username</span>           <span class="o">=</span> <span class="s2">&quot;root&quot;</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">password</span>           <span class="o">=</span> <span class="s2">&quot;xxxx&quot;</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">host</span>               <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">port</span>               <span class="o">=</span> <span class="mi">3306</span>
+</span><span class='line'>    <span class="c1"># db.socket             = &quot;/tmp/mysql.sock&quot;</span>
+</span><span class='line'>    <span class="c1"># Note: when using `skip_tables` with the `db.name = :all` option,</span>
+</span><span class='line'>    <span class="c1"># table names should be prefixed with a database name.</span>
+</span><span class='line'>    <span class="c1"># e.g. [&quot;db_name.table_to_skip&quot;, ...]</span>
+</span><span class='line'>    <span class="c1"># db.skip_tables        = [&quot;skip&quot;, &quot;these&quot;, &quot;tables&quot;]</span>
+</span><span class='line'>    <span class="c1"># db.only_tables        = [&quot;only&quot;, &quot;these&quot;, &quot;tables&quot;]</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">additional_options</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;--quick&quot;</span><span class="p">,</span> <span class="s2">&quot;--single-transaction&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">##</span>
+</span><span class='line'>  <span class="c1"># Amazon Simple Storage Service [Storage]</span>
+</span><span class='line'>  <span class="c1">#</span>
+</span><span class='line'>
+</span><span class='line'> <span class="c1"># 將備份檔案儲存到S3</span>
+</span><span class='line'> <span class="n">store_with</span> <span class="no">S3</span> <span class="k">do</span> <span class="o">|</span><span class="n">s3</span><span class="o">|</span>
+</span><span class='line'>    <span class="c1"># AWS Credentials</span>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">access_key_id</span>     <span class="o">=</span> <span class="s2">&quot;xxxx&quot;</span>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s2">&quot;xxxx&quot;</span>
+</span><span class='line'>    <span class="c1"># Or, to use a IAM Profile:</span>
+</span><span class='line'>    <span class="c1"># s3.use_iam_profile = true</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">region</span>            <span class="o">=</span> <span class="s2">&quot;ap-northeast-1&quot;</span>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">bucket</span>            <span class="o">=</span> <span class="s2">&quot;[bucketname]&quot;</span>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">path</span>              <span class="o">=</span> <span class="s2">&quot;[path]&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># 額外的檔案壓縮，例如用戶上傳的圖片，就可以指定路徑</span>
+</span><span class='line'>  <span class="c1"># archive.add “/home/deploy/xxxxxxx/shared/public/systems/</span>
+</span><span class='line'>  <span class="c1"># archive :my_archive do |archive|</span>
+</span><span class='line'>    <span class="c1"># Run the `tar` command using `sudo`</span>
+</span><span class='line'>    <span class="c1"># archive.use_sudo</span>
+</span><span class='line'>    <span class="c1"># archive.add &quot;/srv&quot;</span>
+</span><span class='line'>  <span class="c1"># end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">##</span>
+</span><span class='line'>  <span class="c1"># Gzip [Compressor]</span>
+</span><span class='line'>  <span class="c1">#</span>
+</span><span class='line'>  <span class="n">compress_with</span> <span class="no">Gzip</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">##</span>
+</span><span class='line'>  <span class="c1"># Mail [Notifier]</span>
+</span><span class='line'>  <span class="c1">#</span>
+</span><span class='line'>  <span class="c1"># The default delivery method for Mail Notifiers is &#39;SMTP&#39;.</span>
+</span><span class='line'>  <span class="c1"># See the documentation for other delivery options.</span>
+</span><span class='line'>  <span class="c1"># 寄信通知，也有很多其他的通知方法，官方文件都有</span>
+</span><span class='line'>  <span class="n">notify_by</span> <span class="no">Mail</span> <span class="k">do</span> <span class="o">|</span><span class="n">mail</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">on_success</span>           <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">on_warning</span>           <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">on_failure</span>           <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">from</span>                 <span class="o">=</span> <span class="s2">&quot;mail.from&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">to</span>                   <span class="o">=</span> <span class="s2">&quot;mail.to&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">address</span>              <span class="o">=</span> <span class="s2">&quot;smtp.mailgun.org&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">port</span>                 <span class="o">=</span> <span class="mi">587</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">domain</span>               <span class="o">=</span> <span class="s2">&quot;mail.domain&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">user_name</span>            <span class="o">=</span> <span class="s2">&quot;mail.user_name&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">password</span>             <span class="o">=</span> <span class="s2">&quot;mail.password&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">authentication</span>       <span class="o">=</span> <span class="s2">&quot;plain&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">encryption</span>           <span class="o">=</span> <span class="ss">:starttls</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著打</p>
+
+<p><code>backup perform --trigger my_backup</code></p>
+
+<p>就可以做備份了</p>
+
+<h1>排程</h1>
+
+<p>每次都要手動去備份相當麻煩，因此接下來就是要設定固定時間跑指令來做備份拉。</p>
+
+<p>這邊是用 <a href="https://github.com/javan/whenever">whenever</a> 來跑 crontab</p>
+
+<p>先在 Gemfile. 加入</p>
+
+<p><code>gem 'whenever', :require =&gt; false</code></p>
+
+<p>接著打 <code>wheneverize .</code></p>
+
+<p>就會產生檔案 <code>config/schedule.rb</code></p>
+
+<p>打開檔案</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">env</span> <span class="ss">:PATH</span><span class="p">,</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;PATH&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:output</span><span class="p">,</span> <span class="s1">&#39;log/cron.log&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">every</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="ss">:at</span> <span class="o">=&gt;</span> <span class="s1">&#39;4:30 am&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">command</span> <span class="s2">&quot;backup perform --trigger my_backup&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>設定就完成囉!</p>
+
+<p>如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：</p>
+
+<p><code>require "whenever/capistrano"</code></p>
+
+<h1>匯入資料庫</h1>
+
+<p>有了備份檔案，就能夠直接在本機端匯入檔案<br/>
+匯入方式如下</p>
+
+<p><code>mysql -u root -p db_name &lt; backup.sql</code></p>
+
+<p>就會看到資料都匯入進去了，另外圖片都是存在 s3 ，如果希望圖片也顯示，就將 production 的圖片複製一份到 development 就可以了，因為兩邊設定的 bucket 是不一樣的。</p>
+
+<p>官方文件：<br/>
+<a href="http://backup.github.io/backup/v4/">backup</a><br/>
+<a href="https://github.com/javan/whenever">whenever</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.eddie.com.tw/2011/05/24/backup-your-website/">用Backup來備份你的網站</a><br/>
+<a href="http://lemonup.logdown.com/posts/169422-rails-whenever-use-note">Whenever 使用筆記</a><br/>
+<a href="http://programmer.shinchi.tw/2013/12/18/mysql%E5%8C%AF%E5%85%A5%E8%88%87%E5%8C%AF%E5%87%BA%E6%8C%87%E4%BB%A4/">mysql匯入與匯出指令</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-01-03T21:42:46+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>3</span><span class='date-suffix'>rd</span>, <span class='date-year'>2016</span></span> <span class='time'>9:42 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/database/'>database</a>, <a class='category' href='/blog/categories/gem/'>gem</a>, <a class='category' href='/blog/categories/rails/'>rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/01/03/backup/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/01/03/backup/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2015/12/27/git-command/" title="Previous Post: Git 指令操作手冊">&laquo; Git 指令操作手冊</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/01/03/backup/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/01/03/backup/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-27T21:05:26+08:00</updated>
+  <updated>2016-01-03T22:12:31+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,247 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Backup 來備份資料庫]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/03/backup/"/>
+    <updated>2016-01-03T21:42:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/03/backup</id>
+    <content type="html"><![CDATA[<p>當網站上線之後，經常會提心吊膽的害怕網站資料不見。<br/>
+這是很重要的動作就是 <code>備份</code> !</p>
+
+<!-- more -->
+
+
+<p>這次主要介紹用 <a href="http://backup.github.io/backup/v4/">backup</a>來做備份</p>
+
+<p>先到遠端的 server 上面</p>
+
+<p><code>gem install backup</code></p>
+
+<p>將 backup 安裝起來</p>
+
+<p>接著輸入</p>
+
+<p><code>backup generate:model --trigger my_backup --archives --storages='s3' --compressor='gzip' --notifiers=‘mail'</code></p>
+
+<p>之後會產生一個 <code>config.rb</code> 和一個 <code>my_backup.rb</code> 的檔案。</p>
+
+<p>打開 <code>my_backup.rb</code> 設定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Model</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:my_backup</span><span class="p">,</span> <span class="s1">&#39;[describe]&#39;</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">##</span>
+</span><span class='line'>  <span class="c1"># MySQL [Database]</span>
+</span><span class='line'>  <span class="c1">#</span>
+</span><span class='line'>  <span class="n">database</span> <span class="no">MySQL</span> <span class="k">do</span> <span class="o">|</span><span class="n">db</span><span class="o">|</span>
+</span><span class='line'>    <span class="c1"># To dump all databases, set `db.name = :all` (or leave blank)</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">name</span>               <span class="o">=</span> <span class="s2">&quot;[dbname]&quot;</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">username</span>           <span class="o">=</span> <span class="s2">&quot;root&quot;</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">password</span>           <span class="o">=</span> <span class="s2">&quot;xxxx&quot;</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">host</span>               <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">port</span>               <span class="o">=</span> <span class="mi">3306</span>
+</span><span class='line'>    <span class="c1"># db.socket             = &quot;/tmp/mysql.sock&quot;</span>
+</span><span class='line'>    <span class="c1"># Note: when using `skip_tables` with the `db.name = :all` option,</span>
+</span><span class='line'>    <span class="c1"># table names should be prefixed with a database name.</span>
+</span><span class='line'>    <span class="c1"># e.g. [&quot;db_name.table_to_skip&quot;, ...]</span>
+</span><span class='line'>    <span class="c1"># db.skip_tables        = [&quot;skip&quot;, &quot;these&quot;, &quot;tables&quot;]</span>
+</span><span class='line'>    <span class="c1"># db.only_tables        = [&quot;only&quot;, &quot;these&quot;, &quot;tables&quot;]</span>
+</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">additional_options</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;--quick&quot;</span><span class="p">,</span> <span class="s2">&quot;--single-transaction&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">##</span>
+</span><span class='line'>  <span class="c1"># Amazon Simple Storage Service [Storage]</span>
+</span><span class='line'>  <span class="c1">#</span>
+</span><span class='line'>
+</span><span class='line'> <span class="c1"># 將備份檔案儲存到S3</span>
+</span><span class='line'> <span class="n">store_with</span> <span class="no">S3</span> <span class="k">do</span> <span class="o">|</span><span class="n">s3</span><span class="o">|</span>
+</span><span class='line'>    <span class="c1"># AWS Credentials</span>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">access_key_id</span>     <span class="o">=</span> <span class="s2">&quot;xxxx&quot;</span>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s2">&quot;xxxx&quot;</span>
+</span><span class='line'>    <span class="c1"># Or, to use a IAM Profile:</span>
+</span><span class='line'>    <span class="c1"># s3.use_iam_profile = true</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">region</span>            <span class="o">=</span> <span class="s2">&quot;ap-northeast-1&quot;</span>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">bucket</span>            <span class="o">=</span> <span class="s2">&quot;[bucketname]&quot;</span>
+</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">path</span>              <span class="o">=</span> <span class="s2">&quot;[path]&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># 額外的檔案壓縮，例如用戶上傳的圖片，就可以指定路徑</span>
+</span><span class='line'>  <span class="c1"># archive.add “/home/deploy/xxxxxxx/shared/public/systems/</span>
+</span><span class='line'>  <span class="c1"># archive :my_archive do |archive|</span>
+</span><span class='line'>    <span class="c1"># Run the `tar` command using `sudo`</span>
+</span><span class='line'>    <span class="c1"># archive.use_sudo</span>
+</span><span class='line'>    <span class="c1"># archive.add &quot;/srv&quot;</span>
+</span><span class='line'>  <span class="c1"># end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">##</span>
+</span><span class='line'>  <span class="c1"># Gzip [Compressor]</span>
+</span><span class='line'>  <span class="c1">#</span>
+</span><span class='line'>  <span class="n">compress_with</span> <span class="no">Gzip</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">##</span>
+</span><span class='line'>  <span class="c1"># Mail [Notifier]</span>
+</span><span class='line'>  <span class="c1">#</span>
+</span><span class='line'>  <span class="c1"># The default delivery method for Mail Notifiers is &#39;SMTP&#39;.</span>
+</span><span class='line'>  <span class="c1"># See the documentation for other delivery options.</span>
+</span><span class='line'>  <span class="c1"># 寄信通知，也有很多其他的通知方法，官方文件都有</span>
+</span><span class='line'>  <span class="n">notify_by</span> <span class="no">Mail</span> <span class="k">do</span> <span class="o">|</span><span class="n">mail</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">on_success</span>           <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">on_warning</span>           <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">on_failure</span>           <span class="o">=</span> <span class="kp">true</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">from</span>                 <span class="o">=</span> <span class="s2">&quot;mail.from&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">to</span>                   <span class="o">=</span> <span class="s2">&quot;mail.to&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">address</span>              <span class="o">=</span> <span class="s2">&quot;smtp.mailgun.org&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">port</span>                 <span class="o">=</span> <span class="mi">587</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">domain</span>               <span class="o">=</span> <span class="s2">&quot;mail.domain&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">user_name</span>            <span class="o">=</span> <span class="s2">&quot;mail.user_name&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">password</span>             <span class="o">=</span> <span class="s2">&quot;mail.password&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">authentication</span>       <span class="o">=</span> <span class="s2">&quot;plain&quot;</span>
+</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">encryption</span>           <span class="o">=</span> <span class="ss">:starttls</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著打</p>
+
+<p><code>backup perform --trigger my_backup</code></p>
+
+<p>就可以做備份了</p>
+
+<h1>排程</h1>
+
+<p>每次都要手動去備份相當麻煩，因此接下來就是要設定固定時間跑指令來做備份拉。</p>
+
+<p>這邊是用 <a href="https://github.com/javan/whenever">whenever</a> 來跑 crontab</p>
+
+<p>先在 Gemfile. 加入</p>
+
+<p><code>gem 'whenever', :require =&gt; false</code></p>
+
+<p>接著打 <code>wheneverize .</code></p>
+
+<p>就會產生檔案 <code>config/schedule.rb</code></p>
+
+<p>打開檔案</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">env</span> <span class="ss">:PATH</span><span class="p">,</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;PATH&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:output</span><span class="p">,</span> <span class="s1">&#39;log/cron.log&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">every</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="ss">:at</span> <span class="o">=&gt;</span> <span class="s1">&#39;4:30 am&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">command</span> <span class="s2">&quot;backup perform --trigger my_backup&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>設定就完成囉!</p>
+
+<p>如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：</p>
+
+<p><code>require "whenever/capistrano"</code></p>
+
+<h1>匯入資料庫</h1>
+
+<p>有了備份檔案，就能夠直接在本機端匯入檔案<br/>
+匯入方式如下</p>
+
+<p><code>mysql -u root -p db_name &lt; backup.sql</code></p>
+
+<p>就會看到資料都匯入進去了，另外圖片都是存在 s3 ，如果希望圖片也顯示，就將 production 的圖片複製一份到 development 就可以了，因為兩邊設定的 bucket 是不一樣的。</p>
+
+<p>官方文件：<br/>
+<a href="http://backup.github.io/backup/v4/">backup</a><br/>
+<a href="https://github.com/javan/whenever">whenever</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.eddie.com.tw/2011/05/24/backup-your-website/">用Backup來備份你的網站</a><br/>
+<a href="http://lemonup.logdown.com/posts/169422-rails-whenever-use-note">Whenever 使用筆記</a><br/>
+<a href="http://programmer.shinchi.tw/2013/12/18/mysql%E5%8C%AF%E5%85%A5%E8%88%87%E5%8C%AF%E5%87%BA%E6%8C%87%E4%BB%A4/">mysql匯入與匯出指令</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Git 指令操作手冊]]></title>
@@ -1593,7 +1834,23 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 </span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#x61;&#105;&#108;&#116;&#x6f;&#58;&#100;&#x65;&#112;&#x6c;&#111;&#121;&#x40;&#x31;&#50;&#51;&#46;&#49;&#50;&#x33;&#x2e;&#49;&#50;&#x2e;&#49;">&#x64;&#x65;&#112;&#108;&#111;&#x79;&#x40;&#x31;&#50;&#x33;&#46;&#49;&#x32;&#x33;&#46;&#x31;&#x32;&#46;&#49;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#x61;&#x69;&#108;&#116;&#111;&#x3a;&#x64;&#101;&#x70;&#108;&#111;&#121;&#64;&#49;&#50;&#51;&#46;&#49;&#x32;&#x33;&#46;&#49;&#50;&#46;&#49;">&#100;&#101;&#112;&#108;&#111;&#x79;&#x40;&#x31;&#x32;&#x33;&#x2e;&#x31;&#x32;&#x33;&#46;&#x31;&#x32;&#46;&#49;</a> 就連進去囉!!</p>
+
+<h1>設定快捷鍵</h1>
+
+<p>可以直接 <code>sudo .ssh/config</code> 設定</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>Host [自訂名稱]
+</span><span class='line'>    HostName [hostname 網址或ip]
+</span><span class='line'>    Port 22
+</span><span class='line'>    User deploy</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著就可以直接 <code>ssh [自訂名稱]</code> 就會登入 deploy 的帳號了。</p>
 
 <p>權限指令參考：
 <a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chown">鳥哥的私房菜</a></p>

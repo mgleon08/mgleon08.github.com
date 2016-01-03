@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2015-12-27T21:05:26+08:00</updated>
+  <updated>2016-01-03T22:12:31+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,165 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Backup 來備份資料庫]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/03/backup/"/>
+    <updated>2016-01-03T21:42:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/03/backup</id>
+    <content type="html"><![CDATA[<p>當網站上線之後，經常會提心吊膽的害怕網站資料不見。<br/>
+這是很重要的動作就是 <code>備份</code> !</p>
+
+<!-- more -->
+
+
+<p>這次主要介紹用 <a href="http://backup.github.io/backup/v4/">backup</a>來做備份</p>
+
+<p>先到遠端的 server 上面</p>
+
+<p><code>gem install backup</code></p>
+
+<p>將 backup 安裝起來</p>
+
+<p>接著輸入</p>
+
+<p><code>backup generate:model --trigger my_backup --archives --storages='s3' --compressor='gzip' --notifiers=‘mail'</code></p>
+
+<p>之後會產生一個 <code>config.rb</code> 和一個 <code>my_backup.rb</code> 的檔案。</p>
+
+<p>打開 <code>my_backup.rb</code> 設定</p>
+
+<pre><code class="ruby">Model.new(:my_backup, '[describe]') do
+
+  ##
+  # MySQL [Database]
+  #
+  database MySQL do |db|
+    # To dump all databases, set `db.name = :all` (or leave blank)
+    db.name               = "[dbname]"
+    db.username           = "root"
+    db.password           = "xxxx"
+    db.host               = "localhost"
+    db.port               = 3306
+    # db.socket             = "/tmp/mysql.sock"
+    # Note: when using `skip_tables` with the `db.name = :all` option,
+    # table names should be prefixed with a database name.
+    # e.g. ["db_name.table_to_skip", ...]
+    # db.skip_tables        = ["skip", "these", "tables"]
+    # db.only_tables        = ["only", "these", "tables"]
+    db.additional_options = ["--quick", "--single-transaction"]
+  end
+
+  ##
+  # Amazon Simple Storage Service [Storage]
+  #
+
+ # 將備份檔案儲存到S3
+ store_with S3 do |s3|
+    # AWS Credentials
+    s3.access_key_id     = "xxxx"
+    s3.secret_access_key = "xxxx"
+    # Or, to use a IAM Profile:
+    # s3.use_iam_profile = true
+
+    s3.region            = "ap-northeast-1"
+    s3.bucket            = "[bucketname]"
+    s3.path              = "[path]"
+  end
+
+  # 額外的檔案壓縮，例如用戶上傳的圖片，就可以指定路徑
+  # archive.add “/home/deploy/xxxxxxx/shared/public/systems/
+  # archive :my_archive do |archive|
+    # Run the `tar` command using `sudo`
+    # archive.use_sudo
+    # archive.add "/srv"
+  # end
+
+  ##
+  # Gzip [Compressor]
+  #
+  compress_with Gzip
+
+  ##
+  # Mail [Notifier]
+  #
+  # The default delivery method for Mail Notifiers is 'SMTP'.
+  # See the documentation for other delivery options.
+  # 寄信通知，也有很多其他的通知方法，官方文件都有
+  notify_by Mail do |mail|
+    mail.on_success           = true
+    mail.on_warning           = true
+    mail.on_failure           = true
+
+    mail.from                 = "mail.from"
+    mail.to                   = "mail.to"
+    mail.address              = "smtp.mailgun.org"
+    mail.port                 = 587
+    mail.domain               = "mail.domain"
+    mail.user_name            = "mail.user_name"
+    mail.password             = "mail.password"
+
+    mail.authentication       = "plain"
+    mail.encryption           = :starttls
+  end
+end
+</code></pre>
+
+<p>接著打</p>
+
+<p><code>backup perform --trigger my_backup</code></p>
+
+<p>就可以做備份了</p>
+
+<h1>排程</h1>
+
+<p>每次都要手動去備份相當麻煩，因此接下來就是要設定固定時間跑指令來做備份拉。</p>
+
+<p>這邊是用 <a href="https://github.com/javan/whenever">whenever</a> 來跑 crontab</p>
+
+<p>先在 Gemfile. 加入</p>
+
+<p><code>gem 'whenever', :require =&gt; false</code></p>
+
+<p>接著打 <code>wheneverize .</code></p>
+
+<p>就會產生檔案 <code>config/schedule.rb</code></p>
+
+<p>打開檔案</p>
+
+<pre><code class="ruby">env :PATH, ENV['PATH']
+set :output, 'log/cron.log'
+
+every 1.day, :at =&gt; '4:30 am' do
+  command "backup perform --trigger my_backup"
+end
+</code></pre>
+
+<p>設定就完成囉!</p>
+
+<p>如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：</p>
+
+<p><code>require "whenever/capistrano"</code></p>
+
+<h1>匯入資料庫</h1>
+
+<p>有了備份檔案，就能夠直接在本機端匯入檔案<br/>
+匯入方式如下</p>
+
+<p><code>mysql -u root -p db_name &lt; backup.sql</code></p>
+
+<p>就會看到資料都匯入進去了，另外圖片都是存在 s3 ，如果希望圖片也顯示，就將 production 的圖片複製一份到 development 就可以了，因為兩邊設定的 bucket 是不一樣的。</p>
+
+<p>官方文件：<br/>
+<a href="http://backup.github.io/backup/v4/">backup</a><br/>
+<a href="https://github.com/javan/whenever">whenever</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.eddie.com.tw/2011/05/24/backup-your-website/">用Backup來備份你的網站</a><br/>
+<a href="http://lemonup.logdown.com/posts/169422-rails-whenever-use-note">Whenever 使用筆記</a><br/>
+<a href="http://programmer.shinchi.tw/2013/12/18/mysql%E5%8C%AF%E5%85%A5%E8%88%87%E5%8C%AF%E5%87%BA%E6%8C%87%E4%BB%A4/">mysql匯入與匯出指令</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - Debugging]]></title>
@@ -380,155 +539,6 @@ end
 <li><a href="http://stackoverflow.com/questions/2652907/what-is-the-difference-between-attr-accessibleattributes-attr-protectedat">stackoverflow</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Accepts_nested_attributes_for]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/"/>
-    <updated>2015-12-13T18:35:13+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for</id>
-    <content type="html"><![CDATA[<p><code>accepts_nested_attributes_for</code> 是一個蠻常會用到的語法</p>
-
-<p>簡單的來說，就是可以透過這個語法，在更新 data 的時候，同時更新其他 model 裡的 data<br/>
-所以並不是每個 model 都必須要有 controller 才能夠做更新的動作</p>
-
-<!-- more -->
-
-
-<p>這裏有兩種情境</p>
-
-<h1>One-to-one</h1>
-
-<pre><code class="ruby">class Book &lt; ActiveRecord::Base
-  has_one :author
-  accepts_nested_attributes_for :author
-end
-</code></pre>
-
-<pre><code class="ruby">params = { book: { name: 'Harry Potter', author_attributes: { name: 'J. K. Rowling' } } }
-
-book = Book.create(params[:book])
-book.author.name # =&gt; 'J. K. Rowling'
-</code></pre>
-
-<p>透過 params 更新 Book 的 name<br/>
-同時透過 <code>author_attributes: { name: 'J. K. Rowling' }</code> 更新 Author 的 name</p>
-
-<p>當然 update 同樣適用</p>
-
-<pre><code class="ruby">params = { book: { author_attributes: { name: 'J. K. Rowling' } } }
-book.update params[:book]
-book.author.name # =&gt; 'J. K. Rowling'
-</code></pre>
-
-<p>另外值得注意的是</p>
-
-<pre><code class="ruby">accepts_nested_attributes_for :author, :allow_destroy =&gt; true, :reject_if =&gt; :all_blank
-</code></pre>
-
-<p><code>:allow_destroy =&gt; true</code> 可以在表單增加一個 _destroy 核選塊來表示刪除<br/>
-<code>:reject_if =&gt; :all_blank</code> 表示在什麼條件下就當作沒有要動作， all_blank 表示如果資料都是空的，就不執行</p>
-
-<h1>One-to-many</h1>
-
-<pre><code class="ruby">class Book &lt; ActiveRecord::Base
-  has_many :pages
-  accepts_nested_attributes_for :page
-end
-</code></pre>
-
-<pre><code class="ruby">params = { book: { 
-    name: 'Harry Potter', page_attributes: [
-        { title: "Philosopher's Stone" }, 
-        { title: "Chamber of Secrets" }
-    ] 
-}}
-
-book = Book.create(params[:book])
-book.pages.length # =&gt; 2
-book.pages.first.title # =&gt; 'Philosopher's Stone'
-book.pages.last.title # =&gt; 'Chamber of Secrets'
-</code></pre>
-
-<h1>通常會搭配 fields_for 來嵌入到同一個表單</h1>
-
-<h3>One-to-one</h3>
-
-<pre><code class="ruby">&lt;%= form_for @book do |b| %&gt;
-  &lt;%= b.label :name %&gt;
-  &lt;%= b.text_field : name %&gt;
-
-  &lt;%= b.fields_for :author do |a| %&gt;
-      &lt;%= a.label :name %&gt;
-      &lt;%= a.text_field : name %&gt;
-
-      &lt;% unless a.object.new_record? %&gt;
-         &lt;%= a.label :_destroy, 'Remove:' %&gt;
-        &lt;%= a.check_box :_destroy %&gt;
-      &lt;% end %&gt;
-  &lt;% end %&gt;
-
-  &lt;%= b.submit %&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<p>這樣就能夠透過原本是 @book 的表單，裡面再放入 author 的欄位進行更新。</p>
-
-<h3>One-to-many</h3>
-
-<p>one-to-many 會比較麻煩，因為當新增的時候，並不知道要新增幾個，因此會動用到 jquery 的動態新增，就是可以在表單上面一直增加欄位。</p>
-
-<p>不過幸好有 gem 可以解決了，以下有幾個 gem</p>
-
-<ul>
-<li><a href="https://github.com/ryanb/nested_form">nested_form</a> ( <a href="http://motion-express.com/blog/20140722-ruby-gem-nested-form">網路上教學</a></li>
-<li><a href="https://github.com/nathanvda/cocoon">cocoon</a></li>
-<li><a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a></li>
-</ul>
-
-
-<h1>strong parameter</h1>
-
-<p>最後記得要加 strong parameter<br/>
-one-to-one 和 one-to-many 都要</p>
-
-<pre><code class="ruby">def book_params
-    params.require(:book)
-        .permit(:name, pages_attributes:[:title, :_destroy, :id])
-end
-</code></pre>
-
-<blockquote><p>每個 gem strong parameter 的方式都有點不太一樣，記得要看一下</p></blockquote>
-
-<h1>helper</h1>
-
-<p>book_helper.rb</p>
-
-<pre><code class="ruby">def setup_author(book)
-    book.build_author if book.author.blank? 
-    #one-to-one 用 build_author ， one-to-many 可以用 authors.build or authors.new 
-    book
-end
-</code></pre>
-
-<p>如果一開始沒設定的話，在 book 表單上是看不到 author 的欄位，因為一開始還沒 build  <br/>
-因此要給它一個判斷，如果是 nil 就先 build_author 給它</p>
-
-<p>接著用 <code>setup_author(@book)</code> 來置換 form_for 中的 @book</p>
-
-<pre><code class="ruby">&lt;%= form_for setup_author(@book), :url =&gt; books_path do |b| %&gt;
-
-...
-
-&lt;% end %&gt;
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/form_helpers.html#building-complex-forms">Guides</a><br/>
-<a href="http://rails.ruby.tw/form_helpers.html#%E6%89%93%E9%80%A0%E8%A4%87%E9%9B%9C%E8%A1%A8%E5%96%AE">Guides 中文</a><br/>
-<a href="http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html">accepts_nested_attributes_for </a> <br/>
-<a href="http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for">fields_for</a></p>
 ]]></content>
   </entry>
   
