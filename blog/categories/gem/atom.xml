@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-03T22:12:31+08:00</updated>
+  <updated>2016-01-05T21:59:47+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -139,18 +139,31 @@ end
 <p>打開檔案</p>
 
 <pre><code class="ruby">env :PATH, ENV['PATH']
-set :output, 'log/cron.log'
+set :output, '/home/[username]/cron.log'
 
 every 1.day, :at =&gt; '4:30 am' do
-  command "backup perform --trigger my_backup"
+  command "/usr/local/bin/backup perform -t my_backup -c /home/[username]/Backup/config.rb"
 end
 </code></pre>
+
+<blockquote><p>切記! 路徑要用絕對路徑啊啊啊!</p></blockquote>
 
 <p>設定就完成囉!</p>
 
 <p>如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：</p>
 
 <p><code>require "whenever/capistrano"</code></p>
+
+<p>另外要看有沒有進排程可以打</p>
+
+<p><code>crontab -e</code></p>
+
+<p>另外 crontab 會分帳號的，所以要用原本的帳號打才會出現。</p>
+
+<blockquote><p>如果只用 whenever 的 rake “XXX” 的話，crontab -e 裡面會先 cd 到專案目錄下，
+這時候 log/cron.log 就沒問題</p>
+
+<p>但是 whenever 的 command “XXXX” 並不會先 cd 到專案目錄下，因此 log/cron.log 會不知道跑去哪裡</p></blockquote>
 
 <h1>匯入資料庫</h1>
 

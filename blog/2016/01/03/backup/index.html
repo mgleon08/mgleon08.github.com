@@ -324,19 +324,32 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">env</span> <span class="ss">:PATH</span><span class="p">,</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;PATH&#39;</span><span class="o">]</span>
-</span><span class='line'><span class="n">set</span> <span class="ss">:output</span><span class="p">,</span> <span class="s1">&#39;log/cron.log&#39;</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:output</span><span class="p">,</span> <span class="s1">&#39;/home/[username]/cron.log&#39;</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">every</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="ss">:at</span> <span class="o">=&gt;</span> <span class="s1">&#39;4:30 am&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">command</span> <span class="s2">&quot;backup perform --trigger my_backup&quot;</span>
+</span><span class='line'>  <span class="n">command</span> <span class="s2">&quot;/usr/local/bin/backup perform -t my_backup -c /home/[username]/Backup/config.rb&quot;</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<blockquote><p>切記! 路徑要用絕對路徑啊啊啊!</p></blockquote>
 
 <p>設定就完成囉!</p>
 
 <p>如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：</p>
 
 <p><code>require "whenever/capistrano"</code></p>
+
+<p>另外要看有沒有進排程可以打</p>
+
+<p><code>crontab -e</code></p>
+
+<p>另外 crontab 會分帳號的，所以要用原本的帳號打才會出現。</p>
+
+<blockquote><p>如果只用 whenever 的 rake “XXX” 的話，crontab -e 裡面會先 cd 到專案目錄下，
+這時候 log/cron.log 就沒問題</p>
+
+<p>但是 whenever 的 command “XXXX” 並不會先 cd 到專案目錄下，因此 log/cron.log 會不知道跑去哪裡</p></blockquote>
 
 <h1>匯入資料庫</h1>
 
