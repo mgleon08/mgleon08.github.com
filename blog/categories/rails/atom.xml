@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-05T21:59:47+08:00</updated>
+  <updated>2016-01-07T22:49:38+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,168 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - 好用的 Enumerable]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/07/rails-enumerable/"/>
+    <updated>2016-01-07T20:40:22+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/07/rails-enumerable</id>
+    <content type="html"><![CDATA[<p>這次主要來介紹 Enumerable api<br/>
+可以很方便的將需要的資料整合在一起</p>
+
+<!-- more -->
+
+
+<h1>inject</h1>
+
+<p>inject 方法可以先給予初始值(數字，hash，array 都可以)，之後給予指定的元素，不斷的迭代。</p>
+
+<pre><code class="ruby">(5..10).inject(1) {|init, n| init * n }
+# =&gt; 151200
+(5..10).inject(1, :*)                         
+#=&gt; 151200
+</code></pre>
+
+<pre><code class="ruby">(5..10).inject {|sum, n| sum * n }
+# =&gt; 45
+(5..10).inject(:+)                            
+#=&gt; 45
+</code></pre>
+
+<p>也可以拿來做比較。</p>
+
+<pre><code class="ruby">%w{ cat sheep bear }.inject do |memo,word|
+   memo.length &gt; word.length ? memo : word
+end
+# =&gt; "sheep"
+</code></pre>
+
+<p>如果給予 inject 的參數為一個空區塊，那麼 inject 會將結果整理成 Hash。</p>
+
+<pre><code class="ruby">User.all.inject({}) do |hash, user| 
+    hash[user.name] = user.id  
+    hash # 需要回傳運算結果
+end
+# =&gt; {"A"=&gt;1, "B"=&gt;2, "C"=&gt;3}
+</code></pre>
+
+<p>但要注意的是，由於每跑一次，都會取用最後的回傳值，當做這次的初始值，因此最後必須再加個 <code>hash</code> ，否則會出錯。</p>
+
+<p>也可改用 reduce 跟 inject 一模一樣<br/>
+<a href="http://stackoverflow.com/questions/13813243/is-inject-the-same-thing-as-reduce-in-ruby">Is inject the same thing as reduce in ruby?</a></p>
+
+<h3>額外說明</h3>
+
+<p>也可以用 map 方式，湊成上面的值。</p>
+
+<pre><code class="ruby">Hash[User.all.map {|user| [user.name, user.id ]}]
+# =&gt; {"A"=&gt;1, "B"=&gt;2, "C"=&gt;3}
+
+User.all.map {|user| [user.name, user.id ]}.to_h
+# =&gt; {"A"=&gt;1, "B"=&gt;2, "C"=&gt;3}
+</code></pre>
+
+<h1>each_with_object</h1>
+
+<p>跟 each 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
+
+<pre><code class="ruby">User.all.each_with_object({}) do | user, hash | 
+    hash[user.name] = user.id  
+end
+</code></pre>
+
+<h1>each_with_index</h1>
+
+<p>用來加上索引。</p>
+
+<pre><code class="ruby">hash = Hash.new
+%w(cat dog wombat).each_with_index {|item, index|
+  hash[item] = index
+}
+
+#=&gt; {"cat"=&gt;0, "dog"=&gt;1, "wombat"=&gt;2}
+</code></pre>
+
+<p><a href="http://www.bbs-software.com/blog/2013/11/22/rubys-injectreduce-and-each_with_object/">Ruby’s inject/reduce and each_with_object</a></p>
+
+<h1>sum</h1>
+
+<p>可以算出集合的加總</p>
+
+<pre><code class="ruby">payments.sum { |p| p.price * p.tax_rate }
+payments.sum(&amp;:price)
+</code></pre>
+
+<p>數字，字串，陣列都可以，其實就是用 <code>+</code> 的方法</p>
+
+<pre><code class="ruby">[5, 15, 10].sum # =&gt; 30
+['foo', 'bar'].sum # =&gt; "foobar"
+[[1, 2], [3, 1, 5]].sum #=&gt; [1, 2, 3, 1, 5]
+</code></pre>
+
+<h1>group_by</h1>
+
+<p>可以依照指定的欄位分組出來。</p>
+
+<pre><code class="ruby">latest_transcripts.group_by(&amp;:day).each do |day, transcripts|
+  p "#{day} -&gt; #{transcripts.map(&amp;:class).join(', ')}"
+end
+
+# "2006-03-01 -&gt; Transcript"
+# "2006-02-28 -&gt; Transcript"
+# "2006-02-27 -&gt; Transcript, Transcript"
+# "2006-02-26 -&gt; Transcript, Transcript"
+# "2006-02-25 -&gt; Transcript"
+# "2006-02-24 -&gt; Transcript, Transcript"
+# "2006-02-23 -&gt; Transcript"
+</code></pre>
+
+<h1>index_by</h1>
+
+<p>index_by可以指定欄位做為鍵值整理成Hash。</p>
+
+<pre><code class="ruby">User.index_by(&amp;:phone)
+# =&gt; {'0912xxxxxx' =&gt; &lt;User ...&gt;, '0919xxxxxx' =&gt; &lt;User ...&gt;, ...}
+</code></pre>
+
+<p>鍵值通常必須是唯一的，若不是唯一的話，會以最後出現的元素做為判斷值。</p>
+
+<h1>any?</h1>
+
+<p>只要有任何條件符合，就回傳true</p>
+
+<pre><code class="ruby">%w{ant bear cat}.any? {|word| word.length &gt;= 3}   
+#=&gt; true
+%w{ant bear cat}.any? {|word| word.length &gt;= 4}   
+#=&gt; true
+[ nil, true, 99 ].any?                            
+#=&gt; 只要有一個不是 nil 和 false 就是 true
+</code></pre>
+
+<p>主要都是集合的方法</p>
+
+<p>可參考之前的<br/>
+<a href="http://mgleon08.github.io/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/">.nil? .empty? .blank? .present? 傻傻分不清楚？</a></p>
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a><br/>
+<a href="http://apidock.com/ruby/Enumerable/inject">inject</a><br/>
+<a href="http://apidock.com/ruby/Enumerable/reduce">reduce</a><br/>
+<a href="http://apidock.com/rails/Enumerable/each_with_object">each_with_object</a><br/>
+<a href="http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index">each_with_index</a><br/>
+<a href="http://apidock.com/rails/Enumerable/sum">sum</a><br/>
+<a href="http://apidock.com/rails/Enumerable/group_by">group_by</a><br/>
+<a href="http://apidock.com/rails/v4.2.1/Enumerable/index_by">index_by</a><br/>
+<a href="http://apidock.com/rails/Enumerable/many%3F">many?</a><br/>
+<a href="http://apidock.com/ruby/Enumerable/any%3F">any?</a></p>
+
+<p>參考文件：<br/>
+<a href="https://gist.github.com/cupakromer/3371003">each_with_object vs inject</a><br/>
+<a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a><br/>
+<a href="http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash">Ruby 用 inject 和 each_with_object 來組 hash
+</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Backup 來備份資料庫]]></title>
@@ -621,71 +783,6 @@ end
 
 <p>參考資料：<br/>
 <a href="https://ihower.tw/rails4/activerecord-query.html">Scopes 作用域</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Counter_cache]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/20/counter-cache/"/>
-    <updated>2015-12-20T12:16:23+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/20/counter-cache</id>
-    <content type="html"><![CDATA[<p>通常要計算 has_many 關聯資料的數量時，就會用以下方式。</p>
-
-<pre><code class="ruby">@book.pages.size
-</code></pre>
-
-<!-- more -->
-
-
-<p>但這樣就會產生很多SQL count查詢，造成效能上的問題</p>
-
-<pre><code class="ruby">SELECT * FROM `pages` LIMIT 5 OFFSET 0
-SELECT count(*) AS count_all FROM `pages` WHERE (`pages`.book_id = 1 )
-SELECT count(*) AS count_all FROM `pages` WHERE (`pages`.book_id = 2 )
-SELECT count(*) AS count_all FROM `pages` WHERE (`pages`.book_id = 3 )
-</code></pre>
-
-<p>因此可以在 Book Model 上新增一個欄位，<code>pages_count</code>，用來記錄該 book 的 page 數量，之後撈資料，就直接撈這個數字就可以了。</p>
-
-<pre><code class="ruby">def change
-    add_column :books, :pages_count, :integer, default: 0
-end
-
-#型態是 integer，記得設定 default 值
-</code></pre>
-
-<p>接著編輯兩邊的 model，Rails 內建有 counter_cache helper，可以直接去做計算!</p>
-
-<pre><code class="ruby">class Book &lt; ActiveRecord::Base
-  has_many :pages
-end
-
-class Page &lt; ActiveRecord::Base
-  belongs_to :book, :counter_cache =&gt; true
-end
-
-#設定成 ture，就會自動去找 pages_count 欄位，若要指定欄位則是 counter_cache: :count_of_pages
-</code></pre>
-
-<p>這樣之後下 <code>@book.pages.size</code> 的指令時 Rails 就會預設去找 <code>pages_count</code> 的欄位，不用重新下 SQL指令計算。</p>
-
-<p>也可以直接下 <code>@book.pages_count</code></p>
-
-<p>最後注意，必須要用 <code>create</code> 和 <code>destroy</code> 才會 call back 更改數字，<code>delete</code> 則不會。</p>
-
-<p>另外如果想要將數字重新計算可以用以下，可以直接在 <code>rails c</code> 裡面跑<br/>
-也可以在新增 counter 的 migration 裡面直接加上去，在 <code>db:migrat</code> 的時候就會刷新了</p>
-
-<pre><code class="ruby">Page.pluck(:id).each do |i|
-    Page.reset_counters(i, :books)
-end
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/association_basics.html#detailed-association-reference">Guides</a><br/>
-<a href="http://rails.ruby.tw/association_basics.html#%E9%97%9C%E8%81%AF%E5%AE%8C%E6%95%B4%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">Guides 中文</a><br/>
-<a href="http://apidock.com/rails/ActiveRecord/Calculations/pluck">pluck</a><br/>
-<a href="http://apidock.com/rails/ActiveRecord/Base/reset_counters/class">reset_counters</a></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-05T21:59:47+08:00</updated>
+  <updated>2016-01-07T22:49:38+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,235 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - 好用的 Enumerable]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/07/rails-enumerable/"/>
+    <updated>2016-01-07T20:40:22+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/07/rails-enumerable</id>
+    <content type="html"><![CDATA[<p>這次主要來介紹 Enumerable api<br/>
+可以很方便的將需要的資料整合在一起</p>
+
+<!-- more -->
+
+
+<h1>inject</h1>
+
+<p>inject 方法可以先給予初始值(數字，hash，array 都可以)，之後給予指定的元素，不斷的迭代。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">5</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="p">{</span><span class="o">|</span><span class="n">init</span><span class="p">,</span> <span class="n">n</span><span class="o">|</span> <span class="n">init</span> <span class="o">*</span> <span class="n">n</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; 151200</span>
+</span><span class='line'><span class="p">(</span><span class="mi">5</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="ss">:*</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 151200</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">5</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">inject</span> <span class="p">{</span><span class="o">|</span><span class="n">sum</span><span class="p">,</span> <span class="n">n</span><span class="o">|</span> <span class="n">sum</span> <span class="o">*</span> <span class="n">n</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; 45</span>
+</span><span class='line'><span class="p">(</span><span class="mi">5</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="ss">:+</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 45</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也可以拿來做比較。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">%w{ cat sheep bear }</span><span class="o">.</span><span class="n">inject</span> <span class="k">do</span> <span class="o">|</span><span class="n">memo</span><span class="p">,</span><span class="n">word</span><span class="o">|</span>
+</span><span class='line'>   <span class="n">memo</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;</span> <span class="n">word</span><span class="o">.</span><span class="n">length</span> <span class="p">?</span> <span class="n">memo</span> <span class="p">:</span> <span class="n">word</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="c1"># =&gt; &quot;sheep&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果給予 inject 的參數為一個空區塊，那麼 inject 會將結果整理成 Hash。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">inject</span><span class="p">({})</span> <span class="k">do</span> <span class="o">|</span><span class="nb">hash</span><span class="p">,</span> <span class="n">user</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">hash</span><span class="o">[</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="o">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>  <span class="nb">hash</span> <span class="c1"># 需要回傳運算結果</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="c1"># =&gt; {&quot;A&quot;=&gt;1, &quot;B&quot;=&gt;2, &quot;C&quot;=&gt;3}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但要注意的是，由於每跑一次，都會取用最後的回傳值，當做這次的初始值，因此最後必須再加個 <code>hash</code> ，否則會出錯。</p>
+
+<p>也可改用 reduce 跟 inject 一模一樣<br/>
+<a href="http://stackoverflow.com/questions/13813243/is-inject-the-same-thing-as-reduce-in-ruby">Is inject the same thing as reduce in ruby?</a></p>
+
+<h3>額外說明</h3>
+
+<p>也可以用 map 方式，湊成上面的值。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Hash</span><span class="o">[</span><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="n">user</span><span class="o">|</span> <span class="o">[</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span> <span class="o">]</span><span class="p">}</span><span class="o">]</span>
+</span><span class='line'><span class="c1"># =&gt; {&quot;A&quot;=&gt;1, &quot;B&quot;=&gt;2, &quot;C&quot;=&gt;3}</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="n">user</span><span class="o">|</span> <span class="o">[</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="p">,</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span> <span class="o">]</span><span class="p">}</span><span class="o">.</span><span class="n">to_h</span>
+</span><span class='line'><span class="c1"># =&gt; {&quot;A&quot;=&gt;1, &quot;B&quot;=&gt;2, &quot;C&quot;=&gt;3}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>each_with_object</h1>
+
+<p>跟 each 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">each_with_object</span><span class="p">({})</span> <span class="k">do</span> <span class="o">|</span> <span class="n">user</span><span class="p">,</span> <span class="nb">hash</span> <span class="o">|</span>
+</span><span class='line'>  <span class="nb">hash</span><span class="o">[</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="o">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>each_with_index</h1>
+
+<p>用來加上索引。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="sx">%w(cat dog wombat)</span><span class="o">.</span><span class="n">each_with_index</span> <span class="p">{</span><span class="o">|</span><span class="n">item</span><span class="p">,</span> <span class="n">index</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">hash</span><span class="o">[</span><span class="n">item</span><span class="o">]</span> <span class="o">=</span> <span class="n">index</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#=&gt; {&quot;cat&quot;=&gt;0, &quot;dog&quot;=&gt;1, &quot;wombat&quot;=&gt;2}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://www.bbs-software.com/blog/2013/11/22/rubys-injectreduce-and-each_with_object/">Ruby’s inject/reduce and each_with_object</a></p>
+
+<h1>sum</h1>
+
+<p>可以算出集合的加總</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">payments</span><span class="o">.</span><span class="n">sum</span> <span class="p">{</span> <span class="o">|</span><span class="nb">p</span><span class="o">|</span> <span class="nb">p</span><span class="o">.</span><span class="n">price</span> <span class="o">*</span> <span class="nb">p</span><span class="o">.</span><span class="n">tax_rate</span> <span class="p">}</span>
+</span><span class='line'><span class="n">payments</span><span class="o">.</span><span class="n">sum</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:price</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>數字，字串，陣列都可以，其實就是用 <code>+</code> 的方法</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">5</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="mi">10</span><span class="o">].</span><span class="n">sum</span> <span class="c1"># =&gt; 30</span>
+</span><span class='line'><span class="o">[</span><span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="o">].</span><span class="n">sum</span> <span class="c1"># =&gt; &quot;foobar&quot;</span>
+</span><span class='line'><span class="o">[[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="o">]].</span><span class="n">sum</span> <span class="c1">#=&gt; [1, 2, 3, 1, 5]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>group_by</h1>
+
+<p>可以依照指定的欄位分組出來。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">latest_transcripts</span><span class="o">.</span><span class="n">group_by</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:day</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">day</span><span class="p">,</span> <span class="n">transcripts</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">p</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">day</span><span class="si">}</span><span class="s2"> -&gt; </span><span class="si">#{</span><span class="n">transcripts</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:class</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;, &#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># &quot;2006-03-01 -&gt; Transcript&quot;</span>
+</span><span class='line'><span class="c1"># &quot;2006-02-28 -&gt; Transcript&quot;</span>
+</span><span class='line'><span class="c1"># &quot;2006-02-27 -&gt; Transcript, Transcript&quot;</span>
+</span><span class='line'><span class="c1"># &quot;2006-02-26 -&gt; Transcript, Transcript&quot;</span>
+</span><span class='line'><span class="c1"># &quot;2006-02-25 -&gt; Transcript&quot;</span>
+</span><span class='line'><span class="c1"># &quot;2006-02-24 -&gt; Transcript, Transcript&quot;</span>
+</span><span class='line'><span class="c1"># &quot;2006-02-23 -&gt; Transcript&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>index_by</h1>
+
+<p>index_by可以指定欄位做為鍵值整理成Hash。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">index_by</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:phone</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; {&#39;0912xxxxxx&#39; =&gt; &lt;User ...&gt;, &#39;0919xxxxxx&#39; =&gt; &lt;User ...&gt;, ...}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>鍵值通常必須是唯一的，若不是唯一的話，會以最後出現的元素做為判斷值。</p>
+
+<h1>any?</h1>
+
+<p>只要有任何條件符合，就回傳true</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sx">%w{ant bear cat}</span><span class="o">.</span><span class="n">any?</span> <span class="p">{</span><span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="n">word</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;=</span> <span class="mi">3</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; true</span>
+</span><span class='line'><span class="sx">%w{ant bear cat}</span><span class="o">.</span><span class="n">any?</span> <span class="p">{</span><span class="o">|</span><span class="n">word</span><span class="o">|</span> <span class="n">word</span><span class="o">.</span><span class="n">length</span> <span class="o">&gt;=</span> <span class="mi">4</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; true</span>
+</span><span class='line'><span class="o">[</span> <span class="kp">nil</span><span class="p">,</span> <span class="kp">true</span><span class="p">,</span> <span class="mi">99</span> <span class="o">].</span><span class="n">any?</span>
+</span><span class='line'><span class="c1">#=&gt; 只要有一個不是 nil 和 false 就是 true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>主要都是集合的方法</p>
+
+<p>可參考之前的<br/>
+<a href="http://mgleon08.github.io/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/">.nil? .empty? .blank? .present? 傻傻分不清楚？</a></p>
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a><br/>
+<a href="http://apidock.com/ruby/Enumerable/inject">inject</a><br/>
+<a href="http://apidock.com/ruby/Enumerable/reduce">reduce</a><br/>
+<a href="http://apidock.com/rails/Enumerable/each_with_object">each_with_object</a><br/>
+<a href="http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index">each_with_index</a><br/>
+<a href="http://apidock.com/rails/Enumerable/sum">sum</a><br/>
+<a href="http://apidock.com/rails/Enumerable/group_by">group_by</a><br/>
+<a href="http://apidock.com/rails/v4.2.1/Enumerable/index_by">index_by</a><br/>
+<a href="http://apidock.com/rails/Enumerable/many%3F">many?</a><br/>
+<a href="http://apidock.com/ruby/Enumerable/any%3F">any?</a></p>
+
+<p>參考文件：<br/>
+<a href="https://gist.github.com/cupakromer/3371003">each_with_object vs inject</a><br/>
+<a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a><br/>
+<a href="http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash">Ruby 用 inject 和 each_with_object 來組 hash
+</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Backup 來備份資料庫]]></title>
@@ -1847,7 +2076,7 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 </span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#x61;&#105;&#x6c;&#116;&#111;&#x3a;&#100;&#101;&#x70;&#x6c;&#x6f;&#x79;&#x40;&#x31;&#50;&#51;&#x2e;&#x31;&#x32;&#x33;&#46;&#49;&#x32;&#x2e;&#49;">&#100;&#x65;&#x70;&#x6c;&#x6f;&#x79;&#x40;&#x31;&#50;&#x33;&#x2e;&#x31;&#x32;&#51;&#x2e;&#x31;&#x32;&#46;&#49;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#97;&#x69;&#x6c;&#116;&#111;&#58;&#100;&#x65;&#x70;&#108;&#x6f;&#x79;&#64;&#49;&#x32;&#51;&#x2e;&#49;&#x32;&#x33;&#46;&#49;&#x32;&#46;&#x31;">&#x64;&#x65;&#112;&#108;&#111;&#121;&#x40;&#49;&#50;&#x33;&#46;&#49;&#50;&#x33;&#x2e;&#49;&#50;&#46;&#49;</a> 就連進去囉!!</p>
 
 <h1>設定快捷鍵</h1>
 
@@ -2440,6 +2669,14 @@ one-to-one 和 one-to-many 都要</p>
 
 <p>設定主要都在 <code>_config.yml</code>，可以更改網站標題，作者名稱，還可以加入facebook按讚，DISQUS回覆等功能<br/>
 修改後要記得 <code>rake generate</code> 才會有效</p>
+
+<h1>新的頁面</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>rake new_page["title"]</span></code></pre></td></tr></table></div></figure>
+
+
+<p>再去首頁新增連結即可。</p>
 
 <h1>撰寫文章</h1>
 
