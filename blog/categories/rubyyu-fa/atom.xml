@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby語法 | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rubyyu-fa/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-07T22:49:38+08:00</updated>
+  <updated>2016-01-08T10:05:38+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -23,6 +23,102 @@
 
 <!-- more -->
 
+
+<h1>Map/Collect</h1>
+
+<p>主要是用來產生數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
+
+<p><code>map</code> 和 <code>collect</code> 其實是一樣的東西，主要是因為其他語言很多都是用 <code>collect</code>。</p>
+
+<pre><code class="ruby">array = [1,2,3]
+array.map {|v| v * 2}
+# =&gt; [2, 4, 6]
+
+hash = {:name =&gt; "Leon", :age =&gt; 18}
+hash.map {|k, v| v }
+# =&gt; ["Leon", 18]
+</code></pre>
+
+<h1>Pluck</h1>
+
+<p>可以針對物件，挑出指定的欄位。</p>
+
+<p>Approach - Collect</p>
+
+<pre><code class="ruby">puts Benchmark.measure { User.where('age &gt; 20').select(:id).collect(&amp;:id) }
+User Load (0.7ms)  SELECT id FROM `users` WHERE (age &lt; 20)
+0.010000   0.000000   0.010000 (  0.011173)
+nil
+</code></pre>
+
+<p>Time Taken : 0.011173 s</p>
+
+<p>Approach - Pluck</p>
+
+<pre><code class="ruby">puts Benchmark.measure { User.where('age &gt; 20').pluck(:id) }
+SQL (0.7ms)  SELECT `users`.`id` FROM `users` WHERE (age &lt; 20)
+0.010000   0.000000   0.010000 (  0.003422)
+nil
+</code></pre>
+
+<p>Time Taken : 0.003422 s</p>
+
+<p>參考<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a></p>
+
+<pre><code class="ruby">Person.pluck(:id)
+# SELECT people.id FROM people
+# =&gt; [1, 2, 3]
+
+Person.pluck(:id, :name)
+# SELECT people.id, people.name FROM people
+# =&gt; [[1, 'David'], [2, 'Jeremy'], [3, 'Jose']]
+
+Person.pluck('DISTINCT role')
+# SELECT DISTINCT role FROM people
+# =&gt; ['admin', 'member', 'guest']
+
+Person.where(age: 21).limit(5).pluck(:id)
+# SELECT people.id FROM people WHERE people.age = 21 LIMIT 5
+# =&gt; [2, 3]
+
+Person.pluck('DATEDIFF(updated_at, created_at)')
+# SELECT DATEDIFF(updated_at, created_at) FROM people
+# =&gt; ['0', '27761', '173']
+</code></pre>
+
+<h1>Select</h1>
+
+<p>可以針對後面的條件，將符合該條件的值塞選出來。</p>
+
+<p>可以在資料庫取值的時候，只取出需要的欄位。</p>
+
+<pre><code class="ruby">User.all.select(:id).map(&amp;:id)
+=&gt; #&lt;ActiveRecord::Relation [#&lt;User id: 1&gt;, #&lt;User id: 2&gt;, #&lt;User id: 3&gt;,...]&gt;
+</code></pre>
+
+<p>可以再搭配 <code>map</code> 變成一個 <code>array</code>。</p>
+
+<pre><code class="ruby">User.all.select(:id).map(&amp;:id)
+# =&gt; [1,2,3]
+</code></pre>
+
+<p>或是直接針對 array 去篩選</p>
+
+<pre><code class="ruby">my_array = [1,2,3,4,5,6,7,8,100]
+my_array.select{|item| item%2==0 }
+# =&gt; [2,4,6,8,100]
+</code></pre>
+
+<p>hash</p>
+
+<pre><code class="ruby">my_hash = {"Joe" =&gt; "male", "Jim" =&gt; "male", "Patty" =&gt; "female"}
+my_hash.select{|name, gender| gender == "male" }
+# {"Joe" =&gt; "male", "Jim" =&gt; "male"}
+
+#改成 map 會變成，回傳 boolean，並且回傳 array
+my_hash.map{|name, gender| gender == "male" }
+#[true, true, false]
+</code></pre>
 
 <h1>inject</h1>
 
@@ -90,11 +186,21 @@ end
 %w(cat dog wombat).each_with_index {|item, index|
   hash[item] = index
 }
+#=&gt; ["cat", "dog", "wombat"]
 
+hash
 #=&gt; {"cat"=&gt;0, "dog"=&gt;1, "wombat"=&gt;2}
 </code></pre>
 
 <p><a href="http://www.bbs-software.com/blog/2013/11/22/rubys-injectreduce-and-each_with_object/">Ruby’s inject/reduce and each_with_object</a></p>
+
+<p>也可以用來將複數的的 position 印出來。</p>
+
+<pre><code class="ruby">["Cool", "chicken!", "beans!", "beef!"].each_with_index do |item, index|
+    print "#{item} " if index%2==0
+end
+Cool beans!  # =&gt; ["Cool", "chicken!", "beans!", "beef!"]
+</code></pre>
 
 <h1>sum</h1>
 
@@ -128,6 +234,20 @@ end
 # "2006-02-23 -&gt; Transcript"
 </code></pre>
 
+<pre><code class="ruby">names = ["James", "Bob", "Joe", "Mark", "Jim"]
+names.group_by{|name| name.length}
+# =&gt; {5=&gt;["James"], 3=&gt;["Bob", "Joe", "Jim"], 4=&gt;["Mark"]} 
+</code></pre>
+
+<h1>grep</h1>
+
+<p>根據指定的條件塞選</p>
+
+<pre><code class="ruby">names = ["James", "Bob", "Joe", "Mark", "Jim"]
+names.grep(/J/)
+#=&gt; ["James", "Joe", "Jim"]
+</code></pre>
+
 <h1>index_by</h1>
 
 <p>index_by可以指定欄位做為鍵值整理成Hash。</p>
@@ -155,8 +275,25 @@ end
 <p>可參考之前的<br/>
 <a href="http://mgleon08.github.io/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/">.nil? .empty? .blank? .present? 傻傻分不清楚？</a></p>
 
+<h1>&amp;:</h1>
+
+<pre><code class="ruby">User.all.map(&amp;:name)
+</code></pre>
+
+<p> <code>&amp;:</code> 代表代入一個Proc<br/>
+ <code>(&amp;:name)</code> = <code>{|name| user.name}</code> 的概念XD。</p>
+
+<h1>Benchmark</h1>
+
+<p>上面其實很多都很類似，主要差異的話就是速度吧<br/>
+所以可以用以下的方式來測試每種執行出來的速度。</p>
+
+<p><a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/benchmark/rdoc/Benchmark.html">Benchmark</a></p>
+
 <p>官方文件：<br/>
 <a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a><br/>
+<a href="http://apidock.com/rails/ActionView/Helpers/FormOptionsHelper/select">select</a><br/>
+<a href="http://apidock.com/rails/ActiveRecord/Calculations/pluck">pluck</a>
 <a href="http://apidock.com/ruby/Enumerable/inject">inject</a><br/>
 <a href="http://apidock.com/ruby/Enumerable/reduce">reduce</a><br/>
 <a href="http://apidock.com/rails/Enumerable/each_with_object">each_with_object</a><br/>
@@ -168,10 +305,13 @@ end
 <a href="http://apidock.com/ruby/Enumerable/any%3F">any?</a></p>
 
 <p>參考文件：<br/>
+<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a><br/>
+<a href="http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods">Ruby Explained: Map, Select, and Other Enumerable Methods</a><br/>
 <a href="https://gist.github.com/cupakromer/3371003">each_with_object vs inject</a><br/>
 <a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a><br/>
 <a href="http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash">Ruby 用 inject 和 each_with_object 來組 hash
-</a></p>
+</a>
+<a href="http://stackoverflow.com/questions/1217088/what-does-mapname-mean-in-ruby">What does map(&amp;:name) mean in Ruby?</a></p>
 ]]></content>
   </entry>
   

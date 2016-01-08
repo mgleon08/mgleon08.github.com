@@ -10,11 +10,7 @@
 
   
   <meta name="description" content="這次主要來介紹 Enumerable api
-可以很方便的將需要的資料整合在一起 inject inject 方法可以先給予初始值(數字，hash，array 都可以)，之後給予指定的元素，不斷的迭代。 1
-2
-3
-4
-(5..10).inject(1) {|init, n| init * n &hellip;">
+可以很方便的將需要的資料整合在一起 Map/Collect 主要是用來產生數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value map 和 collect &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -132,6 +128,158 @@
 <!-- more -->
 
 
+<h1>Map/Collect</h1>
+
+<p>主要是用來產生數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
+
+<p><code>map</code> 和 <code>collect</code> 其實是一樣的東西，主要是因為其他語言很多都是用 <code>collect</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">array</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span> <span class="o">*</span> <span class="mi">2</span><span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; [2, 4, 6]</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">&quot;Leon&quot;</span><span class="p">,</span> <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">18</span><span class="p">}</span>
+</span><span class='line'><span class="nb">hash</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">|</span> <span class="n">v</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; [&quot;Leon&quot;, 18]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Pluck</h1>
+
+<p>可以針對物件，挑出指定的欄位。</p>
+
+<p>Approach - Collect</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;age &gt; 20&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="nb">id</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">)</span>
+</span><span class='line'><span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">000000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mo">011173</span><span class="p">)</span>
+</span><span class='line'><span class="kp">nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Time Taken : 0.011173 s</p>
+
+<p>Approach - Pluck</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;age &gt; 20&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`users`</span><span class="o">.</span><span class="n">`</span><span class="nb">id</span><span class="sb">` FROM `</span><span class="n">users</span><span class="sb">` WHERE (age &lt; 20)</span>
+</span><span class='line'><span class="sb">0.010000   0.000000   0.010000 (  0.003422)</span>
+</span><span class='line'><span class="sb">nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Time Taken : 0.003422 s</p>
+
+<p>參考<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT people.id FROM people</span>
+</span><span class='line'><span class="c1"># =&gt; [1, 2, 3]</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT people.id, people.name FROM people</span>
+</span><span class='line'><span class="c1"># =&gt; [[1, &#39;David&#39;], [2, &#39;Jeremy&#39;], [3, &#39;Jose&#39;]]</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="s1">&#39;DISTINCT role&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT DISTINCT role FROM people</span>
+</span><span class='line'><span class="c1"># =&gt; [&#39;admin&#39;, &#39;member&#39;, &#39;guest&#39;]</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">age</span><span class="p">:</span> <span class="mi">21</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT people.id FROM people WHERE people.age = 21 LIMIT 5</span>
+</span><span class='line'><span class="c1"># =&gt; [2, 3]</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="s1">&#39;DATEDIFF(updated_at, created_at)&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT DATEDIFF(updated_at, created_at) FROM people</span>
+</span><span class='line'><span class="c1"># =&gt; [&#39;0&#39;, &#39;27761&#39;, &#39;173&#39;]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Select</h1>
+
+<p>可以針對後面的條件，將符合該條件的值塞選出來。</p>
+
+<p>可以在資料庫取值的時候，只取出需要的欄位。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;User id: 1&gt;, #&lt;User id: 2&gt;, #&lt;User id: 3&gt;,...]&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以再搭配 <code>map</code> 變成一個 <code>array</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; [1,2,3]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是直接針對 array 去篩選</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">my_array</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">,</span><span class="mi">100</span><span class="o">]</span>
+</span><span class='line'><span class="n">my_array</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="n">item</span><span class="o">|</span> <span class="n">item</span><span class="o">%</span><span class="mi">2</span><span class="o">==</span><span class="mi">0</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; [2,4,6,8,100]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>hash</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">my_hash</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Joe&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;male&quot;</span><span class="p">,</span> <span class="s2">&quot;Jim&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;male&quot;</span><span class="p">,</span> <span class="s2">&quot;Patty&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;female&quot;</span><span class="p">}</span>
+</span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">gender</span><span class="o">|</span> <span class="n">gender</span> <span class="o">==</span> <span class="s2">&quot;male&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># {&quot;Joe&quot; =&gt; &quot;male&quot;, &quot;Jim&quot; =&gt; &quot;male&quot;}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#改成 map 會變成，回傳 boolean，並且回傳 array</span>
+</span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">map</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">gender</span><span class="o">|</span> <span class="n">gender</span> <span class="o">==</span> <span class="s2">&quot;male&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="c1">#[true, true, false]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>inject</h1>
 
 <p>inject 方法可以先給予初始值(數字，hash，array 都可以)，之後給予指定的元素，不斷的迭代。</p>
@@ -231,16 +379,33 @@
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span>
 </span><span class='line'><span class="sx">%w(cat dog wombat)</span><span class="o">.</span><span class="n">each_with_index</span> <span class="p">{</span><span class="o">|</span><span class="n">item</span><span class="p">,</span> <span class="n">index</span><span class="o">|</span>
 </span><span class='line'>  <span class="nb">hash</span><span class="o">[</span><span class="n">item</span><span class="o">]</span> <span class="o">=</span> <span class="n">index</span>
 </span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; [&quot;cat&quot;, &quot;dog&quot;, &quot;wombat&quot;]</span>
 </span><span class='line'>
+</span><span class='line'><span class="nb">hash</span>
 </span><span class='line'><span class="c1">#=&gt; {&quot;cat&quot;=&gt;0, &quot;dog&quot;=&gt;1, &quot;wombat&quot;=&gt;2}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <p><a href="http://www.bbs-software.com/blog/2013/11/22/rubys-injectreduce-and-each_with_object/">Ruby’s inject/reduce and each_with_object</a></p>
+
+<p>也可以用來將複數的的 position 印出來。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="s2">&quot;Cool&quot;</span><span class="p">,</span> <span class="s2">&quot;chicken!&quot;</span><span class="p">,</span> <span class="s2">&quot;beans!&quot;</span><span class="p">,</span> <span class="s2">&quot;beef!&quot;</span><span class="o">].</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">item</span><span class="p">,</span> <span class="n">index</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">print</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">item</span><span class="si">}</span><span class="s2"> &quot;</span> <span class="k">if</span> <span class="n">index</span><span class="o">%</span><span class="mi">2</span><span class="o">==</span><span class="mi">0</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="no">Cool</span> <span class="n">beans!</span>  <span class="c1"># =&gt; [&quot;Cool&quot;, &quot;chicken!&quot;, &quot;beans!&quot;, &quot;beef!&quot;]</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h1>sum</h1>
 
@@ -293,6 +458,30 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">names</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;James&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span><span class="p">,</span> <span class="s2">&quot;Mark&quot;</span><span class="p">,</span> <span class="s2">&quot;Jim&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="n">names</span><span class="o">.</span><span class="n">group_by</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="o">|</span> <span class="nb">name</span><span class="o">.</span><span class="n">length</span><span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; {5=&gt;[&quot;James&quot;], 3=&gt;[&quot;Bob&quot;, &quot;Joe&quot;, &quot;Jim&quot;], 4=&gt;[&quot;Mark&quot;]} </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>grep</h1>
+
+<p>根據指定的條件塞選</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">names</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;James&quot;</span><span class="p">,</span> <span class="s2">&quot;Bob&quot;</span><span class="p">,</span> <span class="s2">&quot;Joe&quot;</span><span class="p">,</span> <span class="s2">&quot;Mark&quot;</span><span class="p">,</span> <span class="s2">&quot;Jim&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="n">names</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="sr">/J/</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; [&quot;James&quot;, &quot;Joe&quot;, &quot;Jim&quot;]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>index_by</h1>
 
 <p>index_by可以指定欄位做為鍵值整理成Hash。</p>
@@ -330,8 +519,27 @@
 <p>可參考之前的<br/>
 <a href="http://mgleon08.github.io/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/">.nil? .empty? .blank? .present? 傻傻分不清楚？</a></p>
 
+<h1>&amp;:</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:name</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p> <code>&amp;:</code> 代表代入一個Proc<br/>
+ <code>(&amp;:name)</code> = <code>{|name| user.name}</code> 的概念XD。</p>
+
+<h1>Benchmark</h1>
+
+<p>上面其實很多都很類似，主要差異的話就是速度吧<br/>
+所以可以用以下的方式來測試每種執行出來的速度。</p>
+
+<p><a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/benchmark/rdoc/Benchmark.html">Benchmark</a></p>
+
 <p>官方文件：<br/>
 <a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a><br/>
+<a href="http://apidock.com/rails/ActionView/Helpers/FormOptionsHelper/select">select</a><br/>
+<a href="http://apidock.com/rails/ActiveRecord/Calculations/pluck">pluck</a>
 <a href="http://apidock.com/ruby/Enumerable/inject">inject</a><br/>
 <a href="http://apidock.com/ruby/Enumerable/reduce">reduce</a><br/>
 <a href="http://apidock.com/rails/Enumerable/each_with_object">each_with_object</a><br/>
@@ -343,10 +551,13 @@
 <a href="http://apidock.com/ruby/Enumerable/any%3F">any?</a></p>
 
 <p>參考文件：<br/>
+<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a><br/>
+<a href="http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods">Ruby Explained: Map, Select, and Other Enumerable Methods</a><br/>
 <a href="https://gist.github.com/cupakromer/3371003">each_with_object vs inject</a><br/>
 <a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a><br/>
 <a href="http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash">Ruby 用 inject 和 each_with_object 來組 hash
-</a></p>
+</a>
+<a href="http://stackoverflow.com/questions/1217088/what-does-mapname-mean-in-ruby">What does map(&amp;:name) mean in Ruby?</a></p>
 </div>
 
 
