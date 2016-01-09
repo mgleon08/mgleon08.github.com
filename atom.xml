@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-08T22:46:31+08:00</updated>
+  <updated>2016-01-09T15:20:28+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,308 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Json]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/09/ruby-on-rails-json/"/>
+    <updated>2016-01-09T12:26:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/09/ruby-on-rails-json</id>
+    <content type="html"><![CDATA[<p>JSON 是很經常是用到的格式，不管是和程式溝通或是交換資料。</p>
+
+<!--more-->
+
+
+<h1>什麼是 JSON</h1>
+
+<p>JSON 是個以純文字為基底去儲存和傳送簡單結構資料，可以透過特定的格式去儲存任何資料(字串,數字,陣列,物件)，也可以透過物件或陣列來傳送較複雜的資料。</p>
+
+<p>一旦建立了您的 JSON 資料，就可以非常簡單的跟其他程式溝通或交換資料，因為 JSON 就只是純文字個格式。</p>
+
+<p>JSON 的優點如下:</p>
+
+<ul>
+<li>相容性高</li>
+<li>格式容易瞭解，閱讀及修改方便</li>
+<li>支援許多資料格式 (number,string,booleans,nulls,array,associative array)</li>
+<li>許多程式都支援函式庫讀取或修改 JSON 資料</li>
+</ul>
+
+
+<p>參考文件：
+<a href="https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/">你不可不知的 JSON 基本介紹</a></p>
+
+<h1>Rails 如何傳遞JSON</h1>
+
+<h3>respond_to</h3>
+
+<p>在 <code>rails</code> 當中可以用 <code>respond_to</code> 設定回傳的 <code>format</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">format</span><span class="o">.</span><span class="n">html</span> <span class="p">{</span> <span class="n">redirect_to</span> <span class="ss">:back</span> <span class="p">}</span>
+</span><span class='line'>  <span class="nb">format</span><span class="o">.</span><span class="n">json</span>
+</span><span class='line'>  <span class="nb">format</span><span class="o">.</span><span class="n">js</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#也可以寫成單行</span>
+</span><span class='line'><span class="n">respond_to</span> <span class="ss">:html</span><span class="p">,</span> <span class="ss">:json</span><span class="p">,</span> <span class="ss">:js</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>若後面沒指定會去找 <code>view</code> 中，後面是 <code>.json</code> 或 <code>.js</code> 的檔案<br/>
+但記得因為 <code>format</code> 有三種，所以要 json 資料的話就在網址後面加 <code>.json</code></p>
+
+<p>respond_to可以用來回應不同的資料格式。Rails內建支援格式包括有<br/>
+<code>:html, :text, :js, :css, :ics, :csv, :xml, :rss, :atom, :yaml, :json</code></p>
+
+<blockquote><p>如果需要擴充，可以編輯config/initializers/mime_types.rb這個檔案</p></blockquote>
+
+<h3>render</h3>
+
+<p>可以簡單使用 <code>render json</code> 的方式，直接強制 html 輸出成 json 格式
+<code>render json: User.info</code><br/>
+這樣連view都不需要，就會直接顯示。</p>
+
+<p>或是直接 <code>render template</code> 指定輸出 json 格式<br/>
+<code>render template: "api/users/index.json.jbuilder"</code></p>
+
+<h3>routes scope設定，指定controller使用json格式輸出</h3>
+
+<p>最後是直接設定好 <code>routes</code> 的 <code>default</code> 格式，這樣就不用再指定要 <code>render</code> 什麼!</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scope</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s1">&#39;/api/v1/&#39;</span><span class="p">,</span> <span class="ss">:defaults</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:format</span> <span class="o">=&gt;</span> <span class="ss">:json</span> <span class="p">},</span> <span class="ss">:module</span> <span class="o">=&gt;</span> <span class="s2">&quot;api_v1&quot;</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="s1">&#39;v1&#39;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">resources</span> <span class="ss">:users</span> <span class="c1">#ApiV1::CompaniesController</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>path</code>：指令網址前面的路徑<br/>
+<code>defaults</code>：指定default的格式<br/>
+<code>module</code>：指定 controller 會是 ApiV1::UsersController
+<code>as</code>：產生URL helper</p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/routing.html">Scope</a><br/>
+<a href="http://motion-express.com/blog/20141124-rails-default-render-json">Rails修改預設顯示格式為json</a></p>
+
+<h1>搭配gem - <a href="https://github.com/rails/jbuilder">jbuilder</a></h1>
+
+<p>再rails當中，很常會用這個 <code>gem</code> 來轉 <code>json</code></p>
+
+<p>像是剛才的<code>render template: "api/users/index.json.jbuilder"</code><br/>
+就會去找這個 template，並且像是 <code>html.erb</code> 一樣可以直接使用 <code>@</code> 的參數。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#api/users/index.json.jbuilder</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">info</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">number</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">json</span><span class="o">.</span><span class="n">total</span> <span class="no">User</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">data</span> <span class="vi">@users</span> <span class="k">do</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">json</span><span class="o">.</span><span class="n">id</span> <span class="n">u</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>    <span class="n">json</span><span class="o">.</span><span class="n">name</span> <span class="n">u</span><span class="o">.</span><span class="n">name</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就會生產出以下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#json</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'><span class="s2">&quot;info&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;number&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>     <span class="s2">&quot;total&quot;</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="s2">&quot;data&quot;</span><span class="p">:</span> <span class="o">[</span>
+</span><span class='line'>     <span class="p">{</span>
+</span><span class='line'>      <span class="s2">&quot;id&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;abc&quot;</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>      <span class="o">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>接收JSON</h1>
+
+<p>可以用 <a href="https://github.com/rest-client/rest-client">rest-client</a> 這個gem<br/>
+先用 <code>get</code> 取得資料，再用 <code>JSON.parse</code> 來將 <code>string</code> 解析成 <code>hash</code></p>
+
+<p>範例： <a href="http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5">Ubike</a> 資料，並存取到資料庫。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#lib/tasks/dev.rake</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:dev</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">task</span> <span class="ss">:fetch_ubike</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;fetching ubike&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">raw_content</span> <span class="o">=</span> <span class="no">RestClient</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">data</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span> <span class="n">raw_content</span> <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">data</span><span class="o">[</span><span class="s2">&quot;result&quot;</span><span class="o">][</span><span class="s2">&quot;results&quot;</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">a</span> <span class="o">=</span> <span class="no">Ubike</span><span class="o">.</span><span class="n">find_by_ubike_id</span><span class="p">(</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;_id&quot;</span><span class="o">]</span> <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="kp">nil</span>
+</span><span class='line'>        <span class="c1"># maybe update it!</span>
+</span><span class='line'>        <span class="no">Ubike</span><span class="o">.</span><span class="n">create</span><span class="p">(</span> <span class="ss">:ubike_id</span> <span class="o">=&gt;</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;_id&quot;</span><span class="o">]</span><span class="p">,</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;sna&quot;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="no">Ubike</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="ss">:ubike_id</span> <span class="o">=&gt;</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;_id&quot;</span><span class="o">]</span><span class="p">,</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;sna&quot;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這樣只要打 <code>rake dev:fetch_ubike</code> 就會自動跑了!</p>
+
+<p>範例2：<a href="http://vote.ly.g0v.tw/api/vote/?page=1">立委資料</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#立委資料，資料相當大，很多分頁</span>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:vote</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'> <span class="n">task</span> <span class="ss">:fetch_raw_vote</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>   <span class="nb">puts</span> <span class="s2">&quot;fetching raw_vote&quot;</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://vote.ly.g0v.tw/api/vote/?page=1&quot;</span>
+</span><span class='line'>   <span class="n">raw_content</span> <span class="o">=</span> <span class="no">RestClient</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">data</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span> <span class="n">raw_content</span> <span class="p">)</span>
+</span><span class='line'>     <span class="k">while</span> <span class="n">data</span><span class="o">[</span><span class="s2">&quot;next&quot;</span><span class="o">]</span> <span class="o">!=</span> <span class="kp">nil</span>
+</span><span class='line'>        <span class="n">data</span><span class="o">[</span><span class="s2">&quot;results&quot;</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">r</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>           <span class="no">Vote</span><span class="o">.</span><span class="n">create</span><span class="p">(</span> <span class="ss">:url</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;url&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:uid</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;uid&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:sitting_id</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;sitting_id&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:vote_seq</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;vote_seq&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:content</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;content&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:conflict</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;conflict&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:results</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;results&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:result</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;result&quot;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>         <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>         <span class="n">url</span> <span class="o">=</span> <span class="n">data</span><span class="o">[</span><span class="s2">&quot;next&quot;</span><span class="o">]</span>
+</span><span class='line'>         <span class="n">raw_content</span> <span class="o">=</span> <span class="no">RestClient</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span class='line'>         <span class="n">data</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span> <span class="n">raw_content</span> <span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件：<br/>
+<a href="https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/">你不可不知的 JSON 基本介紹</a><br/>
+<a href="https://ihower.tw/rails4/routing.html">Scope</a><br/>
+<a href="http://motion-express.com/blog/20141124-rails-default-render-json">Rails修改預設顯示格式為json</a></p>
+
+<p>gem：<br/>
+<a href="https://github.com/rails/jbuilder">jbuilder</a><br/>
+<a href="https://github.com/rest-client/rest-client">rest-client</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - 好用的 Enumerable]]></title>
@@ -26,7 +328,7 @@
 
 <h1>Map/Collect</h1>
 
-<p>主要是用來產生數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
+<p>用來產生新的數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
 
 <p><code>map</code> 和 <code>collect</code> 其實是一樣的東西，主要是因為其他語言很多都是用 <code>collect</code>。</p>
 
@@ -41,9 +343,9 @@
 </span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span> <span class="o">*</span> <span class="mi">2</span><span class="p">}</span>
 </span><span class='line'><span class="c1"># =&gt; [2, 4, 6]</span>
 </span><span class='line'>
-</span><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">&quot;Leon&quot;</span><span class="p">,</span> <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">18</span><span class="p">}</span>
+</span><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">18</span><span class="p">}</span>
 </span><span class='line'><span class="nb">hash</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">|</span> <span class="n">v</span> <span class="p">}</span>
-</span><span class='line'><span class="c1"># =&gt; [&quot;Leon&quot;, 18]</span>
+</span><span class='line'><span class="c1"># =&gt; [&quot;abc&quot;, 18]</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -51,13 +353,13 @@
 
 <p>可以針對物件，挑出指定的欄位。</p>
 
-<p>Approach - Collect</p>
+<p>Approach - map</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;age &gt; 20&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span> <span class="p">}</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;age &gt; 20&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span> <span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="nb">id</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">)</span>
 </span><span class='line'><span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">000000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mo">011173</span><span class="p">)</span>
 </span><span class='line'><span class="kp">nil</span>
@@ -80,6 +382,8 @@
 
 
 <p>Time Taken : 0.003422 s</p>
+
+<p>主要是執行速度上的差異</p>
 
 <p>參考<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a></p>
 
@@ -126,13 +430,13 @@
 
 <h1>Select</h1>
 
-<p>可以針對後面的條件，將符合該條件的值塞選出來。</p>
+<p>可以針對後面的條件，將符合該條件的值或欄位塞選出來。</p>
 
 <p>可以在資料庫取值的時候，只取出需要的欄位。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
 </span><span class='line'><span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;User id: 1&gt;, #&lt;User id: 2&gt;, #&lt;User id: 3&gt;,...]&gt;</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -170,7 +474,7 @@
 </span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">gender</span><span class="o">|</span> <span class="n">gender</span> <span class="o">==</span> <span class="s2">&quot;male&quot;</span> <span class="p">}</span>
 </span><span class='line'><span class="c1"># {&quot;Joe&quot; =&gt; &quot;male&quot;, &quot;Jim&quot; =&gt; &quot;male&quot;}</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#改成 map 會變成，回傳 boolean，並且回傳 array</span>
+</span><span class='line'><span class="c1">#改成 map 會變成，回傳 boolean值，並且回傳 array</span>
 </span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">map</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">gender</span><span class="o">|</span> <span class="n">gender</span> <span class="o">==</span> <span class="s2">&quot;male&quot;</span> <span class="p">}</span>
 </span><span class='line'><span class="c1">#[true, true, false]</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -254,7 +558,7 @@
 
 <h1>each_with_object</h1>
 
-<p>跟 each 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
+<p>跟 inject 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1056,28 +1360,96 @@
 <span class='line-number'>20</span>
 <span class='line-number'>21</span>
 <span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ga    = git add
-</span><span class='line'>gpo   = git push origin
-</span><span class='line'>gpl   = git pull
-</span><span class='line'>gplo  = git pull origin
-</span><span class='line'>gl    = git pull
-</span><span class='line'>gst   = git status
-</span><span class='line'>gci   = git commit
-</span><span class='line'>gco   = git checkout
-</span><span class='line'>gcom  = git checkout master
-</span><span class='line'>gbr   = git branch
-</span><span class='line'>gbd   = git branch -d
-</span><span class='line'>grs   = git reset
-</span><span class='line'>grb   = git rebase
-</span><span class='line'>gsta  = git stash
-</span><span class='line'>gstl  = git stash list
-</span><span class='line'>gstap = git stash pop
-</span><span class='line'>gdi   = git diff
-</span><span class='line'>gre   = git remote
-</span><span class='line'>gcp   = git cherry-pick
-</span><span class='line'>glo   = log --oneline --decorate --color
-</span><span class='line'>gll   = log --pretty=format:'%h %ad | %s%d [%Cgreen%an%Creset]' --graph --date=short
-</span><span class='line'>glg   = log --graph --pretty=format:'%Cred%h%Creset %ad |%C(yellow)%d%Creset %s %Cgreen(%cr)%Creset [%Cgreen%an%Creset]' --abbrev-commit --date=short</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>alias g='git'
+</span><span class='line'>
+</span><span class='line'>alias grs='git reset'
+</span><span class='line'>alias gbr='git branch'
+</span><span class='line'>alias gbrd='git branch -d'
+</span><span class='line'>alias gci='git commit'
+</span><span class='line'>alias gcim='git commit -m'
+</span><span class='line'>alias gst='git status'
+</span><span class='line'>alias gpl='git pull'
+</span><span class='line'>alias gplo='git pull origin'
+</span><span class='line'>
+</span><span class='line'>#git add
+</span><span class='line'>alias ga='git add'
+</span><span class='line'>alias gaa='git add --all'
+</span><span class='line'>alias gapa='git add --patch'
+</span><span class='line'>
+</span><span class='line'>#git push
+</span><span class='line'>alias gp='git push'
+</span><span class='line'>alias gpo='git push origin'
+</span><span class='line'>alias gcp='git cherry-pick'
+</span><span class='line'>alias gpd='git push --dry-run'
+</span><span class='line'>alias gpoat='git push origin --all && git push origin --tags'
+</span><span class='line'>compdef _git gpoat=git-push
+</span><span class='line'>alias gpu='git push upstream'
+</span><span class='line'>alias gpv='git push -v'
+</span><span class='line'>
+</span><span class='line'>#git checkout
+</span><span class='line'>alias gco='git checkout'
+</span><span class='line'>alias gcob='git checkout -b'
+</span><span class='line'>alias gcom='git checkout master'
+</span><span class='line'>
+</span><span class='line'>#git rebase
+</span><span class='line'>alias grb='git rebase'
+</span><span class='line'>alias grba='git rebase --abort'
+</span><span class='line'>alias grbc='git rebase --continue'
+</span><span class='line'>alias grbi='git rebase -i'
+</span><span class='line'>alias grbm='git rebase master'
+</span><span class='line'>alias grbs='git rebase --skip'
+</span><span class='line'>
+</span><span class='line'>#git stash
+</span><span class='line'>alias gsta='git stash'
+</span><span class='line'>alias gstd='git stash drop'
+</span><span class='line'>alias gstl='git stash list'
+</span><span class='line'>alias gstp='git stash pop'
+</span><span class='line'>alias gsts='git stash show --text'
+</span><span class='line'>
+</span><span class='line'>#git log
+</span><span class='line'>alias glg='git log --stat --color'
+</span><span class='line'>alias glgp='git log --stat --color -p'
+</span><span class='line'>alias glgg='git log --graph --color'
+</span><span class='line'>alias glgga='git log --graph --decorate --all'
+</span><span class='line'>alias glgm='git log --graph --max-count=10'
+</span><span class='line'>alias glo='git log --oneline --decorate --color'
+</span><span class='line'>alias glol="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit"
+</span><span class='line'>alias glola="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)&lt;%an&gt;%Creset' --abbrev-commit --all"
+</span><span class='line'>alias glog='git log --oneline --decorate --color --graph'</span></code></pre></td></tr></table></div></figure>
 
 
 <p>官方文件：<br/>
@@ -2344,7 +2716,7 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 </span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#58;&#x64;&#101;&#112;&#x6c;&#x6f;&#x79;&#64;&#x31;&#50;&#x33;&#46;&#x31;&#x32;&#51;&#46;&#49;&#50;&#x2e;&#49;">&#100;&#x65;&#x70;&#x6c;&#x6f;&#121;&#x40;&#49;&#50;&#51;&#x2e;&#49;&#x32;&#x33;&#x2e;&#49;&#50;&#46;&#49;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#97;&#105;&#108;&#116;&#x6f;&#x3a;&#x64;&#101;&#x70;&#x6c;&#111;&#121;&#x40;&#x31;&#50;&#51;&#46;&#x31;&#x32;&#51;&#46;&#49;&#50;&#46;&#49;">&#x64;&#x65;&#x70;&#108;&#x6f;&#121;&#x40;&#49;&#50;&#x33;&#x2e;&#x31;&#50;&#51;&#46;&#49;&#50;&#46;&#x31;</a> 就連進去囉!!</p>
 
 <h1>設定快捷鍵</h1>
 

@@ -10,7 +10,7 @@
 
   
   <meta name="description" content="這次主要來介紹 Enumerable api
-可以很方便的將需要的資料整合在一起 Map/Collect 主要是用來產生數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value map 和 collect &hellip;">
+可以很方便的將需要的資料整合在一起 Map/Collect 用來產生新的數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value map 和 collect &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -130,7 +130,7 @@
 
 <h1>Map/Collect</h1>
 
-<p>主要是用來產生數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
+<p>用來產生新的數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
 
 <p><code>map</code> 和 <code>collect</code> 其實是一樣的東西，主要是因為其他語言很多都是用 <code>collect</code>。</p>
 
@@ -145,9 +145,9 @@
 </span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="n">v</span> <span class="o">*</span> <span class="mi">2</span><span class="p">}</span>
 </span><span class='line'><span class="c1"># =&gt; [2, 4, 6]</span>
 </span><span class='line'>
-</span><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">&quot;Leon&quot;</span><span class="p">,</span> <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">18</span><span class="p">}</span>
+</span><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="ss">:age</span> <span class="o">=&gt;</span> <span class="mi">18</span><span class="p">}</span>
 </span><span class='line'><span class="nb">hash</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">|</span> <span class="n">v</span> <span class="p">}</span>
-</span><span class='line'><span class="c1"># =&gt; [&quot;Leon&quot;, 18]</span>
+</span><span class='line'><span class="c1"># =&gt; [&quot;abc&quot;, 18]</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -155,13 +155,13 @@
 
 <p>可以針對物件，挑出指定的欄位。</p>
 
-<p>Approach - Collect</p>
+<p>Approach - map</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;age &gt; 20&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span> <span class="p">}</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;age &gt; 20&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span> <span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="nb">id</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">)</span>
 </span><span class='line'><span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">000000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mo">011173</span><span class="p">)</span>
 </span><span class='line'><span class="kp">nil</span>
@@ -184,6 +184,8 @@
 
 
 <p>Time Taken : 0.003422 s</p>
+
+<p>主要是執行速度上的差異</p>
 
 <p>參考<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a></p>
 
@@ -230,13 +232,13 @@
 
 <h1>Select</h1>
 
-<p>可以針對後面的條件，將符合該條件的值塞選出來。</p>
+<p>可以針對後面的條件，將符合該條件的值或欄位塞選出來。</p>
 
 <p>可以在資料庫取值的時候，只取出需要的欄位。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
 </span><span class='line'><span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;User id: 1&gt;, #&lt;User id: 2&gt;, #&lt;User id: 3&gt;,...]&gt;</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -274,7 +276,7 @@
 </span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">gender</span><span class="o">|</span> <span class="n">gender</span> <span class="o">==</span> <span class="s2">&quot;male&quot;</span> <span class="p">}</span>
 </span><span class='line'><span class="c1"># {&quot;Joe&quot; =&gt; &quot;male&quot;, &quot;Jim&quot; =&gt; &quot;male&quot;}</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#改成 map 會變成，回傳 boolean，並且回傳 array</span>
+</span><span class='line'><span class="c1">#改成 map 會變成，回傳 boolean值，並且回傳 array</span>
 </span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">map</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">gender</span><span class="o">|</span> <span class="n">gender</span> <span class="o">==</span> <span class="s2">&quot;male&quot;</span> <span class="p">}</span>
 </span><span class='line'><span class="c1">#[true, true, false]</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -358,7 +360,7 @@
 
 <h1>each_with_object</h1>
 
-<p>跟 each 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
+<p>跟 inject 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -609,6 +611,8 @@
       
         <a class="basic-alignment left" href="/blog/2016/01/03/backup/" title="Previous Post: 用 backup 來備份資料庫">&laquo; 用 backup 來備份資料庫</a>
       
+      
+        <a class="basic-alignment right" href="/blog/2016/01/09/ruby-on-rails-json/" title="Next Post: Ruby on Rails - json">Ruby on Rails - json &raquo;</a>
       
     </p>
   </footer>

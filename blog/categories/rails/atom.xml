@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-08T22:46:31+08:00</updated>
+  <updated>2016-01-09T15:20:28+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,208 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Json]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/09/ruby-on-rails-json/"/>
+    <updated>2016-01-09T12:26:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/09/ruby-on-rails-json</id>
+    <content type="html"><![CDATA[<p>JSON 是很經常是用到的格式，不管是和程式溝通或是交換資料。</p>
+
+<!--more-->
+
+
+<h1>什麼是 JSON</h1>
+
+<p>JSON 是個以純文字為基底去儲存和傳送簡單結構資料，可以透過特定的格式去儲存任何資料(字串,數字,陣列,物件)，也可以透過物件或陣列來傳送較複雜的資料。</p>
+
+<p>一旦建立了您的 JSON 資料，就可以非常簡單的跟其他程式溝通或交換資料，因為 JSON 就只是純文字個格式。</p>
+
+<p>JSON 的優點如下:</p>
+
+<ul>
+<li>相容性高</li>
+<li>格式容易瞭解，閱讀及修改方便</li>
+<li>支援許多資料格式 (number,string,booleans,nulls,array,associative array)</li>
+<li>許多程式都支援函式庫讀取或修改 JSON 資料</li>
+</ul>
+
+
+<p>參考文件：
+<a href="https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/">你不可不知的 JSON 基本介紹</a></p>
+
+<h1>Rails 如何傳遞JSON</h1>
+
+<h3>respond_to</h3>
+
+<p>在 <code>rails</code> 當中可以用 <code>respond_to</code> 設定回傳的 <code>format</code>。</p>
+
+<pre><code class="ruby">respond_to do |format|
+    format.html { redirect_to :back }
+    format.json
+    format.js
+end
+
+#也可以寫成單行
+respond_to :html, :json, :js
+</code></pre>
+
+<p>若後面沒指定會去找 <code>view</code> 中，後面是 <code>.json</code> 或 <code>.js</code> 的檔案<br/>
+但記得因為 <code>format</code> 有三種，所以要 json 資料的話就在網址後面加 <code>.json</code></p>
+
+<p>respond_to可以用來回應不同的資料格式。Rails內建支援格式包括有<br/>
+<code>:html, :text, :js, :css, :ics, :csv, :xml, :rss, :atom, :yaml, :json</code></p>
+
+<blockquote><p>如果需要擴充，可以編輯config/initializers/mime_types.rb這個檔案</p></blockquote>
+
+<h3>render</h3>
+
+<p>可以簡單使用 <code>render json</code> 的方式，直接強制 html 輸出成 json 格式
+<code>render json: User.info</code><br/>
+這樣連view都不需要，就會直接顯示。</p>
+
+<p>或是直接 <code>render template</code> 指定輸出 json 格式<br/>
+<code>render template: "api/users/index.json.jbuilder"</code></p>
+
+<h3>routes scope設定，指定controller使用json格式輸出</h3>
+
+<p>最後是直接設定好 <code>routes</code> 的 <code>default</code> 格式，這樣就不用再指定要 <code>render</code> 什麼!</p>
+
+<pre><code class="ruby">scope :path =&gt; '/api/v1/', :defaults =&gt; { :format =&gt; :json }, :module =&gt; "api_v1", :as =&gt; 'v1' do
+    resources :users #ApiV1::CompaniesController
+end
+</code></pre>
+
+<p><code>path</code>：指令網址前面的路徑<br/>
+<code>defaults</code>：指定default的格式<br/>
+<code>module</code>：指定 controller 會是 ApiV1::UsersController
+<code>as</code>：產生URL helper</p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/routing.html">Scope</a><br/>
+<a href="http://motion-express.com/blog/20141124-rails-default-render-json">Rails修改預設顯示格式為json</a></p>
+
+<h1>搭配gem - <a href="https://github.com/rails/jbuilder">jbuilder</a></h1>
+
+<p>再rails當中，很常會用這個 <code>gem</code> 來轉 <code>json</code></p>
+
+<p>像是剛才的<code>render template: "api/users/index.json.jbuilder"</code><br/>
+就會去找這個 template，並且像是 <code>html.erb</code> 一樣可以直接使用 <code>@</code> 的參數。</p>
+
+<pre><code class="ruby">#api/users/index.json.jbuilder
+
+json.info do
+  json.number do
+    json.total User.count
+  end
+
+  json.data @users do |u|
+    json.id u.id
+    json.name u.name
+  end
+end
+</code></pre>
+
+<p>就會生產出以下</p>
+
+<pre><code class="ruby">#json
+{
+"info": {
+  "number": {
+     "total": 1
+  },
+  "data": [
+     {
+      "id": 1,
+      "name": "abc"
+            }
+        ]
+    }
+}
+</code></pre>
+
+<h1>接收JSON</h1>
+
+<p>可以用 <a href="https://github.com/rest-client/rest-client">rest-client</a> 這個gem<br/>
+先用 <code>get</code> 取得資料，再用 <code>JSON.parse</code> 來將 <code>string</code> 解析成 <code>hash</code></p>
+
+<p>範例： <a href="http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5">Ubike</a> 資料，並存取到資料庫。</p>
+
+<pre><code class="ruby">#lib/tasks/dev.rake
+
+namespace :dev do
+
+  task :fetch_ubike =&gt; :environment do
+    puts "fetching ubike"
+
+    url = "http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5"
+
+    raw_content = RestClient.get(url)
+
+    data = JSON.parse( raw_content )
+
+    data["result"]["results"].each do |u|
+      a = Ubike.find_by_ubike_id( u["_id"] )
+
+      if a == nil
+        # maybe update it!
+        Ubike.create( :ubike_id =&gt; u["_id"], :name =&gt; u["sna"])
+      else
+        Ubike.update( :ubike_id =&gt; u["_id"], :name =&gt; u["sna"])
+      end
+    end
+
+  end
+
+end
+</code></pre>
+
+<p>這樣只要打 <code>rake dev:fetch_ubike</code> 就會自動跑了!</p>
+
+<p>範例2：<a href="http://vote.ly.g0v.tw/api/vote/?page=1">立委資料</a></p>
+
+<pre><code class="ruby">#立委資料，資料相當大，很多分頁
+namespace :vote do
+
+ task :fetch_raw_vote =&gt; :environment do
+   puts "fetching raw_vote"
+
+   url = "http://vote.ly.g0v.tw/api/vote/?page=1"
+   raw_content = RestClient.get(url)
+   data = JSON.parse( raw_content )
+     while data["next"] != nil
+        data["results"].each do |r|
+
+           Vote.create( :url =&gt; r["url"],
+                           :uid =&gt; r["uid"],
+                           :sitting_id =&gt; r["sitting_id"],
+                           :vote_seq =&gt; r["vote_seq"],
+                           :content =&gt; r["content"],
+                           :conflict =&gt; r["conflict"],
+                           :results =&gt; r["results"],
+                           :result =&gt; r["result"])
+         end
+
+         url = data["next"]
+         raw_content = RestClient.get(url)
+         data = JSON.parse( raw_content )
+      end
+
+ end
+
+end
+</code></pre>
+
+<p>參考文件：<br/>
+<a href="https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/">你不可不知的 JSON 基本介紹</a><br/>
+<a href="https://ihower.tw/rails4/routing.html">Scope</a><br/>
+<a href="http://motion-express.com/blog/20141124-rails-default-render-json">Rails修改預設顯示格式為json</a></p>
+
+<p>gem：<br/>
+<a href="https://github.com/rails/jbuilder">jbuilder</a><br/>
+<a href="https://github.com/rest-client/rest-client">rest-client</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - 好用的 Enumerable]]></title>
@@ -26,7 +228,7 @@
 
 <h1>Map/Collect</h1>
 
-<p>主要是用來產生數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
+<p>用來產生新的數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
 
 <p><code>map</code> 和 <code>collect</code> 其實是一樣的東西，主要是因為其他語言很多都是用 <code>collect</code>。</p>
 
@@ -34,18 +236,18 @@
 array.map {|v| v * 2}
 # =&gt; [2, 4, 6]
 
-hash = {:name =&gt; "Leon", :age =&gt; 18}
+hash = {:name =&gt; "abc", :age =&gt; 18}
 hash.map {|k, v| v }
-# =&gt; ["Leon", 18]
+# =&gt; ["abc", 18]
 </code></pre>
 
 <h1>Pluck</h1>
 
 <p>可以針對物件，挑出指定的欄位。</p>
 
-<p>Approach - Collect</p>
+<p>Approach - map</p>
 
-<pre><code class="ruby">puts Benchmark.measure { User.where('age &gt; 20').select(:id).collect(&amp;:id) }
+<pre><code class="ruby">puts Benchmark.measure { User.where('age &gt; 20').select(:id). map(&amp;:id) }
 User Load (0.7ms)  SELECT id FROM `users` WHERE (age &lt; 20)
 0.010000   0.000000   0.010000 (  0.011173)
 nil
@@ -62,6 +264,8 @@ nil
 </code></pre>
 
 <p>Time Taken : 0.003422 s</p>
+
+<p>主要是執行速度上的差異</p>
 
 <p>參考<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a></p>
 
@@ -88,11 +292,11 @@ Person.pluck('DATEDIFF(updated_at, created_at)')
 
 <h1>Select</h1>
 
-<p>可以針對後面的條件，將符合該條件的值塞選出來。</p>
+<p>可以針對後面的條件，將符合該條件的值或欄位塞選出來。</p>
 
 <p>可以在資料庫取值的時候，只取出需要的欄位。</p>
 
-<pre><code class="ruby">User.all.select(:id).map(&amp;:id)
+<pre><code class="ruby">User.all.select(:id)
 =&gt; #&lt;ActiveRecord::Relation [#&lt;User id: 1&gt;, #&lt;User id: 2&gt;, #&lt;User id: 3&gt;,...]&gt;
 </code></pre>
 
@@ -115,7 +319,7 @@ my_array.select{|item| item%2==0 }
 my_hash.select{|name, gender| gender == "male" }
 # {"Joe" =&gt; "male", "Jim" =&gt; "male"}
 
-#改成 map 會變成，回傳 boolean，並且回傳 array
+#改成 map 會變成，回傳 boolean值，並且回傳 array
 my_hash.map{|name, gender| gender == "male" }
 #[true, true, false]
 </code></pre>
@@ -171,7 +375,7 @@ User.all.map {|user| [user.name, user.id ]}.to_h
 
 <h1>each_with_object</h1>
 
-<p>跟 each 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
+<p>跟 inject 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
 
 <pre><code class="ruby">User.all.each_with_object({}) do | user, hash | 
     hash[user.name] = user.id  
@@ -836,96 +1040,6 @@ comment.commentable =&gt; #&lt;Article id: 1, ....&gt;
 
 <p>參考資料：<br/>
 <a href="https://ihower.tw/rails4/activerecord-relationships.html">Ruby on Rails 實戰聖經</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Scopes]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes/"/>
-    <updated>2015-12-20T13:54:35+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-scopes</id>
-    <content type="html"><![CDATA[<p>在 controller 經常會用到一些資料的查詢條件<br/>
-但有許多條件是同時會出現在很多地方，或是查詢條件比較複雜，無法一次就看懂在查詢什麼</p>
-
-<p>這時就可以用 Scope 讓程式變得乾淨易讀，而且也可以 <code>串接</code> 來使用。</p>
-
-<!-- more -->
-
-
-<h1>沒帶參數</h1>
-
-<pre><code class="ruby">def index
-    @books = Book.order("create_at DESC")
-end
-</code></pre>
-
-<p>一般 controller 會這樣子撈出所有的資料，並且按照建立時間排序<br/>
-這時就可以在 model 寫下</p>
-
-<pre><code class="ruby">class Book &lt; ActiveRecord::Base
-    scope :news_up, -&gt; { order("created_at DESC") } 
-end
-</code></pre>
-
-<blockquote><p>-> {&hellip;}是Ruby語法，等同於Proc.new{&hellip;}或lambda{&hellip;}，用來建立一個匿名方法物件</p></blockquote>
-
-<p>接著 controller 就只要</p>
-
-<pre><code class="ruby">def index
-    @books = Book.news_up
-end
-</code></pre>
-
-<p>就變得更加清楚明瞭</p>
-
-<h1>帶參數</h1>
-
-<p>找尋建立時間小於參數的資料</p>
-
-<pre><code class="ruby">class Book &lt; ActiveRecord::Base
-  scope :recent, -&gt;(time) {where("created_at &lt; ?", time) }
-end
-</code></pre>
-
-<pre><code class="ruby">class Book &lt; ActiveRecord::Base
-    def self.recent(time)
-        where("created_at &gt; ? ",time)
-    end
-end
-</code></pre>
-
-<p>以上兩種方式皆可</p>
-
-<p>接著只要在controller</p>
-
-<pre><code class="ruby">def index
-    @books = Book.recent(Time.now)
-end
-</code></pre>
-
-<h1>串接</h1>
-
-<pre><code class="ruby">def index
-    @books = Book.news_up.recent(Time.now)
-end
-</code></pre>
-
-<h1>default</h1>
-
-<p>設定所有 scope 的 default 值</p>
-
-<pre><code class="ruby">class Book &lt; ActiveRecord::Base
-    default_scope -&gt; { order('id DESC') }
-end
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/active_record_querying.html#scopes">Guides</a><br/>
-<a href="http://rails.ruby.tw/active_record_querying.html#%E4%BD%9C%E7%94%A8%E5%9F%9F">Guides 中文</a><br/>
-<a href="http://apidock.com/rails/ActiveRecord/NamedScope/ClassMethods/scope">apidock</a></p>
-
-<p>參考資料：<br/>
-<a href="https://ihower.tw/rails4/activerecord-query.html">Scopes 作用域</a></p>
 ]]></content>
   </entry>
   

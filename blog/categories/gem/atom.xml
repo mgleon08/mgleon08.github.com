@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-08T22:46:31+08:00</updated>
+  <updated>2016-01-09T15:20:28+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,208 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - Json]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/09/ruby-on-rails-json/"/>
+    <updated>2016-01-09T12:26:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/09/ruby-on-rails-json</id>
+    <content type="html"><![CDATA[<p>JSON 是很經常是用到的格式，不管是和程式溝通或是交換資料。</p>
+
+<!--more-->
+
+
+<h1>什麼是 JSON</h1>
+
+<p>JSON 是個以純文字為基底去儲存和傳送簡單結構資料，可以透過特定的格式去儲存任何資料(字串,數字,陣列,物件)，也可以透過物件或陣列來傳送較複雜的資料。</p>
+
+<p>一旦建立了您的 JSON 資料，就可以非常簡單的跟其他程式溝通或交換資料，因為 JSON 就只是純文字個格式。</p>
+
+<p>JSON 的優點如下:</p>
+
+<ul>
+<li>相容性高</li>
+<li>格式容易瞭解，閱讀及修改方便</li>
+<li>支援許多資料格式 (number,string,booleans,nulls,array,associative array)</li>
+<li>許多程式都支援函式庫讀取或修改 JSON 資料</li>
+</ul>
+
+
+<p>參考文件：
+<a href="https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/">你不可不知的 JSON 基本介紹</a></p>
+
+<h1>Rails 如何傳遞JSON</h1>
+
+<h3>respond_to</h3>
+
+<p>在 <code>rails</code> 當中可以用 <code>respond_to</code> 設定回傳的 <code>format</code>。</p>
+
+<pre><code class="ruby">respond_to do |format|
+    format.html { redirect_to :back }
+    format.json
+    format.js
+end
+
+#也可以寫成單行
+respond_to :html, :json, :js
+</code></pre>
+
+<p>若後面沒指定會去找 <code>view</code> 中，後面是 <code>.json</code> 或 <code>.js</code> 的檔案<br/>
+但記得因為 <code>format</code> 有三種，所以要 json 資料的話就在網址後面加 <code>.json</code></p>
+
+<p>respond_to可以用來回應不同的資料格式。Rails內建支援格式包括有<br/>
+<code>:html, :text, :js, :css, :ics, :csv, :xml, :rss, :atom, :yaml, :json</code></p>
+
+<blockquote><p>如果需要擴充，可以編輯config/initializers/mime_types.rb這個檔案</p></blockquote>
+
+<h3>render</h3>
+
+<p>可以簡單使用 <code>render json</code> 的方式，直接強制 html 輸出成 json 格式
+<code>render json: User.info</code><br/>
+這樣連view都不需要，就會直接顯示。</p>
+
+<p>或是直接 <code>render template</code> 指定輸出 json 格式<br/>
+<code>render template: "api/users/index.json.jbuilder"</code></p>
+
+<h3>routes scope設定，指定controller使用json格式輸出</h3>
+
+<p>最後是直接設定好 <code>routes</code> 的 <code>default</code> 格式，這樣就不用再指定要 <code>render</code> 什麼!</p>
+
+<pre><code class="ruby">scope :path =&gt; '/api/v1/', :defaults =&gt; { :format =&gt; :json }, :module =&gt; "api_v1", :as =&gt; 'v1' do
+    resources :users #ApiV1::CompaniesController
+end
+</code></pre>
+
+<p><code>path</code>：指令網址前面的路徑<br/>
+<code>defaults</code>：指定default的格式<br/>
+<code>module</code>：指定 controller 會是 ApiV1::UsersController
+<code>as</code>：產生URL helper</p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/routing.html">Scope</a><br/>
+<a href="http://motion-express.com/blog/20141124-rails-default-render-json">Rails修改預設顯示格式為json</a></p>
+
+<h1>搭配gem - <a href="https://github.com/rails/jbuilder">jbuilder</a></h1>
+
+<p>再rails當中，很常會用這個 <code>gem</code> 來轉 <code>json</code></p>
+
+<p>像是剛才的<code>render template: "api/users/index.json.jbuilder"</code><br/>
+就會去找這個 template，並且像是 <code>html.erb</code> 一樣可以直接使用 <code>@</code> 的參數。</p>
+
+<pre><code class="ruby">#api/users/index.json.jbuilder
+
+json.info do
+  json.number do
+    json.total User.count
+  end
+
+  json.data @users do |u|
+    json.id u.id
+    json.name u.name
+  end
+end
+</code></pre>
+
+<p>就會生產出以下</p>
+
+<pre><code class="ruby">#json
+{
+"info": {
+  "number": {
+     "total": 1
+  },
+  "data": [
+     {
+      "id": 1,
+      "name": "abc"
+            }
+        ]
+    }
+}
+</code></pre>
+
+<h1>接收JSON</h1>
+
+<p>可以用 <a href="https://github.com/rest-client/rest-client">rest-client</a> 這個gem<br/>
+先用 <code>get</code> 取得資料，再用 <code>JSON.parse</code> 來將 <code>string</code> 解析成 <code>hash</code></p>
+
+<p>範例： <a href="http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5">Ubike</a> 資料，並存取到資料庫。</p>
+
+<pre><code class="ruby">#lib/tasks/dev.rake
+
+namespace :dev do
+
+  task :fetch_ubike =&gt; :environment do
+    puts "fetching ubike"
+
+    url = "http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5"
+
+    raw_content = RestClient.get(url)
+
+    data = JSON.parse( raw_content )
+
+    data["result"]["results"].each do |u|
+      a = Ubike.find_by_ubike_id( u["_id"] )
+
+      if a == nil
+        # maybe update it!
+        Ubike.create( :ubike_id =&gt; u["_id"], :name =&gt; u["sna"])
+      else
+        Ubike.update( :ubike_id =&gt; u["_id"], :name =&gt; u["sna"])
+      end
+    end
+
+  end
+
+end
+</code></pre>
+
+<p>這樣只要打 <code>rake dev:fetch_ubike</code> 就會自動跑了!</p>
+
+<p>範例2：<a href="http://vote.ly.g0v.tw/api/vote/?page=1">立委資料</a></p>
+
+<pre><code class="ruby">#立委資料，資料相當大，很多分頁
+namespace :vote do
+
+ task :fetch_raw_vote =&gt; :environment do
+   puts "fetching raw_vote"
+
+   url = "http://vote.ly.g0v.tw/api/vote/?page=1"
+   raw_content = RestClient.get(url)
+   data = JSON.parse( raw_content )
+     while data["next"] != nil
+        data["results"].each do |r|
+
+           Vote.create( :url =&gt; r["url"],
+                           :uid =&gt; r["uid"],
+                           :sitting_id =&gt; r["sitting_id"],
+                           :vote_seq =&gt; r["vote_seq"],
+                           :content =&gt; r["content"],
+                           :conflict =&gt; r["conflict"],
+                           :results =&gt; r["results"],
+                           :result =&gt; r["result"])
+         end
+
+         url = data["next"]
+         raw_content = RestClient.get(url)
+         data = JSON.parse( raw_content )
+      end
+
+ end
+
+end
+</code></pre>
+
+<p>參考文件：<br/>
+<a href="https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/">你不可不知的 JSON 基本介紹</a><br/>
+<a href="https://ihower.tw/rails4/routing.html">Scope</a><br/>
+<a href="http://motion-express.com/blog/20141124-rails-default-render-json">Rails修改預設顯示格式為json</a></p>
+
+<p>gem：<br/>
+<a href="https://github.com/rails/jbuilder">jbuilder</a><br/>
+<a href="https://github.com/rest-client/rest-client">rest-client</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Backup 來備份資料庫]]></title>
@@ -426,134 +628,6 @@ end
 
 
 <p>不過目前都還沒用過啊..改天要用到再來研究一下:D</p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - 虛擬屬性Virtual Attribute]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/14/ruby-on-rails-virtual-attribute/"/>
-    <updated>2015-12-14T13:13:37+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/14/ruby-on-rails-virtual-attribute</id>
-    <content type="html"><![CDATA[<p>當要操作的屬性資料，和資料庫的欄位不相同的時候，就可以在 model 裡建立 Virtual Attribute 來取代。</p>
-
-<h3>範例1 - full_name</h3>
-
-<pre><code class="ruby">def full_name
-    "#{self.first_name} #{self.last_name}"
-end
-
-def full_name=(value)
-    self.first_name, self.last_name = value.to_s.split(" ", 2)
-end
-</code></pre>
-
-<!-- more -->
-
-
-<p>當資料庫欄位裡面有 <code>first_name</code> 和 <code>last_name</code> 分別去存取，但顯示的時候卻不可能只顯示一個，通常都一定是要連在一起</p>
-
-<p>這時候就能夠用 Virtual Attribute 做出一個虛擬的屬性 <code>full_name</code> ， 而它的值則是 <code>first_name</code> 和 <code>last_name</code> 合在一起</p>
-
-<p>這樣以後要取出名字，就只要用 <code>full_name</code> 即可，就不需要每次都在那邊相加。</p>
-
-<h3>範例2 - tag_list</h3>
-
-<pre><code class="ruby">def tag_list
-  self.tags.map{ |t| t.name }.join(",")
-end
-
-def tag_list=(str)
-  arr = str.split(",")
-
-  self.tags = arr.map do |t|
-    tag = CompanyTag.find_by_name(t)
-    unless tag
-      tag = CompanyTag.create!( :name =&gt; t )
-    end
-      tag  #沒有加這個的話，uless 最後一個回傳的會是 nil 就會爆錯
-  end
-
-end
-</code></pre>
-
-<p>取出時，先將所有 tag 透過 <code>map</code> 取出所有 name 變成一個 array，再用 <code>join</code> 轉成 string</p>
-
-<p>存取時，先用 <code>split</code> 將 string 轉 array，用 name 去判斷每個元素是否已經存在資料庫，若是沒有，就 <code>create</code> 一個新的</p>
-
-<blockquote><p>可以另外搭配 <a href="https://select2.github.io/">select2</a> 做出比較好看的 tag !!</p></blockquote>
-
-<p>Rails gem
-<a href="https://github.com/argerim/select2-rails">select2-rails</a></p>
-
-<p>```ruby</p>
-
-<script>
-  $("#tag_list").select2({
-    tags: <%=raw Tags.all.map{|t| t.name}%>,
-    tokenSeparators: [',', ' ']
-  });
-</script>
-
-
-<pre><code>
-
-#最後來介紹一下attr_accessor
-
-如果只要一般(沒有像上面還要取出來，單純只要讀取.存取)的虛擬屬性  
-（就是資料庫並不需要這個欄位，但可能要透過這個虛擬屬性，組成某個陣列裡的元素）
-
-則可以直接用 `attr_accessor` 直接產生以下的結果
-</code></pre>
-
-<p>class Girl
-  def initialize(age)
-    @age = age
-  end
-  # @age的getter方法
-  def age<br/>
-    @age<br/>
-  end<br/>
-  # @age的setter方法<br/>
-  def age=(x)<br/>
-    @age = x<br/>
-  end
-end
-```</p>
-
-<p><code>attr_accessor</code> 就是可以自動產生 getter 和 setter<br/>
-<code>attr_reader</code> 產生 getter<br/>
-<code>attr_writer</code> 產生 setter</p>
-
-<p>網路上有一篇講的很清楚，可以去看看<br/>
-<a href="http://blog.eddie.com.tw/2015/03/21/attr_accessor/">Ruby 語法放大鏡之「attr_accessor 是幹嘛的?」</a></p>
-
-<h1>attr_accessible 和 attr_protected</h1>
-
-<p>另外在網路上有發現兩個長個很相像的方法<br/>
-仔細研究發現，這兩個主要好像都是為了防止 Mass assignment (大量賦值)</p>
-
-<p><code>attr_accessible</code> 被設定的 attributes <code>以外</code> 不能夠被 Mass assignment<br/>
-<code>attr_protected</code> 被設定的 attributes <code>自己</code> 不能夠被 Mass assignment</p>
-
-<p>哈哈，一個是自己本身，一個是本身以外，蠻奇妙的。<br/>
-原來這是在還沒有 Strong Parameter 這個功能時的防禦機制!!</p>
-
-<p>詳情：</p>
-
-<ul>
-<li><a href="http://blog.xdite.net/posts/2012/03/05/github-hacked-rails-security/">從 Github 被 hack，談 Rails 的安全性（ mass-assignment ）</a></li>
-<li><a href="http://blog.xdite.net/posts/2012/08/12/strong-parameter-mass-assignment-solution">Strong Parameter: Mass Assignment 機制的防彈衣</a></li>
-</ul>
-
-
-<p>官方文件：</p>
-
-<ul>
-<li><a href="http://apidock.com/rails/ActiveRecord/Base/attr_accessible/class">attr_accessible</a></li>
-<li><a href="http://apidock.com/rails/ActiveRecord/Base/attr_protected/class">attr_protected</a></li>
-<li><a href="http://stackoverflow.com/questions/2652907/what-is-the-difference-between-attr-accessibleattributes-attr-protectedat">stackoverflow</a></li>
-</ul>
-
 ]]></content>
   </entry>
   

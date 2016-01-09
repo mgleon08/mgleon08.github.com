@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby語法 | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rubyyu-fa/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-08T22:46:31+08:00</updated>
+  <updated>2016-01-09T15:20:28+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -26,7 +26,7 @@
 
 <h1>Map/Collect</h1>
 
-<p>主要是用來產生數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
+<p>用來產生新的數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
 
 <p><code>map</code> 和 <code>collect</code> 其實是一樣的東西，主要是因為其他語言很多都是用 <code>collect</code>。</p>
 
@@ -34,18 +34,18 @@
 array.map {|v| v * 2}
 # =&gt; [2, 4, 6]
 
-hash = {:name =&gt; "Leon", :age =&gt; 18}
+hash = {:name =&gt; "abc", :age =&gt; 18}
 hash.map {|k, v| v }
-# =&gt; ["Leon", 18]
+# =&gt; ["abc", 18]
 </code></pre>
 
 <h1>Pluck</h1>
 
 <p>可以針對物件，挑出指定的欄位。</p>
 
-<p>Approach - Collect</p>
+<p>Approach - map</p>
 
-<pre><code class="ruby">puts Benchmark.measure { User.where('age &gt; 20').select(:id).collect(&amp;:id) }
+<pre><code class="ruby">puts Benchmark.measure { User.where('age &gt; 20').select(:id). map(&amp;:id) }
 User Load (0.7ms)  SELECT id FROM `users` WHERE (age &lt; 20)
 0.010000   0.000000   0.010000 (  0.011173)
 nil
@@ -62,6 +62,8 @@ nil
 </code></pre>
 
 <p>Time Taken : 0.003422 s</p>
+
+<p>主要是執行速度上的差異</p>
 
 <p>參考<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a></p>
 
@@ -88,11 +90,11 @@ Person.pluck('DATEDIFF(updated_at, created_at)')
 
 <h1>Select</h1>
 
-<p>可以針對後面的條件，將符合該條件的值塞選出來。</p>
+<p>可以針對後面的條件，將符合該條件的值或欄位塞選出來。</p>
 
 <p>可以在資料庫取值的時候，只取出需要的欄位。</p>
 
-<pre><code class="ruby">User.all.select(:id).map(&amp;:id)
+<pre><code class="ruby">User.all.select(:id)
 =&gt; #&lt;ActiveRecord::Relation [#&lt;User id: 1&gt;, #&lt;User id: 2&gt;, #&lt;User id: 3&gt;,...]&gt;
 </code></pre>
 
@@ -115,7 +117,7 @@ my_array.select{|item| item%2==0 }
 my_hash.select{|name, gender| gender == "male" }
 # {"Joe" =&gt; "male", "Jim" =&gt; "male"}
 
-#改成 map 會變成，回傳 boolean，並且回傳 array
+#改成 map 會變成，回傳 boolean值，並且回傳 array
 my_hash.map{|name, gender| gender == "male" }
 #[true, true, false]
 </code></pre>
@@ -171,7 +173,7 @@ User.all.map {|user| [user.name, user.id ]}.to_h
 
 <h1>each_with_object</h1>
 
-<p>跟 each 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
+<p>跟 inject 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
 
 <pre><code class="ruby">User.all.each_with_object({}) do | user, hash | 
     hash[user.name] = user.id  
