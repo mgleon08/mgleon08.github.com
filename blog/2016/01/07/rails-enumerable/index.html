@@ -9,8 +9,9 @@
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="這次主要來介紹 Enumerable api
-可以很方便的將需要的資料整合在一起 Map/Collect 用來產生新的數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value map 和 collect &hellip;">
+  <meta name="description" content="這次主要來介紹一些好用的 Enumerable
+可以很方便的將需要的資料整合在一起 Map/Collect 對 block 每個值進行運算，並回傳成一個新的 array
+處理 hash 時，也可以分開處理 key 和 value map 和 collect 其實是一樣的東西， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -122,7 +123,7 @@
   </header>
 
 
-<div class="entry-content"><p>這次主要來介紹 Enumerable api<br/>
+<div class="entry-content"><p>這次主要來介紹一些好用的 Enumerable<br/>
 可以很方便的將需要的資料整合在一起</p>
 
 <!-- more -->
@@ -130,7 +131,8 @@
 
 <h1>Map/Collect</h1>
 
-<p>用來產生新的數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value</p>
+<p>對 block 每個值進行運算，並回傳成一個新的 <code>array</code><br/>
+處理 <code>hash</code> 時，也可以分開處理 key 和 value</p>
 
 <p><code>map</code> 和 <code>collect</code> 其實是一樣的東西，主要是因為其他語言很多都是用 <code>collect</code>。</p>
 
@@ -151,90 +153,9 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>Pluck</h1>
-
-<p>可以針對物件，挑出指定的欄位。</p>
-
-<p>Approach - map</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;age &gt; 20&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span> <span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:id</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="nb">id</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="n">age</span> <span class="o">&lt;</span> <span class="mi">20</span><span class="p">)</span>
-</span><span class='line'><span class="mi">0</span><span class="o">.</span><span class="mo">010000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">000000</span>   <span class="mi">0</span><span class="o">.</span><span class="mo">010000</span> <span class="p">(</span>  <span class="mi">0</span><span class="o">.</span><span class="mo">011173</span><span class="p">)</span>
-</span><span class='line'><span class="kp">nil</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Time Taken : 0.011173 s</p>
-
-<p>Approach - Pluck</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span> <span class="no">User</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;age &gt; 20&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'><span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">7</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`users`</span><span class="o">.</span><span class="n">`</span><span class="nb">id</span><span class="sb">` FROM `</span><span class="n">users</span><span class="sb">` WHERE (age &lt; 20)</span>
-</span><span class='line'><span class="sb">0.010000   0.000000   0.010000 (  0.003422)</span>
-</span><span class='line'><span class="sb">nil</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Time Taken : 0.003422 s</p>
-
-<p>主要是執行速度上的差異</p>
-
-<p>參考<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
-</span><span class='line'><span class="c1"># SELECT people.id FROM people</span>
-</span><span class='line'><span class="c1"># =&gt; [1, 2, 3]</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
-</span><span class='line'><span class="c1"># SELECT people.id, people.name FROM people</span>
-</span><span class='line'><span class="c1"># =&gt; [[1, &#39;David&#39;], [2, &#39;Jeremy&#39;], [3, &#39;Jose&#39;]]</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="s1">&#39;DISTINCT role&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="c1"># SELECT DISTINCT role FROM people</span>
-</span><span class='line'><span class="c1"># =&gt; [&#39;admin&#39;, &#39;member&#39;, &#39;guest&#39;]</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">age</span><span class="p">:</span> <span class="mi">21</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
-</span><span class='line'><span class="c1"># SELECT people.id FROM people WHERE people.age = 21 LIMIT 5</span>
-</span><span class='line'><span class="c1"># =&gt; [2, 3]</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="s1">&#39;DATEDIFF(updated_at, created_at)&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="c1"># SELECT DATEDIFF(updated_at, created_at) FROM people</span>
-</span><span class='line'><span class="c1"># =&gt; [&#39;0&#39;, &#39;27761&#39;, &#39;173&#39;]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
 <h1>Select</h1>
 
-<p>可以針對後面的條件，將符合該條件的值或欄位塞選出來。</p>
-
-<p>可以在資料庫取值的時候，只取出需要的欄位。</p>
+<p>對物件，挑出指定欄位的值，並回傳 <code>ActiveRecord::Relation</code></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -279,6 +200,135 @@
 </span><span class='line'><span class="c1">#改成 map 會變成，回傳 boolean值，並且回傳 array</span>
 </span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">map</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">gender</span><span class="o">|</span> <span class="n">gender</span> <span class="o">==</span> <span class="s2">&quot;male&quot;</span> <span class="p">}</span>
 </span><span class='line'><span class="c1">#[true, true, false]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Pluck</h1>
+
+<p>對物件，挑出指定欄位的值，並回傳一個新的 <code>array</code><br/>
+像是 <code>map</code> 和 <code>select</code> 合在一起的指令</p>
+
+<p>Approach - map</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; [1, 2, 3]</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span><span class="no">User</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)}</span>
+</span><span class='line'><span class="c1">#0.000000   0.000000   0.000000 (  0.000857)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">map</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span> <span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; [1, 2, 3]</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">map</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span> <span class="n">a</span><span class="o">.</span><span class="n">id</span><span class="p">}}</span>
+</span><span class='line'><span class="c1"># 0.000000   0.020000   0.020000 (  0.026401)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;User id: 1&gt;, #&lt;User id: 2&gt;, #&lt;User id: 3&gt;]&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Benchmark</span><span class="o">.</span><span class="n">measure</span> <span class="p">{</span><span class="no">User</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span><span class="n">to_a</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#0.000000   0.000000   0.000000 (  0.001549)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>顯然效能上還是 <code>pluck</code> 最快</p>
+
+<p><code>map</code> 會將所有欄位找出來，再根據 block 的值，回傳新的 <code>array</code></p>
+
+<p><code>pluck</code> 和 <code>select</code> 則是只將需要的欄位選出來，但 <code>select</code> 回傳的是 <code>ActiveRecord::Relation</code> 必須再透過 map 轉成 <code>array</code></p>
+
+<p>參考文件：<br/>
+<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a><br/>
+<a href="http://gavinmiller.io/2013/getting-to-know-pluck-and-select/">Getting to Know Pluck and Select</a>
+<a href="http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html">Pluck vs. map and select</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT people.id FROM people</span>
+</span><span class='line'><span class="c1"># =&gt; [1, 2, 3]</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT people.id, people.name FROM people</span>
+</span><span class='line'><span class="c1"># =&gt; [[1, &#39;David&#39;], [2, &#39;Jeremy&#39;], [3, &#39;Jose&#39;]]</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="s1">&#39;DISTINCT role&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT DISTINCT role FROM people</span>
+</span><span class='line'><span class="c1"># =&gt; [&#39;admin&#39;, &#39;member&#39;, &#39;guest&#39;]</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">age</span><span class="p">:</span> <span class="mi">21</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT people.id FROM people WHERE people.age = 21 LIMIT 5</span>
+</span><span class='line'><span class="c1"># =&gt; [2, 3]</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Person</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="s1">&#39;DATEDIFF(updated_at, created_at)&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># SELECT DATEDIFF(updated_at, created_at) FROM people</span>
+</span><span class='line'><span class="c1"># =&gt; [&#39;0&#39;, &#39;27761&#39;, &#39;173&#39;]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>reject</h1>
+
+<p>回傳 block 為 <code>false</code> 的值，成一個新的 <code>array</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Remove even numbers</span>
+</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">30</span><span class="p">)</span><span class="o">.</span><span class="n">reject</span> <span class="p">{</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Remove years dividable with 4 (this is *not* the full leap years rule)</span>
+</span><span class='line'><span class="p">(</span><span class="mi">1950</span><span class="o">.</span><span class="n">.</span><span class="mi">2000</span><span class="p">)</span><span class="o">.</span><span class="n">reject</span> <span class="p">{</span> <span class="o">|</span><span class="n">y</span><span class="o">|</span> <span class="n">y</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; [1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996, 2000]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Remove users with karma below arithmetic mean</span>
+</span><span class='line'><span class="n">total</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">total</span><span class="p">,</span> <span class="n">user</span><span class="o">|</span> <span class="n">total</span> <span class="o">+=</span> <span class="n">user</span><span class="o">.</span><span class="n">karma</span> <span class="p">}</span>
+</span><span class='line'><span class="n">mean</span> <span class="o">=</span> <span class="n">total</span> <span class="o">/</span> <span class="n">users</span><span class="o">.</span><span class="n">size</span>
+</span><span class='line'><span class="n">good_users</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">reject</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="o">.</span><span class="n">karma</span> <span class="o">&lt;</span> <span class="n">mean</span> <span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -406,37 +456,6 @@
 </span><span class='line'>  <span class="nb">print</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">item</span><span class="si">}</span><span class="s2"> &quot;</span> <span class="k">if</span> <span class="n">index</span><span class="o">%</span><span class="mi">2</span><span class="o">==</span><span class="mi">0</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'><span class="no">Cool</span> <span class="n">beans!</span>  <span class="c1"># =&gt; [&quot;Cool&quot;, &quot;chicken!&quot;, &quot;beans!&quot;, &quot;beef!&quot;]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>reject</h1>
-
-<p>將 <code>block</code> 為 <code>false</code> 的值，回傳新的 <code>array</code>，。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Remove even numbers</span>
-</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">30</span><span class="p">)</span><span class="o">.</span><span class="n">reject</span> <span class="p">{</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span> <span class="n">n</span> <span class="o">%</span> <span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">}</span>
-</span><span class='line'><span class="c1"># =&gt; [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29]</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Remove years dividable with 4 (this is *not* the full leap years rule)</span>
-</span><span class='line'><span class="p">(</span><span class="mi">1950</span><span class="o">.</span><span class="n">.</span><span class="mi">2000</span><span class="p">)</span><span class="o">.</span><span class="n">reject</span> <span class="p">{</span> <span class="o">|</span><span class="n">y</span><span class="o">|</span> <span class="n">y</span> <span class="o">%</span> <span class="mi">4</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">}</span>
-</span><span class='line'><span class="c1"># =&gt; [1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996, 2000]</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Remove users with karma below arithmetic mean</span>
-</span><span class='line'><span class="n">total</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">inject</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">total</span><span class="p">,</span> <span class="n">user</span><span class="o">|</span> <span class="n">total</span> <span class="o">+=</span> <span class="n">user</span><span class="o">.</span><span class="n">karma</span> <span class="p">}</span>
-</span><span class='line'><span class="n">mean</span> <span class="o">=</span> <span class="n">total</span> <span class="o">/</span> <span class="n">users</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="n">good_users</span> <span class="o">=</span> <span class="n">users</span><span class="o">.</span><span class="n">reject</span> <span class="p">{</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span> <span class="n">u</span><span class="o">.</span><span class="n">karma</span> <span class="o">&lt;</span> <span class="n">mean</span> <span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -573,6 +592,7 @@
 <p>官方文件：<br/>
 <a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a><br/>
 <a href="http://apidock.com/ruby/Array/map">map/collect</a><br/>
+<a href="http://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-reject">reject</a><br/>
 <a href="http://apidock.com/ruby/Enumerable/inject">inject</a><br/>
 <a href="http://apidock.com/rails/ActiveRecord/QueryMethods/select">select</a><br/>
 <a href="http://apidock.com/rails/ActiveRecord/Calculations/pluck">pluck</a>  <br/>
@@ -580,7 +600,6 @@
 <a href="http://apidock.com/rails/Enumerable/each_with_object">each_with_object</a><br/>
 <a href="http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index">each_with_index</a><br/>
 <a href="http://apidock.com/rails/Enumerable/sum">sum</a><br/>
-<a href="http://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-reject">reject</a><br/>
 <a href="http://apidock.com/rails/Enumerable/group_by">group_by</a><br/>
 <a href="http://apidock.com/rails/v4.2.1/Enumerable/index_by">index_by</a><br/>
 <a href="http://apidock.com/rails/Enumerable/many%3F">many?</a><br/>
@@ -588,6 +607,8 @@
 
 <p>參考文件：<br/>
 <a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a><br/>
+<a href="http://gavinmiller.io/2013/getting-to-know-pluck-and-select/">Getting to Know Pluck and Select</a><br/>
+<a href="http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html">Pluck vs. map and select</a><br/>
 <a href="http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods">Ruby Explained: Map, Select, and Other Enumerable Methods</a><br/>
 <a href="https://gist.github.com/cupakromer/3371003">each_with_object vs inject</a><br/>
 <a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a><br/>
