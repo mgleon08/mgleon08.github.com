@@ -194,6 +194,67 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 * `vi .gitignore` 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。
 * [.gitignore ⼤集合](https://github.com/github/gitignore)
 
+#alias
+自己設定的一些 alias
+
+```
+alias g='git'
+
+alias grs='git reset'
+alias gbr='git branch'
+alias gbrd='git branch -d'
+alias gci='git commit'
+alias gcim='git commit -m'
+alias gst='git status'
+alias gpl='git pull'
+alias gplo='git pull origin'
+
+#git add
+alias ga='git add'
+alias gaa='git add --all'
+alias gapa='git add --patch'
+
+#git push
+alias gp='git push'
+alias gpo='git push origin'
+alias gcp='git cherry-pick'
+alias gpd='git push --dry-run'
+alias gpoat='git push origin --all && git push origin --tags'
+compdef _git gpoat=git-push
+alias gpu='git push upstream'
+alias gpv='git push -v'
+
+#git checkout
+alias gco='git checkout'
+alias gcob='git checkout -b'
+alias gcom='git checkout master'
+
+#git rebase
+alias grb='git rebase'
+alias grba='git rebase --abort'
+alias grbc='git rebase --continue'
+alias grbi='git rebase -i'
+alias grbm='git rebase master'
+alias grbs='git rebase --skip'
+
+#git stash
+alias gsta='git stash'
+alias gstd='git stash drop'
+alias gstl='git stash list'
+alias gstp='git stash pop'
+alias gsts='git stash show --text'
+
+#git log
+alias glg='git log --stat --color'
+alias glgp='git log --stat --color -p'
+alias glgg='git log --graph --color'
+alias glgga='git log --graph --decorate --all'
+alias glgm='git log --graph --max-count=10'
+alias glo='git log --oneline --decorate --color'
+alias glol="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
+alias glola="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all"
+alias glog='git log --oneline --decorate --color --graph'
+```
 
 官方文件：  
 [Git Pro](http://git-scm.com/book/zh-tw/v1)  

@@ -1,0 +1,322 @@
+---
+layout: post
+title: "Ruby On Rails - 好用的 Enumerable"
+date: 2016-01-07 20:40:22 +0800
+comments: true
+categories: ruby ruby語法 rails rails語法 api
+---
+
+這次主要來介紹 Enumerable api  
+可以很方便的將需要的資料整合在一起  
+
+<!-- more -->
+
+#Map/Collect
+
+用來產生新的數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value
+
+`map` 和 `collect` 其實是一樣的東西，主要是因為其他語言很多都是用 `collect`。
+
+```ruby
+array = [1,2,3]
+array.map {|v| v * 2}
+# => [2, 4, 6]
+
+hash = {:name => "abc", :age => 18}
+hash.map {|k, v| v }
+# => ["abc", 18]
+```
+
+#Pluck
+
+可以針對物件，挑出指定的欄位。
+
+Approach - map
+
+```ruby
+puts Benchmark.measure { User.where('age > 20').select(:id). map(&:id) }
+User Load (0.7ms)  SELECT id FROM `users` WHERE (age < 20)
+0.010000   0.000000   0.010000 (  0.011173)
+nil
+```
+Time Taken : 0.011173 s
+
+Approach - Pluck
+
+```ruby
+puts Benchmark.measure { User.where('age > 20').pluck(:id) }
+SQL (0.7ms)  SELECT `users`.`id` FROM `users` WHERE (age < 20)
+0.010000   0.000000   0.010000 (  0.003422)
+nil
+```
+Time Taken : 0.003422 s
+
+主要是執行速度上的差異
+
+參考[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
+
+```ruby
+Person.pluck(:id)
+# SELECT people.id FROM people
+# => [1, 2, 3]
+
+Person.pluck(:id, :name)
+# SELECT people.id, people.name FROM people
+# => [[1, 'David'], [2, 'Jeremy'], [3, 'Jose']]
+
+Person.pluck('DISTINCT role')
+# SELECT DISTINCT role FROM people
+# => ['admin', 'member', 'guest']
+
+Person.where(age: 21).limit(5).pluck(:id)
+# SELECT people.id FROM people WHERE people.age = 21 LIMIT 5
+# => [2, 3]
+
+Person.pluck('DATEDIFF(updated_at, created_at)')
+# SELECT DATEDIFF(updated_at, created_at) FROM people
+# => ['0', '27761', '173']
+```
+
+#Select
+
+可以針對後面的條件，將符合該條件的值或欄位塞選出來。  
+
+
+可以在資料庫取值的時候，只取出需要的欄位。
+
+```ruby
+User.all.select(:id)
+=> #<ActiveRecord::Relation [#<User id: 1>, #<User id: 2>, #<User id: 3>,...]>
+```
+
+可以再搭配 `map` 變成一個 `array`。
+
+```ruby
+User.all.select(:id).map(&:id)
+# => [1,2,3]
+```
+
+或是直接針對 array 去篩選
+
+```ruby
+my_array = [1,2,3,4,5,6,7,8,100]
+my_array.select{|item| item%2==0 }
+# => [2,4,6,8,100]
+```
+
+hash
+
+```ruby
+my_hash = {"Joe" => "male", "Jim" => "male", "Patty" => "female"}
+my_hash.select{|name, gender| gender == "male" }
+# {"Joe" => "male", "Jim" => "male"}
+
+#改成 map 會變成，回傳 boolean值，並且回傳 array
+my_hash.map{|name, gender| gender == "male" }
+#[true, true, false]
+```
+
+#inject
+
+inject 方法可以先給予初始值(數字，hash，array 都可以)，之後給予指定的元素，不斷的迭代。
+
+```ruby
+(5..10).inject(1) {|init, n| init * n }
+# => 151200
+(5..10).inject(1, :*)                         
+#=> 151200
+```
+```ruby
+(5..10).inject {|sum, n| sum * n }
+# => 45
+(5..10).inject(:+)                            
+#=> 45
+```
+也可以拿來做比較。
+
+```ruby
+%w{ cat sheep bear }.inject do |memo,word|
+   memo.length > word.length ? memo : word
+end
+# => "sheep"
+```
+
+如果給予 inject 的參數為一個空區塊，那麼 inject 會將結果整理成 Hash。
+
+```ruby
+User.all.inject({}) do |hash, user| 
+	hash[user.name] = user.id  
+	hash # 需要回傳運算結果
+end
+# => {"A"=>1, "B"=>2, "C"=>3}
+```
+但要注意的是，由於每跑一次，都會取用最後的回傳值，當做這次的初始值，因此最後必須再加個 `hash` ，否則會出錯。
+
+也可改用 reduce 跟 inject 一模一樣  
+[Is inject the same thing as reduce in ruby?](http://stackoverflow.com/questions/13813243/is-inject-the-same-thing-as-reduce-in-ruby)
+
+###額外說明
+也可以用 map 方式，湊成上面的值。
+
+```ruby
+Hash[User.all.map {|user| [user.name, user.id ]}]
+# => {"A"=>1, "B"=>2, "C"=>3}
+
+User.all.map {|user| [user.name, user.id ]}.to_h
+# => {"A"=>1, "B"=>2, "C"=>3}
+```
+
+#each_with_object
+
+跟 inject 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。
+
+```ruby
+User.all.each_with_object({}) do | user, hash | 
+	hash[user.name] = user.id  
+end
+```
+#each_with_index
+
+用來加上索引。
+
+```ruby
+hash = Hash.new
+%w(cat dog wombat).each_with_index {|item, index|
+  hash[item] = index
+}
+#=> ["cat", "dog", "wombat"]
+
+hash
+#=> {"cat"=>0, "dog"=>1, "wombat"=>2}
+```
+[Ruby’s inject/reduce and each_with_object](http://www.bbs-software.com/blog/2013/11/22/rubys-injectreduce-and-each_with_object/)
+
+也可以用來將複數的的 position 印出來。
+
+```ruby
+["Cool", "chicken!", "beans!", "beef!"].each_with_index do |item, index|
+	print "#{item} " if index%2==0
+end
+Cool beans!  # => ["Cool", "chicken!", "beans!", "beef!"]
+```
+
+
+#sum
+可以算出集合的加總
+
+```ruby
+payments.sum { |p| p.price * p.tax_rate }
+payments.sum(&:price)
+```
+
+數字，字串，陣列都可以，其實就是用 `+` 的方法
+
+```ruby
+[5, 15, 10].sum # => 30
+['foo', 'bar'].sum # => "foobar"
+[[1, 2], [3, 1, 5]].sum #=> [1, 2, 3, 1, 5]
+```
+#group_by
+
+可以依照指定的欄位分組出來。
+
+```ruby
+latest_transcripts.group_by(&:day).each do |day, transcripts|
+  p "#{day} -> #{transcripts.map(&:class).join(', ')}"
+end
+
+# "2006-03-01 -> Transcript"
+# "2006-02-28 -> Transcript"
+# "2006-02-27 -> Transcript, Transcript"
+# "2006-02-26 -> Transcript, Transcript"
+# "2006-02-25 -> Transcript"
+# "2006-02-24 -> Transcript, Transcript"
+# "2006-02-23 -> Transcript"
+```
+
+```ruby
+names = ["James", "Bob", "Joe", "Mark", "Jim"]
+names.group_by{|name| name.length}
+# => {5=>["James"], 3=>["Bob", "Joe", "Jim"], 4=>["Mark"]} 
+```
+
+#grep
+
+根據指定的條件塞選
+
+```ruby
+names = ["James", "Bob", "Joe", "Mark", "Jim"]
+names.grep(/J/)
+#=> ["James", "Joe", "Jim"]
+```
+
+
+#index_by
+
+index_by可以指定欄位做為鍵值整理成Hash。
+
+```ruby
+User.index_by(&:phone)
+# => {'0912xxxxxx' => <User ...>, '0919xxxxxx' => <User ...>, ...}
+```
+
+鍵值通常必須是唯一的，若不是唯一的話，會以最後出現的元素做為判斷值。
+
+
+#any?
+
+只要有任何條件符合，就回傳true
+
+```ruby
+%w{ant bear cat}.any? {|word| word.length >= 3}   
+#=> true
+%w{ant bear cat}.any? {|word| word.length >= 4}   
+#=> true
+[ nil, true, 99 ].any?                            
+#=> 只要有一個不是 nil 和 false 就是 true
+```
+主要都是集合的方法
+
+可參考之前的  
+[.nil? .empty? .blank? .present? 傻傻分不清楚？](http://mgleon08.github.io/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/)
+
+#&:
+
+```ruby
+User.all.map(&:name)
+```
+
+ `&:` 代表代入一個Proc  
+ `(&:name)` = `{|name| user.name}` 的概念XD。
+
+#Benchmark
+
+上面其實很多都很類似，主要差異的話就是速度吧  
+所以可以用以下的方式來測試每種執行出來的速度。
+
+[Benchmark](http://ruby-doc.org/stdlib-2.0.0/libdoc/benchmark/rdoc/Benchmark.html)  
+[benchmark-ips](https://github.com/evanphx/benchmark-ips)
+
+
+官方文件：  
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[select](http://apidock.com/rails/ActionView/Helpers/FormOptionsHelper/select)  
+[pluck](http://apidock.com/rails/ActiveRecord/Calculations/pluck)
+[inject](http://apidock.com/ruby/Enumerable/inject)  
+[reduce](http://apidock.com/ruby/Enumerable/reduce)  
+[each_with_object](http://apidock.com/rails/Enumerable/each_with_object)  
+[each_with_index](http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index)  
+[sum](http://apidock.com/rails/Enumerable/sum)  
+[group_by](http://apidock.com/rails/Enumerable/group_by)  
+[index_by](http://apidock.com/rails/v4.2.1/Enumerable/index_by)  
+[many?](http://apidock.com/rails/Enumerable/many%3F)  
+[any?](http://apidock.com/ruby/Enumerable/any%3F)  
+
+參考文件：  
+[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
+[Ruby Explained: Map, Select, and Other Enumerable Methods](http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods)  
+[each_with_object vs inject](https://gist.github.com/cupakromer/3371003)  
+[ActiveSupport - 工具函式庫](https://ihower.tw/rails4/activesupport.html)  
+[Ruby 用 inject 和 each_with_object 來組 hash
+](http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash)
+[What does map(&:name) mean in Ruby?](http://stackoverflow.com/questions/1217088/what-does-mapname-mean-in-ruby)

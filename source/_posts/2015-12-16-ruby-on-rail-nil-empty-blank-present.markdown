@@ -3,7 +3,7 @@ layout: post
 title: ".nil? .empty? .blank? .present? 傻傻分不清楚？"
 date: 2015-12-16 21:29:43 +0800
 comments: true
-categories: ruby rails ruby語法 rails語法
+categories: ruby rails ruby語法 rails語法 api
 ---
 
 在學習ruby on rails的過程中，常常會有一些非常神奇的語法  

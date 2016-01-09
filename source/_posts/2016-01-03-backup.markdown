@@ -128,18 +128,33 @@ end
 
 ```ruby
 env :PATH, ENV['PATH']
-set :output, 'log/cron.log'
+set :output, '/home/[username]/cron.log'
 
 every 1.day, :at => '4:30 am' do
-  command "backup perform --trigger my_backup"
+  command "/usr/local/bin/backup perform -t my_backup -c /home/[username]/Backup/config.rb"
 end
 ```
+>切記! 路徑要用絕對路徑啊啊啊!   
 
 設定就完成囉!
 
-如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：
 
+如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：
 `require "whenever/capistrano"`
+
+也可以只更新遠端 whenever  
+`cap production whenever:update_crontab`
+
+另外要看有沒有進排程可以打
+
+`crontab -e`
+
+另外 crontab 會分帳號的，所以要用原本的帳號打才會出現。
+
+>如果只用 whenever 的 rake “XXX” 的話，crontab -e 裡面會先 cd 到專案目錄下，
+>這時候 log/cron.log 就沒問題  
+
+>但是 whenever 的 command “XXXX” 並不會先 cd 到專案目錄下，因此 log/cron.log 會不知道跑去哪裡
 
 #匯入資料庫
 

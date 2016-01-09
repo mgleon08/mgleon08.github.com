@@ -71,6 +71,12 @@ rake generate
 設定主要都在 `_config.yml`，可以更改網站標題，作者名稱，還可以加入facebook按讚，DISQUS回覆等功能  
 修改後要記得 `rake generate` 才會有效
 
+#新的頁面
+```
+rake new_page["title"]
+```
+再去首頁新增連結即可。
+
 #撰寫文章
 ```
 rake new_post["title"]
