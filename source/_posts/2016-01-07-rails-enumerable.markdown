@@ -6,14 +6,16 @@ comments: true
 categories: ruby ruby語法 rails rails語法 api
 ---
 
-這次主要來介紹 Enumerable api  
+這次主要來介紹一些好用的 Enumerable  
 可以很方便的將需要的資料整合在一起  
 
 <!-- more -->
 
 #Map/Collect
 
-用來產生新的數列，可以針對每個值進行運算，回傳的就是後面條件的該值，並整理成 array，處理 hash 時，也可以分開處理 key 和 value
+對 block 每個值進行運算，並回傳成一個新的 `array`  
+處理 `hash` 時，也可以分開處理 key 和 value
+
 
 `map` 和 `collect` 其實是一樣的東西，主要是因為其他語言很多都是用 `collect`。
 
@@ -27,62 +29,9 @@ hash.map {|k, v| v }
 # => ["abc", 18]
 ```
 
-#Pluck
-
-可以針對物件，挑出指定的欄位。
-
-Approach - map
-
-```ruby
-puts Benchmark.measure { User.where('age > 20').select(:id). map(&:id) }
-User Load (0.7ms)  SELECT id FROM `users` WHERE (age < 20)
-0.010000   0.000000   0.010000 (  0.011173)
-nil
-```
-Time Taken : 0.011173 s
-
-Approach - Pluck
-
-```ruby
-puts Benchmark.measure { User.where('age > 20').pluck(:id) }
-SQL (0.7ms)  SELECT `users`.`id` FROM `users` WHERE (age < 20)
-0.010000   0.000000   0.010000 (  0.003422)
-nil
-```
-Time Taken : 0.003422 s
-
-主要是執行速度上的差異
-
-參考[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
-
-```ruby
-Person.pluck(:id)
-# SELECT people.id FROM people
-# => [1, 2, 3]
-
-Person.pluck(:id, :name)
-# SELECT people.id, people.name FROM people
-# => [[1, 'David'], [2, 'Jeremy'], [3, 'Jose']]
-
-Person.pluck('DISTINCT role')
-# SELECT DISTINCT role FROM people
-# => ['admin', 'member', 'guest']
-
-Person.where(age: 21).limit(5).pluck(:id)
-# SELECT people.id FROM people WHERE people.age = 21 LIMIT 5
-# => [2, 3]
-
-Person.pluck('DATEDIFF(updated_at, created_at)')
-# SELECT DATEDIFF(updated_at, created_at) FROM people
-# => ['0', '27761', '173']
-```
-
 #Select
 
-可以針對後面的條件，將符合該條件的值或欄位塞選出來。  
-
-
-可以在資料庫取值的時候，只取出需要的欄位。
+對物件，挑出指定欄位的值，並回傳 `ActiveRecord::Relation`
 
 ```ruby
 User.all.select(:id)
@@ -114,6 +63,83 @@ my_hash.select{|name, gender| gender == "male" }
 #改成 map 會變成，回傳 boolean值，並且回傳 array
 my_hash.map{|name, gender| gender == "male" }
 #[true, true, false]
+```
+#Pluck
+
+對物件，挑出指定欄位的值，並回傳一個新的 `array`  
+像是 `map` 和 `select` 合在一起的指令
+
+Approach - map
+
+```ruby
+User.pluck(:id)
+#=> [1, 2, 3]
+
+puts Benchmark.measure {User.pluck(:id)}
+#0.000000   0.000000   0.000000 (  0.000857)
+```
+```ruby
+User.all.map{|a| a.id}
+#=> [1, 2, 3]
+
+puts Benchmark.measure {User.all.map{|a| a.id}}
+# 0.000000   0.020000   0.020000 (  0.026401)
+```
+```ruby
+User.select(:id)
+=> #<ActiveRecord::Relation [#<User id: 1>, #<User id: 2>, #<User id: 3>]>
+
+puts Benchmark.measure {User.select(:id).to_a}
+#0.000000   0.000000   0.000000 (  0.001549)
+```
+顯然效能上還是 `pluck` 最快  
+
+`map` 會將所有欄位找出來，再根據 block 的值，回傳新的 `array`  
+
+`pluck` 和 `select ` 則是只將需要的欄位選出來，但 `select` 回傳的是 `ActiveRecord::Relation` 必須再透過 map 轉成 `array`  
+
+參考文件：  
+[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
+[Getting to Know Pluck and Select](http://gavinmiller.io/2013/getting-to-know-pluck-and-select/)
+[Pluck vs. map and select](http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html)
+
+```ruby
+Person.pluck(:id)
+# SELECT people.id FROM people
+# => [1, 2, 3]
+
+Person.pluck(:id, :name)
+# SELECT people.id, people.name FROM people
+# => [[1, 'David'], [2, 'Jeremy'], [3, 'Jose']]
+
+Person.pluck('DISTINCT role')
+# SELECT DISTINCT role FROM people
+# => ['admin', 'member', 'guest']
+
+Person.where(age: 21).limit(5).pluck(:id)
+# SELECT people.id FROM people WHERE people.age = 21 LIMIT 5
+# => [2, 3]
+
+Person.pluck('DATEDIFF(updated_at, created_at)')
+# SELECT DATEDIFF(updated_at, created_at) FROM people
+# => ['0', '27761', '173']
+```
+#reject
+回傳 block 為 `false` 的值，成一個新的 `array`。
+
+```ruby
+# Remove even numbers
+(1..30).reject { |n| n % 2 == 0 }
+# => [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29]
+
+# Remove years dividable with 4 (this is *not* the full leap years rule)
+(1950..2000).reject { |y| y % 4 != 0 }
+# => [1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996, 2000]
+
+# Remove users with karma below arithmetic mean
+total = users.inject(0) { |total, user| total += user.karma }
+mean = total / users.size
+good_users = users.reject { |u| u.karma < mean }
 ```
 
 #inject
@@ -199,7 +225,6 @@ hash
 end
 Cool beans!  # => ["Cool", "chicken!", "beans!", "beef!"]
 ```
-
 
 #sum
 可以算出集合的加總
@@ -300,9 +325,11 @@ User.all.map(&:name)
 
 官方文件：  
 [Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
-[select](http://apidock.com/rails/ActionView/Helpers/FormOptionsHelper/select)  
-[pluck](http://apidock.com/rails/ActiveRecord/Calculations/pluck)
+[map/collect](http://apidock.com/ruby/Array/map)  
+[reject](http://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-reject)  
 [inject](http://apidock.com/ruby/Enumerable/inject)  
+[select](http://apidock.com/rails/ActiveRecord/QueryMethods/select)  
+[pluck](http://apidock.com/rails/ActiveRecord/Calculations/pluck)    
 [reduce](http://apidock.com/ruby/Enumerable/reduce)  
 [each_with_object](http://apidock.com/rails/Enumerable/each_with_object)  
 [each_with_index](http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index)  
@@ -314,6 +341,8 @@ User.all.map(&:name)
 
 參考文件：  
 [Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
+[Getting to Know Pluck and Select](http://gavinmiller.io/2013/getting-to-know-pluck-and-select/)  
+[Pluck vs. map and select](http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html)  
 [Ruby Explained: Map, Select, and Other Enumerable Methods](http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods)  
 [each_with_object vs inject](https://gist.github.com/cupakromer/3371003)  
 [ActiveSupport - 工具函式庫](https://ihower.tw/rails4/activesupport.html)  
