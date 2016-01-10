@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-10T01:23:08+08:00</updated>
+  <updated>2016-01-10T11:33:47+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,136 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - 用 Include 和 Join 避免 N+1 Query]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/10/ruby-on-rails-include-join-avoid-n-1-query/"/>
+    <updated>2016-01-10T10:00:44+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/10/ruby-on-rails-include-join-avoid-n-1-query</id>
+    <content type="html"><![CDATA[<p>在 <code>rails</code> 當中，因為 ORM (Object-relational mapping ) 的便利，可以很快速地建立起連結，但在這過程中，經常會發生 <code>N+1 query</code> 的問題，造成效能上的緩慢，因此要如何解決這個問題，是很重要的。</p>
+
+<!--more-->
+
+
+<h1>N+1 query</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># model</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActieRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:skills</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Skill</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># controller</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>  <span class="vi">@users</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># view</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% @users.each </span><span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"> &lt;%= user.skills %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上的關聯，就是透過 <code>User</code> 和 <code>Post 的關聯</code> ，在 <code>view</code> 中一筆一筆去資料庫找相關的 <code>post</code> ，而這每一筆去資料庫的動作，就會有以下的查詢，然後造成 <code>N+1 query</code> 的問題。</p>
+
+<p>N+1就是指說，迴圈中查詢 N 筆資料，加上一開始的第一筆。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Skill</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`skills`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`skills`</span> <span class="no">WHERE</span> <span class="sb">`skills`</span><span class="o">.</span><span class="n">`user_id</span><span class="sb">` = 1</span>
+</span><span class='line'><span class="sb">Skill Load (0.2ms)  SELECT `</span><span class="n">skills</span><span class="sb">`.* FROM `</span><span class="n">skills</span><span class="sb">` WHERE `</span><span class="n">skills</span><span class="sb">`.`</span><span class="n">user_id</span><span class="sb">` = 2</span>
+</span><span class='line'><span class="sb">Skill Load (1.6ms)  SELECT `</span><span class="n">skills</span><span class="sb">`.* FROM `</span><span class="n">skills</span><span class="sb">` WHERE `</span><span class="n">skills</span><span class="sb">`.`</span><span class="n">user_id</span><span class="sb">` = 3</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>因此要解決這個問題，就能使用以下方式。</p>
+
+<h1>includes</h1>
+
+<p><code>includes</code> 主要用於可以直接將相關連的資料，在同一筆查詢，一起撈出來</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:skills</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">SELECT</span> <span class="sb">`skills`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`skills`</span> <span class="no">WHERE</span> <span class="sb">`skills`</span><span class="o">.</span><span class="n">`user_id</span><span class="sb">` IN (1, 2, 3)</span>
+</span><span class='line'>
+</span><span class='line'><span class="sb"># 回傳所有 User 和 關聯的 skills</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到後面有 <code>IN (1, 2, 3)</code>，就是將上面一筆一筆查詢，變成這種方式一次撈出來。這樣在 <code>view</code> 中執行 <code>user.skills</code> 就不會再去資料庫查詢，因為已經都先撈出來了。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">也可以一次</span> <span class="n">includes</span> <span class="err">多個關聯</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">skills</span><span class="p">:</span> <span class="ss">:profile</span><span class="p">)</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">skills</span><span class="p">:</span> <span class="o">[</span><span class="ss">:cees</span><span class="p">,</span> <span class="ss">:dees</span><span class="o">]</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>joins</h1>
+
+<p><code>joins</code> 則是關聯其他資料庫，可以進行查詢，但並不會將關聯的資料拉出來。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:skills</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">User</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="sb">`users`</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="sb">`users`</span> <span class="no">INNER</span> <span class="no">JOIN</span> <span class="sb">`skills`</span> <span class="no">ON</span> <span class="sb">`skills`</span><span class="o">.</span><span class="n">`user_id</span><span class="sb">` = `</span><span class="n">users</span><span class="sb">`.`</span><span class="nb">id</span><span class="sb">`</span>
+</span><span class='line'>
+</span><span class='line'><span class="sb">#回傳所有，有 skill 的 user</span>
+</span><span class='line'><span class="sb">#因為同一個 user 可能有多個 skill ，這樣就會撈出重複的 user 出來 ， 一個 skill 一個 user，因此可以用 .uniq 來去除重複的資料。</span>
+</span><span class='line'><span class="sb">#如果是一對一就不會有這個問題了</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>回傳的是所有有 <code>skill</code> 的 <code>user</code>，但並不會將 <code>skill</code> 資料撈出來，只是去做比對，因此再用 <code>user.skills</code> ，一樣會去資料庫中撈出資料。</p>
+
+<p>官方資料：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html">Active Record 查詢</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/performance.html">網站效能</a><br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">ActiveRecord - 資料表關聯</a><br/>
+<a href="http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query">Rails使用 include 和 join 避免 N+1 query</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - Json]]></title>
@@ -2769,7 +2899,7 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 </span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#97;&#105;&#108;&#116;&#x6f;&#x3a;&#100;&#x65;&#112;&#108;&#x6f;&#x79;&#64;&#49;&#50;&#51;&#x2e;&#49;&#50;&#51;&#x2e;&#49;&#50;&#46;&#49;">&#100;&#101;&#112;&#108;&#111;&#121;&#64;&#49;&#x32;&#51;&#x2e;&#49;&#x32;&#51;&#46;&#x31;&#50;&#x2e;&#x31;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#97;&#x69;&#x6c;&#x74;&#111;&#58;&#x64;&#x65;&#112;&#108;&#x6f;&#x79;&#64;&#49;&#50;&#51;&#46;&#x31;&#50;&#x33;&#x2e;&#49;&#x32;&#x2e;&#49;">&#100;&#x65;&#x70;&#x6c;&#111;&#x79;&#x40;&#x31;&#x32;&#51;&#x2e;&#x31;&#x32;&#51;&#x2e;&#49;&#x32;&#46;&#49;</a> 就連進去囉!!</p>
 
 <h1>設定快捷鍵</h1>
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-10T01:23:08+08:00</updated>
+  <updated>2016-01-10T11:33:47+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,94 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails - 用 Include 和 Join 避免 N+1 Query]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/10/ruby-on-rails-include-join-avoid-n-1-query/"/>
+    <updated>2016-01-10T10:00:44+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/10/ruby-on-rails-include-join-avoid-n-1-query</id>
+    <content type="html"><![CDATA[<p>在 <code>rails</code> 當中，因為 ORM (Object-relational mapping ) 的便利，可以很快速地建立起連結，但在這過程中，經常會發生 <code>N+1 query</code> 的問題，造成效能上的緩慢，因此要如何解決這個問題，是很重要的。</p>
+
+<!--more-->
+
+
+<h1>N+1 query</h1>
+
+<pre><code class="ruby"># model
+class User &lt; ActieRecord::Base
+  has_many :skills
+end
+
+class Skill &lt; ActiveRecord::Base
+  belongs_to :user
+end
+
+# controller
+def index
+  @users = User.all
+end
+
+# view
+&lt;% @users.each do |user| %&gt;
+ &lt;%= user.skills %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>以上的關聯，就是透過 <code>User</code> 和 <code>Post 的關聯</code> ，在 <code>view</code> 中一筆一筆去資料庫找相關的 <code>post</code> ，而這每一筆去資料庫的動作，就會有以下的查詢，然後造成 <code>N+1 query</code> 的問題。</p>
+
+<p>N+1就是指說，迴圈中查詢 N 筆資料，加上一開始的第一筆。</p>
+
+<pre><code class="ruby">Skill Load (0.2ms)  SELECT `skills`.* FROM `skills` WHERE `skills`.`user_id` = 1
+Skill Load (0.2ms)  SELECT `skills`.* FROM `skills` WHERE `skills`.`user_id` = 2
+Skill Load (1.6ms)  SELECT `skills`.* FROM `skills` WHERE `skills`.`user_id` = 3
+</code></pre>
+
+<p>因此要解決這個問題，就能使用以下方式。</p>
+
+<h1>includes</h1>
+
+<p><code>includes</code> 主要用於可以直接將相關連的資料，在同一筆查詢，一起撈出來</p>
+
+<pre><code class="ruby">User.includes(:skills)
+
+SELECT `skills`.* FROM `skills` WHERE `skills`.`user_id` IN (1, 2, 3)
+
+# 回傳所有 User 和 關聯的 skills
+</code></pre>
+
+<p>可以看到後面有 <code>IN (1, 2, 3)</code>，就是將上面一筆一筆查詢，變成這種方式一次撈出來。這樣在 <code>view</code> 中執行 <code>user.skills</code> 就不會再去資料庫查詢，因為已經都先撈出來了。</p>
+
+<pre><code class="ruby">也可以一次 includes 多個關聯
+
+User.includes(skills: :profile)
+User.includes(skills: [:cees, :dees])
+</code></pre>
+
+<h1>joins</h1>
+
+<p><code>joins</code> 則是關聯其他資料庫，可以進行查詢，但並不會將關聯的資料拉出來。</p>
+
+<pre><code class="ruby">User.joins(:skills)
+
+User Load (0.4ms)  SELECT `users`.* FROM `users` INNER JOIN `skills` ON `skills`.`user_id` = `users`.`id`
+
+#回傳所有，有 skill 的 user
+#因為同一個 user 可能有多個 skill ，這樣就會撈出重複的 user 出來 ， 一個 skill 一個 user，因此可以用 .uniq 來去除重複的資料。
+#如果是一對一就不會有這個問題了
+</code></pre>
+
+<p>回傳的是所有有 <code>skill</code> 的 <code>user</code>，但並不會將 <code>skill</code> 資料撈出來，只是去做比對，因此再用 <code>user.skills</code> ，一樣會去資料庫中撈出資料。</p>
+
+<p>官方資料：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html">Active Record 查詢</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/performance.html">網站效能</a><br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">ActiveRecord - 資料表關聯</a><br/>
+<a href="http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query">Rails使用 include 和 join 避免 N+1 query</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - Json]]></title>
@@ -945,133 +1033,6 @@ content_tag("select", options, multiple: true)
 <a href="http://blog.xdite.net/posts/2011/12/09/how-to-design-helpers">如何運用 / 設計 Rails Helper (1)</a><br/>
 <a href="http://blog.xdite.net/posts/2011/12/10/how-to-design-helpers-2">如何運用 / 設計 Rails Helper (2)</a><br/>
 <a href="http://blog.xdite.net/posts/2012/01/16/how-to-design-helper-3">如何運用 / 設計 Rails Helper (3)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Polymorphic Associations and STI]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti/"/>
-    <updated>2015-12-20T14:47:50+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti</id>
-    <content type="html"><![CDATA[<p>Polymorphic Associations 和 STI，一開始實在不太懂這兩個的差別是什麼？<br/>
-感覺功能都差不多，但仔細研究後發現，其實兩個是完全不同的東西</p>
-
-<!-- more -->
-
-
-<h1>STI 單一表格繼承(Single-table inheritance)</h1>
-
-<p>簡單的來說，就是 <code>子類別</code> 繼承 <code>父類別</code> 的表格欄位和方法<br/>
-在 Rails 慣例中，只要在父類別加上 <code>type</code> 欄位，就可以使用了</p>
-
-<p>以下就是三個 model 共用 User 的表格，<code>Guest</code> 和 <code>Member</code> 不需要在建立自己的資料表</p>
-
-<pre><code class="ruby">class User &lt; ActiveRecord::Base
-    validates_presence_of :name
-end
-
-class Guest &lt; User
-end
-
-class Member &lt; User
-end
-</code></pre>
-
-<p>接著到 console 實際看看</p>
-
-<pre><code class="ruby">guest = Guest.create( :name =&gt; "leon")
-guest.type # "Guest"
-guest.id # 1
-member = Member.create( :name =&gt; "Rails Team" )
-member.type # "Member"
-member.id # 2
-</code></pre>
-
-<p><img src="http://i.imgur.com/h3vf6bE.png" alt="STI" />
-會發現自動就會在 type 記錄是哪個 model，並且 id 會繼續延續下來（因為是存在同一張資料表上）</p>
-
-<blockquote><p>建議繼承的欄位是一致的在使用這個功能，因為交集的欄位不多的話，就會使得很多空間被浪費掉</p></blockquote>
-
-<p>要關閉STI，在父類別加上self.abstract_class = true</p>
-
-<pre><code class="ruby">class User &lt; ActiveRecord::Base
-    validates_presence_of :name
-    self.abstract_class = true
-end
-
-class Guest &lt; User
-end
-
-class Member &lt; User
-end
-</code></pre>
-
-<p>這樣 Guest 和 Member 就必須有自己的資料表了。</p>
-
-<p>官方文件：<br/>
-<a href="http://rails.ruby.tw/association_basics.html#%E5%96%AE%E8%A1%A8%E7%B9%BC%E6%89%BF">Guides 中文</a></p>
-
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/activerecord-others.html">Ruby on Rails 實戰聖經</a></p>
-
-<h1>多型關聯(Polymorphic Associations)</h1>
-
-<p>看字面上的意思，就知道是用在關聯上的，例如 <code>留言</code> ，Article 上面可以留言，Photo 上面可以留言，通常都會直接分別建立 <code>ArticleComment</code>，<code>PhotoComment</code>的 Model。</p>
-
-<p>但如果用 Polymorphic Associations 只要在另外建立一個 <code>Comment model</code> ，並加上 integer 的 <em>id 外部鍵和 string 的 </em>type 欄位說明是哪一種 Model，即可將所有留言都儲存在這裡。</p>
-
-<pre><code class="ruby">class CreateComments &lt; ActiveRecord::Migration
-  def change
-    create_table :comments do |t|
-      t.text :content
-      t.integer :commentable_id
-      t.string :commentable_type
-      #可改成 t.belongs_to :commentable, :polymorphic =&gt; true, index: true 取代
-
-      t.timestamps
-    end
-  end
-end
-</code></pre>
-
-<p>model 中的設定</p>
-
-<pre><code class="ruby">class Comment &lt; ActiveRecord::Base
-  belongs_to :commentable, :polymorphic =&gt; true
-end
-
-class Article &lt; ActiveRecord::Base
-  has_many :comments, :as =&gt; :commentable
-end
-
-class Photo &lt; ActiveRecord::Base
-  has_many :comments, :as =&gt; :commentable
-end
-</code></pre>
-
-<p>之後再 console</p>
-
-<pre><code class="ruby">a = Article.create #id=&gt;1
-a.comments.create(:content =&gt; "First Comment")
-a.comments.create(:content =&gt; "First Comment")
-
-b = Photo.create #id=&gt;1
-b.comments.create(:content =&gt; "First Comment")
-b = Photo.create #id=&gt;2
-b.comments.create(:content =&gt; "First Comment")
-
-# 也可以透過 commentable 反向回查關連的物件
-comment.commentable =&gt; #&lt;Article id: 1, ....&gt;
-</code></pre>
-
-<p><img src="http://i.imgur.com/9t6JGzp.png" alt="Polymorphic Associations" /></p>
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations">Guides</a><br/>
-<a href="http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF">Guides 中文</a></p>
-
-<p>參考資料：<br/>
-<a href="https://ihower.tw/rails4/activerecord-relationships.html">Ruby on Rails 實戰聖經</a></p>
 ]]></content>
   </entry>
   
