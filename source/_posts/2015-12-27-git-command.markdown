@@ -3,24 +3,24 @@ layout: post
 title: "Git 指令操作手冊"
 date: 2015-12-27 20:56:35 +0800
 comments: true
-categories: Git 
+categories: Git
 ---
 
-Git 博大精深，必須花很多時間去學習，從做中學會更快  
+Git 博大精深，必須花很多時間去學習，從做中學會更快
 因此這篇主要用來記錄 Git 的指令和操作，增加記憶，也方便後續查詢。
 
 <!-- more -->
 
 #區域
-1. 工作目錄 Working tree  
-2. 暫存準備遞交區 Staging Area (index索引)  
-3. 儲存庫 Repository  
+1. 工作目錄 Working tree
+2. 暫存準備遞交區 Staging Area (index索引)
+3. 儲存庫 Repository
 
-#狀態  
-1. 沒有被追蹤的檔案 Untracked files  
-2. 有修改、還沒準備要被遞交 Changes not staged for commit  
-3. 有修改、準備要被遞交的檔案(在Staging Area) Changes to be committed  
-4. 已經被遞交的檔案 Committed  
+#狀態
+1. 沒有被追蹤的檔案 Untracked files
+2. 有修改、還沒準備要被遞交 Changes not staged for commit
+3. 有修改、準備要被遞交的檔案(在Staging Area) Changes to be committed
+4. 已經被遞交的檔案 Committed
 
 #符號
 1. HEAD
@@ -89,7 +89,7 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 ###checkout
 * `git checkout [branch]` 切換到該 branch。
 * `git checkout -b [branch]`建立一個新的 branch 並切換到該 branch。
- 
+
 >切換 working tree 的 branch 時,如果有檔案，在 staging area 或是 modified，會無法切換。可以先 commit，只要不 push 出去，再 `reset` 回來即可。或是用 `stash` 的方式
 
 #合併
@@ -108,7 +108,7 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 * `git reset --soft HEAD^` 刪除最近一次的版本紀錄，但保留修改過的檔案。(回到staging area)
 * `git reset --hard HEAD^` 刪除最近一次的版本紀錄，清除修改過的檔案。(完全消失)
 
->HEAD 後面可接 `^` 表示回到上個版本， `^^` 回到上兩個版本，以此類推  
+>HEAD 後面可接 `^` 表示回到上個版本， `^^` 回到上兩個版本，以此類推
 >也可以用 `~`，或是 `^2` or `~2`，都不加就是回到目前最新的版本
 
 * `git reset --hard ORIG_HEAD` 刪除最近一次的版本，但保留最後一次的變更。
@@ -182,13 +182,13 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 
 > 1. 輕量標籤 (lightweight tag)
 	* 不可變更的暫時標籤
-	* 可以添加名稱  
+	* 可以添加名稱
 > 2. 標示標籤 (annotated tag)
 	* 可以添加打標簽者的名稱、email及日期
 	* 可以添加名稱
 	* 可以添加註解
 	* 可以添加簽名
-	 
+
 #其他
 * `.gitkeep` 空目錄不會被 commit，必要時在目錄裡放 `.gitkeep`。
 * `vi .gitignore` 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。
@@ -205,6 +205,7 @@ alias gbr='git branch'
 alias gbrd='git branch -d'
 alias gci='git commit'
 alias gcim='git commit -m'
+alias gcim!='git commit --amend -m'
 alias gst='git status'
 alias gpl='git pull'
 alias gplo='git pull origin'
@@ -256,17 +257,17 @@ alias glola="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Crese
 alias glog='git log --oneline --decorate --color --graph'
 ```
 
-官方文件：  
-[Git Pro](http://git-scm.com/book/zh-tw/v1)  
+官方文件：
+[Git Pro](http://git-scm.com/book/zh-tw/v1)
 
-參考資料：  
-[Git 版本控制系統](https://ihower.tw/git/)  
-[30 天精通 Git 版本控管](https://github.com/doggy8088/Learn-Git-in-30-days)  
-[連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)  
-[好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)  
+參考資料：
+[Git 版本控制系統](https://ihower.tw/git/)
+[30 天精通 Git 版本控管](https://github.com/doggy8088/Learn-Git-in-30-days)
+[連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)
+[好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)
 
-練習：  
-[codeschool](https://try.github.io/levels/1/challenges/1)  
-[Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)  
+練習：
+[codeschool](https://try.github.io/levels/1/challenges/1)
+[Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)
 [learnGitBranching](http://pcottle.github.io/learnGitBranching/)
 
