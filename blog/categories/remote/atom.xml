@@ -1,0 +1,98 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Remote | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/remote/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2016-01-13T23:56:59+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[遠端 Server 指令]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/12/remote-server/"/>
+    <updated>2016-01-12T23:02:38+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/12/remote-server</id>
+    <content type="html"><![CDATA[<p>當部署上 server 後，很多時候都要在 server 上另外打指令
+但可能跟本地的會有稍稍不一樣，所以主要來記錄一下哪些指令</p>
+
+<!--more-->
+
+
+<h1>MySQL</h1>
+
+<p><code>mysql -u root -p （輸入後會進入 mysql 的 console ）</code></p>
+
+<p>mysql 指令參數</p>
+
+<p><code>-h</code> &lt;- mysql server 位置 , 若沒有指定, 預設就是 localhost
+<code>-u</code> &lt;- mysql user 帳號
+<code>-p</code> &lt;- 輸入 mysql user 密碼</p>
+
+<p>若先前已經設定密碼</p>
+
+<p><code>mysqladmin -h mysql_server -u root -p password 新密碼</code></p>
+
+<p>若是還沒有設定</p>
+
+<p><code>mysqladmin -h mysql_server -u root password 新密碼</code></p>
+
+<p><code>show databases</code>
+可以看目前所有的資料庫</p>
+
+<h1>看遠端log?</h1>
+
+<p>nginx log 在 /opt/nginx/logs 下，要用 root 身分才能看</p>
+
+<p>顯示最後500行log
+<code>tail -n 500 log/production.log</code></p>
+
+<p>直掛著顯示log
+<code>tail -f log/production.log</code></p>
+
+<h1>在遠端如何進 rails console?</h1>
+
+<p><code>cd ~/your_project/current</code>
+<code>bin/rails c production</code> 或 <code>bundle exec rails c production</code></p>
+
+<h1>重開 nginx sudo</h1>
+
+<p><code>service nginx restart</code></p>
+
+<h1>重開遠端 rails 而不重開 nginx</h1>
+
+<p>在遠端 <code>~/your_project/current</code> 下執行 <code>touch tmp/restart.txt</code></p>
+
+<h1>在遠端跑 rake</h1>
+
+<p><code>RAILS_ENV=production bin/rake db:seed</code></p>
+
+<h3>siedekiq</h3>
+
+<p>Sidekiq
+<code>RAILS_ENV=production bundle exec sidekiq -q default -q mailers</code></p>
+
+<p>重新啟動
+<code>cap production sidekiq:start</code></p>
+
+<p>監控 sidekiq 看有沒有死掉
+<a href="https://mmonit.com/monit/">monit</a></p>
+
+<h3>sitemap</h3>
+
+<p><code>RAILS_ENV=production rake -s sitemap:refresh</code>
+Sitemap
+<code>RAILS_ENV=production bin/rake sitemap:refresh:no_ping</code></p>
+
+<h1>看有沒有定期執行的程式</h1>
+
+<p><code>crontab -e</code></p>
+]]></content>
+  </entry>
+  
+</feed>
