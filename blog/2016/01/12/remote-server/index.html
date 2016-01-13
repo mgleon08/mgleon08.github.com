@@ -5,13 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>About - Leon's Blogging</title>
+  <title>遠端 Server 指令 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="About Dec 12th, 2015 1:12 pm | Leon Ji Ruby on Rails Developer Github https://github.com/mgleon08
-Yourator www.yourator.co
-Rainbow-Balloons http:// &hellip;">
+  <meta name="description" content="當部署上 server 後，很多時候都要在 server 上另外打指令
+但可能跟本地的會有稍稍不一樣，所以主要來記錄一下哪些指令 MySQL mysql -u root -p （輸入後會進入 mysql 的 console ） mysql 指令參數 -h &lt;- mysql server 位置 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +19,7 @@ Rainbow-Balloons http:// &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/about">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/01/12/remote-server">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -98,54 +97,137 @@ Rainbow-Balloons http:// &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">About</h1>
     
-        <p class="meta">
-            
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time> |
-           <!--  <a href="/about/index.markdown">Edit</a> -->
-        </p>
+      
+        <h1 class="entry-title">遠端 Server 指令</h1>
+      
     
-  </header>
-  
-  <h1>Leon Ji</h1>
-
-<h3>Ruby on Rails Developer</h3>
-
-<p><img src="https://avatars1.githubusercontent.com/u/13741096?v=3&amp;s=460" alt="Leon Ji" /></p>
-
-<ul>
-<li> Github <a href="https://github.com/mgleon08">https://github.com/mgleon08</a></li>
-<li>Yourator <a href="http://www.yourator.co/">www.yourator.co</a></li>
-<li>Rainbow-Balloons <a href="http://www.rainbow-balloons.com/">http://www.rainbow-balloons.com/</a></li>
-<li>Email : <a href="&#109;&#97;&#105;&#x6c;&#116;&#111;&#58;&#x6d;&#x67;&#108;&#x65;&#111;&#x6e;&#48;&#x38;&#x40;&#x67;&#x6d;&#x61;&#105;&#108;&#x2e;&#99;&#111;&#x6d;">&#109;&#103;&#x6c;&#101;&#x6f;&#110;&#x30;&#x38;&#64;&#103;&#x6d;&#x61;&#x69;&#108;&#46;&#x63;&#111;&#109;</a></li>
-</ul>
-
-
-  
-    <footer>
+    
       <p class="meta">
         
+
+
+
+
+<time class='entry-date' datetime='2016-01-12T23:02:38+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>11:02 pm</span></time>
         
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time>
+         | <a href="#disqus_thread">Comments</a>
         
         
       </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>當部署上 server 後，很多時候都要在 server 上另外打指令<br/>
+但可能跟本地的會有稍稍不一樣，所以主要來記錄一下哪些指令</p>
+
+<!--more-->
+
+
+<h1>MySQL</h1>
+
+<p><code>mysql -u root -p （輸入後會進入 mysql 的 console ）</code></p>
+
+<p>mysql 指令參數</p>
+
+<p><code>-h</code> &lt;- mysql server 位置 , 若沒有指定, 預設就是 localhost<br/>
+<code>-u</code> &lt;- mysql user 帳號<br/>
+<code>-p</code> &lt;- 輸入 mysql user 密碼</p>
+
+<p>若先前已經設定密碼</p>
+
+<p><code>mysqladmin -h mysql_server -u root -p password 新密碼</code></p>
+
+<p>若是還沒有設定</p>
+
+<p><code>mysqladmin -h mysql_server -u root password 新密碼</code></p>
+
+<p><code>show databases</code>
+可以看目前所有的資料庫</p>
+
+<h1>看遠端log?</h1>
+
+<p>nginx log 在 /opt/nginx/logs 下，要用 root 身分才能看</p>
+
+<p>顯示最後500行log<br/>
+<code>tail -n 500 log/production.log</code></p>
+
+<p>直掛著顯示log<br/>
+<code>tail -f log/production.log</code></p>
+
+<h1>在遠端如何進 rails console?</h1>
+
+<p><code>cd ~/your_project/current</code><br/>
+<code>bin/rails c production</code> 或 <code>bundle exec rails c production</code></p>
+
+<h1>重開 nginx sudo</h1>
+
+<p><code>service nginx restart</code></p>
+
+<h1>重開遠端 rails 而不重開 nginx</h1>
+
+<p>在遠端 <code>~/your_project/current</code> 下執行 <code>touch tmp/restart.txt</code></p>
+
+<h1>在遠端跑 rake</h1>
+
+<p><code>RAILS_ENV=production bin/rake db:seed</code></p>
+
+<h3>siedekiq</h3>
+
+<p>Sidekiq
+<code>RAILS_ENV=production bundle exec sidekiq -q default -q mailers</code></p>
+
+<p>重新啟動<br/>
+<code>cap production sidekiq:start</code></p>
+
+<p>監控 sidekiq 看有沒有死掉<br/>
+<a href="https://mmonit.com/monit/">monit</a></p>
+
+<h3>sitemap</h3>
+
+<p><code>RAILS_ENV=production rake -s sitemap:refresh</code>
+Sitemap
+<code>RAILS_ENV=production bin/rake sitemap:refresh:no_ping</code></p>
+
+<h1>看有沒有定期執行的程式</h1>
+
+<p><code>crontab -e</code></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
       
-        <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/about/index.html" data-via="" data-counturl="http://mgleon08.github.com/about/index.html" >Tweet</a>
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-01-12T23:02:38+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>11:02 pm</span></time>
+      
+      
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/01/12/remote-server/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/01/12/remote-server/" >Tweet</a>
   
   
   
@@ -153,9 +235,16 @@ Rainbow-Balloons http:// &hellip;">
   
 </div>
 
+    
+    <p class="meta">
       
-    </footer>
-  
+        <a class="basic-alignment left" href="/blog/2016/01/10/ruby-on-rails-include-join-avoid-n-1-query/" title="Previous Post: Ruby on Rails - 用 include 和 join 避免 N+1 query">&laquo; Ruby on Rails - 用 include 和 join 避免 N+1 query</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/01/13/staging-server/" title="Next Post: Ruby on Rails staging 環境和部署">Ruby on Rails staging 環境和部署 &raquo;</a>
+      
+    </p>
+  </footer>
 </article>
 
   <section>
@@ -166,13 +255,6 @@ Rainbow-Balloons http:// &hellip;">
 
 
 </div>
-
-<aside class="sidebar">
-  
-    
-  
-</aside>
-
 
     </div>
   </div>
@@ -189,8 +271,8 @@ Rainbow-Balloons http:// &hellip;">
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/about/index.html';
-        var disqus_url = 'http://mgleon08.github.com/about/index.html';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/01/12/remote-server/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/01/12/remote-server/';
         var disqus_script = 'embed.js';
       
     (function () {

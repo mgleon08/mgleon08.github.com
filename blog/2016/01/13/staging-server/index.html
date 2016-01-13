@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>About - Leon's Blogging</title>
+  <title>Ruby on Rails Staging 環境和部署 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="About Dec 12th, 2015 1:12 pm | Leon Ji Ruby on Rails Developer Github https://github.com/mgleon08
-Yourator www.yourator.co
-Rainbow-Balloons http:// &hellip;">
+  <meta name="description" content="部署上 server 後，通常會需要在一個 staging server
+在上線之前，先部署到 staging server ，以防一些本機測試不到的一些東西。 新增environments/staging.rb 新增 config/environments/staging.rb 環境設定
+內容同 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +20,7 @@ Rainbow-Balloons http:// &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/about">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/01/13/staging-server">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -98,54 +98,152 @@ Rainbow-Balloons http:// &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">About</h1>
     
-        <p class="meta">
-            
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time> |
-           <!--  <a href="/about/index.markdown">Edit</a> -->
-        </p>
+      
+        <h1 class="entry-title">Ruby on Rails Staging 環境和部署</h1>
+      
     
-  </header>
-  
-  <h1>Leon Ji</h1>
-
-<h3>Ruby on Rails Developer</h3>
-
-<p><img src="https://avatars1.githubusercontent.com/u/13741096?v=3&amp;s=460" alt="Leon Ji" /></p>
-
-<ul>
-<li> Github <a href="https://github.com/mgleon08">https://github.com/mgleon08</a></li>
-<li>Yourator <a href="http://www.yourator.co/">www.yourator.co</a></li>
-<li>Rainbow-Balloons <a href="http://www.rainbow-balloons.com/">http://www.rainbow-balloons.com/</a></li>
-<li>Email : <a href="&#109;&#97;&#105;&#x6c;&#116;&#111;&#58;&#x6d;&#x67;&#108;&#x65;&#111;&#x6e;&#48;&#x38;&#x40;&#x67;&#x6d;&#x61;&#105;&#108;&#x2e;&#99;&#111;&#x6d;">&#109;&#103;&#x6c;&#101;&#x6f;&#110;&#x30;&#x38;&#64;&#103;&#x6d;&#x61;&#x69;&#108;&#46;&#x63;&#111;&#109;</a></li>
-</ul>
-
-
-  
-    <footer>
+    
       <p class="meta">
         
+
+
+
+
+<time class='entry-date' datetime='2016-01-13T22:59:11+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:59 pm</span></time>
         
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time>
+         | <a href="#disqus_thread">Comments</a>
         
         
       </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>部署上 server 後，通常會需要在一個 staging server<br/>
+在上線之前，先部署到 staging server ，以防一些本機測試不到的一些東西。</p>
+
+<!-- more -->
+
+
+<h1>新增environments/staging.rb</h1>
+
+<p>新增 <code>config/environments/staging.rb</code> 環境設定<br/>
+內容同 <code>config/environments/production.rb</code></p>
+
+<h1>新增deploy/staging.rb</h1>
+
+<p>新增   <code>config/deploy/staging.rb</code><br/>
+內容同 <code>config/deploy/production.rb</code></p>
+
+<p>佈署 ip 看看是不是同一台伺服器</p>
+
+<h1>server新增設定檔</h1>
+
+<p>server 上新增 <code>/opt/nginx/conf/vhost/staging.conf</code> 設定檔，內容跟 production 用的 nginx 設定檔一樣<br/>
+除了需要加一行 <code>rack_env staging;</code>  因為預設是 <code>rack_env prodcution;</code></p>
+
+<h1>設定網址和部署目錄</h1>
+
+<p>如果 staging 和 production 同一台 server 的話<br/>
+網址(domain name)和佈署目錄得要不一樣：
+上述的 nginx vhost 設定，裡面</p>
+
+<ol>
+<li>server_name 的網址要改</li>
+<li>root 目錄位置要改</li>
+</ol>
+
+
+<h1>搬移指令</h1>
+
+<p>將專案本來 <code>config/deploy.rb</code> 裡面的<br/>
+<code>set :deploy_to, '/home/deploy/shopping'</code> 設定搬到
+<code>config/deploy/staging.rb</code> 和 <code>config/deploy/production.rb</code>
+並且改成不同目錄</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">set</span> <span class="ss">:deploy_to</span><span class="p">,</span> <span class="s1">&#39;/home/username/staging&#39;</span>
+</span><span class='line'><span class="c1">#指定目錄</span>
+</span><span class='line'><span class="n">set</span> <span class="ss">:branch</span><span class="p">,</span> <span class="s1">&#39;staging&#39;</span>
+</span><span class='line'><span class="c1">#指定branch</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Push code to github</h1>
+
+<p><code>git push</code></p>
+
+<h1>檢查部署缺少什麼檔案</h1>
+
+<p><code>cap staging deploy:check</code><br/>
+到 server 上新增 shared/config/database.yml 和 secrets.yml，注意 yml 第一層要改成 staging。</p>
+
+<p>如果有其他 yml 設定也需要一併設定<br/>
+(例如 facebook.yml 和 email.yml 裡面要多加 staging)</p>
+
+<h1>新增staging資料庫</h1>
+
+<p>在 server 上新增 staging 用的資料庫<br/>
+<code>mysql -u root -p</code> <br/>
+<code>CREATE DATABASE ["databasename"] CHARACTER SET utf8;</code></p>
+
+<h1>部署</h1>
+
+<p><code>cap staging deploy</code></p>
+
+<h1>重開nginx</h1>
+
+<p><code>sudo service nginx restart</code></p>
+
+<p>參考文件：<br/>
+<a href="http://pm.5fpro.com/projects/public-wiki/wiki/Rails_%E4%BD%88%E7%BD%B2">Rails 佈署</a><br/>
+<a href="https://ihower.tw/rails4/deployment.html">網站佈署</a> <br/>
+<a href="http://blog.xdite.net/posts/2012/07/09/3-way-to-speedup-asset-pipeline">3 招實用 Asset Pipeline 加速術</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
       
-        <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/about/index.html" data-via="" data-counturl="http://mgleon08.github.com/about/index.html" >Tweet</a>
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-01-13T22:59:11+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:59 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/deploy/'>deploy</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/01/13/staging-server/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/01/13/staging-server/" >Tweet</a>
   
   
   
@@ -153,9 +251,14 @@ Rainbow-Balloons http:// &hellip;">
   
 </div>
 
+    
+    <p class="meta">
       
-    </footer>
-  
+        <a class="basic-alignment left" href="/blog/2016/01/12/remote-server/" title="Previous Post: 遠端 server 指令">&laquo; 遠端 server 指令</a>
+      
+      
+    </p>
+  </footer>
 </article>
 
   <section>
@@ -166,13 +269,6 @@ Rainbow-Balloons http:// &hellip;">
 
 
 </div>
-
-<aside class="sidebar">
-  
-    
-  
-</aside>
-
 
     </div>
   </div>
@@ -189,8 +285,8 @@ Rainbow-Balloons http:// &hellip;">
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/about/index.html';
-        var disqus_url = 'http://mgleon08.github.com/about/index.html';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/01/13/staging-server/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/01/13/staging-server/';
         var disqus_script = 'embed.js';
       
     (function () {

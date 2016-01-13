@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Deploy | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/deploy/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2016-01-13T23:54:14+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails Staging 環境和部署]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/13/staging-server/"/>
+    <updated>2016-01-13T22:59:11+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/13/staging-server</id>
+    <content type="html"><![CDATA[<p>部署上 server 後，通常會需要在一個 staging server<br/>
+在上線之前，先部署到 staging server ，以防一些本機測試不到的一些東西。</p>
+
+<!-- more -->
+
+
+<h1>新增environments/staging.rb</h1>
+
+<p>新增 <code>config/environments/staging.rb</code> 環境設定<br/>
+內容同 <code>config/environments/production.rb</code></p>
+
+<h1>新增deploy/staging.rb</h1>
+
+<p>新增   <code>config/deploy/staging.rb</code><br/>
+內容同 <code>config/deploy/production.rb</code></p>
+
+<p>佈署 ip 看看是不是同一台伺服器</p>
+
+<h1>server新增設定檔</h1>
+
+<p>server 上新增 <code>/opt/nginx/conf/vhost/staging.conf</code> 設定檔，內容跟 production 用的 nginx 設定檔一樣<br/>
+除了需要加一行 <code>rack_env staging;</code>  因為預設是 <code>rack_env prodcution;</code></p>
+
+<h1>設定網址和部署目錄</h1>
+
+<p>如果 staging 和 production 同一台 server 的話<br/>
+網址(domain name)和佈署目錄得要不一樣：
+上述的 nginx vhost 設定，裡面</p>
+
+<ol>
+<li>server_name 的網址要改</li>
+<li>root 目錄位置要改</li>
+</ol>
+
+
+<h1>搬移指令</h1>
+
+<p>將專案本來 <code>config/deploy.rb</code> 裡面的<br/>
+<code>set :deploy_to, '/home/deploy/shopping'</code> 設定搬到
+<code>config/deploy/staging.rb</code> 和 <code>config/deploy/production.rb</code>
+並且改成不同目錄</p>
+
+<pre><code class="ruby">set :deploy_to, '/home/username/staging'
+#指定目錄
+set :branch, 'staging'
+#指定branch
+</code></pre>
+
+<h1>Push code to github</h1>
+
+<p><code>git push</code></p>
+
+<h1>檢查部署缺少什麼檔案</h1>
+
+<p><code>cap staging deploy:check</code><br/>
+到 server 上新增 shared/config/database.yml 和 secrets.yml，注意 yml 第一層要改成 staging。</p>
+
+<p>如果有其他 yml 設定也需要一併設定<br/>
+(例如 facebook.yml 和 email.yml 裡面要多加 staging)</p>
+
+<h1>新增staging資料庫</h1>
+
+<p>在 server 上新增 staging 用的資料庫<br/>
+<code>mysql -u root -p</code> <br/>
+<code>CREATE DATABASE ["databasename"] CHARACTER SET utf8;</code></p>
+
+<h1>部署</h1>
+
+<p><code>cap staging deploy</code></p>
+
+<h1>重開nginx</h1>
+
+<p><code>sudo service nginx restart</code></p>
+
+<p>參考文件：<br/>
+<a href="http://pm.5fpro.com/projects/public-wiki/wiki/Rails_%E4%BD%88%E7%BD%B2">Rails 佈署</a><br/>
+<a href="https://ihower.tw/rails4/deployment.html">網站佈署</a> <br/>
+<a href="http://blog.xdite.net/posts/2012/07/09/3-way-to-speedup-asset-pipeline">3 招實用 Asset Pipeline 加速術</a></p>
+]]></content>
+  </entry>
+  
+</feed>
