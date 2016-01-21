@@ -5,13 +5,13 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby on Rails Staging 環境和部署 - Leon's Blogging</title>
+  <title>Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="部署上 server 後，通常會需要在一個 staging server
-在上線之前，先部署到 staging server ，以防一些本機測試不到的一些東西。 新增environments/staging.rb 新增 config/environments/staging.rb 環境設定
-內容同 &hellip;">
+  <meta name="description" content="最近想說要開始來寫blog，於是在網路上找了幾個之後，最後決定使用Octopress。 使用 Markdown 語法，比起網路上的編輯器更加方便 (對寫coding而言拉。
+直接放在 Github 上，完全不需費用。
+可以用git來做版本控制，即使網路上的消失，本機還是可以做保留。 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +20,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/01/13/staging-server">
+  <link rel="canonical" href="http://mgleon08.github.com/posts/3">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -97,14 +97,15 @@
 </nav>
   <div id="main">
     <div id="content">
-      <div>
-<article class="hentry" role="article">
+      <div class="blog-index">
   
+  
+  
+    <article>
+      
   <header>
     
-      
-        <h1 class="entry-title">Ruby on Rails Staging 環境和部署</h1>
-      
+      <h1 class="entry-title"><a href="/blog/2015/12/11/how-to-install-octopress/">用 Octopress + Github Pages 來架設 Blog</a></h1>
     
     
       <p class="meta">
@@ -113,9 +114,9 @@
 
 
 
-<time class='entry-date' datetime='2016-01-13T22:59:11+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:59 pm</span></time>
+<time class='entry-date' datetime='2015-12-11T23:15:37+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>11</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>11:15 pm</span></time>
         
-         | <a href="#disqus_thread">Comments</a>
+         | <a href="/blog/2015/12/11/how-to-install-octopress/#disqus_thread">Comments</a>
         
         
       </p>
@@ -123,155 +124,40 @@
   </header>
 
 
-<div class="entry-content"><p>部署上 server 後，通常會需要在一個 staging server
-在上線之前，先部署到 staging server ，以防一些本機測試不到的一些東西。</p>
-
-<!-- more -->
-
-
-<h1>新增environments/staging.rb</h1>
-
-<p>新增 <code>config/environments/staging.rb</code> 環境設定
-內容同 <code>config/environments/production.rb</code></p>
-
-<h1>新增deploy/staging.rb</h1>
-
-<p>新增   <code>config/deploy/staging.rb</code>
-內容同 <code>config/deploy/production.rb</code></p>
-
-<p>佈署 ip 看看是不是同一台伺服器</p>
-
-<h1>server新增設定檔</h1>
-
-<p>server 上新增 <code>/opt/nginx/conf/vhost/staging.conf</code> 設定檔，內容跟 production 用的 nginx 設定檔一樣
-除了需要加一行 <code>rack_env staging;</code>  因為預設是 <code>rack_env prodcution;</code></p>
-
-<h1>設定網址和部署目錄</h1>
-
-<p>如果 staging 和 production 同一台 server 的話
-網址(domain name)和佈署目錄得要不一樣：
-上述的 nginx vhost 設定，裡面</p>
+  <div class="entry-content"><p>最近想說要開始來寫blog，於是在網路上找了幾個之後，最後決定使用Octopress。</p>
 
 <ol>
-<li>server_name 的網址要改</li>
-<li>root 目錄位置要改</li>
+<li>使用 Markdown 語法，比起網路上的編輯器更加方便 (對寫coding而言拉。</li>
+<li>直接放在 Github 上，完全不需費用。</li>
+<li>可以用git來做版本控制，即使網路上的消失，本機還是可以做保留。</li>
+<li>一開始雖然比一般blog更加挑戰性(因為全部都要自己安裝XD)，不過也藉此訓練自己。</li>
 </ol>
 
 
-<h1>搬移指令</h1>
-
-<p>將專案本來 <code>config/deploy.rb</code> 裡面的
-<code>set :deploy_to, '/home/deploy/shopping'</code> 設定搬到
-<code>config/deploy/staging.rb</code> 和 <code>config/deploy/production.rb</code>
-並且改成不同目錄</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">set</span> <span class="ss">:deploy_to</span><span class="p">,</span> <span class="s1">&#39;/home/username/staging&#39;</span>
-</span><span class='line'><span class="c1">#指定目錄</span>
-</span><span class='line'><span class="n">set</span> <span class="ss">:branch</span><span class="p">,</span> <span class="s1">&#39;staging&#39;</span>
-</span><span class='line'><span class="c1">#指定branch</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Push code to github</h1>
-
-<p><code>git push</code></p>
-
-<h1>檢查部署缺少什麼檔案</h1>
-
-<p><code>cap staging deploy:check</code>
-到 server 上新增 shared/config/database.yml 和 secrets.yml，注意 yml 第一層要改成 staging。</p>
-
-<p>如果有其他 yml 設定也需要一併設定
-(例如 facebook.yml 和 email.yml 裡面要多加 staging)</p>
-
-<h1>新增staging資料庫</h1>
-
-<p>在 server 上新增 staging 用的資料庫
-<code>mysql -u root -p</code>
-<code>CREATE DATABASE ["databasename"] CHARACTER SET utf8;</code></p>
-
-<h1>部署</h1>
-
-<p><code>cap staging deploy</code></p>
-
-<h1>重開nginx</h1>
-
-<p><code>sudo service nginx restart</code></p>
-
-<p>參考文件：
-<a href="http://pm.5fpro.com/projects/public-wiki/wiki/Rails_%E4%BD%88%E7%BD%B2">Rails 佈署</a>
-<a href="https://ihower.tw/rails4/deployment.html">網站佈署</a>
-<a href="http://blog.xdite.net/posts/2012/07/09/3-way-to-speedup-asset-pipeline">3 招實用 Asset Pipeline 加速術</a>
-<a href="https://ruby-china.org/topics/18616">Capistrano 3 实现 Rails 自动化部署</a></p>
 </div>
-
-
-  <footer>
-    <p class="meta">
-      
+  
+  
+    <footer>
+      <a rel="full-article" href="/blog/2015/12/11/how-to-install-octopress/">Read on &rarr;</a>
+    </footer>
   
 
 
-
-  <span class="byline author vcard">Authored by <span class="fn">
+    </article>
   
-    LeonJi
-  
-  </span></span>
-
-
-      
-
-
-
-
-<time class='entry-date' datetime='2016-01-13T22:59:11+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>13</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:59 pm</span></time>
-      
-      
-
-<span class="categories">
-  
-    <a class='category' href='/blog/categories/deploy/'>deploy</a>
-  
-</span>
-
-
-    </p>
+  <div class="pagination">
     
-      <div class="sharing">
-  
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/01/13/staging-server/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/01/13/staging-server/" >Tweet</a>
-  
-  
-  
-    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
-  
-</div>
-
+    <a href="/blog/archives">Blog Archives</a>
     
-    <p class="meta">
-      
-        <a class="basic-alignment left" href="/blog/2016/01/12/remote-server/" title="Previous Post: 遠端 server 指令">&laquo; 遠端 server 指令</a>
-      
-      
-        <a class="basic-alignment right" href="/blog/2016/01/21/devise-rolify-cancan/" title="Next Post: 會員管理系統 Devise-Rolify-Cancan">會員管理系統 Devise-Rolify-Cancan &raquo;</a>
-      
-    </p>
-  </footer>
-</article>
-
-  <section>
-    <h1>Comments</h1>
-    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+    <a class="next" href="/posts/2">Newer &rarr;</a>
+    
+  </div>
 </div>
-  </section>
-
-
-</div>
+<aside class="sidebar">
+  
+    
+  
+</aside>
 
     </div>
   </div>
@@ -287,10 +173,7 @@
       var disqus_shortname = 'leonji';
       
         
-        // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/01/13/staging-server/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2016/01/13/staging-server/';
-        var disqus_script = 'embed.js';
+        var disqus_script = 'count.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

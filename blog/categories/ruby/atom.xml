@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-14T00:00:06+08:00</updated>
+  <updated>2016-01-21T22:21:38+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -65,11 +65,29 @@ my_array.select{|item| item%2==0 }
 
 <pre><code class="ruby">my_hash = {"Joe" =&gt; "male", "Jim" =&gt; "male", "Patty" =&gt; "female"}
 my_hash.select{|name, gender| gender == "male" }
-# {"Joe" =&gt; "male", "Jim" =&gt; "male"}
+# =&gt; {"Joe" =&gt; "male", "Jim" =&gt; "male"}
+
+也可以
+my_hash.select{|k,v| ["Joe", "Jim"].include?(k)}
 
 #改成 map 會變成，回傳 boolean值，並且回傳 array
 my_hash.map{|name, gender| gender == "male" }
-#[true, true, false]
+# =&gt; [true, true, false]
+</code></pre>
+
+<p>只回傳 ture 的選項</p>
+
+<p>進階用法</p>
+
+<pre><code class="ruby">#在Hash裡定義新的方法 沒有特定對象的通常可以放在lib資料夾
+class Hash
+  def keep(*args)
+    select {|k,v| args.include?(k)}
+  end
+end
+
+my_hash.keep("Joe", "Jim")
+# =&gt; {"Joe" =&gt; "male", "Jim" =&gt; "male"}
 </code></pre>
 
 <h1>Pluck</h1>
@@ -185,6 +203,8 @@ end
 
 <p>但要注意的是，由於每跑一次，都會取用最後的回傳值，當做這次的初始值，因此最後必須再加個 <code>hash</code> ，否則會出錯。</p>
 
+<blockquote><p>也可以直接給予有值的 hash 再繼續加上後面的值，取代掉 inject({}) 中的空 hash</p></blockquote>
+
 <p>也可改用 reduce 跟 inject 一模一樣<br/>
 <a href="http://stackoverflow.com/questions/13813243/is-inject-the-same-thing-as-reduce-in-ruby">Is inject the same thing as reduce in ruby?</a></p>
 
@@ -206,6 +226,25 @@ User.all.map {|user| [user.name, user.id ]}.to_h
 <pre><code class="ruby">User.all.each_with_object({}) do | user, hash | 
     hash[user.name] = user.id  
 end
+</code></pre>
+
+<h1>merge</h1>
+
+<p>可以將另一個 hash 合併在一起</p>
+
+<pre><code class="ruby">h1 = { "a" =&gt; 100, "b" =&gt; 200 }
+h2 = { "b" =&gt; 254, "c" =&gt; 300 }
+h1.merge(h2)   
+#=&gt; {"a"=&gt;100, "b"=&gt;254, "c"=&gt;300}
+
+h1.merge(h2){|key, oldval, newval| newval - oldval}
+#=&gt; {"a"=&gt;100, "b"=&gt;54,  "c"=&gt;300}
+
+h1             
+#=&gt; {"a"=&gt;100, "b"=&gt;200}
+</code></pre>
+
+<pre><code class="ruby">Hash.new(0).merge(name: "abc", phone: 09xxxxx)
 </code></pre>
 
 <h1>each_with_index</h1>
@@ -331,6 +370,7 @@ names.grep(/J/)
 <a href="http://apidock.com/ruby/Enumerable/reduce">reduce</a><br/>
 <a href="http://apidock.com/rails/Enumerable/each_with_object">each_with_object</a><br/>
 <a href="http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index">each_with_index</a><br/>
+<a href="http://ruby-doc.org/core-1.9.3/Hash.html#method-i-merge">merge</a><br/>
 <a href="http://apidock.com/rails/Enumerable/sum">sum</a><br/>
 <a href="http://apidock.com/rails/Enumerable/group_by">group_by</a><br/>
 <a href="http://apidock.com/rails/v4.2.1/Enumerable/index_by">index_by</a><br/>

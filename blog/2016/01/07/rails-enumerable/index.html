@@ -193,13 +193,44 @@
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">my_hash</span> <span class="o">=</span> <span class="p">{</span><span class="s2">&quot;Joe&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;male&quot;</span><span class="p">,</span> <span class="s2">&quot;Jim&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;male&quot;</span><span class="p">,</span> <span class="s2">&quot;Patty&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;female&quot;</span><span class="p">}</span>
 </span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">gender</span><span class="o">|</span> <span class="n">gender</span> <span class="o">==</span> <span class="s2">&quot;male&quot;</span> <span class="p">}</span>
-</span><span class='line'><span class="c1"># {&quot;Joe&quot; =&gt; &quot;male&quot;, &quot;Jim&quot; =&gt; &quot;male&quot;}</span>
+</span><span class='line'><span class="c1"># =&gt; {&quot;Joe&quot; =&gt; &quot;male&quot;, &quot;Jim&quot; =&gt; &quot;male&quot;}</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">也可以</span>
+</span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">select</span><span class="p">{</span><span class="o">|</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="o">|</span> <span class="o">[</span><span class="s2">&quot;Joe&quot;</span><span class="p">,</span> <span class="s2">&quot;Jim&quot;</span><span class="o">].</span><span class="n">include?</span><span class="p">(</span><span class="n">k</span><span class="p">)}</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">#改成 map 會變成，回傳 boolean值，並且回傳 array</span>
 </span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">map</span><span class="p">{</span><span class="o">|</span><span class="nb">name</span><span class="p">,</span> <span class="n">gender</span><span class="o">|</span> <span class="n">gender</span> <span class="o">==</span> <span class="s2">&quot;male&quot;</span> <span class="p">}</span>
-</span><span class='line'><span class="c1">#[true, true, false]</span>
+</span><span class='line'><span class="c1"># =&gt; [true, true, false]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只回傳 ture 的選項</p>
+
+<p>進階用法</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#在Hash裡定義新的方法 沒有特定對象的通常可以放在lib資料夾</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Hash</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">keep</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">select</span> <span class="p">{</span><span class="o">|</span><span class="n">k</span><span class="p">,</span><span class="n">v</span><span class="o">|</span> <span class="n">args</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="n">k</span><span class="p">)}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">my_hash</span><span class="o">.</span><span class="n">keep</span><span class="p">(</span><span class="s2">&quot;Joe&quot;</span><span class="p">,</span> <span class="s2">&quot;Jim&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; {&quot;Joe&quot; =&gt; &quot;male&quot;, &quot;Jim&quot; =&gt; &quot;male&quot;}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -388,6 +419,8 @@
 
 <p>但要注意的是，由於每跑一次，都會取用最後的回傳值，當做這次的初始值，因此最後必須再加個 <code>hash</code> ，否則會出錯。</p>
 
+<blockquote><p>也可以直接給予有值的 hash 再繼續加上後面的值，取代掉 inject({}) 中的空 hash</p></blockquote>
+
 <p>也可改用 reduce 跟 inject 一模一樣<br/>
 <a href="http://stackoverflow.com/questions/13813243/is-inject-the-same-thing-as-reduce-in-ruby">Is inject the same thing as reduce in ruby?</a></p>
 
@@ -418,6 +451,40 @@
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">each_with_object</span><span class="p">({})</span> <span class="k">do</span> <span class="o">|</span> <span class="n">user</span><span class="p">,</span> <span class="nb">hash</span> <span class="o">|</span>
 </span><span class='line'>  <span class="nb">hash</span><span class="o">[</span><span class="n">user</span><span class="o">.</span><span class="n">name</span><span class="o">]</span> <span class="o">=</span> <span class="n">user</span><span class="o">.</span><span class="n">id</span>
 </span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>merge</h1>
+
+<p>可以將另一個 hash 合併在一起</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="mi">200</span> <span class="p">}</span>
+</span><span class='line'><span class="n">h2</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="mi">254</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span> <span class="o">=&gt;</span> <span class="mi">300</span> <span class="p">}</span>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;254, &quot;c&quot;=&gt;300}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">h2</span><span class="p">){</span><span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">oldval</span><span class="p">,</span> <span class="n">newval</span><span class="o">|</span> <span class="n">newval</span> <span class="o">-</span> <span class="n">oldval</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;54,  &quot;c&quot;=&gt;300}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">h1</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;200}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Hash</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;abc&quot;</span><span class="p">,</span> <span class="ss">phone</span><span class="p">:</span> <span class="mi">09</span><span class="n">xxxxx</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -599,6 +666,7 @@
 <a href="http://apidock.com/ruby/Enumerable/reduce">reduce</a><br/>
 <a href="http://apidock.com/rails/Enumerable/each_with_object">each_with_object</a><br/>
 <a href="http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index">each_with_index</a><br/>
+<a href="http://ruby-doc.org/core-1.9.3/Hash.html#method-i-merge">merge</a><br/>
 <a href="http://apidock.com/rails/Enumerable/sum">sum</a><br/>
 <a href="http://apidock.com/rails/Enumerable/group_by">group_by</a><br/>
 <a href="http://apidock.com/rails/v4.2.1/Enumerable/index_by">index_by</a><br/>
