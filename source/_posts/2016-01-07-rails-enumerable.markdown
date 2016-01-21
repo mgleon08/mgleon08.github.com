@@ -58,12 +58,33 @@ hash
 ```ruby
 my_hash = {"Joe" => "male", "Jim" => "male", "Patty" => "female"}
 my_hash.select{|name, gender| gender == "male" }
-# {"Joe" => "male", "Jim" => "male"}
+# => {"Joe" => "male", "Jim" => "male"}
+
+也可以
+my_hash.select{|k,v| ["Joe", "Jim"].include?(k)}
 
 #改成 map 會變成，回傳 boolean值，並且回傳 array
 my_hash.map{|name, gender| gender == "male" }
-#[true, true, false]
+# => [true, true, false]
 ```
+只回傳 ture 的選項
+
+進階用法
+	
+```ruby
+#在Hash裡定義新的方法 沒有特定對象的通常可以放在lib資料夾
+class Hash
+  def keep(*args)
+    select {|k,v| args.include?(k)}
+  end
+end
+
+my_hash.keep("Joe", "Jim")
+# => {"Joe" => "male", "Jim" => "male"}
+```
+
+
+
 #Pluck
 
 對物件，挑出指定欄位的值，並回傳一個新的 `array`  
@@ -178,6 +199,8 @@ end
 ```
 但要注意的是，由於每跑一次，都會取用最後的回傳值，當做這次的初始值，因此最後必須再加個 `hash` ，否則會出錯。
 
+>也可以直接給予有值的 hash 再繼續加上後面的值，取代掉 inject({}) 中的空 hash
+
 也可改用 reduce 跟 inject 一模一樣  
 [Is inject the same thing as reduce in ruby?](http://stackoverflow.com/questions/13813243/is-inject-the-same-thing-as-reduce-in-ruby)
 
@@ -201,6 +224,26 @@ User.all.each_with_object({}) do | user, hash |
 	hash[user.name] = user.id  
 end
 ```
+#merge
+可以將另一個 hash 合併在一起
+
+```ruby
+h1 = { "a" => 100, "b" => 200 }
+h2 = { "b" => 254, "c" => 300 }
+h1.merge(h2)   
+#=> {"a"=>100, "b"=>254, "c"=>300}
+
+h1.merge(h2){|key, oldval, newval| newval - oldval}
+#=> {"a"=>100, "b"=>54,  "c"=>300}
+
+h1             
+#=> {"a"=>100, "b"=>200}
+```
+
+```ruby
+Hash.new(0).merge(name: "abc", phone: 09xxxxx)
+```
+
 #each_with_index
 
 用來加上索引。
@@ -333,6 +376,7 @@ User.all.map(&:name)
 [reduce](http://apidock.com/ruby/Enumerable/reduce)  
 [each_with_object](http://apidock.com/rails/Enumerable/each_with_object)  
 [each_with_index](http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index)  
+[merge](http://ruby-doc.org/core-1.9.3/Hash.html#method-i-merge)  
 [sum](http://apidock.com/rails/Enumerable/sum)  
 [group_by](http://apidock.com/rails/Enumerable/group_by)  
 [index_by](http://apidock.com/rails/v4.2.1/Enumerable/index_by)  

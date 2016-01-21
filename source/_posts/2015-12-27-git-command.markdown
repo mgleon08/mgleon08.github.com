@@ -201,19 +201,25 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 alias g='git'
 
 alias grs='git reset'
-alias gbr='git branch'
-alias gbrd='git branch -d'
 alias gci='git commit'
 alias gcim='git commit -m'
 alias gcim!='git commit --amend -m'
 alias gst='git status'
 alias gpl='git pull'
 alias gplo='git pull origin'
+alias gm='git merge'
+alias gmo='git merge origin'
 
 #git add
 alias ga='git add'
 alias gaa='git add --all'
 alias gapa='git add --patch'
+
+#branch
+alias gb='git branch'
+alias gbd='git branch -d'
+alias gbr='git branch --remote'
+alias gba='git branch -a'
 
 #git push
 alias gp='git push'
