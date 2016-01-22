@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-22T22:31:25+08:00</updated>
+  <updated>2016-01-22T22:44:18+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,31 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Rubocop 寫出好風格]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/22/rubocop/"/>
+    <updated>2016-01-22T22:39:47+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/22/rubocop</id>
+    <content type="html"><![CDATA[<p>rubocop 像是一個程式評量工具，會告知在 rails 中的寫法，要如何才會比較好!</p>
+
+<!-- more -->
+
+
+<pre><code class="ruby">gem install rubocop
+</code></pre>
+
+<p>指令</p>
+
+<pre><code class="ruby">rubocop app spec lib/something.rb
+</code></pre>
+
+<p><a href="https://github.com/bbatsov/rubocop">rubocop</a></p>
+
+<p>參考文件：
+<a href="https://blog.alphacamp.co/2015/12/24/how-to-use-rubocop-in-rails-project/">如何在Rails專案中使用Rubocop統一程式風格？</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Carrierwave 輕鬆做上傳檔案功能]]></title>
@@ -946,180 +971,6 @@ end
 <p>gem：<br/>
 <a href="https://github.com/rails/jbuilder">jbuilder</a><br/>
 <a href="https://github.com/rest-client/rest-client">rest-client</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Backup 來備份資料庫]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/03/backup/"/>
-    <updated>2016-01-03T21:42:46+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/03/backup</id>
-    <content type="html"><![CDATA[<p>當網站上線之後，經常會提心吊膽的害怕網站資料不見。<br/>
-這是很重要的動作就是 <code>備份</code> !</p>
-
-<!-- more -->
-
-
-<p>這次主要介紹用 <a href="http://backup.github.io/backup/v4/">backup</a>來做備份</p>
-
-<p>先到遠端的 server 上面</p>
-
-<p><code>gem install backup</code></p>
-
-<p>將 backup 安裝起來</p>
-
-<p>接著輸入</p>
-
-<p><code>backup generate:model --trigger my_backup --archives --storages='s3' --compressor='gzip' --notifiers=‘mail'</code></p>
-
-<p>之後會產生一個 <code>config.rb</code> 和一個 <code>my_backup.rb</code> 的檔案。</p>
-
-<p>打開 <code>my_backup.rb</code> 設定</p>
-
-<pre><code class="ruby">Model.new(:my_backup, '[describe]') do
-
-  ##
-  # MySQL [Database]
-  #
-  database MySQL do |db|
-    # To dump all databases, set `db.name = :all` (or leave blank)
-    db.name               = "[dbname]"
-    db.username           = "root"
-    db.password           = "xxxx"
-    db.host               = "localhost"
-    db.port               = 3306
-    # db.socket             = "/tmp/mysql.sock"
-    # Note: when using `skip_tables` with the `db.name = :all` option,
-    # table names should be prefixed with a database name.
-    # e.g. ["db_name.table_to_skip", ...]
-    # db.skip_tables        = ["skip", "these", "tables"]
-    # db.only_tables        = ["only", "these", "tables"]
-    db.additional_options = ["--quick", "--single-transaction"]
-  end
-
-  ##
-  # Amazon Simple Storage Service [Storage]
-  #
-
- # 將備份檔案儲存到S3
- store_with S3 do |s3|
-    # AWS Credentials
-    s3.access_key_id     = "xxxx"
-    s3.secret_access_key = "xxxx"
-    # Or, to use a IAM Profile:
-    # s3.use_iam_profile = true
-
-    s3.region            = "ap-northeast-1"
-    s3.bucket            = "[bucketname]"
-    s3.path              = "[path]"
-  end
-
-  # 額外的檔案壓縮，例如用戶上傳的圖片，就可以指定路徑
-  # archive.add “/home/deploy/xxxxxxx/shared/public/systems/
-  # archive :my_archive do |archive|
-    # Run the `tar` command using `sudo`
-    # archive.use_sudo
-    # archive.add "/srv"
-  # end
-
-  ##
-  # Gzip [Compressor]
-  #
-  compress_with Gzip
-
-  ##
-  # Mail [Notifier]
-  #
-  # The default delivery method for Mail Notifiers is 'SMTP'.
-  # See the documentation for other delivery options.
-  # 寄信通知，也有很多其他的通知方法，官方文件都有
-  notify_by Mail do |mail|
-    mail.on_success           = true
-    mail.on_warning           = true
-    mail.on_failure           = true
-
-    mail.from                 = "mail.from"
-    mail.to                   = "mail.to"
-    mail.address              = "smtp.mailgun.org"
-    mail.port                 = 587
-    mail.domain               = "mail.domain"
-    mail.user_name            = "mail.user_name"
-    mail.password             = "mail.password"
-
-    mail.authentication       = "plain"
-    mail.encryption           = :starttls
-  end
-end
-</code></pre>
-
-<p>接著打</p>
-
-<p><code>backup perform --trigger my_backup</code></p>
-
-<p>就可以做備份了</p>
-
-<h1>排程</h1>
-
-<p>每次都要手動去備份相當麻煩，因此接下來就是要設定固定時間跑指令來做備份拉。</p>
-
-<p>這邊是用 <a href="https://github.com/javan/whenever">whenever</a> 來跑 crontab</p>
-
-<p>先在 Gemfile. 加入</p>
-
-<p><code>gem 'whenever', :require =&gt; false</code></p>
-
-<p>接著打 <code>wheneverize .</code></p>
-
-<p>就會產生檔案 <code>config/schedule.rb</code></p>
-
-<p>打開檔案</p>
-
-<pre><code class="ruby">env :PATH, ENV['PATH']
-set :output, '/home/[username]/cron.log'
-
-every 1.day, :at =&gt; '4:30 am' do
-  command "/usr/local/bin/backup perform -t my_backup -c /home/[username]/Backup/config.rb"
-end
-</code></pre>
-
-<blockquote><p>切記! 路徑要用絕對路徑啊啊啊!</p></blockquote>
-
-<p>設定就完成囉!</p>
-
-<p>如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：
-<code>require "whenever/capistrano"</code></p>
-
-<p>也可以只更新遠端 whenever<br/>
-<code>cap production whenever:update_crontab</code></p>
-
-<p>另外要看有沒有進排程可以打</p>
-
-<p><code>crontab -e</code></p>
-
-<p>另外 crontab 會分帳號的，所以要用原本的帳號打才會出現。</p>
-
-<blockquote><p>如果只用 whenever 的 rake “XXX” 的話，crontab -e 裡面會先 cd 到專案目錄下，
-這時候 log/cron.log 就沒問題</p>
-
-<p>但是 whenever 的 command “XXXX” 並不會先 cd 到專案目錄下，因此 log/cron.log 會不知道跑去哪裡</p></blockquote>
-
-<h1>匯入資料庫</h1>
-
-<p>有了備份檔案，就能夠直接在本機端匯入檔案<br/>
-匯入方式如下</p>
-
-<p><code>mysql -u root -p db_name &lt; backup.sql</code></p>
-
-<p>就會看到資料都匯入進去了，另外圖片都是存在 s3 ，如果希望圖片也顯示，就將 production 的圖片複製一份到 development 就可以了，因為兩邊設定的 bucket 是不一樣的。</p>
-
-<p>官方文件：<br/>
-<a href="http://backup.github.io/backup/v4/">backup</a><br/>
-<a href="https://github.com/javan/whenever">whenever</a></p>
-
-<p>參考文件：<br/>
-<a href="http://blog.eddie.com.tw/2011/05/24/backup-your-website/">用Backup來備份你的網站</a><br/>
-<a href="http://lemonup.logdown.com/posts/169422-rails-whenever-use-note">Whenever 使用筆記</a><br/>
-<a href="http://programmer.shinchi.tw/2013/12/18/mysql%E5%8C%AF%E5%85%A5%E8%88%87%E5%8C%AF%E5%87%BA%E6%8C%87%E4%BB%A4/">mysql匯入與匯出指令</a></p>
 ]]></content>
   </entry>
   
