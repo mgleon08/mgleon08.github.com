@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-21T22:21:38+08:00</updated>
+  <updated>2016-01-22T22:31:25+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,258 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Carrierwave 輕鬆做上傳檔案功能]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/22/carrierwave/"/>
+    <updated>2016-01-22T22:12:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/22/carrierwave</id>
+    <content type="html"><![CDATA[<p>另一個上傳檔案的 gem ，相當的實用，和 Paperclip 擇一即可。</p>
+
+<!-- more -->
+
+
+<h1>安裝</h1>
+
+<p>Gemfile</p>
+
+<pre><code class="ruby">gem 'carrierwave'
+gem 'rmagick'
+
+# or gem "mini_magick"
+</code></pre>
+
+<ul>
+<li>carrierwave 上傳檔案</li>
+<li>rmagick 處理圖片</li>
+</ul>
+
+
+<blockquote><p>必須有安裝 ImageMagick 才能使用 rmagick</p></blockquote>
+
+<p>有 homebrew 可以直接</p>
+
+<pre><code class="ruby">brew install imagemagick
+</code></pre>
+
+<h1>設定</h1>
+
+<p>先建立資料夾，主要用來存放所有的檔案</p>
+
+<pre><code class="ruby">rails generate uploader file
+</code></pre>
+
+<p>接著在在要存放的 model 新增一筆欄位</p>
+
+<pre><code class="ruby">rails generate migration add_file_to_products
+</code></pre>
+
+<h1>Model</h1>
+
+<pre><code class="ruby">class Product &lt; ActiveRecord::Base
+  mount_uploader :file, FileUploader
+end
+</code></pre>
+
+<p>最後記得再 strong params 加入</p>
+
+<pre><code class="ruby">private
+  def product_params
+    params.require(:product).permit(:file)
+  end
+end
+</code></pre>
+
+<h1>Form</h1>
+
+<pre><code class="ruby">&lt;%= form_for @product do |f| %&gt;
+  &lt;%= f.file_field :file %&gt;
+  &lt;%= f.submit "Submit" %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<h1>view</h1>
+
+<pre><code class="ruby">&lt;%= image_tag @product.image_url.to_s %&gt;
+</code></pre>
+
+<p>imageurl是預設的helper，to_s是要確定把上傳的路徑轉變為字串，以免發生錯誤。</p>
+
+<h1>RMagick</h1>
+
+<p><code>app/uploaders/file_uploader.rb</code></p>
+
+<p>可以將設定打開，有 RMagick 和 MiniMagick ，都是用來縮圖的。(擇一即可)</p>
+
+<pre><code class="ruby"># Include RMagick or MiniMagick support:
+# include CarrierWave::RMagick
+# include CarrierWave::MiniMagick
+</code></pre>
+
+<p>下面把註解拿掉就可以使用</p>
+
+<pre><code class="ruby">Create different versions of your uploaded files:
+version :thumb do
+  process :resize_to_fit =&gt; [50, 50]
+end
+</code></pre>
+
+<p>之後再 view 中只要指定，就會去抓取縮小後的圖檔</p>
+
+<pre><code class="ruby">&lt;%= image_tag @product.image_url(:thumb).to_s %&gt;
+</code></pre>
+
+<h1>其他</h1>
+
+<p>限制存取大小<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Validate-attachment-file-size">How to: Validate attachment file size</a></p>
+
+<p>存取圖片長寬<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Get-image-dimensions">How to: Get image dimensions</a></p>
+
+<p>存取圖片大小和類型<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Store-the-uploaded-file-size-and-content-type">How to: Store the uploaded file size and content type</a></p>
+
+<p>官方文件：<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a></p>
+
+<p>參考資料：<br/>
+<a href="http://motion-express.com/blog/20140708-ruby-gem-carrierwave">Ruby gem &lsquo;Carrierwave&rsquo; 上傳檔案神器的簡易安裝與使用</a><br/>
+<a href="http://rubyist.marsz.tw/blog/2012-01-10/carrierwave-guides-with-amazon-s3-and-imagemagick-integration/">使用 Carrierwave 處理檔案上傳 (整合 imagemagick 與 Amazon S3)</a> <br/>
+<a href="https://ruby-china.org/topics/4992">gem &lsquo;carrierwave'简易实用介绍</a><br/>
+<a href="http://springok-blog.logdown.com/posts/2015/10/21/railsgem-how-to-use-carrierwave-upload-pictures">Rails如何使用Carrierwave上傳圖片</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[用 Paperclip 輕鬆做上傳檔案功能]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/22/paperclip/"/>
+    <updated>2016-01-22T22:12:20+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/22/paperclip</id>
+    <content type="html"><![CDATA[<p>在網站中經常會需要用到上傳檔案功能
+而 Paperclip 就是可以在上傳檔案這件事變得更加便利。</p>
+
+<!-- more -->
+
+
+<h1>安裝</h1>
+
+<pre><code class="ruby">gem "paperclip"
+</code></pre>
+
+<h1>設定</h1>
+
+<pre><code class="ruby">class AddAvatarColumnsToUsers &lt; ActiveRecord::Migration
+  def up
+    add_attachment :topics, :picture
+  end
+
+  def down
+    remove_attachment :topics, :picture
+  end
+end
+</code></pre>
+
+<p>attachment 會自動產生以下四個攔位</p>
+
+<pre><code class="ruby">t.string   "picture_file_name",    limit: 255
+t.string   "picture_content_type", limit: 255
+t.integer  "picture_file_size",    limit: 4
+t.datetime "picture_updated_at"
+</code></pre>
+
+<h1>Model</h1>
+
+<pre><code class="ruby">class User &lt; ActiveRecord::Base
+  has_attached_file :picture, styles: { medium: "300x300&gt;", thumb: "100x100&gt;" }, default_url: "/images/:style/missing.png"
+  validates_attachment_content_type :picture, content_type: /\Aimage\/.*\Z/
+end
+</code></pre>
+
+<h1>Form</h1>
+
+<pre><code class="ruby">&lt;%= form_for @user, url: users_path, html: { multipart: true } do |form| %&gt;
+  &lt;%= form.file_field :picture %&gt;
+  &lt;%=%&gt;
+
+&lt;% if @user.picture.exist?%&gt;
+    &lt;%= check_box_tag “remove” ,”1”%&gt; #刪除按鈕
+&lt;%end%&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>在編輯的時候設定如果remove=1就設定圖片欄位為nil就會刪除</p>
+
+<h3>controller</h3>
+
+<pre><code class="ruby">if params[:remove]==1
+    @user.picture=nil
+end
+</code></pre>
+
+<h1>View</h1>
+
+<pre><code class="ruby">&lt;%= image_tag @topic.picture.url %&gt;
+&lt;%= image_tag @topic.picture.url(:medium) %&gt;
+&lt;%= image_tag @topic.picture.url(:thumb) %&gt;
+</code></pre>
+
+<h1>同時上傳多個檔案</h1>
+
+<p>1-to-1 可以使用 <code>fields_for</code> 來達成，但若是 1-to-many ，則必須要搭配 JavaScript 協助動態增減欄位，動態加減數量。</p>
+
+<p>可以使用以下 gem<br/>
+<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a></p>
+
+<p>(注意 Strong Parameter，這個 gem 的 README 沒提到)</p>
+
+<h3>model</h3>
+
+<pre><code class="ruby">has_many :banners, dependent: :destroy
+accepts_nested_attributes_for :banners, allow_destroy: true, :reject_if =&gt; :all_blank
+</code></pre>
+
+<h3>strong params</h3>
+
+<pre><code class="ruby">params.require(:company).permit(:banners_attributes =&gt; [:id, :banner, :banner_alt, :_destroy])
+</code></pre>
+
+<h3>form</h3>
+
+<p>```ruby</p>
+
+<p><div class="image">
+  <p>Banner</p>
+    &lt;%= c.nested_fields_for :banners do |b| %>
+      <div class="form-group">
+      &lt;%= b.file_field :banner%>
+      &lt;%= b.label :banner_alt, &ldquo;banner_alt&rdquo; %><br>
+      &lt;%= b.text_field :banner_alt, :class=>&ldquo;form-control&rdquo;%>
+      &lt;%= b.remove_nested_fields_link &lsquo;Remove me&rsquo;%>
+    &lt;% end %>
+    &lt;%=c.add_nested_fields_link :banners, &lsquo;新增Banner&rsquo;, :class => &ldquo;btn btn-default&rdquo;%>
+</div></p>
+
+<p>```</p>
+
+<p>或是  <a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
+
+<h3>可參考之前的</h3>
+
+<p><a href="http://mgleon08.github.io/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/">Ruby on Rails - Accepts_nested_attributes_for</a></p>
+
+<p>官方文件：<br/>
+<a href="https://github.com/thoughtbot/paperclip">paperclip</a><br/>
+<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a><br/>
+<a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
+
+<p>參考文件：<br/>
+<a href="http://chouandy.logdown.com/posts/249554-use-paperclip-implement-any-format-file-uploading">使用 paperclip 實作任意格式檔案上傳</a><br/>
+<a href="http://chouandy.logdown.com/posts/252165-use-paperclip-implement-any-format-file-uploading-to-aws-s3">使用 paperclip 實作任意格式檔案上傳至 AWS S3</a><br/>
+<a href="http://blog.jex.tw/blog/2015/07/13/rails-upload/">Rails 上傳 Upload</a><br/>
+<a href="http://www.railscook.com/recipes/multiple-files-upload-with-nested-resource-using-paperclip-in-rails/">Multiple files upload with nested resource using Paperclip in Rails</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[會員管理系統 Devise-Rolify-Cancan]]></title>
@@ -868,207 +1120,6 @@ end
 <a href="http://blog.eddie.com.tw/2011/05/24/backup-your-website/">用Backup來備份你的網站</a><br/>
 <a href="http://lemonup.logdown.com/posts/169422-rails-whenever-use-note">Whenever 使用筆記</a><br/>
 <a href="http://programmer.shinchi.tw/2013/12/18/mysql%E5%8C%AF%E5%85%A5%E8%88%87%E5%8C%AF%E5%87%BA%E6%8C%87%E4%BB%A4/">mysql匯入與匯出指令</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Debugging]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/19/ruby-on-rails-debugging/"/>
-    <updated>2015-12-19T11:09:06+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/19/ruby-on-rails-debugging</id>
-    <content type="html"><![CDATA[<p>當發生 bug 的時候，要如何來有效率的debug!?
-今天就來介紹幾種方式，快速的找出這些 <code>bug!!</code></p>
-
-<!-- more -->
-
-
-<h1>raise</h1>
-
-<p>直接在覺得有問題的程式碼上面，插入 <code>raise</code>
-rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/raise">RuntimeError</a>，接著網頁就會進入錯誤畫面了
-下面黑色區塊就可以輸入指令，看到底哪裡出問題!!</p>
-
-<p>這是比較陽春的方式，但好處是</p>
-
-<ol>
-<li>不用特別安裝 gem</li>
-<li>也不用去 console 中 debug ， 直接在瀏覽器上就可以執行</li>
-</ol>
-
-
-<p><img src="http://i.imgur.com/W0GTWCo.png" alt="raise" /></p>
-
-<h1><a href="https://github.com/deivid-rodriguez/byebug">byebug</a></h1>
-
-<p>開起新的專案時，就會內建在 development 和 test 環境的一個 gem</p>
-
-<pre><code class="ruby">group :development, :test do
-  # Call 'byebug' anywhere in the code to stop execution and get a debugger console
-  gem 'byebug'
-end
-</code></pre>
-
-<p>一樣是在覺得有問題的程式碼上面插入 <code>byebug</code>
-當跑到那個地方的時候就會停下來，接著就可以在 console 裡面輸入指令
-測試完後就輸入 <code>continue</code> 繼續跑，或是 <code>exit</code> 離開。</p>
-
-<p>但缺點是很吃效能，每次繼續跑就會變超慢，所以我都會直接整個重開XD</p>
-
-<p><img src="http://i.imgur.com/dsaqKTB.png" alt="byebug" /></p>
-
-<h1><a href="https://github.com/charliesome/better_errors">better_errors</a></h1>
-
-<p>安裝方式</p>
-
-<pre><code class="ruby">group :development, :test do
-    gem 'better_errors'
-    gem 'binding_of_caller'
-end
-</code></pre>
-
-<p>有點像是 raise 的進階版本，更多詳細的資訊
-只要有例外，就會顯示這種畫面</p>
-
-<p><img src="http://i.imgur.com/6BxsIH1.png" alt="better_errors" /></p>
-
-<ol>
-<li>左上 - 檢查檔案</li>
-<li>右上 - 可以直接輸入指令來測試，像在 console 一樣</li>
-<li>右下 - 檢查數值，request的互動中是否有參數漏掉?</li>
-</ol>
-
-
-<p>參考文章：
-<a href="http://motion-express.com/blog/20141014-debugging-rails-better-errors/">Debugging Rails 使用 better_errors 在瀏覽器中直接進行除錯</a></p>
-
-<h1><a href="https://github.com/pry/pry">pry</a></h1>
-
-<p>安裝方式</p>
-
-<pre><code class="ruby">gem 'pry'
-gem 'pry-rails'
-gem 'pry-nav'
-</code></pre>
-
-<p>超強的 debug 神器，一樣直接插入 <code>binding.pry</code>
-並且有顏色更加清楚，還可以像打指令 <code>cd @books.first</code> 進入某個變數裡面
-接著就可以直接打 <code>name</code> <code>content</code>，顯示變數內容</p>
-
-<p><img src="http://i.imgur.com/67g9JXM.png" alt="pry" /></p>
-
-<p>指令：<br/>
-<code>self</code> 檢查目前所在的 class 或 scope<br/>
-<code>next</code> 執行這一段 block，並在下一段 block 開始時停止<br/>
-<code>step</code> 執行這一行，並在下一行停止<br/>
-<code>ls、methods</code> 可以看目前的 class 或 scope 內有什麼樣的 variable 或 method 可以使用<br/>
-<code>continue</code> 繼續執行，如果有下一個 <code>binding.pry</code>就會停下來<br/>
-<code>exit</code> 離開 pry ，繼續執行程式</p>
-
-<blockquote><p>要有 <code>gem 'pry-nav'</code> 才會有 next、step ，一步一步 debug</p>
-
-<p>注意!!如果是用上一篇的 pow 來執行的話，要安裝 <a href="https://github.com/Mon-Ouie/pry-remote">pry-remote</a>，並且把原本的 <code>bindig.pry</code> 改成 <code>binding.remote_pry</code></p></blockquote>
-
-<h1><a href="https://github.com/michaeldv/awesome_print">awesome_print</a></h1>
-
-<p>可搭配 awesome_print 有漂亮的輸出<br/>
-<a href="https://github.com/michaeldv/awesome_print">awesome_print</a></p>
-
-<p>顯示上一個變數，漂亮的輸出</p>
-
-<pre><code class="ruby">ap_ 
-</code></pre>
-
-<p>詳細介紹：<br/>
-<a href="http://toyroom.bruceli.net/tw/2014/08/13/awesome-rails-console-customization-using-pry.html">超棒的 rails console 設定</a></p>
-
-<p>參考文章：<br/>
-<a href="http://blog.xdite.net/posts/2012/08/13/pry-the-new-debugger">Pry ：新一代 Debug 利器</a><br/>
-<a href="http://motion-express.com/blog/20141015-debugging-rails-pry">Debugging Rails 沒有錯誤訊息卻還是有bug！要如何即時除錯？</a><br/>
-<a href="http://toyroom.bruceli.net/tw/2014/08/13/awesome-rails-console-customization-using-pry.html">超棒的 rails console 設定</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - 用 Pow 當 HTTP Server]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-pow/"/>
-    <updated>2015-12-18T17:39:04+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/18/ruby-on-rails-pow</id>
-    <content type="html"><![CDATA[<p>當要啟動一個專案的時候，通常都是打 <code>rails s</code><br/>
-就會跑在 port 3000 接著網址打 <code>http://localhost:3000/</code>，就可以打開了!</p>
-
-<p>那要啟動另一個勒？ 通常有以下兩種方式</p>
-
-<!-- more -->
-
-
-<ol>
-<li>先關掉第一個，再開啟另一個</li>
-<li>換別的 port <code>rails s -p 4000</code></li>
-</ol>
-
-
-<p>但是萬一facebook登入，已經設定是 <code>http://localhost:3000/</code>，那就悲劇了..<br/>
-因此有另一種方式來解決這種問題</p>
-
-<h1><a href="http://pow.cx/">pow</a></h1>
-
-<p>安裝方式也相當簡單，照著官方網站</p>
-
-<p>先下載到電腦上</p>
-
-<pre><code>curl get.pow.cx | sh
-</code></pre>
-
-<p>在指向到專案裡面</p>
-
-<pre><code>cd ~/.pow
-$ ln -s /path/to/myapp
-</code></pre>
-
-<p>接著在 <code>open http://myapp.dev</code><br/>
-就會啟動了!</p>
-
-<h1><a href="https://github.com/Rodreegez/powder">powder</a></h1>
-
-<p>powder 是一個整合好 pow 的 gem ，可以更方便快速的啟動一個專案</p>
-
-<h3>安裝方式</h3>
-
-<pre><code>gem install powder
-</code></pre>
-
-<h3>使用方式</h3>
-
-<p>在專案底下輸入</p>
-
-<pre><code>powder link
-</code></pre>
-
-<p>就會建立起連結，接著輸入</p>
-
-<pre><code>powder open
-</code></pre>
-
-<p>就打開了，超方便</p>
-
-<p>另外一定會問到，那要怎麼看 <code>log</code></p>
-
-<ol>
-<li><code>tail -f log/development.log</code></li>
-<li><code>powder applog</code></li>
-</ol>
-
-
-<p>重新啟動 (通常有動到 app 以外的檔案，就會需要重啟)</p>
-
-<ol>
-<li><code>touch tmp/restart.txt</code></li>
-<li><code>powder restart</code></li>
-</ol>
-
-
-<p>更多指令可以到 github 上面看<br/>
-<a href="https://github.com/Rodreegez/powder">powder</a></p>
 ]]></content>
   </entry>
   

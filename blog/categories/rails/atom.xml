@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-21T22:21:38+08:00</updated>
+  <updated>2016-01-22T22:31:25+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,258 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Carrierwave 輕鬆做上傳檔案功能]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/22/carrierwave/"/>
+    <updated>2016-01-22T22:12:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/22/carrierwave</id>
+    <content type="html"><![CDATA[<p>另一個上傳檔案的 gem ，相當的實用，和 Paperclip 擇一即可。</p>
+
+<!-- more -->
+
+
+<h1>安裝</h1>
+
+<p>Gemfile</p>
+
+<pre><code class="ruby">gem 'carrierwave'
+gem 'rmagick'
+
+# or gem "mini_magick"
+</code></pre>
+
+<ul>
+<li>carrierwave 上傳檔案</li>
+<li>rmagick 處理圖片</li>
+</ul>
+
+
+<blockquote><p>必須有安裝 ImageMagick 才能使用 rmagick</p></blockquote>
+
+<p>有 homebrew 可以直接</p>
+
+<pre><code class="ruby">brew install imagemagick
+</code></pre>
+
+<h1>設定</h1>
+
+<p>先建立資料夾，主要用來存放所有的檔案</p>
+
+<pre><code class="ruby">rails generate uploader file
+</code></pre>
+
+<p>接著在在要存放的 model 新增一筆欄位</p>
+
+<pre><code class="ruby">rails generate migration add_file_to_products
+</code></pre>
+
+<h1>Model</h1>
+
+<pre><code class="ruby">class Product &lt; ActiveRecord::Base
+  mount_uploader :file, FileUploader
+end
+</code></pre>
+
+<p>最後記得再 strong params 加入</p>
+
+<pre><code class="ruby">private
+  def product_params
+    params.require(:product).permit(:file)
+  end
+end
+</code></pre>
+
+<h1>Form</h1>
+
+<pre><code class="ruby">&lt;%= form_for @product do |f| %&gt;
+  &lt;%= f.file_field :file %&gt;
+  &lt;%= f.submit "Submit" %&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<h1>view</h1>
+
+<pre><code class="ruby">&lt;%= image_tag @product.image_url.to_s %&gt;
+</code></pre>
+
+<p>imageurl是預設的helper，to_s是要確定把上傳的路徑轉變為字串，以免發生錯誤。</p>
+
+<h1>RMagick</h1>
+
+<p><code>app/uploaders/file_uploader.rb</code></p>
+
+<p>可以將設定打開，有 RMagick 和 MiniMagick ，都是用來縮圖的。(擇一即可)</p>
+
+<pre><code class="ruby"># Include RMagick or MiniMagick support:
+# include CarrierWave::RMagick
+# include CarrierWave::MiniMagick
+</code></pre>
+
+<p>下面把註解拿掉就可以使用</p>
+
+<pre><code class="ruby">Create different versions of your uploaded files:
+version :thumb do
+  process :resize_to_fit =&gt; [50, 50]
+end
+</code></pre>
+
+<p>之後再 view 中只要指定，就會去抓取縮小後的圖檔</p>
+
+<pre><code class="ruby">&lt;%= image_tag @product.image_url(:thumb).to_s %&gt;
+</code></pre>
+
+<h1>其他</h1>
+
+<p>限制存取大小<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Validate-attachment-file-size">How to: Validate attachment file size</a></p>
+
+<p>存取圖片長寬<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Get-image-dimensions">How to: Get image dimensions</a></p>
+
+<p>存取圖片大小和類型<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Store-the-uploaded-file-size-and-content-type">How to: Store the uploaded file size and content type</a></p>
+
+<p>官方文件：<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a></p>
+
+<p>參考資料：<br/>
+<a href="http://motion-express.com/blog/20140708-ruby-gem-carrierwave">Ruby gem &lsquo;Carrierwave&rsquo; 上傳檔案神器的簡易安裝與使用</a><br/>
+<a href="http://rubyist.marsz.tw/blog/2012-01-10/carrierwave-guides-with-amazon-s3-and-imagemagick-integration/">使用 Carrierwave 處理檔案上傳 (整合 imagemagick 與 Amazon S3)</a> <br/>
+<a href="https://ruby-china.org/topics/4992">gem &lsquo;carrierwave'简易实用介绍</a><br/>
+<a href="http://springok-blog.logdown.com/posts/2015/10/21/railsgem-how-to-use-carrierwave-upload-pictures">Rails如何使用Carrierwave上傳圖片</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[用 Paperclip 輕鬆做上傳檔案功能]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/22/paperclip/"/>
+    <updated>2016-01-22T22:12:20+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/22/paperclip</id>
+    <content type="html"><![CDATA[<p>在網站中經常會需要用到上傳檔案功能
+而 Paperclip 就是可以在上傳檔案這件事變得更加便利。</p>
+
+<!-- more -->
+
+
+<h1>安裝</h1>
+
+<pre><code class="ruby">gem "paperclip"
+</code></pre>
+
+<h1>設定</h1>
+
+<pre><code class="ruby">class AddAvatarColumnsToUsers &lt; ActiveRecord::Migration
+  def up
+    add_attachment :topics, :picture
+  end
+
+  def down
+    remove_attachment :topics, :picture
+  end
+end
+</code></pre>
+
+<p>attachment 會自動產生以下四個攔位</p>
+
+<pre><code class="ruby">t.string   "picture_file_name",    limit: 255
+t.string   "picture_content_type", limit: 255
+t.integer  "picture_file_size",    limit: 4
+t.datetime "picture_updated_at"
+</code></pre>
+
+<h1>Model</h1>
+
+<pre><code class="ruby">class User &lt; ActiveRecord::Base
+  has_attached_file :picture, styles: { medium: "300x300&gt;", thumb: "100x100&gt;" }, default_url: "/images/:style/missing.png"
+  validates_attachment_content_type :picture, content_type: /\Aimage\/.*\Z/
+end
+</code></pre>
+
+<h1>Form</h1>
+
+<pre><code class="ruby">&lt;%= form_for @user, url: users_path, html: { multipart: true } do |form| %&gt;
+  &lt;%= form.file_field :picture %&gt;
+  &lt;%=%&gt;
+
+&lt;% if @user.picture.exist?%&gt;
+    &lt;%= check_box_tag “remove” ,”1”%&gt; #刪除按鈕
+&lt;%end%&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<p>在編輯的時候設定如果remove=1就設定圖片欄位為nil就會刪除</p>
+
+<h3>controller</h3>
+
+<pre><code class="ruby">if params[:remove]==1
+    @user.picture=nil
+end
+</code></pre>
+
+<h1>View</h1>
+
+<pre><code class="ruby">&lt;%= image_tag @topic.picture.url %&gt;
+&lt;%= image_tag @topic.picture.url(:medium) %&gt;
+&lt;%= image_tag @topic.picture.url(:thumb) %&gt;
+</code></pre>
+
+<h1>同時上傳多個檔案</h1>
+
+<p>1-to-1 可以使用 <code>fields_for</code> 來達成，但若是 1-to-many ，則必須要搭配 JavaScript 協助動態增減欄位，動態加減數量。</p>
+
+<p>可以使用以下 gem<br/>
+<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a></p>
+
+<p>(注意 Strong Parameter，這個 gem 的 README 沒提到)</p>
+
+<h3>model</h3>
+
+<pre><code class="ruby">has_many :banners, dependent: :destroy
+accepts_nested_attributes_for :banners, allow_destroy: true, :reject_if =&gt; :all_blank
+</code></pre>
+
+<h3>strong params</h3>
+
+<pre><code class="ruby">params.require(:company).permit(:banners_attributes =&gt; [:id, :banner, :banner_alt, :_destroy])
+</code></pre>
+
+<h3>form</h3>
+
+<p>```ruby</p>
+
+<p><div class="image">
+  <p>Banner</p>
+    &lt;%= c.nested_fields_for :banners do |b| %>
+      <div class="form-group">
+      &lt;%= b.file_field :banner%>
+      &lt;%= b.label :banner_alt, &ldquo;banner_alt&rdquo; %><br>
+      &lt;%= b.text_field :banner_alt, :class=>&ldquo;form-control&rdquo;%>
+      &lt;%= b.remove_nested_fields_link &lsquo;Remove me&rsquo;%>
+    &lt;% end %>
+    &lt;%=c.add_nested_fields_link :banners, &lsquo;新增Banner&rsquo;, :class => &ldquo;btn btn-default&rdquo;%>
+</div></p>
+
+<p>```</p>
+
+<p>或是  <a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
+
+<h3>可參考之前的</h3>
+
+<p><a href="http://mgleon08.github.io/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/">Ruby on Rails - Accepts_nested_attributes_for</a></p>
+
+<p>官方文件：<br/>
+<a href="https://github.com/thoughtbot/paperclip">paperclip</a><br/>
+<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a><br/>
+<a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
+
+<p>參考文件：<br/>
+<a href="http://chouandy.logdown.com/posts/249554-use-paperclip-implement-any-format-file-uploading">使用 paperclip 實作任意格式檔案上傳</a><br/>
+<a href="http://chouandy.logdown.com/posts/252165-use-paperclip-implement-any-format-file-uploading-to-aws-s3">使用 paperclip 實作任意格式檔案上傳至 AWS S3</a><br/>
+<a href="http://blog.jex.tw/blog/2015/07/13/rails-upload/">Rails 上傳 Upload</a><br/>
+<a href="http://www.railscook.com/recipes/multiple-files-upload-with-nested-resource-using-paperclip-in-rails/">Multiple files upload with nested resource using Paperclip in Rails</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[會員管理系統 Devise-Rolify-Cancan]]></title>
@@ -782,557 +1034,6 @@ end
 <p>gem：<br/>
 <a href="https://github.com/rails/jbuilder">jbuilder</a><br/>
 <a href="https://github.com/rest-client/rest-client">rest-client</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - 好用的 Enumerable]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/07/rails-enumerable/"/>
-    <updated>2016-01-07T20:40:22+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/07/rails-enumerable</id>
-    <content type="html"><![CDATA[<p>這次主要來介紹一些好用的 Enumerable<br/>
-可以很方便的將需要的資料整合在一起</p>
-
-<!-- more -->
-
-
-<h1>Map/Collect</h1>
-
-<p>對 block 每個值進行運算，並回傳成一個新的 <code>array</code><br/>
-處理 <code>hash</code> 時，也可以分開處理 key 和 value</p>
-
-<p><code>map</code> 和 <code>collect</code> 其實是一樣的東西，主要是因為其他語言很多都是用 <code>collect</code>。</p>
-
-<pre><code class="ruby">array = [1,2,3]
-array.map {|v| v * 2}
-# =&gt; [2, 4, 6]
-
-hash = {:name =&gt; "abc", :age =&gt; 18}
-hash.map {|k, v| v }
-# =&gt; ["abc", 18]
-</code></pre>
-
-<h1>Select</h1>
-
-<p>對物件，挑出指定欄位的值，並回傳 <code>ActiveRecord::Relation</code></p>
-
-<pre><code class="ruby">User.all.select(:id)
-=&gt; #&lt;ActiveRecord::Relation [#&lt;User id: 1&gt;, #&lt;User id: 2&gt;, #&lt;User id: 3&gt;,...]&gt;
-</code></pre>
-
-<p>可以再搭配 <code>map</code> 變成一個 <code>array</code>。</p>
-
-<pre><code class="ruby">User.all.select(:id).map(&amp;:id)
-# =&gt; [1,2,3]
-</code></pre>
-
-<p>或是直接針對 array 去篩選</p>
-
-<pre><code class="ruby">my_array = [1,2,3,4,5,6,7,8,100]
-my_array.select{|item| item%2==0 }
-# =&gt; [2,4,6,8,100]
-</code></pre>
-
-<p>hash</p>
-
-<pre><code class="ruby">my_hash = {"Joe" =&gt; "male", "Jim" =&gt; "male", "Patty" =&gt; "female"}
-my_hash.select{|name, gender| gender == "male" }
-# =&gt; {"Joe" =&gt; "male", "Jim" =&gt; "male"}
-
-也可以
-my_hash.select{|k,v| ["Joe", "Jim"].include?(k)}
-
-#改成 map 會變成，回傳 boolean值，並且回傳 array
-my_hash.map{|name, gender| gender == "male" }
-# =&gt; [true, true, false]
-</code></pre>
-
-<p>只回傳 ture 的選項</p>
-
-<p>進階用法</p>
-
-<pre><code class="ruby">#在Hash裡定義新的方法 沒有特定對象的通常可以放在lib資料夾
-class Hash
-  def keep(*args)
-    select {|k,v| args.include?(k)}
-  end
-end
-
-my_hash.keep("Joe", "Jim")
-# =&gt; {"Joe" =&gt; "male", "Jim" =&gt; "male"}
-</code></pre>
-
-<h1>Pluck</h1>
-
-<p>對物件，挑出指定欄位的值，並回傳一個新的 <code>array</code><br/>
-像是 <code>map</code> 和 <code>select</code> 合在一起的指令</p>
-
-<p>Approach - map</p>
-
-<pre><code class="ruby">User.pluck(:id)
-#=&gt; [1, 2, 3]
-
-puts Benchmark.measure {User.pluck(:id)}
-#0.000000   0.000000   0.000000 (  0.000857)
-</code></pre>
-
-<pre><code class="ruby">User.all.map{|a| a.id}
-#=&gt; [1, 2, 3]
-
-puts Benchmark.measure {User.all.map{|a| a.id}}
-# 0.000000   0.020000   0.020000 (  0.026401)
-</code></pre>
-
-<pre><code class="ruby">User.select(:id)
-=&gt; #&lt;ActiveRecord::Relation [#&lt;User id: 1&gt;, #&lt;User id: 2&gt;, #&lt;User id: 3&gt;]&gt;
-
-puts Benchmark.measure {User.select(:id).to_a}
-#0.000000   0.000000   0.000000 (  0.001549)
-</code></pre>
-
-<p>顯然效能上還是 <code>pluck</code> 最快</p>
-
-<p><code>map</code> 會將所有欄位找出來，再根據 block 的值，回傳新的 <code>array</code></p>
-
-<p><code>pluck</code> 和 <code>select</code> 則是只將需要的欄位選出來，但 <code>select</code> 回傳的是 <code>ActiveRecord::Relation</code> 必須再透過 map 轉成 <code>array</code></p>
-
-<p>參考文件：<br/>
-<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a><br/>
-<a href="http://gavinmiller.io/2013/getting-to-know-pluck-and-select/">Getting to Know Pluck and Select</a>
-<a href="http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html">Pluck vs. map and select</a></p>
-
-<pre><code class="ruby">Person.pluck(:id)
-# SELECT people.id FROM people
-# =&gt; [1, 2, 3]
-
-Person.pluck(:id, :name)
-# SELECT people.id, people.name FROM people
-# =&gt; [[1, 'David'], [2, 'Jeremy'], [3, 'Jose']]
-
-Person.pluck('DISTINCT role')
-# SELECT DISTINCT role FROM people
-# =&gt; ['admin', 'member', 'guest']
-
-Person.where(age: 21).limit(5).pluck(:id)
-# SELECT people.id FROM people WHERE people.age = 21 LIMIT 5
-# =&gt; [2, 3]
-
-Person.pluck('DATEDIFF(updated_at, created_at)')
-# SELECT DATEDIFF(updated_at, created_at) FROM people
-# =&gt; ['0', '27761', '173']
-</code></pre>
-
-<h1>reject</h1>
-
-<p>回傳 block 為 <code>false</code> 的值，成一個新的 <code>array</code>。</p>
-
-<pre><code class="ruby"># Remove even numbers
-(1..30).reject { |n| n % 2 == 0 }
-# =&gt; [1, 3, 5, 7, 9, 11, 13, 15, 17, 19, 21, 23, 25, 27, 29]
-
-# Remove years dividable with 4 (this is *not* the full leap years rule)
-(1950..2000).reject { |y| y % 4 != 0 }
-# =&gt; [1952, 1956, 1960, 1964, 1968, 1972, 1976, 1980, 1984, 1988, 1992, 1996, 2000]
-
-# Remove users with karma below arithmetic mean
-total = users.inject(0) { |total, user| total += user.karma }
-mean = total / users.size
-good_users = users.reject { |u| u.karma &lt; mean }
-</code></pre>
-
-<h1>inject</h1>
-
-<p>inject 方法可以先給予初始值(數字，hash，array 都可以)，之後給予指定的元素，不斷的迭代。</p>
-
-<pre><code class="ruby">(5..10).inject(1) {|init, n| init * n }
-# =&gt; 151200
-(5..10).inject(1, :*)                         
-#=&gt; 151200
-</code></pre>
-
-<pre><code class="ruby">(5..10).inject {|sum, n| sum * n }
-# =&gt; 45
-(5..10).inject(:+)                            
-#=&gt; 45
-</code></pre>
-
-<p>也可以拿來做比較。</p>
-
-<pre><code class="ruby">%w{ cat sheep bear }.inject do |memo,word|
-   memo.length &gt; word.length ? memo : word
-end
-# =&gt; "sheep"
-</code></pre>
-
-<p>如果給予 inject 的參數為一個空區塊，那麼 inject 會將結果整理成 Hash。</p>
-
-<pre><code class="ruby">User.all.inject({}) do |hash, user| 
-    hash[user.name] = user.id  
-    hash # 需要回傳運算結果
-end
-# =&gt; {"A"=&gt;1, "B"=&gt;2, "C"=&gt;3}
-</code></pre>
-
-<p>但要注意的是，由於每跑一次，都會取用最後的回傳值，當做這次的初始值，因此最後必須再加個 <code>hash</code> ，否則會出錯。</p>
-
-<blockquote><p>也可以直接給予有值的 hash 再繼續加上後面的值，取代掉 inject({}) 中的空 hash</p></blockquote>
-
-<p>也可改用 reduce 跟 inject 一模一樣<br/>
-<a href="http://stackoverflow.com/questions/13813243/is-inject-the-same-thing-as-reduce-in-ruby">Is inject the same thing as reduce in ruby?</a></p>
-
-<h3>額外說明</h3>
-
-<p>也可以用 map 方式，湊成上面的值。</p>
-
-<pre><code class="ruby">Hash[User.all.map {|user| [user.name, user.id ]}]
-# =&gt; {"A"=&gt;1, "B"=&gt;2, "C"=&gt;3}
-
-User.all.map {|user| [user.name, user.id ]}.to_h
-# =&gt; {"A"=&gt;1, "B"=&gt;2, "C"=&gt;3}
-</code></pre>
-
-<h1>each_with_object</h1>
-
-<p>跟 inject 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。</p>
-
-<pre><code class="ruby">User.all.each_with_object({}) do | user, hash | 
-    hash[user.name] = user.id  
-end
-</code></pre>
-
-<h1>merge</h1>
-
-<p>可以將另一個 hash 合併在一起</p>
-
-<pre><code class="ruby">h1 = { "a" =&gt; 100, "b" =&gt; 200 }
-h2 = { "b" =&gt; 254, "c" =&gt; 300 }
-h1.merge(h2)   
-#=&gt; {"a"=&gt;100, "b"=&gt;254, "c"=&gt;300}
-
-h1.merge(h2){|key, oldval, newval| newval - oldval}
-#=&gt; {"a"=&gt;100, "b"=&gt;54,  "c"=&gt;300}
-
-h1             
-#=&gt; {"a"=&gt;100, "b"=&gt;200}
-</code></pre>
-
-<pre><code class="ruby">Hash.new(0).merge(name: "abc", phone: 09xxxxx)
-</code></pre>
-
-<h1>each_with_index</h1>
-
-<p>用來加上索引。</p>
-
-<pre><code class="ruby">hash = Hash.new
-%w(cat dog wombat).each_with_index {|item, index|
-  hash[item] = index
-}
-#=&gt; ["cat", "dog", "wombat"]
-
-hash
-#=&gt; {"cat"=&gt;0, "dog"=&gt;1, "wombat"=&gt;2}
-</code></pre>
-
-<p><a href="http://www.bbs-software.com/blog/2013/11/22/rubys-injectreduce-and-each_with_object/">Ruby’s inject/reduce and each_with_object</a></p>
-
-<p>也可以用來將複數的的 position 印出來。</p>
-
-<pre><code class="ruby">["Cool", "chicken!", "beans!", "beef!"].each_with_index do |item, index|
-    print "#{item} " if index%2==0
-end
-Cool beans!  # =&gt; ["Cool", "chicken!", "beans!", "beef!"]
-</code></pre>
-
-<h1>sum</h1>
-
-<p>可以算出集合的加總</p>
-
-<pre><code class="ruby">payments.sum { |p| p.price * p.tax_rate }
-payments.sum(&amp;:price)
-</code></pre>
-
-<p>數字，字串，陣列都可以，其實就是用 <code>+</code> 的方法</p>
-
-<pre><code class="ruby">[5, 15, 10].sum # =&gt; 30
-['foo', 'bar'].sum # =&gt; "foobar"
-[[1, 2], [3, 1, 5]].sum #=&gt; [1, 2, 3, 1, 5]
-</code></pre>
-
-<h1>group_by</h1>
-
-<p>可以依照指定的欄位分組出來。</p>
-
-<pre><code class="ruby">latest_transcripts.group_by(&amp;:day).each do |day, transcripts|
-  p "#{day} -&gt; #{transcripts.map(&amp;:class).join(', ')}"
-end
-
-# "2006-03-01 -&gt; Transcript"
-# "2006-02-28 -&gt; Transcript"
-# "2006-02-27 -&gt; Transcript, Transcript"
-# "2006-02-26 -&gt; Transcript, Transcript"
-# "2006-02-25 -&gt; Transcript"
-# "2006-02-24 -&gt; Transcript, Transcript"
-# "2006-02-23 -&gt; Transcript"
-</code></pre>
-
-<pre><code class="ruby">names = ["James", "Bob", "Joe", "Mark", "Jim"]
-names.group_by{|name| name.length}
-# =&gt; {5=&gt;["James"], 3=&gt;["Bob", "Joe", "Jim"], 4=&gt;["Mark"]} 
-</code></pre>
-
-<h1>grep</h1>
-
-<p>根據指定的條件塞選</p>
-
-<pre><code class="ruby">names = ["James", "Bob", "Joe", "Mark", "Jim"]
-names.grep(/J/)
-#=&gt; ["James", "Joe", "Jim"]
-</code></pre>
-
-<h1>index_by</h1>
-
-<p>index_by可以指定欄位做為鍵值整理成Hash。</p>
-
-<pre><code class="ruby">User.index_by(&amp;:phone)
-# =&gt; {'0912xxxxxx' =&gt; &lt;User ...&gt;, '0919xxxxxx' =&gt; &lt;User ...&gt;, ...}
-</code></pre>
-
-<p>鍵值通常必須是唯一的，若不是唯一的話，會以最後出現的元素做為判斷值。</p>
-
-<h1>any?</h1>
-
-<p>只要有任何條件符合，就回傳true</p>
-
-<pre><code class="ruby">%w{ant bear cat}.any? {|word| word.length &gt;= 3}   
-#=&gt; true
-%w{ant bear cat}.any? {|word| word.length &gt;= 4}   
-#=&gt; true
-[ nil, true, 99 ].any?                            
-#=&gt; 只要有一個不是 nil 和 false 就是 true
-</code></pre>
-
-<p>主要都是集合的方法</p>
-
-<p>可參考之前的<br/>
-<a href="http://mgleon08.github.io/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/">.nil? .empty? .blank? .present? 傻傻分不清楚？</a></p>
-
-<h1>&amp;:</h1>
-
-<pre><code class="ruby">User.all.map(&amp;:name)
-</code></pre>
-
-<p> <code>&amp;:</code> 代表代入一個Proc<br/>
- <code>(&amp;:name)</code> = <code>{|name| user.name}</code> 的概念XD。</p>
-
-<h1>Benchmark</h1>
-
-<p>上面其實很多都很類似，主要差異的話就是速度吧<br/>
-所以可以用以下的方式來測試每種執行出來的速度。</p>
-
-<p><a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/benchmark/rdoc/Benchmark.html">Benchmark</a><br/>
-<a href="https://github.com/evanphx/benchmark-ips">benchmark-ips</a></p>
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.1.0/Enumerable.html">Enumerable</a><br/>
-<a href="http://apidock.com/ruby/Array/map">map/collect</a><br/>
-<a href="http://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-reject">reject</a><br/>
-<a href="http://apidock.com/ruby/Enumerable/inject">inject</a><br/>
-<a href="http://apidock.com/rails/ActiveRecord/QueryMethods/select">select</a><br/>
-<a href="http://apidock.com/rails/ActiveRecord/Calculations/pluck">pluck</a>  <br/>
-<a href="http://apidock.com/ruby/Enumerable/reduce">reduce</a><br/>
-<a href="http://apidock.com/rails/Enumerable/each_with_object">each_with_object</a><br/>
-<a href="http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index">each_with_index</a><br/>
-<a href="http://ruby-doc.org/core-1.9.3/Hash.html#method-i-merge">merge</a><br/>
-<a href="http://apidock.com/rails/Enumerable/sum">sum</a><br/>
-<a href="http://apidock.com/rails/Enumerable/group_by">group_by</a><br/>
-<a href="http://apidock.com/rails/v4.2.1/Enumerable/index_by">index_by</a><br/>
-<a href="http://apidock.com/rails/Enumerable/many%3F">many?</a><br/>
-<a href="http://apidock.com/ruby/Enumerable/any%3F">any?</a></p>
-
-<p>參考文件：<br/>
-<a href="http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/">Rails Pluck vs Select and Map/Collect</a><br/>
-<a href="http://gavinmiller.io/2013/getting-to-know-pluck-and-select/">Getting to Know Pluck and Select</a><br/>
-<a href="http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html">Pluck vs. map and select</a><br/>
-<a href="http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods">Ruby Explained: Map, Select, and Other Enumerable Methods</a><br/>
-<a href="https://gist.github.com/cupakromer/3371003">each_with_object vs inject</a><br/>
-<a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a><br/>
-<a href="http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash">Ruby 用 inject 和 each_with_object 來組 hash
-</a>
-<a href="http://stackoverflow.com/questions/1217088/what-does-mapname-mean-in-ruby">What does map(&amp;:name) mean in Ruby?</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Backup 來備份資料庫]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/03/backup/"/>
-    <updated>2016-01-03T21:42:46+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/03/backup</id>
-    <content type="html"><![CDATA[<p>當網站上線之後，經常會提心吊膽的害怕網站資料不見。<br/>
-這是很重要的動作就是 <code>備份</code> !</p>
-
-<!-- more -->
-
-
-<p>這次主要介紹用 <a href="http://backup.github.io/backup/v4/">backup</a>來做備份</p>
-
-<p>先到遠端的 server 上面</p>
-
-<p><code>gem install backup</code></p>
-
-<p>將 backup 安裝起來</p>
-
-<p>接著輸入</p>
-
-<p><code>backup generate:model --trigger my_backup --archives --storages='s3' --compressor='gzip' --notifiers=‘mail'</code></p>
-
-<p>之後會產生一個 <code>config.rb</code> 和一個 <code>my_backup.rb</code> 的檔案。</p>
-
-<p>打開 <code>my_backup.rb</code> 設定</p>
-
-<pre><code class="ruby">Model.new(:my_backup, '[describe]') do
-
-  ##
-  # MySQL [Database]
-  #
-  database MySQL do |db|
-    # To dump all databases, set `db.name = :all` (or leave blank)
-    db.name               = "[dbname]"
-    db.username           = "root"
-    db.password           = "xxxx"
-    db.host               = "localhost"
-    db.port               = 3306
-    # db.socket             = "/tmp/mysql.sock"
-    # Note: when using `skip_tables` with the `db.name = :all` option,
-    # table names should be prefixed with a database name.
-    # e.g. ["db_name.table_to_skip", ...]
-    # db.skip_tables        = ["skip", "these", "tables"]
-    # db.only_tables        = ["only", "these", "tables"]
-    db.additional_options = ["--quick", "--single-transaction"]
-  end
-
-  ##
-  # Amazon Simple Storage Service [Storage]
-  #
-
- # 將備份檔案儲存到S3
- store_with S3 do |s3|
-    # AWS Credentials
-    s3.access_key_id     = "xxxx"
-    s3.secret_access_key = "xxxx"
-    # Or, to use a IAM Profile:
-    # s3.use_iam_profile = true
-
-    s3.region            = "ap-northeast-1"
-    s3.bucket            = "[bucketname]"
-    s3.path              = "[path]"
-  end
-
-  # 額外的檔案壓縮，例如用戶上傳的圖片，就可以指定路徑
-  # archive.add “/home/deploy/xxxxxxx/shared/public/systems/
-  # archive :my_archive do |archive|
-    # Run the `tar` command using `sudo`
-    # archive.use_sudo
-    # archive.add "/srv"
-  # end
-
-  ##
-  # Gzip [Compressor]
-  #
-  compress_with Gzip
-
-  ##
-  # Mail [Notifier]
-  #
-  # The default delivery method for Mail Notifiers is 'SMTP'.
-  # See the documentation for other delivery options.
-  # 寄信通知，也有很多其他的通知方法，官方文件都有
-  notify_by Mail do |mail|
-    mail.on_success           = true
-    mail.on_warning           = true
-    mail.on_failure           = true
-
-    mail.from                 = "mail.from"
-    mail.to                   = "mail.to"
-    mail.address              = "smtp.mailgun.org"
-    mail.port                 = 587
-    mail.domain               = "mail.domain"
-    mail.user_name            = "mail.user_name"
-    mail.password             = "mail.password"
-
-    mail.authentication       = "plain"
-    mail.encryption           = :starttls
-  end
-end
-</code></pre>
-
-<p>接著打</p>
-
-<p><code>backup perform --trigger my_backup</code></p>
-
-<p>就可以做備份了</p>
-
-<h1>排程</h1>
-
-<p>每次都要手動去備份相當麻煩，因此接下來就是要設定固定時間跑指令來做備份拉。</p>
-
-<p>這邊是用 <a href="https://github.com/javan/whenever">whenever</a> 來跑 crontab</p>
-
-<p>先在 Gemfile. 加入</p>
-
-<p><code>gem 'whenever', :require =&gt; false</code></p>
-
-<p>接著打 <code>wheneverize .</code></p>
-
-<p>就會產生檔案 <code>config/schedule.rb</code></p>
-
-<p>打開檔案</p>
-
-<pre><code class="ruby">env :PATH, ENV['PATH']
-set :output, '/home/[username]/cron.log'
-
-every 1.day, :at =&gt; '4:30 am' do
-  command "/usr/local/bin/backup perform -t my_backup -c /home/[username]/Backup/config.rb"
-end
-</code></pre>
-
-<blockquote><p>切記! 路徑要用絕對路徑啊啊啊!</p></blockquote>
-
-<p>設定就完成囉!</p>
-
-<p>如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：
-<code>require "whenever/capistrano"</code></p>
-
-<p>也可以只更新遠端 whenever<br/>
-<code>cap production whenever:update_crontab</code></p>
-
-<p>另外要看有沒有進排程可以打</p>
-
-<p><code>crontab -e</code></p>
-
-<p>另外 crontab 會分帳號的，所以要用原本的帳號打才會出現。</p>
-
-<blockquote><p>如果只用 whenever 的 rake “XXX” 的話，crontab -e 裡面會先 cd 到專案目錄下，
-這時候 log/cron.log 就沒問題</p>
-
-<p>但是 whenever 的 command “XXXX” 並不會先 cd 到專案目錄下，因此 log/cron.log 會不知道跑去哪裡</p></blockquote>
-
-<h1>匯入資料庫</h1>
-
-<p>有了備份檔案，就能夠直接在本機端匯入檔案<br/>
-匯入方式如下</p>
-
-<p><code>mysql -u root -p db_name &lt; backup.sql</code></p>
-
-<p>就會看到資料都匯入進去了，另外圖片都是存在 s3 ，如果希望圖片也顯示，就將 production 的圖片複製一份到 development 就可以了，因為兩邊設定的 bucket 是不一樣的。</p>
-
-<p>官方文件：<br/>
-<a href="http://backup.github.io/backup/v4/">backup</a><br/>
-<a href="https://github.com/javan/whenever">whenever</a></p>
-
-<p>參考文件：<br/>
-<a href="http://blog.eddie.com.tw/2011/05/24/backup-your-website/">用Backup來備份你的網站</a><br/>
-<a href="http://lemonup.logdown.com/posts/169422-rails-whenever-use-note">Whenever 使用筆記</a><br/>
-<a href="http://programmer.shinchi.tw/2013/12/18/mysql%E5%8C%AF%E5%85%A5%E8%88%87%E5%8C%AF%E5%87%BA%E6%8C%87%E4%BB%A4/">mysql匯入與匯出指令</a></p>
 ]]></content>
   </entry>
   

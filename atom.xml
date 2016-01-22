@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-21T22:21:38+08:00</updated>
+  <updated>2016-01-22T22:31:25+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,350 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Carrierwave 輕鬆做上傳檔案功能]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/22/carrierwave/"/>
+    <updated>2016-01-22T22:12:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/22/carrierwave</id>
+    <content type="html"><![CDATA[<p>另一個上傳檔案的 gem ，相當的實用，和 Paperclip 擇一即可。</p>
+
+<!-- more -->
+
+
+<h1>安裝</h1>
+
+<p>Gemfile</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;carrierwave&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;rmagick&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># or gem &quot;mini_magick&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>carrierwave 上傳檔案</li>
+<li>rmagick 處理圖片</li>
+</ul>
+
+
+<blockquote><p>必須有安裝 ImageMagick 才能使用 rmagick</p></blockquote>
+
+<p>有 homebrew 可以直接</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">imagemagick</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>設定</h1>
+
+<p>先建立資料夾，主要用來存放所有的檔案</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">uploader</span> <span class="n">file</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著在在要存放的 model 新增一筆欄位</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">migration</span> <span class="n">add_file_to_products</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Model</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:file</span><span class="p">,</span> <span class="no">FileUploader</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最後記得再 strong params 加入</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">private</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">product_params</span>
+</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:product</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:file</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Form</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for @product do |f| %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">file_field</span> <span class="ss">:file</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%= f.submit &quot;Submit&quot; %&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>view</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">image_tag</span> <span class="vi">@product</span><span class="o">.</span><span class="n">image_url</span><span class="o">.</span><span class="n">to_s</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>imageurl是預設的helper，to_s是要確定把上傳的路徑轉變為字串，以免發生錯誤。</p>
+
+<h1>RMagick</h1>
+
+<p><code>app/uploaders/file_uploader.rb</code></p>
+
+<p>可以將設定打開，有 RMagick 和 MiniMagick ，都是用來縮圖的。(擇一即可)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Include RMagick or MiniMagick support:</span>
+</span><span class='line'><span class="c1"># include CarrierWave::RMagick</span>
+</span><span class='line'><span class="c1"># include CarrierWave::MiniMagick</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>下面把註解拿掉就可以使用</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Create</span> <span class="n">different</span> <span class="n">versions</span> <span class="n">of</span> <span class="n">your</span> <span class="n">uploaded</span> <span class="ss">files</span><span class="p">:</span>
+</span><span class='line'><span class="n">version</span> <span class="ss">:thumb</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">process</span> <span class="ss">:resize_to_fit</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之後再 view 中只要指定，就會去抓取縮小後的圖檔</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">image_tag</span> <span class="vi">@product</span><span class="o">.</span><span class="n">image_url</span><span class="p">(</span><span class="ss">:thumb</span><span class="p">)</span><span class="o">.</span><span class="n">to_s</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>其他</h1>
+
+<p>限制存取大小<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Validate-attachment-file-size">How to: Validate attachment file size</a></p>
+
+<p>存取圖片長寬<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Get-image-dimensions">How to: Get image dimensions</a></p>
+
+<p>存取圖片大小和類型<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Store-the-uploaded-file-size-and-content-type">How to: Store the uploaded file size and content type</a></p>
+
+<p>官方文件：<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a></p>
+
+<p>參考資料：<br/>
+<a href="http://motion-express.com/blog/20140708-ruby-gem-carrierwave">Ruby gem &lsquo;Carrierwave&rsquo; 上傳檔案神器的簡易安裝與使用</a><br/>
+<a href="http://rubyist.marsz.tw/blog/2012-01-10/carrierwave-guides-with-amazon-s3-and-imagemagick-integration/">使用 Carrierwave 處理檔案上傳 (整合 imagemagick 與 Amazon S3)</a> <br/>
+<a href="https://ruby-china.org/topics/4992">gem &lsquo;carrierwave'简易实用介绍</a><br/>
+<a href="http://springok-blog.logdown.com/posts/2015/10/21/railsgem-how-to-use-carrierwave-upload-pictures">Rails如何使用Carrierwave上傳圖片</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[用 Paperclip 輕鬆做上傳檔案功能]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/22/paperclip/"/>
+    <updated>2016-01-22T22:12:20+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/22/paperclip</id>
+    <content type="html"><![CDATA[<p>在網站中經常會需要用到上傳檔案功能
+而 Paperclip 就是可以在上傳檔案這件事變得更加便利。</p>
+
+<!-- more -->
+
+
+<h1>安裝</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;paperclip&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>設定</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddAvatarColumnsToUsers</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">up</span>
+</span><span class='line'>    <span class="n">add_attachment</span> <span class="ss">:topics</span><span class="p">,</span> <span class="ss">:picture</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">down</span>
+</span><span class='line'>    <span class="n">remove_attachment</span> <span class="ss">:topics</span><span class="p">,</span> <span class="ss">:picture</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>attachment 會自動產生以下四個攔位</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="s2">&quot;picture_file_name&quot;</span><span class="p">,</span>    <span class="ss">limit</span><span class="p">:</span> <span class="mi">255</span>
+</span><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="s2">&quot;picture_content_type&quot;</span><span class="p">,</span> <span class="ss">limit</span><span class="p">:</span> <span class="mi">255</span>
+</span><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">integer</span>  <span class="s2">&quot;picture_file_size&quot;</span><span class="p">,</span>    <span class="ss">limit</span><span class="p">:</span> <span class="mi">4</span>
+</span><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">datetime</span> <span class="s2">&quot;picture_updated_at&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Model</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_attached_file</span> <span class="ss">:picture</span><span class="p">,</span> <span class="ss">styles</span><span class="p">:</span> <span class="p">{</span> <span class="ss">medium</span><span class="p">:</span> <span class="s2">&quot;300x300&gt;&quot;</span><span class="p">,</span> <span class="ss">thumb</span><span class="p">:</span> <span class="s2">&quot;100x100&gt;&quot;</span> <span class="p">},</span> <span class="ss">default_url</span><span class="p">:</span> <span class="s2">&quot;/images/:style/missing.png&quot;</span>
+</span><span class='line'>  <span class="n">validates_attachment_content_type</span> <span class="ss">:picture</span><span class="p">,</span> <span class="ss">content_type</span><span class="p">:</span> <span class="sr">/\Aimage\/.*\Z/</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Form</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for @user, url: users_path, html: { multipart: true } do |form| %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">form</span><span class="o">.</span><span class="n">file_field</span> <span class="ss">:picture</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=%&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="vi">@user</span><span class="o">.</span><span class="n">picture</span><span class="o">.</span><span class="n">exist?</span><span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx"> &lt;%= check_box_tag “remove” ,”1”%&gt;</span> <span class="c1">#刪除按鈕</span>
+</span><span class='line'><span class="o">&lt;%</span><span class="k">end</span><span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在編輯的時候設定如果remove=1就設定圖片欄位為nil就會刪除</p>
+
+<h3>controller</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">params</span><span class="o">[</span><span class="ss">:remove</span><span class="o">]==</span><span class="mi">1</span>
+</span><span class='line'>    <span class="vi">@user</span><span class="o">.</span><span class="n">picture</span><span class="o">=</span><span class="kp">nil</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>View</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= image_tag @topic.picture.url %&gt;</span>
+</span><span class='line'><span class="sx">&lt;%=</span> <span class="n">image_tag</span> <span class="vi">@topic</span><span class="o">.</span><span class="n">picture</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="ss">:medium</span><span class="p">)</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;%= image_tag @topic.picture.url(:thumb) %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>同時上傳多個檔案</h1>
+
+<p>1-to-1 可以使用 <code>fields_for</code> 來達成，但若是 1-to-many ，則必須要搭配 JavaScript 協助動態增減欄位，動態加減數量。</p>
+
+<p>可以使用以下 gem<br/>
+<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a></p>
+
+<p>(注意 Strong Parameter，這個 gem 的 README 沒提到)</p>
+
+<h3>model</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_many</span> <span class="ss">:banners</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
+</span><span class='line'><span class="n">accepts_nested_attributes_for</span> <span class="ss">:banners</span><span class="p">,</span> <span class="ss">allow_destroy</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">:reject_if</span> <span class="o">=&gt;</span> <span class="ss">:all_blank</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>strong params</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:company</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:banners_attributes</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:banner</span><span class="p">,</span> <span class="ss">:banner_alt</span><span class="p">,</span> <span class="ss">:_destroy</span><span class="o">]</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>form</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;image&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Banner</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= c.nested_fields_for :banners do |b| %&gt;</span>
+</span><span class='line'><span class="sr">      &lt;div class=&quot;form-group&quot;&gt;</span>
+</span><span class='line'><span class="sr">      &lt;%= b.file_field :banner%&gt;</span>
+</span><span class='line'><span class="sr">      &lt;%= b.label :banner_alt, &quot;banner_alt&quot; %&gt;&lt;br&gt;</span>
+</span><span class='line'><span class="sr">      &lt;%= b.text_field :banner_alt, :class=&gt;&quot;form-control&quot;%&gt;</span>
+</span><span class='line'><span class="sr">      &lt;%= b.remove_nested_fields_link &#39;Remove me&#39;%&gt;</span>
+</span><span class='line'><span class="sr">    &lt;% end %&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%=c.add_nested_fields_link :banners, &#39;新增Banner&#39;, :class =&gt; &quot;btn btn-default&quot;%&gt;</span>
+</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是  <a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
+
+<h3>可參考之前的</h3>
+
+<p><a href="http://mgleon08.github.io/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/">Ruby on Rails - Accepts_nested_attributes_for</a></p>
+
+<p>官方文件：<br/>
+<a href="https://github.com/thoughtbot/paperclip">paperclip</a><br/>
+<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a><br/>
+<a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
+
+<p>參考文件：<br/>
+<a href="http://chouandy.logdown.com/posts/249554-use-paperclip-implement-any-format-file-uploading">使用 paperclip 實作任意格式檔案上傳</a><br/>
+<a href="http://chouandy.logdown.com/posts/252165-use-paperclip-implement-any-format-file-uploading-to-aws-s3">使用 paperclip 實作任意格式檔案上傳至 AWS S3</a><br/>
+<a href="http://blog.jex.tw/blog/2015/07/13/rails-upload/">Rails 上傳 Upload</a><br/>
+<a href="http://www.railscook.com/recipes/multiple-files-upload-with-nested-resource-using-paperclip-in-rails/">Multiple files upload with nested resource using Paperclip in Rails</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[會員管理系統 Devise-Rolify-Cancan]]></title>
@@ -3935,7 +4279,7 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 </span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#x61;&#105;&#x6c;&#x74;&#x6f;&#x3a;&#x64;&#x65;&#112;&#x6c;&#111;&#121;&#x40;&#x31;&#50;&#51;&#46;&#x31;&#50;&#x33;&#x2e;&#49;&#x32;&#x2e;&#x31;">&#x64;&#101;&#112;&#108;&#111;&#121;&#x40;&#49;&#50;&#51;&#x2e;&#x31;&#x32;&#51;&#x2e;&#49;&#50;&#46;&#49;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#97;&#105;&#x6c;&#x74;&#111;&#x3a;&#x64;&#x65;&#112;&#108;&#x6f;&#121;&#x40;&#x31;&#50;&#x33;&#46;&#x31;&#50;&#51;&#46;&#x31;&#50;&#x2e;&#49;">&#100;&#x65;&#x70;&#108;&#111;&#121;&#x40;&#49;&#50;&#51;&#46;&#x31;&#x32;&#x33;&#x2e;&#x31;&#50;&#x2e;&#49;</a> 就連進去囉!!</p>
 
 <h1>設定快捷鍵</h1>
 
@@ -4125,318 +4469,6 @@ rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/rai
 <li><a href="http://apidock.com/rails/ActiveRecord/Base/attr_protected/class">attr_protected</a></li>
 <li><a href="http://stackoverflow.com/questions/2652907/what-is-the-difference-between-attr-accessibleattributes-attr-protectedat">stackoverflow</a></li>
 </ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Accepts_nested_attributes_for]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/"/>
-    <updated>2015-12-13T18:35:13+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for</id>
-    <content type="html"><![CDATA[<p><code>accepts_nested_attributes_for</code> 是一個蠻常會用到的語法</p>
-
-<p>簡單的來說，就是可以透過這個語法，在更新 data 的時候，同時更新其他 model 裡的 data<br/>
-所以並不是每個 model 都必須要有 controller 才能夠做更新的動作</p>
-
-<!-- more -->
-
-
-<p>這裏有兩種情境</p>
-
-<h1>One-to-one</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">has_one</span> <span class="ss">:author</span>
-</span><span class='line'>  <span class="n">accepts_nested_attributes_for</span> <span class="ss">:author</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">book</span><span class="p">:</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Harry Potter&#39;</span><span class="p">,</span> <span class="ss">author_attributes</span><span class="p">:</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;J. K. Rowling&#39;</span> <span class="p">}</span> <span class="p">}</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">book</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:book</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'><span class="n">book</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">name</span> <span class="c1"># =&gt; &#39;J. K. Rowling&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>透過 params 更新 Book 的 name<br/>
-同時透過 <code>author_attributes: { name: 'J. K. Rowling' }</code> 更新 Author 的 name</p>
-
-<p>當然 update 同樣適用</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">book</span><span class="p">:</span> <span class="p">{</span> <span class="ss">author_attributes</span><span class="p">:</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;J. K. Rowling&#39;</span> <span class="p">}</span> <span class="p">}</span> <span class="p">}</span>
-</span><span class='line'><span class="n">book</span><span class="o">.</span><span class="n">update</span> <span class="n">params</span><span class="o">[</span><span class="ss">:book</span><span class="o">]</span>
-</span><span class='line'><span class="n">book</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">name</span> <span class="c1"># =&gt; &#39;J. K. Rowling&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>另外值得注意的是</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">accepts_nested_attributes_for</span> <span class="ss">:author</span><span class="p">,</span> <span class="ss">:allow_destroy</span> <span class="o">=&gt;</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">:reject_if</span> <span class="o">=&gt;</span> <span class="ss">:all_blank</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>:allow_destroy =&gt; true</code> 可以在表單增加一個 _destroy 核選塊來表示刪除<br/>
-<code>:reject_if =&gt; :all_blank</code> 表示在什麼條件下就當作沒有要動作， all_blank 表示如果資料都是空的，就不執行</p>
-
-<h1>One-to-many</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:pages</span>
-</span><span class='line'>  <span class="n">accepts_nested_attributes_for</span> <span class="ss">:page</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">params</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">book</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Harry Potter&#39;</span><span class="p">,</span> <span class="ss">page_attributes</span><span class="p">:</span> <span class="o">[</span>
-</span><span class='line'>      <span class="p">{</span> <span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Philosopher&#39;s Stone&quot;</span> <span class="p">},</span>
-</span><span class='line'>      <span class="p">{</span> <span class="ss">title</span><span class="p">:</span> <span class="s2">&quot;Chamber of Secrets&quot;</span> <span class="p">}</span>
-</span><span class='line'>  <span class="o">]</span>
-</span><span class='line'><span class="p">}}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">book</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:book</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'><span class="n">book</span><span class="o">.</span><span class="n">pages</span><span class="o">.</span><span class="n">length</span> <span class="c1"># =&gt; 2</span>
-</span><span class='line'><span class="n">book</span><span class="o">.</span><span class="n">pages</span><span class="o">.</span><span class="n">first</span><span class="o">.</span><span class="n">title</span> <span class="c1"># =&gt; &#39;Philosopher&#39;s Stone&#39;</span>
-</span><span class='line'><span class="n">book</span><span class="o">.</span><span class="n">pages</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">title</span> <span class="c1"># =&gt; &#39;Chamber of Secrets&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>通常會搭配 fields_for 來嵌入到同一個表單</h1>
-
-<h3>One-to-one</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for @book do |b| %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">b</span><span class="o">.</span><span class="n">label</span> <span class="ss">:name</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;%= b.text_field : name %&gt;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="o">&lt;</span><span class="sx">%= b.fields_for :author do |a| %&gt;</span>
-</span><span class='line'><span class="sx">   &lt;%=</span> <span class="n">a</span><span class="o">.</span><span class="n">label</span> <span class="ss">:name</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">       &lt;%= a.text_field : name %&gt;</span>
-</span><span class='line'>      
-</span><span class='line'>        <span class="o">&lt;</span><span class="sx">% unless </span><span class="n">a</span><span class="o">.</span><span class="n">object</span><span class="o">.</span><span class="n">new_record?</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">          &lt;%= a.label :_destroy, &#39;Remove:&#39; %&gt;</span>
-</span><span class='line'>        <span class="o">&lt;</span><span class="sx">%= a.check_box :_destroy %&gt;</span>
-</span><span class='line'><span class="sx">       &lt;% end %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;% end %&gt;</span>
-</span><span class='line'><span class="sx">  </span>
-</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">b</span><span class="o">.</span><span class="n">submit</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>這樣就能夠透過原本是 @book 的表單，裡面再放入 author 的欄位進行更新。</p>
-
-<h3>One-to-many</h3>
-
-<p>one-to-many 會比較麻煩，因為當新增的時候，並不知道要新增幾個，因此會動用到 jquery 的動態新增，就是可以在表單上面一直增加欄位。</p>
-
-<p>不過幸好有 gem 可以解決了，以下有幾個 gem</p>
-
-<ul>
-<li><a href="https://github.com/ryanb/nested_form">nested_form</a> ( <a href="http://motion-express.com/blog/20140722-ruby-gem-nested-form">網路上教學</a></li>
-<li><a href="https://github.com/nathanvda/cocoon">cocoon</a></li>
-<li><a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a></li>
-</ul>
-
-
-<h1>strong parameter</h1>
-
-<p>最後記得要加 strong parameter<br/>
-one-to-one 和 one-to-many 都要</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">book_params</span>
-</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:book</span><span class="p">)</span>
-</span><span class='line'>        <span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">pages_attributes</span><span class="p">:</span><span class="o">[</span><span class="ss">:title</span><span class="p">,</span> <span class="ss">:_destroy</span><span class="p">,</span> <span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<blockquote><p>每個 gem strong parameter 的方式都有點不太一樣，記得要看一下</p></blockquote>
-
-<h1>helper</h1>
-
-<p>book_helper.rb</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">setup_author</span><span class="p">(</span><span class="n">book</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">book</span><span class="o">.</span><span class="n">build_author</span> <span class="k">if</span> <span class="n">book</span><span class="o">.</span><span class="n">author</span><span class="o">.</span><span class="n">blank?</span>
-</span><span class='line'>    <span class="c1">#one-to-one 用 build_author ， one-to-many 可以用 authors.build or authors.new </span>
-</span><span class='line'>    <span class="n">book</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果一開始沒設定的話，在 book 表單上是看不到 author 的欄位，因為一開始還沒 build  <br/>
-因此要給它一個判斷，如果是 nil 就先 build_author 給它</p>
-
-<p>接著用 <code>setup_author(@book)</code> 來置換 form_for 中的 @book</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for setup_author(@book), :url =</span><span class="o">&gt;</span> <span class="n">books_path</span> <span class="k">do</span> <span class="o">|</span><span class="n">b</span><span class="o">|</span> <span class="sx">%&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="sx">...</span>
-</span><span class='line'>
-</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/form_helpers.html#building-complex-forms">Guides</a><br/>
-<a href="http://rails.ruby.tw/form_helpers.html#%E6%89%93%E9%80%A0%E8%A4%87%E9%9B%9C%E8%A1%A8%E5%96%AE">Guides 中文</a><br/>
-<a href="http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html">accepts_nested_attributes_for </a> <br/>
-<a href="http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for">fields_for</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Delegate]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-delegate/"/>
-    <updated>2015-12-13T12:25:16+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/13/ruby-on-rails-delegate</id>
-    <content type="html"><![CDATA[<p>神奇語法delegate，之前就看過這個語法，不過一直搞不懂在幹什麼？<br/>
-研究了之後，發現是個很magic的用法!!</p>
-
-<!-- more -->
-
-
-<blockquote><p>說穿了其實是讓 class 的 object 可以直接呼叫到另一個 class 的 method</p></blockquote>
-
-<p>還是看範例比較快</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Cart</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:cart_items</span>
-</span><span class='line'>  <span class="n">delegate</span> <span class="ss">:empty?</span><span class="p">,</span> <span class="ss">:clear</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:line_items</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CartItem</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:cart</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>上面有兩個 model 的關係是 one-to-many<br/>
-一般正常來說必須要<code>@cart.cart_items.empty?</code> 才能夠從 cart 關聯到 cart_items 在呼叫他的方法 <code>empty?</code></p>
-
-<p>不過因為加上了</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">delegate</span> <span class="ss">:empty?</span><span class="p">,</span> <span class="ss">:clear</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:line_items</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p></p>
-
-<p>所以直接呼叫 <code>@cart.empty?</code> 就可以回傳 <code>@cart.cart_items.empty?</code><br/>
-仔細觀察後，其實也就等於下面的 method (但是可以一行解決下面的語法</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">empty?</span>
-</span><span class='line'>    <span class="n">cart_items</span><span class="o">.</span><span class="n">empty?</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>另外還可以加上 <code>prefix: true</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">delegate</span> <span class="ss">:empty?</span><span class="p">,</span> <span class="ss">:clear</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:line_items</span><span class="p">,</span> <span class="ss">prefix</span><span class="p">:</span> <span class="kp">true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>變成直接呼叫 <code>@cart.cart_items_empty?</code> 字面上面的更加清楚!</p>
-
-<p>在官方API文件上甚至可以看到
-可以加上 <code>allow_nil: true</code> 允許 nil
-甚至是 prefix 可以加上別的字，變成</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">delegate</span> <span class="ss">:empty?</span><span class="p">,</span> <span class="ss">:clear</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:line_items</span><span class="p">,</span> <span class="ss">prefix</span><span class="p">:</span> <span class="n">mycart</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>就變成 <code>@cart. mycart_empty?</code><br/>
-蠻酷的吧!</p>
-
-<p>官方文件：
-<a href="http://apidock.com/rails/Module/delegate">delegate</a></p>
-
-<ol>
-<li>:to - Specifies the target object</li>
-<li>:prefix - Prefixes the new method with the target name or a custom prefix</li>
-<li>:allow_nil - if set to true, prevents a NoMethodError to be raised</li>
-</ol>
 
 ]]></content>
   </entry>
