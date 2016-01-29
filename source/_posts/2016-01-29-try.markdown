@@ -1,0 +1,66 @@
+---
+layout: post
+title: "用 try 來防止 nil"
+date: 2016-01-29 21:35:23 +0800
+comments: true
+categories: rails rails語法
+---
+
+在 rails 當中，經常會出現 nil 值，而爆錯，所以經常要去判斷  
+這個 try 就是簡化這個判斷產生的，懂得使用的話會非常好用。
+
+<!-- more -->
+
+但缺點就是每個地方都要去設定，即使是同一個值  
+因此另外一個解決方式就是用之前介紹的 [delegate](http://mgleon08.github.io/blog/2015/12/13/ruby-on-rails-delegate/) 也可以達到同樣的效果。
+
+#try
+
+```ruby
+# without try
+unless @number.nil?
+  @number.next
+end
+ 
+# with try
+@number.try(:next)
+```
+
+將原本要寫三行簡短成一行。
+
+```ruby
+@user = User.create(name: "hello")
+@user.try(:name=, "haha")
+#@user.name = "haha" unless @user.nil?
+
+@user.name 
+#=> "haha"
+
+#若改成@user.try(:name<<, "haha")
+#則會變成Operation 的 << 而爆錯
+#@user.name << "haha" unless @user.nil?
+```
+
+也可以放入 block
+
+```ruby
+#@user.try { |u| "#{u.first_name} #{u.last_name}" }
+```
+
+###用try 防止例外出現
+
+```ruby
+#假設 @user = nil
+
+@user.age
+#=> NoMethodError: undefined method `age' for #<User:0x007f80b74c70e0>
+#因為 nil.age
+
+@user.try(:age)
+#=> nil
+#因為 nil.age unless nil
+```
+
+參考文件：  
+[try - rails_github](https://github.com/rails/rails/blob/master/activesupport/lib/active_support/core_ext/object/try.rb)  
+[try](http://guides.rubyonrails.org/active_support_core_extensions.html#try)

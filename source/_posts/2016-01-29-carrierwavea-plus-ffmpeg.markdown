@@ -1,0 +1,98 @@
+---
+layout: post
+title: "用 carrierwave + FFMPEG 影片轉檔"
+date: 2016-01-29 20:26:02 +0800
+comments: true
+categories: gem rails
+---
+
+若是上傳的檔案是影片，並且要對影片做其他處理，就可以使用 FFMPRG 來處理。
+
+<!-- more --> 
+
+#Gem
+```ruby
+gem 'carrierwave'
+gem 'streamio-ffmpeg'
+```
+
+#設定
+`application.rb`
+
+```ruby
+require 'carrierwave'
+```
+
+`lib/carrierwave/ffmpeg.rb`
+
+```ruby
+require 'streamio-ffmpeg'
+module CarrierWave
+  module FFMPEG
+    module ClassMethods
+      def resample(bitrate)
+        process :resample => bitrate
+      end
+    end
+
+    def resample(bitrate)
+      directory = File.dirname(current_path)
+      tmpfile = File.join(directory, "tmpfile")
+
+      FileUtils.mv( current_path, tmpfile )
+
+      file = ::FFMPEG::Movie.new(tmpfile)
+      file.transcode(current_path, video_bitrate: bitrate)
+
+      File.delete(tmpfile)
+    end
+  end
+end
+```
+
+`app/uploaders/video_uploader.rb`
+
+```ruby
+require File.join(Rails.root, "lib", "carrierwave", "ffmpeg")
+
+class VideoUploader < CarrierWave::Uploader::Base
+  include CarrierWave::FFMPEG
+
+  def store_dir
+    "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
+  end
+
+  def extension_white_list
+    %w(mp4 flv)
+  end
+
+  version :bitrate_800k do
+    process :resample => "800k"
+  end
+
+  version :bitrate_500k, from_version: :bitrate_800k do
+    process :resample => "500k"
+  end
+
+end
+
+```
+
+也可以用 ruby 直接下 ffmpef 的指令
+
+Use %x or '`':
+
+```ruby
+`ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path}`
+%x(ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path})
+```
+
+官方文件：  
+[carrierwave](https://github.com/carrierwaveuploader/carrierwave)  
+[streamio-ffmpeg](https://github.com/streamio/streamio-ffmpeg)  
+[FFMPEG](https://www.ffmpeg.org/)  
+
+參考文件：  
+[Create FFMPEG processor for Carrierwave in Rails 3](http://www.freezzo.com/2010/12/23/create-ffmpeg-processor-for-carrierwave-in-rails-3/)  
+[CarrierWave - basic video conversion](https://prograils.com/posts/carrierwave-basic-video-conversion)  
+[Running command line commands within Ruby script](http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script)  

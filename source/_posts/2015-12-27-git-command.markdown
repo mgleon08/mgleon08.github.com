@@ -120,8 +120,8 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 * `git rebase` 重新修改特定分支的「基礎版本」，把另外一個分支的變更，當成這個分支的基礎。(如果接著直接 merge，則是會直接 fast-forward ，若想保留資訊則加上  `--no-ff`)
 * [Git-rebase 小筆記](https://blog.yorkxin.org/posts/2011/07/29/git-rebase/)
 * `git rebase [SHA1] -i` 可以只接更改某個 commit 之後所有的紀錄。
-* [rebase -i 1](https://github.com/doggy8088/Learn-Git-in-30-days/blob/master/docs/22%20%E4%BF%AE%E6%AD%A3%20commit%20%E9%81%8E%E7%9A%84%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2%E7%B4%80%E9%8C%84%20Part%204%20(rebase).markdown)
-* [rebase -i 2](https://github.com/doggy8088/Learn-Git-in-30-days/blob/master/docs/23%20%E4%BF%AE%E6%AD%A3%20commit%20%E9%81%8E%E7%9A%84%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2%E7%B4%80%E9%8C%84%20Part%205%20(rebase%202).markdown)
+* [rebase -i 修正 commit 過的版本歷史紀錄1](https://github.com/doggy8088/Learn-Git-in-30-days/blob/master/docs/22%20%E4%BF%AE%E6%AD%A3%20commit%20%E9%81%8E%E7%9A%84%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2%E7%B4%80%E9%8C%84%20Part%204%20(rebase).markdown)
+* [rebase -i 修正 commit 過的版本歷史紀錄2](https://github.com/doggy8088/Learn-Git-in-30-days/blob/master/docs/23%20%E4%BF%AE%E6%AD%A3%20commit%20%E9%81%8E%E7%9A%84%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2%E7%B4%80%E9%8C%84%20Part%205%20(rebase%202).markdown)
 
 ###cherry-pick
 * `git cherry-pick` 手動挑出其他 branch 中的 commit，合併進來。
