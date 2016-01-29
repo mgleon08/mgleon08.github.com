@@ -1,0 +1,739 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>用 Rspec + Factory Girl 寫測試 - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="程式寫久之後，就會發現測試的重要性!
+因此來介紹 rails 中，比內建測試還好用的 rspec 搭配 factory_girl 測試種類 單元測試(Unit test)
+針對每個程式各個最小單位進行測試，像是在 controller 就單單只測試 controller 裡面的 action， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/01/29/rspec-plus-factory-girl">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">用 Rspec + Factory Girl 寫測試</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-01-29T20:36:46+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:36 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>程式寫久之後，就會發現測試的重要性!<br/>
+因此來介紹 rails 中，比內建測試還好用的 rspec 搭配 factory_girl</p>
+
+<!-- more -->
+
+
+<h1>測試種類</h1>
+
+<ul>
+<li><p>單元測試(Unit test)<br/>
+針對每個程式各個最小單位進行測試，像是在 controller 就單單只測試 controller 裡面的 action，而裡面產生的 model,method，都用假的方式來取代，已確保有錯誤時，可以很快知道是哪邊有問題 。</p></li>
+<li><p>整合測試(Integration test)<br/>
+主要是用來測試，每個 class 的互動，像是 controller 裡面會 call 到 model ，也會 call 到 view ，並測試回傳的值是否正確。</p></li>
+</ul>
+
+
+<h1>寫測試的好處</h1>
+
+<ul>
+<li>Instant Feedback 即時反饋（寫測試的時間 &lt; debug的時間）</li>
+<li>回歸測試及重構 （重構時就不需要再重複的測試）</li>
+<li>幫助設計API（TDD = 先測試，在實作）</li>
+<li>一種程式文件（可以讓很快就知道之前api怎麼寫的）</li>
+</ul>
+
+
+<h1>慣例</h1>
+
+<ul>
+<li>⼀個 rb 檔案配⼀個同名的 _spec.rb 檔案</li>
+<li>guard 等⼯具容易設定<br/>
+<a href="https://github.com/guard/guard-rspec">guard-rspec</a> 程式⼀修改完存檔，⾃動跑對應的測試（bundle後，輸入 guard init repec 初始化，打guard（bundle exec guard 真正執行））</li>
+<li>editor 有⽀援快速鍵</li>
+<li>describe “#name” 是 instance method</li>
+<li>describe “.name” 是 class method</li>
+<li>測試spec盡量比較簡單清楚，可以不用DRY，實作才會要DRY</li>
+</ul>
+
+
+<h1>輸出格式</h1>
+
+<ul>
+<li>rspec filename.rb 預設不產⽣⽂件</li>
+<li>rspec filename.rb -fd 輸出 specdoc ⽂件</li>
+<li>rspec filename.rb -fh 輸出 html ⽂件</li>
+</ul>
+
+
+<h1>安裝</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span><span class="p">,</span> <span class="ss">:test</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;rspec-rails&#39;</span>
+</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;factory_girl_rails&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>設定</h1>
+
+<h3>顏色描述</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#vi .rspec檔案輸入</span>
+</span><span class='line'><span class="o">--</span><span class="n">color</span> <span class="c1">#顯示顏色</span>
+</span><span class='line'><span class="o">--</span><span class="nb">format</span> <span class="c1">#documentation顯示描述</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>將不需要的檔案關閉</h3>
+
+<p>generate 新的 controller 或是 model 時，rails 就會很聰明的順便新增 sepc 檔案，但有時候我們會希望用到的時候再去建立即可，所以需要關閉就輸入以下指令。</p>
+
+<p><code>/config/application.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">generators</span> <span class="k">do</span> <span class="o">|</span><span class="n">g</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">g</span><span class="o">.</span><span class="n">view_specs</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="n">g</span><span class="o">.</span><span class="n">helper_specs</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="n">g</span><span class="o">.</span><span class="n">request_specs</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="n">g</span><span class="o">.</span><span class="n">controller_specs</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="n">g</span><span class="o">.</span><span class="n">routing_specs</span> <span class="kp">false</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Rspec</h1>
+
+<h3>model</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rails_helper&#39;</span> <span class="c1">#必須載入才能使用裡面的方法</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="no">Post</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="ss">:model</span> <span class="k">do</span> <span class="c1">#RSpec 可省略</span>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;is accessible&quot;</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">create!</span>
+</span><span class='line'>        <span class="n">expect</span><span class="p">(</span><span class="n">post</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span><span class="p">(</span><span class="no">Post</span><span class="o">.</span><span class="n">last</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;has title and content columns&quot;</span> <span class="k">do</span>
+</span><span class='line'>        <span class="n">columns</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">column_names</span>
+</span><span class='line'>        <span class="n">expect</span><span class="p">(</span><span class="n">columns</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="kp">include</span><span class="p">(</span><span class="s2">&quot;id&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>describe</code>, <code>context</code> 描述要測試的是什麼，可以用nested</li>
+<li><code>it</code>, <code>specify</code>, <code>example</code> 就是⼀⼩段測試</li>
+<li><code>expect(…).to</code> 或 <code>expect(…).to_not</code> 定義期望</li>
+<li><code>eq</code> 預期的是否和自己設定的相等</li>
+<li><code>include</code> 預期的是否有包括自己設定的值</li>
+<li><code>describe</code> 和 <code>it</code> 前面加上 x 代表 pending，執行 rspec 就會先跳拓</li>
+<li><a href="https://www.relishapp.com/rspec/rspec-expectations/v/3-4/docs/built-in-matchers/change-matcher">其他方法</a></li>
+</ul>
+
+
+<h3>Routing spec syntax</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;/events&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span><span class="s2">&quot;events#index&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;/widgets/1/edit&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span> <span class="n">be_routable</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;/posts/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>      <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;posts&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:action</span> <span class="o">=&gt;</span> <span class="s2">&quot;show&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>      <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Controller spec syntax</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span><span class="p">(</span><span class="ss">:new</span><span class="p">)</span>
+</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">redirect_to</span><span class="p">(</span><span class="n">events_url</span><span class="p">)</span>
+</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">have_http_status</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">assigns</span><span class="p">(</span><span class="ss">:event</span><span class="p">))</span><span class="o">.</span><span class="n">to</span> <span class="n">be_a_new</span><span class="p">(</span><span class="no">Event</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>View spec syntax</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span>
+</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="kp">include</span><span class="p">(</span><span class="s2">&quot;Title&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span><span class="p">(</span><span class="ss">partial</span><span class="p">:</span> <span class="s2">&quot;_form&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Helper spec syntax</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">helper</span><span class="o">.</span><span class="n">your_method</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>request</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="s2">&quot;Users&quot;</span><span class="p">,</span> <span class="ss">:type</span> <span class="o">=&gt;</span> <span class="ss">:request</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">before</span> <span class="k">do</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;GET /users&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">get</span> <span class="s2">&quot;/users&quot;</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">have_http_status</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span><span class="p">(</span><span class="ss">:index</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="kp">include</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s2">&quot;GET /user/:id&quot;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">get</span> <span class="s2">&quot;/user&quot;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="vi">@user</span><span class="o">.</span><span class="n">id</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">have_http_status</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span><span class="p">(</span><span class="ss">:index</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="o">.</span><span class="n">body</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="kp">include</span><span class="p">(</span><span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>request 通常直接從網址進行 Get 或 Post ，接著判斷傳回來的值是否正確。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before</span> <span class="k">do</span>
+</span><span class='line'>  <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">before</span><span class="p">(</span><span class="ss">:all</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>  <span class="vi">@user</span> <span class="o">=</span> <span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;hello&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#也有 after(:each)，afte(:all)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>before(:each) 每段it之前執行</li>
+<li>before(:all) 整段describe前只執行一次</li>
+<li>after(:each) 每段it之後執行</li>
+<li>after(:all) 整段describe後只執行一次</li>
+<li>(:each) 可以不用加，預設為(:each)</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">let</span><span class="p">(</span><span class="ss">:user</span><span class="p">){</span><span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s2">&quot;hello&quot;</span><span class="p">)}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>相較於 before(:each) 可增加執⾏速度</li>
+<li>有使⽤到才會運算(lazy)，並且在同⼀個 example 測試中多次呼叫會 Memoized 快取起來。</li>
+<li>let! 則是⾮ lazy 版本</li>
+</ul>
+
+
+<h1>factory_girl</h1>
+
+<p>到 <code>spec/rails_helper.rb</code> 設定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">include</span> <span class="no">FactoryGirl</span><span class="o">::</span><span class="no">Syntax</span><span class="o">::</span><span class="no">Methods</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 <code>spec</code> 底下新增 <code>factories</code> 資料夾，接著在裡面新增相對應的物件名稱，像是 <code>user.rb</code></p>
+
+<p><code>spec/factories/user.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">FactoryGirl</span><span class="o">.</span><span class="n">define</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">factory</span> <span class="ss">:user</span><span class="p">,</span> <span class="ss">class</span><span class="p">:</span> <span class="no">User</span><span class="s2">&quot; do</span>
+</span><span class='line'><span class="s2">    name &quot;</span><span class="n">video1</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="s2">    age  18</span>
+</span><span class='line'><span class="s2">    </span>
+</span><span class='line'><span class="s2">    trait :child do</span>
+</span><span class='line'><span class="s2">      age 6</span>
+</span><span class='line'><span class="s2">      #after(:create) {|user| user.add_role(:admin) } </span>
+</span><span class='line'><span class="s2">      #after(:build)  {|user| user.add_role(:admin) } </span>
+</span><span class='line'><span class="s2">      #也可以設定 create 之後的設定</span>
+</span><span class='line'><span class="s2">    end</span>
+</span><span class='line'><span class="s2">  end</span>
+</span><span class='line'><span class="s2">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這樣在 spec 裡面就可以直接建立假資料</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">before</span> <span class="k">do</span>
+</span><span class='line'>  <span class="vi">@user</span>  <span class="o">=</span> <span class="no">FactoryGirl</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span> <span class="c1">#FactoryGirl 可省略</span>
+</span><span class='line'>  <span class="vi">@child</span> <span class="o">=</span> <span class="n">create</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="ss">:child</span><span class="p">)</span> <span class="c1">#就只替換掉 age</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>為什麼要假物件?</h3>
+
+<ul>
+<li>無法控制回傳值的外部系統 (例如第三⽅ web service)</li>
+<li>建構正確的回傳值很⿇煩 (例如得準備很多假資料)</li>
+<li>可能很慢，拖慢測試速度 (例如耗時的運算)</li>
+<li>有難以預測的回傳值 (例如亂數⽅法)</li>
+<li>還沒開始實作 (特別是採⽤ TDD 流程)</li>
+</ul>
+
+
+<h1>Capybara</h1>
+
+<p>RSpec除了可以拿來寫單元程式，我們也可以把測試的層級拉高做整合性測試，以Web應用程式來說，就是去自動化瀏覽器的操作，實際去向網站伺服器請求，然後驗證出來的HTML是正確的輸出。</p>
+
+<p><a href="https://github.com/jnicklas/capybara">capybara</a>就是一套可以搭配的工具，用來模擬瀏覽器行為</p>
+
+<h1>CI server</h1>
+
+<p>CI(Continuous Integration)
+伺服器的用處是每次有人Commit就會自動執行編譯及測試(Ruby不用編譯，所以主要的用處是跑測試)，並回報結果，如果有人送交的程式搞砸了回歸測試，馬上就有回饋可以知道。</p>
+
+<p><a href="https://circleci.com">circleci.com</a></p>
+
+<p>建立 <code>circle.yml</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">machine</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">timezone</span><span class="p">:</span>
+</span><span class='line'>    <span class="no">Asia</span><span class="o">/</span><span class="no">Taipei</span>
+</span><span class='line'>  <span class="ss">ruby</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">version</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'><span class="ss">dependencies</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">pre</span><span class="p">:</span>
+</span><span class='line'>    <span class="o">-</span> <span class="n">rvm</span> <span class="n">use</span> <span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">2</span>
+</span><span class='line'>    <span class="o">-</span> <span class="n">gem</span> <span class="n">install</span> <span class="n">bundler</span>
+</span><span class='line'>    <span class="o">-</span> <span class="n">gem</span> <span class="n">install</span> <span class="n">rubocop</span>
+</span><span class='line'>  <span class="ss">post</span><span class="p">:</span>
+</span><span class='line'>    <span class="o">-</span> <span class="n">gem</span> <span class="n">update</span> <span class="n">rake</span>
+</span><span class='line'><span class="ss">database</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">override</span><span class="p">:</span>
+</span><span class='line'>    <span class="o">-</span> <span class="n">cp</span> <span class="n">config</span><span class="o">/</span><span class="n">database</span><span class="o">.</span><span class="n">yml</span><span class="o">.</span><span class="n">example</span> <span class="n">config</span><span class="o">/</span><span class="n">database</span><span class="o">.</span><span class="n">yml</span>
+</span><span class='line'>    <span class="o">-</span> <span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">create</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span> <span class="o">--</span><span class="n">trace</span>
+</span><span class='line'><span class="nb">test</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">override</span><span class="p">:</span>
+</span><span class='line'>    <span class="o">-</span> <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rspec</span> <span class="o">--</span><span class="n">color</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>建立 <code>config/database.yml.example</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">default</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">default</span>
+</span><span class='line'>  <span class="ss">adapter</span><span class="p">:</span> <span class="n">mysql2</span>
+</span><span class='line'>  <span class="ss">encoding</span><span class="p">:</span> <span class="n">utf8</span>
+</span><span class='line'>  <span class="ss">host</span><span class="p">:</span> <span class="n">localhost</span>
+</span><span class='line'>  <span class="ss">username</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">password</span><span class="p">:</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">test</span><span class="p">:</span>
+</span><span class='line'>  <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">default</span>
+</span><span class='line'>  <span class="ss">database</span><span class="p">:</span> <span class="n">test_db</span>
+</span><span class='line'>
+</span><span class='line'><span class="ss">development</span><span class="p">:</span>
+</span><span class='line'>  <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">default</span>
+</span><span class='line'>  <span class="ss">database</span><span class="p">:</span> <span class="n">development_db</span>
+</span><span class='line'>
+</span><span class='line'><span class="ss">production</span><span class="p">:</span>
+</span><span class='line'>  <span class="o">&lt;&lt;</span><span class="p">:</span> <span class="o">*</span><span class="n">default</span>
+</span><span class='line'>  <span class="ss">database</span><span class="p">:</span> <span class="n">production_db</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著到 <a href="https://circleci.com">circleci.com</a> 和 github 帳號做連結。<br/>
+接著將要跑的 project 加進去，之後只要 push 到 github 就會自動跑了！</p>
+
+<h1>大師引言</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">大部份都是寫</span><span class="n">model</span><span class="err">的測試</span>
+</span><span class='line'><span class="n">controller</span><span class="err">偶爾會寫</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">其他的因為後面有驗收測試也會測試到，所以不浪費時間去寫測試</span>
+</span><span class='line'><span class="err">驗收測試多半是測試子路徑，不會測到所有的條件，所以個別的小項測試，就直接在</span><span class="n">model</span><span class="err">寫就好了</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">工程是寫到</span><span class="n">request</span><span class="err">就很棒了</span>
+</span><span class='line'><span class="n">feature</span> <span class="err">比較像是</span><span class="no">QA</span><span class="err">在寫的</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://betterspecs.org/">Better Specs</a><br/>
+<a href="https://www.relishapp.com/">Relish</a></p>
+
+<p>Gem：<br/>
+<a href="https://github.com/rspec/rspec-rails">rspec-rails</a><br/>
+<a href="https://github.com/thoughtbot/factory_girl_rails">factory_girl_rails</a>  <br/>
+<a href="https://github.com/guard/guard-rspec">guard-rspec</a><br/>
+<a href="https://github.com/jnicklas/capybara">capybara</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/testing.html">自動化測試</a><br/>
+<a href="http://motion-express.com/trainings/rspec-rails-1">RSpec-Rails (基礎篇)</a><br/>
+<a href="http://motion-express.com/blog/20150320-custom-helpers-in-rspec">RSpec-Rails當中自訂methods及helpers</a><br/>
+<a href="http://motion-express.com/blog/20150327-rspec-rails-testing-module">RSpec-Rails 針對module進行unit test</a><br/>
+<a href="http://www.slideshare.net/ihower/rspec-7394497">RSpec 讓你愛上寫測試</a><br/>
+<a href="https://blog.alphacamp.co/2015/03/02/tdd-kata/">程式設計師升級必練內功：TDD Kata</a><br/>
+<a href="https://codility.com/programmers/lessons/">codility 練習</a><br/>
+<a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-01-29T20:36:46+08:00'><span class='date'><span class='date-month'>Jan</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:36 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/gem/'>gem</a>, <a class='category' href='/blog/categories/rails/'>rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/01/29/rspec-plus-factory-girl/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/01/29/rspec-plus-factory-girl/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/01/29/carrierwavea-plus-ffmpeg/" title="Previous Post: 用 carrierwave + FFMPEG 影片轉檔">&laquo; 用 carrierwave + FFMPEG 影片轉檔</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/01/29/association-reference/" title="Next Post: Association Reference 建立關聯">Association Reference 建立關聯 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/01/29/rspec-plus-factory-girl/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/01/29/rspec-plus-factory-girl/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

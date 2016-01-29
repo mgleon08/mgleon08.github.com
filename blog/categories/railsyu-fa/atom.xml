@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails語法 | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/railsyu-fa/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-22T22:44:18+08:00</updated>
+  <updated>2016-01-29T21:40:07+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,69 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Try 來防止 Nil]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/29/try/"/>
+    <updated>2016-01-29T21:35:23+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/29/try</id>
+    <content type="html"><![CDATA[<p>在 rails 當中，經常會出現 nil 值，而爆錯，所以經常要去判斷<br/>
+這個 try 就是簡化這個判斷產生的，懂得使用的話會非常好用。</p>
+
+<!-- more -->
+
+
+<p>但缺點就是每個地方都要去設定，即使是同一個值<br/>
+因此另外一個解決方式就是用之前介紹的 <a href="http://mgleon08.github.io/blog/2015/12/13/ruby-on-rails-delegate/">delegate</a> 也可以達到同樣的效果。</p>
+
+<h1>try</h1>
+
+<pre><code class="ruby"># without try
+unless @number.nil?
+  @number.next
+end
+
+# with try
+@number.try(:next)
+</code></pre>
+
+<p>將原本要寫三行簡短成一行。</p>
+
+<pre><code class="ruby">@user = User.create(name: "hello")
+@user.try(:name=, "haha")
+#@user.name = "haha" unless @user.nil?
+
+@user.name 
+#=&gt; "haha"
+
+#若改成@user.try(:name&lt;&lt;, "haha")
+#則會變成Operation 的 &lt;&lt; 而爆錯
+#@user.name &lt;&lt; "haha" unless @user.nil?
+</code></pre>
+
+<p>也可以放入 block</p>
+
+<pre><code class="ruby">#@user.try { |u| "#{u.first_name} #{u.last_name}" }
+</code></pre>
+
+<h3>用try 防止例外出現</h3>
+
+<pre><code class="ruby">#假設 @user = nil
+
+@user.age
+#=&gt; NoMethodError: undefined method `age' for #&lt;User:0x007f80b74c70e0&gt;
+#因為 nil.age
+
+@user.try(:age)
+#=&gt; nil
+#因為 nil.age unless nil
+</code></pre>
+
+<p>參考文件：<br/>
+<a href="https://github.com/rails/rails/blob/master/activesupport/lib/active_support/core_ext/object/try.rb">try - rails_github</a><br/>
+<a href="http://guides.rubyonrails.org/active_support_core_extensions.html#try">try</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails - 用 Include 和 Join 避免 N+1 Query]]></title>
@@ -899,133 +962,6 @@ content_tag("select", options, multiple: true)
 <a href="http://blog.xdite.net/posts/2011/12/09/how-to-design-helpers">如何運用 / 設計 Rails Helper (1)</a><br/>
 <a href="http://blog.xdite.net/posts/2011/12/10/how-to-design-helpers-2">如何運用 / 設計 Rails Helper (2)</a><br/>
 <a href="http://blog.xdite.net/posts/2012/01/16/how-to-design-helper-3">如何運用 / 設計 Rails Helper (3)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Polymorphic Associations and STI]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti/"/>
-    <updated>2015-12-20T14:47:50+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti</id>
-    <content type="html"><![CDATA[<p>Polymorphic Associations 和 STI，一開始實在不太懂這兩個的差別是什麼？<br/>
-感覺功能都差不多，但仔細研究後發現，其實兩個是完全不同的東西</p>
-
-<!-- more -->
-
-
-<h1>STI 單一表格繼承(Single-table inheritance)</h1>
-
-<p>簡單的來說，就是 <code>子類別</code> 繼承 <code>父類別</code> 的表格欄位和方法<br/>
-在 Rails 慣例中，只要在父類別加上 <code>type</code> 欄位，就可以使用了</p>
-
-<p>以下就是三個 model 共用 User 的表格，<code>Guest</code> 和 <code>Member</code> 不需要在建立自己的資料表</p>
-
-<pre><code class="ruby">class User &lt; ActiveRecord::Base
-    validates_presence_of :name
-end
-
-class Guest &lt; User
-end
-
-class Member &lt; User
-end
-</code></pre>
-
-<p>接著到 console 實際看看</p>
-
-<pre><code class="ruby">guest = Guest.create( :name =&gt; "leon")
-guest.type # "Guest"
-guest.id # 1
-member = Member.create( :name =&gt; "Rails Team" )
-member.type # "Member"
-member.id # 2
-</code></pre>
-
-<p><img src="http://i.imgur.com/h3vf6bE.png" alt="STI" />
-會發現自動就會在 type 記錄是哪個 model，並且 id 會繼續延續下來（因為是存在同一張資料表上）</p>
-
-<blockquote><p>建議繼承的欄位是一致的在使用這個功能，因為交集的欄位不多的話，就會使得很多空間被浪費掉</p></blockquote>
-
-<p>要關閉STI，在父類別加上self.abstract_class = true</p>
-
-<pre><code class="ruby">class User &lt; ActiveRecord::Base
-    validates_presence_of :name
-    self.abstract_class = true
-end
-
-class Guest &lt; User
-end
-
-class Member &lt; User
-end
-</code></pre>
-
-<p>這樣 Guest 和 Member 就必須有自己的資料表了。</p>
-
-<p>官方文件：<br/>
-<a href="http://rails.ruby.tw/association_basics.html#%E5%96%AE%E8%A1%A8%E7%B9%BC%E6%89%BF">Guides 中文</a></p>
-
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/activerecord-others.html">Ruby on Rails 實戰聖經</a></p>
-
-<h1>多型關聯(Polymorphic Associations)</h1>
-
-<p>看字面上的意思，就知道是用在關聯上的，例如 <code>留言</code> ，Article 上面可以留言，Photo 上面可以留言，通常都會直接分別建立 <code>ArticleComment</code>，<code>PhotoComment</code>的 Model。</p>
-
-<p>但如果用 Polymorphic Associations 只要在另外建立一個 <code>Comment model</code> ，並加上 integer 的 <em>id 外部鍵和 string 的 </em>type 欄位說明是哪一種 Model，即可將所有留言都儲存在這裡。</p>
-
-<pre><code class="ruby">class CreateComments &lt; ActiveRecord::Migration
-  def change
-    create_table :comments do |t|
-      t.text :content
-      t.integer :commentable_id
-      t.string :commentable_type
-      #可改成 t.belongs_to :commentable, :polymorphic =&gt; true, index: true 取代
-
-      t.timestamps
-    end
-  end
-end
-</code></pre>
-
-<p>model 中的設定</p>
-
-<pre><code class="ruby">class Comment &lt; ActiveRecord::Base
-  belongs_to :commentable, :polymorphic =&gt; true
-end
-
-class Article &lt; ActiveRecord::Base
-  has_many :comments, :as =&gt; :commentable
-end
-
-class Photo &lt; ActiveRecord::Base
-  has_many :comments, :as =&gt; :commentable
-end
-</code></pre>
-
-<p>之後再 console</p>
-
-<pre><code class="ruby">a = Article.create #id=&gt;1
-a.comments.create(:content =&gt; "First Comment")
-a.comments.create(:content =&gt; "First Comment")
-
-b = Photo.create #id=&gt;1
-b.comments.create(:content =&gt; "First Comment")
-b = Photo.create #id=&gt;2
-b.comments.create(:content =&gt; "First Comment")
-
-# 也可以透過 commentable 反向回查關連的物件
-comment.commentable =&gt; #&lt;Article id: 1, ....&gt;
-</code></pre>
-
-<p><img src="http://i.imgur.com/9t6JGzp.png" alt="Polymorphic Associations" /></p>
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations">Guides</a><br/>
-<a href="http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF">Guides 中文</a></p>
-
-<p>參考資料：<br/>
-<a href="https://ihower.tw/rails4/activerecord-relationships.html">Ruby on Rails 實戰聖經</a></p>
 ]]></content>
   </entry>
   

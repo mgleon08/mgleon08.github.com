@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-22T22:44:18+08:00</updated>
+  <updated>2016-01-29T21:40:07+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,446 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Rspec + Factory Girl 寫測試]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/29/rspec-plus-factory-girl/"/>
+    <updated>2016-01-29T20:36:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/29/rspec-plus-factory-girl</id>
+    <content type="html"><![CDATA[<p>程式寫久之後，就會發現測試的重要性!<br/>
+因此來介紹 rails 中，比內建測試還好用的 rspec 搭配 factory_girl</p>
+
+<!-- more -->
+
+
+<h1>測試種類</h1>
+
+<ul>
+<li><p>單元測試(Unit test)<br/>
+針對每個程式各個最小單位進行測試，像是在 controller 就單單只測試 controller 裡面的 action，而裡面產生的 model,method，都用假的方式來取代，已確保有錯誤時，可以很快知道是哪邊有問題 。</p></li>
+<li><p>整合測試(Integration test)<br/>
+主要是用來測試，每個 class 的互動，像是 controller 裡面會 call 到 model ，也會 call 到 view ，並測試回傳的值是否正確。</p></li>
+</ul>
+
+
+<h1>寫測試的好處</h1>
+
+<ul>
+<li>Instant Feedback 即時反饋（寫測試的時間 &lt; debug的時間）</li>
+<li>回歸測試及重構 （重構時就不需要再重複的測試）</li>
+<li>幫助設計API（TDD = 先測試，在實作）</li>
+<li>一種程式文件（可以讓很快就知道之前api怎麼寫的）</li>
+</ul>
+
+
+<h1>慣例</h1>
+
+<ul>
+<li>⼀個 rb 檔案配⼀個同名的 _spec.rb 檔案</li>
+<li>guard 等⼯具容易設定<br/>
+<a href="https://github.com/guard/guard-rspec">guard-rspec</a> 程式⼀修改完存檔，⾃動跑對應的測試（bundle後，輸入 guard init repec 初始化，打guard（bundle exec guard 真正執行））</li>
+<li>editor 有⽀援快速鍵</li>
+<li>describe “#name” 是 instance method</li>
+<li>describe “.name” 是 class method</li>
+<li>測試spec盡量比較簡單清楚，可以不用DRY，實作才會要DRY</li>
+</ul>
+
+
+<h1>輸出格式</h1>
+
+<ul>
+<li>rspec filename.rb 預設不產⽣⽂件</li>
+<li>rspec filename.rb -fd 輸出 specdoc ⽂件</li>
+<li>rspec filename.rb -fh 輸出 html ⽂件</li>
+</ul>
+
+
+<h1>安裝</h1>
+
+<pre><code class="ruby">group :development, :test do
+  gem 'rspec-rails'
+  gem 'factory_girl_rails'
+end
+</code></pre>
+
+<h1>設定</h1>
+
+<h3>顏色描述</h3>
+
+<pre><code class="ruby">#vi .rspec檔案輸入
+--color #顯示顏色
+--format #documentation顯示描述
+</code></pre>
+
+<h3>將不需要的檔案關閉</h3>
+
+<p>generate 新的 controller 或是 model 時，rails 就會很聰明的順便新增 sepc 檔案，但有時候我們會希望用到的時候再去建立即可，所以需要關閉就輸入以下指令。</p>
+
+<p><code>/config/application.rb</code></p>
+
+<pre><code class="ruby">config.generators do |g|
+  g.view_specs false
+  g.helper_specs false
+  g.request_specs false
+  g.controller_specs false
+  g.routing_specs false
+end
+</code></pre>
+
+<h1>Rspec</h1>
+
+<h3>model</h3>
+
+<pre><code class="ruby">require 'rails_helper' #必須載入才能使用裡面的方法
+
+RSpec.describe Post, type: :model do #RSpec 可省略
+    it "is accessible" do
+        post = Post.create!
+        expect(post).to eq(Post.last)
+    end
+
+    it "has title and content columns" do
+        columns = Post.column_names
+        expect(columns).to include("id")
+    end
+end
+</code></pre>
+
+<ul>
+<li><code>describe</code>, <code>context</code> 描述要測試的是什麼，可以用nested</li>
+<li><code>it</code>, <code>specify</code>, <code>example</code> 就是⼀⼩段測試</li>
+<li><code>expect(…).to</code> 或 <code>expect(…).to_not</code> 定義期望</li>
+<li><code>eq</code> 預期的是否和自己設定的相等</li>
+<li><code>include</code> 預期的是否有包括自己設定的值</li>
+<li><code>describe</code> 和 <code>it</code> 前面加上 x 代表 pending，執行 rspec 就會先跳拓</li>
+<li><a href="https://www.relishapp.com/rspec/rspec-expectations/v/3-4/docs/built-in-matchers/change-matcher">其他方法</a></li>
+</ul>
+
+
+<h3>Routing spec syntax</h3>
+
+<pre><code class="ruby">expect(:get =&gt; "/events").to route_to("events#index")
+expect(:get =&gt; "/widgets/1/edit").not_to be_routable
+
+expect(:get =&gt; "/posts/1").to route_to(
+      :controller =&gt; "posts",
+      :action =&gt; "show",
+      :id =&gt; "1"
+      )
+</code></pre>
+
+<h3>Controller spec syntax</h3>
+
+<pre><code class="ruby">expect(response).to render_template(:new)
+expect(response).to redirect_to(events_url)
+expect(response).to have_http_status(200)
+expect(assigns(:event)).to be_a_new(Event)
+</code></pre>
+
+<h3>View spec syntax</h3>
+
+<pre><code class="ruby">render
+expect(rendered).to include("Title")
+expect(response).to render_template(partial: "_form")
+</code></pre>
+
+<h3>Helper spec syntax</h3>
+
+<pre><code class="ruby">expect(helper.your_method).to eq("")
+</code></pre>
+
+<h3>request</h3>
+
+<pre><code class="ruby">RSpec.describe "Users", :type =&gt; :request do
+  before do
+    @user = User.create(name: "hello")
+  end
+
+  it "GET /users" do
+    get "/users"
+    expect(response).to have_http_status(200)
+    expect(response).to render_template(:index)
+    expect(response.body).to include("hello")
+  end
+
+  it "GET /user/:id" do
+    get "/user", id: @user.id
+    expect(response).to have_http_status(200)
+    expect(response).to render_template(:index)
+    expect(response.body).to include("hello")
+  end
+</code></pre>
+
+<p>request 通常直接從網址進行 Get 或 Post ，接著判斷傳回來的值是否正確。</p>
+
+<pre><code class="ruby">before do  
+    @user = User.new(name: "hello")
+end
+
+before(:all) do
+    @user = User.new(name: "hello")
+end
+
+#也有 after(:each)，afte(:all)
+</code></pre>
+
+<ul>
+<li>before(:each) 每段it之前執行</li>
+<li>before(:all) 整段describe前只執行一次</li>
+<li>after(:each) 每段it之後執行</li>
+<li>after(:all) 整段describe後只執行一次</li>
+<li>(:each) 可以不用加，預設為(:each)</li>
+</ul>
+
+
+<pre><code class="ruby">let(:user){User.new(:name =&gt; "hello")}
+</code></pre>
+
+<ul>
+<li>相較於 before(:each) 可增加執⾏速度</li>
+<li>有使⽤到才會運算(lazy)，並且在同⼀個 example 測試中多次呼叫會 Memoized 快取起來。</li>
+<li>let! 則是⾮ lazy 版本</li>
+</ul>
+
+
+<h1>factory_girl</h1>
+
+<p>到 <code>spec/rails_helper.rb</code> 設定</p>
+
+<pre><code class="ruby">RSpec.configure do |config|
+  config.include FactoryGirl::Syntax::Methods
+end
+</code></pre>
+
+<p>在 <code>spec</code> 底下新增 <code>factories</code> 資料夾，接著在裡面新增相對應的物件名稱，像是 <code>user.rb</code></p>
+
+<p><code>spec/factories/user.rb</code></p>
+
+<pre><code class="ruby">FactoryGirl.define do
+  factory :user, class: User" do
+    name "video1"
+    age  18
+
+    trait :child do
+      age 6
+      #after(:create) {|user| user.add_role(:admin) } 
+      #after(:build)  {|user| user.add_role(:admin) } 
+      #也可以設定 create 之後的設定
+    end
+  end
+end
+</code></pre>
+
+<p>這樣在 spec 裡面就可以直接建立假資料</p>
+
+<pre><code class="ruby">before do  
+    @user  = FactoryGirl.create(:user) #FactoryGirl 可省略
+    @child = create(:user, :child) #就只替換掉 age
+end
+</code></pre>
+
+<h3>為什麼要假物件?</h3>
+
+<ul>
+<li>無法控制回傳值的外部系統 (例如第三⽅ web service)</li>
+<li>建構正確的回傳值很⿇煩 (例如得準備很多假資料)</li>
+<li>可能很慢，拖慢測試速度 (例如耗時的運算)</li>
+<li>有難以預測的回傳值 (例如亂數⽅法)</li>
+<li>還沒開始實作 (特別是採⽤ TDD 流程)</li>
+</ul>
+
+
+<h1>Capybara</h1>
+
+<p>RSpec除了可以拿來寫單元程式，我們也可以把測試的層級拉高做整合性測試，以Web應用程式來說，就是去自動化瀏覽器的操作，實際去向網站伺服器請求，然後驗證出來的HTML是正確的輸出。</p>
+
+<p><a href="https://github.com/jnicklas/capybara">capybara</a>就是一套可以搭配的工具，用來模擬瀏覽器行為</p>
+
+<h1>CI server</h1>
+
+<p>CI(Continuous Integration)
+伺服器的用處是每次有人Commit就會自動執行編譯及測試(Ruby不用編譯，所以主要的用處是跑測試)，並回報結果，如果有人送交的程式搞砸了回歸測試，馬上就有回饋可以知道。</p>
+
+<p><a href="https://circleci.com">circleci.com</a></p>
+
+<p>建立 <code>circle.yml</code></p>
+
+<pre><code class="ruby">machine:
+  timezone:
+    Asia/Taipei
+  ruby:
+    version: 2.1.2
+dependencies:
+  pre:
+    - rvm use 2.1.2
+    - gem install bundler
+    - gem install rubocop
+  post:
+    - gem update rake
+database:
+  override:
+    - cp config/database.yml.example config/database.yml
+    - rake db:create db:migrate --trace
+test:
+  override:
+    - bundle exec rspec --color
+</code></pre>
+
+<p>建立 <code>config/database.yml.example</code></p>
+
+<pre><code class="ruby">default: &amp;default
+  adapter: mysql2
+  encoding: utf8
+  host: localhost
+  username:
+  password:
+
+test:
+  &lt;&lt;: *default
+  database: test_db
+
+development:
+  &lt;&lt;: *default
+  database: development_db
+
+production:
+  &lt;&lt;: *default
+  database: production_db
+</code></pre>
+
+<p>接著到 <a href="https://circleci.com">circleci.com</a> 和 github 帳號做連結。<br/>
+接著將要跑的 project 加進去，之後只要 push 到 github 就會自動跑了！</p>
+
+<h1>大師引言</h1>
+
+<pre><code>大部份都是寫model的測試
+controller偶爾會寫
+
+其他的因為後面有驗收測試也會測試到，所以不浪費時間去寫測試
+驗收測試多半是測試子路徑，不會測到所有的條件，所以個別的小項測試，就直接在model寫就好了
+
+工程是寫到request就很棒了
+feature 比較像是QA在寫的
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://betterspecs.org/">Better Specs</a><br/>
+<a href="https://www.relishapp.com/">Relish</a></p>
+
+<p>Gem：<br/>
+<a href="https://github.com/rspec/rspec-rails">rspec-rails</a><br/>
+<a href="https://github.com/thoughtbot/factory_girl_rails">factory_girl_rails</a>  <br/>
+<a href="https://github.com/guard/guard-rspec">guard-rspec</a><br/>
+<a href="https://github.com/jnicklas/capybara">capybara</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/testing.html">自動化測試</a><br/>
+<a href="http://motion-express.com/trainings/rspec-rails-1">RSpec-Rails (基礎篇)</a><br/>
+<a href="http://motion-express.com/blog/20150320-custom-helpers-in-rspec">RSpec-Rails當中自訂methods及helpers</a><br/>
+<a href="http://motion-express.com/blog/20150327-rspec-rails-testing-module">RSpec-Rails 針對module進行unit test</a><br/>
+<a href="http://www.slideshare.net/ihower/rspec-7394497">RSpec 讓你愛上寫測試</a><br/>
+<a href="https://blog.alphacamp.co/2015/03/02/tdd-kata/">程式設計師升級必練內功：TDD Kata</a><br/>
+<a href="https://codility.com/programmers/lessons/">codility 練習</a><br/>
+<a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[用 Carrierwave + FFMPEG 影片轉檔]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/29/carrierwavea-plus-ffmpeg/"/>
+    <updated>2016-01-29T20:26:02+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/29/carrierwavea-plus-ffmpeg</id>
+    <content type="html"><![CDATA[<p>若是上傳的檔案是影片，並且要對影片做其他處理，就可以使用 FFMPRG 來處理。</p>
+
+<!-- more -->
+
+
+<p></p>
+
+<h1>Gem</h1>
+
+<pre><code class="ruby">gem 'carrierwave'
+gem 'streamio-ffmpeg'
+</code></pre>
+
+<h1>設定</h1>
+
+<p><code>application.rb</code></p>
+
+<pre><code class="ruby">require 'carrierwave'
+</code></pre>
+
+<p><code>lib/carrierwave/ffmpeg.rb</code></p>
+
+<pre><code class="ruby">require 'streamio-ffmpeg'
+module CarrierWave
+  module FFMPEG
+    module ClassMethods
+      def resample(bitrate)
+        process :resample =&gt; bitrate
+      end
+    end
+
+    def resample(bitrate)
+      directory = File.dirname(current_path)
+      tmpfile = File.join(directory, "tmpfile")
+
+      FileUtils.mv( current_path, tmpfile )
+
+      file = ::FFMPEG::Movie.new(tmpfile)
+      file.transcode(current_path, video_bitrate: bitrate)
+
+      File.delete(tmpfile)
+    end
+  end
+end
+</code></pre>
+
+<p><code>app/uploaders/video_uploader.rb</code></p>
+
+<pre><code class="ruby">require File.join(Rails.root, "lib", "carrierwave", "ffmpeg")
+
+class VideoUploader &lt; CarrierWave::Uploader::Base
+  include CarrierWave::FFMPEG
+
+  def store_dir
+    "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
+  end
+
+  def extension_white_list
+    %w(mp4 flv)
+  end
+
+  version :bitrate_800k do
+    process :resample =&gt; "800k"
+  end
+
+  version :bitrate_500k, from_version: :bitrate_800k do
+    process :resample =&gt; "500k"
+  end
+
+end
+</code></pre>
+
+<p>也可以用 ruby 直接下 ffmpef 的指令</p>
+
+<p>Use %x or &lsquo;`&rsquo;:</p>
+
+<pre><code class="ruby">`ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path}`
+%x(ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path})
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a><br/>
+<a href="https://github.com/streamio/streamio-ffmpeg">streamio-ffmpeg</a><br/>
+<a href="https://www.ffmpeg.org/">FFMPEG</a></p>
+
+<p>參考文件：<br/>
+<a href="http://www.freezzo.com/2010/12/23/create-ffmpeg-processor-for-carrierwave-in-rails-3/">Create FFMPEG processor for Carrierwave in Rails 3</a><br/>
+<a href="https://prograils.com/posts/carrierwave-basic-video-conversion">CarrierWave - basic video conversion</a><br/>
+<a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Rubocop 寫出好風格]]></title>
@@ -287,690 +727,6 @@ accepts_nested_attributes_for :banners, allow_destroy: true, :reject_if =&gt; :a
 <a href="http://chouandy.logdown.com/posts/252165-use-paperclip-implement-any-format-file-uploading-to-aws-s3">使用 paperclip 實作任意格式檔案上傳至 AWS S3</a><br/>
 <a href="http://blog.jex.tw/blog/2015/07/13/rails-upload/">Rails 上傳 Upload</a><br/>
 <a href="http://www.railscook.com/recipes/multiple-files-upload-with-nested-resource-using-paperclip-in-rails/">Multiple files upload with nested resource using Paperclip in Rails</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[會員管理系統 Devise-Rolify-Cancan]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/21/devise-rolify-cancan/"/>
-    <updated>2016-01-21T22:17:48+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/21/devise-rolify-cancan</id>
-    <content type="html"><![CDATA[<p>Devise + Rolify + Cancancan</p>
-
-<p>Devise    負責登入、註冊、退出等等，會員註冊登入流程<br/>
-Rolify    負責給予角色<br/>
-Cancancan 負責指定角色的權限，可以執行哪些 action</p>
-
-<!-- more -->
-
-
-<pre><code>gem 'devise'
-gem 'rolify'
-gem 'cancancan'
-</code></pre>
-
-<h1><a href="https://github.com/plataformatec/devise">Device</a></h1>
-
-<pre><code class="ruby">rails generate devise:install
-
-#create  config/initializers/devise.rb
-#create  config/locales/devise.en.yml
-</code></pre>
-
-<h3>接下來有幾個設定是 divice 建議設定的</h3>
-
-<ul>
-<li>確認 root 有設定到</li>
-</ul>
-
-
-<pre><code class="ruby">root "welcome#index"
-</code></pre>
-
-<ul>
-<li>編輯 <code>config/environments/development.rb</code> 和 <code>production.rb</code> 加入寄信時預設的網站網址</li>
-</ul>
-
-
-<pre><code class="ruby">config.action_mailer.default_url_options = { :host =&gt; 'localhost:3000' }
-</code></pre>
-
-<ul>
-<li>在 view 中 加入可以顯示 flash 的 code</li>
-</ul>
-
-
-<pre><code class="ruby">&lt;%if flash[:notice].present?%&gt;
-    &lt;div class="alert alert-success text-center" role="notice"&gt;
-        &lt;%= flash[:notice] %&gt;
-    &lt;/div&gt;
-&lt;%end%&gt;
-
-&lt;%if flash[:alert].present?%&gt;
-    &lt;div class="alert alert-danger text-center" role="alert"&gt;
-        &lt;%= flash[:alert] %&gt;
-    &lt;/div&gt;
-&lt;%end%&gt;
-</code></pre>
-
-<ul>
-<li>預設不會產生 devise 的 view，因此必須輸入以下指令，就可以去更改 view 的樣式。</li>
-</ul>
-
-
-<pre><code class="ruby">rails g devise:views
-
-#預設在 app/views/devise 
-</code></pre>
-
-<h3>產生 model</h3>
-
-<pre><code class="ruby">rails generate devise User
-
-#invoke  active_record
-#create  db/migrate/20160117113653_add_devise_to_users.rb
-#insert  app/models/user.rb
-#route   devise_for :users
-</code></pre>
-
-<p>models/user</p>
-
-<pre><code class="ruby">class User &lt; ActiveRecord::Base
-  rolify
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable
-end
-</code></pre>
-
-<p>裡面有些是預設沒打開的，像是寄認證信之類的，需要再打開設定就可以了，migration 也是。<br/>
-也可以自行在 model 增加欄位，因為預設的可能是比較基本的。</p>
-
-<h3>驗證</h3>
-
-<p>在需要登入的 controller 加上</p>
-
-<pre><code class="ruby">before_action :authenticate_user!
-</code></pre>
-
-<p>在 view 中加入</p>
-
-<pre><code class="ruby">&lt;% if current_user %&gt;
-    &lt;%= link_to('登出', destroy_user_session_path, :method =&gt; :delete) %&gt; 
-    |
-    &lt;%= link_to('修改密碼', edit_registration_path(:user)) %&gt;
-&lt;% else %&gt;
-    &lt;%= link_to('註冊', new_registration_path(:user)) %&gt; 
-    |
-    &lt;%= link_to('登入', new_session_path(:user)) %&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<p>編輯 <code>application_controller.rb</code></p>
-
-<pre><code class="ruby">class ApplicationController &lt; ActionController::Base
-  before_action :configure_permitted_parameters, if: :devise_controller?
-
-  protected
-
-  def configure_permitted_parameters
-    devise_parameter_sanitizer.permit(:sign_up, keys: [:username])
-  end
-end
-</code></pre>
-
-<h3>串接社群登入 Authentication: 使用 Omniauth</h3>
-
-<p><a href="https://github.com/mkdynamic/omniauth-facebook">omniauth-facebook</a><br/>
-<a href="http://www.rubydoc.info/gems/omniauth-google-oauth2/0.2.5/frames">omniauth-google-oauth2</a><br/>
-<a href="https://github.com/timbreitkreutz/omniauth-yahoo">omniauth-yahoo</a> <br/>
-<a href="https://github.com/intridea/omniauth-github">omniauth-github</a></p>
-
-<h1><a href="https://github.com/RolifyCommunity/rolify">Rolify</a></h1>
-
-<p>產生權限的 modle 和設定檔</p>
-
-<pre><code class="ruby">rails generate rolify Role User
-
-#invoke  active_record
-#create  app/models/role.rb
-#insert  app/models/role.rb
-#create  db/migrate/20160117114226_rolify_create_roles.rb
-#insert  app/models/user.rb
-#create  config/initializers/rolify.rb
-</code></pre>
-
-<p>新增權限</p>
-
-<pre><code class="ruby">user = User.find(1)
-user.add_role :admin
-</code></pre>
-
-<p>移除權限</p>
-
-<pre><code class="ruby">remove_role :admin
-</code></pre>
-
-<p>判斷權限</p>
-
-<pre><code class="ruby">user.has_role? :admin
-#=&gt; true
-</code></pre>
-
-<p>找擁有權限的人</p>
-
-<pre><code class="ruby">User.with_role(:admin)
-#找單一權限
-
-User.with_any_role(:user, :admin)
-#找 a or b 權限
-
-User.with_all_roles(:user, :admin)
-#找 a + b 權限
-</code></pre>
-
-<h3>對 resource 設定角色權限</h3>
-
-<p>可以直接指定這個權限可以進入哪些 resource</p>
-
-<p>先在要設定的 model 裡</p>
-
-<blockquote><p>In the resource models you want to apply roles on, just add resourcify method. For example, on this ActiveRecord class:</p></blockquote>
-
-<pre><code class="ruby">class Forum &lt; ActiveRecord::Base
-  resourcify
-end
-</code></pre>
-
-<p>這樣就可以設定自己才可以看到自己的資料</p>
-
-<pre><code class="ruby">user.add_role :moderator, Forum.first 
-#設定為第一個 Forum 的 resource
-
-user.has_role? :moderator, Forum.first
-#=&gt; true
-
-user.has_role? :moderator, Forum.last
-#=&gt; false
-
-user.add_role :moderator, Forum 
-#設定為所有的 Forum 的 resource
-</code></pre>
-
-<h3>resource 角色權限查詢</h3>
-
-<p>Instance level</p>
-
-<pre><code class="ruby">forum = Forum.first
-forum.roles
-# =&gt; [ list of roles that are only binded to forum instance ]
-forum.applied_roles
-# =&gt; [ list of roles binded to forum instance and to the Forum class ]
-</code></pre>
-
-<p>Class level</p>
-
-<pre><code class="ruby">Forum.with_role(:admin)
-# =&gt; [ list of Forum instances that has role "admin" binded to it ]
-Forum.with_role(:admin, current_user)
-# =&gt; [ list of Forum instances that has role "admin" binded to it and belongs to current_user roles ]
-Forum.with_roles([:admin, :user], current_user)
-# =&gt; [ list of Forum instances that has role "admin" or "user" binded to it and belongs to current_user roles ]
-
-User.with_any_role(:user, :admin)
-# =&gt; [ list of User instances that has role "admin" or "user" binded to it ]
-User.with_role(:site_admin, current_site)
-# =&gt; [ list of User instances that have a scoped role of "site_admin" to a site instance ]
-User.with_role(:site_admin, :any)
-# =&gt; [ list of User instances that have a scoped role of "site_admin" for any site instances ]
-User.with_all_roles(:site_admin, :admin)
-# =&gt; [ list of User instances that have a role of "site_admin" and a role of "admin" binded to it ]
-
-Forum.find_roles
-# =&gt; [ list of roles that binded to any Forum instance or to the Forum class ]
-Forum.find_roles(:admin)
-# =&gt; [ list of roles that binded to any Forum instance or to the Forum class with "admin" as a role name ]
-Forum.find_roles(:admin, current_user)
-# =&gt; [ list of roles that binded to any Forum instance or to the Forum class with "admin" as a role name and belongs to current_user roles ]
-</code></pre>
-
-<h3>Callbacks</h3>
-
-<pre><code class="ruby">class User &lt; ActiveRecord::Base
-  rolify :before_add =&gt; :before_add_method
-
-  def before_add_method(role)
-    # do something before it gets added
-  end
-end
-
-#四種 callbacks
-#before_add
-#after_add
-#before_remove
-#after_remove
-</code></pre>
-
-<h1><a href="https://github.com/CanCanCommunity/cancancan">Cancancan</a></h1>
-
-<pre><code class="ruby">rails generate cancan:ability
-#create  app/models/ability.rb
-</code></pre>
-
-<p>ability.rb 主要是定義，每個角色擁有哪些權限，並在 view 或 controller ，設定條件時，就會到這邊去查看，是否符合此條件。</p>
-
-<pre><code class="ruby">#app/models/ability.rb
-
-class Ability
-  include CanCan::Ability
-
-  def initialize(user) #這個 user 其實就是 devise 提供的 current_user
-    if user.blank? # not logged in
-      can [:new, :create], Forum #可以執行 Form Controller 裡的 new 和 create action
-      cannot [:new], Comment  #無法執行 Comment Controller 裡的 new action
-      basic_read_only #呼叫基本權限設定 Medthod
-    elsif user.has_role?(:admin) #如果 role 為 admin
-      can :manage, :all #可管理所有資源
-    end
-  end
-
-  protected
-
-  def basic_read_only
-    can :read, Forum
-  end
-end
-
-#:manage: 是指這個 controller 內所有的 action
-#:read :  指 :index 和 :show
-#:update: 指 :edit  和 :update
-#:destroy:指 :destroy
-#:create: 指 :new   和 :crate
-</code></pre>
-
-<p>也可以這樣寫</p>
-
-<pre><code class="ruby">can :read, [ Post, Comment ]
-can [ :create, :update ], [ Post, Comment ]
-</code></pre>
-
-<p>自訂 Alias action</p>
-
-<pre><code class="ruby">alias_action :update, :destroy, :to =&gt; :modify
-can :modify, Comment
-</code></pre>
-
-<p>自訂 method</p>
-
-<pre><code class="ruby">protected
-
-  def basic_read_only
-    can :read, Forum
-  end
-</code></pre>
-
-<p>設定只能管理自己的post</p>
-
-<pre><code class="ruby">can :update, Post do |post|
-    (post.user_id == user.id)
-end
-
-can :destroy, Post do |post|
-    (post.user_id == user.id)
-end
-
-# 也可以這樣寫
-can :update,  Post, user_id: user.id
-can :destroy, Post, user_id: user.id
-</code></pre>
-
-<h3><a href="https://github.com/CanCanCommunity/cancancan/wiki/Authorizing-controller-actions">Authorizing controller actions</a></h3>
-
-<p>load_and_authorized_resource</p>
-
-<pre><code class="ruby">class ProductsController &lt; ActionController::Base
-  load_and_authorize_resource
-  def discontinue
-    # Automatically does the following:
-    # @product = Product.find(params[:id])
-    # authorize! :discontinue, @product
-  end
-end
-
-#指定 action
-#load_and_authorize_resource :only =&gt; [:index, :show]
-</code></pre>
-
-<p>這個指令做了兩件事情</p>
-
-<ul>
-<li>load_resource</li>
-</ul>
-
-
-<p>主要是可以自動加入 @instance ， 預設跟 Class 名稱相同，Article => @article</p>
-
-<pre><code class="ruby">def ArticlesController &lt; ApplicationController
-  load_resource
-
-  def new
-  end
-
-  def show
-    # @article automatically set to Article.find(params[:id])
-  end
-end
-</code></pre>
-
-<p>等於</p>
-
-<pre><code class="ruby">def ArticlesController &lt; ApplicationController
-  def new
-    @article = Article.new
-  end 
-
-  def show
-    @article = Article.find(params[:id])   
-  end
-end
-</code></pre>
-
-<ul>
-<li>authorize_resource</li>
-</ul>
-
-
-<p>代表將這個 Controller 加入權限的控制，並去 <code>model/ability.rb</code> 裡面判斷權限是否有效?</p>
-
-<pre><code class="ruby">authorize_resource
-</code></pre>
-
-<p>也可以針對每個 action 去做設定</p>
-
-<pre><code class="ruby">def show
-  @project = Project.find(params[:project])
-  authorize! :show, @project
-end
-</code></pre>
-
-<p>cancancan預設 ＠instance 變數 與 Controller Name 相同<br/>
-若＠instance變數 不為 Controller Name，
-設定控管時須加入 &ldquo;變數名稱&rdquo;</p>
-
-<pre><code class="ruby">class TopicController &lt; ApplicationController
- authorize_resource :post #變數名稱
-
- def index
-  @post = Topic.all 
-  #預設為 @topic
- end
-
-end
-
-#model/ability.rb 裡面要這樣下
-can :read,   Post
-can :create, Post
-can :update, Post
-</code></pre>
-
-<ul>
-<li><a href="https://github.com/CanCanCommunity/cancancan/wiki/Ensure-Authorization">check_authorization</a></li>
-</ul>
-
-
-<p>確保controller 都有加入授權管理</p>
-
-<pre><code class="ruby">class ApplicationController &lt; ActionController::Base
-  check_authorization
-end
-</code></pre>
-
-<h3>if can?</h3>
-
-<p>會根據 <code>model/ability.rb</code> 去判斷是否有權限，並顯示。</p>
-
-<pre><code class="ruby">&lt;% if can? :create, Project %&gt;
-  &lt;%= link_to "New Project", new_project_path %&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<h3>例外處理<a href="https://github.com/CanCanCommunity/cancancan/wiki/Exception-Handling">Exception-Handling</a></h3>
-
-<p>若 user 無權限進入， cancancan 會噴出一個 CanCan::AccessDenied exception。<br/>
-但那樣子比較不好看，所以我們要另外重新導向一個顯示無權限的頁面。</p>
-
-<blockquote><p><code>authorize_resource</code> or <code>authorize!</code> 才會丟例外。</p></blockquote>
-
-<pre><code class="ruby">#application_controller.rb
-rescue_from CanCan::AccessDenied do |exception|
-  redirect_to root_url, :alert =&gt; exception.messag #導向另一個頁面
-end
-
-#render json: "Authorization failed. 權限錯誤，請洽管理人員。
-#render :file =&gt; "#{Rails.root}/public/403.html", :status =&gt; 403, :layout =&gt; false
-#respond_to do |format|
-  #format.json { render nothing: true, status: :forbidden }
-  #format.html { redirect_to main_app.root_url, :alert =&gt; exception.message }
-#end
-</code></pre>
-
-<p>gem：<br/>
-<a href="https://github.com/plataformatec/devise">Device</a><br/>
-<a href="https://github.com/CanCanCommunity/cancancan">Cancancan</a><br/>
-<a href="https://github.com/RolifyCommunity/rolify">Rolify</a><br/>
-<a href="https://github.com/RolifyCommunity/rolify/wiki/Devise---CanCanCan---rolify-Tutorial">Devise CanCanCan rolify Tutorial</a></p>
-
-<p>參考文件：<br/>
-<a href="http://disco26.logdown.com/posts/210475-devise-rolify-cancan">Devise + Rolify + Cancan</a><br/>
-<a href="http://deveede.logdown.com/posts/206943-use-deviserolify-cancan-control-permissions">使用Devise＋Rolify + Cancan 控管權限</a><br/>
-<a href="http://blog.jex.tw/blog/2015/04/12/rails-user/">Rails - Devise + Cancancan + Rolify</a><br/>
-<a href="http://blog.xdite.net/posts/2012/07/30/cancan-rule-engine-authorization-based-library-1/">Cancan 實作角色權限設計的最佳實踐(1)</a><br/>
-<a href="http://blog.xdite.net/posts/2012/07/30/cancan-rule-engine-authorization-based-library-2/">Cancan 實作角色權限設計的最佳實踐(2)</a><br/>
-<a href="http://blog.xdite.net/posts/2012/07/30/cancan-rule-engine-authorization-based-library-3/">Cancan 實作角色權限設計的最佳實踐(3)</a><br/>
-<a href="https://ihower.tw/rails4/auth.html">使用者認證</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Json]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/09/ruby-on-rails-json/"/>
-    <updated>2016-01-09T12:26:46+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/09/ruby-on-rails-json</id>
-    <content type="html"><![CDATA[<p>JSON 是很經常是用到的格式，不管是和程式溝通或是交換資料。</p>
-
-<!--more-->
-
-
-<h1>什麼是 JSON</h1>
-
-<p>JSON 是個以純文字為基底去儲存和傳送簡單結構資料，可以透過特定的格式去儲存任何資料(字串,數字,陣列,物件)，也可以透過物件或陣列來傳送較複雜的資料。</p>
-
-<p>一旦建立了您的 JSON 資料，就可以非常簡單的跟其他程式溝通或交換資料，因為 JSON 就只是純文字個格式。</p>
-
-<p>JSON 的優點如下:</p>
-
-<ul>
-<li>相容性高</li>
-<li>格式容易瞭解，閱讀及修改方便</li>
-<li>支援許多資料格式 (number,string,booleans,nulls,array,associative array)</li>
-<li>許多程式都支援函式庫讀取或修改 JSON 資料</li>
-</ul>
-
-
-<p>參考文件：
-<a href="https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/">你不可不知的 JSON 基本介紹</a></p>
-
-<h1>Rails 如何傳遞JSON</h1>
-
-<h3>respond_to</h3>
-
-<p>在 <code>rails</code> 當中可以用 <code>respond_to</code> 設定回傳的 <code>format</code>。</p>
-
-<pre><code class="ruby">respond_to do |format|
-    format.html { redirect_to :back }
-    format.json
-    format.js
-end
-
-#也可以寫成單行
-respond_to :html, :json, :js
-</code></pre>
-
-<p>若後面沒指定會去找 <code>view</code> 中，後面是 <code>.json</code> 或 <code>.js</code> 的檔案<br/>
-但記得因為 <code>format</code> 有三種，所以要 json 資料的話就在網址後面加 <code>.json</code></p>
-
-<p>respond_to可以用來回應不同的資料格式。Rails內建支援格式包括有<br/>
-<code>:html, :text, :js, :css, :ics, :csv, :xml, :rss, :atom, :yaml, :json</code></p>
-
-<blockquote><p>如果需要擴充，可以編輯config/initializers/mime_types.rb這個檔案</p></blockquote>
-
-<h3>render</h3>
-
-<p>可以簡單使用 <code>render json</code> 的方式，直接強制 html 輸出成 json 格式
-<code>render json: User.info</code><br/>
-這樣連view都不需要，就會直接顯示。</p>
-
-<p>或是直接 <code>render template</code> 指定輸出 json 格式<br/>
-<code>render template: "api/users/index.json.jbuilder"</code></p>
-
-<h3>routes scope設定，指定controller使用json格式輸出</h3>
-
-<p>最後是直接設定好 <code>routes</code> 的 <code>default</code> 格式，這樣就不用再指定要 <code>render</code> 什麼!</p>
-
-<pre><code class="ruby">scope :path =&gt; '/api/v1/', :defaults =&gt; { :format =&gt; :json }, :module =&gt; "api_v1", :as =&gt; 'v1' do
-    resources :users #ApiV1::CompaniesController
-end
-</code></pre>
-
-<p><code>path</code>：指令網址前面的路徑<br/>
-<code>defaults</code>：指定default的格式<br/>
-<code>module</code>：指定 controller 會是 ApiV1::UsersController
-<code>as</code>：產生URL helper</p>
-
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/routing.html">Scope</a><br/>
-<a href="http://motion-express.com/blog/20141124-rails-default-render-json">Rails修改預設顯示格式為json</a></p>
-
-<h1>搭配gem - <a href="https://github.com/rails/jbuilder">jbuilder</a></h1>
-
-<p>再rails當中，很常會用這個 <code>gem</code> 來轉 <code>json</code></p>
-
-<p>像是剛才的<code>render template: "api/users/index.json.jbuilder"</code><br/>
-就會去找這個 template，並且像是 <code>html.erb</code> 一樣可以直接使用 <code>@</code> 的參數。</p>
-
-<pre><code class="ruby">#api/users/index.json.jbuilder
-
-json.info do
-  json.number do
-    json.total User.count
-  end
-
-  json.data @users do |u|
-    json.id u.id
-    json.name u.name
-  end
-end
-</code></pre>
-
-<p>就會生產出以下</p>
-
-<pre><code class="ruby">#json
-{
-"info": {
-  "number": {
-     "total": 1
-  },
-  "data": [
-     {
-      "id": 1,
-      "name": "abc"
-            }
-        ]
-    }
-}
-</code></pre>
-
-<h1>接收JSON</h1>
-
-<p>可以用 <a href="https://github.com/rest-client/rest-client">rest-client</a> 這個gem<br/>
-先用 <code>get</code> 取得資料，再用 <code>JSON.parse</code> 來將 <code>string</code> 解析成 <code>hash</code></p>
-
-<p>範例： <a href="http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5">Ubike</a> 資料，並存取到資料庫。</p>
-
-<pre><code class="ruby">#lib/tasks/dev.rake
-
-namespace :dev do
-
-  task :fetch_ubike =&gt; :environment do
-    puts "fetching ubike"
-
-    url = "http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5"
-
-    raw_content = RestClient.get(url)
-
-    data = JSON.parse( raw_content )
-
-    data["result"]["results"].each do |u|
-      a = Ubike.find_by_ubike_id( u["_id"] )
-
-      if a == nil
-        # maybe update it!
-        Ubike.create( :ubike_id =&gt; u["_id"], :name =&gt; u["sna"])
-      else
-        Ubike.update( :ubike_id =&gt; u["_id"], :name =&gt; u["sna"])
-      end
-    end
-
-  end
-
-end
-</code></pre>
-
-<p>這樣只要打 <code>rake dev:fetch_ubike</code> 就會自動跑了!</p>
-
-<p>範例2：<a href="http://vote.ly.g0v.tw/api/vote/?page=1">立委資料</a></p>
-
-<pre><code class="ruby">#立委資料，資料相當大，很多分頁
-namespace :vote do
-
- task :fetch_raw_vote =&gt; :environment do
-   puts "fetching raw_vote"
-
-   url = "http://vote.ly.g0v.tw/api/vote/?page=1"
-   raw_content = RestClient.get(url)
-   data = JSON.parse( raw_content )
-     while data["next"] != nil
-        data["results"].each do |r|
-
-           Vote.create( :url =&gt; r["url"],
-                           :uid =&gt; r["uid"],
-                           :sitting_id =&gt; r["sitting_id"],
-                           :vote_seq =&gt; r["vote_seq"],
-                           :content =&gt; r["content"],
-                           :conflict =&gt; r["conflict"],
-                           :results =&gt; r["results"],
-                           :result =&gt; r["result"])
-         end
-
-         url = data["next"]
-         raw_content = RestClient.get(url)
-         data = JSON.parse( raw_content )
-      end
-
- end
-
-end
-</code></pre>
-
-<p>參考文件：<br/>
-<a href="https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/">你不可不知的 JSON 基本介紹</a><br/>
-<a href="https://ihower.tw/rails4/routing.html">Scope</a><br/>
-<a href="http://motion-express.com/blog/20141124-rails-default-render-json">Rails修改預設顯示格式為json</a></p>
-
-<p>gem：<br/>
-<a href="https://github.com/rails/jbuilder">jbuilder</a><br/>
-<a href="https://github.com/rest-client/rest-client">rest-client</a></p>
 ]]></content>
   </entry>
   
