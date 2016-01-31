@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-29T21:40:07+08:00</updated>
+  <updated>2016-01-31T12:30:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,339 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[自訂 Validation]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/31/custom-validation/"/>
+    <updated>2016-01-31T12:29:33+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/31/custom-validation</id>
+    <content type="html"><![CDATA[<p>當內建的驗證沒有自己的需求時，可以自訂驗證的 method 來使用。</p>
+
+<!-- more -->
+
+
+<pre><code class="ruby">class Picture &lt; ActiveRecord::Base
+  belongs_to :user
+  validate  :picture_size  #注意沒有加 's'
+
+  private
+
+  # 驗證圖片的大小
+  def picture_size
+    if picture.size &gt; 5.megabytes
+      errors.add(:picture, "should be less than 5MB")
+      #errors[:picture] &lt;&lt; "should be less than 5MB"
+    end
+  end
+end
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/active_record_validations.html">Active Record 驗證</a><br/>
+<a href="http://rails.ruby.tw/active_record_validations.html">Active Record 驗證 中文</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/activerecord-lifecycle.html">ActiveRecord - 資料驗證及回呼</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Association Supports 方法]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/31/association-supports/"/>
+    <updated>2016-01-31T11:54:15+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/31/association-supports</id>
+    <content type="html"><![CDATA[<p>在 model 和 model 之間，經常要建立對應的關聯，rails 也提供很多 Supports 的 helper</p>
+
+<!-- more -->
+
+
+<pre><code class="ruby">class User &lt; ActiveRecord::Base
+    has_many :microposts, dependent: :destroy
+    has_many :active_relationships,  class_name:  "Relationship", foreign_key: "follower_id", dependent: :destroy
+    has_many :passive_relationships, class_name:  "Relationship", foreign_key: "followed_id", dependent: :destroy
+    has_many :following, through: :active_relationships,  source: :followed
+    has_many :followers, through: :passive_relationships, source: :follower
+end
+</code></pre>
+
+<ul>
+<li><p><code>through</code> 透過關聯來建立另一個關聯集合，用於建立多對多的關係</p></li>
+<li><p><code>class_name</code> 變更關聯的類別名稱</p></li>
+</ul>
+
+
+<p>可以用這個方式，自己關聯自己，像是要上面，User 可以 follower 很多個 User</p>
+
+<blockquote><p>rails 慣例是 model 名稱，所以不用另外加 class_name</p></blockquote>
+
+<ul>
+<li><code>foreign_key</code> 可以修改外鍵名稱</li>
+</ul>
+
+
+<blockquote><p>rails 外鍵慣例是關聯的 Model 名稱加上 _id 後綴</p></blockquote>
+
+<ul>
+<li><code>dependent</code></li>
+</ul>
+
+
+<p>設定當物件刪除時，如何處理依賴它的資料</p>
+
+<pre><code class="ruby">class Event &lt; ActiveRecord::Base
+  has_many :attendees, :dependent =&gt; :destroy
+end
+
+#:destroy 把依賴的attendees也一併刪除，並且執行Attendee的destroy回呼
+#:delete 把依賴的attendees也一併刪除，但不執行Attendee的destroy回呼
+#:nullify 這是預設值，不會幫忙刪除attendees，但會把attendees的外部鍵event_id都設成NULL
+#:restrict_with_exception 如果有任何依賴的attendees資料，則連event都不允許刪除。執行刪除時會丟出錯誤例外ActiveRecord::DeleteRestrictionError。
+#:restrict_with_error 不允許刪除。執行刪除時會回傳false，在@event.errors中會留有錯誤訊息。
+</code></pre>
+
+<ul>
+<li><code>source</code></li>
+</ul>
+
+
+<p>搭配through設定使用，當關聯的名稱不一致的時候，需要加上source指名是哪一種物件。</p>
+
+<ul>
+<li><code>counter_cache</code> 參考之前文章 <a href="http://mgleon08.github.io/blog/2015/12/20/counter-cache/">counter-cache</a></li>
+</ul>
+
+
+<pre><code class="ruby">class Book &lt; ActiveRecord::Base
+  has_many :pages
+end
+
+class Page &lt; ActiveRecord::Base
+  belongs_to :book, :counter_cache =&gt; true
+end
+
+#設定成 ture，就會自動去找 pages_count 欄位，若要指定欄位則是 counter_cache: :count_of_pages
+</code></pre>
+
+<ul>
+<li><code>inverse_of</code></li>
+</ul>
+
+
+<p>關聯另一端的關聯名稱。</p>
+
+<blockquote><p>belongs_to 無法與 :polymorphic 同時使用。<br/>
+has_one 無法與 :through 或 :as 同時使用。</p></blockquote>
+
+<ul>
+<li><code>polymorphic</code> &amp; <code>as</code> 參考之前文章 <a href="http://mgleon08.github.io/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti/">polymorphic</a></li>
+</ul>
+
+
+<pre><code class="ruby">class Comment &lt; ActiveRecord::Base
+  belongs_to :commentable, :polymorphic =&gt; true
+end
+
+class Article &lt; ActiveRecord::Base
+  has_many :comments, :as =&gt; :commentable
+end
+
+class Photo &lt; ActiveRecord::Base
+  has_many :comments, :as =&gt; :commentable
+end
+</code></pre>
+
+<ul>
+<li><code>touch</code><br/>
+touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at 或 updated_on 的時間戳會自動設成當前時間</li>
+</ul>
+
+
+<pre><code class="ruby">class Order &lt; ActiveRecord::Base
+  belongs_to :customer, touch: true 
+  #更改欄位 touch: :orders_updated_at
+end
+</code></pre>
+
+<ul>
+<li><p><code>validate</code> 預設為 false，儲存物件時不會驗證關聯物件</p></li>
+<li><p><code>primary_key</code> 可以修改主鍵名稱</p></li>
+</ul>
+
+
+<h1>Scope</h1>
+
+<ul>
+<li><code>where</code></li>
+</ul>
+
+
+<pre><code class="ruby">class Order &lt; ActiveRecord::Base
+  belongs_to :customer, -&gt; { where active: true }
+end
+</code></pre>
+
+<ul>
+<li><code>includes</code></li>
+</ul>
+
+
+<p>經常性使用 <code>@line_item.order.customer</code> 就可以加上</p>
+
+<pre><code class="ruby">class LineItem &lt; ActiveRecord::Base
+  belongs_to :order, -&gt; { includes :customer }
+end
+
+class Order &lt; ActiveRecord::Base
+  belongs_to :customer
+  has_many :line_items
+end
+
+class Customer &lt; ActiveRecord::Base
+  has_many :orders
+end
+</code></pre>
+
+<ul>
+<li><code>readonly</code></li>
+</ul>
+
+
+<p>如果設定了 readonly 選項，則關聯物件取出時為唯讀。</p>
+
+<ul>
+<li><code>select</code></li>
+</ul>
+
+
+<p>select 方法可以覆寫用來取出關聯的 SELECT 子句。預設會取出所有欄位</p>
+
+<h3>has_many 額外方式</h3>
+
+<p>條件也可透過 Hash 指定</p>
+
+<pre><code class="ruby">class Customer &lt; ActiveRecord::Base
+  has_many :confirmed_orders, -&gt; { where confirmed: true },
+                              class_name: "Order"
+end
+</code></pre>
+
+<p>用 Hash 的 where，產生出來的記錄會自動使用 Hash 的作用域。</p>
+
+<p>上例中，使用 <code>@customer.confirmed_orders.create</code> 或 <code>@customer.confirmed_orders.build</code> 會建立出 confirmed 欄位為 true 的訂單</p>
+
+<ul>
+<li><code>group</code> 對結果做分組</li>
+</ul>
+
+
+<pre><code class="ruby">has_many :line_items, -&gt; { group 'orders.id' }
+</code></pre>
+
+<ul>
+<li><code>limit</code> 限制透過關聯取出物件的數量</li>
+</ul>
+
+
+<pre><code class="ruby"> has_many :recent_orders, -&gt; { order('order_date desc').limit(100) }
+</code></pre>
+
+<ul>
+<li><code>offset</code> 指定開始從關聯取出物件的偏移量</li>
+</ul>
+
+
+<pre><code class="ruby">has_many :orders, -&gt; { offset(11) }
+</code></pre>
+
+<ul>
+<li><code>order</code> 指定關聯物件取出後的排序方式</li>
+</ul>
+
+
+<pre><code class="ruby">has_many :orders, -&gt; { order "date_confirmed DESC" }
+</code></pre>
+
+<ul>
+<li><code>distinct</code> 確保集合中沒有重複的物件</li>
+</ul>
+
+
+<pre><code class="ruby">has_many :articles, -&gt; { distinct }, through: :readings
+</code></pre>
+
+<p>若想確保不插入重複的資料到資料庫（這樣取出來就確定是不重複的記錄了），應該要在資料表上新增一個唯一性的索引。</p>
+
+<p>舉例來說，如果有 person_articles 資料表，想確保所有文章不重複，可加入下面這個遷移</p>
+
+<pre><code class="ruby">add_index :person_articles, :article, unique: true
+</code></pre>
+
+<p>不要使用 include? 來確保唯一性，因為多個使用者可能同時加入文章，可能會導致競態條件（Race Condition）</p>
+
+<pre><code class="ruby">person.articles &lt;&lt; article unless person.articles.include?(article)
+</code></pre>
+
+<ul>
+<li><code>extending</code> 指定一個模組名稱，用來擴充關聯代理（association proxy）</li>
+</ul>
+
+
+<pre><code class="ruby">module FindRecentExtension
+  def find_recent
+    where("created_at &gt; ?", 5.days.ago)
+  end
+end
+
+class Customer &lt; ActiveRecord::Base
+  has_many :orders, -&gt; { extending FindRecentExtension }
+end
+
+class Supplier &lt; ActiveRecord::Base
+  has_many :deliveries, -&gt; { extending FindRecentExtension }
+end
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/association_basics.html#has-many-association-reference">has_many Association Reference</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">has_many Association Reference 中文</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#belongs-to-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">belongs_to 關聯手冊</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#has-one-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">has_one 關聯手冊</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">has_many 關聯</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">ActiveRecord - 資料表關聯</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Transactions 交易]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/31/transactions/"/>
+    <updated>2016-01-31T10:58:13+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/31/transactions</id>
+    <content type="html"><![CDATA[<p>當兩件事情必須確實執行完畢，才存取到資料庫！</p>
+
+<!-- more -->
+
+
+<h1>Transactions交易</h1>
+
+<p>像是銀行匯款，必須一方確實扣款，另一方確實有新增款項，這筆交易在算成功!</p>
+
+<pre><code class="ruby">ActiveRecord::Base.transaction do
+  User.create!(:name =&gt; 'hello')
+  Feed.create!
+end
+</code></pre>
+
+<p>在 transaction 裡面必須使用加上 <code>!</code> 才會丟例外，讓交易失敗。</p>
+
+<p>另外，資料要在 transaction 完成後，才會存取到資料庫，因此有用 <code>after_save</code> 回呼，可能就會失敗。</p>
+
+<p>因此必須改用 <code>after_commit</code>這個回呼，才能確保讀取到交易完成後的資料。</p>
+
+<p><a href="https://ihower.tw/rails4/activerecord-others.html">ActiveRecord - 進階功能</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Try 來防止 Nil]]></title>
@@ -73,84 +406,6 @@ end
 <p>參考文件：<br/>
 <a href="https://github.com/rails/rails/blob/master/activesupport/lib/active_support/core_ext/object/try.rb">try - rails_github</a><br/>
 <a href="http://guides.rubyonrails.org/active_support_core_extensions.html#try">try</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Association Reference 建立關聯]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/29/association-reference/"/>
-    <updated>2016-01-29T21:33:02+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/29/association-reference</id>
-    <content type="html"><![CDATA[<p>在 model 和 model 之間，經常要建立對應的關聯，而 rails 又有相當多的關聯方式，還有 method</p>
-
-<!-- more -->
-
-
-<h1>has_many 建立關聯</h1>
-
-<p><code>User</code> has_many <code>Post</code><br/>
-可以用下面方法，將兩個 model 關聯起來。</p>
-
-<pre><code class="ruby">class User &lt; ActiveRecord::Base
-  has_many :posts
-end
-</code></pre>
-
-<pre><code class="ruby">@user.posts 
-#回傳所有關聯物件的陣列，沒有則回傳空陣列
-
-@user.posts &lt;&lt; Post.find(1) 
-#透過將外鍵設為加入物件的主鍵
-
-@user.posts.delete(object, ...) 
-#透過將外鍵設為 NULL，從關聯集合中移除一個或多個物件，會回呼 dependent 設定
-
-@user.posts.destroy(object, ...) 
-#呼叫 destroy 來移除物件，不管 dependent 設定
-
-@user.posts = (objects) 
-#根據提供的物件來決定要刪除還是新增
-
-@user.post_ids 
-#回傳所有關聯的 id 陣列
-
-@user.post_ids=([1,2,3])
-#更改集合擁有物件的 ID，根據所提供的主鍵值來決定要刪除還是新增
-
-@user.posts.clear
-#移除集合中的所有物件。若有設定 dependent: :destroy 選項，則會 destory 關聯物件；若設定的是 dependent: :delete_all 選項，則會直接從資料庫刪除關聯物件；其他情況會將外鍵設為 NULL
-
-@user.posts.empty?
-#在集合沒有任何關聯物件時回傳 true
-
-@user.posts.size
-#回傳集合中物件的數量
-
-@user.posts.find(...)
-#在集合中查詢物件。語法和選項與 ActiveRecord::Base.find 相同
-
-@user.posts.where(...)
-
-@open_orders = @customer.orders.where(open: true) # No query yet
-@open_order = @open_orders.first # Now the database will be queried
-#根據提供的條件來查找物件，預設是惰性載入，僅在需要用到物件才會去資料庫做查詢。
-
-@user.posts.exists?(...)
-#依提供的條件檢查物件存在集合裡。語法和選項與 ActiveRecord::Base.exists? 相同
-
-@user.posts.build(attributes = {}, ...)
-#回傳一個或多個新關聯物件。這些物件由傳入的屬性來初始化，同時會自動設定外鍵。但關聯物件仍未儲存至資料庫
-
-@user.posts.create(attributes = {})
-#回傳關聯類型的新物件。 這個物件透過傳入的屬性來初始化，同時會自動設定外鍵。一旦通過所有 Model 的驗證規則時，便把此關聯物件存入資料庫
-
-@user.posts.create!(attributes = {})
-#驗證失敗時會拋出 ActiveRecord::RecordInvalid 異常
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/association_basics.html#has-many-association-reference">has_many Association Reference</a><br/>
-<a href="http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">has_many Association Reference 中文</a></p>
 ]]></content>
   </entry>
   
@@ -355,6 +610,13 @@ end
 </ul>
 
 
+<h1>Stub</h1>
+
+<pre><code class="ruby">allow_any_instance_of(User).to receive(:follow).and_return(false)
+</code></pre>
+
+<p>用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。</p>
+
 <h1>factory_girl</h1>
 
 <p>到 <code>spec/rails_helper.rb</code> 設定</p>
@@ -494,225 +756,6 @@ feature 比較像是QA在寫的
 <a href="https://blog.alphacamp.co/2015/03/02/tdd-kata/">程式設計師升級必練內功：TDD Kata</a><br/>
 <a href="https://codility.com/programmers/lessons/">codility 練習</a><br/>
 <a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Carrierwave + FFMPEG 影片轉檔]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/29/carrierwavea-plus-ffmpeg/"/>
-    <updated>2016-01-29T20:26:02+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/29/carrierwavea-plus-ffmpeg</id>
-    <content type="html"><![CDATA[<p>若是上傳的檔案是影片，並且要對影片做其他處理，就可以使用 FFMPRG 來處理。</p>
-
-<!-- more -->
-
-
-<p></p>
-
-<h1>Gem</h1>
-
-<pre><code class="ruby">gem 'carrierwave'
-gem 'streamio-ffmpeg'
-</code></pre>
-
-<h1>設定</h1>
-
-<p><code>application.rb</code></p>
-
-<pre><code class="ruby">require 'carrierwave'
-</code></pre>
-
-<p><code>lib/carrierwave/ffmpeg.rb</code></p>
-
-<pre><code class="ruby">require 'streamio-ffmpeg'
-module CarrierWave
-  module FFMPEG
-    module ClassMethods
-      def resample(bitrate)
-        process :resample =&gt; bitrate
-      end
-    end
-
-    def resample(bitrate)
-      directory = File.dirname(current_path)
-      tmpfile = File.join(directory, "tmpfile")
-
-      FileUtils.mv( current_path, tmpfile )
-
-      file = ::FFMPEG::Movie.new(tmpfile)
-      file.transcode(current_path, video_bitrate: bitrate)
-
-      File.delete(tmpfile)
-    end
-  end
-end
-</code></pre>
-
-<p><code>app/uploaders/video_uploader.rb</code></p>
-
-<pre><code class="ruby">require File.join(Rails.root, "lib", "carrierwave", "ffmpeg")
-
-class VideoUploader &lt; CarrierWave::Uploader::Base
-  include CarrierWave::FFMPEG
-
-  def store_dir
-    "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
-  end
-
-  def extension_white_list
-    %w(mp4 flv)
-  end
-
-  version :bitrate_800k do
-    process :resample =&gt; "800k"
-  end
-
-  version :bitrate_500k, from_version: :bitrate_800k do
-    process :resample =&gt; "500k"
-  end
-
-end
-</code></pre>
-
-<p>也可以用 ruby 直接下 ffmpef 的指令</p>
-
-<p>Use %x or &lsquo;`&rsquo;:</p>
-
-<pre><code class="ruby">`ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path}`
-%x(ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path})
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a><br/>
-<a href="https://github.com/streamio/streamio-ffmpeg">streamio-ffmpeg</a><br/>
-<a href="https://www.ffmpeg.org/">FFMPEG</a></p>
-
-<p>參考文件：<br/>
-<a href="http://www.freezzo.com/2010/12/23/create-ffmpeg-processor-for-carrierwave-in-rails-3/">Create FFMPEG processor for Carrierwave in Rails 3</a><br/>
-<a href="https://prograils.com/posts/carrierwave-basic-video-conversion">CarrierWave - basic video conversion</a><br/>
-<a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Carrierwave 輕鬆做上傳檔案功能]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/22/carrierwave/"/>
-    <updated>2016-01-22T22:12:46+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/22/carrierwave</id>
-    <content type="html"><![CDATA[<p>另一個上傳檔案的 gem ，相當的實用，和 Paperclip 擇一即可。</p>
-
-<!-- more -->
-
-
-<h1>安裝</h1>
-
-<p>Gemfile</p>
-
-<pre><code class="ruby">gem 'carrierwave'
-gem 'rmagick'
-
-# or gem "mini_magick"
-</code></pre>
-
-<ul>
-<li>carrierwave 上傳檔案</li>
-<li>rmagick 處理圖片</li>
-</ul>
-
-
-<blockquote><p>必須有安裝 ImageMagick 才能使用 rmagick</p></blockquote>
-
-<p>有 homebrew 可以直接</p>
-
-<pre><code class="ruby">brew install imagemagick
-</code></pre>
-
-<h1>設定</h1>
-
-<p>先建立資料夾，主要用來存放所有的檔案</p>
-
-<pre><code class="ruby">rails generate uploader file
-</code></pre>
-
-<p>接著在在要存放的 model 新增一筆欄位</p>
-
-<pre><code class="ruby">rails generate migration add_file_to_products
-</code></pre>
-
-<h1>Model</h1>
-
-<pre><code class="ruby">class Product &lt; ActiveRecord::Base
-  mount_uploader :file, FileUploader
-end
-</code></pre>
-
-<p>最後記得再 strong params 加入</p>
-
-<pre><code class="ruby">private
-  def product_params
-    params.require(:product).permit(:file)
-  end
-end
-</code></pre>
-
-<h1>Form</h1>
-
-<pre><code class="ruby">&lt;%= form_for @product do |f| %&gt;
-  &lt;%= f.file_field :file %&gt;
-  &lt;%= f.submit "Submit" %&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<h1>view</h1>
-
-<pre><code class="ruby">&lt;%= image_tag @product.image_url.to_s %&gt;
-</code></pre>
-
-<p>imageurl是預設的helper，to_s是要確定把上傳的路徑轉變為字串，以免發生錯誤。</p>
-
-<h1>RMagick</h1>
-
-<p><code>app/uploaders/file_uploader.rb</code></p>
-
-<p>可以將設定打開，有 RMagick 和 MiniMagick ，都是用來縮圖的。(擇一即可)</p>
-
-<pre><code class="ruby"># Include RMagick or MiniMagick support:
-# include CarrierWave::RMagick
-# include CarrierWave::MiniMagick
-</code></pre>
-
-<p>下面把註解拿掉就可以使用</p>
-
-<pre><code class="ruby">Create different versions of your uploaded files:
-version :thumb do
-  process :resize_to_fit =&gt; [50, 50]
-end
-</code></pre>
-
-<p>之後再 view 中只要指定，就會去抓取縮小後的圖檔</p>
-
-<pre><code class="ruby">&lt;%= image_tag @product.image_url(:thumb).to_s %&gt;
-</code></pre>
-
-<h1>其他</h1>
-
-<p>限制存取大小<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Validate-attachment-file-size">How to: Validate attachment file size</a></p>
-
-<p>存取圖片長寬<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Get-image-dimensions">How to: Get image dimensions</a></p>
-
-<p>存取圖片大小和類型<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Store-the-uploaded-file-size-and-content-type">How to: Store the uploaded file size and content type</a></p>
-
-<p>官方文件：<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a></p>
-
-<p>參考資料：<br/>
-<a href="http://motion-express.com/blog/20140708-ruby-gem-carrierwave">Ruby gem &lsquo;Carrierwave&rsquo; 上傳檔案神器的簡易安裝與使用</a><br/>
-<a href="http://rubyist.marsz.tw/blog/2012-01-10/carrierwave-guides-with-amazon-s3-and-imagemagick-integration/">使用 Carrierwave 處理檔案上傳 (整合 imagemagick 與 Amazon S3)</a> <br/>
-<a href="https://ruby-china.org/topics/4992">gem &lsquo;carrierwave'简易实用介绍</a><br/>
-<a href="http://springok-blog.logdown.com/posts/2015/10/21/railsgem-how-to-use-carrierwave-upload-pictures">Rails如何使用Carrierwave上傳圖片</a></p>
 ]]></content>
   </entry>
   

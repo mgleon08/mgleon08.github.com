@@ -248,26 +248,92 @@ require &#39;carrierwave &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>FFMPEG</h1>
+
 <p>也可以用 ruby 直接下 ffmpef 的指令</p>
 
-<p>Use %x or &lsquo;`&rsquo;:</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ffmpeg</span> <span class="o">-</span><span class="n">y</span> <span class="o">-</span><span class="n">i</span> <span class="c1">#{input_path} -vf &quot;scale=ceil(oh*a):480&quot; -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>縮圖</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ffmpeg</span> <span class="o">-</span><span class="n">i</span> <span class="c1">#{input} -ss 00:00:05 -vframes 1 #{thumbnil}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Calling shell commands from Ruby</h1>
+
+<ol>
+<li>Kernel#`, commonly called backticks – <code>cmd</code></li>
+</ol>
+
+
+<p>Returns the result of the shell command.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sb">`ffmpeg -y -i </span><span class="si">#{</span><span class="n">input_path</span><span class="si">}</span><span class="sb"> -vf &quot;scale=ceil(oh*a):480&quot; -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b </span><span class="si">#{</span><span class="n">bitrate</span><span class="si">}</span><span class="sb"> -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart </span><span class="si">#{</span><span class="n">output_path</span><span class="si">}</span><span class="sb">`</span>
-</span><span class='line'><span class="sx">%x(ffmpeg -y -i </span><span class="si">#{</span><span class="n">input_path</span><span class="si">}</span><span class="sx"> -vf &quot;scale=ceil(oh*a):480&quot; -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b </span><span class="si">#{</span><span class="n">bitrate</span><span class="si">}</span><span class="sx"> -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart </span><span class="si">#{</span><span class="n">output_path</span><span class="si">}</span><span class="sx">)</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="sb">`echo &#39;hi&#39;`</span>
+</span><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="sb">`</span><span class="si">#{</span><span class="n">cmd</span><span class="si">}</span><span class="sb">`</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Built-in syntax, <code>%x( cmd )</code></li>
+</ol>
+
+
+<p>Returns the result of the shell command, just like the backticks.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="sx">%x( echo &#39;hi&#39; )</span>
+</span><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="sx">%x[ </span><span class="si">#{</span><span class="n">cmd</span><span class="si">}</span><span class="sx"> ]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Kernel# <code>system</code></li>
+</ol>
+
+
+<p>Return: true if the command was found and ran successfully, false otherwise</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">wasGood</span> <span class="o">=</span> <span class="nb">system</span><span class="p">(</span> <span class="s2">&quot;echo &#39;hi&#39;&quot;</span> <span class="p">)</span>
+</span><span class='line'><span class="n">wasGood</span> <span class="o">=</span> <span class="nb">system</span><span class="p">(</span> <span class="n">cmd</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Kernel#exec</li>
+</ol>
+
+
+<p>Return: none, the current process is replaced and never continues</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">exec</span><span class="p">(</span> <span class="s2">&quot;echo &#39;hi&#39;&quot;</span> <span class="p">)</span>
+</span><span class='line'><span class="nb">exec</span><span class="p">(</span> <span class="n">cmd</span> <span class="p">)</span> <span class="c1"># Note: this will never be reached because of the line above</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <p>官方文件：<br/>
 <a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a><br/>
 <a href="https://github.com/streamio/streamio-ffmpeg">streamio-ffmpeg</a><br/>
-<a href="https://www.ffmpeg.org/">FFMPEG</a></p>
+<a href="https://www.ffmpeg.org/">FFMPEG</a><br/>
+<a href="http://ruby-doc.org/core-2.3.0/Kernel.html">Kernel</a></p>
 
 <p>參考文件：<br/>
 <a href="http://www.freezzo.com/2010/12/23/create-ffmpeg-processor-for-carrierwave-in-rails-3/">Create FFMPEG processor for Carrierwave in Rails 3</a><br/>
 <a href="https://prograils.com/posts/carrierwave-basic-video-conversion">CarrierWave - basic video conversion</a><br/>
-<a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a></p>
+<a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a><br/>
+<a href="http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby">Calling shell commands from Ruby</a><br/>
+<a href="http://tech.natemurray.com/2007/03/ruby-shell-commands.html">6 Ways to Run Shell Commands in Ruby Tuesday</a></p>
 </div>
 
 

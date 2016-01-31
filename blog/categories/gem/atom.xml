@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-29T21:40:07+08:00</updated>
+  <updated>2016-01-31T12:30:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -213,6 +213,13 @@ end
 <li>let! 則是⾮ lazy 版本</li>
 </ul>
 
+
+<h1>Stub</h1>
+
+<pre><code class="ruby">allow_any_instance_of(User).to receive(:follow).and_return(false)
+</code></pre>
+
+<p>用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。</p>
 
 <h1>factory_girl</h1>
 
@@ -433,23 +440,76 @@ class VideoUploader &lt; CarrierWave::Uploader::Base
 end
 </code></pre>
 
+<h1>FFMPEG</h1>
+
 <p>也可以用 ruby 直接下 ffmpef 的指令</p>
 
-<p>Use %x or &lsquo;`&rsquo;:</p>
+<pre><code class="ruby">ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path}
+</code></pre>
 
-<pre><code class="ruby">`ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path}`
-%x(ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path})
+<p>縮圖</p>
+
+<pre><code class="ruby">ffmpeg -i #{input} -ss 00:00:05 -vframes 1 #{thumbnil}
+</code></pre>
+
+<h1>Calling shell commands from Ruby</h1>
+
+<ol>
+<li>Kernel#`, commonly called backticks – <code>cmd</code></li>
+</ol>
+
+
+<p>Returns the result of the shell command.</p>
+
+<pre><code class="ruby">value = `echo 'hi'`
+value = `#{cmd}`
+</code></pre>
+
+<ol>
+<li>Built-in syntax, <code>%x( cmd )</code></li>
+</ol>
+
+
+<p>Returns the result of the shell command, just like the backticks.</p>
+
+<pre><code class="ruby">value = %x( echo 'hi' )
+value = %x[ #{cmd} ]
+</code></pre>
+
+<ol>
+<li>Kernel# <code>system</code></li>
+</ol>
+
+
+<p>Return: true if the command was found and ran successfully, false otherwise</p>
+
+<pre><code class="ruby">wasGood = system( "echo 'hi'" )
+wasGood = system( cmd )
+</code></pre>
+
+<ol>
+<li>Kernel#exec</li>
+</ol>
+
+
+<p>Return: none, the current process is replaced and never continues</p>
+
+<pre><code class="ruby">exec( "echo 'hi'" )
+exec( cmd ) # Note: this will never be reached because of the line above
 </code></pre>
 
 <p>官方文件：<br/>
 <a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a><br/>
 <a href="https://github.com/streamio/streamio-ffmpeg">streamio-ffmpeg</a><br/>
-<a href="https://www.ffmpeg.org/">FFMPEG</a></p>
+<a href="https://www.ffmpeg.org/">FFMPEG</a><br/>
+<a href="http://ruby-doc.org/core-2.3.0/Kernel.html">Kernel</a></p>
 
 <p>參考文件：<br/>
 <a href="http://www.freezzo.com/2010/12/23/create-ffmpeg-processor-for-carrierwave-in-rails-3/">Create FFMPEG processor for Carrierwave in Rails 3</a><br/>
 <a href="https://prograils.com/posts/carrierwave-basic-video-conversion">CarrierWave - basic video conversion</a><br/>
-<a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a></p>
+<a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a><br/>
+<a href="http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby">Calling shell commands from Ruby</a><br/>
+<a href="http://tech.natemurray.com/2007/03/ruby-shell-commands.html">6 Ways to Run Shell Commands in Ruby Tuesday</a></p>
 ]]></content>
   </entry>
   

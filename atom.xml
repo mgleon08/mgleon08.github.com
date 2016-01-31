@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-01-29T21:40:07+08:00</updated>
+  <updated>2016-01-31T12:30:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,458 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[自訂 Validation]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/31/custom-validation/"/>
+    <updated>2016-01-31T12:29:33+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/31/custom-validation</id>
+    <content type="html"><![CDATA[<p>當內建的驗證沒有自己的需求時，可以自訂驗證的 method 來使用。</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Picture</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
+</span><span class='line'>  <span class="n">validate</span>  <span class="ss">:picture_size</span>  <span class="c1">#注意沒有加 &#39;s&#39;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># 驗證圖片的大小</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">picture_size</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">picture</span><span class="o">.</span><span class="n">size</span> <span class="o">&gt;</span> <span class="mi">5</span><span class="o">.</span><span class="n">megabytes</span>
+</span><span class='line'>      <span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="ss">:picture</span><span class="p">,</span> <span class="s2">&quot;should be less than 5MB&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="c1">#errors[:picture] &lt;&lt; &quot;should be less than 5MB&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/active_record_validations.html">Active Record 驗證</a><br/>
+<a href="http://rails.ruby.tw/active_record_validations.html">Active Record 驗證 中文</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/activerecord-lifecycle.html">ActiveRecord - 資料驗證及回呼</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Association Supports 方法]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/31/association-supports/"/>
+    <updated>2016-01-31T11:54:15+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/31/association-supports</id>
+    <content type="html"><![CDATA[<p>在 model 和 model 之間，經常要建立對應的關聯，rails 也提供很多 Supports 的 helper</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:microposts</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:active_relationships</span><span class="p">,</span>  <span class="ss">class_name</span><span class="p">:</span>  <span class="s2">&quot;Relationship&quot;</span><span class="p">,</span> <span class="ss">foreign_key</span><span class="p">:</span> <span class="s2">&quot;follower_id&quot;</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:passive_relationships</span><span class="p">,</span> <span class="ss">class_name</span><span class="p">:</span>  <span class="s2">&quot;Relationship&quot;</span><span class="p">,</span> <span class="ss">foreign_key</span><span class="p">:</span> <span class="s2">&quot;followed_id&quot;</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:following</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:active_relationships</span><span class="p">,</span>  <span class="ss">source</span><span class="p">:</span> <span class="ss">:followed</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:followers</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:passive_relationships</span><span class="p">,</span> <span class="ss">source</span><span class="p">:</span> <span class="ss">:follower</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p><code>through</code> 透過關聯來建立另一個關聯集合，用於建立多對多的關係</p></li>
+<li><p><code>class_name</code> 變更關聯的類別名稱</p></li>
+</ul>
+
+
+<p>可以用這個方式，自己關聯自己，像是要上面，User 可以 follower 很多個 User</p>
+
+<blockquote><p>rails 慣例是 model 名稱，所以不用另外加 class_name</p></blockquote>
+
+<ul>
+<li><code>foreign_key</code> 可以修改外鍵名稱</li>
+</ul>
+
+
+<blockquote><p>rails 外鍵慣例是關聯的 Model 名稱加上 _id 後綴</p></blockquote>
+
+<ul>
+<li><code>dependent</code></li>
+</ul>
+
+
+<p>設定當物件刪除時，如何處理依賴它的資料</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Event</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:attendees</span><span class="p">,</span> <span class="ss">:dependent</span> <span class="o">=&gt;</span> <span class="ss">:destroy</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#:destroy 把依賴的attendees也一併刪除，並且執行Attendee的destroy回呼</span>
+</span><span class='line'><span class="c1">#:delete 把依賴的attendees也一併刪除，但不執行Attendee的destroy回呼</span>
+</span><span class='line'><span class="c1">#:nullify 這是預設值，不會幫忙刪除attendees，但會把attendees的外部鍵event_id都設成NULL</span>
+</span><span class='line'><span class="c1">#:restrict_with_exception 如果有任何依賴的attendees資料，則連event都不允許刪除。執行刪除時會丟出錯誤例外ActiveRecord::DeleteRestrictionError。</span>
+</span><span class='line'><span class="c1">#:restrict_with_error 不允許刪除。執行刪除時會回傳false，在@event.errors中會留有錯誤訊息。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>source</code></li>
+</ul>
+
+
+<p>搭配through設定使用，當關聯的名稱不一致的時候，需要加上source指名是哪一種物件。</p>
+
+<ul>
+<li><code>counter_cache</code> 參考之前文章 <a href="http://mgleon08.github.io/blog/2015/12/20/counter-cache/">counter-cache</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:pages</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Page</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:book</span><span class="p">,</span> <span class="ss">:counter_cache</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#設定成 ture，就會自動去找 pages_count 欄位，若要指定欄位則是 counter_cache: :count_of_pages</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>inverse_of</code></li>
+</ul>
+
+
+<p>關聯另一端的關聯名稱。</p>
+
+<blockquote><p>belongs_to 無法與 :polymorphic 同時使用。<br/>
+has_one 無法與 :through 或 :as 同時使用。</p></blockquote>
+
+<ul>
+<li><code>polymorphic</code> &amp; <code>as</code> 參考之前文章 <a href="http://mgleon08.github.io/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti/">polymorphic</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:commentable</span><span class="p">,</span> <span class="ss">:polymorphic</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Article</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="ss">:commentable</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Photo</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="ss">:commentable</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>touch</code><br/>
+touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at 或 updated_on 的時間戳會自動設成當前時間</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Order</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:customer</span><span class="p">,</span> <span class="ss">touch</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="c1">#更改欄位 touch: :orders_updated_at</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><p><code>validate</code> 預設為 false，儲存物件時不會驗證關聯物件</p></li>
+<li><p><code>primary_key</code> 可以修改主鍵名稱</p></li>
+</ul>
+
+
+<h1>Scope</h1>
+
+<ul>
+<li><code>where</code></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Order</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:customer</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span> <span class="ss">active</span><span class="p">:</span> <span class="kp">true</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>includes</code></li>
+</ul>
+
+
+<p>經常性使用 <code>@line_item.order.customer</code> 就可以加上</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">LineItem</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:order</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">includes</span> <span class="ss">:customer</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Order</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:customer</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:line_items</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Customer</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:orders</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>readonly</code></li>
+</ul>
+
+
+<p>如果設定了 readonly 選項，則關聯物件取出時為唯讀。</p>
+
+<ul>
+<li><code>select</code></li>
+</ul>
+
+
+<p>select 方法可以覆寫用來取出關聯的 SELECT 子句。預設會取出所有欄位</p>
+
+<h3>has_many 額外方式</h3>
+
+<p>條件也可透過 Hash 指定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Customer</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:confirmed_orders</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span> <span class="ss">confirmed</span><span class="p">:</span> <span class="kp">true</span> <span class="p">},</span>
+</span><span class='line'>                              <span class="ss">class_name</span><span class="p">:</span> <span class="s2">&quot;Order&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>用 Hash 的 where，產生出來的記錄會自動使用 Hash 的作用域。</p>
+
+<p>上例中，使用 <code>@customer.confirmed_orders.create</code> 或 <code>@customer.confirmed_orders.build</code> 會建立出 confirmed 欄位為 true 的訂單</p>
+
+<ul>
+<li><code>group</code> 對結果做分組</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_many</span> <span class="ss">:line_items</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">group</span> <span class="s1">&#39;orders.id&#39;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>limit</code> 限制透過關聯取出物件的數量</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="n">has_many</span> <span class="ss">:recent_orders</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s1">&#39;order_date desc&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">limit</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>offset</code> 指定開始從關聯取出物件的偏移量</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_many</span> <span class="ss">:orders</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">offset</span><span class="p">(</span><span class="mi">11</span><span class="p">)</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>order</code> 指定關聯物件取出後的排序方式</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_many</span> <span class="ss">:orders</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span> <span class="s2">&quot;date_confirmed DESC&quot;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>distinct</code> 確保集合中沒有重複的物件</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_many</span> <span class="ss">:articles</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">distinct</span> <span class="p">},</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:readings</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>若想確保不插入重複的資料到資料庫（這樣取出來就確定是不重複的記錄了），應該要在資料表上新增一個唯一性的索引。</p>
+
+<p>舉例來說，如果有 person_articles 資料表，想確保所有文章不重複，可加入下面這個遷移</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">add_index</span> <span class="ss">:person_articles</span><span class="p">,</span> <span class="ss">:article</span><span class="p">,</span> <span class="ss">unique</span><span class="p">:</span> <span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>不要使用 include? 來確保唯一性，因為多個使用者可能同時加入文章，可能會導致競態條件（Race Condition）</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">person</span><span class="o">.</span><span class="n">articles</span> <span class="o">&lt;&lt;</span> <span class="n">article</span> <span class="k">unless</span> <span class="n">person</span><span class="o">.</span><span class="n">articles</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="n">article</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>extending</code> 指定一個模組名稱，用來擴充關聯代理（association proxy）</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">FindRecentExtension</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">find_recent</span>
+</span><span class='line'>    <span class="n">where</span><span class="p">(</span><span class="s2">&quot;created_at &gt; ?&quot;</span><span class="p">,</span> <span class="mi">5</span><span class="o">.</span><span class="n">days</span><span class="o">.</span><span class="n">ago</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Customer</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:orders</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">extending</span> <span class="no">FindRecentExtension</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Supplier</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:deliveries</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">extending</span> <span class="no">FindRecentExtension</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/association_basics.html#has-many-association-reference">has_many Association Reference</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">has_many Association Reference 中文</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#belongs-to-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">belongs_to 關聯手冊</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#has-one-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">has_one 關聯手冊</a><br/>
+<a href="http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">has_many 關聯</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">ActiveRecord - 資料表關聯</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Transactions 交易]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/01/31/transactions/"/>
+    <updated>2016-01-31T10:58:13+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/01/31/transactions</id>
+    <content type="html"><![CDATA[<p>當兩件事情必須確實執行完畢，才存取到資料庫！</p>
+
+<!-- more -->
+
+
+<h1>Transactions交易</h1>
+
+<p>像是銀行匯款，必須一方確實扣款，另一方確實有新增款項，這筆交易在算成功!</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span><span class="o">.</span><span class="n">transaction</span> <span class="k">do</span>
+</span><span class='line'>  <span class="no">User</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">:name</span> <span class="o">=&gt;</span> <span class="s1">&#39;hello&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">Feed</span><span class="o">.</span><span class="n">create!</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 transaction 裡面必須使用加上 <code>!</code> 才會丟例外，讓交易失敗。</p>
+
+<p>另外，資料要在 transaction 完成後，才會存取到資料庫，因此有用 <code>after_save</code> 回呼，可能就會失敗。</p>
+
+<p>因此必須改用 <code>after_commit</code>這個回呼，才能確保讀取到交易完成後的資料。</p>
+
+<p><a href="https://ihower.tw/rails4/activerecord-others.html">ActiveRecord - 進階功能</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Try 來防止 Nil]]></title>
@@ -104,141 +556,6 @@
 <p>參考文件：<br/>
 <a href="https://github.com/rails/rails/blob/master/activesupport/lib/active_support/core_ext/object/try.rb">try - rails_github</a><br/>
 <a href="http://guides.rubyonrails.org/active_support_core_extensions.html#try">try</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Association Reference 建立關聯]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/29/association-reference/"/>
-    <updated>2016-01-29T21:33:02+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/29/association-reference</id>
-    <content type="html"><![CDATA[<p>在 model 和 model 之間，經常要建立對應的關聯，而 rails 又有相當多的關聯方式，還有 method</p>
-
-<!-- more -->
-
-
-<h1>has_many 建立關聯</h1>
-
-<p><code>User</code> has_many <code>Post</code><br/>
-可以用下面方法，將兩個 model 關聯起來。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span>
-</span><span class='line'><span class="c1">#回傳所有關聯物件的陣列，沒有則回傳空陣列</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span> <span class="o">&lt;&lt;</span> <span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#透過將外鍵設為加入物件的主鍵</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="n">object</span><span class="p">,</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#透過將外鍵設為 NULL，從關聯集合中移除一個或多個物件，會回呼 dependent 設定</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">destroy</span><span class="p">(</span><span class="n">object</span><span class="p">,</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#呼叫 destroy 來移除物件，不管 dependent 設定</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span> <span class="o">=</span> <span class="p">(</span><span class="n">objects</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#根據提供的物件來決定要刪除還是新增</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">post_ids</span>
-</span><span class='line'><span class="c1">#回傳所有關聯的 id 陣列</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">post_ids</span><span class="o">=</span><span class="p">(</span><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#更改集合擁有物件的 ID，根據所提供的主鍵值來決定要刪除還是新增</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">clear</span>
-</span><span class='line'><span class="c1">#移除集合中的所有物件。若有設定 dependent: :destroy 選項，則會 destory 關聯物件；若設定的是 dependent: :delete_all 選項，則會直接從資料庫刪除關聯物件；其他情況會將外鍵設為 NULL</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">empty?</span>
-</span><span class='line'><span class="c1">#在集合沒有任何關聯物件時回傳 true</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="c1">#回傳集合中物件的數量</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#在集合中查詢物件。語法和選項與 ActiveRecord::Base.find 相同</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@open_orders</span> <span class="o">=</span> <span class="vi">@customer</span><span class="o">.</span><span class="n">orders</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">open</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="c1"># No query yet</span>
-</span><span class='line'><span class="vi">@open_order</span> <span class="o">=</span> <span class="vi">@open_orders</span><span class="o">.</span><span class="n">first</span> <span class="c1"># Now the database will be queried</span>
-</span><span class='line'><span class="c1">#根據提供的條件來查找物件，預設是惰性載入，僅在需要用到物件才會去資料庫做查詢。</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#依提供的條件檢查物件存在集合裡。語法和選項與 ActiveRecord::Base.exists? 相同</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">build</span><span class="p">(</span><span class="n">attributes</span> <span class="o">=</span> <span class="p">{},</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#回傳一個或多個新關聯物件。這些物件由傳入的屬性來初始化，同時會自動設定外鍵。但關聯物件仍未儲存至資料庫</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="n">attributes</span> <span class="o">=</span> <span class="p">{})</span>
-</span><span class='line'><span class="c1">#回傳關聯類型的新物件。 這個物件透過傳入的屬性來初始化，同時會自動設定外鍵。一旦通過所有 Model 的驗證規則時，便把此關聯物件存入資料庫</span>
-</span><span class='line'>
-</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">posts</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="n">attributes</span> <span class="o">=</span> <span class="p">{})</span>
-</span><span class='line'><span class="c1">#驗證失敗時會拋出 ActiveRecord::RecordInvalid 異常</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/association_basics.html#has-many-association-reference">has_many Association Reference</a><br/>
-<a href="http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">has_many Association Reference 中文</a></p>
 ]]></content>
   </entry>
   
@@ -524,6 +841,15 @@
 <li>let! 則是⾮ lazy 版本</li>
 </ul>
 
+
+<h1>Stub</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">allow_any_instance_of</span><span class="p">(</span><span class="no">User</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:follow</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="kp">false</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。</p>
 
 <h1>factory_girl</h1>
 
@@ -866,26 +1192,92 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>FFMPEG</h1>
+
 <p>也可以用 ruby 直接下 ffmpef 的指令</p>
 
-<p>Use %x or &lsquo;`&rsquo;:</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ffmpeg</span> <span class="o">-</span><span class="n">y</span> <span class="o">-</span><span class="n">i</span> <span class="c1">#{input_path} -vf &quot;scale=ceil(oh*a):480&quot; -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>縮圖</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ffmpeg</span> <span class="o">-</span><span class="n">i</span> <span class="c1">#{input} -ss 00:00:05 -vframes 1 #{thumbnil}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Calling shell commands from Ruby</h1>
+
+<ol>
+<li>Kernel#`, commonly called backticks – <code>cmd</code></li>
+</ol>
+
+
+<p>Returns the result of the shell command.</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sb">`ffmpeg -y -i </span><span class="si">#{</span><span class="n">input_path</span><span class="si">}</span><span class="sb"> -vf &quot;scale=ceil(oh*a):480&quot; -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b </span><span class="si">#{</span><span class="n">bitrate</span><span class="si">}</span><span class="sb"> -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart </span><span class="si">#{</span><span class="n">output_path</span><span class="si">}</span><span class="sb">`</span>
-</span><span class='line'><span class="sx">%x(ffmpeg -y -i </span><span class="si">#{</span><span class="n">input_path</span><span class="si">}</span><span class="sx"> -vf &quot;scale=ceil(oh*a):480&quot; -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b </span><span class="si">#{</span><span class="n">bitrate</span><span class="si">}</span><span class="sx"> -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart </span><span class="si">#{</span><span class="n">output_path</span><span class="si">}</span><span class="sx">)</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="sb">`echo &#39;hi&#39;`</span>
+</span><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="sb">`</span><span class="si">#{</span><span class="n">cmd</span><span class="si">}</span><span class="sb">`</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Built-in syntax, <code>%x( cmd )</code></li>
+</ol>
+
+
+<p>Returns the result of the shell command, just like the backticks.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="sx">%x( echo &#39;hi&#39; )</span>
+</span><span class='line'><span class="n">value</span> <span class="o">=</span> <span class="sx">%x[ </span><span class="si">#{</span><span class="n">cmd</span><span class="si">}</span><span class="sx"> ]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Kernel# <code>system</code></li>
+</ol>
+
+
+<p>Return: true if the command was found and ran successfully, false otherwise</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">wasGood</span> <span class="o">=</span> <span class="nb">system</span><span class="p">(</span> <span class="s2">&quot;echo &#39;hi&#39;&quot;</span> <span class="p">)</span>
+</span><span class='line'><span class="n">wasGood</span> <span class="o">=</span> <span class="nb">system</span><span class="p">(</span> <span class="n">cmd</span> <span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>Kernel#exec</li>
+</ol>
+
+
+<p>Return: none, the current process is replaced and never continues</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">exec</span><span class="p">(</span> <span class="s2">&quot;echo &#39;hi&#39;&quot;</span> <span class="p">)</span>
+</span><span class='line'><span class="nb">exec</span><span class="p">(</span> <span class="n">cmd</span> <span class="p">)</span> <span class="c1"># Note: this will never be reached because of the line above</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <p>官方文件：<br/>
 <a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a><br/>
 <a href="https://github.com/streamio/streamio-ffmpeg">streamio-ffmpeg</a><br/>
-<a href="https://www.ffmpeg.org/">FFMPEG</a></p>
+<a href="https://www.ffmpeg.org/">FFMPEG</a><br/>
+<a href="http://ruby-doc.org/core-2.3.0/Kernel.html">Kernel</a></p>
 
 <p>參考文件：<br/>
 <a href="http://www.freezzo.com/2010/12/23/create-ffmpeg-processor-for-carrierwave-in-rails-3/">Create FFMPEG processor for Carrierwave in Rails 3</a><br/>
 <a href="https://prograils.com/posts/carrierwave-basic-video-conversion">CarrierWave - basic video conversion</a><br/>
-<a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a></p>
+<a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a><br/>
+<a href="http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby">Calling shell commands from Ruby</a><br/>
+<a href="http://tech.natemurray.com/2007/03/ruby-shell-commands.html">6 Ways to Run Shell Commands in Ruby Tuesday</a></p>
 ]]></content>
   </entry>
   
@@ -4328,13 +4720,15 @@ Sitemap
 <span class='line-number'>10</span>
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
+<span class='line-number'>13</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">CreateComments</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
 </span><span class='line'>    <span class="n">create_table</span> <span class="ss">:comments</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
 </span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">text</span> <span class="ss">:content</span>
 </span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">integer</span> <span class="ss">:commentable_id</span>
 </span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:commentable_type</span>
-</span><span class='line'>      <span class="c1">#可改成 t.belongs_to :commentable, :polymorphic =&gt; true, index: true 取代</span>
+</span><span class='line'>      <span class="c1">#可改成 t.belongs_to :commentable, polymorphic: true, index: true 取代</span>
+</span><span class='line'>      <span class="c1">#或是 t.references :commentable, polymorphic: true, index: true 取代</span>
 </span><span class='line'>
 </span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
 </span><span class='line'>    <span class="k">end</span>
@@ -4531,231 +4925,6 @@ Sitemap
 
 <p>參考資料：<br/>
 <a href="https://ihower.tw/rails4/activerecord-query.html">Scopes 作用域</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Counter_cache]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/20/counter-cache/"/>
-    <updated>2015-12-20T12:16:23+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/20/counter-cache</id>
-    <content type="html"><![CDATA[<p>通常要計算 has_many 關聯資料的數量時，就會用以下方式。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@book</span><span class="o">.</span><span class="n">pages</span><span class="o">.</span><span class="n">size</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<!-- more -->
-
-
-<p>但這樣就會產生很多SQL count查詢，造成效能上的問題</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">SELECT</span> <span class="o">*</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">LIMIT</span> <span class="mi">5</span> <span class="no">OFFSET</span> <span class="mi">0</span>
-</span><span class='line'><span class="no">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">AS</span> <span class="n">count_all</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="sb">`pages`</span><span class="o">.</span><span class="n">book_id</span> <span class="o">=</span> <span class="mi">1</span> <span class="p">)</span>
-</span><span class='line'><span class="no">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">AS</span> <span class="n">count_all</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="sb">`pages`</span><span class="o">.</span><span class="n">book_id</span> <span class="o">=</span> <span class="mi">2</span> <span class="p">)</span>
-</span><span class='line'><span class="no">SELECT</span> <span class="n">count</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">AS</span> <span class="n">count_all</span> <span class="no">FROM</span> <span class="sb">`pages`</span> <span class="no">WHERE</span> <span class="p">(</span><span class="sb">`pages`</span><span class="o">.</span><span class="n">book_id</span> <span class="o">=</span> <span class="mi">3</span> <span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>因此可以在 Book Model 上新增一個欄位，<code>pages_count</code>，用來記錄該 book 的 page 數量，之後撈資料，就直接撈這個數字就可以了。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">change</span>
-</span><span class='line'>  <span class="n">add_column</span> <span class="ss">:books</span><span class="p">,</span> <span class="ss">:pages_count</span><span class="p">,</span> <span class="ss">:integer</span><span class="p">,</span> <span class="ss">default</span><span class="p">:</span> <span class="mi">0</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#型態是 integer，記得設定 default 值</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>接著編輯兩邊的 model，Rails 內建有 counter_cache helper，可以直接去做計算!</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:pages</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Page</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:book</span><span class="p">,</span> <span class="ss">:counter_cache</span> <span class="o">=&gt;</span> <span class="kp">true</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#設定成 ture，就會自動去找 pages_count 欄位，若要指定欄位則是 counter_cache: :count_of_pages</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>這樣之後下 <code>@book.pages.size</code> 的指令時 Rails 就會預設去找 <code>pages_count</code> 的欄位，不用重新下 SQL指令計算。</p>
-
-<p>也可以直接下 <code>@book.pages_count</code></p>
-
-<p>最後注意，必須要用 <code>create</code> 和 <code>destroy</code> 才會 call back 更改數字，<code>delete</code> 則不會。</p>
-
-<p>另外如果想要將數字重新計算可以用以下，可以直接在 <code>rails c</code> 裡面跑<br/>
-也可以在新增 counter 的 migration 裡面直接加上去，在 <code>db:migrat</code> 的時候就會刷新了</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Page</span><span class="o">.</span><span class="n">pluck</span><span class="p">(</span><span class="ss">:id</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
-</span><span class='line'>  <span class="no">Page</span><span class="o">.</span><span class="n">reset_counters</span><span class="p">(</span><span class="n">i</span><span class="p">,</span> <span class="ss">:books</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/association_basics.html#detailed-association-reference">Guides</a><br/>
-<a href="http://rails.ruby.tw/association_basics.html#%E9%97%9C%E8%81%AF%E5%AE%8C%E6%95%B4%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A">Guides 中文</a><br/>
-<a href="http://apidock.com/rails/ActiveRecord/Calculations/pluck">pluck</a><br/>
-<a href="http://apidock.com/rails/ActiveRecord/Base/reset_counters/class">reset_counters</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails - Debugging]]></title>
-    <link href="http://mgleon08.github.com/blog/2015/12/19/ruby-on-rails-debugging/"/>
-    <updated>2015-12-19T11:09:06+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2015/12/19/ruby-on-rails-debugging</id>
-    <content type="html"><![CDATA[<p>當發生 bug 的時候，要如何來有效率的debug!?
-今天就來介紹幾種方式，快速的找出這些 <code>bug!!</code></p>
-
-<!-- more -->
-
-
-<h1>raise</h1>
-
-<p>直接在覺得有問題的程式碼上面，插入 <code>raise</code>
-rails 就會在該行指令處產生 <a href="http://apidock.com/ruby/Kernel/raise">RuntimeError</a>，接著網頁就會進入錯誤畫面了
-下面黑色區塊就可以輸入指令，看到底哪裡出問題!!</p>
-
-<p>這是比較陽春的方式，但好處是</p>
-
-<ol>
-<li>不用特別安裝 gem</li>
-<li>也不用去 console 中 debug ， 直接在瀏覽器上就可以執行</li>
-</ol>
-
-
-<p><img src="http://i.imgur.com/W0GTWCo.png" alt="raise" /></p>
-
-<h1><a href="https://github.com/deivid-rodriguez/byebug">byebug</a></h1>
-
-<p>開起新的專案時，就會內建在 development 和 test 環境的一個 gem</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span><span class="p">,</span> <span class="ss">:test</span> <span class="k">do</span>
-</span><span class='line'>  <span class="c1"># Call &#39;byebug&#39; anywhere in the code to stop execution and get a debugger console</span>
-</span><span class='line'>  <span class="n">gem</span> <span class="s1">&#39;byebug&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>一樣是在覺得有問題的程式碼上面插入 <code>byebug</code>
-當跑到那個地方的時候就會停下來，接著就可以在 console 裡面輸入指令
-測試完後就輸入 <code>continue</code> 繼續跑，或是 <code>exit</code> 離開。</p>
-
-<p>但缺點是很吃效能，每次繼續跑就會變超慢，所以我都會直接整個重開XD</p>
-
-<p><img src="http://i.imgur.com/dsaqKTB.png" alt="byebug" /></p>
-
-<h1><a href="https://github.com/charliesome/better_errors">better_errors</a></h1>
-
-<p>安裝方式</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">group</span> <span class="ss">:development</span><span class="p">,</span> <span class="ss">:test</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">gem</span> <span class="s1">&#39;better_errors&#39;</span>
-</span><span class='line'>    <span class="n">gem</span> <span class="s1">&#39;binding_of_caller&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>有點像是 raise 的進階版本，更多詳細的資訊
-只要有例外，就會顯示這種畫面</p>
-
-<p><img src="http://i.imgur.com/6BxsIH1.png" alt="better_errors" /></p>
-
-<ol>
-<li>左上 - 檢查檔案</li>
-<li>右上 - 可以直接輸入指令來測試，像在 console 一樣</li>
-<li>右下 - 檢查數值，request的互動中是否有參數漏掉?</li>
-</ol>
-
-
-<p>參考文章：
-<a href="http://motion-express.com/blog/20141014-debugging-rails-better-errors/">Debugging Rails 使用 better_errors 在瀏覽器中直接進行除錯</a></p>
-
-<h1><a href="https://github.com/pry/pry">pry</a></h1>
-
-<p>安裝方式</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;pry&#39;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;pry-rails&#39;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;pry-nav&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>超強的 debug 神器，一樣直接插入 <code>binding.pry</code>
-並且有顏色更加清楚，還可以像打指令 <code>cd @books.first</code> 進入某個變數裡面
-接著就可以直接打 <code>name</code> <code>content</code>，顯示變數內容</p>
-
-<p><img src="http://i.imgur.com/67g9JXM.png" alt="pry" /></p>
-
-<p>指令：<br/>
-<code>self</code> 檢查目前所在的 class 或 scope<br/>
-<code>next</code> 執行這一段 block，並在下一段 block 開始時停止<br/>
-<code>step</code> 執行這一行，並在下一行停止<br/>
-<code>ls、methods</code> 可以看目前的 class 或 scope 內有什麼樣的 variable 或 method 可以使用<br/>
-<code>continue</code> 繼續執行，如果有下一個 <code>binding.pry</code>就會停下來<br/>
-<code>exit</code> 離開 pry ，繼續執行程式</p>
-
-<blockquote><p>要有 <code>gem 'pry-nav'</code> 才會有 next、step ，一步一步 debug</p>
-
-<p>注意!!如果是用上一篇的 pow 來執行的話，要安裝 <a href="https://github.com/Mon-Ouie/pry-remote">pry-remote</a>，並且把原本的 <code>bindig.pry</code> 改成 <code>binding.remote_pry</code></p></blockquote>
-
-<h1><a href="https://github.com/michaeldv/awesome_print">awesome_print</a></h1>
-
-<p>可搭配 awesome_print 有漂亮的輸出<br/>
-<a href="https://github.com/michaeldv/awesome_print">awesome_print</a></p>
-
-<p>顯示上一個變數，漂亮的輸出</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ap_</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>詳細介紹：<br/>
-<a href="http://toyroom.bruceli.net/tw/2014/08/13/awesome-rails-console-customization-using-pry.html">超棒的 rails console 設定</a></p>
-
-<p>參考文章：<br/>
-<a href="http://blog.xdite.net/posts/2012/08/13/pry-the-new-debugger">Pry ：新一代 Debug 利器</a><br/>
-<a href="http://motion-express.com/blog/20141015-debugging-rails-pry">Debugging Rails 沒有錯誤訊息卻還是有bug！要如何即時除錯？</a><br/>
-<a href="http://toyroom.bruceli.net/tw/2014/08/13/awesome-rails-console-customization-using-pry.html">超棒的 rails console 設定</a></p>
 ]]></content>
   </entry>
   
