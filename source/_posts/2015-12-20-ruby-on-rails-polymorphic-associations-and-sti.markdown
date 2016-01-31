@@ -82,7 +82,8 @@ class CreateComments < ActiveRecord::Migration
       t.text :content
       t.integer :commentable_id
       t.string :commentable_type
-      #可改成 t.belongs_to :commentable, :polymorphic => true, index: true 取代
+      #可改成 t.belongs_to :commentable, polymorphic: true, index: true 取代
+      #或是 t.references :commentable, polymorphic: true, index: true 取代
 
       t.timestamps
     end

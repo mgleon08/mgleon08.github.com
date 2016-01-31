@@ -178,9 +178,18 @@ end
 ```ruby
 let(:user){User.new(:name => "hello")}
 ```
+
 * 相較於 before(:each) 可增加執⾏速度  
 * 有使⽤到才會運算(lazy)，並且在同⼀個 example 測試中多次呼叫會 Memoized 快取起來。  
 * let! 則是⾮ lazy 版本  
+
+#Stub
+
+```ruby
+allow_any_instance_of(User).to receive(:follow).and_return(false)
+```
+用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。
+
 
 #factory_girl
 

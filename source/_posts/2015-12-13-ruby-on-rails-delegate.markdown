@@ -59,7 +59,7 @@ delegate :empty?, :clear, to: :line_items, prefix: true
 ```ruby
 delegate :empty?, :clear, to: :line_items, prefix: mycart
 ```
-就變成 `@cart. mycart_empty?`  
+就變成 `@cart.mycart_empty?`  
 蠻酷的吧!
 
 官方文件：
