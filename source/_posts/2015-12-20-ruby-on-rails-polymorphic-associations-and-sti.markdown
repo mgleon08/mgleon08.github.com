@@ -3,17 +3,17 @@ layout: post
 title: "Ruby on Rails - Polymorphic Associations and STI"
 date: 2015-12-20 14:47:50 +0800
 comments: true
-categories:  rails rails語法
---- 
+categories: rails
+---
 
-Polymorphic Associations 和 STI，一開始實在不太懂這兩個的差別是什麼？  
+Polymorphic Associations 和 STI，一開始實在不太懂這兩個的差別是什麼？
 感覺功能都差不多，但仔細研究後發現，其實兩個是完全不同的東西
 
 <!-- more -->
 
 #STI 單一表格繼承(Single-table inheritance)
 
-簡單的來說，就是 `子類別` 繼承 `父類別` 的表格欄位和方法  
+簡單的來說，就是 `子類別` 繼承 `父類別` 的表格欄位和方法
 在 Rails 慣例中，只要在父類別加上 `type` 欄位，就可以使用了
 
 以下就是三個 model 共用 User 的表格，`Guest` 和 `Member` 不需要在建立自己的資料表
@@ -63,10 +63,10 @@ end
 這樣 Guest 和 Member 就必須有自己的資料表了。
 
 
-官方文件：  
-[Guides 中文](http://rails.ruby.tw/association_basics.html#%E5%96%AE%E8%A1%A8%E7%B9%BC%E6%89%BF) 
+官方文件：
+[Guides 中文](http://rails.ruby.tw/association_basics.html#%E5%96%AE%E8%A1%A8%E7%B9%BC%E6%89%BF)
 
-參考文件：  
+參考文件：
 [Ruby on Rails 實戰聖經](https://ihower.tw/rails4/activerecord-others.html)
 
 #多型關聯(Polymorphic Associations)
@@ -106,7 +106,7 @@ class Photo < ActiveRecord::Base
   has_many :comments, :as => :commentable
 end
 ```
-之後再 console 
+之後再 console
 
 ```ruby
 a = Article.create #id=>1
@@ -124,9 +124,9 @@ comment.commentable => #<Article id: 1, ....>
 
 ![Polymorphic Associations](http://i.imgur.com/9t6JGzp.png)
 
-官方文件：  
-[Guides](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations)  
-[Guides 中文](http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF)  
+官方文件：
+[Guides](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations)
+[Guides 中文](http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF)
 
-參考資料：  
+參考資料：
 [Ruby on Rails 實戰聖經](https://ihower.tw/rails4/activerecord-relationships.html)

@@ -3,7 +3,7 @@ layout: post
 title: "Association supports 方法"
 date: 2016-01-31 11:54:15 +0800
 comments: true
-categories: rails rails語法
+categories: rails
 ---
 
 在 model 和 model 之間，經常要建立對應的關聯，rails 也提供很多 Supports 的 helper
@@ -22,17 +22,17 @@ end
 
 * `through` 透過關聯來建立另一個關聯集合，用於建立多對多的關係
 
-* `class_name` 變更關聯的類別名稱  
+* `class_name` 變更關聯的類別名稱
 
 可以用這個方式，自己關聯自己，像是要上面，User 可以 follower 很多個 User
 
 >rails 慣例是 model 名稱，所以不用另外加 class_name
 
-* `foreign_key` 可以修改外鍵名稱  
+* `foreign_key` 可以修改外鍵名稱
 
 >rails 外鍵慣例是關聯的 Model 名稱加上 _id 後綴
 
-* `dependent` 
+* `dependent`
 
 設定當物件刪除時，如何處理依賴它的資料
 
@@ -48,7 +48,7 @@ end
 #:restrict_with_error 不允許刪除。執行刪除時會回傳false，在@event.errors中會留有錯誤訊息。
 ```
 
-* `source` 
+* `source`
 
 搭配through設定使用，當關聯的名稱不一致的時候，需要加上source指名是哪一種物件。
 
@@ -66,11 +66,11 @@ end
 #設定成 ture，就會自動去找 pages_count 欄位，若要指定欄位則是 counter_cache: :count_of_pages
 ```
 
-* `inverse_of`  
+* `inverse_of`
 
 關聯另一端的關聯名稱。
 
->belongs_to 無法與 :polymorphic 同時使用。  
+>belongs_to 無法與 :polymorphic 同時使用。
 >has_one 無法與 :through 或 :as 同時使用。
 
 * `polymorphic` & `as` 參考之前文章 [polymorphic](http://mgleon08.github.io/blog/2015/12/20/ruby-on-rails-polymorphic-associations-and-sti/)
@@ -88,12 +88,12 @@ class Photo < ActiveRecord::Base
   has_many :comments, :as => :commentable
 end
 ```
-* `touch`  
+* `touch`
 touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at 或 updated_on 的時間戳會自動設成當前時間
 
 ```ruby
 class Order < ActiveRecord::Base
-  belongs_to :customer, touch: true 
+  belongs_to :customer, touch: true
   #更改欄位 touch: :orders_updated_at
 end
 ```
@@ -115,17 +115,17 @@ end
 * `includes`
 
 經常性使用 `@line_item.order.customer` 就可以加上
- 
+
 ```ruby
 class LineItem < ActiveRecord::Base
   belongs_to :order, -> { includes :customer }
 end
- 
+
 class Order < ActiveRecord::Base
   belongs_to :customer
   has_many :line_items
 end
- 
+
 class Customer < ActiveRecord::Base
   has_many :orders
 end
@@ -148,7 +148,7 @@ class Customer < ActiveRecord::Base
                               class_name: "Order"
 end
 ```
-用 Hash 的 where，產生出來的記錄會自動使用 Hash 的作用域。  
+用 Hash 的 where，產生出來的記錄會自動使用 Hash 的作用域。
 
 上例中，使用 `@customer.confirmed_orders.create` 或 `@customer.confirmed_orders.build` 會建立出 confirmed 欄位為 true 的訂單
 
@@ -171,13 +171,13 @@ has_many :orders, -> { offset(11) }
 ```
 
 * `order` 指定關聯物件取出後的排序方式
- 
+
 ```ruby
 has_many :orders, -> { order "date_confirmed DESC" }
 ```
 
 * `distinct` 確保集合中沒有重複的物件
- 
+
 ```ruby
 has_many :articles, -> { distinct }, through: :readings
 ```
@@ -204,22 +204,22 @@ module FindRecentExtension
     where("created_at > ?", 5.days.ago)
   end
 end
- 
+
 class Customer < ActiveRecord::Base
   has_many :orders, -> { extending FindRecentExtension }
 end
- 
+
 class Supplier < ActiveRecord::Base
   has_many :deliveries, -> { extending FindRecentExtension }
 end
 ```
 
-官方文件：  
-[has_many Association Reference](http://guides.rubyonrails.org/association_basics.html#has-many-association-reference)  
-[has_many Association Reference 中文](http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)  
-[belongs_to 關聯手冊](http://rails.ruby.tw/association_basics.html#belongs-to-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)  
-[has_one 關聯手冊](http://rails.ruby.tw/association_basics.html#has-one-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)  
+官方文件：
+[has_many Association Reference](http://guides.rubyonrails.org/association_basics.html#has-many-association-reference)
+[has_many Association Reference 中文](http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)
+[belongs_to 關聯手冊](http://rails.ruby.tw/association_basics.html#belongs-to-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)
+[has_one 關聯手冊](http://rails.ruby.tw/association_basics.html#has-one-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)
 [has_many 關聯](http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)
 
-參考文件：  
+參考文件：
 [ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)

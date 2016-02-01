@@ -3,7 +3,7 @@ layout: post
 title: "用 ruby 進行 File ＆ Dir 檔案操作"
 date: 2016-01-31 19:07:00 +0800
 comments: true
-categories: ruby ruby語法
+categories: ruby
 ---
 用 ruby 來操作 file ＆ Dir 檔案。
 
@@ -47,11 +47,11 @@ File.join(Rails.root, "ruby.rb")
 #File data
 
 ```ruby
-File.extname("ruby.rb"") 
+File.extname("ruby.rb"")
 #=> ".rb"
 
-File.basename("/home/work/ruby.rb", ".*") 
-#=> "ruby" 
+File.basename("/home/work/ruby.rb", ".*")
+#=> "ruby"
 # `*` Regular Expression，代表不管任何字
 
 File.dirname("/home/work/ruby.rb")
@@ -98,9 +98,9 @@ FileUtils.copy_entry("dir", "new_dir")
 # 複製整個資料夾內容
 ```
 
-官方文件：  
-[File](http://ruby-doc.org/core-2.3.0/File.html)  
+官方文件：
+[File](http://ruby-doc.org/core-2.3.0/File.html)
 [FileUtils](http://ruby-doc.org/stdlib-2.2.2/libdoc/fileutils/rdoc/FileUtils.html#method-c-cd)
 
-參考文件：  
+參考文件：
 [用Ruby Scripting維護系統](http://motion-express.com/trainings/scripting-in-ruby/screencasts/manipulating-files)

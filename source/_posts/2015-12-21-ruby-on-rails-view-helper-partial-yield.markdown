@@ -3,11 +3,11 @@ layout: post
 title: "Ruby on Rails - helper?partial?yield?"
 date: 2015-12-21 11:08:08 +0800
 comments: true
-categories: rails rails語法
+categories: rails
 ---
 
-在 Rails 中 View 是負責放 html 的地方，因此會盡量讓它單純呈現畫面，邏輯的東西則是放在別的地方。  
-但是有時候還是不免會有許多重複的 html ，或是判斷和邏輯的東西必須擺放。  
+在 Rails 中 View 是負責放 html 的地方，因此會盡量讓它單純呈現畫面，邏輯的東西則是放在別的地方。
+但是有時候還是不免會有許多重複的 html ，或是判斷和邏輯的東西必須擺放。
 因此 rails 就有提供了幾個方法可以解決這些問題。
 
 <!-- more -->
@@ -23,7 +23,7 @@ Helper 主要是來整理 view 中，包含邏輯的部份，指的是可以在 
 * truncate：可以將過長的內容，指定擷取前幾個字元，後面則變成 ...
 * strip_tags：移除HTML標籤
 
-以上這些都是內建好的一些 helper  
+以上這些都是內建好的一些 helper
 當然我們也可以自訂自己的 helper 出來
 
 ###範例
@@ -67,7 +67,7 @@ class PostsController
 end
 ```
 
-最後是 helper 也可以放 html 進去  
+最後是 helper 也可以放 html 進去
 只要加上 `content_tag`
 
 ```ruby
@@ -136,12 +136,12 @@ or
 <% end %>
 ```
 
-將參數直接丟進去，就不用在 view 裡面包 block 
+將參數直接丟進去，就不用在 view 裡面包 block
 
 #yield
 
-yield 主要是會被替換成樣板的地方。  
-通常是使用在 layout 裡面的 `application.html.erb`。  
+yield 主要是會被替換成樣板的地方。
+通常是使用在 layout 裡面的 `application.html.erb`。
 會將上下板固定，而中間有 `<%= yield %>` 的地方，就是顯示其他所有的 html.erb 檔案的內容
 
 好處是可以將網站的版型固定，只在需要出現內容的地方用 yield 引進來就可以了。
@@ -201,22 +201,22 @@ yield 主要是會被替換成樣板的地方。
 * helper 負責處理跟邏輯判斷有關的東西。
 * yield 負責替換樣板的東西。
 
->建議在 Helper 與 Controller 的 code 不要互相混來呼叫來呼叫去。  
->讓 View 歸 View，Controller 歸 Controller。  
+>建議在 Helper 與 Controller 的 code 不要互相混來呼叫來呼叫去。
+>讓 View 歸 View，Controller 歸 Controller。
 >若真有業務上的需求需要「到處都可以用」。建議寫 Module 掛在 lib 用 mixin 技巧混入。
 
 
-官方文件：  
-[Guides](http://guides.rubyonrails.org/layouts_and_rendering.html#structuring-layouts)  
+官方文件：
+[Guides](http://guides.rubyonrails.org/layouts_and_rendering.html#structuring-layouts)
 [Guides 中文](http://rails.ruby.tw/layouts_and_rendering.html#%E7%B5%84%E7%B9%94%E7%89%88%E5%9E%8B)
- 
-APIdock：  
-[partial](http://apidock.com/rails/ActionView/Partials)  
-[helper](http://apidock.com/rails/ActionController/Helpers)  
 
-參考資料：  
-[Ruby on Rails 實戰聖經](https://ihower.tw/rails4/actionview.html)  
-[rails102](https://rocodev.gitbooks.io/rails-102/content/chapter1-mvc/v/what-is-view.html)  
-[如何運用 / 設計 Rails Helper (1)](http://blog.xdite.net/posts/2011/12/09/how-to-design-helpers)  
-[如何運用 / 設計 Rails Helper (2)](http://blog.xdite.net/posts/2011/12/10/how-to-design-helpers-2)  
+APIdock：
+[partial](http://apidock.com/rails/ActionView/Partials)
+[helper](http://apidock.com/rails/ActionController/Helpers)
+
+參考資料：
+[Ruby on Rails 實戰聖經](https://ihower.tw/rails4/actionview.html)
+[rails102](https://rocodev.gitbooks.io/rails-102/content/chapter1-mvc/v/what-is-view.html)
+[如何運用 / 設計 Rails Helper (1)](http://blog.xdite.net/posts/2011/12/09/how-to-design-helpers)
+[如何運用 / 設計 Rails Helper (2)](http://blog.xdite.net/posts/2011/12/10/how-to-design-helpers-2)
 [如何運用 / 設計 Rails Helper (3)](http://blog.xdite.net/posts/2012/01/16/how-to-design-helper-3)

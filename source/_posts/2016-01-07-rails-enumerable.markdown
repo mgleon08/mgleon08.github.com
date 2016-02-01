@@ -3,17 +3,17 @@ layout: post
 title: "Ruby On Rails - 好用的 Enumerable"
 date: 2016-01-07 20:40:22 +0800
 comments: true
-categories: ruby ruby語法 rails rails語法 api
+categories: ruby rails api
 ---
 
-這次主要來介紹一些好用的 Enumerable  
-可以很方便的將需要的資料整合在一起  
+這次主要來介紹一些好用的 Enumerable
+可以很方便的將需要的資料整合在一起
 
 <!-- more -->
 
 #Map/Collect
 
-對 block 每個值進行運算，並回傳成一個新的 `array`  
+對 block 每個值進行運算，並回傳成一個新的 `array`
 處理 `hash` 時，也可以分開處理 key 和 value
 
 
@@ -70,7 +70,7 @@ my_hash.map{|name, gender| gender == "male" }
 只回傳 ture 的選項
 
 進階用法
-	
+
 ```ruby
 #在Hash裡定義新的方法 沒有特定對象的通常可以放在lib資料夾
 class Hash
@@ -87,7 +87,7 @@ my_hash.keep("Joe", "Jim")
 
 #Pluck
 
-對物件，挑出指定欄位的值，並回傳一個新的 `array`  
+對物件，挑出指定欄位的值，並回傳一個新的 `array`
 像是 `map` 和 `select` 合在一起的指令
 
 Approach - map
@@ -113,14 +113,14 @@ User.select(:id)
 puts Benchmark.measure {User.select(:id).to_a}
 #0.000000   0.000000   0.000000 (  0.001549)
 ```
-顯然效能上還是 `pluck` 最快  
+顯然效能上還是 `pluck` 最快
 
-`map` 會將所有欄位找出來，再根據 block 的值，回傳新的 `array`  
+`map` 會將所有欄位找出來，再根據 block 的值，回傳新的 `array`
 
-`pluck` 和 `select ` 則是只將需要的欄位選出來，但 `select` 回傳的是 `ActiveRecord::Relation` 必須再透過 map 轉成 `array`  
+`pluck` 和 `select ` 則是只將需要的欄位選出來，但 `select` 回傳的是 `ActiveRecord::Relation` 必須再透過 map 轉成 `array`
 
-參考文件：  
-[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
+參考文件：
+[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)
 [Getting to Know Pluck and Select](http://gavinmiller.io/2013/getting-to-know-pluck-and-select/)
 [Pluck vs. map and select](http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html)
 
@@ -170,13 +170,13 @@ inject 方法可以先給予初始值(數字，hash，array 都可以)，之後�
 ```ruby
 (5..10).inject(1) {|init, n| init * n }
 # => 151200
-(5..10).inject(1, :*)                         
+(5..10).inject(1, :*)
 #=> 151200
 ```
 ```ruby
 (5..10).inject {|sum, n| sum * n }
 # => 45
-(5..10).inject(:+)                            
+(5..10).inject(:+)
 #=> 45
 ```
 也可以拿來做比較。
@@ -191,8 +191,8 @@ end
 如果給予 inject 的參數為一個空區塊，那麼 inject 會將結果整理成 Hash。
 
 ```ruby
-User.all.inject({}) do |hash, user| 
-	hash[user.name] = user.id  
+User.all.inject({}) do |hash, user|
+	hash[user.name] = user.id
 	hash # 需要回傳運算結果
 end
 # => {"A"=>1, "B"=>2, "C"=>3}
@@ -201,7 +201,7 @@ end
 
 >也可以直接給予有值的 hash 再繼續加上後面的值，取代掉 inject({}) 中的空 hash
 
-也可改用 reduce 跟 inject 一模一樣  
+也可改用 reduce 跟 inject 一模一樣
 [Is inject the same thing as reduce in ruby?](http://stackoverflow.com/questions/13813243/is-inject-the-same-thing-as-reduce-in-ruby)
 
 ###額外說明
@@ -220,8 +220,8 @@ User.all.map {|user| [user.name, user.id ]}.to_h
 跟 inject 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。
 
 ```ruby
-User.all.each_with_object({}) do | user, hash | 
-	hash[user.name] = user.id  
+User.all.each_with_object({}) do | user, hash |
+	hash[user.name] = user.id
 end
 ```
 #merge
@@ -230,13 +230,13 @@ end
 ```ruby
 h1 = { "a" => 100, "b" => 200 }
 h2 = { "b" => 254, "c" => 300 }
-h1.merge(h2)   
+h1.merge(h2)
 #=> {"a"=>100, "b"=>254, "c"=>300}
 
 h1.merge(h2){|key, oldval, newval| newval - oldval}
 #=> {"a"=>100, "b"=>54,  "c"=>300}
 
-h1             
+h1
 #=> {"a"=>100, "b"=>200}
 ```
 
@@ -305,7 +305,7 @@ end
 ```ruby
 names = ["James", "Bob", "Joe", "Mark", "Jim"]
 names.group_by{|name| name.length}
-# => {5=>["James"], 3=>["Bob", "Joe", "Jim"], 4=>["Mark"]} 
+# => {5=>["James"], 3=>["Bob", "Joe", "Jim"], 4=>["Mark"]}
 ```
 
 #grep
@@ -336,16 +336,16 @@ User.index_by(&:phone)
 只要有任何條件符合，就回傳true
 
 ```ruby
-%w{ant bear cat}.any? {|word| word.length >= 3}   
+%w{ant bear cat}.any? {|word| word.length >= 3}
 #=> true
-%w{ant bear cat}.any? {|word| word.length >= 4}   
+%w{ant bear cat}.any? {|word| word.length >= 4}
 #=> true
-[ nil, true, 99 ].any?                            
+[ nil, true, 99 ].any?
 #=> 只要有一個不是 nil 和 false 就是 true
 ```
 主要都是集合的方法
 
-可參考之前的  
+可參考之前的
 [.nil? .empty? .blank? .present? 傻傻分不清楚？](http://mgleon08.github.io/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/)
 
 #&:
@@ -354,42 +354,42 @@ User.index_by(&:phone)
 User.all.map(&:name)
 ```
 
- `&:` 代表代入一個Proc  
+ `&:` 代表代入一個Proc
  `(&:name)` = `{|name| user.name}` 的概念XD。
 
 #Benchmark
 
-上面其實很多都很類似，主要差異的話就是速度吧  
+上面其實很多都很類似，主要差異的話就是速度吧
 所以可以用以下的方式來測試每種執行出來的速度。
 
-[Benchmark](http://ruby-doc.org/stdlib-2.0.0/libdoc/benchmark/rdoc/Benchmark.html)  
+[Benchmark](http://ruby-doc.org/stdlib-2.0.0/libdoc/benchmark/rdoc/Benchmark.html)
 [benchmark-ips](https://github.com/evanphx/benchmark-ips)
 
 
-官方文件：  
-[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
-[map/collect](http://apidock.com/ruby/Array/map)  
-[reject](http://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-reject)  
-[inject](http://apidock.com/ruby/Enumerable/inject)  
-[select](http://apidock.com/rails/ActiveRecord/QueryMethods/select)  
-[pluck](http://apidock.com/rails/ActiveRecord/Calculations/pluck)    
-[reduce](http://apidock.com/ruby/Enumerable/reduce)  
-[each_with_object](http://apidock.com/rails/Enumerable/each_with_object)  
-[each_with_index](http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index)  
-[merge](http://ruby-doc.org/core-1.9.3/Hash.html#method-i-merge)  
-[sum](http://apidock.com/rails/Enumerable/sum)  
-[group_by](http://apidock.com/rails/Enumerable/group_by)  
-[index_by](http://apidock.com/rails/v4.2.1/Enumerable/index_by)  
-[many?](http://apidock.com/rails/Enumerable/many%3F)  
-[any?](http://apidock.com/ruby/Enumerable/any%3F)  
+官方文件：
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)
+[map/collect](http://apidock.com/ruby/Array/map)
+[reject](http://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-reject)
+[inject](http://apidock.com/ruby/Enumerable/inject)
+[select](http://apidock.com/rails/ActiveRecord/QueryMethods/select)
+[pluck](http://apidock.com/rails/ActiveRecord/Calculations/pluck)
+[reduce](http://apidock.com/ruby/Enumerable/reduce)
+[each_with_object](http://apidock.com/rails/Enumerable/each_with_object)
+[each_with_index](http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index)
+[merge](http://ruby-doc.org/core-1.9.3/Hash.html#method-i-merge)
+[sum](http://apidock.com/rails/Enumerable/sum)
+[group_by](http://apidock.com/rails/Enumerable/group_by)
+[index_by](http://apidock.com/rails/v4.2.1/Enumerable/index_by)
+[many?](http://apidock.com/rails/Enumerable/many%3F)
+[any?](http://apidock.com/ruby/Enumerable/any%3F)
 
-參考文件：  
-[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
-[Getting to Know Pluck and Select](http://gavinmiller.io/2013/getting-to-know-pluck-and-select/)  
-[Pluck vs. map and select](http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html)  
-[Ruby Explained: Map, Select, and Other Enumerable Methods](http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods)  
-[each_with_object vs inject](https://gist.github.com/cupakromer/3371003)  
-[ActiveSupport - 工具函式庫](https://ihower.tw/rails4/activesupport.html)  
+參考文件：
+[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)
+[Getting to Know Pluck and Select](http://gavinmiller.io/2013/getting-to-know-pluck-and-select/)
+[Pluck vs. map and select](http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html)
+[Ruby Explained: Map, Select, and Other Enumerable Methods](http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods)
+[each_with_object vs inject](https://gist.github.com/cupakromer/3371003)
+[ActiveSupport - 工具函式庫](https://ihower.tw/rails4/activesupport.html)
 [Ruby 用 inject 和 each_with_object 來組 hash
 ](http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash)
 [What does map(&:name) mean in Ruby?](http://stackoverflow.com/questions/1217088/what-does-mapname-mean-in-ruby)

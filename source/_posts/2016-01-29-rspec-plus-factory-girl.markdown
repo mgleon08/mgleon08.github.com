@@ -3,7 +3,7 @@ layout: post
 title: "用 Rspec + Factory Girl 寫測試"
 date: 2016-01-29 20:36:46 +0800
 comments: true
-categories: rails gem
+categories: rails gem rspec
 ---
 
 程式寫久之後，就會發現測試的重要性!  
@@ -207,14 +207,22 @@ end
 ```ruby
 FactoryGirl.define do
   factory :user, class: User" do
-    name "video1"
+    name "hello"
     age  18
     
+    # 可以設定create 之後要做哪些動作
+    after(:create) do |video|
+      create(:photo, photo_id: photo.id)
+      create(:photo, size: "500", photo_id: photo.id)
+      create(:photo, size: "800", photo_id: photo.id)
+    end
+    
+    # 也可以設定多種條件
     trait :child do
       age 6
       #after(:create) {|user| user.add_role(:admin) } 
       #after(:build)  {|user| user.add_role(:admin) } 
-      #也可以設定 create 之後的設定
+      # 也可以設定 create 之後的設定
     end
   end
 end

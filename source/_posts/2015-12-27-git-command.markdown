@@ -3,7 +3,7 @@ layout: post
 title: "Git 指令操作手冊"
 date: 2015-12-27 20:56:35 +0800
 comments: true
-categories: Git
+categories: git
 ---
 
 Git 博大精深，必須花很多時間去學習，從做中學會更快

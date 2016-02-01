@@ -10,6 +10,12 @@ categories: gem rails
 
 <!-- more --> 
 
+#電腦先安裝ffmpeg
+
+```
+brew install ffmpeg
+```
+
 #Gem
 ```ruby
 gem 'carrierwave'

@@ -3,17 +3,17 @@ layout: post
 title: ".nil? .empty? .blank? .present? 傻傻分不清楚？"
 date: 2015-12-16 21:29:43 +0800
 comments: true
-categories: ruby rails ruby語法 rails語法 api
+categories: ruby rails api
 ---
 
-在學習ruby on rails的過程中，常常會有一些非常神奇的語法  
+在學習ruby on rails的過程中，常常會有一些非常神奇的語法
 其中又有些語法非常的相像..所以常常會搞混
 
 今天就來介紹一下這幾個很相似的 method
 
 <!-- more -->
 
-#.nil? 
+#.nil?
 ```ruby
 nil.nil?       #true
 [].nil?        #false
@@ -24,7 +24,7 @@ nil.nil?       #true
 123.nil?       #false
 ```
 * ruby method
-* 任何物件都是false，只有nil是true  
+* 任何物件都是false，只有nil是true
 
 #.empty? & .any?
 ```ruby
@@ -55,9 +55,9 @@ nil.any?       #NoMethodError: undefined method `any?' for nil:NilClass
 #.blank? & .present?
 
 ```ruby
-nil.blank?     #true 
-[].blank?      #true 
-{}.blank?      #true 
+nil.blank?     #true
+[].blank?      #true
+{}.blank?      #true
 "".blank?      #true
 " ".blank?     #true
 "abc".blank?   #false
@@ -70,9 +70,9 @@ nil.blank?     #true
 * 相對的 method 是 `present?`
 
 ```ruby
-nil.present?   #false 
-[].present?    #false 
-{}.present?    #false 
+nil.present?   #false
+[].present?    #false
+{}.present?    #false
 "".present?    #false
 " ".present?   #false
 "abc".present? #true
@@ -80,7 +80,7 @@ nil.present?   #false
 ```
 
 
->經過上面這樣看來，只有 `.blank?` 和 `.present?` 不會爆錯 (所以我都用這個(誤))  
+>經過上面這樣看來，只有 `.blank?` 和 `.present?` 不會爆錯 (所以我都用這個(誤))
 >主要還是要看當時的情境拉XD
 
 
@@ -106,9 +106,9 @@ Object.ancestors        ＃查祖宗十八代是誰?
 Object.methods          ＃查物件有哪些方法?
 Object.respond_to? :new ＃查物件是否有這個方法?
 ```
-  
 
-官方文件：  
+
+官方文件：
 
 * [.nil?](http://apidock.com/ruby/Object/nil%3F)
 * [.empty?](http://apidock.com/rails/ActiveRecord/Associations/CollectionProxy/empty%3F)
@@ -117,9 +117,9 @@ Object.respond_to? :new ＃查物件是否有這個方法?
 * [.persisted?](http://apidock.com/rails/Object/present%3F)
 * [.new_record?](http://apidock.com/rails/ActiveRecord/Base/new_record%3F)
 * [.persisted?](http://apidock.com/rails/ActiveRecord/Persistence/persisted%3F)
-* [.superclass](http://apidock.com/ruby/Class/superclass)  
-* [.ancestors](http://apidock.com/rails/ActiveRecord/Acts/Tree/InstanceMethods/ancestors)  
-* [.methods](http://apidock.com/ruby/Object/methods)  
+* [.superclass](http://apidock.com/ruby/Class/superclass)
+* [.ancestors](http://apidock.com/rails/ActiveRecord/Acts/Tree/InstanceMethods/ancestors)
+* [.methods](http://apidock.com/ruby/Object/methods)
 * [.respond_to?](http://apidock.com/ruby/Object/respond_to%3F)
 
 

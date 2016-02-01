@@ -3,16 +3,16 @@ layout: post
 title: "Ruby on Rails - json"
 date: 2016-01-09 12:26:46 +0800
 comments: true
-categories: rails rails語法 gem
+categories: rails gem
 ---
 
-JSON 是很經常是用到的格式，不管是和程式溝通或是交換資料。  
- 
+JSON 是很經常是用到的格式，不管是和程式溝通或是交換資料。
+
 <!--more-->
 
 #什麼是 JSON
 
-JSON 是個以純文字為基底去儲存和傳送簡單結構資料，可以透過特定的格式去儲存任何資料(字串,數字,陣列,物件)，也可以透過物件或陣列來傳送較複雜的資料。  
+JSON 是個以純文字為基底去儲存和傳送簡單結構資料，可以透過特定的格式去儲存任何資料(字串,數字,陣列,物件)，也可以透過物件或陣列來傳送較複雜的資料。
 
 一旦建立了您的 JSON 資料，就可以非常簡單的跟其他程式溝通或交換資料，因為 JSON 就只是純文字個格式。
 
@@ -42,20 +42,20 @@ end
 #也可以寫成單行
 respond_to :html, :json, :js
 ```
-若後面沒指定會去找 `view` 中，後面是 `.json` 或 `.js` 的檔案  
+若後面沒指定會去找 `view` 中，後面是 `.json` 或 `.js` 的檔案
 但記得因為 `format` 有三種，所以要 json 資料的話就在網址後面加 `.json`
 
-respond_to可以用來回應不同的資料格式。Rails內建支援格式包括有  
+respond_to可以用來回應不同的資料格式。Rails內建支援格式包括有
 `:html, :text, :js, :css, :ics, :csv, :xml, :rss, :atom, :yaml, :json`
 
 >如果需要擴充，可以編輯config/initializers/mime_types.rb這個檔案
 
 ###render
-可以簡單使用 `render json` 的方式，直接強制 html 輸出成 json 格式 
-`render json: User.info`  
+可以簡單使用 `render json` 的方式，直接強制 html 輸出成 json 格式
+`render json: User.info`
 這樣連view都不需要，就會直接顯示。
 
-或是直接 `render template` 指定輸出 json 格式  
+或是直接 `render template` 指定輸出 json 格式
 `render template: "api/users/index.json.jbuilder"`
 
 ###routes scope設定，指定controller使用json格式輸出
@@ -66,20 +66,20 @@ scope :path => '/api/v1/', :defaults => { :format => :json }, :module => "api_v1
     resources :users #ApiV1::CompaniesController
 end
 ```
-`path`：指令網址前面的路徑  
-`defaults`：指定default的格式  
+`path`：指令網址前面的路徑
+`defaults`：指定default的格式
 `module`：指定 controller 會是 ApiV1::UsersController
 `as`：產生URL helper
 
-參考文件：  
-[Scope](https://ihower.tw/rails4/routing.html)  
+參考文件：
+[Scope](https://ihower.tw/rails4/routing.html)
 [Rails修改預設顯示格式為json](http://motion-express.com/blog/20141124-rails-default-render-json)
-  
+
 #搭配gem - [jbuilder](https://github.com/rails/jbuilder)
 
 再rails當中，很常會用這個 `gem` 來轉 `json`
 
-像是剛才的`render template: "api/users/index.json.jbuilder"`  
+像是剛才的`render template: "api/users/index.json.jbuilder"`
 就會去找這個 template，並且像是 `html.erb` 一樣可以直接使用 `@` 的參數。
 
 ```ruby
@@ -117,10 +117,10 @@ end
 
 #接收JSON
 
-可以用 [rest-client](https://github.com/rest-client/rest-client) 這個gem  
+可以用 [rest-client](https://github.com/rest-client/rest-client) 這個gem
 先用 `get` 取得資料，再用 `JSON.parse` 來將 `string` 解析成 `hash`
 
-範例： [Ubike](http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5) 資料，並存取到資料庫。  
+範例： [Ubike](http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5) 資料，並存取到資料庫。
 
 ```ruby
 #lib/tasks/dev.rake
@@ -188,13 +188,12 @@ namespace :vote do
 end
 ```
 
-參考文件：  
-[你不可不知的 JSON 基本介紹](https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/)  
-[Scope](https://ihower.tw/rails4/routing.html)  
+參考文件：
+[你不可不知的 JSON 基本介紹](https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/)
+[Scope](https://ihower.tw/rails4/routing.html)
 [Rails修改預設顯示格式為json](http://motion-express.com/blog/20141124-rails-default-render-json)
 
-gem：  
-[jbuilder](https://github.com/rails/jbuilder)  
-[rest-client](https://github.com/rest-client/rest-client)  
- 
- 
+gem：
+[jbuilder](https://github.com/rails/jbuilder)
+[rest-client](https://github.com/rest-client/rest-client)
+

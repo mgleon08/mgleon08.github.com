@@ -3,7 +3,7 @@ layout: post
 title: "Ruby on Rails - 用 include 和 join 避免 N+1 query"
 date: 2016-01-10 10:00:44 +0800
 comments: true
-categories: rails rails語法
+categories: rails
 ---
 
 在 `rails` 當中，因為 ORM (Object-relational mapping ) 的便利，可以很快速地建立起連結，但在這過程中，經常會發生 `N+1 query` 的問題，造成效能上的緩慢，因此要如何解決這個問題，是很重要的。
@@ -81,12 +81,12 @@ User Load (0.4ms)  SELECT `users`.* FROM `users` INNER JOIN `skills` ON `skills`
 回傳的是所有有 `skill` 的 `user`，但並不會將 `skill` 資料撈出來，只是去做比對，因此再用 `user.skills` ，一樣會去資料庫中撈出資料。
 
 
-官方資料：  
-[Active Record Query Interface](http://guides.rubyonrails.org/active_record_querying.html)  
+官方資料：
+[Active Record Query Interface](http://guides.rubyonrails.org/active_record_querying.html)
 [Active Record 查詢](http://rails.ruby.tw/active_record_querying.html)
 
-參考資料：  
-[網站效能](https://ihower.tw/rails4/performance.html)  
-[ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)  
+參考資料：
+[網站效能](https://ihower.tw/rails4/performance.html)
+[ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)
 [Rails使用 include 和 join 避免 N+1 query](http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query)
 
