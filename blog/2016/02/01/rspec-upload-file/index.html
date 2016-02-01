@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: 教學 - Leon's Blogging</title>
+  <title>如何測試上傳檔案 Rspec Upload File - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="Category: 教學">
+  <meta name="description" content="rails 本身就有內建的 helper 可以很快的建造假的檔案，然後就可以測試上傳的功能了。 建立資料夾 spec/fixtures/files 在資料夾裡放入用來測試的檔案 Rack::Test::UploadedFile.new Rack::Test::UploadedFile.new(' &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/categories/jiao-xue">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/02/01/rspec-upload-file">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -96,46 +96,138 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: 教學</h1>
+    
+      
+        <h1 class="entry-title">如何測試上傳檔案 Rspec Upload File</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-02-01T21:32:55+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2016</span></span> <span class='time'>9:32 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
 
 
+<div class="entry-content"><p>rails 本身就有內建的 helper 可以很快的建造假的檔案，然後就可以測試上傳的功能了。</p>
 
-  
-  <h2>2015</h2>
-
-<article>
-  
-<h1><a href="/blog/2015/12/11/how-to-install-octopress/">用 Octopress + Github Pages 來架設 Blog</a></h1>
-<time datetime="2015-12-11T23:15:37+08:00" pubdate><span class='month'>Dec</span> <span class='day'>11</span> <span class='year'>2015</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/blog/'>blog</a>, <a class='category' href='/blog/categories/octopress/'>octopress</a>, <a class='category' href='/blog/categories/jiao-xue/'>教學</a></span>
-</footer>
+<!-- more -->
 
 
-</article>
+<h1>建立資料夾</h1>
 
+<p><code>spec/fixtures/files</code></p>
+
+<p>在資料夾裡放入用來測試的檔案</p>
+
+<h1>Rack::Test::UploadedFile.new</h1>
+
+<p><code>Rack::Test::UploadedFile.new('path','mime-type')</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rack</span><span class="o">::</span><span class="no">Test</span><span class="o">::</span><span class="no">UploadedFile</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;test.jpg&#39;</span><span class="p">,</span> <span class="s2">&quot;image/jpeg&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="no">Rack</span><span class="o">::</span><span class="no">Test</span><span class="o">::</span><span class="no">UploadedFile</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="s1">&#39;/spec/fixtures/files/1.jpg&#39;</span><span class="p">)))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>fixture_file_upload</h1>
+
+<p>上面的簡短版本 <code>fixture_file_upload('path','mime-type')</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vi">@file1</span> <span class="o">=</span> <span class="n">fixture_file_upload</span><span class="p">(</span><span class="s1">&#39;files/1.jpg&#39;</span><span class="p">,</span> <span class="s1">&#39;image/jpg&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="vi">@file2</span> <span class="o">=</span> <span class="n">fixture_file_upload</span><span class="p">(</span><span class="s1">&#39;files/2.pdf&#39;</span><span class="p">,</span> <span class="s1">&#39;application/pdf&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上兩個擇一，這樣就可以在 <code>create</code> 將 <code>@file</code> 帶入到 params</p>
+
+<p>官方文件：
+<a href="http://www.rubydoc.info/github/brynary/rack-test/Rack/Test/UploadedFile">Class: Rack::Test::UploadedFile</a>
+<a href="http://apidock.com/rails/ActionDispatch/TestProcess/fixture_file_upload">fixture_file_upload</a></p>
+
+<p>參考文件：
+<a href="http://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails">How do I test a file upload in rails?</a>
+<a href="https://ruby-china.org/topics/21057">[求助] 文件上传的测试代码怎么写</a></p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
-</article>
 
 
-</div>
 
-<aside class="sidebar">
+  <span class="byline author vcard">Authored by <span class="fn">
   
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-02-01T21:32:55+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2016</span></span> <span class='time'>9:32 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/rspec/'>rspec</a>
+  
+</span>
+
+
+    </p>
     
+      <div class="sharing">
   
-</aside>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/02/01/rspec-upload-file/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/02/01/rspec-upload-file/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/01/31/ruby-file-dir/" title="Previous Post: 用 ruby 進行 File ＆ Dir 檔案操作">&laquo; 用 ruby 進行 File ＆ Dir 檔案操作</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/02/01/customer-module-class/" title="Next Post: 自定 Module 和 class 檔案">自定 Module 和 class 檔案 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
 
     </div>
   </div>
@@ -151,7 +243,10 @@
       var disqus_shortname = 'leonji';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/02/01/rspec-upload-file/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/02/01/rspec-upload-file/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
