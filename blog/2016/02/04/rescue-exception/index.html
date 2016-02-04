@@ -5,19 +5,20 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>自定 Module 和 Class 檔案 - Leon's Blogging</title>
+  <title>例外處理 Rescue Exception - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="在 rails 當中，可以自訂一些好用方便的檔案，在適當的時機來使用。 method 在 lib/require/object.rb，可以自行新增 class 1
+  <meta name="description" content="在 rails 當中，當發生例外時就會爆錯，畫面就會不見。
+但有時我們並不希望讓它這樣，因此可以用 rescue 才處理掉這些例外發生時，該執行的動作。 例外處理 1
 2
 3
 4
 5
 6
 7
-8
-class Object def is?(*objects) for object in objects &hellip;">
+begin # 有可能發生例外的處理動作
+rescue =&gt; e # 例外發生時的處理措施 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -26,7 +27,7 @@ class Object def is?(*objects) for object in objects &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/02/01/customer-module-class">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/02/04/rescue-exception">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -109,7 +110,7 @@ class Object def is?(*objects) for object in objects &hellip;">
   <header>
     
       
-        <h1 class="entry-title">自定 Module 和 Class 檔案</h1>
+        <h1 class="entry-title">例外處理 Rescue Exception</h1>
       
     
     
@@ -119,7 +120,7 @@ class Object def is?(*objects) for object in objects &hellip;">
 
 
 
-<time class='entry-date' datetime='2016-02-01T22:19:13+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2016</span></span> <span class='time'>10:19 pm</span></time>
+<time class='entry-date' datetime='2016-02-04T21:51:38+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:51 pm</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -129,14 +130,37 @@ class Object def is?(*objects) for object in objects &hellip;">
   </header>
 
 
-<div class="entry-content"><p>在 rails 當中，可以自訂一些好用方便的檔案，在適當的時機來使用。</p>
+<div class="entry-content"><p>在 rails 當中，當發生例外時就會爆錯，畫面就會不見。<br/>
+但有時我們並不希望讓它這樣，因此可以用 rescue 才處理掉這些例外發生時，該執行的動作。</p>
 
 <!-- more -->
 
 
-<h1>method</h1>
+<h1>例外處理</h1>
 
-<p>在 <code>lib/require/object.rb</code>，可以自行新增 class</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="c1"># 有可能發生例外的處理動作</span>
+</span><span class='line'><span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="c1"># 例外發生時的處理措施</span>
+</span><span class='line'><span class="k">ensure</span>
+</span><span class='line'>  <span class="c1"># 無論有沒有發生例外，這一段都一定會執行</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>分開處理例外</h1>
+
+<p>可以給予不同例外，執行不同動作</p>
+
+<p>順序應為最特殊為第一位，以此類推<br/>
+若要在最後包含所有例外，可以使用rescue Exception</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -146,22 +170,43 @@ class Object def is?(*objects) for object in objects &hellip;">
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Object</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">is?</span><span class="p">(</span><span class="o">*</span><span class="n">objects</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">for</span> <span class="n">object</span> <span class="k">in</span> <span class="n">objects</span>
-</span><span class='line'>      <span class="k">return</span> <span class="kp">true</span> <span class="k">if</span> <span class="nb">self</span> <span class="o">==</span> <span class="n">object</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>    <span class="kp">false</span>
-</span><span class='line'>  <span class="k">end</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="c1"># 有可能發生例外的處理動作</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">ArgumentError</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="c1"># 例外發生時的處理措施</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">TypeError</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="c1"># 例外發生時的處理措施</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">Exception</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="c1"># 例外發生時的處理措施</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>require</h1>
+<p>如果沒有指定變數，例外物件會自動存放在：<code>$!</code>及<code>$@</code>變數中<br/>
+<code>$!</code>：最後發生例外的物件<br/>
+<code>$@</code>：呈現最後例外所發生的位置和資計</p>
 
-<p>但要記得要在使用的檔案，先 require 才能夠使用</p>
+<h1>重來</h1>
 
-<p>也可以直接在 <code>config/initializer/require.rb</code> require 進來，就不用每個檔案上面都 require 了。</p>
+<p>例外發生後，再重新執行一次</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="c1"># 有可能發生例外的處理動作</span>
+</span><span class='line'><span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="k">retry</span> <span class="c1">#重新再跑</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>例外語法的簡化</h1>
+
+<p>如果例外 begin &amp; end 的範圍剛好就是整個方法的範圍，就可以省略。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -170,30 +215,36 @@ class Object def is?(*objects) for object in objects &hellip;">
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#單個檔案</span>
-</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/lib/require/object.rb&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#多個檔案</span>
-</span><span class='line'><span class="no">Dir</span><span class="o">[</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/lib/require/object.rb&quot;</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">require</span> <span class="n">file</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">rescue</span>
+</span><span class='line'>  <span class="c1">#有可能發生例外的處理動作</span>
+</span><span class='line'><span class="k">rescue</span>
+</span><span class='line'>  <span class="c1">#例外發生時的處理措施</span>
+</span><span class='line'><span class="k">ensure</span>
+</span><span class='line'>  <span class="c1">#無論是否發生例外都會執行</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>使用</h1>
+<h1>自行產生例外</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;hello&quot;</span><span class="o">.</span><span class="n">is?</span><span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">,</span> <span class="s2">&quot;hello)</span>
-</span><span class='line'><span class="s2">#=&gt; true</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&quot;</span><span class="n">hello</span><span class="s2">&quot;.is?(&quot;</span><span class="n">yes</span><span class="s2">&quot;, &quot;</span><span class="n">no</span><span class="s2">&quot;)</span>
-</span><span class='line'><span class="s2">#=&gt; false</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">test</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="no">StandardError</span><span class="p">,</span> <span class="s2">&quot;test error&quot;</span>
+</span><span class='line'>  <span class="c1">#丟例外出來 raise(例外名稱, 例外訊息)</span>
+</span><span class='line'><span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="nb">binding</span><span class="o">.</span><span class="n">pry</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<p>參考文件：<br/>
+<a href="http://blog.xuite.net/yschu/wretch/104912690-Ruby+-+Chapter+09+%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86(exception">Ruby - Chapter 09 例外處理(exception)</a>)<br/>
+<a href="http://blog.tonycube.com/2011/07/ruby8.html">Ruby學習筆記(8) – 錯誤與例外處理</a></p>
 </div>
 
 
@@ -216,7 +267,7 @@ class Object def is?(*objects) for object in objects &hellip;">
 
 
 
-<time class='entry-date' datetime='2016-02-01T22:19:13+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2016</span></span> <span class='time'>10:19 pm</span></time>
+<time class='entry-date' datetime='2016-02-04T21:51:38+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:51 pm</span></time>
       
       
 
@@ -231,7 +282,7 @@ class Object def is?(*objects) for object in objects &hellip;">
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/02/01/customer-module-class/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/02/01/customer-module-class/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/02/04/rescue-exception/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/02/04/rescue-exception/" >Tweet</a>
   
   
   
@@ -242,10 +293,8 @@ class Object def is?(*objects) for object in objects &hellip;">
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2016/02/01/rspec-upload-file/" title="Previous Post: 如何測試上傳檔案 Rspec upload file">&laquo; 如何測試上傳檔案 Rspec upload file</a>
+        <a class="basic-alignment left" href="/blog/2016/02/01/customer-module-class/" title="Previous Post: 自定 Module 和 class 檔案">&laquo; 自定 Module 和 class 檔案</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2016/02/04/rescue-exception/" title="Next Post: 例外處理 rescue exception">例外處理 rescue exception &raquo;</a>
       
     </p>
   </footer>
@@ -275,8 +324,8 @@ class Object def is?(*objects) for object in objects &hellip;">
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/02/01/customer-module-class/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2016/02/01/customer-module-class/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/02/04/rescue-exception/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/02/04/rescue-exception/';
         var disqus_script = 'embed.js';
       
     (function () {
