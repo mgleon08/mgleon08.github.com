@@ -22,7 +22,7 @@ rails 本身就有內建的 helper 可以很快的建造假的檔案，然後就
 
 ```ruby
 Rack::Test::UploadedFile.new('test.jpg', "image/jpeg")
-Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, '/spec/fixtures/files/1.jpg')))
+Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, '/spec/fixtures/files/1.jpg')), "image/jpeg")
 ```
 
 #fixture_file_upload

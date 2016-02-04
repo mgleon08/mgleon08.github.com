@@ -69,7 +69,7 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 * `git commit` 將 Staging Area 檔案 commit。
 * `git commit -m [commit 訊息]` 直接寫入 commit 訊息。
 * `git commit -am [commit 訊息]` 等於 `git add .` + `git commit -m`。
-* `git commit --amend` 修改上一個 commit 訊息。
+* `git commit --amend` 合併到上一個 commit 訊息。
 
 ###status
 * `git status` 檢視檔案的狀態。
@@ -119,10 +119,20 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 ###rebase
 * `git rebase` 重新修改特定分支的「基礎版本」，把另外一個分支的變更，當成這個分支的基礎。(如果接著直接 merge，則是會直接 fast-forward ，若想保留資訊則加上  `--no-ff`)
 * [Git-rebase 小筆記](https://blog.yorkxin.org/posts/2011/07/29/git-rebase/)
-* `git rebase [SHA1] -i` 可以只接更改某個 commit 之後所有的紀錄。
+* `git rebase -i [SHA1]` 可以只接更改某個 commit 之後所有的紀錄。
 * [rebase -i 修正 commit 過的版本歷史紀錄1](https://github.com/doggy8088/Learn-Git-in-30-days/blob/master/docs/22%20%E4%BF%AE%E6%AD%A3%20commit%20%E9%81%8E%E7%9A%84%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2%E7%B4%80%E9%8C%84%20Part%204%20(rebase).markdown)
 * [rebase -i 修正 commit 過的版本歷史紀錄2](https://github.com/doggy8088/Learn-Git-in-30-days/blob/master/docs/23%20%E4%BF%AE%E6%AD%A3%20commit%20%E9%81%8E%E7%9A%84%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2%E7%B4%80%E9%8C%84%20Part%205%20(rebase%202).markdown)
+* `git rebase --onto <new base-commit> <current base-commit>` 指定要從哪裡開始接枝
+* 有 conflict 修改好後，`git rebase --continue`
 
+```
+pick   = 要這條 commit ，什麼都不改
+reword = 要這條 commit ，但要改 commit message
+edit   = 要這條 commit，但要改 commit 的內容
+squash = 要這條 commit，但要跟前面那條合併，並保留這條的 messages
+fixup  = squash + 只使用前面那條 commit 的 message ，捨棄這條 message
+exec   = 執行一條指令
+```
 ###cherry-pick
 * `git cherry-pick` 手動挑出其他 branch 中的 commit，合併進來。
 * `git cherry-pick [SHA1] -e` 建立版本前先編輯訊息。

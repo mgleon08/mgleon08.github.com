@@ -183,13 +183,26 @@ let(:user){User.new(:name => "hello")}
 * 有使⽤到才會運算(lazy)，並且在同⼀個 example 測試中多次呼叫會 Memoized 快取起來。  
 * let! 則是⾮ lazy 版本  
 
-#Stub
+###Stub
 
 ```ruby
 allow_any_instance_of(User).to receive(:follow).and_return(false)
 ```
 用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。
 
+###focus
+當想要只跑指定的測試時，可以加上 focus
+
+```ruby
+  it '#index',  focus:true do
+    get :index, format: :json
+    expect(response).to have_http_status 200
+  end
+```
+
+```ruby
+rspec --tag focus
+```
 
 #factory_girl
 
@@ -233,6 +246,19 @@ end
 before do  
 	@user  = FactoryGirl.create(:user) #FactoryGirl 可省略
 	@child = create(:user, :child) #就只替換掉 age
+end
+```
+
+###注意
+factory_girl 產生出來的資料，不會透過 controller ，而是直接再 model 產生，因此會跑出 validation 的驗證。
+
+若是希望能跑 controller action 裡的 method 則是要另外跑
+
+```ruby
+trait :user_buy do
+  after(:create) do |user|
+    user.buy
+  end
 end
 ```
 
