@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-04T21:54:59+08:00</updated>
+  <updated>2016-02-06T10:40:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,346 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby 中的 Block & Yield & Proc & Lambda]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/06/block-yield-proc-lambda/"/>
+    <updated>2016-02-06T10:37:37+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/06/block-yield-proc-lambda</id>
+    <content type="html"><![CDATA[<p>在學 ruby 時，經常會搞不清楚這四個，因為都非常相像!</p>
+
+<!-- more -->
+
+
+<h1>block</h1>
+
+<p>什麼是 block ?</p>
+
+<p>在 ruby 中 <code>block</code> 就是只 <code>do..end</code> || <code>{}</code> 包起來的區塊，就稱為 <code>block</code>。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">i</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="c1"># =&gt; 1,2,3</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">].</span><span class="n">each</span> <span class="p">{</span><span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">i</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># =&gt; 1,2,3</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>基本上兩個是等價的，但是慣例上，一行會用 <code>{}</code> ，多行則是用 <code>do..end</code><br/>
+<code>block</code> 無法單獨存在，必須放在 <code>method</code> 後面</p>
+
+<p>另外 <code>block</code> 是可以傳遞的，用 <code>&amp;</code> 表示</p>
+
+<h1>yield</h1>
+
+<p><code>yield</code> 其實就是調用 <code>block</code> 的一種方式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Array</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">iterate!</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="k">yield</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">array</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">iterate!</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">n</span> <span class="o">**</span> <span class="mi">2</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">array</span><span class="o">.</span><span class="n">inspect</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># =&gt; [1, 4, 9, 16]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其實就是再把 <code>&amp;block</code> 的寫法簡化</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">test</span>
+</span><span class='line'>  <span class="k">yield</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">block</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>procedure (proc)</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">who_am_i</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">block</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">who_am_i</span> <span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># =&gt; Proc</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>有此理解，透過 <code>&amp;block</code> 將程式碼傳遞過去後，其實它就是 <code>proc</code>。</p>
+
+<p>跟 <code>block</code> 不同的地方是，<code>proc</code> 是可保存的</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">pro</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span>  <span class="nb">puts</span> <span class="n">a</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; &lt;Proc:0x007fcb23ad2640@(irb):1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pro</span> <span class="o">=</span> <span class="nb">proc</span> <span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span>  <span class="nb">puts</span> <span class="n">a</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; &lt;Proc:0x007fcb23ad2640@(irb):1&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pro</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">a</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">a</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pro</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+</span><span class='line'><span class="mi">123</span>
+</span><span class='line'><span class="c1">#=&gt;nil</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pro</span><span class="o">.</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span> <span class="c1">#非正規用法</span>
+</span><span class='line'><span class="mi">123</span>
+</span><span class='line'><span class="c1">#=&gt;nil</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">pro</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+</span><span class='line'><span class="mi">123</span>
+</span><span class='line'><span class="c1">#=&gt; 123</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此時就會被 <code>p</code> 存起來，因此引用時就不需加上 <code>&amp;</code></p>
+
+<h1>lambda</h1>
+
+<p>lambda 與 method 用法相同，概念是一樣的<br/>
+不同的是 <code>Method</code> 是有名字的method，而 <code>lambda</code> 是匿名 method</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">lam</span> <span class="o">=</span> <span class="nb">lambda</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">a</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; &lt;Proc:0x007fcb23aa1860@(irb):1 (lambda)&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">lam</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'><span class="c1">#=&gt; Proc 有此可知，lambda 的原型是 proc</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">lam</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="k">do</span> <span class="o">|</span><span class="n">a</span><span class="o">|</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">a</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">lam</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#NoMethodError: undefined method `l&#39; for main:Object</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">lam</span><span class="o">.</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span> <span class="c1">#非正規用法</span>
+</span><span class='line'><span class="mi">123</span>
+</span><span class='line'><span class="c1">#=&gt; nil</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">lam</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+</span><span class='line'><span class="mi">123</span>
+</span><span class='line'><span class="c1">#=&gt; nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>lambda 跟 proc 非常類似，主要有兩個差異</p>
+
+<h3>1.lambda 會檢查參數的個數</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">one</span><span class="p">,</span> <span class="n">two</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">args</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">|</span> <span class="nb">puts</span> <span class="s2">&quot;Give me a </span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">c</span><span class="o">.</span><span class="n">class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+</span><span class='line'><span class="c1"># =&gt; Give me a 1 and a 2 and a NilClass</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">args</span><span class="p">(</span><span class="nb">lambda</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">|</span> <span class="nb">puts</span> <span class="s2">&quot;Give me a </span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">c</span><span class="o">.</span><span class="n">class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
+</span><span class='line'><span class="c1"># *.rb:8: ArgumentError: wrong number of arguments (2 for 3) (ArgumentError)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2.lambda 的return 會繼續執行，proc 則會直接終止</h3>
+
+<p><code>lambda</code> 比較像是一個 method 的 return <br/>
+<code>proc</code> 則是比較像是 一整個 method 的 return</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">proc_return</span>
+</span><span class='line'>  <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="k">return</span> <span class="s2">&quot;Proc.new&quot;</span><span class="p">}</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'>  <span class="k">return</span> <span class="s2">&quot;proc_return method finished&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">lambda_return</span>
+</span><span class='line'>  <span class="nb">lambda</span> <span class="p">{</span> <span class="k">return</span> <span class="s2">&quot;lambda&quot;</span> <span class="p">}</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'>  <span class="k">return</span> <span class="s2">&quot;lambda_return method finished&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">proc_return</span>
+</span><span class='line'><span class="no">Proc</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="c1">#=&gt; nil</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">lambda_return</span>
+</span><span class='line'><span class="n">lambda_return</span> <span class="nb">method</span> <span class="n">finished</span>
+</span><span class='line'><span class="c1">#=&gt; nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>使用時機</h3>
+
+<p>在某些情況下，使用 <code>lambda</code> 會比 <code>proc</code> 還簡約。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">generic_return</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">one</span><span class="p">,</span> <span class="n">two</span>    <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="n">three</span><span class="p">,</span> <span class="n">four</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">return</span> <span class="s2">&quot;Give me a </span><span class="si">#{</span><span class="n">three</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">four</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">generic_return</span><span class="p">(</span><span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">generic_return</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">generic_return</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">;</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">generic_return</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="o">[</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span><span class="o">]</span> <span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># =&gt; Give me a 3 and a 4</span>
+</span><span class='line'><span class="c1"># =&gt; *.rb:9: unexpected return (LocalJumpError)</span>
+</span><span class='line'><span class="c1"># =&gt; Give me a 4 and a</span>
+</span><span class='line'><span class="c1"># =&gt; Give me a 3 and a 4</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># proc 需再用 array 包覆起來</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件：<br/>
+<a href="http://rubyer.me/blog/917/">理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。</a><br/>
+<a href="https://ruby-china.org/topics/10414">聊聊 Ruby 中的 block, proc 和 lambda</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[例外處理 Rescue Exception]]></title>
@@ -1128,14 +1468,20 @@ touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;/events&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span><span class="s2">&quot;events#index&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;/widgets/1/edit&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span> <span class="n">be_routable</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="s2">&quot;posts&quot;</span><span class="p">,</span> <span class="ss">:type</span> <span class="o">=&gt;</span> <span class="ss">:routing</span> <span class="k">do</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;/posts/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
-</span><span class='line'>      <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;posts&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="ss">:action</span> <span class="o">=&gt;</span> <span class="s2">&quot;show&quot;</span><span class="p">,</span>
-</span><span class='line'>      <span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s2">&quot;1&quot;</span>
-</span><span class='line'>      <span class="p">)</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;/events&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span><span class="s2">&quot;events#index&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;/widgets/1/edit&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span> <span class="n">be_routable</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="ss">:get</span> <span class="o">=&gt;</span> <span class="s2">&quot;/posts/1&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">route_to</span><span class="p">(</span>
+</span><span class='line'>        <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;posts&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="ss">:action</span> <span class="o">=&gt;</span> <span class="s2">&quot;show&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="ss">:id</span> <span class="o">=&gt;</span> <span class="s2">&quot;1&quot;</span>
+</span><span class='line'>        <span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1145,10 +1491,14 @@ touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span><span class="p">(</span><span class="ss">:new</span><span class="p">)</span>
-</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">redirect_to</span><span class="p">(</span><span class="n">events_url</span><span class="p">)</span>
-</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">have_http_status</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
-</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">assigns</span><span class="p">(</span><span class="ss">:event</span><span class="p">))</span><span class="o">.</span><span class="n">to</span> <span class="n">be_a_new</span><span class="p">(</span><span class="no">Event</span><span class="p">)</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="no">PostsController</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="ss">:controller</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span><span class="p">(</span><span class="ss">:new</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">redirect_to</span><span class="p">(</span><span class="n">events_url</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">have_http_status</span><span class="p">(</span><span class="mi">200</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="n">assigns</span><span class="p">(</span><span class="ss">:event</span><span class="p">))</span><span class="o">.</span><span class="n">to</span> <span class="n">be_a_new</span><span class="p">(</span><span class="no">Event</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1157,9 +1507,13 @@ touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">render</span>
-</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="kp">include</span><span class="p">(</span><span class="s2">&quot;Title&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span><span class="p">(</span><span class="ss">partial</span><span class="p">:</span> <span class="s2">&quot;_form&quot;</span><span class="p">)</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="s2">&quot;posts/index.html.erb&quot;</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="ss">:view</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">render</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="n">rendered</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="kp">include</span><span class="p">(</span><span class="s2">&quot;Title&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">expect</span><span class="p">(</span><span class="n">response</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">render_template</span><span class="p">(</span><span class="ss">partial</span><span class="p">:</span> <span class="s2">&quot;_form&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1167,6 +1521,15 @@ touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">expect</span><span class="p">(</span><span class="n">helper</span><span class="o">.</span><span class="n">your_method</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span><span class="p">(</span><span class="s2">&quot;&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>model spec</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">Material</span><span class="o">::</span><span class="no">Banner</span><span class="p">,</span> <span class="ss">type</span><span class="p">:</span> <span class="ss">:model</span> <span class="k">do</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -4067,262 +4430,6 @@ Sitemap
 <a href="http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash">Ruby 用 inject 和 each_with_object 來組 hash
 </a>
 <a href="http://stackoverflow.com/questions/1217088/what-does-mapname-mean-in-ruby">What does map(&amp;:name) mean in Ruby?</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Backup 來備份資料庫]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/03/backup/"/>
-    <updated>2016-01-03T21:42:46+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/03/backup</id>
-    <content type="html"><![CDATA[<p>當網站上線之後，經常會提心吊膽的害怕網站資料不見。<br/>
-這是很重要的動作就是 <code>備份</code> !</p>
-
-<!-- more -->
-
-
-<p>這次主要介紹用 <a href="http://backup.github.io/backup/v4/">backup</a>來做備份</p>
-
-<p>先到遠端的 server 上面</p>
-
-<p><code>gem install backup</code></p>
-
-<p>將 backup 安裝起來</p>
-
-<p>接著輸入</p>
-
-<p><code>backup generate:model --trigger my_backup --archives --storages='s3' --compressor='gzip' --notifiers=‘mail'</code></p>
-
-<p>之後會產生一個 <code>config.rb</code> 和一個 <code>my_backup.rb</code> 的檔案。</p>
-
-<p>打開 <code>my_backup.rb</code> 設定</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Model</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:my_backup</span><span class="p">,</span> <span class="s1">&#39;[describe]&#39;</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">##</span>
-</span><span class='line'>  <span class="c1"># MySQL [Database]</span>
-</span><span class='line'>  <span class="c1">#</span>
-</span><span class='line'>  <span class="n">database</span> <span class="no">MySQL</span> <span class="k">do</span> <span class="o">|</span><span class="n">db</span><span class="o">|</span>
-</span><span class='line'>    <span class="c1"># To dump all databases, set `db.name = :all` (or leave blank)</span>
-</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">name</span>               <span class="o">=</span> <span class="s2">&quot;[dbname]&quot;</span>
-</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">username</span>           <span class="o">=</span> <span class="s2">&quot;root&quot;</span>
-</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">password</span>           <span class="o">=</span> <span class="s2">&quot;xxxx&quot;</span>
-</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">host</span>               <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span>
-</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">port</span>               <span class="o">=</span> <span class="mi">3306</span>
-</span><span class='line'>    <span class="c1"># db.socket             = &quot;/tmp/mysql.sock&quot;</span>
-</span><span class='line'>    <span class="c1"># Note: when using `skip_tables` with the `db.name = :all` option,</span>
-</span><span class='line'>    <span class="c1"># table names should be prefixed with a database name.</span>
-</span><span class='line'>    <span class="c1"># e.g. [&quot;db_name.table_to_skip&quot;, ...]</span>
-</span><span class='line'>    <span class="c1"># db.skip_tables        = [&quot;skip&quot;, &quot;these&quot;, &quot;tables&quot;]</span>
-</span><span class='line'>    <span class="c1"># db.only_tables        = [&quot;only&quot;, &quot;these&quot;, &quot;tables&quot;]</span>
-</span><span class='line'>    <span class="n">db</span><span class="o">.</span><span class="n">additional_options</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;--quick&quot;</span><span class="p">,</span> <span class="s2">&quot;--single-transaction&quot;</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">##</span>
-</span><span class='line'>  <span class="c1"># Amazon Simple Storage Service [Storage]</span>
-</span><span class='line'>  <span class="c1">#</span>
-</span><span class='line'>
-</span><span class='line'> <span class="c1"># 將備份檔案儲存到S3</span>
-</span><span class='line'> <span class="n">store_with</span> <span class="no">S3</span> <span class="k">do</span> <span class="o">|</span><span class="n">s3</span><span class="o">|</span>
-</span><span class='line'>    <span class="c1"># AWS Credentials</span>
-</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">access_key_id</span>     <span class="o">=</span> <span class="s2">&quot;xxxx&quot;</span>
-</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">secret_access_key</span> <span class="o">=</span> <span class="s2">&quot;xxxx&quot;</span>
-</span><span class='line'>    <span class="c1"># Or, to use a IAM Profile:</span>
-</span><span class='line'>    <span class="c1"># s3.use_iam_profile = true</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">region</span>            <span class="o">=</span> <span class="s2">&quot;ap-northeast-1&quot;</span>
-</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">bucket</span>            <span class="o">=</span> <span class="s2">&quot;[bucketname]&quot;</span>
-</span><span class='line'>    <span class="n">s3</span><span class="o">.</span><span class="n">path</span>              <span class="o">=</span> <span class="s2">&quot;[path]&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># 額外的檔案壓縮，例如用戶上傳的圖片，就可以指定路徑</span>
-</span><span class='line'>  <span class="c1"># archive.add “/home/deploy/xxxxxxx/shared/public/systems/</span>
-</span><span class='line'>  <span class="c1"># archive :my_archive do |archive|</span>
-</span><span class='line'>    <span class="c1"># Run the `tar` command using `sudo`</span>
-</span><span class='line'>    <span class="c1"># archive.use_sudo</span>
-</span><span class='line'>    <span class="c1"># archive.add &quot;/srv&quot;</span>
-</span><span class='line'>  <span class="c1"># end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">##</span>
-</span><span class='line'>  <span class="c1"># Gzip [Compressor]</span>
-</span><span class='line'>  <span class="c1">#</span>
-</span><span class='line'>  <span class="n">compress_with</span> <span class="no">Gzip</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">##</span>
-</span><span class='line'>  <span class="c1"># Mail [Notifier]</span>
-</span><span class='line'>  <span class="c1">#</span>
-</span><span class='line'>  <span class="c1"># The default delivery method for Mail Notifiers is &#39;SMTP&#39;.</span>
-</span><span class='line'>  <span class="c1"># See the documentation for other delivery options.</span>
-</span><span class='line'>  <span class="c1"># 寄信通知，也有很多其他的通知方法，官方文件都有</span>
-</span><span class='line'>  <span class="n">notify_by</span> <span class="no">Mail</span> <span class="k">do</span> <span class="o">|</span><span class="n">mail</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">on_success</span>           <span class="o">=</span> <span class="kp">true</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">on_warning</span>           <span class="o">=</span> <span class="kp">true</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">on_failure</span>           <span class="o">=</span> <span class="kp">true</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">from</span>                 <span class="o">=</span> <span class="s2">&quot;mail.from&quot;</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">to</span>                   <span class="o">=</span> <span class="s2">&quot;mail.to&quot;</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">address</span>              <span class="o">=</span> <span class="s2">&quot;smtp.mailgun.org&quot;</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">port</span>                 <span class="o">=</span> <span class="mi">587</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">domain</span>               <span class="o">=</span> <span class="s2">&quot;mail.domain&quot;</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">user_name</span>            <span class="o">=</span> <span class="s2">&quot;mail.user_name&quot;</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">password</span>             <span class="o">=</span> <span class="s2">&quot;mail.password&quot;</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">authentication</span>       <span class="o">=</span> <span class="s2">&quot;plain&quot;</span>
-</span><span class='line'>    <span class="n">mail</span><span class="o">.</span><span class="n">encryption</span>           <span class="o">=</span> <span class="ss">:starttls</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>接著打</p>
-
-<p><code>backup perform --trigger my_backup</code></p>
-
-<p>就可以做備份了</p>
-
-<h1>排程</h1>
-
-<p>每次都要手動去備份相當麻煩，因此接下來就是要設定固定時間跑指令來做備份拉。</p>
-
-<p>這邊是用 <a href="https://github.com/javan/whenever">whenever</a> 來跑 crontab</p>
-
-<p>先在 Gemfile. 加入</p>
-
-<p><code>gem 'whenever', :require =&gt; false</code></p>
-
-<p>接著打 <code>wheneverize .</code></p>
-
-<p>就會產生檔案 <code>config/schedule.rb</code></p>
-
-<p>打開檔案</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">env</span> <span class="ss">:PATH</span><span class="p">,</span> <span class="no">ENV</span><span class="o">[</span><span class="s1">&#39;PATH&#39;</span><span class="o">]</span>
-</span><span class='line'><span class="n">set</span> <span class="ss">:output</span><span class="p">,</span> <span class="s1">&#39;/home/[username]/cron.log&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">every</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span><span class="p">,</span> <span class="ss">:at</span> <span class="o">=&gt;</span> <span class="s1">&#39;4:30 am&#39;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">command</span> <span class="s2">&quot;/usr/local/bin/backup perform -t my_backup -c /home/[username]/Backup/config.rb&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<blockquote><p>切記! 路徑要用絕對路徑啊啊啊!</p></blockquote>
-
-<p>設定就完成囉!</p>
-
-<p>如果有使用 capistrano 的話，可以在 Capfile 加入下面程式：
-<code>require "whenever/capistrano"</code></p>
-
-<p>也可以只更新遠端 whenever<br/>
-<code>cap production whenever:update_crontab</code></p>
-
-<p>另外要看有沒有進排程可以打</p>
-
-<p><code>crontab -e</code></p>
-
-<p>另外 crontab 會分帳號的，所以要用原本的帳號打才會出現。</p>
-
-<blockquote><p>如果只用 whenever 的 rake “XXX” 的話，crontab -e 裡面會先 cd 到專案目錄下，
-這時候 log/cron.log 就沒問題</p>
-
-<p>但是 whenever 的 command “XXXX” 並不會先 cd 到專案目錄下，因此 log/cron.log 會不知道跑去哪裡</p></blockquote>
-
-<h1>匯入資料庫</h1>
-
-<p>有了備份檔案，就能夠直接在本機端匯入檔案<br/>
-匯入方式如下</p>
-
-<p><code>mysql -u root -p db_name &lt; backup.sql</code></p>
-
-<p>就會看到資料都匯入進去了，另外圖片都是存在 s3 ，如果希望圖片也顯示，就將 production 的圖片複製一份到 development 就可以了，因為兩邊設定的 bucket 是不一樣的。</p>
-
-<p>官方文件：<br/>
-<a href="http://backup.github.io/backup/v4/">backup</a><br/>
-<a href="https://github.com/javan/whenever">whenever</a></p>
-
-<p>參考文件：<br/>
-<a href="http://blog.eddie.com.tw/2011/05/24/backup-your-website/">用Backup來備份你的網站</a><br/>
-<a href="http://lemonup.logdown.com/posts/169422-rails-whenever-use-note">Whenever 使用筆記</a><br/>
-<a href="http://programmer.shinchi.tw/2013/12/18/mysql%E5%8C%AF%E5%85%A5%E8%88%87%E5%8C%AF%E5%87%BA%E6%8C%87%E4%BB%A4/">mysql匯入與匯出指令</a></p>
 ]]></content>
   </entry>
   
