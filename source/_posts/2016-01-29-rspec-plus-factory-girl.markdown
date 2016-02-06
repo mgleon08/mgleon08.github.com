@@ -104,29 +104,36 @@ end
 
 ###Routing spec syntax
 ```ruby
-expect(:get => "/events").to route_to("events#index")
-expect(:get => "/widgets/1/edit").not_to be_routable
+RSpec.describe "posts", :type => :routing do
 
-expect(:get => "/posts/1").to route_to(
-      :controller => "posts",
-      :action => "show",
-      :id => "1"
-      )
+  expect(:get => "/events").to route_to("events#index")
+  expect(:get => "/widgets/1/edit").not_to be_routable
+
+  expect(:get => "/posts/1").to route_to(
+        :controller => "posts",
+        :action => "show",
+        :id => "1"
+        )
+end
 ```
 
 ###Controller spec syntax
 ```ruby
-expect(response).to render_template(:new)
-expect(response).to redirect_to(events_url)
-expect(response).to have_http_status(200)
-expect(assigns(:event)).to be_a_new(Event)
+RSpec.describe PostsController, type: :controller do
+  expect(response).to render_template(:new)
+  expect(response).to redirect_to(events_url)
+  expect(response).to have_http_status(200)
+  expect(assigns(:event)).to be_a_new(Event)
+end
 ```
 
 ###View spec syntax
 ```ruby
-render
-expect(rendered).to include("Title")
-expect(response).to render_template(partial: "_form")
+RSpec.describe "posts/index.html.erb", type: :view do
+  render
+  expect(rendered).to include("Title")
+  expect(response).to render_template(partial: "_form")
+end
 ```
 
 ###Helper spec syntax
@@ -134,6 +141,11 @@ expect(response).to render_template(partial: "_form")
 expect(helper.your_method).to eq("")
 ```
 
+### model spec
+```ruby
+describe Material::Banner, type: :model do
+end
+```
 ###request
 ```ruby
 RSpec.describe "Users", :type => :request do
