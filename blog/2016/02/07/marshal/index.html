@@ -5,11 +5,22 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: Ruby - Leon's Blogging</title>
+  <title>用 Marshal 來傳遞資料 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="Category: ruby">
+  <meta name="description" content="當兩台 server 要互相傳遞資料時，都必須確保資料的正確性，因此可以透過 Marshal 解析後來傳遞。 一般可以用 to_a, to_yml, to_s 來轉成不同 type
+但這樣很可能會失真 因此用 Marshal 就會比較精準，並且快很多 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+h &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +29,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/categories/ruby">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/02/07/marshal">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -96,147 +107,131 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: Ruby</h1>
+    
+      
+        <h1 class="entry-title">用 Marshal 來傳遞資料</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-02-07T15:44:52+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>3:44 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
 
 
+<div class="entry-content"><p>當兩台 server 要互相傳遞資料時，都必須確保資料的正確性，因此可以透過 Marshal 解析後來傳遞。</p>
 
-  
-  <h2>2016</h2>
-
-<article>
-  
-<h1><a href="/blog/2016/02/07/yaml/">用 Yaml 來寫文件</a></h1>
-<time datetime="2016-02-07T16:08:29+08:00" pubdate><span class='month'>Feb</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
+<!-- more -->
 
 
-</article>
+<p>一般可以用 <code>to_a</code>, <code>to_yml</code>, <code>to_s</code> 來轉成不同 <code>type</code><br/>
+但這樣很可能會失真</p>
+
+<p>因此用 Marshal 就會比較精準，並且快很多</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:a</span><span class="o">=&gt;</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="o">=&gt;</span><span class="mi">2</span><span class="p">,</span> <span class="no">Time</span><span class="o">.</span><span class="n">new</span><span class="o">=&gt;</span><span class="no">Class</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Marshal</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">h</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;\x04\b{\b:\x06ai\x06I\&quot;\x06b\x06:\x06ETi\aIu:\tTime\r\xE7\x04\x1D\x80r\xB6D\xC0\a:\voffseti\x02\x80p:\tzoneI\&quot;\bCST\x06;\x06Fc\nClass&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;test.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="no">Marshal</span><span class="o">.</span><span class="n">dump</span><span class="p">(</span><span class="n">h</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#在 irb 要先 exit 重開</span>
+</span><span class='line'><span class="no">Marshal</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;test.txt&quot;</span><span class="p">,</span> <span class="s2">&quot;r&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">read</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {:a=&gt;1, &quot;b&quot;=&gt;2, Time.new=&gt;Class}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-
-<article>
-  
-<h1><a href="/blog/2016/02/07/marshal/">用 Marshal 來傳遞資料</a></h1>
-<time datetime="2016-02-07T15:44:52+08:00" pubdate><span class='month'>Feb</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/02/07/ruby-crawler/">用 Ruby 做網頁爬蟲</a></h1>
-<time datetime="2016-02-07T15:21:59+08:00" pubdate><span class='month'>Feb</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/02/07/callsystem/">Call System From Ruby</a></h1>
-<time datetime="2016-02-07T14:31:31+08:00" pubdate><span class='month'>Feb</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/02/06/block-yield-proc-lambda/">Ruby 中的 Block & Yield & Proc & Lambda</a></h1>
-<time datetime="2016-02-06T10:37:37+08:00" pubdate><span class='month'>Feb</span> <span class='day'>06</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/01/31/ruby-file-dir/">用 Ruby 進行 File ＆ Dir 檔案操作</a></h1>
-<time datetime="2016-01-31T19:07:00+08:00" pubdate><span class='month'>Jan</span> <span class='day'>31</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/01/07/rails-enumerable/">Ruby on Rails - 好用的 Enumerable</a></h1>
-<time datetime="2016-01-07T20:40:22+08:00" pubdate><span class='month'>Jan</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/api/'>api</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-  
-  <h2>2015</h2>
-
-<article>
-  
-<h1><a href="/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/">.nil? .empty? .blank? .present? 傻傻分不清楚？</a></h1>
-<time datetime="2015-12-16T21:29:43+08:00" pubdate><span class='month'>Dec</span> <span class='day'>16</span> <span class='year'>2015</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/api/'>api</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.2.0/Marshal.html">Marshal</a></p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
-</article>
 
 
-</div>
 
-<aside class="sidebar">
+  <span class="byline author vcard">Authored by <span class="fn">
   
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-02-07T15:44:52+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>7</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>3:44 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
+
+
+    </p>
     
+      <div class="sharing">
   
-</aside>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/02/07/marshal/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/02/07/marshal/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/02/07/regular-expression/" title="Previous Post: 正規表示式 Regular Expression">&laquo; 正規表示式 Regular Expression</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/02/07/yaml/" title="Next Post: 用 yaml 來寫文件">用 yaml 來寫文件 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
 
     </div>
   </div>
@@ -252,7 +247,10 @@
       var disqus_shortname = 'leonji';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/02/07/marshal/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/02/07/marshal/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
