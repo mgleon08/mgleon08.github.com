@@ -28,7 +28,9 @@ end
 #require
 但要記得要在使用的檔案，先 require 才能夠使用
 
-也可以直接在 `config/initializer/require.rb` require 進來，就不用每個檔案上面都 require 了。
+也可以直接在 `config/initializer` 新增 `require.rb` 檔案，將檔案 require 進來，就不用每個檔案上面都 require 了。
+
+>`initializer` 裡面的檔案，程式一執行就會全部都執行了
 
 ```ruby
 #單個檔案
@@ -38,6 +40,13 @@ require "#{Rails.root}/lib/require/object.rb"
 Dir["#{Rails.root}/lib/require/object.rb"].each do |file|
   require file
 end
+
+#lib 底下所有檔案
+Dir["#{Rails.root}/lib/**/*.rb"].each do |file|
+  require file
+end
+
+# 檔案 && 資料夾名稱可自訂 ex: monkey_patches
 ```
 
 #使用
