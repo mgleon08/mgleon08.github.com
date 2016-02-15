@@ -5,9 +5,7 @@ date: 2016-02-15 21:12:09 +0800
 comments: true
 categories: ruby
 ---
-#ruby版本控制 rvm
-
-可以輕鬆的切換 ruby 版本
+好用的工具，可以輕鬆的切換 ruby 版本!
 
 <!-- more -->
 
