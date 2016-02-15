@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-07T17:35:14+08:00</updated>
+  <updated>2016-02-15T21:14:44+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,108 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[RVM and Gemsets Ruby版本控制]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/15/rvm-and-gemsets/"/>
+    <updated>2016-02-15T21:12:09+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/15/rvm-and-gemsets</id>
+    <content type="html"><![CDATA[<h1>ruby版本控制 rvm</h1>
+
+<p>可以輕鬆的切換 ruby 版本</p>
+
+<!-- more -->
+
+
+<h1>安裝</h1>
+
+<p><a href="https://rvm.io/">rvm</a></p>
+
+<pre><code>\curl -sSL https://get.rvm.io | bash -s stable
+</code></pre>
+
+<h3>安裝 ruby 版本</h3>
+
+<pre><code>rvm install 2.2.3
+</code></pre>
+
+<h3>使用版本</h3>
+
+<pre><code>rvm use 2.2.3
+</code></pre>
+
+<h3>目前有的版本</h3>
+
+<pre><code>rvm list
+</code></pre>
+
+<h3>移除</h3>
+
+<pre><code>rvm remove 2.2.3
+</code></pre>
+
+<h3>看本機是否使用 rvm 還是本機</h3>
+
+<pre><code>which ruby
+</code></pre>
+
+<h1>設定</h1>
+
+<p>安裝好之後，基本上就是一個全新的，gem 都要全部重新安裝<br/>
+記得先去安裝 <code>bundler</code></p>
+
+<pre><code>gem install bundler
+</code></pre>
+
+<p>之後再去專案底下輸入 <code>bundle</code> 就會重新安裝了</p>
+
+<h1>Gemset</h1>
+
+<p>在該版本的 ruby 下，在區分要安裝哪些 gem</p>
+
+<h3>目前有的 gemset</h3>
+
+<pre><code>rvm gemset list
+</code></pre>
+
+<h3>新增</h3>
+
+<pre><code>rvm gemset create rails4.2.4
+</code></pre>
+
+<h3>使用</h3>
+
+<pre><code>rvm gemset use rails4.2.4
+</code></pre>
+
+<h3>清空</h3>
+
+<p>清空裡面的 gem ，但保留 gemset
+<code>
+rvm gemset empty rails4.2.4
+</code></p>
+
+<h3>刪除</h3>
+
+<pre><code>rvm gemset delete rails4.2.4
+</code></pre>
+
+<h1>Bonus</h1>
+
+<h3>直接換兩個</h3>
+
+<pre><code>rvm 2.2.3@rails4.2.4
+# ruby 和 gemset 一起切換
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="https://rvm.io/">rvm</a></p>
+
+<p>參考文件：<br/>
+<a href="http://motion-express.com/blog/20141005-ruby-rvm-gemset">Ruby gem 想要一機裝多個版本？RVM來幫你！</a><br/>
+<a href="http://blog.eddie.com.tw/2011/04/08/rvm-and-gemsets/">RVM and Gemsets</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Yaml 來寫文件]]></title>
@@ -214,210 +316,6 @@ exec( cmd ) # Note: this will never be reached because of the line above
 <p>參考文件： <br/>
 <a href="http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby">Calling shell commands from Ruby</a><br/>
 <a href="http://tech.natemurray.com/2007/03/ruby-shell-commands.html">6 Ways to Run Shell Commands in Ruby Tuesday</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby 中的 Block & Yield & Proc & Lambda]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/06/block-yield-proc-lambda/"/>
-    <updated>2016-02-06T10:37:37+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/06/block-yield-proc-lambda</id>
-    <content type="html"><![CDATA[<p>在學 ruby 時，經常會搞不清楚這四個，因為都非常相像!</p>
-
-<!-- more -->
-
-
-<h1>block</h1>
-
-<p>什麼是 block ?</p>
-
-<p>在 ruby 中 <code>block</code> 就是只 <code>do..end</code> || <code>{}</code> 包起來的區塊，就稱為 <code>block</code>。</p>
-
-<pre><code class="ruby">[1,2,3].each do |i|
-    puts i
-end
-# =&gt; 1,2,3
-
-[1,2,3].each {|i| puts i}
-
-# =&gt; 1,2,3
-</code></pre>
-
-<p>基本上兩個是等價的，但是慣例上，一行會用 <code>{}</code> ，多行則是用 <code>do..end</code><br/>
-<code>block</code> 無法單獨存在，必須放在 <code>method</code> 後面</p>
-
-<p>另外 <code>block</code> 是可以傳遞的，用 <code>&amp;</code> 表示</p>
-
-<h1>yield</h1>
-
-<p><code>yield</code> 其實就是調用 <code>block</code> 的一種方式</p>
-
-<pre><code class="ruby">class Array
-  def iterate!
-    self.each_with_index do |n, i|
-      self[i] = yield(n)
-    end
-  end
-end
-
-array = [1, 2, 3, 4]
-
-array.iterate! do |n|
-  n ** 2
-end
-
-puts array.inspect
-
-# =&gt; [1, 4, 9, 16]
-</code></pre>
-
-<p>其實就是再把 <code>&amp;block</code> 的寫法簡化</p>
-
-<pre><code class="ruby">def test
-  yield
-end
-
-def test(&amp;block)
-  block.call
-end
-</code></pre>
-
-<h1>procedure (proc)</h1>
-
-<pre><code class="ruby">def who_am_i(&amp;block)
-  block.class
-end
-
-puts who_am_i {}
-
-# =&gt; Proc
-</code></pre>
-
-<p>有此理解，透過 <code>&amp;block</code> 將程式碼傳遞過去後，其實它就是 <code>proc</code>。</p>
-
-<p>跟 <code>block</code> 不同的地方是，<code>proc</code> 是可保存的</p>
-
-<pre><code class="ruby">pro = Proc.new {|a|  puts a}
-#=&gt; &lt;Proc:0x007fcb23ad2640@(irb):1&gt;
-
-pro = proc {|a|  puts a}
-#=&gt; &lt;Proc:0x007fcb23ad2640@(irb):1&gt;
-
-pro = Proc.new do |a|
-  puts a
-end
-
-pro.call(123)
-123
-#=&gt;nil
-
-pro.(123) #非正規用法
-123
-#=&gt;nil
-
-pro(123)
-123
-#=&gt; 123
-</code></pre>
-
-<p>此時就會被 <code>p</code> 存起來，因此引用時就不需加上 <code>&amp;</code></p>
-
-<h1>lambda</h1>
-
-<p>lambda 與 method 用法相同，概念是一樣的<br/>
-不同的是 <code>Method</code> 是有名字的method，而 <code>lambda</code> 是匿名 method</p>
-
-<pre><code class="ruby">lam = lambda{|a| puts a}
-#=&gt; &lt;Proc:0x007fcb23aa1860@(irb):1 (lambda)&gt;
-
-lam.class
-#=&gt; Proc 有此可知，lambda 的原型是 proc
-
-lam = lambda do |a|
-  puts a
-end
-
-lam(123)
-#NoMethodError: undefined method `l' for main:Object
-
-lam.(123) #非正規用法
-123
-#=&gt; nil
-
-lam.call(123)
-123
-#=&gt; nil
-</code></pre>
-
-<p>lambda 跟 proc 非常類似，主要有兩個差異</p>
-
-<h3>1.lambda 會檢查參數的個數</h3>
-
-<pre><code class="ruby">def args(code)
-  one, two = 1, 2
-  code.call(one, two)
-end
-
-args(Proc.new{|a, b, c| puts "Give me a #{a} and a #{b} and a #{c.class}"})
-# =&gt; Give me a 1 and a 2 and a NilClass
-
-args(lambda{|a, b, c| puts "Give me a #{a} and a #{b} and a #{c.class}"})
-# *.rb:8: ArgumentError: wrong number of arguments (2 for 3) (ArgumentError)
-</code></pre>
-
-<h3>2.lambda 的return 會繼續執行，proc 則會直接終止</h3>
-
-<p><code>lambda</code> 比較像是一個 method 的 return <br/>
-<code>proc</code> 則是比較像是 一整個 method 的 return</p>
-
-<pre><code class="ruby">def proc_return
-  Proc.new { return "Proc.new"}.call
-  return "proc_return method finished"
-end
-
-def lambda_return
-  lambda { return "lambda" }.call
-  return "lambda_return method finished"
-end
-
-puts proc_return
-Proc.new
-#=&gt; nil
-
-puts lambda_return
-lambda_return method finished
-#=&gt; nil
-</code></pre>
-
-<h3>使用時機</h3>
-
-<p>在某些情況下，使用 <code>lambda</code> 會比 <code>proc</code> 還簡約。</p>
-
-<pre><code class="ruby">def generic_return(code)
-  one, two    = 1, 2
-  three, four = code.call(one, two)
-  return "Give me a #{three} and a #{four}"
-end
-
-puts generic_return(lambda { |x, y| return x + 2, y + 2 })
-
-puts generic_return(Proc.new { |x, y| return x + 2, y + 2 })
-
-puts generic_return(Proc.new { |x, y| x + 2; y + 2 })
-
-puts generic_return(Proc.new { |x, y| [x + 2, y + 2] })
-
-# =&gt; Give me a 3 and a 4
-# =&gt; *.rb:9: unexpected return (LocalJumpError)
-# =&gt; Give me a 4 and a
-# =&gt; Give me a 3 and a 4
-
-# proc 需再用 array 包覆起來
-</code></pre>
-
-<p>參考文件：<br/>
-<a href="http://rubyer.me/blog/917/">理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。</a><br/>
-<a href="https://ruby-china.org/topics/10414">聊聊 Ruby 中的 block, proc 和 lambda</a></p>
 ]]></content>
   </entry>
   
