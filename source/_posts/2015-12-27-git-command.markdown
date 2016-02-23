@@ -162,6 +162,10 @@ exec   = 執行一條指令
 
 >加上 `-u` 後續就只要 `git push` 和 `git pull` 即可。
 
+
+* `git push --force` 可將 github 上的 `commit` 全部覆蓋掉。
+
+
 #差異
 * `git diff` 比對「Working tree」與「Staging Area」之間的差異。
 * `git diff commit` 比對「Working tree」與「指定 commit 物件裡的那個 tree 物件」之間的差異。

@@ -135,3 +135,4 @@ params.require(:company).permit(:banners_attributes => [:id, :banner, :banner_al
 [使用 paperclip 實作任意格式檔案上傳至 AWS S3](http://chouandy.logdown.com/posts/252165-use-paperclip-implement-any-format-file-uploading-to-aws-s3)  
 [Rails 上傳 Upload](http://blog.jex.tw/blog/2015/07/13/rails-upload/)  
 [Multiple files upload with nested resource using Paperclip in Rails](http://www.railscook.com/recipes/multiple-files-upload-with-nested-resource-using-paperclip-in-rails/)  
+[Paperclip 圖片上傳與額外說明](http://railsfun.tw/t/paperclip/64)

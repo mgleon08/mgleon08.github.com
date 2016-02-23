@@ -1,0 +1,204 @@
+---
+layout: post
+title: "用 Sidekiq 處理 background job"
+date: 2016-02-23 21:06:26 +0800
+comments: true
+categories: gem
+---
+
+當遇到一些需要等待比較長時間處理的動作時，就可以將這工作，丟到背景去處理  
+給用戶們更好的時候體驗。
+
+<!-- more -->
+
+#Sidekiq:
+
+###Pros
+* runs thread per worker (uses much less memory);
+* less forking (works faster);
+* more options out of the box.
+
+###Cons
+* [huge] requires thread-safety of your code and all dependencies. If you run thread-unsafe code with threads, you're asking for trouble;
+* works on some rubies better than others (jruby and rubinius are recommended, efficiency on MRI is decreased due to GVL (global VM lock)).
+
+>每個 worker 是一個 thread，要注意 thread-safety 的問題  
+>Your worker code does need to be thread-safe.
+
+一台機器，只能有一個 redis server，但是 redis 可以有多個 database  
+redis 的 database 可以共享給不同 server shared
+
+#Redis
+Sidekiq是搭配Redis來儲存Job，而Redis是一套高性能的 `In-Memory Key-Value` 儲存系統。
+
+```
+gem install redis
+```
+[redis](http://redis.io/)
+
+#安裝
+
+```ruby
+gem 'sidekiq'
+gem 'sinatra', :require => nil #用來呈現 Web UI
+```
+
+#設定
+
+###Active Job
+可用 ruby 內建的 Active Job，來產生 job。 
+
+```ruby
+rails g job test
+# => app/jobs/test_job.rb
+```
+設定在 `config/application.rb`  
+或是各個環境去做設定 `config/environments/development.rb`
+
+```ruby
+config.active_job.queue_adapter = :sidekiq
+```
+`app/jobs/test_job.rb`
+
+```ruby
+class TestJob < ActiveJob::Base
+  queue_as :default
+
+  def perform(*args)
+    # Do something later
+  end
+end
+```
+
+###Worker
+或是直接用 sidekiq 的 worker。
+
+`app/works/test_worker.rb`
+
+```ruby
+class TestWorker < ActiveJob::Base
+  include Sidekiq::Worker
+  sidekiq_options :queue => :default, :retry => 3
+
+  def perform(*args)
+    # Do something later
+  end
+end
+```
+
+###other
+
+設定 `redis` client 和 server
+
+* 將 worker push 到哪個 redis
+* 從哪個 redis pull worker 下來
+
+`config/sidekiq.rb`
+
+```ruby
+redis_server = '127.0.0.1'
+redis_port = 6379
+redis_db_num = 0
+redis_namespace = "sidekiq_moai_#{Rails.env}"
+
+Sidekiq.configure_server do |config|
+  config.redis = { url: "redis://#{redis_server}:#{redis_port}/#{redis_db_num}", namespace: redis_namespace }
+end
+
+Sidekiq.configure_client do |config|
+  config.redis = { url: "redis://#{redis_server}:#{redis_port}/#{redis_db_num}", namespace: redis_namespace, size: 25 }
+end
+
+```
+
+`config/sidekiq.yml`
+
+```ruby
+:concurrency: 1
+:pidfile: ./tmp/pids/sidekiq.pid
+:logfile: ./log/sidekiq.log
+:queues:
+  - default
+development:
+  :concurrency: 1
+staging:
+  :concurrency: 10
+production:
+  :concurrency: 20
+```
+
+`config/routes.rb`
+
+```ruby
+require 'sidekiq/web'
+mount Sidekiq::Web => '/sidekiq'
+```
+
+#啟動
+
+```ruby
+bundle exec sidekiq
+#會自動去找 sidekiq.yml
+```
+
+```ruby
+bundle exec sidekiq -q default -c 1
+
+#-c, --concurrency INT            processor threads to use
+#-d, --daemon                     Daemonize process
+#-e, --environment ENV            Application environment
+#-g, --tag TAG                    Process tag for procline
+#-i, --index INT                  unique process index on this machine
+#-q, --queue QUEUE[,WEIGHT]       Queues to process with optional weights
+#-r, --require [PATH|DIR]         Location of Rails application with workers or file to require
+#-t, --timeout NUM                Shutdown timeout
+#-v, --verbose                    Print more verbose output
+#-C, --config PATH                path to YAML config file
+#-L, --logfile PATH               path to writable logfile
+#-P, --pidfile PATH               path to pidfile
+#-V, --version                    Print version and exit
+#-h, --help                       Show help
+```
+
+```ruby
+#job
+TestJob.perform_later()
+
+#worker
+TesrWork.perform_async()
+
+#建議參數不要直接塞 object
+```
+
+
+
+#備註
+
+清除 Queue 中的 Job，避免Queue中存放了太多蠢蠢欲動的僵屍Job，一方面也要防止耗費大量時間的Job再起浪費資源。  
+
+```
+redis-cli -n flushdb
+redis-cli flushall
+```
+
+官方文件：  
+[Active Job Basics](http://edgeguides.rubyonrails.org/active_job_basics.html)  
+[Active Job Basics 中文](http://rails.ruby.tw/active_job_basics.html)
+
+參考文件：    
+[Web server / Application server 傻傻分不清楚 ？](http://michaelhsu.tw/2013/07/04/server/#Web_server_/_Application_server_傻傻分不清楚_？)
+[Thread-Safe的理解與分析](http://aftcast.pixnet.net/blog/post/23786004-thread-safe%E7%9A%84%E7%90%86%E8%A7%A3%E8%88%87%E5%88%86%E6%9E%90)  
+[Sharing Sidekiq between two apps](http://stackoverflow.com/questions/18892667/sharing-sidekiq-between-two-apps)  
+[multiple project using sidekiq on same machine](https://codedecoder.wordpress.com/2014/02/27/multiple-project-single-sidekiq-daemon-instance-one-machine/)  
+[Use Sidekiq on a separate servers](http://blog.nicolas-brousse.fr/articles/2015-07-15-test-1--sidekiq-on-separate-servers/)   
+[Sidekiq 异常的监控](https://ruby-china.org/topics/18853)
+[使用 Monit＋Mina 监控服务器](https://ruby-china.org/topics/23176)  
+[【译】使用Rails 4.2+ 测试异步邮件系统](http://code.oneapm.com/ruby/2015/05/26/test-rails-mailer/)  
+[Sidekiq in Rails](http://www.cnblogs.com/richard1234/p/3829074.html)  
+[How to Integrate Sidekiq With ActiveJob](http://ruby-journal.com/how-to-integrate-sidekiq-with-activejob/)
+
+gem：  
+[sidekiq](https://github.com/mperham/sidekiq)  
+[sidekiq-status](https://github.com/utgarda/sidekiq-status)  
+[sidekiq-failures](https://github.com/mhfs/sidekiq-failures)   
+[exception_notification](https://github.com/smartinez87/exception_notification)  

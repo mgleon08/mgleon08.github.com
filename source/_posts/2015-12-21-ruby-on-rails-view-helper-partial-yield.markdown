@@ -206,17 +206,17 @@ yield 主要是會被替換成樣板的地方。
 >若真有業務上的需求需要「到處都可以用」。建議寫 Module 掛在 lib 用 mixin 技巧混入。
 
 
-官方文件：
-[Guides](http://guides.rubyonrails.org/layouts_and_rendering.html#structuring-layouts)
+官方文件：  
+[Guides](http://guides.rubyonrails.org/layouts_and_rendering.html#structuring-layouts)  
 [Guides 中文](http://rails.ruby.tw/layouts_and_rendering.html#%E7%B5%84%E7%B9%94%E7%89%88%E5%9E%8B)
 
-APIdock：
-[partial](http://apidock.com/rails/ActionView/Partials)
+APIdock：  
+[partial](http://apidock.com/rails/ActionView/Partials)  
 [helper](http://apidock.com/rails/ActionController/Helpers)
 
-參考資料：
+參考資料：  
 [Ruby on Rails 實戰聖經](https://ihower.tw/rails4/actionview.html)
-[rails102](https://rocodev.gitbooks.io/rails-102/content/chapter1-mvc/v/what-is-view.html)
-[如何運用 / 設計 Rails Helper (1)](http://blog.xdite.net/posts/2011/12/09/how-to-design-helpers)
-[如何運用 / 設計 Rails Helper (2)](http://blog.xdite.net/posts/2011/12/10/how-to-design-helpers-2)
+[rails102](https://rocodev.gitbooks.io/rails-102/content/chapter1-mvc/v/what-is-view.html)  
+[如何運用 / 設計 Rails Helper (1)](http://blog.xdite.net/posts/2011/12/09/how-to-design-helpers)  
+[如何運用 / 設計 Rails Helper (2)](http://blog.xdite.net/posts/2011/12/10/how-to-design-helpers-2)  
 [如何運用 / 設計 Rails Helper (3)](http://blog.xdite.net/posts/2012/01/16/how-to-design-helper-3)
