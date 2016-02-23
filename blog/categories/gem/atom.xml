@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-15T21:16:50+08:00</updated>
+  <updated>2016-02-23T21:09:37+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,212 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Sidekiq 處理 Background Job]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/23/sidekiq/"/>
+    <updated>2016-02-23T21:06:26+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/23/sidekiq</id>
+    <content type="html"><![CDATA[<p>當遇到一些需要等待比較長時間處理的動作時，就可以將這工作，丟到背景去處理<br/>
+給用戶們更好的時候體驗。</p>
+
+<!-- more -->
+
+
+<h1>Sidekiq:</h1>
+
+<h3>Pros</h3>
+
+<ul>
+<li>runs thread per worker (uses much less memory);</li>
+<li>less forking (works faster);</li>
+<li>more options out of the box.</li>
+</ul>
+
+
+<h3>Cons</h3>
+
+<ul>
+<li>[huge] requires thread-safety of your code and all dependencies. If you run thread-unsafe code with threads, you&rsquo;re asking for trouble;</li>
+<li>works on some rubies better than others (jruby and rubinius are recommended, efficiency on MRI is decreased due to GVL (global VM lock)).</li>
+</ul>
+
+
+<blockquote><p>每個 worker 是一個 thread，要注意 thread-safety 的問題<br/>
+Your worker code does need to be thread-safe.</p></blockquote>
+
+<p>一台機器，只能有一個 redis server，但是 redis 可以有多個 database<br/>
+redis 的 database 可以共享給不同 server shared</p>
+
+<h1>Redis</h1>
+
+<p>Sidekiq是搭配Redis來儲存Job，而Redis是一套高性能的 <code>In-Memory Key-Value</code> 儲存系統。</p>
+
+<pre><code>gem install redis
+</code></pre>
+
+<p><a href="http://redis.io/">redis</a></p>
+
+<h1>安裝</h1>
+
+<pre><code class="ruby">gem 'sidekiq'
+gem 'sinatra', :require =&gt; nil #用來呈現 Web UI
+</code></pre>
+
+<h1>設定</h1>
+
+<h3>Active Job</h3>
+
+<p>可用 ruby 內建的 Active Job，來產生 job。</p>
+
+<pre><code class="ruby">rails g job test
+# =&gt; app/jobs/test_job.rb
+</code></pre>
+
+<p>設定在 <code>config/application.rb</code><br/>
+或是各個環境去做設定 <code>config/environments/development.rb</code></p>
+
+<pre><code class="ruby">config.active_job.queue_adapter = :sidekiq
+</code></pre>
+
+<p><code>app/jobs/test_job.rb</code></p>
+
+<pre><code class="ruby">class TestJob &lt; ActiveJob::Base
+  queue_as :default
+
+  def perform(*args)
+    # Do something later
+  end
+end
+</code></pre>
+
+<h3>Worker</h3>
+
+<p>或是直接用 sidekiq 的 worker。</p>
+
+<p><code>app/works/test_worker.rb</code></p>
+
+<pre><code class="ruby">class TestWorker &lt; ActiveJob::Base
+  include Sidekiq::Worker
+  sidekiq_options :queue =&gt; :default, :retry =&gt; 3
+
+  def perform(*args)
+    # Do something later
+  end
+end
+</code></pre>
+
+<h3>other</h3>
+
+<p>設定 <code>redis</code> client 和 server</p>
+
+<ul>
+<li>將 worker push 到哪個 redis</li>
+<li>從哪個 redis pull worker 下來</li>
+</ul>
+
+
+<p><code>config/sidekiq.rb</code></p>
+
+<pre><code class="ruby">redis_server = '127.0.0.1'
+redis_port = 6379
+redis_db_num = 0
+redis_namespace = "sidekiq_moai_#{Rails.env}"
+
+Sidekiq.configure_server do |config|
+  config.redis = { url: "redis://#{redis_server}:#{redis_port}/#{redis_db_num}", namespace: redis_namespace }
+end
+
+Sidekiq.configure_client do |config|
+  config.redis = { url: "redis://#{redis_server}:#{redis_port}/#{redis_db_num}", namespace: redis_namespace, size: 25 }
+end
+</code></pre>
+
+<p><code>config/sidekiq.yml</code></p>
+
+<pre><code class="ruby">:concurrency: 1
+:pidfile: ./tmp/pids/sidekiq.pid
+:logfile: ./log/sidekiq.log
+:queues:
+  - default
+development:
+  :concurrency: 1
+staging:
+  :concurrency: 10
+production:
+  :concurrency: 20
+</code></pre>
+
+<p><code>config/routes.rb</code></p>
+
+<pre><code class="ruby">require 'sidekiq/web'
+mount Sidekiq::Web =&gt; '/sidekiq'
+</code></pre>
+
+<h1>啟動</h1>
+
+<pre><code class="ruby">bundle exec sidekiq
+#會自動去找 sidekiq.yml
+</code></pre>
+
+<pre><code class="ruby">bundle exec sidekiq -q default -c 1
+
+#-c, --concurrency INT            processor threads to use
+#-d, --daemon                     Daemonize process
+#-e, --environment ENV            Application environment
+#-g, --tag TAG                    Process tag for procline
+#-i, --index INT                  unique process index on this machine
+#-q, --queue QUEUE[,WEIGHT]       Queues to process with optional weights
+#-r, --require [PATH|DIR]         Location of Rails application with workers or file to require
+#-t, --timeout NUM                Shutdown timeout
+#-v, --verbose                    Print more verbose output
+#-C, --config PATH                path to YAML config file
+#-L, --logfile PATH               path to writable logfile
+#-P, --pidfile PATH               path to pidfile
+#-V, --version                    Print version and exit
+#-h, --help                       Show help
+</code></pre>
+
+<pre><code class="ruby">#job
+TestJob.perform_later()
+
+#worker
+TesrWork.perform_async()
+
+#建議參數不要直接塞 object
+</code></pre>
+
+<h1>備註</h1>
+
+<p>清除 Queue 中的 Job，避免Queue中存放了太多蠢蠢欲動的僵屍Job，一方面也要防止耗費大量時間的Job再起浪費資源。</p>
+
+<pre><code>redis-cli -n flushdb
+redis-cli flushall
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://edgeguides.rubyonrails.org/active_job_basics.html">Active Job Basics</a><br/>
+<a href="http://rails.ruby.tw/active_job_basics.html">Active Job Basics 中文</a></p>
+
+<p>參考文件：  <br/>
+<a href="http://michaelhsu.tw/2013/07/04/server/#Web_server_/_Application_server_%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%E6%A5%9A_%EF%BC%9F">Web server / Application server 傻傻分不清楚 ？</a>
+<a href="http://aftcast.pixnet.net/blog/post/23786004-thread-safe%E7%9A%84%E7%90%86%E8%A7%A3%E8%88%87%E5%88%86%E6%9E%90">Thread-Safe的理解與分析</a><br/>
+<a href="http://stackoverflow.com/questions/18892667/sharing-sidekiq-between-two-apps">Sharing Sidekiq between two apps</a><br/>
+<a href="https://codedecoder.wordpress.com/2014/02/27/multiple-project-single-sidekiq-daemon-instance-one-machine/">multiple project using sidekiq on same machine</a><br/>
+<a href="http://blog.nicolas-brousse.fr/articles/2015-07-15-test-1--sidekiq-on-separate-servers/">Use Sidekiq on a separate servers</a> <br/>
+<a href="https://ruby-china.org/topics/18853">Sidekiq 异常的监控</a>
+<a href="https://ruby-china.org/topics/23176">使用 Monit＋Mina 监控服务器</a><br/>
+<a href="http://code.oneapm.com/ruby/2015/05/26/test-rails-mailer/">【译】使用Rails 4.2+ 测试异步邮件系统</a><br/>
+<a href="http://www.cnblogs.com/richard1234/p/3829074.html">Sidekiq in Rails</a><br/>
+<a href="http://ruby-journal.com/how-to-integrate-sidekiq-with-activejob/">How to Integrate Sidekiq With ActiveJob</a></p>
+
+<p>gem：<br/>
+<a href="https://github.com/mperham/sidekiq">sidekiq</a><br/>
+<a href="https://github.com/utgarda/sidekiq-status">sidekiq-status</a><br/>
+<a href="https://github.com/mhfs/sidekiq-failures">sidekiq-failures</a> <br/>
+<a href="https://github.com/smartinez87/exception_notification">exception_notification</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Rspec + Factory Girl 寫測試]]></title>
@@ -709,136 +915,6 @@ end
 <a href="http://rubyist.marsz.tw/blog/2012-01-10/carrierwave-guides-with-amazon-s3-and-imagemagick-integration/">使用 Carrierwave 處理檔案上傳 (整合 imagemagick 與 Amazon S3)</a> <br/>
 <a href="https://ruby-china.org/topics/4992">gem &lsquo;carrierwave'简易实用介绍</a><br/>
 <a href="http://springok-blog.logdown.com/posts/2015/10/21/railsgem-how-to-use-carrierwave-upload-pictures">Rails如何使用Carrierwave上傳圖片</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Paperclip 輕鬆做上傳檔案功能]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/22/paperclip/"/>
-    <updated>2016-01-22T22:12:20+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/22/paperclip</id>
-    <content type="html"><![CDATA[<p>在網站中經常會需要用到上傳檔案功能
-而 Paperclip 就是可以在上傳檔案這件事變得更加便利。</p>
-
-<!-- more -->
-
-
-<h1>安裝</h1>
-
-<pre><code class="ruby">gem "paperclip"
-</code></pre>
-
-<h1>設定</h1>
-
-<pre><code class="ruby">class AddAvatarColumnsToUsers &lt; ActiveRecord::Migration
-  def up
-    add_attachment :topics, :picture
-  end
-
-  def down
-    remove_attachment :topics, :picture
-  end
-end
-</code></pre>
-
-<p>attachment 會自動產生以下四個攔位</p>
-
-<pre><code class="ruby">t.string   "picture_file_name",    limit: 255
-t.string   "picture_content_type", limit: 255
-t.integer  "picture_file_size",    limit: 4
-t.datetime "picture_updated_at"
-</code></pre>
-
-<h1>Model</h1>
-
-<pre><code class="ruby">class User &lt; ActiveRecord::Base
-  has_attached_file :picture, styles: { medium: "300x300&gt;", thumb: "100x100&gt;" }, default_url: "/images/:style/missing.png"
-  validates_attachment_content_type :picture, content_type: /\Aimage\/.*\Z/
-end
-</code></pre>
-
-<h1>Form</h1>
-
-<pre><code class="ruby">&lt;%= form_for @user, url: users_path, html: { multipart: true } do |form| %&gt;
-  &lt;%= form.file_field :picture %&gt;
-  &lt;%=%&gt;
-
-&lt;% if @user.picture.exist?%&gt;
-    &lt;%= check_box_tag “remove” ,”1”%&gt; #刪除按鈕
-&lt;%end%&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<p>在編輯的時候設定如果remove=1就設定圖片欄位為nil就會刪除</p>
-
-<h3>controller</h3>
-
-<pre><code class="ruby">if params[:remove]==1
-    @user.picture=nil
-end
-</code></pre>
-
-<h1>View</h1>
-
-<pre><code class="ruby">&lt;%= image_tag @topic.picture.url %&gt;
-&lt;%= image_tag @topic.picture.url(:medium) %&gt;
-&lt;%= image_tag @topic.picture.url(:thumb) %&gt;
-</code></pre>
-
-<h1>同時上傳多個檔案</h1>
-
-<p>1-to-1 可以使用 <code>fields_for</code> 來達成，但若是 1-to-many ，則必須要搭配 JavaScript 協助動態增減欄位，動態加減數量。</p>
-
-<p>可以使用以下 gem<br/>
-<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a></p>
-
-<p>(注意 Strong Parameter，這個 gem 的 README 沒提到)</p>
-
-<h3>model</h3>
-
-<pre><code class="ruby">has_many :banners, dependent: :destroy
-accepts_nested_attributes_for :banners, allow_destroy: true, :reject_if =&gt; :all_blank
-</code></pre>
-
-<h3>strong params</h3>
-
-<pre><code class="ruby">params.require(:company).permit(:banners_attributes =&gt; [:id, :banner, :banner_alt, :_destroy])
-</code></pre>
-
-<h3>form</h3>
-
-<p>```ruby</p>
-
-<p><div class="image">
-  <p>Banner</p>
-    &lt;%= c.nested_fields_for :banners do |b| %>
-      <div class="form-group">
-      &lt;%= b.file_field :banner%>
-      &lt;%= b.label :banner_alt, &ldquo;banner_alt&rdquo; %><br>
-      &lt;%= b.text_field :banner_alt, :class=>&ldquo;form-control&rdquo;%>
-      &lt;%= b.remove_nested_fields_link &lsquo;Remove me&rsquo;%>
-    &lt;% end %>
-    &lt;%=c.add_nested_fields_link :banners, &lsquo;新增Banner&rsquo;, :class => &ldquo;btn btn-default&rdquo;%>
-</div></p>
-
-<p>```</p>
-
-<p>或是  <a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
-
-<h3>可參考之前的</h3>
-
-<p><a href="http://mgleon08.github.io/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/">Ruby on Rails - Accepts_nested_attributes_for</a></p>
-
-<p>官方文件：<br/>
-<a href="https://github.com/thoughtbot/paperclip">paperclip</a><br/>
-<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a><br/>
-<a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
-
-<p>參考文件：<br/>
-<a href="http://chouandy.logdown.com/posts/249554-use-paperclip-implement-any-format-file-uploading">使用 paperclip 實作任意格式檔案上傳</a><br/>
-<a href="http://chouandy.logdown.com/posts/252165-use-paperclip-implement-any-format-file-uploading-to-aws-s3">使用 paperclip 實作任意格式檔案上傳至 AWS S3</a><br/>
-<a href="http://blog.jex.tw/blog/2015/07/13/rails-upload/">Rails 上傳 Upload</a><br/>
-<a href="http://www.railscook.com/recipes/multiple-files-upload-with-nested-resource-using-paperclip-in-rails/">Multiple files upload with nested resource using Paperclip in Rails</a></p>
 ]]></content>
   </entry>
   

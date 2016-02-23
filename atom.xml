@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-15T21:16:50+08:00</updated>
+  <updated>2016-02-23T21:09:37+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,301 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Sidekiq 處理 Background Job]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/23/sidekiq/"/>
+    <updated>2016-02-23T21:06:26+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/23/sidekiq</id>
+    <content type="html"><![CDATA[<p>當遇到一些需要等待比較長時間處理的動作時，就可以將這工作，丟到背景去處理<br/>
+給用戶們更好的時候體驗。</p>
+
+<!-- more -->
+
+
+<h1>Sidekiq:</h1>
+
+<h3>Pros</h3>
+
+<ul>
+<li>runs thread per worker (uses much less memory);</li>
+<li>less forking (works faster);</li>
+<li>more options out of the box.</li>
+</ul>
+
+
+<h3>Cons</h3>
+
+<ul>
+<li>[huge] requires thread-safety of your code and all dependencies. If you run thread-unsafe code with threads, you&rsquo;re asking for trouble;</li>
+<li>works on some rubies better than others (jruby and rubinius are recommended, efficiency on MRI is decreased due to GVL (global VM lock)).</li>
+</ul>
+
+
+<blockquote><p>每個 worker 是一個 thread，要注意 thread-safety 的問題<br/>
+Your worker code does need to be thread-safe.</p></blockquote>
+
+<p>一台機器，只能有一個 redis server，但是 redis 可以有多個 database<br/>
+redis 的 database 可以共享給不同 server shared</p>
+
+<h1>Redis</h1>
+
+<p>Sidekiq是搭配Redis來儲存Job，而Redis是一套高性能的 <code>In-Memory Key-Value</code> 儲存系統。</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>gem install redis</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://redis.io/">redis</a></p>
+
+<h1>安裝</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;sidekiq&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;sinatra&#39;</span><span class="p">,</span> <span class="ss">:require</span> <span class="o">=&gt;</span> <span class="kp">nil</span> <span class="c1">#用來呈現 Web UI</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>設定</h1>
+
+<h3>Active Job</h3>
+
+<p>可用 ruby 內建的 Active Job，來產生 job。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">job</span> <span class="nb">test</span>
+</span><span class='line'><span class="c1"># =&gt; app/jobs/test_job.rb</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>設定在 <code>config/application.rb</code><br/>
+或是各個環境去做設定 <code>config/environments/development.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">active_job</span><span class="o">.</span><span class="n">queue_adapter</span> <span class="o">=</span> <span class="ss">:sidekiq</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>app/jobs/test_job.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">TestJob</span> <span class="o">&lt;</span> <span class="no">ActiveJob</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">queue_as</span> <span class="ss">:default</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># Do something later</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Worker</h3>
+
+<p>或是直接用 sidekiq 的 worker。</p>
+
+<p><code>app/works/test_worker.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">TestWorker</span> <span class="o">&lt;</span> <span class="no">ActiveJob</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Worker</span>
+</span><span class='line'>  <span class="n">sidekiq_options</span> <span class="ss">:queue</span> <span class="o">=&gt;</span> <span class="ss">:default</span><span class="p">,</span> <span class="ss">:retry</span> <span class="o">=&gt;</span> <span class="mi">3</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">perform</span><span class="p">(</span><span class="o">*</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># Do something later</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>other</h3>
+
+<p>設定 <code>redis</code> client 和 server</p>
+
+<ul>
+<li>將 worker push 到哪個 redis</li>
+<li>從哪個 redis pull worker 下來</li>
+</ul>
+
+
+<p><code>config/sidekiq.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">redis_server</span> <span class="o">=</span> <span class="s1">&#39;127.0.0.1&#39;</span>
+</span><span class='line'><span class="n">redis_port</span> <span class="o">=</span> <span class="mi">6379</span>
+</span><span class='line'><span class="n">redis_db_num</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">redis_namespace</span> <span class="o">=</span> <span class="s2">&quot;sidekiq_moai_</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">env</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Sidekiq</span><span class="o">.</span><span class="n">configure_server</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">redis</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">url</span><span class="p">:</span> <span class="s2">&quot;redis://</span><span class="si">#{</span><span class="n">redis_server</span><span class="si">}</span><span class="s2">:</span><span class="si">#{</span><span class="n">redis_port</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">redis_db_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ss">namespace</span><span class="p">:</span> <span class="n">redis_namespace</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Sidekiq</span><span class="o">.</span><span class="n">configure_client</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">redis</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">url</span><span class="p">:</span> <span class="s2">&quot;redis://</span><span class="si">#{</span><span class="n">redis_server</span><span class="si">}</span><span class="s2">:</span><span class="si">#{</span><span class="n">redis_port</span><span class="si">}</span><span class="s2">/</span><span class="si">#{</span><span class="n">redis_db_num</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ss">namespace</span><span class="p">:</span> <span class="n">redis_namespace</span><span class="p">,</span> <span class="ss">size</span><span class="p">:</span> <span class="mi">25</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>config/sidekiq.yml</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">:concurrency</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'><span class="ss">:pidfile</span><span class="p">:</span> <span class="o">.</span><span class="n">/tmp</span><span class="o">/</span><span class="n">pids</span><span class="o">/</span><span class="n">sidekiq</span><span class="o">.</span><span class="n">pid</span>
+</span><span class='line'><span class="ss">:logfile</span><span class="p">:</span> <span class="o">.</span><span class="n">/log</span><span class="o">/</span><span class="n">sidekiq</span><span class="o">.</span><span class="n">log</span>
+</span><span class='line'><span class="ss">:queues</span><span class="p">:</span>
+</span><span class='line'>  <span class="o">-</span> <span class="n">default</span>
+</span><span class='line'><span class="ss">development</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">:concurrency</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'><span class="ss">staging</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">:concurrency</span><span class="p">:</span> <span class="mi">10</span>
+</span><span class='line'><span class="ss">production</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">:concurrency</span><span class="p">:</span> <span class="mi">20</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>config/routes.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;sidekiq/web&#39;</span>
+</span><span class='line'><span class="n">mount</span> <span class="no">Sidekiq</span><span class="o">::</span><span class="no">Web</span> <span class="o">=&gt;</span> <span class="s1">&#39;/sidekiq&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>啟動</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="nb">exec</span> <span class="n">sidekiq</span>
+</span><span class='line'><span class="c1">#會自動去找 sidekiq.yml</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="nb">exec</span> <span class="n">sidekiq</span> <span class="o">-</span><span class="n">q</span> <span class="n">default</span> <span class="o">-</span><span class="n">c</span> <span class="mi">1</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#-c, --concurrency INT            processor threads to use</span>
+</span><span class='line'><span class="c1">#-d, --daemon                     Daemonize process</span>
+</span><span class='line'><span class="c1">#-e, --environment ENV            Application environment</span>
+</span><span class='line'><span class="c1">#-g, --tag TAG                    Process tag for procline</span>
+</span><span class='line'><span class="c1">#-i, --index INT                  unique process index on this machine</span>
+</span><span class='line'><span class="c1">#-q, --queue QUEUE[,WEIGHT]       Queues to process with optional weights</span>
+</span><span class='line'><span class="c1">#-r, --require [PATH|DIR]         Location of Rails application with workers or file to require</span>
+</span><span class='line'><span class="c1">#-t, --timeout NUM                Shutdown timeout</span>
+</span><span class='line'><span class="c1">#-v, --verbose                    Print more verbose output</span>
+</span><span class='line'><span class="c1">#-C, --config PATH                path to YAML config file</span>
+</span><span class='line'><span class="c1">#-L, --logfile PATH               path to writable logfile</span>
+</span><span class='line'><span class="c1">#-P, --pidfile PATH               path to pidfile</span>
+</span><span class='line'><span class="c1">#-V, --version                    Print version and exit</span>
+</span><span class='line'><span class="c1">#-h, --help                       Show help</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#job</span>
+</span><span class='line'><span class="no">TestJob</span><span class="o">.</span><span class="n">perform_later</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#worker</span>
+</span><span class='line'><span class="no">TesrWork</span><span class="o">.</span><span class="n">perform_async</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#建議參數不要直接塞 object</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>備註</h1>
+
+<p>清除 Queue 中的 Job，避免Queue中存放了太多蠢蠢欲動的僵屍Job，一方面也要防止耗費大量時間的Job再起浪費資源。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">redis</span><span class="o">-</span><span class="n">cli</span> <span class="o">-</span><span class="n">n</span> <span class="n">flushdb</span>
+</span><span class='line'><span class="n">redis</span><span class="o">-</span><span class="n">cli</span> <span class="n">flushall</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://edgeguides.rubyonrails.org/active_job_basics.html">Active Job Basics</a><br/>
+<a href="http://rails.ruby.tw/active_job_basics.html">Active Job Basics 中文</a></p>
+
+<p>參考文件：  <br/>
+<a href="http://michaelhsu.tw/2013/07/04/server/#Web_server_/_Application_server_%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%E6%A5%9A_%EF%BC%9F">Web server / Application server 傻傻分不清楚 ？</a>
+<a href="http://aftcast.pixnet.net/blog/post/23786004-thread-safe%E7%9A%84%E7%90%86%E8%A7%A3%E8%88%87%E5%88%86%E6%9E%90">Thread-Safe的理解與分析</a><br/>
+<a href="http://stackoverflow.com/questions/18892667/sharing-sidekiq-between-two-apps">Sharing Sidekiq between two apps</a><br/>
+<a href="https://codedecoder.wordpress.com/2014/02/27/multiple-project-single-sidekiq-daemon-instance-one-machine/">multiple project using sidekiq on same machine</a><br/>
+<a href="http://blog.nicolas-brousse.fr/articles/2015-07-15-test-1--sidekiq-on-separate-servers/">Use Sidekiq on a separate servers</a> <br/>
+<a href="https://ruby-china.org/topics/18853">Sidekiq 异常的监控</a>
+<a href="https://ruby-china.org/topics/23176">使用 Monit＋Mina 监控服务器</a><br/>
+<a href="http://code.oneapm.com/ruby/2015/05/26/test-rails-mailer/">【译】使用Rails 4.2+ 测试异步邮件系统</a><br/>
+<a href="http://www.cnblogs.com/richard1234/p/3829074.html">Sidekiq in Rails</a><br/>
+<a href="http://ruby-journal.com/how-to-integrate-sidekiq-with-activejob/">How to Integrate Sidekiq With ActiveJob</a></p>
+
+<p>gem：<br/>
+<a href="https://github.com/mperham/sidekiq">sidekiq</a><br/>
+<a href="https://github.com/utgarda/sidekiq-status">sidekiq-status</a><br/>
+<a href="https://github.com/mhfs/sidekiq-failures">sidekiq-failures</a> <br/>
+<a href="https://github.com/smartinez87/exception_notification">exception_notification</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[RVM and Gemsets Ruby版本控制]]></title>
@@ -2864,189 +3159,6 @@ touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at
 <a href="http://rubyist.marsz.tw/blog/2012-01-10/carrierwave-guides-with-amazon-s3-and-imagemagick-integration/">使用 Carrierwave 處理檔案上傳 (整合 imagemagick 與 Amazon S3)</a> <br/>
 <a href="https://ruby-china.org/topics/4992">gem &lsquo;carrierwave'简易实用介绍</a><br/>
 <a href="http://springok-blog.logdown.com/posts/2015/10/21/railsgem-how-to-use-carrierwave-upload-pictures">Rails如何使用Carrierwave上傳圖片</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Paperclip 輕鬆做上傳檔案功能]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/22/paperclip/"/>
-    <updated>2016-01-22T22:12:20+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/22/paperclip</id>
-    <content type="html"><![CDATA[<p>在網站中經常會需要用到上傳檔案功能
-而 Paperclip 就是可以在上傳檔案這件事變得更加便利。</p>
-
-<!-- more -->
-
-
-<h1>安裝</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;paperclip&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>設定</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">AddAvatarColumnsToUsers</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">up</span>
-</span><span class='line'>    <span class="n">add_attachment</span> <span class="ss">:topics</span><span class="p">,</span> <span class="ss">:picture</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">down</span>
-</span><span class='line'>    <span class="n">remove_attachment</span> <span class="ss">:topics</span><span class="p">,</span> <span class="ss">:picture</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>attachment 會自動產生以下四個攔位</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="s2">&quot;picture_file_name&quot;</span><span class="p">,</span>    <span class="ss">limit</span><span class="p">:</span> <span class="mi">255</span>
-</span><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="s2">&quot;picture_content_type&quot;</span><span class="p">,</span> <span class="ss">limit</span><span class="p">:</span> <span class="mi">255</span>
-</span><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">integer</span>  <span class="s2">&quot;picture_file_size&quot;</span><span class="p">,</span>    <span class="ss">limit</span><span class="p">:</span> <span class="mi">4</span>
-</span><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">datetime</span> <span class="s2">&quot;picture_updated_at&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Model</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">has_attached_file</span> <span class="ss">:picture</span><span class="p">,</span> <span class="ss">styles</span><span class="p">:</span> <span class="p">{</span> <span class="ss">medium</span><span class="p">:</span> <span class="s2">&quot;300x300&gt;&quot;</span><span class="p">,</span> <span class="ss">thumb</span><span class="p">:</span> <span class="s2">&quot;100x100&gt;&quot;</span> <span class="p">},</span> <span class="ss">default_url</span><span class="p">:</span> <span class="s2">&quot;/images/:style/missing.png&quot;</span>
-</span><span class='line'>  <span class="n">validates_attachment_content_type</span> <span class="ss">:picture</span><span class="p">,</span> <span class="ss">content_type</span><span class="p">:</span> <span class="sr">/\Aimage\/.*\Z/</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Form</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for @user, url: users_path, html: { multipart: true } do |form| %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">form</span><span class="o">.</span><span class="n">file_field</span> <span class="ss">:picture</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;%=%&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="vi">@user</span><span class="o">.</span><span class="n">picture</span><span class="o">.</span><span class="n">exist?</span><span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx"> &lt;%= check_box_tag “remove” ,”1”%&gt;</span> <span class="c1">#刪除按鈕</span>
-</span><span class='line'><span class="o">&lt;%</span><span class="k">end</span><span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">&lt;% end %&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在編輯的時候設定如果remove=1就設定圖片欄位為nil就會刪除</p>
-
-<h3>controller</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">if</span> <span class="n">params</span><span class="o">[</span><span class="ss">:remove</span><span class="o">]==</span><span class="mi">1</span>
-</span><span class='line'>    <span class="vi">@user</span><span class="o">.</span><span class="n">picture</span><span class="o">=</span><span class="kp">nil</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>View</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= image_tag @topic.picture.url %&gt;</span>
-</span><span class='line'><span class="sx">&lt;%=</span> <span class="n">image_tag</span> <span class="vi">@topic</span><span class="o">.</span><span class="n">picture</span><span class="o">.</span><span class="n">url</span><span class="p">(</span><span class="ss">:medium</span><span class="p">)</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">&lt;%= image_tag @topic.picture.url(:thumb) %&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>同時上傳多個檔案</h1>
-
-<p>1-to-1 可以使用 <code>fields_for</code> 來達成，但若是 1-to-many ，則必須要搭配 JavaScript 協助動態增減欄位，動態加減數量。</p>
-
-<p>可以使用以下 gem<br/>
-<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a></p>
-
-<p>(注意 Strong Parameter，這個 gem 的 README 沒提到)</p>
-
-<h3>model</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">has_many</span> <span class="ss">:banners</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
-</span><span class='line'><span class="n">accepts_nested_attributes_for</span> <span class="ss">:banners</span><span class="p">,</span> <span class="ss">allow_destroy</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">:reject_if</span> <span class="o">=&gt;</span> <span class="ss">:all_blank</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>strong params</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:company</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:banners_attributes</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:banner</span><span class="p">,</span> <span class="ss">:banner_alt</span><span class="p">,</span> <span class="ss">:_destroy</span><span class="o">]</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>form</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;image&quot;</span><span class="o">&gt;</span>
-</span><span class='line'>  <span class="o">&lt;</span><span class="nb">p</span><span class="o">&gt;</span><span class="no">Banner</span><span class="o">&lt;</span><span class="sr">/p&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%= c.nested_fields_for :banners do |b| %&gt;</span>
-</span><span class='line'><span class="sr">      &lt;div class=&quot;form-group&quot;&gt;</span>
-</span><span class='line'><span class="sr">      &lt;%= b.file_field :banner%&gt;</span>
-</span><span class='line'><span class="sr">      &lt;%= b.label :banner_alt, &quot;banner_alt&quot; %&gt;&lt;br&gt;</span>
-</span><span class='line'><span class="sr">      &lt;%= b.text_field :banner_alt, :class=&gt;&quot;form-control&quot;%&gt;</span>
-</span><span class='line'><span class="sr">      &lt;%= b.remove_nested_fields_link &#39;Remove me&#39;%&gt;</span>
-</span><span class='line'><span class="sr">    &lt;% end %&gt;</span>
-</span><span class='line'><span class="sr">    &lt;%=c.add_nested_fields_link :banners, &#39;新增Banner&#39;, :class =&gt; &quot;btn btn-default&quot;%&gt;</span>
-</span><span class='line'><span class="sr">&lt;/</span><span class="n">div</span><span class="o">&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>或是  <a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
-
-<h3>可參考之前的</h3>
-
-<p><a href="http://mgleon08.github.io/blog/2015/12/13/ruby-on-rails-accepts-nested-attributes-for/">Ruby on Rails - Accepts_nested_attributes_for</a></p>
-
-<p>官方文件：<br/>
-<a href="https://github.com/thoughtbot/paperclip">paperclip</a><br/>
-<a href="https://github.com/ncri/nested_form_fields">nested_form_fields</a><br/>
-<a href="https://github.com/nathanvda/cocoon">cocoon</a></p>
-
-<p>參考文件：<br/>
-<a href="http://chouandy.logdown.com/posts/249554-use-paperclip-implement-any-format-file-uploading">使用 paperclip 實作任意格式檔案上傳</a><br/>
-<a href="http://chouandy.logdown.com/posts/252165-use-paperclip-implement-any-format-file-uploading-to-aws-s3">使用 paperclip 實作任意格式檔案上傳至 AWS S3</a><br/>
-<a href="http://blog.jex.tw/blog/2015/07/13/rails-upload/">Rails 上傳 Upload</a><br/>
-<a href="http://www.railscook.com/recipes/multiple-files-upload-with-nested-resource-using-paperclip-in-rails/">Multiple files upload with nested resource using Paperclip in Rails</a></p>
 ]]></content>
   </entry>
   
