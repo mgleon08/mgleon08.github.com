@@ -5,11 +5,27 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Category: Ruby - Leon's Blogging</title>
+  <title>Ruby 中的 Include Extend Require - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="Category: ruby">
+  <meta name="description" content="常常搞不清楚，include，extend，require這幾個差異。 module include &amp; extend 主要是將 module 的方法，可以繼承給 class 或 instance 使用。 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -18,7 +34,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/categories/ruby">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -96,175 +112,198 @@
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">Category: Ruby</h1>
+    
+      
+        <h1 class="entry-title">Ruby 中的 Include Extend Require</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-02-24T21:49:30+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:49 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
     
   </header>
-  
-  <div id="blog-archives" class="category">
 
 
+<div class="entry-content"><p>常常搞不清楚，<code>include</code>，<code>extend</code>，<code>require</code>這幾個差異。</p>
 
-  
-  <h2>2016</h2>
-
-<article>
-  
-<h1><a href="/blog/2016/02/24/include-extend-require/">Ruby 中的 Include Extend Require</a></h1>
-<time datetime="2016-02-24T21:49:30+08:00" pubdate><span class='month'>Feb</span> <span class='day'>24</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
+<!-- more -->
 
 
-</article>
+<h1>module</h1>
+
+<p><code>include</code> &amp; <code>extend</code> 主要是將 <code>module</code> 的方法，可以繼承給 <code>class</code> 或 <code>instance</code> 使用。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">hello</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s1">&#39;Hello!&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Foo</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
+</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
+</span><span class='line'><span class="c1"># =&gt; Hello!</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="no">Foo</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
+</span><span class='line'><span class="c1"># =&gt; Hello!</span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
+</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
+<p>由此可知</p>
 
-<article>
-  
-<h1><a href="/blog/2016/02/15/rvm-and-gemsets/">RVM and Gemsets Ruby版本控制</a></h1>
-<time datetime="2016-02-15T21:12:09+08:00" pubdate><span class='month'>Feb</span> <span class='day'>15</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
+<ul>
+<li><code>extend</code>  增加 class_methods</li>
+<li><code>include</code> 增加 instance_methods</li>
+</ul>
 
 
-</article>
+<h1>require</h1>
+
+<p>在 ruby 中，一開始用有很多 <code>method</code> 可以使用，是因為 ruby 將一些常用的都先載入進來。</p>
+
+<ul>
+<li><a href="http://ruby-doc.org/core-2.3.0/">core</a></li>
+</ul>
 
 
+<p>而其他比較不常用的 method 就必須在要使用的時候，先 require 進來才可以。</p>
 
-<article>
-  
-<h1><a href="/blog/2016/02/07/yaml/">用 Yaml 來寫文件</a></h1>
-<time datetime="2016-02-07T16:08:29+08:00" pubdate><span class='month'>Feb</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
+<ul>
+<li><a href="http://ruby-doc.org/stdlib-2.3.0/">std</a></li>
+</ul>
 
 
-</article>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;fileutils&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
+<p>也可以載入自己設定好的檔案，不過記得路徑的問題，可以使用 <code>require_relative</code></p>
 
-<article>
-  
-<h1><a href="/blog/2016/02/07/marshal/">用 Marshal 來傳遞資料</a></h1>
-<time datetime="2016-02-07T15:44:52+08:00" pubdate><span class='month'>Feb</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;test&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-</article>
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.3.0/">ruby-doc</a></p>
 
-
-
-<article>
-  
-<h1><a href="/blog/2016/02/07/ruby-crawler/">用 Ruby 做網頁爬蟲</a></h1>
-<time datetime="2016-02-07T15:21:59+08:00" pubdate><span class='month'>Feb</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/02/07/callsystem/">Call System From Ruby</a></h1>
-<time datetime="2016-02-07T14:31:31+08:00" pubdate><span class='month'>Feb</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/02/06/block-yield-proc-lambda/">Ruby 中的 Block & Yield & Proc & Lambda</a></h1>
-<time datetime="2016-02-06T10:37:37+08:00" pubdate><span class='month'>Feb</span> <span class='day'>06</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/01/31/ruby-file-dir/">用 Ruby 進行 File ＆ Dir 檔案操作</a></h1>
-<time datetime="2016-01-31T19:07:00+08:00" pubdate><span class='month'>Jan</span> <span class='day'>31</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-<article>
-  
-<h1><a href="/blog/2016/01/07/rails-enumerable/">Ruby on Rails - 好用的 Enumerable</a></h1>
-<time datetime="2016-01-07T20:40:22+08:00" pubdate><span class='month'>Jan</span> <span class='day'>07</span> <span class='year'>2016</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/api/'>api</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
-
-
-  
-  <h2>2015</h2>
-
-<article>
-  
-<h1><a href="/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/">.nil? .empty? .blank? .present? 傻傻分不清楚？</a></h1>
-<time datetime="2015-12-16T21:29:43+08:00" pubdate><span class='month'>Dec</span> <span class='day'>16</span> <span class='year'>2015</span></time>
-
-<footer>
-  <span class="categories">posted in <a class='category' href='/blog/categories/api/'>api</a>, <a class='category' href='/blog/categories/rails/'>rails</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a></span>
-</footer>
-
-
-</article>
-
+<p>參考文件：<br/>
+<a href="http://blog.eddie.com.tw/2015/03/24/class-and-module/">Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」</a> <br/>
+<a href="http://motion-express.com/blog/20150407-ruby-require-require-relative-load">require、require_relative是什麼意思？差在哪？</a></p>
 </div>
 
+
+  <footer>
+    <p class="meta">
+      
   
-</article>
 
 
-</div>
 
-<aside class="sidebar">
+  <span class="byline author vcard">Authored by <span class="fn">
   
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-02-24T21:49:30+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:49 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
+
+
+    </p>
     
+      <div class="sharing">
   
-</aside>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
 
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/02/24/slack-notifier/" title="Previous Post: 用 slack 通知大小事">&laquo; 用 slack 通知大小事</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
 
     </div>
   </div>
@@ -280,7 +319,10 @@
       var disqus_shortname = 'leonji';
       
         
-        var disqus_script = 'count.js';
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/02/24/include-extend-require/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/02/24/include-extend-require/';
+        var disqus_script = 'embed.js';
       
     (function () {
       var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;

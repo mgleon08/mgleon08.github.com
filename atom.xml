@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-24T20:32:12+08:00</updated>
+  <updated>2016-02-24T22:16:23+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,118 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby 中的 Include Extend Require]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/"/>
+    <updated>2016-02-24T21:49:30+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/24/include-extend-require</id>
+    <content type="html"><![CDATA[<p>常常搞不清楚，<code>include</code>，<code>extend</code>，<code>require</code>這幾個差異。</p>
+
+<!-- more -->
+
+
+<h1>module</h1>
+
+<p><code>include</code> &amp; <code>extend</code> 主要是將 <code>module</code> 的方法，可以繼承給 <code>class</code> 或 <code>instance</code> 使用。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">hello</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s1">&#39;Hello!&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Foo</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
+</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
+</span><span class='line'><span class="c1"># =&gt; Hello!</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="no">Foo</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
+</span><span class='line'><span class="c1"># =&gt; Hello!</span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
+</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>由此可知</p>
+
+<ul>
+<li><code>extend</code>  增加 class_methods</li>
+<li><code>include</code> 增加 instance_methods</li>
+</ul>
+
+
+<h1>require</h1>
+
+<p>在 ruby 中，一開始用有很多 <code>method</code> 可以使用，是因為 ruby 將一些常用的都先載入進來。</p>
+
+<ul>
+<li><a href="http://ruby-doc.org/core-2.3.0/">core</a></li>
+</ul>
+
+
+<p>而其他比較不常用的 method 就必須在要使用的時候，先 require 進來才可以。</p>
+
+<ul>
+<li><a href="http://ruby-doc.org/stdlib-2.3.0/">std</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;fileutils&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也可以載入自己設定好的檔案，不過記得路徑的問題，可以使用 <code>require_relative</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;test&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.3.0/">ruby-doc</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.eddie.com.tw/2015/03/24/class-and-module/">Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」</a> <br/>
+<a href="http://motion-express.com/blog/20150407-ruby-require-require-relative-load">require、require_relative是什麼意思？差在哪？</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Slack 通知大小事]]></title>
@@ -3055,37 +3167,6 @@ touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at
 <a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a><br/>
 <a href="http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby">Calling shell commands from Ruby</a><br/>
 <a href="http://tech.natemurray.com/2007/03/ruby-shell-commands.html">6 Ways to Run Shell Commands in Ruby Tuesday</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Rubocop 寫出好風格]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/22/rubocop/"/>
-    <updated>2016-01-22T22:39:47+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/22/rubocop</id>
-    <content type="html"><![CDATA[<p>rubocop 像是一個程式評量工具，會告知在 rails 中的寫法，要如何才會比較好!</p>
-
-<!-- more -->
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">rubocop</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>指令</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rubocop</span> <span class="n">app</span> <span class="n">spec</span> <span class="n">lib</span><span class="o">/</span><span class="n">something</span><span class="o">.</span><span class="n">rb</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="https://github.com/bbatsov/rubocop">rubocop</a></p>
-
-<p>參考文件：
-<a href="https://blog.alphacamp.co/2015/12/24/how-to-use-rubocop-in-rails-project/">如何在Rails專案中使用Rubocop統一程式風格？</a></p>
 ]]></content>
   </entry>
   

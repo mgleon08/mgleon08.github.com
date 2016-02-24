@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-24T20:32:12+08:00</updated>
+  <updated>2016-02-24T22:16:23+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,88 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby 中的 Include Extend Require]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/"/>
+    <updated>2016-02-24T21:49:30+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/24/include-extend-require</id>
+    <content type="html"><![CDATA[<p>常常搞不清楚，<code>include</code>，<code>extend</code>，<code>require</code>這幾個差異。</p>
+
+<!-- more -->
+
+
+<h1>module</h1>
+
+<p><code>include</code> &amp; <code>extend</code> 主要是將 <code>module</code> 的方法，可以繼承給 <code>class</code> 或 <code>instance</code> 使用。</p>
+
+<pre><code class="ruby">module Foo   
+  def hello     
+    puts 'Hello!'   
+  end 
+end
+
+class Bar
+  include Foo
+end
+
+Bar.hello
+# =&gt; `&lt;main&gt;': undefined method `hello' for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)
+a = Bar.new
+a.hello
+# =&gt; Hello!
+
+class Bar
+  extend Foo
+end
+
+Bar.hello
+# =&gt; Hello!
+a = Bar.new
+a.hello
+# =&gt; `&lt;main&gt;': undefined method `hello' for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)
+</code></pre>
+
+<p>由此可知</p>
+
+<ul>
+<li><code>extend</code>  增加 class_methods</li>
+<li><code>include</code> 增加 instance_methods</li>
+</ul>
+
+
+<h1>require</h1>
+
+<p>在 ruby 中，一開始用有很多 <code>method</code> 可以使用，是因為 ruby 將一些常用的都先載入進來。</p>
+
+<ul>
+<li><a href="http://ruby-doc.org/core-2.3.0/">core</a></li>
+</ul>
+
+
+<p>而其他比較不常用的 method 就必須在要使用的時候，先 require 進來才可以。</p>
+
+<ul>
+<li><a href="http://ruby-doc.org/stdlib-2.3.0/">std</a></li>
+</ul>
+
+
+<pre><code class="ruby">require 'fileutils'
+</code></pre>
+
+<p>也可以載入自己設定好的檔案，不過記得路徑的問題，可以使用 <code>require_relative</code></p>
+
+<pre><code class="ruby">require_relative 'test'
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.3.0/">ruby-doc</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.eddie.com.tw/2015/03/24/class-and-module/">Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」</a> <br/>
+<a href="http://motion-express.com/blog/20150407-ruby-require-require-relative-load">require、require_relative是什麼意思？差在哪？</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[RVM and Gemsets Ruby版本控制]]></title>
@@ -242,78 +324,6 @@ end
 <p>參考文件：<br/>
 <a href="https://www.youtube.com/watch?v=6XUnYRB0Zpo&amp;list=PLJ6M-k9dQEQ3VsyOZQwjZ5GdjaLJH3eB_">RailsFun</a><br/>
 <a href="http://tonytonyjan.net/slides/2014-07-03-simple-crawler/">Ruby Crawler 輕輕鬆鬆做個 Ruby 爬蟲機器人</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Call System From Ruby]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/07/callsystem/"/>
-    <updated>2016-02-07T14:31:31+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/07/callsystem</id>
-    <content type="html"><![CDATA[<p>可以直接透過 ruby 來執行 commands 的指令。</p>
-
-<!-- more -->
-
-
-<h1>Calling shell commands from Ruby</h1>
-
-<p>回傳的</p>
-
-<ol>
-<li>Kernel#`, commonly called backticks – <code>cmd</code></li>
-</ol>
-
-
-<p>Returns the result of the shell command.</p>
-
-<pre><code class="ruby">value = `echo 'hi'`
-value = `#{cmd}`
-value.class
-#=&gt; String 回傳結果
-</code></pre>
-
-<ol>
-<li>Built-in syntax, <code>%x( cmd )</code></li>
-</ol>
-
-
-<p>Returns the result of the shell command, just like the backticks.</p>
-
-<pre><code class="ruby">value = %x( echo 'hi' )
-value = %x[ #{cmd} ]
-</code></pre>
-
-<ol>
-<li>Kernel# <code>system</code></li>
-</ol>
-
-
-<p>Return: true if the command was found and ran successfully, false otherwise</p>
-
-<pre><code class="ruby">wasGood = system( "echo 'hi'" )
-wasGood = system( cmd )
-wasGood.class
-=&gt; TrueClass 回傳有沒有成功
-</code></pre>
-
-<ol>
-<li>Kernel#exec</li>
-</ol>
-
-
-<p>Return: none, the current process is replaced and never continues</p>
-
-<pre><code class="ruby">exec( "echo 'hi'" )
-exec( cmd ) # Note: this will never be reached because of the line above
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.3.0/Kernel.html">Kernel</a><br/>
-<a href="http://ruby-doc.org/stdlib-2.3.0/libdoc/open3/rdoc/Open3.html#method-c-pipeline">Open3 - 可執行精密的操作</a></p>
-
-<p>參考文件： <br/>
-<a href="http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby">Calling shell commands from Ruby</a><br/>
-<a href="http://tech.natemurray.com/2007/03/ruby-shell-commands.html">6 Ways to Run Shell Commands in Ruby Tuesday</a></p>
 ]]></content>
   </entry>
   
