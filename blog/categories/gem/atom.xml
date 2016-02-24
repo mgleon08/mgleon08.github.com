@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-23T21:09:37+08:00</updated>
+  <updated>2016-02-24T20:32:12+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,71 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Slack 通知大小事]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/24/slack-notifier/"/>
+    <updated>2016-02-24T20:24:11+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/24/slack-notifier</id>
+    <content type="html"><![CDATA[<p>透過 slack 來通知程式上的人任何事情，相當方便。</p>
+
+<!-- more -->
+
+
+<h1>申請 webhook</h1>
+
+<ul>
+<li>到 slack 網站，根據想發送訊息的 channel 申請一個 <a href="https://api.slack.com/incoming-webhooks#putting_it_all_together">Incoming Webhooks</a></li>
+</ul>
+
+
+<blockquote><p>Incoming Webhooks 傳到 slack<br/>
+Outgoing Webhooks slack 傳出去</p></blockquote>
+
+<ul>
+<li>申請好了會給一串 <code>url</code></li>
+</ul>
+
+
+<h1>安裝</h1>
+
+<pre><code class="ruby">gem 'slack-notifier'
+</code></pre>
+
+<h1>設定</h1>
+
+<pre><code class="ruby">def notify_system_manager_by_slack(parameter)
+  notifier = Slack::Notifier.new("WebHookUrl")
+  notifier.username = "[Sidekiq] Error Notifier"
+
+  message  = "Time:"    + "#{Time.now.strftime('%Y-%m-%d %H:%M:%S')}\n"
+  message += "Message:" + "#{parameter}\n"
+
+  setting = {
+    text:  message,
+    color: "danger"
+  }
+
+  notifier.ping "\n", attachments: [setting]
+end
+</code></pre>
+
+<h1>再通知加上其他訊息</h1>
+
+<p>可以在 slack 上面加上顏色，訊息，或圖片等等的<br/>
+都可以在網站上找到 <a href="https://api.slack.com/docs/attachments">Attachments</a></p>
+
+<h1>錯誤通知</h1>
+
+<p>如果希望有錯誤能夠通知你，可以用第三方的工具 + slack 更加方便</p>
+
+<p><a href="https://rollbar.com/">Rollbar</a><br/>
+<a href="https://getsentry.com/welcome/">Sentry</a></p>
+
+<p>gem：<br/>
+<a href="https://github.com/stevenosloan/slack-notifier">slack-notifier</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Sidekiq 處理 Background Job]]></title>
@@ -133,13 +198,14 @@ Sidekiq.configure_client do |config|
 end
 </code></pre>
 
-<p><code>config/sidekiq.yml</code></p>
+<p><code>config/initializers/sidekiq.yml</code></p>
 
 <pre><code class="ruby">:concurrency: 1
 :pidfile: ./tmp/pids/sidekiq.pid
 :logfile: ./log/sidekiq.log
 :queues:
   - default
+  - [myqueue, 2]
 development:
   :concurrency: 1
 staging:
@@ -158,6 +224,8 @@ mount Sidekiq::Web =&gt; '/sidekiq'
 
 <pre><code class="ruby">bundle exec sidekiq
 #會自動去找 sidekiq.yml
+
+bundle exec sidekiq -C ./config/sidekiq.yml
 </code></pre>
 
 <pre><code class="ruby">bundle exec sidekiq -q default -c 1
@@ -793,128 +861,6 @@ exec( cmd ) # Note: this will never be reached because of the line above
 
 <p>參考文件：
 <a href="https://blog.alphacamp.co/2015/12/24/how-to-use-rubocop-in-rails-project/">如何在Rails專案中使用Rubocop統一程式風格？</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Carrierwave 輕鬆做上傳檔案功能]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/22/carrierwave/"/>
-    <updated>2016-01-22T22:12:46+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/22/carrierwave</id>
-    <content type="html"><![CDATA[<p>另一個上傳檔案的 gem ，相當的實用，和 Paperclip 擇一即可。</p>
-
-<!-- more -->
-
-
-<h1>安裝</h1>
-
-<p>Gemfile</p>
-
-<pre><code class="ruby">gem 'carrierwave'
-gem 'rmagick'
-
-# or gem "mini_magick"
-</code></pre>
-
-<ul>
-<li>carrierwave 上傳檔案</li>
-<li>rmagick 處理圖片</li>
-</ul>
-
-
-<blockquote><p>必須有安裝 ImageMagick 才能使用 rmagick</p></blockquote>
-
-<p>有 homebrew 可以直接</p>
-
-<pre><code class="ruby">brew install imagemagick
-</code></pre>
-
-<h1>設定</h1>
-
-<p>先建立資料夾，主要用來存放所有的檔案</p>
-
-<pre><code class="ruby">rails generate uploader file
-</code></pre>
-
-<p>接著在在要存放的 model 新增一筆欄位</p>
-
-<pre><code class="ruby">rails generate migration add_file_to_products
-</code></pre>
-
-<h1>Model</h1>
-
-<pre><code class="ruby">class Product &lt; ActiveRecord::Base
-  mount_uploader :file, FileUploader
-end
-</code></pre>
-
-<p>最後記得再 strong params 加入</p>
-
-<pre><code class="ruby">private
-  def product_params
-    params.require(:product).permit(:file)
-  end
-end
-</code></pre>
-
-<h1>Form</h1>
-
-<pre><code class="ruby">&lt;%= form_for @product do |f| %&gt;
-  &lt;%= f.file_field :file %&gt;
-  &lt;%= f.submit "Submit" %&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<h1>view</h1>
-
-<pre><code class="ruby">&lt;%= image_tag @product.image_url.to_s %&gt;
-</code></pre>
-
-<p>imageurl是預設的helper，to_s是要確定把上傳的路徑轉變為字串，以免發生錯誤。</p>
-
-<h1>RMagick</h1>
-
-<p><code>app/uploaders/file_uploader.rb</code></p>
-
-<p>可以將設定打開，有 RMagick 和 MiniMagick ，都是用來縮圖的。(擇一即可)</p>
-
-<pre><code class="ruby"># Include RMagick or MiniMagick support:
-# include CarrierWave::RMagick
-# include CarrierWave::MiniMagick
-</code></pre>
-
-<p>下面把註解拿掉就可以使用</p>
-
-<pre><code class="ruby">Create different versions of your uploaded files:
-version :thumb do
-  process :resize_to_fit =&gt; [50, 50]
-end
-</code></pre>
-
-<p>之後再 view 中只要指定，就會去抓取縮小後的圖檔</p>
-
-<pre><code class="ruby">&lt;%= image_tag @product.image_url(:thumb).to_s %&gt;
-</code></pre>
-
-<h1>其他</h1>
-
-<p>限制存取大小<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Validate-attachment-file-size">How to: Validate attachment file size</a></p>
-
-<p>存取圖片長寬<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Get-image-dimensions">How to: Get image dimensions</a></p>
-
-<p>存取圖片大小和類型<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Store-the-uploaded-file-size-and-content-type">How to: Store the uploaded file size and content type</a></p>
-
-<p>官方文件：<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a></p>
-
-<p>參考資料：<br/>
-<a href="http://motion-express.com/blog/20140708-ruby-gem-carrierwave">Ruby gem &lsquo;Carrierwave&rsquo; 上傳檔案神器的簡易安裝與使用</a><br/>
-<a href="http://rubyist.marsz.tw/blog/2012-01-10/carrierwave-guides-with-amazon-s3-and-imagemagick-integration/">使用 Carrierwave 處理檔案上傳 (整合 imagemagick 與 Amazon S3)</a> <br/>
-<a href="https://ruby-china.org/topics/4992">gem &lsquo;carrierwave'简易实用介绍</a><br/>
-<a href="http://springok-blog.logdown.com/posts/2015/10/21/railsgem-how-to-use-carrierwave-upload-pictures">Rails如何使用Carrierwave上傳圖片</a></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-23T21:09:37+08:00</updated>
+  <updated>2016-02-24T20:32:12+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,88 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[用 Slack 通知大小事]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/24/slack-notifier/"/>
+    <updated>2016-02-24T20:24:11+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/24/slack-notifier</id>
+    <content type="html"><![CDATA[<p>透過 slack 來通知程式上的人任何事情，相當方便。</p>
+
+<!-- more -->
+
+
+<h1>申請 webhook</h1>
+
+<ul>
+<li>到 slack 網站，根據想發送訊息的 channel 申請一個 <a href="https://api.slack.com/incoming-webhooks#putting_it_all_together">Incoming Webhooks</a></li>
+</ul>
+
+
+<blockquote><p>Incoming Webhooks 傳到 slack<br/>
+Outgoing Webhooks slack 傳出去</p></blockquote>
+
+<ul>
+<li>申請好了會給一串 <code>url</code></li>
+</ul>
+
+
+<h1>安裝</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;slack-notifier&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>設定</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">notify_system_manager_by_slack</span><span class="p">(</span><span class="n">parameter</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">notifier</span> <span class="o">=</span> <span class="no">Slack</span><span class="o">::</span><span class="no">Notifier</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;WebHookUrl&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">notifier</span><span class="o">.</span><span class="n">username</span> <span class="o">=</span> <span class="s2">&quot;[Sidekiq] Error Notifier&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">message</span>  <span class="o">=</span> <span class="s2">&quot;Time:&quot;</span>    <span class="o">+</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="o">.</span><span class="n">strftime</span><span class="p">(</span><span class="s1">&#39;%Y-%m-%d %H:%M:%S&#39;</span><span class="p">)</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="n">message</span> <span class="o">+=</span> <span class="s2">&quot;Message:&quot;</span> <span class="o">+</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">parameter</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">setting</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>    <span class="ss">text</span><span class="p">:</span>  <span class="n">message</span><span class="p">,</span>
+</span><span class='line'>    <span class="ss">color</span><span class="p">:</span> <span class="s2">&quot;danger&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">notifier</span><span class="o">.</span><span class="n">ping</span> <span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">,</span> <span class="ss">attachments</span><span class="p">:</span> <span class="o">[</span><span class="n">setting</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>再通知加上其他訊息</h1>
+
+<p>可以在 slack 上面加上顏色，訊息，或圖片等等的<br/>
+都可以在網站上找到 <a href="https://api.slack.com/docs/attachments">Attachments</a></p>
+
+<h1>錯誤通知</h1>
+
+<p>如果希望有錯誤能夠通知你，可以用第三方的工具 + slack 更加方便</p>
+
+<p><a href="https://rollbar.com/">Rollbar</a><br/>
+<a href="https://getsentry.com/welcome/">Sentry</a></p>
+
+<p>gem：<br/>
+<a href="https://github.com/stevenosloan/slack-notifier">slack-notifier</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Sidekiq 處理 Background Job]]></title>
@@ -172,7 +254,7 @@ redis 的 database 可以共享給不同 server shared</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><code>config/sidekiq.yml</code></p>
+<p><code>config/initializers/sidekiq.yml</code></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -185,11 +267,13 @@ redis 的 database 可以共享給不同 server shared</p>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
 <span class='line-number'>11</span>
+<span class='line-number'>12</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">:concurrency</span><span class="p">:</span> <span class="mi">1</span>
 </span><span class='line'><span class="ss">:pidfile</span><span class="p">:</span> <span class="o">.</span><span class="n">/tmp</span><span class="o">/</span><span class="n">pids</span><span class="o">/</span><span class="n">sidekiq</span><span class="o">.</span><span class="n">pid</span>
 </span><span class='line'><span class="ss">:logfile</span><span class="p">:</span> <span class="o">.</span><span class="n">/log</span><span class="o">/</span><span class="n">sidekiq</span><span class="o">.</span><span class="n">log</span>
 </span><span class='line'><span class="ss">:queues</span><span class="p">:</span>
 </span><span class='line'>  <span class="o">-</span> <span class="n">default</span>
+</span><span class='line'>  <span class="o">-</span> <span class="o">[</span><span class="n">myqueue</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span>
 </span><span class='line'><span class="ss">development</span><span class="p">:</span>
 </span><span class='line'>  <span class="ss">:concurrency</span><span class="p">:</span> <span class="mi">1</span>
 </span><span class='line'><span class="ss">staging</span><span class="p">:</span>
@@ -212,8 +296,12 @@ redis 的 database 可以共享給不同 server shared</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="nb">exec</span> <span class="n">sidekiq</span>
 </span><span class='line'><span class="c1">#會自動去找 sidekiq.yml</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">bundle</span> <span class="nb">exec</span> <span class="n">sidekiq</span> <span class="o">-</span><span class="n">C</span> <span class="o">.</span><span class="n">/config</span><span class="o">/</span><span class="n">sidekiq</span><span class="o">.</span><span class="n">yml</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -2998,167 +3086,6 @@ touch 為 true 時，儲存或刪除關聯物件時，關聯物件的 updated_at
 
 <p>參考文件：
 <a href="https://blog.alphacamp.co/2015/12/24/how-to-use-rubocop-in-rails-project/">如何在Rails專案中使用Rubocop統一程式風格？</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Carrierwave 輕鬆做上傳檔案功能]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/22/carrierwave/"/>
-    <updated>2016-01-22T22:12:46+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/22/carrierwave</id>
-    <content type="html"><![CDATA[<p>另一個上傳檔案的 gem ，相當的實用，和 Paperclip 擇一即可。</p>
-
-<!-- more -->
-
-
-<h1>安裝</h1>
-
-<p>Gemfile</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s1">&#39;carrierwave&#39;</span>
-</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;rmagick&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># or gem &quot;mini_magick&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>carrierwave 上傳檔案</li>
-<li>rmagick 處理圖片</li>
-</ul>
-
-
-<blockquote><p>必須有安裝 ImageMagick 才能使用 rmagick</p></blockquote>
-
-<p>有 homebrew 可以直接</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">imagemagick</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>設定</h1>
-
-<p>先建立資料夾，主要用來存放所有的檔案</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">uploader</span> <span class="n">file</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>接著在在要存放的 model 新增一筆欄位</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">generate</span> <span class="n">migration</span> <span class="n">add_file_to_products</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Model</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Product</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">mount_uploader</span> <span class="ss">:file</span><span class="p">,</span> <span class="no">FileUploader</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>最後記得再 strong params 加入</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">product_params</span>
-</span><span class='line'>    <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:product</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:file</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Form</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;</span><span class="sx">%= form_for @product do |f| %&gt;</span>
-</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">f</span><span class="o">.</span><span class="n">file_field</span> <span class="ss">:file</span> <span class="sx">%&gt;</span>
-</span><span class='line'><span class="sx">  &lt;%= f.submit &quot;Submit&quot; %&gt;</span>
-</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>view</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">image_tag</span> <span class="vi">@product</span><span class="o">.</span><span class="n">image_url</span><span class="o">.</span><span class="n">to_s</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>imageurl是預設的helper，to_s是要確定把上傳的路徑轉變為字串，以免發生錯誤。</p>
-
-<h1>RMagick</h1>
-
-<p><code>app/uploaders/file_uploader.rb</code></p>
-
-<p>可以將設定打開，有 RMagick 和 MiniMagick ，都是用來縮圖的。(擇一即可)</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Include RMagick or MiniMagick support:</span>
-</span><span class='line'><span class="c1"># include CarrierWave::RMagick</span>
-</span><span class='line'><span class="c1"># include CarrierWave::MiniMagick</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>下面把註解拿掉就可以使用</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Create</span> <span class="n">different</span> <span class="n">versions</span> <span class="n">of</span> <span class="n">your</span> <span class="n">uploaded</span> <span class="ss">files</span><span class="p">:</span>
-</span><span class='line'><span class="n">version</span> <span class="ss">:thumb</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">process</span> <span class="ss">:resize_to_fit</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">50</span><span class="p">,</span> <span class="mi">50</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>之後再 view 中只要指定，就會去抓取縮小後的圖檔</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&lt;%=</span> <span class="n">image_tag</span> <span class="vi">@product</span><span class="o">.</span><span class="n">image_url</span><span class="p">(</span><span class="ss">:thumb</span><span class="p">)</span><span class="o">.</span><span class="n">to_s</span> <span class="o">%&gt;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>其他</h1>
-
-<p>限制存取大小<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Validate-attachment-file-size">How to: Validate attachment file size</a></p>
-
-<p>存取圖片長寬<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Get-image-dimensions">How to: Get image dimensions</a></p>
-
-<p>存取圖片大小和類型<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave/wiki/How-to:-Store-the-uploaded-file-size-and-content-type">How to: Store the uploaded file size and content type</a></p>
-
-<p>官方文件：<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a></p>
-
-<p>參考資料：<br/>
-<a href="http://motion-express.com/blog/20140708-ruby-gem-carrierwave">Ruby gem &lsquo;Carrierwave&rsquo; 上傳檔案神器的簡易安裝與使用</a><br/>
-<a href="http://rubyist.marsz.tw/blog/2012-01-10/carrierwave-guides-with-amazon-s3-and-imagemagick-integration/">使用 Carrierwave 處理檔案上傳 (整合 imagemagick 與 Amazon S3)</a> <br/>
-<a href="https://ruby-china.org/topics/4992">gem &lsquo;carrierwave'简易实用介绍</a><br/>
-<a href="http://springok-blog.logdown.com/posts/2015/10/21/railsgem-how-to-use-carrierwave-upload-pictures">Rails如何使用Carrierwave上傳圖片</a></p>
 ]]></content>
   </entry>
   
