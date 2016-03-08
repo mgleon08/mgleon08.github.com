@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-24T22:16:23+08:00</updated>
+  <updated>2016-03-08T11:40:38+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -190,12 +190,12 @@ Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, '/spec/fixtures/fil
 
 <p>以上兩個擇一，這樣就可以在 <code>create</code> 將 <code>@file</code> 帶入到 params</p>
 
-<p>官方文件：
-<a href="http://www.rubydoc.info/github/brynary/rack-test/Rack/Test/UploadedFile">Class: Rack::Test::UploadedFile</a>
+<p>官方文件：<br/>
+<a href="http://www.rubydoc.info/github/brynary/rack-test/Rack/Test/UploadedFile">Class: Rack::Test::UploadedFile</a><br/>
 <a href="http://apidock.com/rails/ActionDispatch/TestProcess/fixture_file_upload">fixture_file_upload</a></p>
 
-<p>參考文件：
-<a href="http://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails">How do I test a file upload in rails?</a>
+<p>參考文件：<br/>
+<a href="http://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails">How do I test a file upload in rails?</a><br/>
 <a href="https://ruby-china.org/topics/21057">[求助] 文件上传的测试代码怎么写</a></p>
 ]]></content>
   </entry>
@@ -223,6 +223,35 @@ Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, '/spec/fixtures/fil
       #errors[:picture] &lt;&lt; "should be less than 5MB"
     end
   end
+end
+</code></pre>
+
+<h1>Performing Custom Validations</h1>
+
+<p>也可以將 <code>validator</code> 拉出來，比較乾淨。</p>
+
+<p><code>app/validators/photo_size_validator.rb</code></p>
+
+<pre><code class="ruby">class PhotoSizeValidator &lt; ActiveModel::Validator
+  def validate record
+    unless validated? record
+      record.errors[:file_size] &lt;&lt; 'must be less than 1 MB'
+    end
+  end
+
+  private
+
+  def validated? record
+    record.file.size &lt; 1.megabytes
+  end
+end
+</code></pre>
+
+<p><code>models/photo.rb</code></p>
+
+<pre><code class="ruby">class Material::Banner &lt; ActiveRecord::Base
+  include ActiveModel::Validations
+  validates_with PhotoSizeValidator
 end
 </code></pre>
 

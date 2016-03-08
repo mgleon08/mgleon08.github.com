@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rspec | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rspec/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-02-24T22:16:23+08:00</updated>
+  <updated>2016-03-08T11:40:38+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -47,22 +47,22 @@ Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, '/spec/fixtures/fil
 
 <p>以上兩個擇一，這樣就可以在 <code>create</code> 將 <code>@file</code> 帶入到 params</p>
 
-<p>官方文件：
-<a href="http://www.rubydoc.info/github/brynary/rack-test/Rack/Test/UploadedFile">Class: Rack::Test::UploadedFile</a>
+<p>官方文件：<br/>
+<a href="http://www.rubydoc.info/github/brynary/rack-test/Rack/Test/UploadedFile">Class: Rack::Test::UploadedFile</a><br/>
 <a href="http://apidock.com/rails/ActionDispatch/TestProcess/fixture_file_upload">fixture_file_upload</a></p>
 
-<p>參考文件：
-<a href="http://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails">How do I test a file upload in rails?</a>
+<p>參考文件：<br/>
+<a href="http://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails">How do I test a file upload in rails?</a><br/>
 <a href="https://ruby-china.org/topics/21057">[求助] 文件上传的测试代码怎么写</a></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[用 Rspec + Factory Girl 寫測試]]></title>
+    <title type="html"><![CDATA[用 Rspec + Factory Girl + CircleCi 寫測試]]></title>
     <link href="http://mgleon08.github.com/blog/2016/01/29/rspec-plus-factory-girl/"/>
     <updated>2016-01-29T20:36:46+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/01/29/rspec-plus-factory-girl</id>
-    <content type="html"><![CDATA[<p>程式寫久之後，就會發現測試的重要性!<br/>
+    <content type="html"><![CDATA[<p>程式寫久之後，就會發現測試的重要性!
 因此來介紹 rails 中，比內建測試還好用的 rspec 搭配 factory_girl</p>
 
 <!-- more -->
@@ -71,9 +71,9 @@ Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, '/spec/fixtures/fil
 <h1>測試種類</h1>
 
 <ul>
-<li><p>單元測試(Unit test)<br/>
+<li><p>單元測試(Unit test)
 針對每個程式各個最小單位進行測試，像是在 controller 就單單只測試 controller 裡面的 action，而裡面產生的 model,method，都用假的方式來取代，已確保有錯誤時，可以很快知道是哪邊有問題 。</p></li>
-<li><p>整合測試(Integration test)<br/>
+<li><p>整合測試(Integration test)
 主要是用來測試，每個 class 的互動，像是 controller 裡面會 call 到 model ，也會 call 到 view ，並測試回傳的值是否正確。</p></li>
 </ul>
 
@@ -92,7 +92,7 @@ Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, '/spec/fixtures/fil
 
 <ul>
 <li>⼀個 rb 檔案配⼀個同名的 _spec.rb 檔案</li>
-<li>guard 等⼯具容易設定<br/>
+<li>guard 等⼯具容易設定
 <a href="https://github.com/guard/guard-rspec">guard-rspec</a> 程式⼀修改完存檔，⾃動跑對應的測試（bundle後，輸入 guard init repec 初始化，打guard（bundle exec guard 真正執行））</li>
 <li>editor 有⽀援快速鍵</li>
 <li>describe “#name” 是 instance method</li>
@@ -215,6 +215,18 @@ end
 
 <pre><code class="ruby">describe Material::Banner, type: :model do
 end
+
+#驗證
+
+it 'fails validation with no wrong video type' do
+  video = Video.new(file: file)
+  video.valid?
+  expect(video.errors[:file].first).to include('allowed types: mp4, flv')
+end
+
+or
+
+expect(video).to be_invalid
 </code></pre>
 
 <h3>request</h3>
@@ -241,7 +253,7 @@ end
 
 <p>request 通常直接從網址進行 Get 或 Post ，接著判斷傳回來的值是否正確。</p>
 
-<pre><code class="ruby">before do  
+<pre><code class="ruby">before do
     @user = User.new(name: "hello")
 end
 
@@ -273,10 +285,61 @@ end
 
 <h3>Stub</h3>
 
+<p><code>Stub:</code>
+For replacing a method with code that returns a specified result.
+用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。</p>
+
+<pre><code class="ruby">describe Zombie do
+  let(:zombie) { Zombie.create }
+
+  context "#decapitate" do
+    it "sets status to dead again" do
+      zombie.weapon.stub(:slice)  #模擬 slice 阻斷掉他
+      zombie.decapitate
+      zombie.status.should == "dead again"
+    end
+  end
+end
+</code></pre>
+
+<h3>mock</h3>
+
+<p><code>Mock:</code>
+A stub with an expectations that the method gets called.
+不只忽略這個 method ，並且期望被呼叫到</p>
+
+<pre><code class="ruby"># simulate a not found resource
+context "when not found" do
+  before { allow(Resource).to receive(:where).with(created_from: params[:id]).and_return(false) }
+  it { is_expected.to respond_with 404 }
+end
+</code></pre>
+
+<pre><code class="ruby">describe Zombie do
+  let(:zombie) { Zombie.create }
+
+  context "#decapitate" do
+    it "calls weapon.slice" do
+      zombie.weapon.should_receive(:slice)
+      zombie.decapitate
+    end
+  end
+end
+</code></pre>
+
 <pre><code class="ruby">allow_any_instance_of(User).to receive(:follow).and_return(false)
 </code></pre>
 
-<p>用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。</p>
+<p><a href="http://betterspecs.org/#mock">mock</a></p>
+
+<h3>let &amp; subject</h3>
+
+<ul>
+<li><a href="http://betterspecs.org/#subject">subject</a></li>
+<li><a href="http://betterspecs.org/#let">let</a></li>
+<li><a href="https://ruby-china.org/topics/9271">RSpec 中 let 和 subject 的区别是什么？</a></li>
+</ul>
+
 
 <h3>focus</h3>
 
@@ -290,6 +353,14 @@ end
 
 <pre><code class="ruby">rspec --tag focus
 </code></pre>
+
+<h3>matchers</h3>
+
+<ul>
+<li><a href="https://www.relishapp.com/rspec/rspec-expectations/v/2-2/docs/matchers">2-2 version matchers</a></li>
+<li><a href="http://www.relishapp.com/rspec/rspec-expectations/v/3-4/docs">3-4 version</a></li>
+</ul>
+
 
 <h1>factory_girl</h1>
 
@@ -319,8 +390,8 @@ end
     # 也可以設定多種條件
     trait :child do
       age 6
-      #after(:create) {|user| user.add_role(:admin) } 
-      #after(:build)  {|user| user.add_role(:admin) } 
+      #after(:create) {|user| user.add_role(:admin) }
+      #after(:build)  {|user| user.add_role(:admin) }
       # 也可以設定 create 之後的設定
     end
   end
@@ -329,7 +400,7 @@ end
 
 <p>這樣在 spec 裡面就可以直接建立假資料</p>
 
-<pre><code class="ruby">before do  
+<pre><code class="ruby">before do
     @user  = FactoryGirl.create(:user) #FactoryGirl 可省略
     @child = create(:user, :child) #就只替換掉 age
 end
@@ -358,6 +429,16 @@ end
 <li>還沒開始實作 (特別是採⽤ TDD 流程)</li>
 </ul>
 
+
+<h2>其他設定</h2>
+
+<p><code>rails g model</code> 時，一併產生 factory_girl 的檔案在 <code>spc/factories</code></p>
+
+<pre><code class="ruby">config.generators do |g|
+  g.test_framework :rspec, :fixture =&gt; true, :views =&gt; false, :fixture_replacement =&gt; :factory_girl
+  g.fixture_replacement :factory_girl, :dir =&gt; "spec/factories"
+end
+</code></pre>
 
 <h1>Capybara</h1>
 
@@ -417,7 +498,7 @@ production:
   database: production_db
 </code></pre>
 
-<p>接著到 <a href="https://circleci.com">circleci.com</a> 和 github 帳號做連結。<br/>
+<p>接著到 <a href="https://circleci.com">circleci.com</a> 和 github 帳號做連結。
 接著將要跑的 project 加進去，之後只要 push 到 github 就會自動跑了！</p>
 
 <h1>大師引言</h1>
@@ -432,25 +513,29 @@ controller偶爾會寫
 feature 比較像是QA在寫的
 </code></pre>
 
-<p>官方文件：<br/>
-<a href="http://betterspecs.org/">Better Specs</a><br/>
-<a href="https://www.relishapp.com/">Relish</a></p>
+<p>官方文件：
+<a href="http://betterspecs.org/">Better Specs</a>
+<a href="https://www.relishapp.com/">Relish</a>
+<a href="http://matchers.shoulda.io/">shoulda</a></p>
 
-<p>Gem：<br/>
-<a href="https://github.com/rspec/rspec-rails">rspec-rails</a><br/>
-<a href="https://github.com/thoughtbot/factory_girl_rails">factory_girl_rails</a>  <br/>
-<a href="https://github.com/guard/guard-rspec">guard-rspec</a><br/>
-<a href="https://github.com/jnicklas/capybara">capybara</a></p>
+<p>Gem：
+<a href="https://github.com/rspec/rspec-rails">rspec-rails</a>
+<a href="https://github.com/thoughtbot/factory_girl_rails">factory_girl_rails</a>
+<a href="https://github.com/guard/guard-rspec">guard-rspec</a>
+<a href="https://github.com/jnicklas/capybara">capybara</a>
+<a href="https://github.com/thoughtbot/shoulda-matchers">shoulda-matchers</a></p>
 
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/testing.html">自動化測試</a><br/>
-<a href="http://motion-express.com/trainings/rspec-rails-1">RSpec-Rails (基礎篇)</a><br/>
-<a href="http://motion-express.com/blog/20150320-custom-helpers-in-rspec">RSpec-Rails當中自訂methods及helpers</a><br/>
-<a href="http://motion-express.com/blog/20150327-rspec-rails-testing-module">RSpec-Rails 針對module進行unit test</a><br/>
-<a href="http://www.slideshare.net/ihower/rspec-7394497">RSpec 讓你愛上寫測試</a><br/>
-<a href="https://blog.alphacamp.co/2015/03/02/tdd-kata/">程式設計師升級必練內功：TDD Kata</a><br/>
-<a href="https://codility.com/programmers/lessons/">codility 練習</a><br/>
-<a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a></p>
+<p>參考文件：
+<a href="https://ihower.tw/rails4/testing.html">自動化測試</a>
+<a href="http://motion-express.com/trainings/rspec-rails-1">RSpec-Rails (基礎篇)</a>
+<a href="http://motion-express.com/blog/20150320-custom-helpers-in-rspec">RSpec-Rails當中自訂methods及helpers</a>
+<a href="http://motion-express.com/blog/20150327-rspec-rails-testing-module">RSpec-Rails 針對module進行unit test</a>
+<a href="http://www.slideshare.net/ihower/rspec-7394497">RSpec 讓你愛上寫測試</a>
+<a href="https://blog.alphacamp.co/2015/03/02/tdd-kata/">程式設計師升級必練內功：TDD Kata</a>
+<a href="https://codility.com/programmers/lessons/">codility 練習</a>
+<a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a>
+<a href="https://ruby-china.org/topics/10977">对 stub 和 mock 的理解</a>
+<a href="https://ruby-china.org/topics/9271">RSpec 中 let 和 subject 的区别是什么？</a></p>
 ]]></content>
   </entry>
   
