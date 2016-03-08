@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "用 carrierwave + FFMPEG 影片轉檔"
+title: "用 carrierwave + FFMPEG 影片轉檔 (Mediainfo檔案資訊)"
 date: 2016-01-29 20:26:02 +0800
 comments: true
 categories: gem rails
@@ -96,6 +96,20 @@ ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v 
 
 ```ruby
 ffmpeg -i #{input} -ss 00:00:05 -vframes 1 #{thumbnil}
+```
+
+#Mediainfo
+
+mediainfo 也是可以用來知道檔案的資訊，也蠻好用的
+
+```ruby
+`mediainfo '--Inform=Video;%Width%' #{input}`
+```
+
+看有什麼參數可用
+
+```ruby
+mediainfo --Info-Parameters
 ```
 
 #Calling shell commands from Ruby

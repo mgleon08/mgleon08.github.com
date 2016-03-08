@@ -81,6 +81,36 @@ x #ignore whitespace in regex
 o #perform #{...} substitutions only once
 ```
 
+#Sed 工具
+
+[sed 工具](http://dywang.csie.cyut.edu.tw/dywang/linuxProgram/node36.html)
+
+```
+sed (stream editor) 可以分析 Standard Input (STDIN) 的資料，進行取代、刪除、新增、擷取特定行等處理後，再輸出到 standrad out (STDOUT)。
+sed 指令
+[root@linux ~]# sed [-nefr] [動作]
+
+選項：
+-n  ：使用安靜 (silent) 模式。在一般 sed 的用法中，所有來自 STDIN 
+      的資料一般都會被列出到螢幕上。但如果加上 -n 參數後，則只有經過
+      sed 特殊處理的那一行(或者動作)才會被列出來。
+-e  ：直接在指令列模式上進行 sed 的動作編輯；
+-f  ：-f filename 可以執行 filename 內的 sed 動作；
+-r  ：sed 的動作支援的是延伸型正規表示法的語法。(預設是基礎正規表示法語法)
+-i  ：直接修改讀取的檔案內容，而不是由螢幕輸出。
+
+動作說明：  [n1[,n2]]function
+n1, n2 ：選擇進行動作的行數，例如，『10,20[動作行為] 』
+
+function：
+a   ：新增， a 的後面可以接字串，這些字串會在目前的下一行出現。
+c   ：取代， c 的後面可以接字串，這些字串可以取代 n1,n2 之間的行。
+d   ：刪除， d 後面通常不接任何字串；
+i   ：插入， i 的後面可以接字串，這些字串會在目前的上一行出現；
+p   ：列印，將某個選擇的資料印出。通常 p 會與參數 sed -n 一起運作。
+s   ：取代，s 的動作可以搭配正規表示法。例如 1,20s/old/new/g 。
+```
+
 參考文件：  
 [正規表示式 Regular Expression](https://atedev.wordpress.com/2007/11/23/%E6%AD%A3%E8%A6%8F%E8%A1%A8%E7%A4%BA%E5%BC%8F-regular-expression/)
 

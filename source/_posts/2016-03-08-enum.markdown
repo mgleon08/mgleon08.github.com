@@ -1,0 +1,47 @@
+---
+layout: post
+title: "用 Enum 做選項"
+date: 2016-03-08 22:39:02 +0800
+comments: true
+categories: rails
+---
+
+可將多的選項的欄位，用 interger 來儲存，在列舉出來。  
+好處是之後要更改欄位名稱，就可以直接更改相對應的值，就不用特別去資料庫更改。
+
+<!-- more -->
+
+###設定
+注意要 enum 的欄位必須是 `integer`
+
+```
+t.integer gender
+```
+model
+
+```ruby
+enum gender:[:male, :female]
+```
+
+```ruby
+User.genders
+#=>{"male"=>0, "female"=>1}
+
+User.keys
+#=>["male", "female"]
+
+user = User.first
+user.update(gender: 0)
+user.gender
+#=>"male"
+
+user.male?
+#=> true
+user.female?
+#=> false
+```
+官方文件：  
+[api - Enum](http://api.rubyonrails.org/v4.1/classes/ActiveRecord/Enum.html)  
+
+參考文件：  
+[Rails 4.1 的新特性（译）](https://ruby-china.org/topics/18504)

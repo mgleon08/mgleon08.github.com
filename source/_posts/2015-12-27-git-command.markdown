@@ -224,6 +224,7 @@ alias gpl='git pull'
 alias gplo='git pull origin'
 alias gm='git merge'
 alias gmo='git merge origin'
+alias gd='git diff'
 
 #git add
 alias ga='git add'
