@@ -207,6 +207,7 @@ exec   = 執行一條指令
 * `.gitkeep` 空目錄不會被 commit，必要時在目錄裡放 `.gitkeep`。
 * `vi .gitignore` 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。
 * [.gitignore ⼤集合](https://github.com/github/gitignore)
+* [移除 github 上敏感檔案](https://help.github.com/articles/remove-sensitive-data/)
 
 #alias
 自己設定的一些 alias
@@ -227,7 +228,7 @@ alias gmo='git merge origin'
 #git add
 alias ga='git add'
 alias gaa='git add --all'
-alias gapa='git add --patch'
+alias gap='git add --patch'
 
 #branch
 alias gb='git branch'
@@ -266,6 +267,7 @@ alias gstp='git stash pop'
 alias gsts='git stash show --text'
 
 #git log
+alias gl='git log'
 alias glg='git log --stat --color'
 alias glgp='git log --stat --color -p'
 alias glgg='git log --graph --color'

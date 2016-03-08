@@ -59,10 +59,22 @@ a.hello
 require 'fileutils'
 ```
 
-也可以載入自己設定好的檔案，不過記得路徑的問題，可以使用 `require_relative `
+也可以載入自己設定好的檔案，通常設定在 `/lib/test.rb`  
+
+```ruby
+require 'test'
+```
+
+不過記得路徑的問題，可以使用 `require_relative `
 
 ```ruby
 require_relative 'test'
+```
+
+如果是放在資料夾底下的話 `/lib/file/test.rb` 
+
+```ruby
+require 'file/test'
 ```
 
 官方文件：  
@@ -70,4 +82,5 @@ require_relative 'test'
 
 參考文件：  
 [Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」](http://blog.eddie.com.tw/2015/03/24/class-and-module/)   
-[require、require_relative是什麼意思？差在哪？](http://motion-express.com/blog/20150407-ruby-require-require-relative-load)
+[require、require_relative是什麼意思？差在哪？](http://motion-express.com/blog/20150407-ruby-require-require-relative-load)  
+[環境設定與Bundle](https://ihower.tw/rails4/environments-and-bundler.html)

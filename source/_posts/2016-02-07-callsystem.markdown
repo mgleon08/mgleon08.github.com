@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Call System from Ruby"
+title: "用 ruby 來 Calling shell commands"
 date: 2016-02-07 14:31:31 +0800
 comments: true
 categories: ruby
@@ -10,11 +10,7 @@ categories: ruby
 
 <!-- more -->
 
-#Calling shell commands from Ruby
-
-回傳的 
-
-1. Kernel#\`, commonly called backticks – `cmd` 
+* Kernel#\`, commonly called backticks – `cmd` 
 
 Returns the result of the shell command.
 
@@ -25,7 +21,7 @@ value.class
 #=> String 回傳結果
 ```
 
-2. Built-in syntax, `%x( cmd )`  
+* Built-in syntax, `%x( cmd )`  
 
 Returns the result of the shell command, just like the backticks.
 
@@ -33,7 +29,8 @@ Returns the result of the shell command, just like the backticks.
 value = %x( echo 'hi' )
 value = %x[ #{cmd} ]
 ```
-3. Kernel# `system`
+
+* Kernel# `system`
 
 Return: true if the command was found and ran successfully, false otherwise
 
@@ -43,7 +40,8 @@ wasGood = system( cmd )
 wasGood.class
 => TrueClass 回傳有沒有成功
 ```
-4. Kernel#exec
+
+* Kernel#exec
 
 Return: none, the current process is replaced and never continues
 
@@ -51,7 +49,6 @@ Return: none, the current process is replaced and never continues
 exec( "echo 'hi'" )
 exec( cmd ) # Note: this will never be reached because of the line above
 ```
-
 
 官方文件：  
 [Kernel](http://ruby-doc.org/core-2.3.0/Kernel.html)  

@@ -13,23 +13,31 @@ categories: command_line remote
 
 #MySQL
 
-`mysql -u root -p （輸入後會進入 mysql 的 console ）`
+```ruby
+mysql -u root -p （輸入後會進入 mysql 的 console ）
+```
 
 mysql 指令參數
 
-`-h` <- mysql server 位置 , 若沒有指定, 預設就是 localhost
-`-u` <- mysql user 帳號
+`-h` <- mysql server 位置 , 若沒有指定, 預設就是 localhost  
+`-u` <- mysql user 帳號  
 `-p` <- 輸入 mysql user 密碼
 
 若先前已經設定密碼
 
-`mysqladmin -h mysql_server -u root -p password 新密碼`
+```ruby
+mysqladmin -h mysql_server -u root -p password 新密碼
+```
 
 若是還沒有設定
 
-`mysqladmin -h mysql_server -u root password 新密碼`
+```ruby
+mysqladmin -h mysql_server -u root password 新密碼
+```
 
-`show databases`
+```ruby
+show databases
+```
 可以看目前所有的資料庫
 
 #看遠端log?

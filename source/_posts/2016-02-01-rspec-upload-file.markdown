@@ -37,10 +37,10 @@ Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, '/spec/fixtures/fil
 以上兩個擇一，這樣就可以在 `create` 將 `@file` 帶入到 params
 
 
-官方文件：
-[Class: Rack::Test::UploadedFile](http://www.rubydoc.info/github/brynary/rack-test/Rack/Test/UploadedFile)
+官方文件：  
+[Class: Rack::Test::UploadedFile](http://www.rubydoc.info/github/brynary/rack-test/Rack/Test/UploadedFile)  
 [fixture_file_upload](http://apidock.com/rails/ActionDispatch/TestProcess/fixture_file_upload)
 
-參考文件：
-[How do I test a file upload in rails?](http://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails)
+參考文件：  
+[How do I test a file upload in rails?](http://stackoverflow.com/questions/1178587/how-do-i-test-a-file-upload-in-rails)  
 [[求助] 文件上传的测试代码怎么写](https://ruby-china.org/topics/21057)

@@ -29,6 +29,9 @@ hash.map {|k, v| v }
 # => ["abc", 18]
 ```
 
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[map/collect](http://apidock.com/ruby/Array/map)  
+
 #Select
 
 對物件，挑出指定欄位的值，並回傳 `ActiveRecord::Relation`
@@ -83,6 +86,8 @@ my_hash.keep("Joe", "Jim")
 # => {"Joe" => "male", "Jim" => "male"}
 ```
 
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[select](http://apidock.com/rails/ActiveRecord/QueryMethods/select)  
 
 
 #Pluck
@@ -119,9 +124,12 @@ puts Benchmark.measure {User.select(:id).to_a}
 
 `pluck` 和 `select ` 則是只將需要的欄位選出來，但 `select` 回傳的是 `ActiveRecord::Relation` 必須再透過 map 轉成 `array`
 
-參考文件：
-[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)
-[Getting to Know Pluck and Select](http://gavinmiller.io/2013/getting-to-know-pluck-and-select/)
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[pluck](http://apidock.com/rails/ActiveRecord/Calculations/pluck)  
+
+參考文件：  
+[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
+[Getting to Know Pluck and Select](http://gavinmiller.io/2013/getting-to-know-pluck-and-select/)  
 [Pluck vs. map and select](http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html)
 
 ```ruby
@@ -163,6 +171,8 @@ mean = total / users.size
 good_users = users.reject { |u| u.karma < mean }
 ```
 
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[reject](http://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-reject)  
 #inject
 
 inject 方法可以先給予初始值(數字，hash，array 都可以)，之後給予指定的元素，不斷的迭代。
@@ -214,7 +224,8 @@ Hash[User.all.map {|user| [user.name, user.id ]}]
 User.all.map {|user| [user.name, user.id ]}.to_h
 # => {"A"=>1, "B"=>2, "C"=>3}
 ```
-
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[inject](http://apidock.com/ruby/Enumerable/inject)  
 #each_with_object
 
 跟 inject 非常類似，，主要差別在於你不用回傳運算結果，還有參數是顛倒過來的。
@@ -224,6 +235,9 @@ User.all.each_with_object({}) do | user, hash |
 	hash[user.name] = user.id
 end
 ```
+
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[each_with_object](http://apidock.com/rails/Enumerable/each_with_object)  
 #merge
 可以將另一個 hash 合併在一起
 
@@ -243,7 +257,8 @@ h1
 ```ruby
 Hash.new(0).merge(name: "abc", phone: 09xxxxx)
 ```
-
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[merge](http://ruby-doc.org/core-1.9.3/Hash.html#method-i-merge)  
 #each_with_index
 
 用來加上索引。
@@ -268,7 +283,8 @@ hash
 end
 Cool beans!  # => ["Cool", "chicken!", "beans!", "beef!"]
 ```
-
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[each_with_index](http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index)  
 #sum
 可以算出集合的加總
 
@@ -284,6 +300,9 @@ payments.sum(&:price)
 ['foo', 'bar'].sum # => "foobar"
 [[1, 2], [3, 1, 5]].sum #=> [1, 2, 3, 1, 5]
 ```
+
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)   
+[sum](http://apidock.com/rails/Enumerable/sum)  
 #group_by
 
 可以依照指定的欄位分組出來。
@@ -308,6 +327,9 @@ names.group_by{|name| name.length}
 # => {5=>["James"], 3=>["Bob", "Joe", "Jim"], 4=>["Mark"]}
 ```
 
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[group_by](http://apidock.com/rails/Enumerable/group_by)  
+
 #grep
 
 根據指定的條件塞選
@@ -317,7 +339,6 @@ names = ["James", "Bob", "Joe", "Mark", "Jim"]
 names.grep(/J/)
 #=> ["James", "Joe", "Jim"]
 ```
-
 
 #index_by
 
@@ -330,10 +351,27 @@ User.index_by(&:phone)
 
 鍵值通常必須是唯一的，若不是唯一的話，會以最後出現的元素做為判斷值。
 
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[index_by](http://apidock.com/rails/v4.2.1/Enumerable/index_by)  
+#all?
+
+`所有` 條件符合，就回傳true
+
+```ruby
+%w{ant bear cat}.all? {|word| word.length >= 3}
+#=> true
+%w{ant bear cat}.all? {|word| word.length >= 4}
+#=> false
+[ nil, true, 99 ].all?
+#=> false
+#=> 只要有一個是 nil 或 false 就是 false
+```
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[all?](http://apidock.com/ruby/Enumerable/all%3F)  
 
 #any?
 
-只要有任何條件符合，就回傳true
+只要有 `任何` 條件符合，就回傳true
 
 ```ruby
 %w{ant bear cat}.any? {|word| word.length >= 3}
@@ -341,12 +379,101 @@ User.index_by(&:phone)
 %w{ant bear cat}.any? {|word| word.length >= 4}
 #=> true
 [ nil, true, 99 ].any?
+#=> true
 #=> 只要有一個不是 nil 和 false 就是 true
 ```
-主要都是集合的方法
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[any?](http://apidock.com/ruby/Enumerable/any%3F)  
 
 可參考之前的
 [.nil? .empty? .blank? .present? 傻傻分不清楚？](http://mgleon08.github.io/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/)
+
+#chunk
+
+可以將數列分區塊，去判斷。
+
+```ruby
+[3,1,4,1,5,9,2,6,5,3,5].chunk{|n| n.even?}.each {|even, ary|
+  p [even, ary]
+}
+
+#=> [false, [3, 1]]
+#   [true, [4]]
+#   [false, [1, 5, 9]]
+#   [true, [2, 6]]
+#   [false, [5, 3, 5]]
+
+[3, 1, 4, 1, 5, 9, 2, 6, 5, 3, 5].chunk { |n| n.even? }.to_a
+#=> [[false, [3, 1]], [true, [4]], [false, [1, 5, 9]], [true, [2, 6]], [false, [5, 3, 5]]]
+```
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[chunk](http://apidock.com/ruby/Enumerable/chunk)  
+
+#partition
+
+將元素劃分為兩個
+
+```ruby
+(1..6).partition { |v| v.even? } 
+#=> [[2, 4, 6], [1, 3, 5]]
+```
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[partition](http://apidock.com/ruby/Enumerable/partition)
+
+#slice
+
+取出相對應的值
+
+Array
+
+```ruby
+a = ['a','b','c']
+
+a.slice(2)
+#=> 'c'
+a.slice!(2)
+#=> 'c'
+a
+#=> ['a', 'b']
+```
+
+Hash
+
+```ruby
+a = {a:1, b:2, c:3}
+
+a.slice(:b)
+#=> {:b=>2}
+a.slice!(:b)
+#=> {:a=>1, :c=>3}
+a
+#=> {:b=>2}
+```
+
+###Array 和 Hash 在 slice! 有些不一樣的地方
+
+`Array`： 是將指定的值拿掉。   
+`Hash` ： 是將指定的值留下來。
+
+#zip
+
+每個元素和對應的元素合在一起
+
+```ruby
+a = [ 4, 5, 6 ]
+b = [ 7, 8, 9 ]
+
+[1, 2, 3].zip(a, b)      
+#=> [[1, 4, 7], [2, 5, 8], [3, 6, 9]]
+
+[1, 2].zip(a, b)         
+#=> [[1, 4, 7], [2, 5, 8]]
+
+a.zip([1, 2], [8])       
+#=> [[4, 1, 8], [5, 2, nil], [6, nil, nil]]
+```
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[partition](http://apidock.com/ruby/Enumerable/partition)
 
 #&:
 
@@ -366,30 +493,32 @@ User.all.map(&:name)
 [benchmark-ips](https://github.com/evanphx/benchmark-ips)
 
 
-官方文件：
-[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)
-[map/collect](http://apidock.com/ruby/Array/map)
-[reject](http://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-reject)
-[inject](http://apidock.com/ruby/Enumerable/inject)
-[select](http://apidock.com/rails/ActiveRecord/QueryMethods/select)
-[pluck](http://apidock.com/rails/ActiveRecord/Calculations/pluck)
-[reduce](http://apidock.com/ruby/Enumerable/reduce)
-[each_with_object](http://apidock.com/rails/Enumerable/each_with_object)
-[each_with_index](http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index)
-[merge](http://ruby-doc.org/core-1.9.3/Hash.html#method-i-merge)
-[sum](http://apidock.com/rails/Enumerable/sum)
-[group_by](http://apidock.com/rails/Enumerable/group_by)
-[index_by](http://apidock.com/rails/v4.2.1/Enumerable/index_by)
-[many?](http://apidock.com/rails/Enumerable/many%3F)
-[any?](http://apidock.com/ruby/Enumerable/any%3F)
+官方文件：  
+[Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
+[map/collect](http://apidock.com/ruby/Array/map)  
+[reject](http://ruby-doc.org/core-2.2.3/Enumerable.html#method-i-reject)  
+[inject](http://apidock.com/ruby/Enumerable/inject)  
+[select](http://apidock.com/rails/ActiveRecord/QueryMethods/select)  
+[pluck](http://apidock.com/rails/ActiveRecord/Calculations/pluck)  
+[reduce](http://apidock.com/ruby/Enumerable/reduce)  
+[each_with_object](http://apidock.com/rails/Enumerable/each_with_object)  
+[each_with_index](http://apidock.com/ruby/v1_9_3_392/Enumerable/each_with_index)  
+[merge](http://ruby-doc.org/core-1.9.3/Hash.html#method-i-merge)  
+[sum](http://apidock.com/rails/Enumerable/sum)  
+[group_by](http://apidock.com/rails/Enumerable/group_by)  
+[index_by](http://apidock.com/rails/v4.2.1/Enumerable/index_by)  
+[many?](http://apidock.com/rails/Enumerable/many%3F)  
+[all?](http://apidock.com/ruby/Enumerable/all%3F)  
+[any?](http://apidock.com/ruby/Enumerable/any%3F)  
+[chunk](http://apidock.com/ruby/Enumerable/chunk) 
 
-參考文件：
-[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)
-[Getting to Know Pluck and Select](http://gavinmiller.io/2013/getting-to-know-pluck-and-select/)
-[Pluck vs. map and select](http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html)
-[Ruby Explained: Map, Select, and Other Enumerable Methods](http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods)
-[each_with_object vs inject](https://gist.github.com/cupakromer/3371003)
-[ActiveSupport - 工具函式庫](https://ihower.tw/rails4/activesupport.html)
+參考文件：  
+[Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
+[Getting to Know Pluck and Select](http://gavinmiller.io/2013/getting-to-know-pluck-and-select/)  
+[Pluck vs. map and select](http://ohm.sh/2014/02/09/pluck-vs-map-and-select.html)  
+[Ruby Explained: Map, Select, and Other Enumerable Methods](http://www.eriktrautman.com/posts/ruby-explained-map-select-and-other-enumerable-methods)  
+[each_with_object vs inject](https://gist.github.com/cupakromer/3371003)  
+[ActiveSupport - 工具函式庫](https://ihower.tw/rails4/activesupport.html)  
 [Ruby 用 inject 和 each_with_object 來組 hash
-](http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash)
+](http://motion-express.com/blog/20141027-ruby-inject-each-with-object-hash)  
 [What does map(&:name) mean in Ruby?](http://stackoverflow.com/questions/1217088/what-does-mapname-mean-in-ruby)

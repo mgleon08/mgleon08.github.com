@@ -80,5 +80,9 @@ Host [自訂名稱]
 接著就可以直接 `ssh [自訂名稱]` 就會登入 deploy 的帳號了。
 
 
-權限指令參考：
+#SSH agent forwarding  
+[Using SSH agent forwarding](https://developer.github.com/guides/using-ssh-agent-forwarding/)  
+[SSH agent forwarding 的應用](https://ihower.tw/blog/archives/7837)
+
+權限指令參考：  
 [鳥哥的私房菜](http://linux.vbird.org/linux_basic/0210filepermission.php#chown)

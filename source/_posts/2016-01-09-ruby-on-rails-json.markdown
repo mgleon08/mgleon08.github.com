@@ -26,6 +26,25 @@ JSON 的優點如下:
 參考文件：
 [你不可不知的 JSON 基本介紹](https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/)
 
+#轉 json 格式
+rails 當中有很方便的方法就可以轉 `json`  
+
+`to_json` 轉 `string` 格式  
+Returns a JSON string representing the hash.   
+Without any options, the returned JSON string will include all the hash keys
+
+`as_json` 轉 `ruby json` 格式   
+is used to create the structure of the JSON as a Hash, and the rendering of that hash into a JSON string is left up to ActiveSupport::json.encode
+
+大致上就是盡量用 `as_json`， model 中要覆蓋掉 json 的話也要用 `as_json`
+
+官方文件：  
+[as_json](http://api.rubyonrails.org/classes/ActiveModel/Serializers/JSON.html#method-i-as_json)  
+[to_json](http://apidock.com/rails/Hash/to_json)
+
+參考文件：  
+[Rails to_json or as_json?](http://jonathanjulian.com/2010/04/rails-to_json-or-as_json/)  
+
 #Rails 如何傳遞JSON
 
 ###respond_to
@@ -71,8 +90,9 @@ end
 `module`：指定 controller 會是 ApiV1::UsersController
 `as`：產生URL helper
 
-參考文件：
-[Scope](https://ihower.tw/rails4/routing.html)
+
+參考文件：  
+[Scope](https://ihower.tw/rails4/routing.html)  
 [Rails修改預設顯示格式為json](http://motion-express.com/blog/20141124-rails-default-render-json)
 
 #搭配gem - [jbuilder](https://github.com/rails/jbuilder)
@@ -188,12 +208,17 @@ namespace :vote do
 end
 ```
 
-參考文件：
-[你不可不知的 JSON 基本介紹](https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/)
-[Scope](https://ihower.tw/rails4/routing.html)
-[Rails修改預設顯示格式為json](http://motion-express.com/blog/20141124-rails-default-render-json)
+官方文件：  
+[method-i-as_json](http://api.rubyonrails.org/classes/ActiveModel/Serializers/JSON.html#method-i-as_json)  
+[to_json](http://apidock.com/rails/Hash/to_json)
 
-gem：
-[jbuilder](https://github.com/rails/jbuilder)
+參考文件：  
+[你不可不知的 JSON 基本介紹](https://blog.wu-boy.com/2011/04/%E4%BD%A0%E4%B8%8D%E5%8F%AF%E4%B8%8D%E7%9F%A5%E7%9A%84-json-%E5%9F%BA%E6%9C%AC%E4%BB%8B%E7%B4%B9/)  
+[Scope](https://ihower.tw/rails4/routing.html)  
+[Rails修改預設顯示格式為json](http://motion-express.com/blog/20141124-rails-default-render-json)  
+[Rails to_json or as_json?](http://jonathanjulian.com/2010/04/rails-to_json-or-as_json/)  
+
+gem：  
+[jbuilder](https://github.com/rails/jbuilder)  
 [rest-client](https://github.com/rest-client/rest-client)
 

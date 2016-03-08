@@ -1,22 +1,22 @@
 ---
 layout: post
-title: "用 Rspec + Factory Girl 寫測試"
+title: "用 Rspec + Factory Girl + CircleCi 寫測試"
 date: 2016-01-29 20:36:46 +0800
 comments: true
 categories: rails gem rspec
 ---
 
-程式寫久之後，就會發現測試的重要性!  
+程式寫久之後，就會發現測試的重要性!
 因此來介紹 rails 中，比內建測試還好用的 rspec 搭配 factory_girl
 
 <!-- more -->
 
 #測試種類
 
-* 單元測試(Unit test)  
+* 單元測試(Unit test)
 針對每個程式各個最小單位進行測試，像是在 controller 就單單只測試 controller 裡面的 action，而裡面產生的 model,method，都用假的方式來取代，已確保有錯誤時，可以很快知道是哪邊有問題 。
-	
-* 整合測試(Integration test)  
+
+* 整合測試(Integration test)
 主要是用來測試，每個 class 的互動，像是 controller 裡面會 call 到 model ，也會 call 到 view ，並測試回傳的值是否正確。
 
 
@@ -29,7 +29,7 @@ categories: rails gem rspec
 #慣例
 
 * ⼀個 rb 檔案配⼀個同名的 _spec.rb 檔案
-* guard 等⼯具容易設定  
+* guard 等⼯具容易設定
 [guard-rspec](https://github.com/guard/guard-rspec) 程式⼀修改完存檔，⾃動跑對應的測試（bundle後，輸入 guard init repec 初始化，打guard（bundle exec guard 真正執行））
 * editor 有⽀援快速鍵
 * describe “#name” 是 instance method
@@ -94,7 +94,7 @@ RSpec.describe Post, type: :model do #RSpec 可省略
 end
 ```
 
-* `describe`, `context` 描述要測試的是什麼，可以用nested   
+* `describe`, `context` 描述要測試的是什麼，可以用nested
 * `it`, `specify`, `example` 就是⼀⼩段測試
 * `expect(…).to` 或 `expect(…).to_not` 定義期望
 * `eq` 預期的是否和自己設定的相等
@@ -145,7 +145,20 @@ expect(helper.your_method).to eq("")
 ```ruby
 describe Material::Banner, type: :model do
 end
+
+#驗證
+
+it 'fails validation with no wrong video type' do
+  video = Video.new(file: file)
+  video.valid?
+  expect(video.errors[:file].first).to include('allowed types: mp4, flv')
+end
+
+or
+
+expect(video).to be_invalid
 ```
+
 ###request
 ```ruby
 RSpec.describe "Users", :type => :request do
@@ -159,7 +172,7 @@ RSpec.describe "Users", :type => :request do
     expect(response).to render_template(:index)
     expect(response.body).to include("hello")
   end
-  
+
   it "GET /user/:id" do
     get "/user", id: @user.id
     expect(response).to have_http_status(200)
@@ -170,7 +183,7 @@ RSpec.describe "Users", :type => :request do
 request 通常直接從網址進行 Get 或 Post ，接著判斷傳回來的值是否正確。
 
 ```ruby
-before do  
+before do
 	@user = User.new(name: "hello")
 end
 
@@ -185,22 +198,73 @@ end
 * before(:all) 整段describe前只執行一次
 * after(:each) 每段it之後執行
 * after(:all) 整段describe後只執行一次
-* (:each) 可以不用加，預設為(:each) 
+* (:each) 可以不用加，預設為(:each)
 
 ```ruby
 let(:user){User.new(:name => "hello")}
 ```
 
-* 相較於 before(:each) 可增加執⾏速度  
-* 有使⽤到才會運算(lazy)，並且在同⼀個 example 測試中多次呼叫會 Memoized 快取起來。  
-* let! 則是⾮ lazy 版本  
+* 相較於 before(:each) 可增加執⾏速度
+* 有使⽤到才會運算(lazy)，並且在同⼀個 example 測試中多次呼叫會 Memoized 快取起來。
+* let! 則是⾮ lazy 版本
 
 ###Stub
+
+`Stub:`
+For replacing a method with code that returns a specified result.
+用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。
+
+```ruby
+describe Zombie do
+  let(:zombie) { Zombie.create }
+
+  context "#decapitate" do
+    it "sets status to dead again" do
+      zombie.weapon.stub(:slice)  #模擬 slice 阻斷掉他
+      zombie.decapitate
+      zombie.status.should == "dead again"
+    end
+  end
+end
+```
+
+###mock
+
+`Mock:`
+A stub with an expectations that the method gets called.
+不只忽略這個 method ，並且期望被呼叫到
+
+```ruby
+# simulate a not found resource
+context "when not found" do
+  before { allow(Resource).to receive(:where).with(created_from: params[:id]).and_return(false) }
+  it { is_expected.to respond_with 404 }
+end
+```
+
+```ruby
+describe Zombie do
+  let(:zombie) { Zombie.create }
+
+  context "#decapitate" do
+    it "calls weapon.slice" do
+      zombie.weapon.should_receive(:slice)
+      zombie.decapitate
+    end
+  end
+end
+```
 
 ```ruby
 allow_any_instance_of(User).to receive(:follow).and_return(false)
 ```
-用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。
+[mock](http://betterspecs.org/#mock)
+
+###let & subject
+
+* [subject](http://betterspecs.org/#subject)
+* [let](http://betterspecs.org/#let)
+* [RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)
 
 ###focus
 當想要只跑指定的測試時，可以加上 focus
@@ -215,6 +279,11 @@ allow_any_instance_of(User).to receive(:follow).and_return(false)
 ```ruby
 rspec --tag focus
 ```
+
+###matchers
+
+* [2-2 version matchers](https://www.relishapp.com/rspec/rspec-expectations/v/2-2/docs/matchers)
+* [3-4 version](http://www.relishapp.com/rspec/rspec-expectations/v/3-4/docs)
 
 #factory_girl
 
@@ -234,19 +303,19 @@ FactoryGirl.define do
   factory :user, class: User" do
     name "hello"
     age  18
-    
+
     # 可以設定create 之後要做哪些動作
     after(:create) do |video|
       create(:photo, photo_id: photo.id)
       create(:photo, size: "500", photo_id: photo.id)
       create(:photo, size: "800", photo_id: photo.id)
     end
-    
+
     # 也可以設定多種條件
     trait :child do
       age 6
-      #after(:create) {|user| user.add_role(:admin) } 
-      #after(:build)  {|user| user.add_role(:admin) } 
+      #after(:create) {|user| user.add_role(:admin) }
+      #after(:build)  {|user| user.add_role(:admin) }
       # 也可以設定 create 之後的設定
     end
   end
@@ -255,7 +324,7 @@ end
 這樣在 spec 裡面就可以直接建立假資料
 
 ```ruby
-before do  
+before do
 	@user  = FactoryGirl.create(:user) #FactoryGirl 可省略
 	@child = create(:user, :child) #就只替換掉 age
 end
@@ -281,13 +350,23 @@ end
 * 有難以預測的回傳值 (例如亂數⽅法)
 * 還沒開始實作 (特別是採⽤ TDD 流程)
 
+##其他設定
+`rails g model` 時，一併產生 factory_girl 的檔案在 `spc/factories `
+
+```ruby
+config.generators do |g|
+  g.test_framework :rspec, :fixture => true, :views => false, :fixture_replacement => :factory_girl
+  g.fixture_replacement :factory_girl, :dir => "spec/factories"
+end
+```
+
 #Capybara
 RSpec除了可以拿來寫單元程式，我們也可以把測試的層級拉高做整合性測試，以Web應用程式來說，就是去自動化瀏覽器的操作，實際去向網站伺服器請求，然後驗證出來的HTML是正確的輸出。
 
 [capybara](https://github.com/jnicklas/capybara)就是一套可以搭配的工具，用來模擬瀏覽器行為
 
 #CI server
-CI(Continuous Integration) 
+CI(Continuous Integration)
 伺服器的用處是每次有人Commit就會自動執行編譯及測試(Ruby不用編譯，所以主要的用處是跑測試)，並回報結果，如果有人送交的程式搞砸了回歸測試，馬上就有回饋可以知道。
 
 [circleci.com](https://circleci.com)
@@ -317,7 +396,7 @@ test:
 
 ```
 
-建立 `config/database.yml.example`  
+建立 `config/database.yml.example`
 
 ```ruby
 default: &default
@@ -340,8 +419,8 @@ production:
   database: production_db
 ```
 
-接著到 [circleci.com](https://circleci.com) 和 github 帳號做連結。  
-接著將要跑的 project 加進去，之後只要 push 到 github 就會自動跑了！  
+接著到 [circleci.com](https://circleci.com) 和 github 帳號做連結。
+接著將要跑的 project 加進去，之後只要 push 到 github 就會自動跑了！
 
 
 #大師引言
@@ -355,22 +434,26 @@ controller偶爾會寫
 工程是寫到request就很棒了
 feature 比較像是QA在寫的
 ```
-官方文件：  
-[Better Specs](http://betterspecs.org/)  
-[Relish](https://www.relishapp.com/)  
+官方文件：
+[Better Specs](http://betterspecs.org/)
+[Relish](https://www.relishapp.com/)
+[shoulda](http://matchers.shoulda.io/)
 
-Gem：  
-[rspec-rails](https://github.com/rspec/rspec-rails)  
-[factory_girl_rails](https://github.com/thoughtbot/factory_girl_rails)    
-[guard-rspec](https://github.com/guard/guard-rspec)  
+Gem：
+[rspec-rails](https://github.com/rspec/rspec-rails)
+[factory_girl_rails](https://github.com/thoughtbot/factory_girl_rails)
+[guard-rspec](https://github.com/guard/guard-rspec)
 [capybara](https://github.com/jnicklas/capybara)
+[shoulda-matchers](https://github.com/thoughtbot/shoulda-matchers)
 
-參考文件：  
-[自動化測試](https://ihower.tw/rails4/testing.html)  
-[RSpec-Rails (基礎篇)](http://motion-express.com/trainings/rspec-rails-1)  
-[RSpec-Rails當中自訂methods及helpers](http://motion-express.com/blog/20150320-custom-helpers-in-rspec)  
-[RSpec-Rails 針對module進行unit test](http://motion-express.com/blog/20150327-rspec-rails-testing-module)  
-[RSpec 讓你愛上寫測試](http://www.slideshare.net/ihower/rspec-7394497)  
-[程式設計師升級必練內功：TDD Kata](https://blog.alphacamp.co/2015/03/02/tdd-kata/)  
-[codility 練習](https://codility.com/programmers/lessons/)  
+參考文件：
+[自動化測試](https://ihower.tw/rails4/testing.html)
+[RSpec-Rails (基礎篇)](http://motion-express.com/trainings/rspec-rails-1)
+[RSpec-Rails當中自訂methods及helpers](http://motion-express.com/blog/20150320-custom-helpers-in-rspec)
+[RSpec-Rails 針對module進行unit test](http://motion-express.com/blog/20150327-rspec-rails-testing-module)
+[RSpec 讓你愛上寫測試](http://www.slideshare.net/ihower/rspec-7394497)
+[程式設計師升級必練內功：TDD Kata](https://blog.alphacamp.co/2015/03/02/tdd-kata/)
+[codility 練習](https://codility.com/programmers/lessons/)
 [保齡球練習](http://www.sportcalculators.com/bowling-score-calculator)
+[对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)
+[RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)
