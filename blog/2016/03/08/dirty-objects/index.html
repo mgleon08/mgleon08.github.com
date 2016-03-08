@@ -5,13 +5,44 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>About - Leon's Blogging</title>
+  <title>Dirty Objects 追蹤 Model 的屬性是否有改變 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="About Dec 12th, 2015 1:12 pm | Leon Ji Ruby on Rails Developer Github https://github.com/mgleon08
-Yourator www.yourator.co
-Rainbow-Balloons http:// &hellip;">
+  <meta name="description" content="可用來觀察，追蹤 Model 的屬性是否有改變
+可在存進資料庫前，根據是否修改，來做其他動作 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15
+16
+17
+18
+19
+20
+21
+22
+23
+24
+25
+26
+27
+28
+29
+30
+a.changed
+#=&gt; []
+a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +51,7 @@ Rainbow-Balloons http:// &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/about">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/03/08/dirty-objects">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -98,54 +129,142 @@ Rainbow-Balloons http:// &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">About</h1>
     
-        <p class="meta">
-            
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time> |
-           <!--  <a href="/about/index.markdown">Edit</a> -->
-        </p>
+      
+        <h1 class="entry-title">Dirty Objects 追蹤 Model 的屬性是否有改變</h1>
+      
     
-  </header>
-  
-  <h1>Leon Ji</h1>
-
-<h3>Ruby on Rails Developer</h3>
-
-<p><img src="https://avatars1.githubusercontent.com/u/13741096?v=3&amp;s=460" alt="Leon Ji" /></p>
-
-<ul>
-<li> Github <a href="https://github.com/mgleon08">https://github.com/mgleon08</a></li>
-<li>Yourator <a href="http://www.yourator.co/">www.yourator.co</a></li>
-<li>Rainbow-Balloons <a href="http://www.rainbow-balloons.com/">http://www.rainbow-balloons.com/</a></li>
-<li>Email : <a href="&#x6d;&#x61;&#x69;&#108;&#116;&#111;&#x3a;&#109;&#103;&#x6c;&#101;&#111;&#x6e;&#x30;&#x38;&#64;&#103;&#x6d;&#97;&#105;&#108;&#x2e;&#x63;&#x6f;&#x6d;">&#x6d;&#x67;&#108;&#x65;&#x6f;&#110;&#48;&#56;&#64;&#103;&#109;&#97;&#x69;&#108;&#x2e;&#x63;&#x6f;&#x6d;</a></li>
-</ul>
-
-
-  
-    <footer>
+    
       <p class="meta">
         
+
+
+
+
+<time class='entry-date' datetime='2016-03-08T22:36:09+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:36 pm</span></time>
         
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time>
+         | <a href="#disqus_thread">Comments</a>
         
         
       </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>可用來觀察，追蹤 Model 的屬性是否有改變<br/>
+可在存進資料庫前，根據是否修改，來做其他動作</p>
+
+<!-- more -->
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">changed</span>
+</span><span class='line'><span class="c1">#=&gt; []</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">changed?</span>
+</span><span class='line'><span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s2">&quot;abc&quot;</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;abc&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">changed?</span>
+</span><span class='line'><span class="c1">#=&gt; true</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">changed</span>
+</span><span class='line'><span class="c1">#=&gt; [&quot;title&quot;]</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">changes</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;title&quot;=&gt;[&quot;ha&quot;, &quot;abc&quot;]}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">title_was</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;ha&quot; 改變之前的值</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">title</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;asd&quot;</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">title_change</span>
+</span><span class='line'><span class="c1">#=&gt; [&quot;ha&quot;, &quot;asd&quot;]</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">儲存進資料庫，追蹤記錄就消失了。</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">save</span>
+</span><span class='line'><span class="c1">#=&gt; true</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">changed?</span>
+</span><span class='line'><span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">changed</span>
+</span><span class='line'><span class="c1">#=&gt; []</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">changes</span>
+</span><span class='line'><span class="c1">#=&gt; {}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://api.rubyonrails.org/classes/ActiveModel/Dirty.html">api - Dirty</a></p>
+</div>
+
+
+  <footer>
+    <p class="meta">
       
-        <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/about/index.html" data-via="" data-counturl="http://mgleon08.github.com/about/index.html" >Tweet</a>
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-03-08T22:36:09+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:36 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/03/08/dirty-objects/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/03/08/dirty-objects/" >Tweet</a>
   
   
   
@@ -153,9 +272,16 @@ Rainbow-Balloons http:// &hellip;">
   
 </div>
 
+    
+    <p class="meta">
       
-    </footer>
-  
+        <a class="basic-alignment left" href="/blog/2016/03/08/serialize-store/" title="Previous Post: Serialize & Store 將 object 塞在欄位裡">&laquo; Serialize & Store 將 object 塞在欄位裡</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/03/08/enum/" title="Next Post: 用 Enum 做選項">用 Enum 做選項 &raquo;</a>
+      
+    </p>
+  </footer>
 </article>
 
   <section>
@@ -166,13 +292,6 @@ Rainbow-Balloons http:// &hellip;">
 
 
 </div>
-
-<aside class="sidebar">
-  
-    
-  
-</aside>
-
 
     </div>
   </div>
@@ -189,8 +308,8 @@ Rainbow-Balloons http:// &hellip;">
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/about/index.html';
-        var disqus_url = 'http://mgleon08.github.com/about/index.html';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/03/08/dirty-objects/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/03/08/dirty-objects/';
         var disqus_script = 'embed.js';
       
     (function () {

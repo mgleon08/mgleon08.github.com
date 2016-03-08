@@ -5,27 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby 中的 Include Extend Require - Leon's Blogging</title>
+  <title>Serialize & Store 將 Object 塞在欄位裡 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="常常搞不清楚，include，extend，require這幾個差異。 module include &amp; extend 主要是將 module 的方法，可以繼承給 class 或 instance 使用。 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17 &hellip;">
+  <meta name="description" content="當欄位上需要塞比較多 data 時就可以使用，相當便利。 Serialize 序列化 可以將一個 object 轉換成一個可被資料庫儲存及傳輸的純文字形態
+反之讀出來就是，Deserialize 反序列。 serialize 可指定欄位，在存入資料庫時，就會自動序列化成YAML格式。 欄位必須是 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -34,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/03/08/serialize-store">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -117,7 +102,7 @@
   <header>
     
       
-        <h1 class="entry-title">Ruby 中的 Include Extend Require</h1>
+        <h1 class="entry-title">Serialize & Store 將 Object 塞在欄位裡</h1>
       
     
     
@@ -127,7 +112,7 @@
 
 
 
-<time class='entry-date' datetime='2016-02-24T21:49:30+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:49 pm</span></time>
+<time class='entry-date' datetime='2016-03-08T22:33:45+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:33 pm</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -137,14 +122,69 @@
   </header>
 
 
-<div class="entry-content"><p>常常搞不清楚，<code>include</code>，<code>extend</code>，<code>require</code>這幾個差異。</p>
+<div class="entry-content"><p>當欄位上需要塞比較多 <code>data</code> 時就可以使用，相當便利。</p>
 
 <!-- more -->
 
 
-<h1>module</h1>
+<h1>Serialize 序列化</h1>
 
-<p><code>include</code> &amp; <code>extend</code> 主要是將 <code>module</code> 的方法，可以繼承給 <code>class</code> 或 <code>instance</code> 使用。</p>
+<p>可以將一個 object 轉換成一個可被資料庫儲存及傳輸的純文字形態
+反之讀出來就是，Deserialize 反序列。</p>
+
+<p><code>serialize</code> 可指定欄位，在存入資料庫時，就會自動序列化成YAML格式。</p>
+
+<h3>欄位必須是 text</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">text</span> <span class="n">types</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>model</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">serialize</span> <span class="ss">:types</span>
+</span><span class='line'>  <span class="c1">#若沒特別指定，任何形式都可存取</span>
+</span><span class='line'>  <span class="n">serialize</span> <span class="ss">:types</span> <span class="nb">Array</span>
+</span><span class='line'>  <span class="c1">#指定 Array，就不能塞 Hash 進去</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">profiles</span><span class="p">:</span> <span class="p">{</span><span class="ss">gender</span><span class="p">:</span> <span class="s2">&quot;male&quot;</span><span class="p">,</span> <span class="ss">phone</span><span class="p">:</span> <span class="mi">12345</span><span class="p">})</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">profiles</span>
+</span><span class='line'><span class="c1">#=&gt; {gender: &quot;male&quot;, phone: 12345}</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">profiles</span><span class="o">[</span><span class="ss">:gender</span><span class="o">]</span>
+</span><span class='line'><span class="c1">#=&gt; male</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>缺點是 serialize 後的欄位，就無法用 where 進行查詢。</p></blockquote>
+
+<h1>Store</h1>
+
+<p>上述的 profiles 可以用 <code>store</code> 來設定。
+就像是一般的變數一樣。</p>
+
+<h3>欄位必須是 text</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">t</span><span class="o">.</span><span class="n">text</span> <span class="n">types</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -159,103 +199,29 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">hello</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s1">&#39;Hello!&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">store</span> <span class="ss">:profiles</span><span class="p">,</span> <span class="ss">:accessors</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="ss">:gender</span><span class="p">,</span> <span class="ss">:phone</span><span class="o">]</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
-</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; Hello!</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">create</span><span class="p">(</span><span class="ss">gender</span><span class="p">:</span> <span class="s2">&quot;male&quot;</span><span class="p">,</span> <span class="ss">phone</span><span class="p">:</span> <span class="mi">12345</span><span class="p">)</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; Hello!</span>
-</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>由此可知</p>
-
-<ul>
-<li><code>extend</code>  增加 class_methods</li>
-<li><code>include</code> 增加 instance_methods</li>
-</ul>
-
-
-<h1>require</h1>
-
-<p>在 ruby 中，一開始用有很多 <code>method</code> 可以使用，是因為 ruby 將一些常用的都先載入進來。</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/core-2.3.0/">core</a></li>
-</ul>
-
-
-<p>而其他比較不常用的 method 就必須在要使用的時候，先 require 進來才可以。</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/stdlib-2.3.0/">std</a></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;fileutils&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>也可以載入自己設定好的檔案，通常設定在 <code>/lib/test.rb</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;test&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>不過記得路徑的問題，可以使用 <code>require_relative</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;test&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果是放在資料夾底下的話 <code>/lib/file/test.rb</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;file/test&#39;</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">profiles</span>
+</span><span class='line'><span class="c1">#=&gt; {:gender =&gt; &quot;male&quot;, :phone =&gt; 12345}</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">gender</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;male&quot;</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">phone</span>
+</span><span class='line'><span class="c1">#=&gt; 12345</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.3.0/">ruby-doc</a></p>
+<a href="http://api.rubyonrails.org/classes/ActiveRecord/Base.html#M001799">api - serialize</a><br/>
+<a href="http://apidock.com/rails/ActiveRecord/Base/serialize/class">apidock - serialize</a><br/>
+<a href="http://api.rubyonrails.org/classes/ActiveRecord/Store.html">api - Store</a></p>
 
 <p>參考文件：<br/>
-<a href="http://blog.eddie.com.tw/2015/03/24/class-and-module/">Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」</a> <br/>
-<a href="http://motion-express.com/blog/20150407-ruby-require-require-relative-load">require、require_relative是什麼意思？差在哪？</a><br/>
-<a href="https://ihower.tw/rails4/environments-and-bundler.html">環境設定與Bundle</a></p>
+<a href="https://ihower.tw/rails4/activerecord-others.html">ActiveRecord - 進階功能</a></p>
 </div>
 
 
@@ -278,7 +244,7 @@
 
 
 
-<time class='entry-date' datetime='2016-02-24T21:49:30+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:49 pm</span></time>
+<time class='entry-date' datetime='2016-03-08T22:33:45+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:33 pm</span></time>
       
       
 
@@ -293,7 +259,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/03/08/serialize-store/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/03/08/serialize-store/" >Tweet</a>
   
   
   
@@ -304,10 +270,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2016/02/24/slack-notifier/" title="Previous Post: 用 slack 通知大小事">&laquo; 用 slack 通知大小事</a>
+        <a class="basic-alignment left" href="/blog/2016/02/24/include-extend-require/" title="Previous Post: Ruby 中的 include extend require">&laquo; Ruby 中的 include extend require</a>
       
       
-        <a class="basic-alignment right" href="/blog/2016/03/08/serialize-store/" title="Next Post: Serialize & Store 將 object 塞在欄位裡">Serialize & Store 將 object 塞在欄位裡 &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2016/03/08/dirty-objects/" title="Next Post: Dirty Objects 追蹤 Model 的屬性是否有改變">Dirty Objects 追蹤 Model 的屬性是否有改變 &raquo;</a>
       
     </p>
   </footer>
@@ -337,8 +303,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/02/24/include-extend-require/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2016/02/24/include-extend-require/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/03/08/serialize-store/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/03/08/serialize-store/';
         var disqus_script = 'embed.js';
       
     (function () {

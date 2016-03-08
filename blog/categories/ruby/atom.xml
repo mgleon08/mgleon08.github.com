@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-03-08T11:40:38+08:00</updated>
+  <updated>2016-03-08T23:25:42+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -14,327 +14,283 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Ruby 中的 Include Extend Require]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/"/>
-    <updated>2016-02-24T21:49:30+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/24/include-extend-require</id>
-    <content type="html"><![CDATA[<p>常常搞不清楚，<code>include</code>，<code>extend</code>，<code>require</code>這幾個差異。</p>
+    <title type="html"><![CDATA[用 Instance_eval & Class_eval 自己加 Method!]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/08/instance-eval-class-eval/"/>
+    <updated>2016-03-08T22:46:28+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/08/instance-eval-class-eval</id>
+    <content type="html"><![CDATA[<p>有時候會發現有些 object，沒有設定 setter &amp; getter ，剛好又需要用到，這時就可以派上用場拉。</p>
 
 <!-- more -->
 
 
-<h1>module</h1>
+<h1>instance_eval &amp; class_eval</h1>
 
-<p><code>include</code> &amp; <code>extend</code> 主要是將 <code>module</code> 的方法，可以繼承給 <code>class</code> 或 <code>instance</code> 使用。</p>
+<p><code>instance_eval</code> Use ClassName.instance_eval to define a class method (one associated with the class object but not visible to instances).</p>
 
-<pre><code class="ruby">module Foo   
-  def hello     
-    puts 'Hello!'   
-  end 
+<p><code>class_eval</code> Use ClassName.class_eval to define an instance method (one that applies to all of the instances of ClassName).</p>
+
+<p>簡單的來說，就是自己定義 class or instance 的 method</p>
+
+<pre><code class="ruby">class MyClass
+  def initialize(num)
+    @num = num
+  end
 end
 
-class Bar
-  include Foo
+a = MyClass.new(1)
+b = MyClass.new(2)
+</code></pre>
+
+<p>錯誤，因為沒有 getter or setter methods</p>
+
+<pre><code class="ruby">a.num
+#=&gt;NoMethodError: undefined method `num' for #&lt;MyClass:0x007fba5c02c858 @num="1"&gt;
+</code></pre>
+
+<p>自行加 instance method</p>
+
+<pre><code class="ruby">a.instance_eval { @num }
+#=&gt; 1
+</code></pre>
+
+<p>也可以直接定義 method，這樣就可以一直重複使用</p>
+
+<pre><code class="ruby">a.instance_eval do
+   def num
+     @num
+   end
 end
 
-Bar.hello
-# =&gt; `&lt;main&gt;': undefined method `hello' for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)
-a = Bar.new
-a.hello
-# =&gt; Hello!
+a.num
+#=&gt; 1
+b.num
+#NoMethodError: undefined method `num' for #&lt;MyClass:0x007fba5c08e5f8 @num="2"&gt;
+</code></pre>
 
-class Bar
-  extend Foo
+<p>上述指定義了 a 的 <code>instance method</code> 所以 b 會錯誤。<br/>
+因此可以直接定義在 <code>class instance</code></p>
+
+<pre><code class="ruby">MyClass.class_eval do
+  def num
+    @num
+  end
 end
 
-Bar.hello
-# =&gt; Hello!
-a = Bar.new
-a.hello
-# =&gt; `&lt;main&gt;': undefined method `hello' for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)
+a.num
+#=&gt; 1
+b.num
+#=&gt; 2
 </code></pre>
-
-<p>由此可知</p>
-
-<ul>
-<li><code>extend</code>  增加 class_methods</li>
-<li><code>include</code> 增加 instance_methods</li>
-</ul>
-
-
-<h1>require</h1>
-
-<p>在 ruby 中，一開始用有很多 <code>method</code> 可以使用，是因為 ruby 將一些常用的都先載入進來。</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/core-2.3.0/">core</a></li>
-</ul>
-
-
-<p>而其他比較不常用的 method 就必須在要使用的時候，先 require 進來才可以。</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/stdlib-2.3.0/">std</a></li>
-</ul>
-
-
-<pre><code class="ruby">require 'fileutils'
-</code></pre>
-
-<p>也可以載入自己設定好的檔案，通常設定在 <code>/lib/test.rb</code></p>
-
-<pre><code class="ruby">require 'test'
-</code></pre>
-
-<p>不過記得路徑的問題，可以使用 <code>require_relative</code></p>
-
-<pre><code class="ruby">require_relative 'test'
-</code></pre>
-
-<p>如果是放在資料夾底下的話 <code>/lib/file/test.rb</code></p>
-
-<pre><code class="ruby">require 'file/test'
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.3.0/">ruby-doc</a></p>
 
 <p>參考文件：<br/>
-<a href="http://blog.eddie.com.tw/2015/03/24/class-and-module/">Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」</a> <br/>
-<a href="http://motion-express.com/blog/20150407-ruby-require-require-relative-load">require、require_relative是什麼意思？差在哪？</a><br/>
-<a href="https://ihower.tw/rails4/environments-and-bundler.html">環境設定與Bundle</a></p>
+<a href="http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php">Understanding class_eval and instance_eval</a></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[RVM and Gemsets Ruby版本控制]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/15/rvm-and-gemsets/"/>
-    <updated>2016-02-15T21:12:09+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/15/rvm-and-gemsets</id>
-    <content type="html"><![CDATA[<p>好用的工具，可以輕鬆的切換 ruby 版本!</p>
+    <title type="html"><![CDATA[有什麼事，就問 Ruby 吧!]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/08/ask-ruby/"/>
+    <updated>2016-03-08T22:43:33+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/08/ask-ruby</id>
+    <content type="html"><![CDATA[<p>ruby 有趣的事，什麼都可以問它XD</p>
 
 <!-- more -->
 
 
-<h1>安裝</h1>
+<pre><code class="ruby">a = [1,2,3]
 
-<p><a href="https://rvm.io/">rvm</a></p>
+#問 a 的方法有哪些
+a.methods
+#=&gt; [:inspect, :to_s, :to_a, :to_h, :to_ary, :frozen?, :==, :eql?, :hash...]
 
-<pre><code>\curl -sSL https://get.rvm.io | bash -s stable
+#問它是否有這個方法
+a.respond_to? :to_s
+#=&gt; true
+
+#問它的 class 是什麼
+a.class
+#=&gt; Array
+
+#問爸爸的class 是什麼
+Array.superclass  =&gt; Object   
+
+#直接列出祖宗十八代
+Array.ancestors
+#=&gt; [Array, JSON::Ext::Generator::GeneratorMethods::Array, Enumerable, Object, ActiveSupport::Dependencies::Loadable, PP::ObjectMixin, JSON::Ext::Generator::GeneratorMethods::Object, Kernel, BasicObject]
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Double Colon(::) 是啥? 能吃嗎？]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/08/double-colon/"/>
+    <updated>2016-03-08T22:42:03+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/08/double-colon</id>
+    <content type="html"><![CDATA[<p>在 ruby 中常常會看到各種符號， 像是 <code>::</code> 在 ruby 就像是 <code>namespace</code> 的感覺。<br/>
+<code>::</code> 加在最前面，就是會去參照最上面的 <code>namespace</code>。</p>
+
+<!-- more -->
+
+
+<pre><code class="ruby">MR_COUNT = 0        # constant defined on main Object class
+module Foo
+  MR_COUNT = 0
+  ::MR_COUNT = 1    # set global count to 1
+  MR_COUNT = 2      # set local count to 2
+end
+puts MR_COUNT       # this is the global constant
+puts Foo::MR_COUNT  # this is the local "Foo" constant
 </code></pre>
 
-<h3>安裝 ruby 版本</h3>
+<pre><code class="ruby">module Foo
+  # We may not know about this in real big apps
+  module Rails
+    class Engine 
+    end
+  end
 
-<pre><code>rvm install 2.2.3
+  class Engine1 &lt; Rails::Engine
+  end
+
+  class Engine2 &lt; ::Rails::Engine
+  end
+end
+
+Foo::Engine1.superclass
+ =&gt; Foo::Rails::Engine # not what we want
+
+Foo::Engine2.superclass
+ =&gt; Rails::Engine # correct
 </code></pre>
-
-<h3>使用版本</h3>
-
-<pre><code>rvm use 2.2.3
-</code></pre>
-
-<h3>目前有的版本</h3>
-
-<pre><code>rvm list
-</code></pre>
-
-<h3>移除</h3>
-
-<pre><code>rvm remove 2.2.3
-</code></pre>
-
-<h3>看本機是否使用 rvm 還是本機</h3>
-
-<pre><code>which ruby
-</code></pre>
-
-<h1>設定</h1>
-
-<p>安裝好之後，基本上就是一個全新的，gem 都要全部重新安裝<br/>
-記得先去安裝 <code>bundler</code></p>
-
-<pre><code>gem install bundler
-</code></pre>
-
-<p>之後再去專案底下輸入 <code>bundle</code> 就會重新安裝了</p>
-
-<h1>Gemset</h1>
-
-<p>在該版本的 ruby 下，在區分要安裝哪些 gem</p>
-
-<h3>目前有的 gemset</h3>
-
-<pre><code>rvm gemset list
-</code></pre>
-
-<h3>新增</h3>
-
-<pre><code>rvm gemset create rails4.2.4
-</code></pre>
-
-<h3>使用</h3>
-
-<pre><code>rvm gemset use rails4.2.4
-</code></pre>
-
-<h3>清空</h3>
-
-<p>清空裡面的 gem ，但保留 gemset
-<code>
-rvm gemset empty rails4.2.4
-</code></p>
-
-<h3>刪除</h3>
-
-<pre><code>rvm gemset delete rails4.2.4
-</code></pre>
-
-<h1>Bonus</h1>
-
-<h3>直接換兩個</h3>
-
-<pre><code>rvm 2.2.3@rails4.2.4
-# ruby 和 gemset 一起切換
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="https://rvm.io/">rvm</a></p>
 
 <p>參考文件：<br/>
-<a href="http://motion-express.com/blog/20141005-ruby-rvm-gemset">Ruby gem 想要一機裝多個版本？RVM來幫你！</a><br/>
-<a href="http://blog.eddie.com.tw/2011/04/08/rvm-and-gemsets/">RVM and Gemsets</a></p>
+<a href="http://blog.eddie.com.tw/2015/04/19/namespace/">Ruby 語法放大鏡之「有時候會看到有兩個冒號寫法是什麼意思?」</a><br/>
+<a href="http://stackoverflow.com/questions/4819312/double-colons-before-class-names-in-ruby">Double colons before class names in Ruby?</a><br/>
+<a href="http://stackoverflow.com/questions/10482772/rubys-double-colon-operator-usage-differences">Ruby&rsquo;s double colon (::) operator usage differences</a><br/>
+<a href="https://cbabhusal.wordpress.com/2015/03/26/ruby-ruby-dot-and-double-colon-operators/">Ruby : Ruby dot “.” and double Colon “::” Operators</a></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[用 Yaml 來寫文件]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/07/yaml/"/>
-    <updated>2016-02-07T16:08:29+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/07/yaml</id>
-    <content type="html"><![CDATA[<p>yaml 格式經常會在 rails 裡看到，像是 config 裡的 database.yml，或 en.yml<br/>
-這種格式經常拿來寫一些固定的常數。</p>
-
-<p>因此也可以拿來設定網頁中固定的像是選單之類的文件。</p>
+    <title type="html"><![CDATA[Dirty Objects 追蹤 Model 的屬性是否有改變]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/08/dirty-objects/"/>
+    <updated>2016-03-08T22:36:09+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/08/dirty-objects</id>
+    <content type="html"><![CDATA[<p>可用來觀察，追蹤 Model 的屬性是否有改變<br/>
+可在存進資料庫前，根據是否修改，來做其他動作</p>
 
 <!-- more -->
 
 
-<p>自訂 yaml</p>
+<pre><code class="ruby">a.changed
+#=&gt; []
+a.changed?
+#=&gt; false
+a.title = "abc"
+#=&gt; "abc"
 
-<p><code>sample.yml</code></p>
+a.changed?
+#=&gt; true
+a.changed
+#=&gt; ["title"]
+a.changes
+#=&gt; {"title"=&gt;["ha", "abc"]}
 
-<pre><code class="ruby">option:
-  - a:  foo
-    a1: bar
-  - b:  foo
-    b1: bar
-  - c:  foo
-    c1: bar
-</code></pre>
+a.title_was
+#=&gt; "ha" 改變之前的值
+a.title
+#=&gt; "asd"
+a.title_change
+#=&gt; ["ha", "asd"]
 
-<p><code>:</code> hash<br/>
-<code>-</code> array</p>
-
-<pre><code class="ruby">require "yaml"
-
-SAMPLE = YAML.load(File.read(File.expand_path('../sample.yml', __FILE__))).freeze
-
-#=&gt; {"option"=&gt;
-#       [
-#           {"a"=&gt;"foo", "a1"=&gt;"bar"}, 
-#           {"b"=&gt;"foo", "b1"=&gt;"bar"}, 
-#           {"c"=&gt;"foo", "c1"=&gt;"bar"}
-#       ]
-#   }
+儲存進資料庫，追蹤記錄就消失了。
+a.save
+#=&gt; true
+a.changed?
+#=&gt; false
+a.changed
+#=&gt; []
+a.changes
+#=&gt; {}
 </code></pre>
 
 <p>官方文件：<br/>
-<a href="http://ruby-doc.org/stdlib-2.3.0/libdoc/yaml/rdoc/YAML/Store.html">Yaml</a></p>
+<a href="http://api.rubyonrails.org/classes/ActiveModel/Dirty.html">api - Dirty</a></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[用 Marshal 來傳遞資料]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/07/marshal/"/>
-    <updated>2016-02-07T15:44:52+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/07/marshal</id>
-    <content type="html"><![CDATA[<p>當兩台 server 要互相傳遞資料時，都必須確保資料的正確性，因此可以透過 Marshal 解析後來傳遞。</p>
+    <title type="html"><![CDATA[Serialize & Store 將 Object 塞在欄位裡]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/08/serialize-store/"/>
+    <updated>2016-03-08T22:33:45+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/08/serialize-store</id>
+    <content type="html"><![CDATA[<p>當欄位上需要塞比較多 <code>data</code> 時就可以使用，相當便利。</p>
 
 <!-- more -->
 
 
-<p>一般可以用 <code>to_a</code>, <code>to_yml</code>, <code>to_s</code> 來轉成不同 <code>type</code><br/>
-但這樣很可能會失真</p>
+<h1>Serialize 序列化</h1>
 
-<p>因此用 Marshal 就會比較精準，並且快很多</p>
+<p>可以將一個 object 轉換成一個可被資料庫儲存及傳輸的純文字形態
+反之讀出來就是，Deserialize 反序列。</p>
 
-<pre><code class="ruby">h = {:a=&gt;1, "b"=&gt;2, Time.new=&gt;Class}
+<p><code>serialize</code> 可指定欄位，在存入資料庫時，就會自動序列化成YAML格式。</p>
 
-Marshal.dump(h)
-#=&gt; "\x04\b{\b:\x06ai\x06I\"\x06b\x06:\x06ETi\aIu:\tTime\r\xE7\x04\x1D\x80r\xB6D\xC0\a:\voffseti\x02\x80p:\tzoneI\"\bCST\x06;\x06Fc\nClass"
+<h3>欄位必須是 text</h3>
 
-File.open("test.txt", "w").write(Marshal.dump(h))
+<pre><code class="ruby">t.text types
+</code></pre>
 
-#在 irb 要先 exit 重開
-Marshal.load(File.open("test.txt", "r").read)
-#=&gt; {:a=&gt;1, "b"=&gt;2, Time.new=&gt;Class}
+<p>model</p>
+
+<pre><code class="ruby">class User &lt; ActiveRecord::Base
+  serialize :types
+  #若沒特別指定，任何形式都可存取
+  serialize :types Array
+  #指定 Array，就不能塞 Hash 進去
+end
+
+User.create(profiles: {gender: "male", phone: 12345})
+User.last.profiles
+#=&gt; {gender: "male", phone: 12345}
+User.last.profiles[:gender]
+#=&gt; male
+</code></pre>
+
+<blockquote><p>缺點是 serialize 後的欄位，就無法用 where 進行查詢。</p></blockquote>
+
+<h1>Store</h1>
+
+<p>上述的 profiles 可以用 <code>store</code> 來設定。
+就像是一般的變數一樣。</p>
+
+<h3>欄位必須是 text</h3>
+
+<pre><code class="ruby">t.text types
+</code></pre>
+
+<pre><code class="ruby">class User &lt; ActiveRecord::Base
+  store :profiles, :accessors =&gt; [:gender, :phone]
+end
+
+
+User.create(gender: "male", phone: 12345)
+
+user.profiles
+#=&gt; {:gender =&gt; "male", :phone =&gt; 12345}
+user.gender
+#=&gt; "male"
+user.phone
+#=&gt; 12345
 </code></pre>
 
 <p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.2.0/Marshal.html">Marshal</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Ruby 做網頁爬蟲]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/07/ruby-crawler/"/>
-    <updated>2016-02-07T15:21:59+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/07/ruby-crawler</id>
-    <content type="html"><![CDATA[<p>網頁爬蟲是一個蠻常聽到的名詞，簡單的來說就是可以透過程式，去分析網站頁面，將想要的資訊抓下來!</p>
-
-<!-- more -->
-
-
-<h3>wget</h3>
-
-<p>command line 下載檔案的指令<br/>
-mac 本身沒有內建要另外安裝。</p>
-
-<pre><code>brew install wget
-</code></pre>
-
-<pre><code class="ruby">require "open-uri" #open-uri 把一個網頁當一個檔案來打開 stb-lib
-require "nokogiri" #解析 html gem
-
-html = open("http://ezprice.com.tw/").read
-doc = Nokogiri::HTML(html)
-ans = []
-
-doc.search('img').each do |i|
-  ans &lt;&lt; i.attr('src')
-end
-
-#將相對路徑改成絕對路徑
-temp_ans = ans.map do 
-  |url| url.match(/^http/) ? url : "http://ezprice.com.tw/#{url}"
-end
-
-#透過 wget 下載檔案到目前的資料夾
-temp_ans.each do |full_url|
-  `wget #{full_url}`
-end
-</code></pre>
-
-<p><code>open-uri</code> 只能一個網址<br/>
-<code>curb</code> 比較豐富</p>
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/stdlib-2.3.0/libdoc/open-uri/rdoc/index.html">open-uri</a><br/>
-<a href="http://www.nokogiri.org/">nokogiri</a></p>
+<a href="http://api.rubyonrails.org/classes/ActiveRecord/Base.html#M001799">api - serialize</a><br/>
+<a href="http://apidock.com/rails/ActiveRecord/Base/serialize/class">apidock - serialize</a><br/>
+<a href="http://api.rubyonrails.org/classes/ActiveRecord/Store.html">api - Store</a></p>
 
 <p>參考文件：<br/>
-<a href="https://www.youtube.com/watch?v=6XUnYRB0Zpo&amp;list=PLJ6M-k9dQEQ3VsyOZQwjZ5GdjaLJH3eB_">RailsFun</a><br/>
-<a href="http://tonytonyjan.net/slides/2014-07-03-simple-crawler/">Ruby Crawler 輕輕鬆鬆做個 Ruby 爬蟲機器人</a></p>
+<a href="https://ihower.tw/rails4/activerecord-others.html">ActiveRecord - 進階功能</a></p>
 ]]></content>
   </entry>
   

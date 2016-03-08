@@ -5,27 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby 中的 Include Extend Require - Leon's Blogging</title>
+  <title>用 Instance_eval & Class_eval 自己加 Method! - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="常常搞不清楚，include，extend，require這幾個差異。 module include &amp; extend 主要是將 module 的方法，可以繼承給 class 或 instance 使用。 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17 &hellip;">
+  <meta name="description" content="有時候會發現有些 object，沒有設定 setter &amp; getter ，剛好又需要用到，這時就可以派上用場拉。 instance_eval &amp; class_eval instance_eval Use ClassName.instance_eval to define a &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -34,7 +18,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/03/08/instance-eval-class-eval">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -117,7 +101,7 @@
   <header>
     
       
-        <h1 class="entry-title">Ruby 中的 Include Extend Require</h1>
+        <h1 class="entry-title">用 Instance_eval & Class_eval 自己加 Method!</h1>
       
     
     
@@ -127,7 +111,7 @@
 
 
 
-<time class='entry-date' datetime='2016-02-24T21:49:30+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:49 pm</span></time>
+<time class='entry-date' datetime='2016-03-08T22:46:28+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:46 pm</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -137,14 +121,57 @@
   </header>
 
 
-<div class="entry-content"><p>常常搞不清楚，<code>include</code>，<code>extend</code>，<code>require</code>這幾個差異。</p>
+<div class="entry-content"><p>有時候會發現有些 object，沒有設定 setter &amp; getter ，剛好又需要用到，這時就可以派上用場拉。</p>
 
 <!-- more -->
 
 
-<h1>module</h1>
+<h1>instance_eval &amp; class_eval</h1>
 
-<p><code>include</code> &amp; <code>extend</code> 主要是將 <code>module</code> 的方法，可以繼承給 <code>class</code> 或 <code>instance</code> 使用。</p>
+<p><code>instance_eval</code> Use ClassName.instance_eval to define a class method (one associated with the class object but not visible to instances).</p>
+
+<p><code>class_eval</code> Use ClassName.class_eval to define an instance method (one that applies to all of the instances of ClassName).</p>
+
+<p>簡單的來說，就是自己定義 class or instance 的 method</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MyClass</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">num</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@num</span> <span class="o">=</span> <span class="n">num</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">MyClass</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="n">b</span> <span class="o">=</span> <span class="no">MyClass</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>錯誤，因為沒有 getter or setter methods</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">num</span>
+</span><span class='line'><span class="c1">#=&gt;NoMethodError: undefined method `num&#39; for #&lt;MyClass:0x007fba5c02c858 @num=&quot;1&quot;&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>自行加 instance method</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">instance_eval</span> <span class="p">{</span> <span class="vi">@num</span> <span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; 1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也可以直接定義 method，這樣就可以一直重複使用</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -156,106 +183,47 @@
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">hello</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s1">&#39;Hello!&#39;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">instance_eval</span> <span class="k">do</span>
+</span><span class='line'>   <span class="k">def</span> <span class="nf">num</span>
+</span><span class='line'>     <span class="vi">@num</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">num</span>
+</span><span class='line'><span class="c1">#=&gt; 1</span>
+</span><span class='line'><span class="n">b</span><span class="o">.</span><span class="n">num</span>
+</span><span class='line'><span class="c1">#NoMethodError: undefined method `num&#39; for #&lt;MyClass:0x007fba5c08e5f8 @num=&quot;2&quot;&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上述指定義了 a 的 <code>instance method</code> 所以 b 會錯誤。<br/>
+因此可以直接定義在 <code>class instance</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">MyClass</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">num</span>
+</span><span class='line'>      <span class="vi">@num</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
-</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; Hello!</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; Hello!</span>
-</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">num</span>
+</span><span class='line'><span class="c1">#=&gt; 1</span>
+</span><span class='line'><span class="n">b</span><span class="o">.</span><span class="n">num</span>
+</span><span class='line'><span class="c1">#=&gt; 2</span>
 </span></code></pre></td></tr></table></div></figure>
 
-
-<p>由此可知</p>
-
-<ul>
-<li><code>extend</code>  增加 class_methods</li>
-<li><code>include</code> 增加 instance_methods</li>
-</ul>
-
-
-<h1>require</h1>
-
-<p>在 ruby 中，一開始用有很多 <code>method</code> 可以使用，是因為 ruby 將一些常用的都先載入進來。</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/core-2.3.0/">core</a></li>
-</ul>
-
-
-<p>而其他比較不常用的 method 就必須在要使用的時候，先 require 進來才可以。</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/stdlib-2.3.0/">std</a></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;fileutils&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>也可以載入自己設定好的檔案，通常設定在 <code>/lib/test.rb</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;test&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>不過記得路徑的問題，可以使用 <code>require_relative</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;test&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果是放在資料夾底下的話 <code>/lib/file/test.rb</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;file/test&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.3.0/">ruby-doc</a></p>
 
 <p>參考文件：<br/>
-<a href="http://blog.eddie.com.tw/2015/03/24/class-and-module/">Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」</a> <br/>
-<a href="http://motion-express.com/blog/20150407-ruby-require-require-relative-load">require、require_relative是什麼意思？差在哪？</a><br/>
-<a href="https://ihower.tw/rails4/environments-and-bundler.html">環境設定與Bundle</a></p>
+<a href="http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php">Understanding class_eval and instance_eval</a></p>
 </div>
 
 
@@ -278,7 +246,7 @@
 
 
 
-<time class='entry-date' datetime='2016-02-24T21:49:30+08:00'><span class='date'><span class='date-month'>Feb</span> <span class='date-day'>24</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:49 pm</span></time>
+<time class='entry-date' datetime='2016-03-08T22:46:28+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>8</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:46 pm</span></time>
       
       
 
@@ -293,7 +261,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/03/08/instance-eval-class-eval/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/03/08/instance-eval-class-eval/" >Tweet</a>
   
   
   
@@ -304,10 +272,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2016/02/24/slack-notifier/" title="Previous Post: 用 slack 通知大小事">&laquo; 用 slack 通知大小事</a>
+        <a class="basic-alignment left" href="/blog/2016/03/08/ask-ruby/" title="Previous Post: 有什麼事，就問 ruby 吧!">&laquo; 有什麼事，就問 ruby 吧!</a>
       
       
-        <a class="basic-alignment right" href="/blog/2016/03/08/serialize-store/" title="Next Post: Serialize & Store 將 object 塞在欄位裡">Serialize & Store 將 object 塞在欄位裡 &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2016/03/08/migration/" title="Next Post: Migration 中新增欄位 + 指令">Migration 中新增欄位 + 指令 &raquo;</a>
       
     </p>
   </footer>
@@ -337,8 +305,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/02/24/include-extend-require/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2016/02/24/include-extend-require/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/03/08/instance-eval-class-eval/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/03/08/instance-eval-class-eval/';
         var disqus_script = 'embed.js';
       
     (function () {
