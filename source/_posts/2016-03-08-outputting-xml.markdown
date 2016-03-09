@@ -46,18 +46,16 @@ xml.xml do
     xml.age    @age
   end
 end
+
+#<xml>
+  #<linkXml>
+    #<phone>1234-5678</phone>
+    #<age>20</age>
+  #</linkXml>
+#</xml>
 ```
 
-```輸出
-<xml>
-  <linkXml>
-    <phone>1234-5678</phone>
-    <age>20</age>
-  </linkXml>
-</xml>
-```
-
-參考文件：  
+參考文件：
 [Outputting XML Using Ruby on Rails
-](https://richonrails.com/articles/outputting-xml-using-ruby-on-rails)  
+](https://richonrails.com/articles/outputting-xml-using-ruby-on-rails)
 [Action View - 樣板設計](https://ihower.tw/rails4/actionview.html)
