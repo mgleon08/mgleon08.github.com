@@ -571,6 +571,65 @@ A stub with an expectations that the method gets called.
 </ul>
 
 
+<h3>include</h3>
+
+<p>可以將常用的包成 <code>method</code> include 進來。</p>
+
+<p><code>spec/custom_helper.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">CustomHelper</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">my_helper_method</span><span class="p">(</span><span class="n">success</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>要記得 reqyire &amp; include 進來</p>
+
+<p><code>spec/rails_helper.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;custom_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">FactoryGirl</span><span class="o">::</span><span class="no">SyntaxRunner</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:include</span><span class="p">,</span> <span class="no">CustomHelper</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1">#factory girl 也可以引入這個 helper 進來</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">include</span> <span class="no">CustomHelper</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>factories/post.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">FactoryGirl</span><span class="o">.</span><span class="n">define</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">factory</span> <span class="ss">:post</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">title</span> <span class="p">{</span> <span class="n">my_helper_method</span><span class="p">(</span><span class="kp">attr</span><span class="p">)</span> <span class="p">}</span> <span class="c1">#記得要加 {}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://www.relishapp.com/rspec/rspec-core/docs/helper-methods/define-helper-methods-in-a-module">Define helper methods in a module</a></p>
+
 <h1>factory_girl</h1>
 
 <p>到 <code>spec/rails_helper.rb</code> 設定</p>
@@ -697,6 +756,8 @@ A stub with an expectations that the method gets called.
 
 <p><a href="https://github.com/jnicklas/capybara">capybara</a>就是一套可以搭配的工具，用來模擬瀏覽器行為</p>
 
+<p>如果真的需要打開瀏覽器測試，例如需要測試JavaScript和Ajax介面，可以使用 <a href="http://docs.seleniumhq.org/">seleniumhq</a> 或<a href="http://watir.com/"> Watir</a> 工具</p>
+
 <h1>CI server</h1>
 
 <p>CI(Continuous Integration)
@@ -791,6 +852,17 @@ A stub with an expectations that the method gets called.
 <p>接著到 <a href="https://circleci.com">circleci.com</a> 和 github 帳號做連結。
 接著將要跑的 project 加進去，之後只要 push 到 github 就會自動跑了！</p>
 
+<h1>Other</h1>
+
+<p><a href="https://github.com/guard/guard-rspec">guard-rspec</a> <br/>
+<code>Continuous Testing</code> 的工具。程式修改完存檔，自動跑對應的測試。</p>
+
+<p><a href="https://github.com/thoughtbot/shoulda-matchers">shoulda-matchers</a> <br/>
+提供了更多Rails的專屬Matchers</p>
+
+<p><a href="https://github.com/colszowka/simplecov">SimpleCov</a><br/>
+用來顯示，測試涵蓋的範圍，可知道哪些地方沒有測試到</p>
+
 <h1>大師引言</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -812,28 +884,29 @@ A stub with an expectations that the method gets called.
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>官方文件：
-<a href="http://betterspecs.org/">Better Specs</a>
-<a href="https://www.relishapp.com/">Relish</a>
+<p>官方文件：<br/>
+<a href="http://betterspecs.org/">Better Specs</a><br/>
+<a href="https://www.relishapp.com/">Relish</a><br/>
 <a href="http://matchers.shoulda.io/">shoulda</a></p>
 
-<p>Gem：
-<a href="https://github.com/rspec/rspec-rails">rspec-rails</a>
-<a href="https://github.com/thoughtbot/factory_girl_rails">factory_girl_rails</a>
-<a href="https://github.com/guard/guard-rspec">guard-rspec</a>
-<a href="https://github.com/jnicklas/capybara">capybara</a>
-<a href="https://github.com/thoughtbot/shoulda-matchers">shoulda-matchers</a></p>
+<p>Gem：<br/>
+<a href="https://github.com/rspec/rspec-rails">rspec-rails</a><br/>
+<a href="https://github.com/thoughtbot/factory_girl_rails">factory_girl_rails</a><br/>
+<a href="https://github.com/guard/guard-rspec">guard-rspec</a><br/>
+<a href="https://github.com/jnicklas/capybara">capybara</a><br/>
+<a href="https://github.com/thoughtbot/shoulda-matchers">shoulda-matchers</a><br/>
+<a href="https://github.com/colszowka/simplecov">SimpleCov</a></p>
 
-<p>參考文件：
-<a href="https://ihower.tw/rails4/testing.html">自動化測試</a>
-<a href="http://motion-express.com/trainings/rspec-rails-1">RSpec-Rails (基礎篇)</a>
-<a href="http://motion-express.com/blog/20150320-custom-helpers-in-rspec">RSpec-Rails當中自訂methods及helpers</a>
-<a href="http://motion-express.com/blog/20150327-rspec-rails-testing-module">RSpec-Rails 針對module進行unit test</a>
-<a href="http://www.slideshare.net/ihower/rspec-7394497">RSpec 讓你愛上寫測試</a>
-<a href="https://blog.alphacamp.co/2015/03/02/tdd-kata/">程式設計師升級必練內功：TDD Kata</a>
-<a href="https://codility.com/programmers/lessons/">codility 練習</a>
-<a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a>
-<a href="https://ruby-china.org/topics/10977">对 stub 和 mock 的理解</a>
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/testing.html">自動化測試</a><br/>
+<a href="http://motion-express.com/trainings/rspec-rails-1">RSpec-Rails (基礎篇)</a><br/>
+<a href="http://motion-express.com/blog/20150320-custom-helpers-in-rspec">RSpec-Rails當中自訂methods及helpers</a><br/>
+<a href="http://motion-express.com/blog/20150327-rspec-rails-testing-module">RSpec-Rails 針對module進行unit test</a><br/>
+<a href="http://www.slideshare.net/ihower/rspec-7394497">RSpec 讓你愛上寫測試</a><br/>
+<a href="https://blog.alphacamp.co/2015/03/02/tdd-kata/">程式設計師升級必練內功：TDD Kata</a><br/>
+<a href="https://codility.com/programmers/lessons/">codility 練習</a><br/>
+<a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a><br/>
+<a href="https://ruby-china.org/topics/10977">对 stub 和 mock 的理解</a><br/>
 <a href="https://ruby-china.org/topics/9271">RSpec 中 let 和 subject 的区别是什么？</a></p>
 </div>
 

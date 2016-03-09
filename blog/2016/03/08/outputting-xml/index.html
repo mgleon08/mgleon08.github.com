@@ -9,15 +9,10 @@
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="在 rails 當中，可以用 xml.builder 來輕鬆的輸出 xml view index.xml.builder 1
+  <meta name="description" content="在 rails 當中，可以用 xml.builder 來輕鬆的輸出 xml Format 可以直接在 routes ，設定 format 格式 1
+get :l, :defaults =&gt; { :format =&gt; &#39;xml&#39; } 或是 controller 1
 2
-3
-4
-5
-6
-7
-xml.instruct!
-xml.xml do xml.linkXml do xml.phone @user xml.age @age end &hellip;">
+3 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -134,7 +129,43 @@ xml.xml do xml.linkXml do xml.phone @user xml.age @age end &hellip;">
 <!-- more -->
 
 
-<p>view</p>
+<h1>Format</h1>
+
+<p>可以直接在 <code>routes</code> ，設定 format 格式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span>  <span class="ss">:l</span><span class="p">,</span> <span class="ss">:defaults</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:format</span> <span class="o">=&gt;</span> <span class="s1">&#39;xml&#39;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是 controller</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;csv&#39;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">PeopleController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="vi">@people</span> <span class="o">=</span> <span class="no">Person</span><span class="o">.</span><span class="n">all</span>
+</span><span class='line'>    <span class="n">respond_to</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">format</span><span class="o">.</span><span class="n">html</span>
+</span><span class='line'>      <span class="nb">format</span><span class="o">.</span><span class="n">json</span><span class="p">{</span> <span class="n">render</span> <span class="ss">:json</span> <span class="o">=&gt;</span> <span class="vi">@person</span><span class="o">.</span><span class="n">to_json</span> <span class="p">}</span>
+</span><span class='line'>      <span class="nb">format</span><span class="o">.</span><span class="n">xml</span> <span class="p">{</span> <span class="n">render</span> <span class="ss">:xml</span> <span class="o">=&gt;</span> <span class="vi">@person</span><span class="o">.</span><span class="n">to_xml</span> <span class="p">}</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>View</h1>
 
 <p><code>index.xml.builder</code></p>
 
@@ -145,6 +176,13 @@ xml.xml do xml.linkXml do xml.phone @user xml.age @age end &hellip;">
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">xml</span><span class="o">.</span><span class="n">instruct!</span>
 </span><span class='line'><span class="n">xml</span><span class="o">.</span><span class="n">xml</span> <span class="k">do</span>
 </span><span class='line'>  <span class="n">xml</span><span class="o">.</span><span class="n">linkXml</span> <span class="k">do</span>
@@ -152,19 +190,19 @@ xml.xml do xml.linkXml do xml.phone @user xml.age @age end &hellip;">
 </span><span class='line'>    <span class="n">xml</span><span class="o">.</span><span class="n">age</span>    <span class="vi">@age</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#&lt;xml&gt;</span>
+</span><span class='line'>  <span class="c1">#&lt;linkXml&gt;</span>
+</span><span class='line'>    <span class="c1">#&lt;phone&gt;1234-5678&lt;/phone&gt;</span>
+</span><span class='line'>    <span class="c1">#&lt;age&gt;20&lt;/age&gt;</span>
+</span><span class='line'>  <span class="c1">#&lt;/linkXml&gt;</span>
+</span><span class='line'><span class="c1">#&lt;/xml&gt;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>可以直接在 <code>routes</code> ，設定 format 格式</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span>  <span class="ss">:l</span><span class="p">,</span> <span class="ss">:defaults</span> <span class="o">=&gt;</span> <span class="p">{</span> <span class="ss">:format</span> <span class="o">=&gt;</span> <span class="s1">&#39;xml&#39;</span> <span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件：<br/>
+<p>參考文件：
 <a href="https://richonrails.com/articles/outputting-xml-using-ruby-on-rails">Outputting XML Using Ruby on Rails
-</a><br/>
+</a>
 <a href="https://ihower.tw/rails4/actionview.html">Action View - 樣板設計</a></p>
 </div>
 
