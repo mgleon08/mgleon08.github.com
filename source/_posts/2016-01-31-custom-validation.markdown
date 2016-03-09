@@ -31,9 +31,9 @@ end
 
 也可以將 `validator` 拉出來，比較乾淨。
 
-`app/validators/photo_size_validator.rb`
-
 ```ruby
+#app/validators/photo_size_validator.rb
+
 class PhotoSizeValidator < ActiveModel::Validator
   def validate record
     unless validated? record
@@ -47,13 +47,27 @@ class PhotoSizeValidator < ActiveModel::Validator
     record.file.size < 1.megabytes
   end
 end
-```
-`models/photo.rb`
 
-```ruby
-class Material::Banner < ActiveRecord::Base
+#models/photo.rb
+class PhotoValidator < ActiveModel::EachValidator
   include ActiveModel::Validations
   validates_with PhotoSizeValidator
+end
+```
+
+or
+
+```ruby
+class EmailValidator < ActiveModel::EachValidator
+  def validate_each(record, attribute, value)
+    unless value =~ /\A([^@\s]+)@((?:[-a-z0-9]+\.)+[a-z]{2,})\z/i
+      record.errors[attribute] << (options[:message] || "is not an email")
+    end
+  end
+end
+ 
+class Person < ActiveRecord::Base
+  validates :email, presence: true, email: true
 end
 ```
 

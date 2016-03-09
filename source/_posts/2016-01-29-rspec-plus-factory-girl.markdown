@@ -285,6 +285,46 @@ rspec --tag focus
 * [2-2 version matchers](https://www.relishapp.com/rspec/rspec-expectations/v/2-2/docs/matchers)
 * [3-4 version](http://www.relishapp.com/rspec/rspec-expectations/v/3-4/docs)
 
+###include
+
+可以將常用的包成 `method` include 進來。
+
+`spec/custom_helper.rb`
+
+```ruby
+module CustomHelper
+  def my_helper_method(success)
+    ...
+  end
+end
+```
+要記得 reqyire & include 進來
+
+`spec/rails_helper.rb`
+
+```ruby
+require_relative 'custom_helper'
+
+RSpec.configure do |config|
+  FactoryGirl::SyntaxRunner.send(:include, CustomHelper) 
+  #factory girl 也可以引入這個 helper 進來
+  
+  config.include CustomHelper
+end
+```
+
+`factories/post.rb`
+
+```ruby
+FactoryGirl.define do
+  factory :post do
+    title { my_helper_method(attr) } #記得要加 {}
+  end
+end
+```
+
+[Define helper methods in a module](https://www.relishapp.com/rspec/rspec-core/docs/helper-methods/define-helper-methods-in-a-module)
+
 #factory_girl
 
 到 `spec/rails_helper.rb` 設定
@@ -363,7 +403,9 @@ end
 #Capybara
 RSpec除了可以拿來寫單元程式，我們也可以把測試的層級拉高做整合性測試，以Web應用程式來說，就是去自動化瀏覽器的操作，實際去向網站伺服器請求，然後驗證出來的HTML是正確的輸出。
 
-[capybara](https://github.com/jnicklas/capybara)就是一套可以搭配的工具，用來模擬瀏覽器行為
+[capybara](https://github.com/jnicklas/capybara)就是一套可以搭配的工具，用來模擬瀏覽器行為  
+
+如果真的需要打開瀏覽器測試，例如需要測試JavaScript和Ajax介面，可以使用 [seleniumhq](http://docs.seleniumhq.org/) 或[ Watir](http://watir.com/) 工具
 
 #CI server
 CI(Continuous Integration)
@@ -422,6 +464,15 @@ production:
 接著到 [circleci.com](https://circleci.com) 和 github 帳號做連結。
 接著將要跑的 project 加進去，之後只要 push 到 github 就會自動跑了！
 
+#Other
+[guard-rspec](https://github.com/guard/guard-rspec)   
+`Continuous Testing` 的工具。程式修改完存檔，自動跑對應的測試。
+
+[shoulda-matchers](https://github.com/thoughtbot/shoulda-matchers)   
+提供了更多Rails的專屬Matchers
+
+[SimpleCov](https://github.com/colszowka/simplecov)  
+用來顯示，測試涵蓋的範圍，可知道哪些地方沒有測試到
 
 #大師引言
 ```
@@ -434,26 +485,27 @@ controller偶爾會寫
 工程是寫到request就很棒了
 feature 比較像是QA在寫的
 ```
-官方文件：
-[Better Specs](http://betterspecs.org/)
-[Relish](https://www.relishapp.com/)
-[shoulda](http://matchers.shoulda.io/)
+官方文件：  
+[Better Specs](http://betterspecs.org/)  
+[Relish](https://www.relishapp.com/)  
+[shoulda](http://matchers.shoulda.io/)  
 
-Gem：
-[rspec-rails](https://github.com/rspec/rspec-rails)
-[factory_girl_rails](https://github.com/thoughtbot/factory_girl_rails)
-[guard-rspec](https://github.com/guard/guard-rspec)
-[capybara](https://github.com/jnicklas/capybara)
-[shoulda-matchers](https://github.com/thoughtbot/shoulda-matchers)
+Gem：  
+[rspec-rails](https://github.com/rspec/rspec-rails)  
+[factory_girl_rails](https://github.com/thoughtbot/factory_girl_rails)  
+[guard-rspec](https://github.com/guard/guard-rspec)  
+[capybara](https://github.com/jnicklas/capybara)  
+[shoulda-matchers](https://github.com/thoughtbot/shoulda-matchers)  
+[SimpleCov](https://github.com/colszowka/simplecov)
 
-參考文件：
-[自動化測試](https://ihower.tw/rails4/testing.html)
-[RSpec-Rails (基礎篇)](http://motion-express.com/trainings/rspec-rails-1)
-[RSpec-Rails當中自訂methods及helpers](http://motion-express.com/blog/20150320-custom-helpers-in-rspec)
-[RSpec-Rails 針對module進行unit test](http://motion-express.com/blog/20150327-rspec-rails-testing-module)
-[RSpec 讓你愛上寫測試](http://www.slideshare.net/ihower/rspec-7394497)
-[程式設計師升級必練內功：TDD Kata](https://blog.alphacamp.co/2015/03/02/tdd-kata/)
-[codility 練習](https://codility.com/programmers/lessons/)
-[保齡球練習](http://www.sportcalculators.com/bowling-score-calculator)
-[对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)
-[RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)
+參考文件：  
+[自動化測試](https://ihower.tw/rails4/testing.html)  
+[RSpec-Rails (基礎篇)](http://motion-express.com/trainings/rspec-rails-1)  
+[RSpec-Rails當中自訂methods及helpers](http://motion-express.com/blog/20150320-custom-helpers-in-rspec)  
+[RSpec-Rails 針對module進行unit test](http://motion-express.com/blog/20150327-rspec-rails-testing-module)  
+[RSpec 讓你愛上寫測試](http://www.slideshare.net/ihower/rspec-7394497)  
+[程式設計師升級必練內功：TDD Kata](https://blog.alphacamp.co/2015/03/02/tdd-kata/)  
+[codility 練習](https://codility.com/programmers/lessons/)  
+[保齡球練習](http://www.sportcalculators.com/bowling-score-calculator)  
+[对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)  
+[RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)  

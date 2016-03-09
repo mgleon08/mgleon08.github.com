@@ -45,6 +45,30 @@ a.hello
 * `extend`  增加 class_methods
 * `include` 增加 instance_methods
 
+
+###也可以用 include 導入 module 的 method
+
+`module.rb`
+
+```ruby
+module Foo
+  def bar(a)
+    puts "#{a}"
+  end
+end
+```
+
+`test.rb`
+
+```ruby
+require './module'
+include Foo
+
+bar('hello')
+or 
+Foo.bar('hello')
+```
+
 #require
 
 在 ruby 中，一開始用有很多 `method` 可以使用，是因為 ruby 將一些常用的都先載入進來。

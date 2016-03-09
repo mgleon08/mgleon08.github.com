@@ -208,6 +208,18 @@ puts generic_return(Proc.new { |x, y| [x + 2, y + 2] })
 # proc 需再用 array 包覆起來
 ```
 
+#lambda 新寫法
+
+```ruby
+# bad
+lambda = lambda { |a, b​​| a + b }
+lambda.call(1, 2)
+
+# good
+lambda = ->(a, b) { a + b }
+lambda.(1, 2)
+```
+
 參考文件：  
 [理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。](http://rubyer.me/blog/917/)  
 [聊聊 Ruby 中的 block, proc 和 lambda](https://ruby-china.org/topics/10414)

@@ -492,6 +492,15 @@ User.all.map(&:name)
 [Benchmark](http://ruby-doc.org/stdlib-2.0.0/libdoc/benchmark/rdoc/Benchmark.html)
 [benchmark-ips](https://github.com/evanphx/benchmark-ips)
 
+#建議
+
+```ruby
+map    勝於 collect
+find   勝於 detect
+select 勝於 find_all
+reduce 勝於 inject
+size   勝於 length
+```
 
 官方文件：  
 [Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  

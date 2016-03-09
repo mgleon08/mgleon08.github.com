@@ -83,13 +83,13 @@ gem 'pry-nav'
 
 ![pry](http://i.imgur.com/67g9JXM.png)
 
-指令：
-`self` 檢查目前所在的 class 或 scope
-`next` 執行這一段 block，並在下一段 block 開始時停止
-`step` 執行這一行，並在下一行停止
-`ls、methods` 可以看目前的 class 或 scope 內有什麼樣的 variable 或 method 可以使用
-`continue` 繼續執行，如果有下一個 `binding.pry`就會停下來
-`exit` 離開 pry ，繼續執行程式
+指令：  
+`self` 檢查目前所在的 class 或 scope  
+`next` 執行這一段 block，並在下一段 block 開始時停止  
+`step` 執行這一行，並在下一行停止  
+`ls、methods` 可以看目前的 class 或 scope 內有什麼樣的 variable 或 method 可以使用  
+`continue` 繼續執行，如果有下一個 `binding.pry`就會停下來  
+`exit` 離開 pry ，繼續執行程式  
 
 >要有 `gem 'pry-nav'` 才會有 next、step ，一步一步 debug
 
@@ -105,11 +105,11 @@ gem 'pry-nav'
 ap_
 ```
 
-詳細介紹：
+詳細介紹：  
 [超棒的 rails console 設定](http://toyroom.bruceli.net/tw/2014/08/13/awesome-rails-console-customization-using-pry.html)
 
 
-參考文章：
-[Pry ：新一代 Debug 利器](http://blog.xdite.net/posts/2012/08/13/pry-the-new-debugger)
-[Debugging Rails 沒有錯誤訊息卻還是有bug！要如何即時除錯？](http://motion-express.com/blog/20141015-debugging-rails-pry)
+參考文章：  
+[Pry ：新一代 Debug 利器](http://blog.xdite.net/posts/2012/08/13/pry-the-new-debugger)  
+[Debugging Rails 沒有錯誤訊息卻還是有bug！要如何即時除錯？](http://motion-express.com/blog/20141015-debugging-rails-pry)  
 [超棒的 rails console 設定](http://toyroom.bruceli.net/tw/2014/08/13/awesome-rails-console-customization-using-pry.html)

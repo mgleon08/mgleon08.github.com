@@ -71,6 +71,10 @@ Dir.entries(".").each do |file|
   puts File.file?(file)
 end
 # 檢查整個資料夾內的項目是否為檔案
+
+Dir["#{Rails.root}/test/*.rb"].each do |file|
+  require file
+end
 ```
 
 #判斷
