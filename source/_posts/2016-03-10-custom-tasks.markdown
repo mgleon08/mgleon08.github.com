@@ -10,10 +10,10 @@ categories: rails
 
 <!-- more -->
 
-檔案放在 `/config/tasks/xxx.rake`  
+檔案放在 `/config/tasks/xxx.rake`
 記得後面副檔名是 `rake`
 
-#[Ubike](http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5) 
+#[Ubike](http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5)
 
 get 台北 Uike 資料，並存取到資料庫。
 
@@ -115,15 +115,15 @@ def paste_secrets
     # if you're sharing your code publicly.
 
     development:
-      secret_key_base: #{%x[rake secret].strip}
+      secret_key_base: #{`rake secret`.strip}
 
     test:
-      secret_key_base: #{%x[rake secret].gsub('\n','')}
+      secret_key_base: #{`rake secret`.gsub('\n','')}
 
     # Do not keep production secrets in the repository,
     # instead read values from the environment.
     production:
-      secret_key_base: #{%x[rake secret].gsub('\n','')}
+      secret_key_base: #{`rake secret`.gsub('\n','')}
   "
   path = "#{Rails.root}/config/secrets.yml"
   File.open(path,"w"){|file|
@@ -141,8 +141,8 @@ namespace :generate do
 end
 ```
 
-之前寫的Json  
+之前寫的Json
 [Json](http://mgleon08.github.io/blog/2016/01/09/ruby-on-rails-json/)
- 
-參考資料：  
+
+參考資料：
 [錦囊妙計](https://ihower.tw/rails4/rails-recipes.html)
