@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "用 yaml 來寫文件"
+title: "用 yaml 來寫文件, 設定檔"
 date: 2016-02-07 16:08:29 +0800
 comments: true
 categories: ruby
@@ -35,6 +35,10 @@ require "yaml"
 
 SAMPLE = YAML.load(File.read(File.expand_path('../sample.yml', __FILE__))).freeze
 
+or
+
+SAMPLE = YAML.load_file('sample.yml')
+
 #=> {"option"=>
 #		[
 #			{"a"=>"foo", "a1"=>"bar"}, 
@@ -44,5 +48,33 @@ SAMPLE = YAML.load(File.read(File.expand_path('../sample.yml', __FILE__))).freez
 #	}
 ```
 
+#設定檔
+
+再 `/config` 底下建立 yml & yml.example  
+並將 yml 的放進 `.gitignore` ，避免敏感資訊，傳到 github 上面
+
+上 production 的時候，再將 example 的複製過來，將密碼改成 production 的即可。
+
+`/config/fb.yml`
+
+```ruby
+development:
+  app_id: xxxxxxxxxxxxxxxx
+  secret: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+
+production:
+  app_id: xxxxxxxxxxxxxxxx
+  secret: xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+然後再需要的地方就可以直接使用了
+
+```ruby
+fb_config = Rails.application.config_for(:fb)
+fb_config["app_id"] #=> xxxxxxxxxxxxxxxx
+fb_config["secret"] #=> xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+```
+
+[config_for](http://apidock.com/rails/v4.2.1/Rails/Application/config_for)
+
 官方文件：  
-[Yaml](http://ruby-doc.org/stdlib-2.3.0/libdoc/yaml/rdoc/YAML/Store.html)
+[Yaml](http://ruby-doc.org/stdlib-1.8.6/libdoc/yaml/rdoc/YAML.html)  
