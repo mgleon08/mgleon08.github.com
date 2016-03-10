@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-03-10T11:20:16+08:00</updated>
+  <updated>2016-03-10T21:35:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,255 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[自己定義 Rake Tasks]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/10/custom-tasks/"/>
+    <updated>2016-03-10T21:29:39+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/10/custom-tasks</id>
+    <content type="html"><![CDATA[<p>在寫 rails 當中，經常會用到 rake xxx，現在也可以自己定義了!</p>
+
+<!-- more -->
+
+
+<p>檔案放在 <code>/config/tasks/xxx.rake</code>
+記得後面副檔名是 <code>rake</code></p>
+
+<h1><a href="http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5">Ubike</a></h1>
+
+<p>get 台北 Uike 資料，並存取到資料庫。</p>
+
+<p>可以用 <a href="https://github.com/rest-client/rest-client">rest-client</a> 這個gem
+先用 <code>get</code> 取得資料，再用 <code>JSON.parse</code> 來將 <code>string</code> 解析成 <code>hash</code></p>
+
+<p><code>rake dev:fetch_ubike</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#lib/tasks/dev.rake</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;get Ubike date&quot;</span> <span class="c1"># 新增訊息在 rake --tasks 裡面</span>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:dev</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">task</span> <span class="ss">:fetch_ubike</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;fetching ubike&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5&quot;</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">raw_content</span> <span class="o">=</span> <span class="no">RestClient</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">data</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span> <span class="n">raw_content</span> <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">data</span><span class="o">[</span><span class="s2">&quot;result&quot;</span><span class="o">][</span><span class="s2">&quot;results&quot;</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">u</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">a</span> <span class="o">=</span> <span class="no">Ubike</span><span class="o">.</span><span class="n">find_by_ubike_id</span><span class="p">(</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;_id&quot;</span><span class="o">]</span> <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">if</span> <span class="n">a</span> <span class="o">==</span> <span class="kp">nil</span>
+</span><span class='line'>        <span class="c1"># maybe update it!</span>
+</span><span class='line'>        <span class="no">Ubike</span><span class="o">.</span><span class="n">create</span><span class="p">(</span> <span class="ss">:ubike_id</span> <span class="o">=&gt;</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;_id&quot;</span><span class="o">]</span><span class="p">,</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;sna&quot;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">else</span>
+</span><span class='line'>        <span class="no">Ubike</span><span class="o">.</span><span class="n">update</span><span class="p">(</span> <span class="ss">:ubike_id</span> <span class="o">=&gt;</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;_id&quot;</span><span class="o">]</span><span class="p">,</span> <span class="ss">:name</span> <span class="o">=&gt;</span> <span class="n">u</span><span class="o">[</span><span class="s2">&quot;sna&quot;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這樣只要打 <code>rake dev:fetch_ubike</code> 就會自動跑了!</p>
+
+<h1><a href="http://vote.ly.g0v.tw/api/vote/?page=1">立委資料</a></h1>
+
+<p><code>rake vote:fetch_raw_vote</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#立委資料，資料相當大，很多分頁</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;get vote data&quot;</span> <span class="c1"># 新增訊息在 rake --tasks 裡面</span>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:vote</span> <span class="k">do</span>
+</span><span class='line'>
+</span><span class='line'> <span class="n">task</span> <span class="ss">:fetch_raw_vote</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>   <span class="nb">puts</span> <span class="s2">&quot;fetching raw_vote&quot;</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">url</span> <span class="o">=</span> <span class="s2">&quot;http://vote.ly.g0v.tw/api/vote/?page=1&quot;</span>
+</span><span class='line'>   <span class="n">raw_content</span> <span class="o">=</span> <span class="no">RestClient</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">data</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span> <span class="n">raw_content</span> <span class="p">)</span>
+</span><span class='line'>     <span class="k">while</span> <span class="n">data</span><span class="o">[</span><span class="s2">&quot;next&quot;</span><span class="o">]</span> <span class="o">!=</span> <span class="kp">nil</span>
+</span><span class='line'>        <span class="n">data</span><span class="o">[</span><span class="s2">&quot;results&quot;</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">r</span><span class="o">|</span>
+</span><span class='line'>
+</span><span class='line'>           <span class="no">Vote</span><span class="o">.</span><span class="n">create</span><span class="p">(</span> <span class="ss">:url</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;url&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:uid</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;uid&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:sitting_id</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;sitting_id&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:vote_seq</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;vote_seq&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:content</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;content&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:conflict</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;conflict&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:results</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;results&quot;</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>                           <span class="ss">:result</span> <span class="o">=&gt;</span> <span class="n">r</span><span class="o">[</span><span class="s2">&quot;result&quot;</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>         <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>         <span class="n">url</span> <span class="o">=</span> <span class="n">data</span><span class="o">[</span><span class="s2">&quot;next&quot;</span><span class="o">]</span>
+</span><span class='line'>         <span class="n">raw_content</span> <span class="o">=</span> <span class="no">RestClient</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">url</span><span class="p">)</span>
+</span><span class='line'>         <span class="n">data</span> <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span> <span class="n">raw_content</span> <span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>secret.yml</h1>
+
+<p>或是定義可以直接下指令新增 <code>secret.yml</code></p>
+
+<p><code>rake generate:secrets</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">paste_secrets</span>
+</span><span class='line'>  <span class="n">text</span> <span class="o">=</span> <span class="s2">&quot;</span>
+</span><span class='line'><span class="s2">    # Be sure to restart your server when you modify this file.</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">    # Your secret key is used for verifying the integrity of signed cookies.</span>
+</span><span class='line'><span class="s2">    # If you change this key, all old signed cookies will become invalid!</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">    # Make sure the secret is at least 30 characters and all random,</span>
+</span><span class='line'><span class="s2">    # no regular words or you&#39;ll be exposed to dictionary attacks.</span>
+</span><span class='line'><span class="s2">    # You can use `rake secret` to generate a secure secret key.</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">    # Make sure the secrets in this file are kept private</span>
+</span><span class='line'><span class="s2">    # if you&#39;re sharing your code publicly.</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">    development:</span>
+</span><span class='line'><span class="s2">      secret_key_base: </span><span class="si">#{</span><span class="sb">`rake secret`</span><span class="o">.</span><span class="n">strip</span><span class="si">}</span><span class="s2"></span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">    test:</span>
+</span><span class='line'><span class="s2">      secret_key_base: </span><span class="si">#{</span><span class="sb">`rake secret`</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;\n&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">    # Do not keep production secrets in the repository,</span>
+</span><span class='line'><span class="s2">    # instead read values from the environment.</span>
+</span><span class='line'><span class="s2">    production:</span>
+</span><span class='line'><span class="s2">      secret_key_base: </span><span class="si">#{</span><span class="sb">`rake secret`</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;\n&#39;</span><span class="p">,</span><span class="s1">&#39;&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2"></span>
+</span><span class='line'><span class="s2">  &quot;</span>
+</span><span class='line'>  <span class="n">path</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/config/secrets.yml&quot;</span>
+</span><span class='line'>  <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="n">path</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">){</span><span class="o">|</span><span class="n">file</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">file</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;Add secrets.yml&quot;</span> <span class="c1"># 新增訊息在 rake --tasks 裡面</span>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:generate</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">task</span> <span class="ss">:secrets</span> <span class="k">do</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Generating: </span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/config/secrets.yml&quot;</span>
+</span><span class='line'>    <span class="n">paste_secrets</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Done!&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之前寫的Json
+<a href="http://mgleon08.github.io/blog/2016/01/09/ruby-on-rails-json/">Json</a></p>
+
+<p>參考資料：
+<a href="https://ihower.tw/rails4/rails-recipes.html">錦囊妙計</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Outputting XML]]></title>
@@ -282,7 +531,8 @@
 
 
 <p>參考文件：<br/>
-<a href="http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php">Understanding class_eval and instance_eval</a></p>
+<a href="http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php">Understanding class_eval and instance_eval</a><br/>
+<a href="http://openhome.cc/Gossip/Ruby/Eval.html">eval</a></p>
 ]]></content>
   </entry>
   
@@ -318,11 +568,55 @@
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="o">]</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">#問 a 的方法有哪些</span>
 </span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">methods</span>
 </span><span class='line'><span class="c1">#=&gt; [:inspect, :to_s, :to_a, :to_h, :to_ary, :frozen?, :==, :eql?, :hash...]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">public_methods</span>    <span class="c1">#取得實例上public方法</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">protected_methods</span> <span class="c1">#取得實例上protected方法</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">private_methods</span>   <span class="c1">#取得實例上private方法</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">instance_methods</span>           <span class="c1">#可取得類別或模組上定義的非private實例方法</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">public_instance_methods</span>    <span class="c1">#可取得類別或模組上定義的public實例方法</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">protected_instance_methods</span> <span class="c1">#可取得類別或模組上定義的protected實例方法</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">private_instance_methods</span>   <span class="c1">#可取得類別或模組上定義的private實例方法</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">instance_methods</span><span class="p">(</span><span class="kp">false</span><span class="p">)</span>
+</span><span class='line'><span class="err">如果呼叫方法時加上</span><span class="kp">false</span><span class="err">，表示僅取得類別或模組中定義的實例方法，排除繼承或含括而來的實例方法。</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">public_class_method</span>  <span class="c1">#取得public的模組或類別方法</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">private_class_method</span> <span class="c1">#取得private的模組或類別方法</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">local_variables</span>    <span class="c1">#區域變數清單</span>
+</span><span class='line'><span class="nb">global_variables</span>   <span class="c1">#全域變數清單</span>
+</span><span class='line'><span class="nb">instance_variables</span> <span class="c1">#物件的實例變數</span>
+</span><span class='line'><span class="nb">class_variables</span>    <span class="c1">#類別或模組變數</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">defined?</span> <span class="c1">#知道變數是哪個範圍的變數 local? global?</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">#問它是否有這個方法</span>
 </span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">respond_to?</span> <span class="ss">:to_s</span>
@@ -685,11 +979,11 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Ruby 中的 Include Extend Require]]></title>
+    <title type="html"><![CDATA[Ruby 中的 Include Extend Require Load]]></title>
     <link href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/"/>
     <updated>2016-02-24T21:49:30+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/02/24/include-extend-require</id>
-    <content type="html"><![CDATA[<p>常常搞不清楚，<code>include</code>，<code>extend</code>，<code>require</code>這幾個差異。</p>
+    <content type="html"><![CDATA[<p>常常搞不清楚，<code>include</code>，<code>extend</code>，<code>require</code>，<code>load</code>這幾個差異。</p>
 
 <!-- more -->
 
@@ -835,13 +1129,25 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>Load</h1>
+
+<p>跟 require 類似，不過每 load 一次，就會重新執行該 load 的檔案。</p>
+
+<blockquote><p>以術語來說，load 要求載入一個檔案，而require要求某個功能特性（Feature）</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">load</span> <span class="s2">&quot;sample.rb&quot;</span> <span class="c1">#load 要加 .rb</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <p>官方文件：<br/>
 <a href="http://ruby-doc.org/core-2.3.0/">ruby-doc</a></p>
 
 <p>參考文件：<br/>
 <a href="http://blog.eddie.com.tw/2015/03/24/class-and-module/">Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」</a> <br/>
 <a href="http://motion-express.com/blog/20150407-ruby-require-require-relative-load">require、require_relative是什麼意思？差在哪？</a><br/>
-<a href="https://ihower.tw/rails4/environments-and-bundler.html">環境設定與Bundle</a></p>
+<a href="https://ihower.tw/rails4/environments-and-bundler.html">環境設定與Bundle</a><br/>
+<a href="http://openhome.cc/Gossip/Ruby/LoadRequire.html">load 與 require</a></p>
 ]]></content>
   </entry>
   
@@ -1944,6 +2250,111 @@ mac 本身沒有內建要另外安裝。</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h3>&amp;</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Array</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">iterate!</span><span class="p">(</span><span class="o">&amp;</span><span class="n">code</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">array</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">iterate!</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">n</span> <span class="o">**</span> <span class="mi">2</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">array</span><span class="o">.</span><span class="n">inspect</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Proc</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Array</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">iterate!</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">array_1</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">square</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">n</span> <span class="o">**</span> <span class="mi">2</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">iterate!</span><span class="p">(</span><span class="n">square</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">array</span><span class="o">.</span><span class="n">inspect</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>lambda</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Array</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">iterate!</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">array</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">iterate!</span><span class="p">(</span><span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span> <span class="n">n</span> <span class="o">**</span> <span class="mi">2</span> <span class="p">})</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">array</span><span class="o">.</span><span class="n">inspect</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <p>其實就是再把 <code>&amp;block</code> 的寫法簡化</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -2004,13 +2415,7 @@ mac 本身沒有內建要另外安裝。</p>
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">pro</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span>  <span class="nb">puts</span> <span class="n">a</span><span class="p">}</span>
-</span><span class='line'><span class="c1">#=&gt; &lt;Proc:0x007fcb23ad2640@(irb):1&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">pro</span> <span class="o">=</span> <span class="nb">proc</span> <span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span>  <span class="nb">puts</span> <span class="n">a</span><span class="p">}</span>
 </span><span class='line'><span class="c1">#=&gt; &lt;Proc:0x007fcb23ad2640@(irb):1&gt;</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">pro</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">a</span><span class="o">|</span>
@@ -2031,7 +2436,7 @@ mac 本身沒有內建要另外安裝。</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>此時就會被 <code>p</code> 存起來，因此引用時就不需加上 <code>&amp;</code></p>
+<p>此時就會被 <code>pro</code> 存起來，因此引用時就不需加上 <code>&amp;</code></p>
 
 <h1>lambda</h1>
 
@@ -2110,8 +2515,8 @@ mac 本身沒有內建要另外安裝。</p>
 
 <h3>2.lambda 的return 會繼續執行，proc 則會直接終止</h3>
 
-<p><code>lambda</code> 比較像是一個 method 的 return <br/>
-<code>proc</code> 則是比較像是 一整個 method 的 return</p>
+<p><code>lambda</code> 比較像是一個 method 的 return，會 return 值回去，並且繼續執行 <br/>
+<code>proc</code> 則是比較像是 一整個 method 的 return，return 就結束</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -2141,11 +2546,11 @@ mac 本身沒有內建要另外安裝。</p>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'><span class="nb">puts</span> <span class="n">proc_return</span>
-</span><span class='line'><span class="no">Proc</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="o">=&gt;</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span>
 </span><span class='line'><span class="c1">#=&gt; nil</span>
 </span><span class='line'>
 </span><span class='line'><span class="nb">puts</span> <span class="n">lambda_return</span>
-</span><span class='line'><span class="n">lambda_return</span> <span class="nb">method</span> <span class="n">finished</span>
+</span><span class='line'><span class="o">=&gt;</span><span class="n">lambda_return</span> <span class="nb">method</span> <span class="n">finished</span>
 </span><span class='line'><span class="c1">#=&gt; nil</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -2218,7 +2623,9 @@ mac 本身沒有內建要另外安裝。</p>
 
 <p>參考文件：<br/>
 <a href="http://rubyer.me/blog/917/">理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。</a><br/>
-<a href="https://ruby-china.org/topics/10414">聊聊 Ruby 中的 block, proc 和 lambda</a></p>
+<a href="https://ruby-china.org/topics/10414">聊聊 Ruby 中的 block, proc 和 lambda</a><br/>
+<a href="http://openhome.cc/Gossip/Ruby/Proc.html">程式區塊與 Proc</a><br/>
+<a href="http://openhome.cc/Gossip/Ruby/Lamdba.html">使用 lambda</a></p>
 ]]></content>
   </entry>
   
@@ -2342,95 +2749,6 @@ mac 本身沒有內建要另外安裝。</p>
 <p>參考文件：<br/>
 <a href="http://blog.xuite.net/yschu/wretch/104912690-Ruby+-+Chapter+09+%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86(exception">Ruby - Chapter 09 例外處理(exception)</a>)<br/>
 <a href="http://blog.tonycube.com/2011/07/ruby8.html">Ruby學習筆記(8) – 錯誤與例外處理</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[自定 Module 和 Class 檔案]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/01/customer-module-class/"/>
-    <updated>2016-02-01T22:19:13+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/01/customer-module-class</id>
-    <content type="html"><![CDATA[<p>在 rails 當中，可以自訂一些好用方便的檔案，在適當的時機來使用。</p>
-
-<!-- more -->
-
-
-<h1>method</h1>
-
-<p>在 <code>lib/require/object.rb</code>，可以自行新增 class</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Object</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">is?</span><span class="p">(</span><span class="o">*</span><span class="n">objects</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">for</span> <span class="n">object</span> <span class="k">in</span> <span class="n">objects</span>
-</span><span class='line'>      <span class="k">return</span> <span class="kp">true</span> <span class="k">if</span> <span class="nb">self</span> <span class="o">==</span> <span class="n">object</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>    <span class="kp">false</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>require</h1>
-
-<p>但要記得要在使用的檔案，先 require 才能夠使用</p>
-
-<p>也可以直接在 <code>config/initializer</code> 新增 <code>require.rb</code> 檔案，將檔案 require 進來，就不用每個檔案上面都 require 了。</p>
-
-<blockquote><p><code>initializer</code> 裡面的檔案，程式一執行就會全部都執行了</p></blockquote>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#單個檔案</span>
-</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/lib/require/object.rb&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#多個檔案</span>
-</span><span class='line'><span class="no">Dir</span><span class="o">[</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/lib/require/object.rb&quot;</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">require</span> <span class="n">file</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#lib 底下所有檔案</span>
-</span><span class='line'><span class="no">Dir</span><span class="o">[</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/lib/**/*.rb&quot;</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">file</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">require</span> <span class="n">file</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 檔案 &amp;&amp; 資料夾名稱可自訂 ex: monkey_patches</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>使用</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="s2">&quot;hello&quot;</span><span class="o">.</span><span class="n">is?</span><span class="p">(</span><span class="s2">&quot;yes&quot;</span><span class="p">,</span> <span class="s2">&quot;no&quot;</span><span class="p">,</span> <span class="s2">&quot;hello)</span>
-</span><span class='line'><span class="s2">#=&gt; true</span>
-</span><span class='line'>
-</span><span class='line'><span class="s2">&quot;</span><span class="n">hello</span><span class="s2">&quot;.is?(&quot;</span><span class="n">yes</span><span class="s2">&quot;, &quot;</span><span class="n">no</span><span class="s2">&quot;)</span>
-</span><span class='line'><span class="s2">#=&gt; false</span>
-</span></code></pre></td></tr></table></div></figure>
-
 ]]></content>
   </entry>
   
