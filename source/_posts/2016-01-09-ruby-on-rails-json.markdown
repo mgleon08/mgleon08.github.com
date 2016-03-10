@@ -142,9 +142,12 @@ end
 
 範例： [Ubike](http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5) 資料，並存取到資料庫。
 
+`rake dev:fetch_ubike`
+
 ```ruby
 #lib/tasks/dev.rake
 
+desc "get Ubike date" # 就可以新增訊息在 rake --tasks 裡面
 namespace :dev do
 
   task :fetch_ubike => :environment do
@@ -175,8 +178,12 @@ end
 
 範例2：[立委資料](http://vote.ly.g0v.tw/api/vote/?page=1)
 
+`rake vote:fetch_raw_vote`
+
 ```ruby
 #立委資料，資料相當大，很多分頁
+
+desc "get vote data" # 就可以新增訊息在 rake --tasks 裡面
 namespace :vote do
 
  task :fetch_raw_vote => :environment do

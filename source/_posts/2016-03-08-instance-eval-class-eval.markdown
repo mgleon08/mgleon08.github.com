@@ -76,4 +76,5 @@ b.num
 ```
 
 參考文件：  
-[Understanding class_eval and instance_eval](http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php)
+[Understanding class_eval and instance_eval](http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php)  
+[eval](http://openhome.cc/Gossip/Ruby/Eval.html)

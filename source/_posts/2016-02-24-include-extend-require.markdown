@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "Ruby 中的 include extend require"
+title: "Ruby 中的 include extend require load"
 date: 2016-02-24 21:49:30 +0800
 comments: true
 categories: ruby
 ---
 
-常常搞不清楚，`include`，`extend`，`require`這幾個差異。
+常常搞不清楚，`include`，`extend`，`require`，`load`這幾個差異。
 
 <!-- more -->
 
@@ -101,10 +101,22 @@ require_relative 'test'
 require 'file/test'
 ```
 
+#Load
+
+跟 require 類似，不過每 load 一次，就會重新執行該 load 的檔案。
+
+>以術語來說，load 要求載入一個檔案，而require要求某個功能特性（Feature）
+
+```ruby
+load "sample.rb" #load 要加 .rb
+```
+
+
 官方文件：  
 [ruby-doc](http://ruby-doc.org/core-2.3.0/)  
 
 參考文件：  
 [Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」](http://blog.eddie.com.tw/2015/03/24/class-and-module/)   
 [require、require_relative是什麼意思？差在哪？](http://motion-express.com/blog/20150407-ruby-require-require-relative-load)  
-[環境設定與Bundle](https://ihower.tw/rails4/environments-and-bundler.html)
+[環境設定與Bundle](https://ihower.tw/rails4/environments-and-bundler.html)  
+[load 與 require](http://openhome.cc/Gossip/Ruby/LoadRequire.html)

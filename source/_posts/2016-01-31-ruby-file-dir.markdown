@@ -19,10 +19,10 @@ File.new("ruby.rb", "w")
 
 File.open("/home/work/ruby.rb")
 
-File.open("ruby.rb") { |f|
+File.open("ruby.rb", 'w') { |f|
   f.write("puts 'hello world'")
 }
-# 打開檔案，並寫入文字
+# 打開檔案，並寫入文字（若沒檔案會直接新增）
 
 File.delete("/home/work/ruby.rb")
 #刪除檔案

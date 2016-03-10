@@ -57,6 +57,66 @@ puts array.inspect
 # => [1, 4, 9, 16]
 ```
 
+###&
+
+```ruby
+class Array
+  def iterate!(&code)
+    self.each_with_index do |n, i|
+      self[i] = code.call(n)
+    end
+  end
+end
+
+array = [1, 2, 3, 4]
+
+array.iterate! do |n|
+  n ** 2
+end
+
+puts array.inspect
+```
+###Proc
+
+```ruby
+class Array
+  def iterate!(code)
+    self.each_with_index do |n, i|
+      self[i] = code.call(n)
+    end
+  end
+end
+
+array_1 = [1, 2, 3, 4]
+
+square = Proc.new do |n|
+  n ** 2
+end
+
+array.iterate!(square)
+
+puts array.inspect
+```
+###lambda
+
+```ruby
+class Array
+  def iterate!(code)
+    self.each_with_index do |n, i|
+      self[i] = code.call(n)
+    end
+  end
+end
+
+array = [1, 2, 3, 4]
+
+array.iterate!(lambda { |n| n ** 2 })
+
+puts array.inspect
+
+```
+
+
 其實就是再把 `&block` 的寫法簡化
 
 ```ruby
@@ -89,9 +149,6 @@ puts who_am_i {}
 pro = Proc.new {|a|  puts a}
 #=> <Proc:0x007fcb23ad2640@(irb):1>
 
-pro = proc {|a|  puts a}
-#=> <Proc:0x007fcb23ad2640@(irb):1>
-
 pro = Proc.new do |a|
   puts a
 end
@@ -109,7 +166,7 @@ pro(123)
 #=> 123
 ```
 
-此時就會被 `p` 存起來，因此引用時就不需加上 `&`
+此時就會被 `pro` 存起來，因此引用時就不需加上 `&`
 
 #lambda
 
@@ -158,8 +215,8 @@ args(lambda{|a, b, c| puts "Give me a #{a} and a #{b} and a #{c.class}"})
 ```
 ###2.lambda 的return 會繼續執行，proc 則會直接終止
 
-`lambda` 比較像是一個 method 的 return   
-`proc` 則是比較像是 一整個 method 的 return
+`lambda` 比較像是一個 method 的 return，會 return 值回去，並且繼續執行   
+`proc` 則是比較像是 一整個 method 的 return，return 就結束
 
 ```ruby
 def proc_return
@@ -173,11 +230,11 @@ def lambda_return
 end
 
 puts proc_return
-Proc.new
+=>Proc.new
 #=> nil
 
 puts lambda_return
-lambda_return method finished
+=>lambda_return method finished
 #=> nil
 ```
 
@@ -222,4 +279,6 @@ lambda.(1, 2)
 
 參考文件：  
 [理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。](http://rubyer.me/blog/917/)  
-[聊聊 Ruby 中的 block, proc 和 lambda](https://ruby-china.org/topics/10414)
+[聊聊 Ruby 中的 block, proc 和 lambda](https://ruby-china.org/topics/10414)  
+[程式區塊與 Proc](http://openhome.cc/Gossip/Ruby/Proc.html)  
+[使用 lambda](http://openhome.cc/Gossip/Ruby/Lamdba.html)

@@ -124,6 +124,7 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 * [rebase -i 修正 commit 過的版本歷史紀錄2](https://github.com/doggy8088/Learn-Git-in-30-days/blob/master/docs/23%20%E4%BF%AE%E6%AD%A3%20commit%20%E9%81%8E%E7%9A%84%E7%89%88%E6%9C%AC%E6%AD%B7%E5%8F%B2%E7%B4%80%E9%8C%84%20Part%205%20(rebase%202).markdown)
 * `git rebase --onto <new base-commit> <current base-commit>` 指定要從哪裡開始接枝
 * 有 conflict 修改好後，`git rebase --continue`
+* 直接從 rebase 狀態離開 `git rebase --abort`
 
 ```
 pick   = 要這條 commit ，什麼都不改
