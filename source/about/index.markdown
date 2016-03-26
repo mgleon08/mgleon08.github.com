@@ -14,4 +14,4 @@ footer: true
 *  Yourator : [www.yourator.co](http://www.yourator.co/)
 *  Rainbow-Balloons : [http://www.rainbow-balloons.com/](http://www.rainbow-balloons.com/)
 *  Email : mgleon08@gmail.com
-*  Skill : HTML, CSS, JavaScript, Ruby, Rails
+*  Skill : HTML, CSS, JavaScript, jQuery, Angular, Ruby, Rails
