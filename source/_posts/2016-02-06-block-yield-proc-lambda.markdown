@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "Ruby 中的 Block & Yield & Proc & Lambda"
+title: "Ruby 中的 Block & Yield & Proc & Lambda & method"
 date: 2016-02-06 10:37:37 +0800
 comments: true
 categories: ruby
 ---
 
-在學 ruby 時，經常會搞不清楚這四個，因為都非常相像!  
+在學 ruby 時，經常會搞不清楚這幾個，因為都非常相像!  
 
 <!-- more -->
 
@@ -40,14 +40,15 @@ end
 ```ruby
 class Array
   def iterate!
-    self.each_with_index do |n, i|
-      self[i] = yield(n)
+    self.each_with_index do |n, i| #[1, 2, 3, 4].each_with_index
+      self[i] = yield(n)           #等於於 self[i] = n ** 2 
     end
   end
 end
 
 array = [1, 2, 3, 4]
 
+# array 呼叫 iterate! method 並將後面 do 帶入
 array.iterate! do |n|
   n ** 2
 end
@@ -57,7 +58,9 @@ puts array.inspect
 # => [1, 4, 9, 16]
 ```
 
-###&
+###& 區塊引述傳遞 寫法
+
+若要調用在變數，前綴一個『&』符號，並且要放在最後一個
 
 ```ruby
 class Array
@@ -76,7 +79,17 @@ end
 
 puts array.inspect
 ```
-###Proc
+
+其實 ruby 自動會將 後面的 block 轉換成 proc
+
+```ruby
+a = Proc.new{|n| n ** 2}
+array.iterate!(&a)
+
+#這樣也成立，必須要加上 & 代表 block
+```
+
+###Proc 寫法
 
 ```ruby
 class Array
@@ -97,7 +110,26 @@ array.iterate!(square)
 
 puts array.inspect
 ```
-###lambda
+
+###yield 其實就是再把 `&block` 的寫法簡化
+
+以下三種相等
+
+```ruby
+def test
+  yield
+end
+
+def test(&block)
+  block.call
+end
+
+def test
+  Proc.new.call
+end
+```
+
+###lambda 寫法
 
 ```ruby
 class Array
@@ -113,23 +145,58 @@ array = [1, 2, 3, 4]
 array.iterate!(lambda { |n| n ** 2 })
 
 puts array.inspect
-
 ```
 
-
-其實就是再把 `&block` 的寫法簡化
+#&
+& 實際上是會觸發物件的 `to_proc` 方法，並嘗試指定給 & 變數  
+因此可以在物件上定義 `to_proc`，然後使用 & 來觸發
 
 ```ruby
-def test
-  yield
+class People
+  attr_reader :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def self.to_proc
+    Proc.new { |people| people.name }
+  end
 end
 
-def test(&block)
-  block.call
-end
+a = People.new('adler')
+b = People.new('kai')
+c = People.new('eugene')
+
+print [a, b, c].map(&People)
+# ["adler", "kai", "eugene"]
+```
+symbol 都有 `to_proc` 這個 method 因此可以改寫成
+
+```ruby
+:upcase.to_proc.call("abc")
+#=> "ABC"
+
+:downcase.to_proc.call("ABC")
+#=> "abc"
 ```
 
+
+有些 method 甚至連 `&` 也可以省略
+
+```ruby
+[1, 2, 3].reduce { |sum, element| sum += element }
+# => 6
+[1, 2, 3].reduce(&:+)
+# => 6
+[1, 2, 3].reduce(:+)
+# => 6
+```
+
+
 #procedure (proc)
+
+proc 都會有 `.call` 的 method 來呼叫
 
 ```ruby
 def who_am_i(&block)
@@ -240,6 +307,7 @@ puts lambda_return
 
 ###使用時機
 
+`proc` 若作用域是在外面，無法將 return 傳進去，必須用 `lambda`  
 在某些情況下，使用 `lambda` 會比 `proc` 還簡約。
 
 ```ruby
@@ -265,7 +333,7 @@ puts generic_return(Proc.new { |x, y| [x + 2, y + 2] })
 # proc 需再用 array 包覆起來
 ```
 
-#lambda 新寫法
+#Ruby 1.9 lambda 新寫法
 
 ```ruby
 # bad
@@ -277,8 +345,35 @@ lambda = ->(a, b) { a + b }
 lambda.(1, 2)
 ```
 
+#method
+
+```ruby
+class People
+  attr_reader :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def coding(language)
+    puts "like #{language}"
+  end
+end
+
+a = People.new('leon')
+
+a.method(:coding).class
+#=> Method
+a.method(:coding).call('ruby')
+#=> like ruby
+```
+
+[取得 Method](http://openhome.cc/Gossip/Ruby/Method.html)
+
 參考文件：  
 [理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。](http://rubyer.me/blog/917/)  
 [聊聊 Ruby 中的 block, proc 和 lambda](https://ruby-china.org/topics/10414)  
+[迭代器與程式區塊](http://openhome.cc/Gossip/Ruby/IteratorBlock.html)
 [程式區塊與 Proc](http://openhome.cc/Gossip/Ruby/Proc.html)  
-[使用 lambda](http://openhome.cc/Gossip/Ruby/Lamdba.html)
+[使用 lambda](http://openhome.cc/Gossip/Ruby/Lamdba.html)  
+[取得 Method](http://openhome.cc/Gossip/Ruby/Method.html)

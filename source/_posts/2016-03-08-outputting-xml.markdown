@@ -55,7 +55,10 @@ end
 #</xml>
 ```
 
-參考文件：
+gem：  
+[builder](https://github.com/jimweirich/builder)
+
+參考文件：  
 [Outputting XML Using Ruby on Rails
 ](https://richonrails.com/articles/outputting-xml-using-ruby-on-rails)
 [Action View - 樣板設計](https://ihower.tw/rails4/actionview.html)

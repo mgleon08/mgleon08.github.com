@@ -236,6 +236,23 @@ User.all.each_with_object({}) do | user, hash |
 end
 ```
 
+複雜用法
+
+```ruby
+people = [{ math:10, english:20, chinese:30}, 
+          { math:90, english:80, chinese:90}
+          ]
+#=> [{:math=>10, :english=>20, :chinese=>30}, {:math=>90, :english=>80, :chinese=>90}]
+ 
+all = Hash.new(0).merge(label: "總分", student: people)
+#=> {:label=>"總分", :student=>[{:math=>10, :english=>20, :chinese=>30}, {:math=>90, :english=>80, :chinese=>90}]}
+
+people.each_with_object(all) do |number, hash|
+  number.each {|key, value| hash[key] += value }
+end
+#=> {:label=>"總分", :student=>[{:math=>10, :english=>20, :chinese=>30}, {:math=>90, :english=>80, :chinese=>90}], :math=>100, :english=>100, :chinese=>120}
+```
+
 [Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
 [each_with_object](http://apidock.com/rails/Enumerable/each_with_object)  
 #merge

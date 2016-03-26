@@ -11,6 +11,12 @@ categories: rails gem rspec
 
 <!-- more -->
 
+#RSpec
+Ruby 的測試 DSL (Domain-specific language)
+
+- Semantic Code：⽐ Test::Unit 更好讀，寫的⼈ 更容易描述測試⺫的
+- Self-documenting：可執⾏的規格⽂件
+
 #測試種類
 
 * 單元測試(Unit test)
@@ -49,6 +55,15 @@ group :development, :test do
   gem 'rspec-rails'
   gem 'factory_girl_rails'
 end
+
+#ruby
+gem install rspec
+rspec --init
+#create   .rspec
+#create   spec/spec_helper.rb
+
+#rails
+rails generate rspec:install
 ```
 
 #設定
@@ -56,8 +71,9 @@ end
 ### 顏色描述
 ```ruby
 #vi .rspec檔案輸入
+--require spec_helper
 --color #顯示顏色
---format #documentation顯示描述
+--format documentation #顯示描述
 ```
 ###將不需要的檔案關閉
 generate 新的 controller 或是 model 時，rails 就會很聰明的順便新增 sepc 檔案，但有時候我們會希望用到的時候再去建立即可，所以需要關閉就輸入以下指令。
@@ -73,6 +89,23 @@ config.generators do |g|
   g.routing_specs false
 end
 ```
+
+#語法介紹
+
+- describe 或 context 用來描述你要測試的是什麼，可以用nested
+- it 每個 it 就是⼀⼩段測試（it, specify, example都是一樣的）
+- expect(…).to 或 to_not 所有物件都有這個⽅法來定義你的期望
+- before(:each) 每段 it 之前執⾏
+- before(:all) 整段 describe 執⾏⼀次 ＊沒加(:xxx)預設是:each
+- after(:each) • afte(:all)
+- pending 可以先列出要測試的，但不用執行，直接在it前面加上x，xit
+- let(:name) { exp }
+    - 相較於 before(:each) 可增加執⾏速度
+    - 有使⽤到才會運算(lazy)，並且在同⼀個 example 測試中多次呼叫會 Memoized 快取起來。
+    - • let! 則是⾮ lazy 版本 (will create before every example)
+- 別名
+    - describe = context
+    - it = specify = example
 
 #Rspec
 
@@ -211,8 +244,10 @@ let(:user){User.new(:name => "hello")}
 ###Stub
 
 `Stub:`
-For replacing a method with code that returns a specified result.
+For replacing a method with code that returns a specified result.  
 用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。
+  
+專注於要測試的東西，如果 method 有呼叫其他 method 就可以 stub 掉
 
 ```ruby
 describe Zombie do
@@ -231,8 +266,8 @@ end
 ###mock
 
 `Mock:`
-A stub with an expectations that the method gets called.
-不只忽略這個 method ，並且期望被呼叫到
+A stub with an expectations that the method gets called.  
+假造 method，不只忽略這個 method ，並且期望被呼叫到
 
 ```ruby
 # simulate a not found resource
@@ -260,7 +295,30 @@ allow_any_instance_of(User).to receive(:follow).and_return(false)
 ```
 [mock](http://betterspecs.org/#mock)
 
+範例:
+
+```ruby
+#/app/models/zombie.rbdef geolocate  loc = Zoogle.graveyard_locator(self.graveyard)  "#{loc[:latitude]}, #{loc[:longitude]}"end
+#/spec/models/zombie_spec.rbit "calls Zoogle.graveyard_locator" do  Zoogle.should_receive(:graveyard_locator).with(zombie.graveyard)    .and_return({latitude: 2, longitude: 3})  zombie.geolocateend￼#stubs the method + expectation with correct param + return value
+
+#/spec/models/zombie_spec.rbit "returns properly formatted lat, long" do  Zoogle.stub(:graveyard_locator).with(zombie.graveyard)     .and_return({latitude: 2, longitude: 3})  zombie.geolocate.should == "2, 3"end
+```
+
+```ruby
+#/app/models/zombie.rbdef geolocate_with_object  loc = Zoogle.graveyard_locator(self.graveyard)  "#{loc.latitude}, #{loc.longitude}"enddef latitude  return 2end
+def longitude  return 3 
+end
+￼￼￼￼￼#/spec/models/zombie_spec.rbit "returns properly formatted lat, long" do  loc = stub(latitude: 2, longitude: 3)  Zoogle.stub(:graveyard_locator).returns(loc)  zombie.geolocate_with_object.should == "2, 3"end
+```
+
 ###let & subject
+
+```ruby
+subject (:zombie) { Zombie.new(name:'john') }
+let(:axe){ Weapon.new(name:'axe') }
+```
+`let`  只有在用到時才會執行  
+`let!` 每個測試前都會執行
 
 * [subject](http://betterspecs.org/#subject)
 * [let](http://betterspecs.org/#let)
@@ -280,10 +338,24 @@ allow_any_instance_of(User).to receive(:follow).and_return(false)
 rspec --tag focus
 ```
 
+要忽略特定的測試，可以加上 slow
+
+```ruby
+  it '#index',  slow:true do
+    get :index, format: :json
+    expect(response).to have_http_status 200
+  end
+```
+可以不就在輸入 tag 就會執行
+
+```ruby
+￼#spec/spec_helper.rbRSpec.configure do |config|  config.filter_run focus: true  config.run_all_with_everything_filtered = true
+    config.filter_run_excluding slow: true  config.run_all_with_everything_filtered = trueend
+```
+
 ###matchers
 
-* [2-2 version matchers](https://www.relishapp.com/rspec/rspec-expectations/v/2-2/docs/matchers)
-* [3-4 version](http://www.relishapp.com/rspec/rspec-expectations/v/3-4/docs)
+* [rspec](https://relishapp.com/rspec/)
 
 ###include
 
@@ -324,6 +396,49 @@ end
 ```
 
 [Define helper methods in a module](https://www.relishapp.com/rspec/rspec-core/docs/helper-methods/define-helper-methods-in-a-module)
+
+###shared_examples
+
+```ruby
+describe Vampire do   it_behaves_like 'the undead'
+   #let(:undead) { Zombie.new }end
+
+shared_examples_for 'the undead' do  #RSpec.shared_examples  it 'does not have a pulse' do    subject.pulse.should == false 
+    #undead.pulse.should == false
+  endend
+```
+
+```ruby
+#spec/models/vampire_spec.rb
+describe Zombie do  it_behaves_like 'the undead', Zombie.newend
+
+#spec/support/shared_examples_for_undead.rbshared_examples_for 'the undead' do |undead|  it 'does not have a pulse' doundead.pulse.should == false endend
+```
+
+###custom matcher
+
+```ruby
+#spec/models/zombie_spec.rb￼describe Zombie do  it 'validates presence of name' do    zombie = Zombie.new(name: nil)    zombie.should validate_presence_of(:name)  endend
+```
+
+```ruby
+#spec/support/validate_presence_of.rb module ValidatePresenceOf   class Matcher     def initialize(attribute)       @attribute = attribute
+       #default message
+       @message = "can't be blank"     end
+          def matches?(model)
+       @model = model
+       #主要的測試       model.valid?       model.errors.has_key?(@attribute)
+       #collect errors and find a match
+       errors = @model.errors[@attribute]       errors.any? { |error| error == @message }     end 
+   end   def validate_presence_of(attribute)     Matcher.new(attribute)   end 
+   
+   def failure_message      "#{@model.class} failed to validate :#{@attribute} presence."   end
+      def negative_failure_message      "#{@model.class} validated :#{@attribute} presence."   end
+   
+   #override failure message & return self
+   def with_message(message)     @message = message     self   end
+end
+```
 
 #factory_girl
 
@@ -487,7 +602,7 @@ feature 比較像是QA在寫的
 ```
 官方文件：  
 [Better Specs](http://betterspecs.org/)  
-[Relish](https://www.relishapp.com/)  
+[Relish](https://relishapp.com/rspec/)   
 [shoulda](http://matchers.shoulda.io/)  
 
 Gem：  
@@ -496,7 +611,8 @@ Gem：
 [guard-rspec](https://github.com/guard/guard-rspec)  
 [capybara](https://github.com/jnicklas/capybara)  
 [shoulda-matchers](https://github.com/thoughtbot/shoulda-matchers)  
-[SimpleCov](https://github.com/colszowka/simplecov)
+[SimpleCov](https://github.com/colszowka/simplecov)  
+[database_cleaner](https://github.com/DatabaseCleaner/database_cleaner)
 
 參考文件：  
 [自動化測試](https://ihower.tw/rails4/testing.html)  

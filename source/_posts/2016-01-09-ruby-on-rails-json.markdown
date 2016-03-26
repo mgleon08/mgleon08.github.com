@@ -36,7 +36,19 @@ Without any options, the returned JSON string will include all the hash keys
 `as_json` 轉 `ruby json` 格式   
 is used to create the structure of the JSON as a Hash, and the rendering of that hash into a JSON string is left up to ActiveSupport::json.encode
 
+>Anytime to_json is called on an object, as_json is invoked to create the data structure, and then that hash is encoded as a JSON string using ActiveSupport::json.encode
+
 大致上就是盡量用 `as_json`， model 中要覆蓋掉 json 的話也要用 `as_json`
+
+```ruby
+@user.as_json(only: :name) #指定屬性
+@user.as_json(only: [:name, :age]) #指定屬性
+@user.as_json(root: true)
+￼￼￼@user.as_json(include: :name, except: [:created_at, :updated_at, :id]
+{
+  "name": { "age":12 }
+}
+```
 
 官方文件：  
 [as_json](http://api.rubyonrails.org/classes/ActiveModel/Serializers/JSON.html#method-i-as_json)  
@@ -216,7 +228,7 @@ end
 ```
 
 官方文件：  
-[method-i-as_json](http://api.rubyonrails.org/classes/ActiveModel/Serializers/JSON.html#method-i-as_json)  
+[as_json](http://api.rubyonrails.org/classes/ActiveModel/Serializers/JSON.html#method-i-as_json)  
 [to_json](http://apidock.com/rails/Hash/to_json)
 
 參考文件：  

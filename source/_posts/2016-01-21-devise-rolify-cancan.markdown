@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "會員管理系統 Devise-Rolify-Cancan"
+title: "會員權限控管 Devise-Rolify-Cancan"
 date: 2016-01-21 22:17:48 +0800
 comments: true
 categories: gem rails
@@ -482,7 +482,8 @@ gem：
 [Device](https://github.com/plataformatec/devise)  
 [Cancancan](https://github.com/CanCanCommunity/cancancan)  
 [Rolify](https://github.com/RolifyCommunity/rolify)  
-[Devise CanCanCan rolify Tutorial](https://github.com/RolifyCommunity/rolify/wiki/Devise---CanCanCan---rolify-Tutorial)
+[Devise CanCanCan rolify Tutorial](https://github.com/RolifyCommunity/rolify/wiki/Devise---CanCanCan---rolify-Tutorial)  
+[pundit](https://github.com/elabs/pundit)
 
 參考文件：  
 [Devise + Rolify + Cancan](http://disco26.logdown.com/posts/210475-devise-rolify-cancan)  
