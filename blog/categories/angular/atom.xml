@@ -1,0 +1,455 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Angular | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/angular/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2016-03-27T21:31:11+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Angular Custom Directive]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/27/angular-custom-directive/"/>
+    <updated>2016-03-27T21:07:16+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/27/angular-custom-directive</id>
+    <content type="html"><![CDATA[<p>在 angular 當中可以自己客製 Directive，讓 code 變得更乾淨。</p>
+
+<!-- more -->
+
+
+<p>```js
+app.directive(&lsquo;productTitle&rsquo;, function(){
+    return{
+        restrict: &lsquo;E&rsquo;
+        templateUrl: &lsquo;product-title.html&rsquo;
+    }
+});</p>
+
+<p><product-title></product-title></p>
+
+<p>app.directive(&lsquo;productTitle&rsquo;, function(){
+    return{
+        restrict: &lsquo;A&rsquo;
+        templateUrl: &lsquo;product-title.html&rsquo;
+    }
+});</p>
+
+<p>//js 的 productTitle 名稱在 html 就會變成 product-title</p>
+
+<h3 product-title></h3>
+
+
+<p>‘A’ – Attribute (You want to use your directive as <div rating>)
+‘E’ – Element (Use it as <rating>)
+‘C’ – Class. (Use it like <div class=”rating”>)
+‘M’ – Comment (Use it like &lt;!– directive: rating –>
+```</p>
+
+<p><code>controller</code> 一起包在 <code>app.directive</code> 裡面</p>
+
+<p>```js
+app.directive(&lsquo;productTitle&rsquo;, function(){
+    return{
+        restrict: &lsquo;A&rsquo;
+        templateUrl: &lsquo;product-title.html&rsquo;
+        controller: function() {
+            this.tab = 1;
+            },
+        controllerAs: &ldquo;tab&rdquo;
+    }
+});</p>
+
+<p>//js 的 productTitle 名稱在 html 就會變成 product-title</p>
+
+<h3 product-title></h3>
+
+
+<p>```</p>
+
+<p>參考文件：<br/>
+<a href="http://ithelp.ithome.com.tw/question/10140689">入門AngularJS筆記-directive
+</a><br/>
+<a href="http://exile1030-blog.logdown.com/posts/167848-custom-angularjs-directive-1">自訂 AngularJs Directive (1) :開始</a><br/>
+<a href="http://exile1030-blog.logdown.com/posts/168283-customizing-the-angularjs-directive-2">自訂 AngularJs Directive (2): Hello World</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[#Angular File Upload]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/27/angular-file-upload/"/>
+    <updated>2016-03-27T21:03:04+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/27/angular-file-upload</id>
+    <content type="html"><![CDATA[<p>網站上有時候會用到上傳檔案功能。<br/>
+透過 angular，可以使用<a href="https://github.com/nervgh/angular-file-upload">angular-file-upload</a> 很方便的就建立出來</p>
+
+<!-- more -->
+
+
+<p></p>
+
+<p>這個 module 也有提供很多 API 可以使用 <a href="https://github.com/nervgh/angular-file-upload/wiki/Module-API">Module-API</a></p>
+
+<h1>controller</h1>
+
+<pre><code class="js">app
+.controller('VideoShowCtrl',
+  [        '$scope', '$http', 'FileUploader', '$stateParams',
+  function( $scope ,  $http ,  FileUploader ,  $stateParams){
+
+    //透過 $stateParams (ui-router) 可以得到 router 上的 id
+    var postID = $stateParams.id     
+    var uploader = new FileUploader({
+        url: '/posts/show' + postID',
+        formData: [],
+        headers: {
+            'X-CSRF-TOKEN' : document.querySelector("meta[name=csrf-token]").content
+        }
+    });
+
+    //內建提供上傳檔案前可以做哪些事
+    uploader.onBeforeUploadItem = function(item){
+        //若是傳的是 array，接到的會變成 string，可能是放在 formData 的原因@@
+        item.formData.push({ title: 'hello' })
+    };
+
+    //內建提供上傳檔案後做哪些事
+    uploader.onAfterAddingFile = function(item){
+        if(item.uploader.queue.length &gt; 1){ item.uploader.queue.shift() }
+    };
+
+    $scope.uploader = uploader
+
+}]);
+</code></pre>
+
+<h1>view</h1>
+
+<pre><code class="js">&lt;input type="file" nv-file-select="" uploader="uploader" /&gt;
+</code></pre>
+
+<p>參考文件：<br/>
+<a href="https://github.com/angular-ui/ui-router/wiki/URL-Routing">URL Routing</a></p>
+
+<p>gem：<br/>
+<a href="https://github.com/Marthyn/angularjs-file-upload-rails">angularjs-file-upload-rails</a><br/>
+<a href="https://github.com/nervgh/angular-file-upload">angular-file-upload</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Angular 筆記]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/27/angular-notes/"/>
+    <updated>2016-03-27T20:43:10+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/27/angular-notes</id>
+    <content type="html"><![CDATA[<p>最近有幸在專案上用到 angular，不過卡在非常尷尬的點&hellip;<br/>
+已經出 angular2 了，但專案是用 angular1..但還是來學習一下吧</p>
+
+<!-- more -->
+
+
+<p>AngularJS 跟 Rails 一樣是 MVC 框架，<br/>
+可以透過 Controller 來處理 Model 和 View 的綁定。</p>
+
+<p>Model 可以在 Controller 中進行處理<br/>
+並且透過 <code>雙向資料繫結 (Two Way Data-Binding)</code>，可以即時的互動!</p>
+
+<h1>Angular Setting</h1>
+
+<pre><code class="js">//app/asset/javascript/app.js
+
+//angular.module
+//Where we write pieces of our Angular application.//Makes our code more maintainable, testable, and readable. 
+//Where we define dependencies for our app.
+
+var app = angular.module('app', //設定 module 名稱，只能有一個
+  [ 'ui.router',                //Dependency Injection 其他 module
+    'angularFileUpload'
+  ])
+</code></pre>
+
+<h1>ui-router config</h1>
+
+<p>可藉由 <code>ui-router</code> module 來自定前端的 router，要再另外 inject，因為不是內建的</p>
+
+<pre><code class="js">//#字號前面為原本的 router，後面則為 ui-router，也可以透過 HTML5mode 來把 # 字號去除掉，但就要小心不要跟原本的 router 衝到。
+
+http://localhost:3000/#/posts/list
+</code></pre>
+
+<pre><code class="js">app
+.config(['$httpProvider', function($httpProvider){
+
+    //防止 CSRF，rails 預設都必須帶 token，才可以發 post，防止外來的攻擊
+    var headers = $httpProvider.defaults.headers.common;
+    token_tag = document.querySelector("meta[name=csrf-token]");
+    if( token_tag ){ headers['X-CSRF-TOKEN'] = token_tag.content; };
+    headers['X-Requested-With'] = 'XMLHttpRequest';
+
+    //另一種方式
+    //$httpProvider.defaults.headers.common['X-CSRF-TOKEN'] = $('meta[name=csrf-token]').attr('content');
+}])
+.config(
+  [      '$stateProvider', '$urlRouterProvider',
+  function($stateProvider,  $urlRouterProvider) {
+
+  // For any unmatched url, redirect to /state1
+  $urlRouterProvider.otherwise("/home");
+
+  // Now set up the states
+  $stateProvider
+    .state('posts', {
+      abstract: true,
+      url:"/posts",   
+      template: "&lt;ui-view&gt;&lt;/ui-view&gt;",
+    })
+    .state('posts.list', {
+      url: "/list", //http://localhost:3000/#/posts/list
+      templateUrl: "/posts/index.html",
+      controller: 'PostIndexCrtl'
+    })
+    .state('posts.show', {
+      url: "/show/:id", //http://localhost:3000/#/posts/show/1
+      templateUrl: "/posts/show.html",
+      controller: 'PostShowCrtl'
+    })
+}])
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="https://github.com/angular-ui/ui-router">ui-router</a><br/>
+<a href="https://angular-ui.github.io/ui-router/site/#/api/ui.router">ui-router github.io</a></p>
+
+<h1>Angular Controller</h1>
+
+<pre><code class="js">//app/asset/javascript/Post/PostIndexCrtl.js
+app
+.controller('PostIndexCrtl', //設定 controller 名稱，只能有一個
+  [       '$scope', '$http', //注入這個 controller 會用到的模組
+  function($scope, $http){   //這裏在要注入一次到這個 function 裡面
+
+    //定義一個 function 可以透過 $http 發 get 拿回 json
+    var getPost = function(){
+        $http.get('/posts').success(function(data){
+                //定義變數 post = 傳回來的dat
+                $scope.posts = data;
+        });
+    };
+
+    //這裏馬上執行，因為一定要有 data 才能做其他事
+    getPost()
+
+   //排序
+   $scope.sortKey = 'id';
+   $scope.sort = function(keyname){
+        $scope.sortKey = keyname;
+        $scope.reverse = !$scope.reverse; //加驚嘆號可以將值變成 boolean
+    }
+
+    //checkboxs
+    var selection = []
+    var fruits = [
+        '蘋果','西瓜','香蕉'
+    ];
+
+   //當點擊 checkbox 將值丟到 selection，取消則刪除
+   var toggleSelection = function toggleSelection(fruit) {
+        //indexOf()找出目前點擊的位置，若沒有則為 -1
+        var idx = $scope.selection.indexOf(fruit);         
+        if (idx &gt; -1) {
+        //splice(位置，刪除第幾個，新增資料)
+          $scope.selection.splice(idx, 1);
+        } else {
+          $scope.selection.push(fruit);
+        }
+      };
+
+    //也可以將所有變數定義在最後面，方便管理
+   $scope.selection = selection;
+   $scope.fruits = fruits
+   $scope.toggleSelection = toggleSelection
+}])
+</code></pre>
+
+<h1>view</h1>
+
+<p>在 <html ng-app="app"> ， ng-app 用來宣告 angular 的範圍<br/>
+記得要載入 angular library才能使用<br/>
+惱人的 turbolink 記得拿掉</p>
+
+<p><code>&lt;ui-view&gt;&lt;/ui-view&gt;</code><br/>
+ui.router 的語法，用來顯示透過 angular 拉回來的 view ，有點像是上面的 yield 是拉 rails 裡的 view 一樣
+範例就是會拉下面 index 的 view 進來</p>
+
+<h1>Angluar View</h1>
+
+<p>```html</p>
+
+<!--public/posts/index.html-->
+
+
+<div class="box">
+  <div class="box-header">
+    <div class='pull-right'>
+        <!-- ng-model 綁定 data 用來篩選-->
+      <label>Any: <input ng-model="search.$"></label>
+      <label>ID: <input ng-model="search.id"></label>
+    </div>
+  </div>
+  <div class="box-body">
+    <table class="table table-bordered table-hover">
+      <thead>
+        <tr>
+            <!-- ng-clik 觸發 controller 裡的 sort() function 並帶參數進去 -->
+          <th ng-click="sort('id')" class='pointer'>ID
+          <!-- ng-show true 顯示 flase 隱藏，相反為 ng-hide -->
+          <span class="glyphicon" ng-show="sortKey=='id'" ng-class="{'glyphicon-chevron-up':reverse,'glyphicon-chevron-down':!reverse}"></span>
+          </th>
+          <th>名稱</th>
+          <th>描述</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- ng-repeat 展開取回來的 array data -->
+        <!-- filter 篩選 -->
+        <!-- orderBy 排序 -->
+        <tr ng-repeat="video in videos | filter:search:strict | orderBy:sortKey:reverse">
+            <td></td>
+          <td></td>
+          <td></td>
+        </tr>
+    </tbody>
+    </table>
+  </div>
+</div>
+
+
+
+
+<!--checkbox 多選項-->
+
+
+<p><label ng-repeat="fruit in fruits">
+  <input type="checkbox" name="selectedFruits[]" value="" ng-checked="selection.indexOf(fruit) > -1"
+    ng-click=&ldquo;toggleSelection(fruit)&rdquo; >
+    
+</label></p>
+
+<pre></pre>
+
+
+<pre><code>
+#指令
+
+* `ng-app` 用來宣告 angular 的範圍，也可放在 `body` 裡面。
+* `ng-init` 可以直接在 view 中設定初始值，不過偏好管理還是直接設在 js 比較方便
+* `ng-model` 設定綁定的變數
+* `ng-click` 點下去觸發，設定好的function()  
+* `ng-show ng-hide` 搭配 ng-model 綁定資料，就可以來根據各種情況來顯示會隱藏
+* `ng-repeat`
+</code></pre>
+
+<p ng-repeat="post in posts">.</p>
+
+
+<p>$index – 取出陣列中的index。(從0開始)
+$first – 如果是第一個項目，就傳回true、否則為false。
+$middle – 如果不是第一個和最後一個項目，就傳回true、否則為false。
+$last – 如果是最後一個項目，就傳回true、否則為false。
+<code>``
+*</code>ng-checkbox` 勾選框</p>
+
+<pre><code class="js">ng-true-value="YES" ng-false-value="NO"
+可搭配這兩個設定 ture 和 false 時的值
+</code></pre>
+
+<ul>
+<li><code>ng-checked</code> 可以讓勾選框有 &lsquo;選擇全部&rsquo; 勾選或 &lsquo;取消全部&rsquo; 勾選的狀態</li>
+<li><code>ng-options</code> 下拉式選單</li>
+</ul>
+
+
+<pre><code class="js">&lt;select ng-model="Select1" ng-options="post.name for post in posts"&gt;
+    &lt;option value=""&gt;-- 請選擇 --&lt;/option&gt;
+&lt;/select&gt;
+</code></pre>
+
+<ul>
+<li><code>ng-switch</code> 可以搭配 <code>ng-options</code></li>
+<li><code>ng-change</code> 當資料改變會跟者執行</li>
+<li><code>ng-include</code> 像是 partial 一樣可以 include 其他 view 進來</li>
+</ul>
+
+
+<pre><code class="js">&lt;ng-include src="'/templates/search_bar.html'"&gt;&lt;/ng-include&gt;
+</code></pre>
+
+<ul>
+<li><code>ng-src</code> 用來取代 html 中 img 標籤裡的 src 屬性</li>
+</ul>
+
+
+<p>由於 AngularJS 是整個網站載完後才開始編譯，使用 ng-src 可以解決還沒載入完 html 發生的錯誤。</p>
+
+<ul>
+<li><code>ng-href</code>是用來取代html中 a 標籤裡的href屬性</li>
+</ul>
+
+
+<p>如果Angular還沒載入或載入失敗，會直接讓href讀取到的內容，
+而a 標籤裡的href屬性無法辨識，就會連結到404的錯誤頁面。</p>
+
+<ul>
+<li><code>ng-bind</code> 綁定 model，避免 html 載入完畢，js 還沒載入導致畫面顯示  的狀態</li>
+<li><code>ng-cloak</code> 跟 ng-bind 類似，需要另外增加css，用來解決跨瀏覽器顯示的問題</li>
+<li><code>ng-bind-template</code> 可以一次綁定多個 model</li>
+<li><code>ng-class</code> 用 angular 設定 class</li>
+<li><code>ng-form</code> ng-form允許有巢狀表單(nest forms)，就是在表單內再增加一個或多個form，而form則無法達到此需求。</li>
+<li><code>$scope</code> 用來宣告變數，有點像是 js 的 <code>var</code> 或著 rails 的 <code>@</code></li>
+<li><code>$watch</code> <a href="http://jsbin.com/oHIXIqa/3/edit?html,js,output">範例</a></li>
+</ul>
+
+
+<pre><code class="js">$watch、ng-change、ng-click的比較
+
+範例中$watch和ng-change的結果相同，
+但使用$watch指令，watch的值還會傳回newValue,oldValue，
+提供“改變的新數值”和“前一次改變的舊數值”。
+
+$watch和ng-change是在改變內容值的時候，觸發事件，ng-click則只會在點擊輸入框時被執行。
+</code></pre>
+
+<p><code>filter</code></p>
+
+<pre><code>test
+
+currency  貨幣符號
+date      將 Date 轉成指定格式的日期
+filter    可以篩選陣列中的內容
+json      json
+limitTo   限制陣列或字串裡面的字元個數
+number    可以為數值或指定小數以下位數
+lowercase 將英文字串轉成英文小寫
+uppercase 將英文字串轉成英文大寫
+orderBy   可以將資料作排序
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="https://angularjs.org/">AngularJs</a><br/>
+<a href="https://angular-ui.github.io/bootstrap/">angular-ui</a><br/>
+<a href="https://github.com/angular-ui/ui-router">ui-router</a>  <br/>
+<a href="https://angular-ui.github.io/ui-router/site/#/api/ui.router">ui-router github.io</a></p>
+
+<p>參考資料：<br/>
+<a href="http://ithelp.ithome.com.tw/profile/share?id=20071512&amp;page=4">入門AngularJS筆記</a><br/>
+<a href="http://programer-learn.blogspot.tw/p/angularjs.html">AngularJS 系列</a><br/>
+<a href="http://code.ciphertrick.com/2015/06/01/search-sort-and-pagination-ngrepeat-angularjs/">Search Sort and Pagination in ng-repeat – AngularJS</a></p>
+]]></content>
+  </entry>
+  
+</feed>

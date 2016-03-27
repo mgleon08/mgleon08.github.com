@@ -5,11 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby 中的 Block & Yield & Proc & Lambda - Leon's Blogging</title>
+  <title>Ruby 中的 Block & Yield & Proc & Lambda & Method - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="在學 ruby 時，經常會搞不清楚這四個，因為都非常相像! block 什麼是 block ? 在 ruby 中 block 就是只 do..end || {} 包起來的區塊，就稱為 block。 1
+  <meta name="description" content="在學 ruby 時，經常會搞不清楚這幾個，因為都非常相像! block 什麼是 block ? 在 ruby 中 block 就是只 do..end || {} 包起來的區塊，就稱為 block。 1
 2
 3
 4
@@ -110,7 +110,7 @@ end &hellip;">
   <header>
     
       
-        <h1 class="entry-title">Ruby 中的 Block & Yield & Proc & Lambda</h1>
+        <h1 class="entry-title">Ruby 中的 Block & Yield & Proc & Lambda & Method</h1>
       
     
     
@@ -130,7 +130,7 @@ end &hellip;">
   </header>
 
 
-<div class="entry-content"><p>在學 ruby 時，經常會搞不清楚這四個，因為都非常相像!</p>
+<div class="entry-content"><p>在學 ruby 時，經常會搞不清楚這幾個，因為都非常相像!</p>
 
 <!-- more -->
 
@@ -186,16 +186,18 @@ end &hellip;">
 <span class='line-number'>15</span>
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
+<span class='line-number'>18</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Array</span>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">iterate!</span>
-</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="k">yield</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span> <span class="c1">#[1, 2, 3, 4].each_with_index</span>
+</span><span class='line'>      <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="k">yield</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>           <span class="c1">#等於於 self[i] = n ** 2 </span>
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">array</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span>
 </span><span class='line'>
+</span><span class='line'><span class="c1"># array 呼叫 iterate! method 並將後面 do 帶入</span>
 </span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">iterate!</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
 </span><span class='line'>  <span class="n">n</span> <span class="o">**</span> <span class="mi">2</span>
 </span><span class='line'><span class="k">end</span>
@@ -206,7 +208,9 @@ end &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>&amp;</h3>
+<h3>&amp; 區塊引述傳遞 寫法</h3>
+
+<p>若要調用在變數，前綴一個『&amp;』符號，並且要放在最後一個</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -241,7 +245,20 @@ end &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>Proc</h3>
+<p>其實 ruby 自動會將 後面的 block 轉換成 proc</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span><span class="p">{</span><span class="o">|</span><span class="n">n</span><span class="o">|</span> <span class="n">n</span> <span class="o">**</span> <span class="mi">2</span><span class="p">}</span>
+</span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">iterate!</span><span class="p">(</span><span class="o">&amp;</span><span class="n">a</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#這樣也成立，必須要加上 &amp; 代表 block</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Proc 寫法</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -280,7 +297,36 @@ end &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>lambda</h3>
+<h3>yield 其實就是再把 <code>&amp;block</code> 的寫法簡化</h3>
+
+<p>以下三種相等</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">test</span>
+</span><span class='line'>  <span class="k">yield</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">block</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">test</span>
+</span><span class='line'>  <span class="no">Proc</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>lambda 寫法</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -311,7 +357,10 @@ end &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>其實就是再把 <code>&amp;block</code> 的寫法簡化</p>
+<h1>&amp;</h1>
+
+<p>&amp; 實際上是會觸發物件的 <code>to_proc</code> 方法，並嘗試指定給 &amp; 變數<br/>
+因此可以在物件上定義 <code>to_proc</code>，然後使用 &amp; 來觸發</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -320,17 +369,73 @@ end &hellip;">
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">test</span>
-</span><span class='line'>  <span class="k">yield</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">People</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:name</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@name</span> <span class="o">=</span> <span class="nb">name</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">to_proc</span>
+</span><span class='line'>    <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">people</span><span class="o">|</span> <span class="n">people</span><span class="o">.</span><span class="n">name</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">test</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">block</span><span class="o">.</span><span class="n">call</span>
-</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">People</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;adler&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">b</span> <span class="o">=</span> <span class="no">People</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;kai&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">c</span> <span class="o">=</span> <span class="no">People</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;eugene&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">print</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="no">People</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># [&quot;adler&quot;, &quot;kai&quot;, &quot;eugene&quot;]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>symbol 都有 <code>to_proc</code> 這個 method 因此可以改寫成</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">:upcase</span><span class="o">.</span><span class="n">to_proc</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s2">&quot;abc&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;ABC&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="ss">:downcase</span><span class="o">.</span><span class="n">to_proc</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s2">&quot;ABC&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;abc&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>有些 method 甚至連 <code>&amp;</code> 也可以省略</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">reduce</span> <span class="p">{</span> <span class="o">|</span><span class="n">sum</span><span class="p">,</span> <span class="n">element</span><span class="o">|</span> <span class="n">sum</span> <span class="o">+=</span> <span class="n">element</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; 6</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">reduce</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:+</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; 6</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">reduce</span><span class="p">(</span><span class="ss">:+</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; 6</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <h1>procedure (proc)</h1>
+
+<p>proc 都會有 <code>.call</code> 的 method 來呼叫</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -513,7 +618,8 @@ end &hellip;">
 
 <h3>使用時機</h3>
 
-<p>在某些情況下，使用 <code>lambda</code> 會比 <code>proc</code> 還簡約。</p>
+<p><code>proc</code> 若作用域是在外面，無法將 return 傳進去，必須用 <code>lambda</code><br/>
+在某些情況下，使用 <code>lambda</code> 會比 <code>proc</code> 還簡約。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -558,7 +664,7 @@ end &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>lambda 新寫法</h1>
+<h1>Ruby 1.9 lambda 新寫法</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -577,11 +683,56 @@ end &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>method</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">People</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:name</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@name</span> <span class="o">=</span> <span class="nb">name</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">coding</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;like </span><span class="si">#{</span><span class="n">language</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">People</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;leon&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="ss">:coding</span><span class="p">)</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'><span class="c1">#=&gt; Method</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="ss">:coding</span><span class="p">)</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s1">&#39;ruby&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; like ruby</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://openhome.cc/Gossip/Ruby/Method.html">取得 Method</a></p>
+
 <p>參考文件：<br/>
 <a href="http://rubyer.me/blog/917/">理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。</a><br/>
 <a href="https://ruby-china.org/topics/10414">聊聊 Ruby 中的 block, proc 和 lambda</a><br/>
+<a href="http://openhome.cc/Gossip/Ruby/IteratorBlock.html">迭代器與程式區塊</a>
 <a href="http://openhome.cc/Gossip/Ruby/Proc.html">程式區塊與 Proc</a><br/>
-<a href="http://openhome.cc/Gossip/Ruby/Lamdba.html">使用 lambda</a></p>
+<a href="http://openhome.cc/Gossip/Ruby/Lamdba.html">使用 lambda</a><br/>
+<a href="http://openhome.cc/Gossip/Ruby/Method.html">取得 Method</a></p>
 </div>
 
 
