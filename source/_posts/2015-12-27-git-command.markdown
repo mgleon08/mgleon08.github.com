@@ -208,9 +208,9 @@ exec   = 執行一條指令
 * `.gitkeep` 空目錄不會被 commit，必要時在目錄裡放 `.gitkeep`。
 * `vi .gitignore` 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。
 * [.gitignore ⼤集合](https://github.com/github/gitignore)
-* [移除 git 上敏感檔案](https://help.github.com/articles/remove-sensitive-data/)  
+* [移除 git 上敏感檔案](https://help.github.com/articles/remove-sensitive-data/)
 
-```git
+```
 git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch 檔案名稱' --prune-empty --tag-name-filter cat -- --all
 ```
 * `.gitignore` not working
@@ -222,11 +222,11 @@ git rm -r --cached .
 git add .
 git commit -m "fixed untracked files"
 ```
-* 開乾淨的 branch  
+* 開乾淨的 branch
 [How to create a new empty branch for a new project](http://stackoverflow.com/questions/13969050/how-to-create-a-new-empty-branch-for-a-new-project)
-```git
+```ruby
 git checkout --orphan <branchname>
-``` 
+```
 
 #alias
 自己設定的一些 alias

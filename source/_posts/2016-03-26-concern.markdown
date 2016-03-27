@@ -1,0 +1,156 @@
+---
+layout: post
+title: "用 Concern 來整理 code "
+date: 2016-03-26 09:32:30 +0800
+comments: true
+categories: 
+---
+
+當有相當多地方用到同樣的東西時，就可以用 concern 來讓 code 變得更乾淨。
+
+<!--more-->
+
+#使用時機
+* DRYing up model codes
+* Skin Fat Models.
+
+1. 將可重用的功能抽出來，讓多個 model 共用
+2. model 太肥大，將相關的邏輯的 code 放到不同的 concern 裡
+3. ActiveSupport::Concern 的風格
+
+#ActiveSupport::Concern
+任務是讓管理 modules 之間的 dependencies 變得容易。  
+也可以用 `include` 同時達成 `class methods` `instance methods`
+（原本必須 include + extend 才能達成）
+
+#原本作法
+
+```ruby
+# app/models/concerns/sample.rb
+
+module Sample
+  # self.included 會在 Sample 被 include 時執行
+  # base 傳入是誰哪個 Class include 了這個 module
+  def self.included(base)
+    base.class_eval do # 用 class_eval 在該 class 新增 Class method
+      #scope :disabled, -> { where(disabled: true) } 可以定義 scope
+      def self.foo
+      	  "這裡是 class 的 method"
+      end
+    end
+  end
+
+  def bar
+     "這裡是 instance 的 method"
+  end
+end
+```
+```ruby
+#app/models/test.rb
+class Test < ActiveRecord::Base
+  include Samples
+end
+
+Test.foo
+=> "這裡是 class 的 method"
+
+Test.new.bar
+=> "這裡是 instance 的 method"
+```
+
+兩個 module 可以互相 include
+
+```ruby
+# app/models/concerns/sample2.rb
+module Sample2
+  include Sample
+
+  def self.included(base)
+    base.class_eval do
+      #do something method
+    end
+  end
+end
+```
+```ruby
+#app/models/test.rb
+class Test < ActiveRecord::Base
+  include Sample
+  # include Sample，再透過 Sample 去 include Sample2 ,這樣就不用一次 include 兩個 module了
+end
+```
+以上看起來蠻理想的  
+但因為 include `Sample` 的是 `Sample2`  
+所以 `Sample` 的 base 就變成了 `Sample2` ， 不是我們要的 `Test`
+
+
+#更改
+
+```ruby
+# app/models/concerns/sample.rb
+module Sample
+  extend ActiveSupport::Concern
+    included do
+      self.send(:method) # base 改成 self
+    end
+end
+```
+
+```ruby
+# app/models/concerns/sample2.rb
+module Sample2
+  extend ActiveSupport::Concern
+  include Sample
+
+  included do
+    self.send(:methods)  # base 改成 self
+    # 可以在這裡放當 include 時要執行的東西
+    # 可以存取所有 class level 的東西
+    # ex1: 宣告 shared scope
+    # ex2: 可寫 shared validation
+  end
+  
+#可以直接定義 ClassMethods 不需再 send(:extend, ClassMethods) 或是用 class_eval 去定義
+   module ClassMethods  
+      def foo
+        # do something
+      end
+   end
+   
+#可以直接定義 InstanceMethods 不需再 send(:include, InstanceMethods)或是用 instance_eval 去定義
+   module InstanceMethods  #也可以不用特別定義 module InstanceMethods
+      def bar
+         # do something
+      end
+   end
+end
+```
+
+```ruby
+#app/models/test.rb
+class Test < ActiveRecord::Base
+  include Samples
+end
+```
+
+#concern vs service object
+
+* concern
+ - 簡單說就是，有許多 model 有共用的邏輯片段，可以拆出來 	
+* service object
+ - 與 concern 不同
+
+* 兩個搭配使用
+ - 將許多 service object 搬到 concern
+
+官方文件：  
+[ActiveSupport](http://api.rubyonrails.org/classes/ActiveSupport/Concern.html)  
+ 
+參考文件：  
+[什麼時候使用Concerns，什麼時候使用Services？](https://ruby-china.org/topics/18401)  
+[深入Rails3: ActiveSupport::Concern](https://ihower.tw/blog/archives/3949)  
+[How to use concerns in Rails 4](http://stackoverflow.com/questions/14541823/how-to-use-concerns-in-rails-4)  
+[ActiveSupport::Concern 小結](https://ruby-china.org/topics/19812)  
+[rails use case - mixin & concerns](http://adz.cool/posts/210893-rails-use-case-mixin-and-concerns)  
+[Slimming Down Your Models and Controllers with Concerns, Service Objects, and Tableless Models](https://www.viget.com/articles/slimming-down-your-models-and-controllers)  
+[ActiveSupport - 工具函式庫](https://ihower.tw/rails4/activesupport.html)
