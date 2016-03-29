@@ -311,6 +311,9 @@ end
 ￼￼￼￼￼#/spec/models/zombie_spec.rbit "returns properly formatted lat, long" do  loc = stub(latitude: 2, longitude: 3)  Zoogle.stub(:graveyard_locator).returns(loc)  zombie.geolocate_with_object.should == "2, 3"end
 ```
 
+[Stubs, Mocks and Spies in RSpec](https://about.futurelearn.com/blog/stubs-mocks-spies-rspec/)  
+[了解 Stubs, Mocks, and Spies](https://github.com/festime/stubs-mocks-spies-in-rspec)
+
 ###let & subject
 
 ```ruby
