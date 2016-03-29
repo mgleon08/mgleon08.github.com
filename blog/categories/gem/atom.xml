@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-03-27T21:31:11+08:00</updated>
+  <updated>2016-03-30T00:09:24+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,109 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[RSpec & Capybara 整合測試(Selenium and Poltergeist Driver)]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/30/rspec-capybara-selenium-poltergeist-driver/"/>
+    <updated>2016-03-30T00:04:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/30/rspec-capybara-selenium-poltergeist-driver</id>
+    <content type="html"><![CDATA[<p>capybara 是一個可以模擬瀏覽器行為的測試，還蠻好玩的~<br/>
+搭配不同 driver，用不同的方式來跑</p>
+
+<!-- more -->
+
+
+<p>因為是要模擬人真正在使用網頁的狀態，因次每一動，都要定義出來。</p>
+
+<h1>設定</h1>
+
+<pre><code class="ruby">#spec/rails_help.rb
+require 'capybara/rspec'
+require 'capybara/rails'
+require 'capybara/poltergeist'
+
+RSpec.configure do |config|
+  #要設定為 false ，就會實際存在 database，因此需要 database_cleaner 來清
+  config.use_transactional_fixtures = false
+
+  #devise controller 設定
+  config.include Devise::TestHelpers, :type =&gt; :controller
+  #devise capybara 設定
+  config.include Warden::Test::Helpers
+
+  #database_clean 設定 suite -&gt; 整個 rspec
+  config.before(:suite) do
+    DatabaseCleaner.clean_with :truncation
+  end
+
+  config.before(:each) do |example|
+    DatabaseCleaner.strategy = example.metadata[:js] ? :truncation : :transaction
+    DatabaseCleaner.start
+  end
+
+  config.after(:each) do |example|
+    DatabaseCleaner.clean
+  end
+
+  #可以設定環境變數，再跑指令時，下 DRIVER=selenium rspec spec/features 才會使用預設 :rack_test 跑，但沒有支援 js 因此才需要用到 selenium(跑瀏覽器)，poltergeist(跑console)
+  unless ENV["DRIVER"] == "selenium"
+    Capybara.javascript_driver = :poltergeist
+  end
+
+  Capybara.register_driver :poltergeist do |app|
+    Capybara::Poltergeist::Driver.new(app,
+      js_errors: true,
+      timeout: 15,
+      phantomjs_logger: File.new("#{Rails.root}/log/temp.log","w")
+    )
+  end
+end
+</code></pre>
+
+<h1>spec</h1>
+
+<pre><code class="ruby">#spec/features/user_spec.rb
+
+require 'rails_helper'
+
+describe 'home page' do
+  before do
+    @user  = create(:user, :admin)
+    # mock CSRF 
+    allow_any_instance_of(ActionController::Base).to receive(:protect_against_forgery?).and_return(true)
+  end
+
+  it 'User is admin can login and see data', :js =&gt; true do
+    visit '/backend'#後台首頁
+    fill_in 'email', :with =&gt; 'admin@gmail.com' #輸入email
+    fill_in 'password', :with =&gt; 'password' #輸入密碼
+    click_button 'submit' #點擊登入
+    expect(page).to have_content('後台') #到後台看到後台的字
+  end
+
+  it 'logout', :js=&gt; true do
+    login_as(@user) #登入
+    visit '/backend/posts'  #在內頁
+    find("#logout").click #點擊登出，記得要下 id
+    expect(current_path).to eq('/') #回到首頁
+    expect(page).to have_content('首頁') #頁面上也首頁的字
+  end
+end
+</code></pre>
+
+<p>gem：<br/>
+<a href="https://github.com/jnicklas/capybara">capybara</a> <br/>
+<a href="https://github.com/SeleniumHQ/selenium">selenium</a><br/>
+<a href="https://github.com/teampoltergeist/poltergeist">poltergeist</a><br/>
+<a href="https://github.com/DatabaseCleaner/database_cleaner">database_cleaner</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.tomoyukikashiro.me/post/test-csrf-in-feature-test-using-capybara/">Test CSRF in feature test using Capybara</a>      <br/>
+<a href="http://www.opinionatedprogrammer.com/2011/02/capybara-and-selenium-with-rspec-and-rails-3/">Capybara (and Selenium) with RSpec &amp; Rails 3: quick tutorial</a><br/>
+<a href="https://github.com/plataformatec/devise/wiki/How-To:-Test-with-Capybara">Devise: How To: Test with Capybara</a><br/>
+<a href="http://stackoverflow.com/questions/10904996/difference-between-truncation-transaction-and-deletion-database-strategies">Difference between truncation, transaction and deletion database strategies</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[用 Pundit 來做權限管理]]></title>
@@ -744,6 +847,9 @@ end
 ￼￼￼￼￼#/spec/models/zombie_spec.rbit "returns properly formatted lat, long" do  loc = stub(latitude: 2, longitude: 3)  Zoogle.stub(:graveyard_locator).returns(loc)  zombie.geolocate_with_object.should == "2, 3"end
 </code></pre>
 
+<p><a href="https://about.futurelearn.com/blog/stubs-mocks-spies-rspec/">Stubs, Mocks and Spies in RSpec</a><br/>
+<a href="https://github.com/festime/stubs-mocks-spies-in-rspec">了解 Stubs, Mocks, and Spies</a></p>
+
 <h3>let &amp; subject</h3>
 
 <pre><code class="ruby">subject (:zombie) { Zombie.new(name:'john') }
@@ -1060,173 +1166,6 @@ feature 比較像是QA在寫的
 <a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a><br/>
 <a href="https://ruby-china.org/topics/10977">对 stub 和 mock 的理解</a><br/>
 <a href="https://ruby-china.org/topics/9271">RSpec 中 let 和 subject 的区别是什么？</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Carrierwave + FFMPEG 影片轉檔 (Mediainfo檔案資訊)]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/01/29/carrierwavea-plus-ffmpeg/"/>
-    <updated>2016-01-29T20:26:02+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/01/29/carrierwavea-plus-ffmpeg</id>
-    <content type="html"><![CDATA[<p>若是上傳的檔案是影片，並且要對影片做其他處理，就可以使用 FFMPRG 來處理。</p>
-
-<!-- more -->
-
-
-<p></p>
-
-<h1>電腦先安裝ffmpeg</h1>
-
-<pre><code>brew install ffmpeg
-</code></pre>
-
-<h1>Gem</h1>
-
-<pre><code class="ruby">gem 'carrierwave'
-gem 'streamio-ffmpeg'
-</code></pre>
-
-<h1>設定</h1>
-
-<p><code>application.rb</code></p>
-
-<pre><code class="ruby">require 'carrierwave'
-</code></pre>
-
-<p><code>lib/carrierwave/ffmpeg.rb</code></p>
-
-<pre><code class="ruby">require 'streamio-ffmpeg'
-module CarrierWave
-  module FFMPEG
-    module ClassMethods
-      def resample(bitrate)
-        process :resample =&gt; bitrate
-      end
-    end
-
-    def resample(bitrate)
-      directory = File.dirname(current_path)
-      tmpfile = File.join(directory, "tmpfile")
-
-      FileUtils.mv( current_path, tmpfile )
-
-      file = ::FFMPEG::Movie.new(tmpfile)
-      file.transcode(current_path, video_bitrate: bitrate)
-
-      File.delete(tmpfile)
-    end
-  end
-end
-</code></pre>
-
-<p><code>app/uploaders/video_uploader.rb</code></p>
-
-<pre><code class="ruby">require File.join(Rails.root, "lib", "carrierwave", "ffmpeg")
-
-class VideoUploader &lt; CarrierWave::Uploader::Base
-  include CarrierWave::FFMPEG
-
-  def store_dir
-    "uploads/#{model.class.to_s.underscore}/#{mounted_as}/#{model.id}"
-  end
-
-  def extension_white_list
-    %w(mp4 flv)
-  end
-
-  version :bitrate_800k do
-    process :resample =&gt; "800k"
-  end
-
-  version :bitrate_500k, from_version: :bitrate_800k do
-    process :resample =&gt; "500k"
-  end
-
-end
-</code></pre>
-
-<h1>FFMPEG</h1>
-
-<p>也可以用 ruby 直接下 ffmpef 的指令</p>
-
-<pre><code class="ruby">ffmpeg -y -i #{input_path} -vf "scale=ceil(oh*a):480" -vcodec libx264 -preset:v slow -pix_fmt yuv420p -profile:v baseline -level 3.0 -b #{bitrate} -r 29.97 -acodec libvo_aacenc -ac 2 -ar 44100 -ab 64k -movflags faststart #{output_path}
-</code></pre>
-
-<p>縮圖</p>
-
-<pre><code class="ruby">ffmpeg -i #{input} -ss 00:00:05 -vframes 1 #{thumbnil}
-</code></pre>
-
-<h1>Mediainfo</h1>
-
-<p>mediainfo 也是可以用來知道檔案的資訊，也蠻好用的</p>
-
-<pre><code class="ruby">`mediainfo '--Inform=Video;%Width%' #{input}`
-</code></pre>
-
-<p>看有什麼參數可用</p>
-
-<pre><code class="ruby">mediainfo --Info-Parameters
-</code></pre>
-
-<h1>Calling shell commands from Ruby</h1>
-
-<ol>
-<li>Kernel#`, commonly called backticks – <code>cmd</code></li>
-</ol>
-
-
-<p>Returns the result of the shell command.</p>
-
-<pre><code class="ruby">value = `echo 'hi'`
-value = `#{cmd}`
-</code></pre>
-
-<ol>
-<li>Built-in syntax, <code>%x( cmd )</code></li>
-</ol>
-
-
-<p>Returns the result of the shell command, just like the backticks.</p>
-
-<pre><code class="ruby">value = %x( echo 'hi' )
-value = %x[ #{cmd} ]
-</code></pre>
-
-<ol>
-<li>Kernel# <code>system</code></li>
-</ol>
-
-
-<p>Return: true if the command was found and ran successfully, false otherwise</p>
-
-<pre><code class="ruby">wasGood = system( "echo 'hi'" )
-wasGood = system( cmd )
-</code></pre>
-
-<ol>
-<li>Kernel#exec</li>
-</ol>
-
-
-<p>Return: none, the current process is replaced and never continues</p>
-
-<pre><code class="ruby">exec( "echo 'hi'" )
-exec( cmd ) # Note: this will never be reached because of the line above
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a><br/>
-<a href="https://github.com/streamio/streamio-ffmpeg">streamio-ffmpeg</a><br/>
-<a href="https://www.ffmpeg.org/">FFMPEG</a><br/>
-<a href="http://ruby-doc.org/core-2.3.0/Kernel.html">Kernel</a></p>
-
-<p>參考文件：<br/>
-<a href="http://www.freezzo.com/2010/12/23/create-ffmpeg-processor-for-carrierwave-in-rails-3/">Create FFMPEG processor for Carrierwave in Rails 3</a><br/>
-<a href="https://prograils.com/posts/carrierwave-basic-video-conversion">CarrierWave - basic video conversion</a><br/>
-<a href="http://stackoverflow.com/questions/3159945/running-command-line-commands-within-ruby-script">Running command line commands within Ruby script</a><br/>
-<a href="http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby">Calling shell commands from Ruby</a><br/>
-<a href="http://tech.natemurray.com/2007/03/ruby-shell-commands.html">6 Ways to Run Shell Commands in Ruby Tuesday</a></p>
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-03-27T21:31:11+08:00</updated>
+  <updated>2016-03-30T00:09:24+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,179 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[RSpec & Capybara 整合測試(Selenium and Poltergeist Driver)]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/30/rspec-capybara-selenium-poltergeist-driver/"/>
+    <updated>2016-03-30T00:04:46+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/30/rspec-capybara-selenium-poltergeist-driver</id>
+    <content type="html"><![CDATA[<p>capybara 是一個可以模擬瀏覽器行為的測試，還蠻好玩的~<br/>
+搭配不同 driver，用不同的方式來跑</p>
+
+<!-- more -->
+
+
+<p>因為是要模擬人真正在使用網頁的狀態，因次每一動，都要定義出來。</p>
+
+<h1>設定</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#spec/rails_help.rb</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara/rspec&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara/rails&#39;</span>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;capybara/poltergeist&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">configure</span> <span class="k">do</span> <span class="o">|</span><span class="n">config</span><span class="o">|</span>
+</span><span class='line'>  <span class="c1">#要設定為 false ，就會實際存在 database，因此需要 database_cleaner 來清</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">use_transactional_fixtures</span> <span class="o">=</span> <span class="kp">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#devise controller 設定</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">include</span> <span class="no">Devise</span><span class="o">::</span><span class="no">TestHelpers</span><span class="p">,</span> <span class="ss">:type</span> <span class="o">=&gt;</span> <span class="ss">:controller</span>
+</span><span class='line'>  <span class="c1">#devise capybara 設定</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">include</span> <span class="no">Warden</span><span class="o">::</span><span class="no">Test</span><span class="o">::</span><span class="no">Helpers</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#database_clean 設定 suite -&gt; 整個 rspec</span>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">before</span><span class="p">(</span><span class="ss">:suite</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">DatabaseCleaner</span><span class="o">.</span><span class="n">clean_with</span> <span class="ss">:truncation</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">before</span><span class="p">(</span><span class="ss">:each</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">example</span><span class="o">|</span>
+</span><span class='line'>    <span class="no">DatabaseCleaner</span><span class="o">.</span><span class="n">strategy</span> <span class="o">=</span> <span class="n">example</span><span class="o">.</span><span class="n">metadata</span><span class="o">[</span><span class="ss">:js</span><span class="o">]</span> <span class="p">?</span> <span class="ss">:truncation</span> <span class="p">:</span> <span class="ss">:transaction</span>
+</span><span class='line'>    <span class="no">DatabaseCleaner</span><span class="o">.</span><span class="n">start</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">config</span><span class="o">.</span><span class="n">after</span><span class="p">(</span><span class="ss">:each</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">example</span><span class="o">|</span>
+</span><span class='line'>    <span class="no">DatabaseCleaner</span><span class="o">.</span><span class="n">clean</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#可以設定環境變數，再跑指令時，下 DRIVER=selenium rspec spec/features 才會使用預設 :rack_test 跑，但沒有支援 js 因此才需要用到 selenium(跑瀏覽器)，poltergeist(跑console)</span>
+</span><span class='line'>  <span class="k">unless</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;DRIVER&quot;</span><span class="o">]</span> <span class="o">==</span> <span class="s2">&quot;selenium&quot;</span>
+</span><span class='line'>    <span class="no">Capybara</span><span class="o">.</span><span class="n">javascript_driver</span> <span class="o">=</span> <span class="ss">:poltergeist</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="no">Capybara</span><span class="o">.</span><span class="n">register_driver</span> <span class="ss">:poltergeist</span> <span class="k">do</span> <span class="o">|</span><span class="n">app</span><span class="o">|</span>
+</span><span class='line'>    <span class="no">Capybara</span><span class="o">::</span><span class="no">Poltergeist</span><span class="o">::</span><span class="no">Driver</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">app</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">js_errors</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">timeout</span><span class="p">:</span> <span class="mi">15</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">phantomjs_logger</span><span class="p">:</span> <span class="no">File</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/log/temp.log&quot;</span><span class="p">,</span><span class="s2">&quot;w&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>spec</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#spec/features/user_spec.rb</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;rails_helper&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="s1">&#39;home page&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">before</span> <span class="k">do</span>
+</span><span class='line'>    <span class="vi">@user</span>  <span class="o">=</span> <span class="n">create</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="ss">:admin</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1"># mock CSRF </span>
+</span><span class='line'>    <span class="n">allow_any_instance_of</span><span class="p">(</span><span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">receive</span><span class="p">(</span><span class="ss">:protect_against_forgery?</span><span class="p">)</span><span class="o">.</span><span class="n">and_return</span><span class="p">(</span><span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s1">&#39;User is admin can login and see data&#39;</span><span class="p">,</span> <span class="ss">:js</span> <span class="o">=&gt;</span> <span class="kp">true</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">visit</span> <span class="s1">&#39;/backend&#39;</span><span class="c1">#後台首頁</span>
+</span><span class='line'>    <span class="n">fill_in</span> <span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="ss">:with</span> <span class="o">=&gt;</span> <span class="s1">&#39;admin@gmail.com&#39;</span> <span class="c1">#輸入email</span>
+</span><span class='line'>    <span class="n">fill_in</span> <span class="s1">&#39;password&#39;</span><span class="p">,</span> <span class="ss">:with</span> <span class="o">=&gt;</span> <span class="s1">&#39;password&#39;</span> <span class="c1">#輸入密碼</span>
+</span><span class='line'>    <span class="n">click_button</span> <span class="s1">&#39;submit&#39;</span> <span class="c1">#點擊登入</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">page</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">have_content</span><span class="p">(</span><span class="s1">&#39;後台&#39;</span><span class="p">)</span> <span class="c1">#到後台看到後台的字</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">it</span> <span class="s1">&#39;logout&#39;</span><span class="p">,</span> <span class="ss">:js</span><span class="o">=&gt;</span> <span class="kp">true</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">login_as</span><span class="p">(</span><span class="vi">@user</span><span class="p">)</span> <span class="c1">#登入</span>
+</span><span class='line'>    <span class="n">visit</span> <span class="s1">&#39;/backend/posts&#39;</span>  <span class="c1">#在內頁</span>
+</span><span class='line'>    <span class="n">find</span><span class="p">(</span><span class="s2">&quot;#logout&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">click</span> <span class="c1">#點擊登出，記得要下 id</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">current_path</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span><span class="p">(</span><span class="s1">&#39;/&#39;</span><span class="p">)</span> <span class="c1">#回到首頁</span>
+</span><span class='line'>    <span class="n">expect</span><span class="p">(</span><span class="n">page</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">have_content</span><span class="p">(</span><span class="s1">&#39;首頁&#39;</span><span class="p">)</span> <span class="c1">#頁面上也首頁的字</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>gem：<br/>
+<a href="https://github.com/jnicklas/capybara">capybara</a> <br/>
+<a href="https://github.com/SeleniumHQ/selenium">selenium</a><br/>
+<a href="https://github.com/teampoltergeist/poltergeist">poltergeist</a><br/>
+<a href="https://github.com/DatabaseCleaner/database_cleaner">database_cleaner</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.tomoyukikashiro.me/post/test-csrf-in-feature-test-using-capybara/">Test CSRF in feature test using Capybara</a>      <br/>
+<a href="http://www.opinionatedprogrammer.com/2011/02/capybara-and-selenium-with-rspec-and-rails-3/">Capybara (and Selenium) with RSpec &amp; Rails 3: quick tutorial</a><br/>
+<a href="https://github.com/plataformatec/devise/wiki/How-To:-Test-with-Capybara">Devise: How To: Test with Capybara</a><br/>
+<a href="http://stackoverflow.com/questions/10904996/difference-between-truncation-transaction-and-deletion-database-strategies">Difference between truncation, transaction and deletion database strategies</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Angular Custom Directive]]></title>
@@ -114,7 +287,7 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[#Angular File Upload]]></title>
+    <title type="html"><![CDATA[Angular File Upload]]></title>
     <link href="http://mgleon08.github.com/blog/2016/03/27/angular-file-upload/"/>
     <updated>2016-03-27T21:03:04+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/03/27/angular-file-upload</id>
@@ -3193,179 +3366,6 @@ ui.router 的語法，用來顯示透過 angular 拉回來的 view ，有點像�
 
 <p>參考文件：<br/>
 <a href="https://ihower.tw/rails4/activerecord-others.html">ActiveRecord - 進階功能</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby 中的 Include Extend Require Load]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/"/>
-    <updated>2016-02-24T21:49:30+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/24/include-extend-require</id>
-    <content type="html"><![CDATA[<p>常常搞不清楚，<code>include</code>，<code>extend</code>，<code>require</code>，<code>load</code>這幾個差異。</p>
-
-<!-- more -->
-
-
-<h1>module</h1>
-
-<p><code>include</code> &amp; <code>extend</code> 主要是將 <code>module</code> 的方法，可以繼承給 <code>class</code> 或 <code>instance</code> 使用。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">hello</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s1">&#39;Hello!&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
-</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; Hello!</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Bar</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">Foo</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Bar</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; Hello!</span>
-</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">Bar</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">hello</span>
-</span><span class='line'><span class="c1"># =&gt; `&lt;main&gt;&#39;: undefined method `hello&#39; for #&lt;Bar:0x007fd815939618&gt; (NoMethodError)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>由此可知</p>
-
-<ul>
-<li><code>extend</code>  增加 class_methods</li>
-<li><code>include</code> 增加 instance_methods</li>
-</ul>
-
-
-<h3>也可以用 include 導入 module 的 method</h3>
-
-<p><code>module.rb</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">bar</span><span class="p">(</span><span class="n">a</span><span class="p">)</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>test.rb</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;./module&#39;</span>
-</span><span class='line'><span class="kp">include</span> <span class="no">Foo</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">bar</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="ow">or</span>
-</span><span class='line'><span class="no">Foo</span><span class="o">.</span><span class="n">bar</span><span class="p">(</span><span class="s1">&#39;hello&#39;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>require</h1>
-
-<p>在 ruby 中，一開始用有很多 <code>method</code> 可以使用，是因為 ruby 將一些常用的都先載入進來。</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/core-2.3.0/">core</a></li>
-</ul>
-
-
-<p>而其他比較不常用的 method 就必須在要使用的時候，先 require 進來才可以。</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/stdlib-2.3.0/">std</a></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;fileutils&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>也可以載入自己設定好的檔案，通常設定在 <code>/lib/test.rb</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;test&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>不過記得路徑的問題，可以使用 <code>require_relative</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">require_relative</span> <span class="s1">&#39;test&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>如果是放在資料夾底下的話 <code>/lib/file/test.rb</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;file/test&#39;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Load</h1>
-
-<p>跟 require 類似，不過每 load 一次，就會重新執行該 load 的檔案。</p>
-
-<blockquote><p>以術語來說，load 要求載入一個檔案，而require要求某個功能特性（Feature）</p></blockquote>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">load</span> <span class="s2">&quot;sample.rb&quot;</span> <span class="c1">#load 要加 .rb</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.3.0/">ruby-doc</a></p>
-
-<p>參考文件：<br/>
-<a href="http://blog.eddie.com.tw/2015/03/24/class-and-module/">Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」</a> <br/>
-<a href="http://motion-express.com/blog/20150407-ruby-require-require-relative-load">require、require_relative是什麼意思？差在哪？</a><br/>
-<a href="https://ihower.tw/rails4/environments-and-bundler.html">環境設定與Bundle</a><br/>
-<a href="http://openhome.cc/Gossip/Ruby/LoadRequire.html">load 與 require</a></p>
 ]]></content>
   </entry>
   
