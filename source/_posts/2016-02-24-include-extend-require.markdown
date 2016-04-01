@@ -13,6 +13,7 @@ categories: ruby
 # module
 `include` & `extend` 主要是將 `module` 的方法，可以繼承給 `class` 或 `instance` 使用。
 
+###include
 ```ruby
 module Foo   
   def hello     
@@ -29,6 +30,14 @@ Bar.hello
 a = Bar.new
 a.hello
 # => Hello!
+```
+###extend
+```ruby
+module Foo   
+  def hello     
+    puts 'Hello!'   
+  end 
+end
 
 class Bar
   extend Foo
@@ -39,10 +48,18 @@ Bar.hello
 a = Bar.new
 a.hello
 # => `<main>': undefined method `hello' for #<Bar:0x007fd815939618> (NoMethodError)
+
+另一種方式
+
+bar = Bar.new
+bar.extend(Foo)
+bar.hello
+#=> Hello!
 ```
 由此可知 
 
 * `extend`  增加 class_methods
+	* 如果是 instance 用 extend 則會是 instance_methods
 * `include` 增加 instance_methods
 
 

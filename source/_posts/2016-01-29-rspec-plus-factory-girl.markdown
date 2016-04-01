@@ -241,6 +241,13 @@ let(:user){User.new(:name => "hello")}
 * 有使⽤到才會運算(lazy)，並且在同⼀個 example 測試中多次呼叫會 Memoized 快取起來。
 * let! 則是⾮ lazy 版本
 
+
+###預期會執行某一個class的methd
+
+```
+ expect(Clsss).to receive(:method).with(params)
+```
+
 ###Stub
 
 `Stub:`

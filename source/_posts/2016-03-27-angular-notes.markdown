@@ -225,7 +225,7 @@ ng-true-value="YES" ng-false-value="NO"
 </select>
   
 ```
-* `ng-switch` 可以搭配 `ng-options`
+* `ng-switch` 可以搭配 `ng-options` [ng-switch](http://ithelp.ithome.com.tw/question/10136011)
 * `ng-change` 當資料改變會跟者執行
 * `ng-include` 像是 partial 一樣可以 include 其他 view 進來
 
@@ -284,4 +284,14 @@ orderBy   可以將資料作排序
 參考資料：  
 [入門AngularJS筆記](http://ithelp.ithome.com.tw/profile/share?id=20071512&page=4)  
 [AngularJS 系列](http://programer-learn.blogspot.tw/p/angularjs.html)  
-[Search Sort and Pagination in ng-repeat – AngularJS](http://code.ciphertrick.com/2015/06/01/search-sort-and-pagination-ngrepeat-angularjs/)  
+[AngularJS 學習筆記系列 ](http://sweeteason.pixnet.net/blog/post/40589830)  
+[給 Rails Developer 看的 Angular + Rails 起步走](http://carolhsu.github.io/blog/2014/06/07/step-by-step-with-angularjs-and-rails/)  
+[Search Sort and Pagination in ng-repeat – AngularJS](http://code.ciphertrick.com/2015/06/01/search-sort-and-pagination-ngrepeat-angularjs/)    
+[Angular 中文社區](http://www.angularjs.cn/T001)  
+[[AngularJs]淺談Angular.js的Provider機制](http://kirkchen.logdown.com/posts/245678-angularjs-talking-about-the-angularjs-provider-mechanisms)  
+[ANGULARJS $Q DEFERRED 和 PROMISE](http://blog.begin.com.tw/?p=30)  
+[流浪貓の窩 - angular學習筆記](http://www.cnblogs.com/liulangmao/tag/angular/default.html?page=4)  
+[NG筆記1-AngularJS學習資源與術語](http://blog.darkthread.net/post-2014-06-11-angularjs-notes-1.aspx)  
+[學習 AngularJS](https://github.com/jmcunningham/AngularJS-Learning/blob/master/ZH-TW.md)  
+[初學 AngularJS 的路](http://ithelp.ithome.com.tw/profile/share?id=20091340&page=2)
+

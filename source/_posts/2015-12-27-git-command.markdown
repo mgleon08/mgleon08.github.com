@@ -227,7 +227,14 @@ git commit -m "fixed untracked files"
 ```ruby
 git checkout --orphan <branchname>
 ```
+* 直接複製遠端的 branch
 
+先到遠端的 branch，在遠端的 branch 複製切到本地
+
+```ruby
+git checkout origin/development
+git checkout -b development
+```
 #alias
 自己設定的一些 alias
 

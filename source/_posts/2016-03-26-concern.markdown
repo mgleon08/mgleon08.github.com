@@ -3,7 +3,7 @@ layout: post
 title: "用 Concern 來整理 code "
 date: 2016-03-26 09:32:30 +0800
 comments: true
-categories: 
+categories: ruby
 ---
 
 當有相當多地方用到同樣的東西時，就可以用 concern 來讓 code 變得更乾淨。
@@ -29,6 +29,7 @@ categories:
 # app/models/concerns/sample.rb
 
 module Sample
+  include Sample2
   # self.included 會在 Sample 被 include 時執行
   # base 傳入是誰哪個 Class include 了這個 module
   def self.included(base)
@@ -63,8 +64,6 @@ Test.new.bar
 ```ruby
 # app/models/concerns/sample2.rb
 module Sample2
-  include Sample
-
   def self.included(base)
     base.class_eval do
       #do something method
@@ -80,8 +79,8 @@ class Test < ActiveRecord::Base
 end
 ```
 以上看起來蠻理想的  
-但因為 include `Sample` 的是 `Sample2`  
-所以 `Sample` 的 base 就變成了 `Sample2` ， 不是我們要的 `Test`
+但因為 include `Sample2` 的是 `Sample`  
+所以 `Sample2` 的 base 就變成了 `Sample` ， 不是我們要的 `Test`
 
 
 #更改
@@ -89,6 +88,7 @@ end
 ```ruby
 # app/models/concerns/sample.rb
 module Sample
+  include Sample2
   extend ActiveSupport::Concern
     included do
       self.send(:method) # base 改成 self
@@ -100,7 +100,6 @@ end
 # app/models/concerns/sample2.rb
 module Sample2
   extend ActiveSupport::Concern
-  include Sample
 
   included do
     self.send(:methods)  # base 改成 self
@@ -129,7 +128,7 @@ end
 ```ruby
 #app/models/test.rb
 class Test < ActiveRecord::Base
-  include Samples
+  include Sample
 end
 ```
 
