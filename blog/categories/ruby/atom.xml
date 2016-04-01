@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-03-30T00:09:24+08:00</updated>
+  <updated>2016-04-01T10:34:55+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -103,6 +103,163 @@ Man.yo('leon') #=&gt; 'yo leon'
 </a><br/>
 <a href="http://motion-express.com/blog/20141209-ruby-class-inheritance">Ruby class 基本的覆寫(override)及繼承(inheritance)</a><br/>
 <a href="http://motion-express.com/blog/20141208-class-method-and-instance-method">Ruby當中的class method和instance method差在哪？</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[用 Concern 來整理 Code]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/26/concern/"/>
+    <updated>2016-03-26T09:32:30+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/26/concern</id>
+    <content type="html"><![CDATA[<p>當有相當多地方用到同樣的東西時，就可以用 concern 來讓 code 變得更乾淨。</p>
+
+<!--more-->
+
+
+<h1>使用時機</h1>
+
+<ul>
+<li>DRYing up model codes</li>
+<li><p>Skin Fat Models.</p></li>
+<li><p>將可重用的功能抽出來，讓多個 model 共用</p></li>
+<li>model 太肥大，將相關的邏輯的 code 放到不同的 concern 裡</li>
+<li>ActiveSupport::Concern 的風格</li>
+</ul>
+
+
+<h1>ActiveSupport::Concern</h1>
+
+<p>任務是讓管理 modules 之間的 dependencies 變得容易。<br/>
+也可以用 <code>include</code> 同時達成 <code>class methods</code> <code>instance methods</code>
+（原本必須 include + extend 才能達成）</p>
+
+<h1>原本作法</h1>
+
+<pre><code class="ruby"># app/models/concerns/sample.rb
+
+module Sample
+  include Sample2
+  # self.included 會在 Sample 被 include 時執行
+  # base 傳入是誰哪個 Class include 了這個 module
+  def self.included(base)
+    base.class_eval do # 用 class_eval 在該 class 新增 Class method
+      #scope :disabled, -&gt; { where(disabled: true) } 可以定義 scope
+      def self.foo
+          "這裡是 class 的 method"
+      end
+    end
+  end
+
+  def bar
+     "這裡是 instance 的 method"
+  end
+end
+</code></pre>
+
+<pre><code class="ruby">#app/models/test.rb
+class Test &lt; ActiveRecord::Base
+  include Samples
+end
+
+Test.foo
+=&gt; "這裡是 class 的 method"
+
+Test.new.bar
+=&gt; "這裡是 instance 的 method"
+</code></pre>
+
+<p>兩個 module 可以互相 include</p>
+
+<pre><code class="ruby"># app/models/concerns/sample2.rb
+module Sample2
+  def self.included(base)
+    base.class_eval do
+      #do something method
+    end
+  end
+end
+</code></pre>
+
+<pre><code class="ruby">#app/models/test.rb
+class Test &lt; ActiveRecord::Base
+  include Sample
+  # include Sample，再透過 Sample 去 include Sample2 ,這樣就不用一次 include 兩個 module了
+end
+</code></pre>
+
+<p>以上看起來蠻理想的<br/>
+但因為 include <code>Sample2</code> 的是 <code>Sample</code><br/>
+所以 <code>Sample2</code> 的 base 就變成了 <code>Sample</code> ， 不是我們要的 <code>Test</code></p>
+
+<h1>更改</h1>
+
+<pre><code class="ruby"># app/models/concerns/sample.rb
+module Sample
+  include Sample2
+  extend ActiveSupport::Concern
+    included do
+      self.send(:method) # base 改成 self
+    end
+end
+</code></pre>
+
+<pre><code class="ruby"># app/models/concerns/sample2.rb
+module Sample2
+  extend ActiveSupport::Concern
+
+  included do
+    self.send(:methods)  # base 改成 self
+    # 可以在這裡放當 include 時要執行的東西
+    # 可以存取所有 class level 的東西
+    # ex1: 宣告 shared scope
+    # ex2: 可寫 shared validation
+  end
+
+#可以直接定義 ClassMethods 不需再 send(:extend, ClassMethods) 或是用 class_eval 去定義
+   module ClassMethods  
+      def foo
+        # do something
+      end
+   end
+
+#可以直接定義 InstanceMethods 不需再 send(:include, InstanceMethods)或是用 instance_eval 去定義
+   module InstanceMethods  #也可以不用特別定義 module InstanceMethods
+      def bar
+         # do something
+      end
+   end
+end
+</code></pre>
+
+<pre><code class="ruby">#app/models/test.rb
+class Test &lt; ActiveRecord::Base
+  include Sample
+end
+</code></pre>
+
+<h1>concern vs service object</h1>
+
+<ul>
+<li>concern</li>
+<li>簡單說就是，有許多 model 有共用的邏輯片段，可以拆出來</li>
+<li>service object</li>
+<li><p>與 concern 不同</p></li>
+<li><p>兩個搭配使用</p></li>
+<li>將許多 service object 搬到 concern</li>
+</ul>
+
+
+<p>官方文件：<br/>
+<a href="http://api.rubyonrails.org/classes/ActiveSupport/Concern.html">ActiveSupport</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ruby-china.org/topics/18401">什麼時候使用Concerns，什麼時候使用Services？</a><br/>
+<a href="https://ihower.tw/blog/archives/3949">深入Rails3: ActiveSupport::Concern</a><br/>
+<a href="http://stackoverflow.com/questions/14541823/how-to-use-concerns-in-rails-4">How to use concerns in Rails 4</a><br/>
+<a href="https://ruby-china.org/topics/19812">ActiveSupport::Concern 小結</a><br/>
+<a href="http://adz.cool/posts/210893-rails-use-case-mixin-and-concerns">rails use case - mixin &amp; concerns</a><br/>
+<a href="https://www.viget.com/articles/slimming-down-your-models-and-controllers">Slimming Down Your Models and Controllers with Concerns, Service Objects, and Tableless Models</a><br/>
+<a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a></p>
 ]]></content>
   </entry>
   
@@ -496,57 +653,9 @@ Array.superclass  =&gt; Object
 #直接列出祖宗十八代
 Array.ancestors
 #=&gt; [Array, JSON::Ext::Generator::GeneratorMethods::Array, Enumerable, Object, ActiveSupport::Dependencies::Loadable, PP::ObjectMixin, JSON::Ext::Generator::GeneratorMethods::Object, Kernel, BasicObject]
+
+Array.included_modules
 </code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Double Colon(::) 是啥? 能吃嗎？]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/08/double-colon/"/>
-    <updated>2016-03-08T22:42:03+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/08/double-colon</id>
-    <content type="html"><![CDATA[<p>在 ruby 中常常會看到各種符號， 像是 <code>::</code> 在 ruby 就像是 <code>namespace</code> 的感覺。<br/>
-<code>::</code> 加在最前面，就是會去參照最上面的 <code>namespace</code>。</p>
-
-<!-- more -->
-
-
-<pre><code class="ruby">MR_COUNT = 0        # constant defined on main Object class
-module Foo
-  MR_COUNT = 0
-  ::MR_COUNT = 1    # set global count to 1
-  MR_COUNT = 2      # set local count to 2
-end
-puts MR_COUNT       # this is the global constant
-puts Foo::MR_COUNT  # this is the local "Foo" constant
-</code></pre>
-
-<pre><code class="ruby">module Foo
-  # We may not know about this in real big apps
-  module Rails
-    class Engine 
-    end
-  end
-
-  class Engine1 &lt; Rails::Engine
-  end
-
-  class Engine2 &lt; ::Rails::Engine
-  end
-end
-
-Foo::Engine1.superclass
- =&gt; Foo::Rails::Engine # not what we want
-
-Foo::Engine2.superclass
- =&gt; Rails::Engine # correct
-</code></pre>
-
-<p>參考文件：<br/>
-<a href="http://blog.eddie.com.tw/2015/04/19/namespace/">Ruby 語法放大鏡之「有時候會看到有兩個冒號寫法是什麼意思?」</a><br/>
-<a href="http://stackoverflow.com/questions/4819312/double-colons-before-class-names-in-ruby">Double colons before class names in Ruby?</a><br/>
-<a href="http://stackoverflow.com/questions/10482772/rubys-double-colon-operator-usage-differences">Ruby&rsquo;s double colon (::) operator usage differences</a><br/>
-<a href="https://cbabhusal.wordpress.com/2015/03/26/ruby-ruby-dot-and-double-colon-operators/">Ruby : Ruby dot “.” and double Colon “::” Operators</a></p>
 ]]></content>
   </entry>
   

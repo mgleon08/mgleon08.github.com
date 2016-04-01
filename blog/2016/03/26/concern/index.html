@@ -166,9 +166,11 @@ model 太肥大，將相關的邏輯的 code 放到不同的 concern &hellip;">
 <span class='line-number'>16</span>
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
+<span class='line-number'>19</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># app/models/concerns/sample.rb</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">module</span> <span class="nn">Sample</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Sample2</span>
 </span><span class='line'>  <span class="c1"># self.included 會在 Sample 被 include 時執行</span>
 </span><span class='line'>  <span class="c1"># base 傳入是誰哪個 Class include 了這個 module</span>
 </span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">included</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
@@ -220,12 +222,8 @@ model 太肥大，將相關的邏輯的 code 放到不同的 concern &hellip;">
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># app/models/concerns/sample2.rb</span>
 </span><span class='line'><span class="k">module</span> <span class="nn">Sample2</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Sample</span>
-</span><span class='line'>
 </span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">included</span><span class="p">(</span><span class="n">base</span><span class="p">)</span>
 </span><span class='line'>    <span class="n">base</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
 </span><span class='line'>      <span class="c1">#do something method</span>
@@ -249,8 +247,8 @@ model 太肥大，將相關的邏輯的 code 放到不同的 concern &hellip;">
 
 
 <p>以上看起來蠻理想的<br/>
-但因為 include <code>Sample</code> 的是 <code>Sample2</code><br/>
-所以 <code>Sample</code> 的 base 就變成了 <code>Sample2</code> ， 不是我們要的 <code>Test</code></p>
+但因為 include <code>Sample2</code> 的是 <code>Sample</code><br/>
+所以 <code>Sample2</code> 的 base 就變成了 <code>Sample</code> ， 不是我們要的 <code>Test</code></p>
 
 <h1>更改</h1>
 
@@ -261,8 +259,10 @@ model 太肥大，將相關的邏輯的 code 放到不同的 concern &hellip;">
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
+<span class='line-number'>8</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># app/models/concerns/sample.rb</span>
 </span><span class='line'><span class="k">module</span> <span class="nn">Sample</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Sample2</span>
 </span><span class='line'>  <span class="kp">extend</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Concern</span>
 </span><span class='line'>    <span class="n">included</span> <span class="k">do</span>
 </span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:method</span><span class="p">)</span> <span class="c1"># base 改成 self</span>
@@ -299,11 +299,9 @@ model 太肥大，將相關的邏輯的 code 放到不同的 concern &hellip;">
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
 <span class='line-number'>26</span>
-<span class='line-number'>27</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># app/models/concerns/sample2.rb</span>
 </span><span class='line'><span class="k">module</span> <span class="nn">Sample2</span>
 </span><span class='line'>  <span class="kp">extend</span> <span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Concern</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Sample</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="n">included</span> <span class="k">do</span>
 </span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:methods</span><span class="p">)</span>  <span class="c1"># base 改成 self</span>
@@ -338,7 +336,7 @@ model 太肥大，將相關的邏輯的 code 放到不同的 concern &hellip;">
 <span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#app/models/test.rb</span>
 </span><span class='line'><span class="k">class</span> <span class="nc">Test</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Samples</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Sample</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -391,6 +389,12 @@ model 太肥大，將相關的邏輯的 code 放到不同的 concern &hellip;">
 <time class='entry-date' datetime='2016-03-26T09:32:30+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:32 am</span></time>
       
       
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
 
 
     </p>
