@@ -193,6 +193,48 @@ symbol 都有 `to_proc` 這個 method 因此可以改寫成
 # => 6
 ```
 
+###proc into block
+
+Calling a method with & in front of a parameter
+```ruby
+tweets.each(&printer) 
+```
+turns a proc into block 
+
+###block into a proc
+
+Defining a method with & in front of a parameter
+
+```rubydef each(&block)
+```
+turns a block into a proc,so it can be assigned to parameter
+
+###togeter
+
+```rubyclass Timeline  attr_accessor :tweets  def each(&block) #block into a proc    tweets.each(&block) #proc into block  end 
+end
+```
+
+###加上 symlbol
+
+```ruby
+tweets.map { |tweet| tweet.user }
+#上下相等tweets.map(&:user)
+```
+
+###optional
+
+```ruby
+def print  if block_given? #可判對是否有傳進 block    tweets.each { |tweet| puts yield tweet }  else    puts tweets.join(", ")  endend
+```
+
+###closure
+
+```rubydef tweet_as(user)  lambda { |tweet| puts "#{user}: #{tweet}" }end
+gregg_tweet = tweet_as("greggpollack")
+#=> lambda { |tweet| puts "greggpollack: #{tweet}" }
+gregg_tweet.call("Mind blowing!")# => greggpollack: Mind blowing!
+```
 
 #procedure (proc)
 

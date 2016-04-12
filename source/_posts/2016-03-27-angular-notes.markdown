@@ -100,6 +100,15 @@ app
                 $scope.posts = data;
         });
     };
+     //也可這樣寫
+     //$http({ method: "GET",
+             //url: "/posts",
+             //data: {
+                //name: foo
+            //}
+      //}).success(function(data){
+            //$scope.posts = data;
+      //});
     
     //這裏馬上執行，因為一定要有 data 才能做其他事
     getPost()
@@ -261,9 +270,9 @@ $watch和ng-change是在改變內容值的時候，觸發事件，ng-click則只
 
 `filter`  
 
-```
-{{ 'test' | json}}
+`{{ 'test' | json}}`
 
+```
 currency  貨幣符號
 date      將 Date 轉成指定格式的日期
 filter    可以篩選陣列中的內容

@@ -75,6 +75,50 @@ b.num
 #=> 2
 ```
 
+###instance_eval
+```ruby
+class Tweet
+  def initialize(user)
+    @user = user
+    @tweet = []
+  end
+
+  def submit_to_twitter
+    tweet_text = @tweet.join(' ')
+    puts "#{@user}: #{tweet_text}"
+  end
+
+  def text(str)
+    @tweet << str
+  end
+
+  def hashtag(str)
+    @tweet << "#" + str
+    self
+  end
+
+  def mention(*users) 
+    users.each do |user|      @tweet << "@" + user    end    self  end
+
+  def text(str)
+    @tweet << str
+    self
+  end
+end
+
+def tweet_as(user, text = nil, &block)
+  tweet = Tweet.new(user)
+  tweet.text(text) if text  tweet.instance_eval(&block) if block_given?
+  tweet.submit_to_twitter
+end
+
+tweet_as 'markkendall' do
+  mention 'foo', 'bar'
+  text 'I made a DSL!'
+  hashtag 'hooray'
+end
+```
+
 參考文件：  
 [Understanding class_eval and instance_eval](http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php)  
 [eval](http://openhome.cc/Gossip/Ruby/Eval.html)

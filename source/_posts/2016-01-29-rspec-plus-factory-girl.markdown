@@ -450,6 +450,35 @@ describe Zombie do  it_behaves_like 'the undead', Zombie.newend
 end
 ```
 
+###CURL
+
+可以用 command line 來測試 get
+
+```ruby
+curl -i localhost:3000/posts
+#-i 詳細資訊
+
+curl -IH "Accept: application/json" localhost:3000/posts
+curl -IH "Accept: application/xml" localhost:3000/posts
+#H HEAD
+
+curl -i -X POST -d 'episode[title]=ZombieApocalypseNow' http://localhost:3000/posts
+
+#-X the -X option specifies the method
+#-d use -d to send data on the request
+
+curl -Iu 'carlos:secret' http://localhost:3000/posts
+#上下一樣
+curl -I http://carlos:secret@localhost:3000/episodes
+#send Basic Auth credentials with the -u option
+
+curl -IH "Accept: application/json" -u 'carlos:fakesecret' http://localhost:3000/posts
+#client asks for JSON
+
+curl -IH "Authorization: Token token=16d7d6089b8fe0c5e19bfe10bb156832" http://localhost:3000/posts
+#Set token on Authorization header
+```
+
 #factory_girl
 
 到 `spec/rails_helper.rb` 設定

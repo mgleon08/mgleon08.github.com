@@ -17,7 +17,7 @@ categories: rails
 
 ```ruby
 def index
-	@books = Book.order("create_at DESC")
+	@books = Book.order(create_at: :desc)
 end
 ```
 一般 controller 會這樣子撈出所有的資料，並且按照建立時間排序
@@ -25,7 +25,7 @@ end
 
 ```ruby
 class Book < ActiveRecord::Base
-    scope :news_up, -> { order("created_at DESC") }
+    scope :news_up, -> { order(created_at: :desc) }
 end
 ```
 >-> {...}是Ruby語法，等同於Proc.new{...}或lambda{...}，用來建立一個匿名方法物件
@@ -74,18 +74,26 @@ def index
 end
 ```
 
+```ruby
+class Book < ActiveRecord::Base
+  scope :recent, ->{ where(published_at: 2.weeks.ago) }
+  scope :recent_red, ->{ recent.where(color: 'red') }
+end
+```
+
 #default
 設定所有 scope 的 default 值
 
 ```ruby
 class Book < ActiveRecord::Base
-    default_scope -> { order('id DESC') }
+    default_scope -> { order(id: :desc) }
+    #or default_scope { order(id: :desc) }
 end
 ```
 
-官方文件：
-[Guides](http://guides.rubyonrails.org/active_record_querying.html#scopes)
-[Guides 中文](http://rails.ruby.tw/active_record_querying.html#%E4%BD%9C%E7%94%A8%E5%9F%9F)
+官方文件：  
+[Guides](http://guides.rubyonrails.org/active_record_querying.html#scopes)  
+[Guides 中文](http://rails.ruby.tw/active_record_querying.html#%E4%BD%9C%E7%94%A8%E5%9F%9F)  
 [apidock](http://apidock.com/rails/ActiveRecord/NamedScope/ClassMethods/scope)
 
 參考資料：
