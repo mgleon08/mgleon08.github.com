@@ -11,7 +11,7 @@ categories: ruby
 <!-- more -->
 
 ```ruby
-class Post
+class Post
   #自己建立 method_missing 呼叫
   def method_missing(method_name, *args)
     puts "You tried to call #{method_name} with these arguments: #{args}"
@@ -118,7 +118,7 @@ class Post
           @text << " #" + match[1]
         end
       end 
-      send(method_name)	#並且呼叫 method
+      send(method_name) #並且呼叫 method
     else
       super #沒有就 raises a NoMethodError
     end

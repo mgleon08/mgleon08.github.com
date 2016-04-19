@@ -4,8 +4,7 @@ title: "Dynamic Classes & Methods"
 date: 2016-04-19 22:16:35 +0800
 comments: true
 categories: ruby
----
-
+--- 
 ruby 可以很幫變的動態產生 Classes 和 Methods
 
 <!-- more -->
@@ -13,26 +12,39 @@ ruby 可以很幫變的動態產生 Classes 和 Methods
 #Struct
 
 ```ruby
-class Post  attr_accessor :user, :status  def initialize(user, status)    @user, @status = user, status  end 
+class Post
+  attr_accessor :user, :status
+  def initialize(user, status)
+    @user, @status = user, status
+  end 
   
-  def to_s    "#{user}: #{status}"  end
+  def to_s
+    "#{user}: #{status}"
+  end
 end
 
 #上下相等
 
 Post = Struct.new(:user, :status) do 
-  def to_s    "#{user}: #{status}"  endend
+  def to_s
+    "#{user}: #{status}"
+  end
+end
 ```
 
 #send()
 
-```rubypost.say= post.send(:say)= post.send("say")
+```ruby
+post.say
+= post.send(:say)
+= post.send("say")
 
-#也可以 call 到 private 的 method```
-
+#也可以 call 到 private 的 method
+```
 #alias_method
 
-```rubyclass Post
+```ruby
+class Post
   attr_reader :foo #=> return @foo
   #一定要在定義好的 method 後面還 call 得到
   alias_method :bar, :foo #=> the same method 別名/原名
@@ -47,14 +59,29 @@ end
 
 ```ruby
 
-class Post  def draft    @status = :draft
-  end  
-  def posted    @status = :posted  end
-    def deleted    @status = :deleted  endend
+class Post
+  def draft
+    @status = :draft
+  end
+  
+  def posted
+    @status = :posted
+  end
+  
+  def deleted
+    @status = :deleted
+  end
+end
 
 #上下相等
 
-class Post  states = [:draft, :posted, :deleted]  states.each do |status|    define_method status do      @status = status    end  end 
+class Post
+  states = [:draft, :posted, :deleted]
+  states.each do |status|
+    define_method status do
+      @status = status
+    end
+  end 
 end
 ```
 
@@ -132,4 +159,4 @@ Post.new.say_hi
 參考文件：  
 [What does send() do in Ruby?](http://stackoverflow.com/questions/3337285/what-does-send-do-in-ruby)  
 [alias vs alias_method](https://gist.github.com/plusor/6104625)    
-[如何設計出漂亮的 Ruby APIs](https://ihower.tw/blog/archives/4797)  
+[如何設計出漂亮的 Ruby APIs](https://ihower.tw/blog/archives/4797) 
