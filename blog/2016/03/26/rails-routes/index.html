@@ -26,9 +26,8 @@
 14
 15
 16
-17
 #直接設定
-get &#39;/patients/:id&#39;, to: &#39;patients#show &hellip;">
+get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -164,10 +163,8 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show &hellip;">
 <span class='line-number'>14</span>
 <span class='line-number'>15</span>
 <span class='line-number'>16</span>
-<span class='line-number'>17</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#直接設定</span>
 </span><span class='line'><span class="n">get</span> <span class="s1">&#39;/patients/:id&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;patients#show&#39;</span>
-</span><span class='line'>
 </span><span class='line'>
 </span><span class='line'><span class="c1">#REST</span>
 </span><span class='line'><span class="c1">#設定 scope 有點像資料夾的概念，可用來區分後台可控制範圍</span>
@@ -274,22 +271,8 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show &hellip;">
 <span class='line-number'>23</span>
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#過濾id</span>
 </span><span class='line'><span class="n">get</span> <span class="s1">&#39;photos/:id&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;photos#show&#39;</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="sr">/[A-Z]\d{5}/</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#設定子網域</span>
-</span><span class='line'><span class="n">namespace</span> <span class="ss">:admin</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">constraints</span> <span class="ss">subdomain</span><span class="p">:</span> <span class="s1">&#39;admin&#39;</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">resources</span> <span class="ss">:photos</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">#黑名單</span>
 </span><span class='line'><span class="k">class</span> <span class="nc">BlacklistConstraint</span>
@@ -313,6 +296,232 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show &hellip;">
 </span><span class='line'>  <span class="n">get</span> <span class="s1">&#39;*path&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;blacklist#index&#39;</span><span class="p">,</span>
 </span><span class='line'>    <span class="ss">constraints</span><span class="p">:</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">request</span><span class="o">|</span> <span class="no">Blacklist</span><span class="o">.</span><span class="n">retrieve_ips</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">remote_ip</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>子網域</h3>
+
+<figure class='code'><figcaption><span>resources :posts, constraints: { subdomain: 'api' }</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sb">```</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby￼constraints subdomain: &lsquo;api&rsquo; do  resources :posts  #<a href="http://api.mgleon08.com/posts%EF%BF%BCend">http://api.mgleon08.com/posts%EF%BF%BCend</a></p>
+
+<figure class='code'><figcaption><span>resources :posts, constraints: { subdomain: 'api' }</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sb">```ruby</span>
+</span><span class='line'><span class="sb">namespace :api do</span>
+</span><span class='line'><span class="sb">  constraints subdomain: &#39;api&#39; do</span>
+</span><span class='line'><span class="sb">    resources :posts</span>
+</span><span class='line'><span class="sb">  end</span>
+</span><span class='line'><span class="sb">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sb">#產生兩個 api</span>
+</span><span class='line'><span class="sb">#http://api.mgleon08.com/api/posts</span>
+</span><span class='line'>
+</span><span class='line'><span class="sb">constraints subdomain: &#39;api&#39; do </span>
+</span><span class='line'><span class="sb"> namespace :api, path: &#39;/&#39; do #加上 path 就可以消去後面的</span>
+</span><span class='line'><span class="sb">     resources :zombies</span>
+</span><span class='line'><span class="sb">   end</span>
+</span><span class='line'><span class="sb">end</span>
+</span><span class='line'><span class="sb">#上下一樣</span>
+</span><span class='line'><span class="sb">namespace :api, path: &#39;/&#39;, constraints: { subdomain: &#39;api&#39; } do</span>
+</span><span class='line'><span class="sb">  resources :zombies</span>
+</span><span class='line'><span class="sb">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="sb">#http://api.mgleon08.com/posts</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>DRY</h1>
+
+<h3>concern</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">concern</span> <span class="ss">:sociable</span> <span class="k">do</span> <span class="o">|</span><span class="n">options</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:comments</span><span class="p">,</span> <span class="n">options</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:categories</span><span class="p">,</span> <span class="n">options</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:tags</span><span class="p">,</span> <span class="n">options</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:messages</span><span class="p">,</span> <span class="ss">concerns</span><span class="p">:</span> <span class="ss">:sociable</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span><span class="p">,</span>    <span class="ss">concerns</span><span class="p">:</span> <span class="ss">:sociable</span>
+</span><span class='line'><span class="err">￼</span><span class="n">resources</span> <span class="ss">:items</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">concerns</span> <span class="ss">:sociable</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="ss">:create</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>or</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">concern</span> <span class="ss">:sociable</span><span class="p">,</span> <span class="no">Sociable</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:messages</span><span class="p">,</span> <span class="ss">concerns</span><span class="p">:</span> <span class="ss">:sociable</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span><span class="p">,</span> <span class="ss">concerns</span><span class="p">:</span> <span class="ss">:sociable</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:items</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">concerns</span> <span class="ss">:sociable</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="ss">:create</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#app/concerns/sociable.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Sociable</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">call</span><span class="p">(</span><span class="n">mapper</span><span class="p">,</span> <span class="n">options</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">mapper</span><span class="o">.</span><span class="n">resources</span> <span class="ss">:comments</span><span class="p">,</span> <span class="n">options</span>
+</span><span class='line'>    <span class="n">mapper</span><span class="o">.</span><span class="n">resources</span> <span class="ss">:categories</span><span class="p">,</span> <span class="n">options</span>
+</span><span class='line'>    <span class="n">mapper</span><span class="o">.</span><span class="n">resources</span> <span class="ss">:tags</span><span class="p">,</span> <span class="n">options</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>合併</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resources</span> <span class="ss">:zombies</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="ss">:index</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:humans</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="ss">:inde</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">￼</span><span class="n">with_options</span> <span class="ss">only</span><span class="p">:</span> <span class="ss">:index</span> <span class="k">do</span> <span class="o">|</span><span class="n">list_only</span><span class="o">|</span>
+</span><span class='line'>   <span class="n">list_only</span><span class="o">.</span><span class="n">resources</span> <span class="ss">:zombies</span>
+</span><span class='line'>   <span class="n">list_only</span><span class="o">.</span><span class="n">resources</span> <span class="ss">:humans</span>
+</span><span class='line'>   <span class="n">list_only</span><span class="o">.</span><span class="n">resources</span> <span class="ss">:medical_kits</span>
+</span><span class='line'><span class="err">￼￼￼￼</span><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>將 module 名稱改為大寫</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#app/controllers/api/posts_controller.rb</span>
+</span><span class='line'><span class="err">￼</span><span class="k">module</span> <span class="nn">Api</span> <span class="c1">#通常是camelcase</span>
+</span><span class='line'>   <span class="k">class</span> <span class="nc">PostController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#config/initializers/inflections.rb</span>
+</span><span class='line'><span class="err">￼</span><span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Inflector</span><span class="o">.</span><span class="n">inflections</span><span class="p">(</span><span class="ss">:en</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">inflect</span><span class="o">|</span>
+</span><span class='line'><span class="err">￼</span>  <span class="n">inflect</span><span class="o">.</span><span class="n">acronym</span> <span class="s1">&#39;API&#39;</span>
+</span><span class='line'><span class="err">￼</span><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>CURL</h1>
+
+<p>可以用 command line 來測試 get</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">i</span> <span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">posts</span>
+</span><span class='line'><span class="c1">#-i 詳細資訊</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="no">IH</span> <span class="s2">&quot;Accept: application/json&quot;</span> <span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">posts</span>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="no">IH</span> <span class="s2">&quot;Accept: application/xml&quot;</span> <span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">posts</span>
+</span><span class='line'><span class="c1">#H HEAD</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">i</span> <span class="o">-</span><span class="n">X</span> <span class="no">POST</span> <span class="o">-</span><span class="n">d</span> <span class="s1">&#39;episode[title]=ZombieApocalypseNow&#39;</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">posts</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#-X the -X option specifies the method</span>
+</span><span class='line'><span class="c1">#-d use -d to send data on the request</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="no">Iu</span> <span class="s1">&#39;carlos:secret&#39;</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">posts</span>
+</span><span class='line'><span class="c1">#上下一樣</span>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">I</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">carlos</span><span class="p">:</span><span class="n">secret</span><span class="vi">@localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">episodes</span>
+</span><span class='line'><span class="c1">#send Basic Auth credentials with the -u option</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="no">IH</span> <span class="s2">&quot;Accept: application/json&quot;</span> <span class="o">-</span><span class="n">u</span> <span class="s1">&#39;carlos:fakesecret&#39;</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">posts</span>
+</span><span class='line'><span class="c1">#client asks for JSON</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="no">IH</span> <span class="s2">&quot;Authorization: Token token=16d7d6089b8fe0c5e19bfe10bb156832&quot;</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span><span class="o">/</span><span class="n">posts</span>
+</span><span class='line'><span class="c1">#Set token on Authorization header</span>
 </span></code></pre></td></tr></table></div></figure>
 
 

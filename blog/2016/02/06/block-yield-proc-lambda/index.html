@@ -433,9 +433,119 @@ end &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>procedure (proc)</h1>
+<h3>proc into block</h3>
 
-<p>proc 都會有 <code>.call</code> 的 method 來呼叫</p>
+<p>Calling a method with &amp; in front of a parameter
+```ruby
+tweets.each(&amp;printer)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">turns</span> <span class="n">a</span> <span class="nb">proc</span> <span class="n">into</span> <span class="n">block</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">###block into a proc</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Defining</span> <span class="n">a</span> <span class="nb">method</span> <span class="n">with</span> <span class="o">&amp;</span> <span class="k">in</span> <span class="n">front</span> <span class="n">of</span> <span class="n">a</span> <span class="n">parameter</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>rubydef each(&amp;block)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">turns</span> <span class="n">a</span> <span class="n">block</span> <span class="n">into</span> <span class="n">a</span> <span class="nb">proc</span><span class="p">,</span><span class="n">so</span> <span class="n">it</span> <span class="n">can</span> <span class="n">be</span> <span class="n">assigned</span> <span class="n">to</span> <span class="n">parameter</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">###togeter</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>rubyclass Timeline  attr_accessor :tweets  def each(&amp;block) #block into a proc    tweets.each(&amp;block) #proc into block  end
+end</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">###加上 symlbol</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby
+tweets.map { |tweet| tweet.user }</p>
+
+<h1>上下相等tweets.map(&amp;:user)</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">###optional</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby
+def print  if block_given? #可判對是否有傳進 block    tweets.each { |tweet| puts yield tweet }  else    puts tweets.join(&ldquo;, &rdquo;)  endend</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">###closure</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>rubydef tweet_as(user)  lambda { |tweet| puts &ldquo;#{user}: #{tweet}&rdquo; }end
+gregg_tweet = tweet_as(&ldquo;greggpollack&rdquo;)</p>
+
+<h1>=> lambda { |tweet| puts &ldquo;greggpollack: #{tweet}&rdquo; }</h1>
+
+<p>gregg_tweet.call(&ldquo;Mind blowing!&rdquo;)# => greggpollack: Mind blowing!</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#procedure (proc)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">proc</span> <span class="err">都會有</span> <span class="sb">`.call`</span> <span class="err">的</span> <span class="nb">method</span> <span class="err">來呼叫</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby
+def who_am_i(&amp;block)
+  block.class
+end</p>
+
+<p>puts who_am_i {}</p>
+
+<h1>=> Proc</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">有此理解，透過</span> <span class="sb">`&amp;block`</span> <span class="err">將程式碼傳遞過去後，其實它就是</span> <span class="sb">`proc`</span><span class="err">。</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">跟</span> <span class="sb">`block`</span> <span class="err">不同的地方是，</span><span class="sb">`proc`</span> <span class="err">是可保存的</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby
+pro = Proc.new {|a|  puts a}</p>
+
+<h1>=> &lt;Proc:0x007fcb23ad2640@(irb):1></h1>
+
+<p>pro = Proc.new do |a|
+  puts a
+end</p>
+
+<p>pro.call(123)
+123</p>
+
+<h1>=>nil</h1>
+
+<p>pro.(123) #非正規用法
+123</p>
+
+<h1>=>nil</h1>
+
+<p>pro(123)
+123</p>
+
+<h1>=> 123</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -443,286 +553,179 @@ end &hellip;">
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">who_am_i</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">block</span><span class="o">.</span><span class="n">class</span>
-</span><span class='line'><span class="k">end</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">此時就會被</span> <span class="sb">`pro`</span> <span class="err">存起來，因此引用時就不需加上</span> <span class="sb">`&amp;`</span>
 </span><span class='line'>
-</span><span class='line'><span class="nb">puts</span> <span class="n">who_am_i</span> <span class="p">{}</span>
+</span><span class='line'><span class="c1">#lambda</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1"># =&gt; Proc</span>
+</span><span class='line'><span class="nb">lambda</span> <span class="err">與</span> <span class="nb">method</span> <span class="err">用法相同，概念是一樣的</span>
+</span><span class='line'><span class="err">不同的是</span> <span class="sb">`Method`</span> <span class="err">是有名字的</span><span class="nb">method</span><span class="err">，而</span> <span class="sb">`lambda`</span> <span class="err">是匿名</span> <span class="nb">method</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>有此理解，透過 <code>&amp;block</code> 將程式碼傳遞過去後，其實它就是 <code>proc</code>。</p>
+<p>ruby
+lam = lambda{|a| puts a}</p>
 
-<p>跟 <code>block</code> 不同的地方是，<code>proc</code> 是可保存的</p>
+<h1>=> &lt;Proc:0x007fcb23aa1860@(irb):1 (lambda)></h1>
+
+<p>lam.class</p>
+
+<h1>=> Proc 有此可知，lambda 的原型是 proc</h1>
+
+<p>lam = lambda do |a|
+  puts a
+end</p>
+
+<p>lam(123)</p>
+
+<h1>NoMethodError: undefined method `l' for main:Object</h1>
+
+<p>lam.(123) #非正規用法
+123</p>
+
+<h1>=> nil</h1>
+
+<p>lam.call(123)
+123</p>
+
+<h1>=> nil</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">lambda</span> <span class="err">跟</span> <span class="nb">proc</span> <span class="err">非常類似，主要有兩個差異</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">###1.lambda 會檢查參數的個數</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>ruby
+def args(code)
+  one, two = 1, 2
+  code.call(one, two)
+end</p>
+
+<p>args(Proc.new{|a, b, c| puts &ldquo;Give me a #{a} and a #{b} and a #{c.class}&rdquo;})</p>
+
+<h1>=> Give me a 1 and a 2 and a NilClass</h1>
+
+<p>args(lambda{|a, b, c| puts &ldquo;Give me a #{a} and a #{b} and a #{c.class}&rdquo;})</p>
+
+<h1>*.rb:8: ArgumentError: wrong number of arguments (2 for 3) (ArgumentError)</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">pro</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span>  <span class="nb">puts</span> <span class="n">a</span><span class="p">}</span>
-</span><span class='line'><span class="c1">#=&gt; &lt;Proc:0x007fcb23ad2640@(irb):1&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">###2.lambda 的return 會繼續執行，proc 則會直接終止</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">pro</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">a</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="n">a</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">pro</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
-</span><span class='line'><span class="mi">123</span>
-</span><span class='line'><span class="c1">#=&gt;nil</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">pro</span><span class="o">.</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span> <span class="c1">#非正規用法</span>
-</span><span class='line'><span class="mi">123</span>
-</span><span class='line'><span class="c1">#=&gt;nil</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">pro</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
-</span><span class='line'><span class="mi">123</span>
-</span><span class='line'><span class="c1">#=&gt; 123</span>
+</span><span class='line'><span class="sb">`lambda`</span> <span class="err">比較像是一個</span> <span class="nb">method</span> <span class="err">的</span> <span class="k">return</span><span class="err">，會</span> <span class="k">return</span> <span class="err">值回去，並且繼續執行</span>
+</span><span class='line'><span class="sb">`proc`</span> <span class="err">則是比較像是</span> <span class="err">一整個</span> <span class="nb">method</span> <span class="err">的</span> <span class="k">return</span><span class="err">，</span><span class="k">return</span> <span class="err">就結束</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>此時就會被 <code>pro</code> 存起來，因此引用時就不需加上 <code>&amp;</code></p>
+<p>ruby
+def proc_return
+  Proc.new { return &ldquo;Proc.new&rdquo;}.call
+  return &ldquo;proc_return method finished&rdquo;
+end</p>
 
-<h1>lambda</h1>
+<p>def lambda_return
+  lambda { return &ldquo;lambda&rdquo; }.call
+  return &ldquo;lambda_return method finished&rdquo;
+end</p>
 
-<p>lambda 與 method 用法相同，概念是一樣的<br/>
-不同的是 <code>Method</code> 是有名字的method，而 <code>lambda</code> 是匿名 method</p>
+<p>puts proc_return
+=>Proc.new</p>
+
+<h1>=> nil</h1>
+
+<p>puts lambda_return
+=>lambda_return method finished</p>
+
+<h1>=> nil</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">lam</span> <span class="o">=</span> <span class="nb">lambda</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">a</span><span class="p">}</span>
-</span><span class='line'><span class="c1">#=&gt; &lt;Proc:0x007fcb23aa1860@(irb):1 (lambda)&gt;</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">###使用時機</span>
 </span><span class='line'>
-</span><span class='line'><span class="n">lam</span><span class="o">.</span><span class="n">class</span>
-</span><span class='line'><span class="c1">#=&gt; Proc 有此可知，lambda 的原型是 proc</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">lam</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="k">do</span> <span class="o">|</span><span class="n">a</span><span class="o">|</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="n">a</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">lam</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#NoMethodError: undefined method `l&#39; for main:Object</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">lam</span><span class="o">.</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span> <span class="c1">#非正規用法</span>
-</span><span class='line'><span class="mi">123</span>
-</span><span class='line'><span class="c1">#=&gt; nil</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">lam</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
-</span><span class='line'><span class="mi">123</span>
-</span><span class='line'><span class="c1">#=&gt; nil</span>
+</span><span class='line'><span class="sb">`proc`</span> <span class="err">若作用域是在外面，無法將</span> <span class="k">return</span> <span class="err">傳進去，必須用</span> <span class="sb">`lambda`</span>
+</span><span class='line'><span class="err">在某些情況下，使用</span> <span class="sb">`lambda`</span> <span class="err">會比</span> <span class="sb">`proc`</span> <span class="err">還簡約。</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>lambda 跟 proc 非常類似，主要有兩個差異</p>
+<p>ruby
+def generic_return(code)
+  one, two    = 1, 2
+  three, four = code.call(one, two)
+  return &ldquo;Give me a #{three} and a #{four}&rdquo;
+end</p>
 
-<h3>1.lambda 會檢查參數的個數</h3>
+<p>puts generic_return(lambda { |x, y| return x + 2, y + 2 })</p>
+
+<p>puts generic_return(Proc.new { |x, y| return x + 2, y + 2 })</p>
+
+<p>puts generic_return(Proc.new { |x, y| x + 2; y + 2 })</p>
+
+<p>puts generic_return(Proc.new { |x, y| [x + 2, y + 2] })</p>
+
+<h1>=> Give me a 3 and a 4</h1>
+
+<h1>=> *.rb:9: unexpected return (LocalJumpError)</h1>
+
+<h1>=> Give me a 4 and a</h1>
+
+<h1>=> Give me a 3 and a 4</h1>
+
+<h1>proc 需再用 array 包覆起來</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">one</span><span class="p">,</span> <span class="n">two</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
-</span><span class='line'>  <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">args</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">|</span> <span class="nb">puts</span> <span class="s2">&quot;Give me a </span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">c</span><span class="o">.</span><span class="n">class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
-</span><span class='line'><span class="c1"># =&gt; Give me a 1 and a 2 and a NilClass</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">args</span><span class="p">(</span><span class="nb">lambda</span><span class="p">{</span><span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">|</span> <span class="nb">puts</span> <span class="s2">&quot;Give me a </span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">c</span><span class="o">.</span><span class="n">class</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">})</span>
-</span><span class='line'><span class="c1"># *.rb:8: ArgumentError: wrong number of arguments (2 for 3) (ArgumentError)</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#Ruby 1.9 lambda 新寫法</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>2.lambda 的return 會繼續執行，proc 則會直接終止</h3>
+<p>ruby</p>
 
-<p><code>lambda</code> 比較像是一個 method 的 return，會 return 值回去，並且繼續執行 <br/>
-<code>proc</code> 則是比較像是 一整個 method 的 return，return 就結束</p>
+<h1>bad</h1>
+
+<p>lambda = lambda { |a, b​​| a + b }
+lambda.call(1, 2)</p>
+
+<h1>good</h1>
+
+<p>lambda = ->(a, b) { a + b }
+lambda.(1, 2)</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">proc_return</span>
-</span><span class='line'>  <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="k">return</span> <span class="s2">&quot;Proc.new&quot;</span><span class="p">}</span><span class="o">.</span><span class="n">call</span>
-</span><span class='line'>  <span class="k">return</span> <span class="s2">&quot;proc_return method finished&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">lambda_return</span>
-</span><span class='line'>  <span class="nb">lambda</span> <span class="p">{</span> <span class="k">return</span> <span class="s2">&quot;lambda&quot;</span> <span class="p">}</span><span class="o">.</span><span class="n">call</span>
-</span><span class='line'>  <span class="k">return</span> <span class="s2">&quot;lambda_return method finished&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">puts</span> <span class="n">proc_return</span>
-</span><span class='line'><span class="o">=&gt;</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="c1">#=&gt; nil</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">puts</span> <span class="n">lambda_return</span>
-</span><span class='line'><span class="o">=&gt;</span><span class="n">lambda_return</span> <span class="nb">method</span> <span class="n">finished</span>
-</span><span class='line'><span class="c1">#=&gt; nil</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#method</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>使用時機</h3>
+<p>ruby
+class People
+  attr_reader :name</p>
 
-<p><code>proc</code> 若作用域是在外面，無法將 return 傳進去，必須用 <code>lambda</code><br/>
-在某些情況下，使用 <code>lambda</code> 會比 <code>proc</code> 還簡約。</p>
+<p>  def initialize(name)
+    @name = name
+  end</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">generic_return</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">one</span><span class="p">,</span> <span class="n">two</span>    <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
-</span><span class='line'>  <span class="n">three</span><span class="p">,</span> <span class="n">four</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">return</span> <span class="s2">&quot;Give me a </span><span class="si">#{</span><span class="n">three</span><span class="si">}</span><span class="s2"> and a </span><span class="si">#{</span><span class="n">four</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">puts</span> <span class="n">generic_return</span><span class="p">(</span><span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">puts</span> <span class="n">generic_return</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">puts</span> <span class="n">generic_return</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">;</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">puts</span> <span class="n">generic_return</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="o">[</span><span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span><span class="o">]</span> <span class="p">})</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># =&gt; Give me a 3 and a 4</span>
-</span><span class='line'><span class="c1"># =&gt; *.rb:9: unexpected return (LocalJumpError)</span>
-</span><span class='line'><span class="c1"># =&gt; Give me a 4 and a</span>
-</span><span class='line'><span class="c1"># =&gt; Give me a 3 and a 4</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># proc 需再用 array 包覆起來</span>
-</span></code></pre></td></tr></table></div></figure>
+<p>  def coding(language)
+    puts &ldquo;like #{language}&rdquo;
+  end
+end</p>
 
+<p>a = People.new(&lsquo;leon&rsquo;)</p>
 
-<h1>Ruby 1.9 lambda 新寫法</h1>
+<p>a.method(:coding).class</p>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># bad</span>
-</span><span class='line'><span class="nb">lambda</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="err">​​</span><span class="o">|</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="p">}</span>
-</span><span class='line'><span class="nb">lambda</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># good</span>
-</span><span class='line'><span class="nb">lambda</span> <span class="o">=</span> <span class="o">-&gt;</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">)</span> <span class="p">{</span> <span class="n">a</span> <span class="o">+</span> <span class="n">b</span> <span class="p">}</span>
-</span><span class='line'><span class="nb">lambda</span><span class="o">.</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
+<h1>=> Method</h1>
 
+<p>a.method(:coding).call(&lsquo;ruby&rsquo;)</p>
 
-<h1>method</h1>
+<h1>=> like ruby</h1>
 
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">People</span>
-</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:name</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="nb">name</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@name</span> <span class="o">=</span> <span class="nb">name</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">coding</span><span class="p">(</span><span class="n">language</span><span class="p">)</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;like </span><span class="si">#{</span><span class="n">language</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">People</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;leon&#39;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="ss">:coding</span><span class="p">)</span><span class="o">.</span><span class="n">class</span>
-</span><span class='line'><span class="c1">#=&gt; Method</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="ss">:coding</span><span class="p">)</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="s1">&#39;ruby&#39;</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; like ruby</span>
-</span></code></pre></td></tr></table></div></figure>
-
+<p>```</p>
 
 <p><a href="http://openhome.cc/Gossip/Ruby/Method.html">取得 Method</a></p>
 
@@ -732,7 +735,8 @@ end &hellip;">
 <a href="http://openhome.cc/Gossip/Ruby/IteratorBlock.html">迭代器與程式區塊</a>
 <a href="http://openhome.cc/Gossip/Ruby/Proc.html">程式區塊與 Proc</a><br/>
 <a href="http://openhome.cc/Gossip/Ruby/Lamdba.html">使用 lambda</a><br/>
-<a href="http://openhome.cc/Gossip/Ruby/Method.html">取得 Method</a></p>
+<a href="http://openhome.cc/Gossip/Ruby/Method.html">取得 Method</a><br/>
+<a href="http://chuyi.inow.tw/index.php/ruby%E7%9A%84block-lambda-proc%E8%88%87%E5%87%BD%E5%BC%8F%E7%89%A9%E4%BB%B6/">Ruby的block, lambda, Proc與函式物件</a></p>
 </div>
 
 

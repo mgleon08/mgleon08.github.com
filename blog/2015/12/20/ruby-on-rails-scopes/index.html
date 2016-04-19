@@ -13,7 +13,7 @@
 但有許多條件是同時會出現在很多地方，或是查詢條件比較複雜，無法一次就看懂在查詢什麼 這時就可以用 Scope 讓程式變得乾淨易讀，而且也可以 串接 來使用。 沒帶參數 1
 2
 3
-def index @books = Book.order(& &hellip;">
+def index @books = Book.order( &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -139,7 +139,7 @@ def index @books = Book.order(& &hellip;">
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">index</span>
-</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;create_at DESC&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="vi">@books</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="ss">create_at</span><span class="p">:</span> <span class="ss">:desc</span><span class="p">)</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -151,7 +151,7 @@ def index @books = Book.order(& &hellip;">
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>    <span class="n">scope</span> <span class="ss">:news_up</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s2">&quot;created_at DESC&quot;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">scope</span> <span class="ss">:news_up</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="ss">created_at</span><span class="p">:</span> <span class="ss">:desc</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -223,6 +223,19 @@ def index @books = Book.order(& &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:recent</span><span class="p">,</span> <span class="o">-&gt;</span><span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">published_at</span><span class="p">:</span> <span class="mi">2</span><span class="o">.</span><span class="n">weeks</span><span class="o">.</span><span class="n">ago</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:recent_red</span><span class="p">,</span> <span class="o">-&gt;</span><span class="p">{</span> <span class="n">recent</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">color</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>default</h1>
 
 <p>設定所有 scope 的 default 值</p>
@@ -230,15 +243,99 @@ def index @books = Book.order(& &hellip;">
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
+<span class='line-number'>4</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Book</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>    <span class="n">default_scope</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="s1">&#39;id DESC&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">default_scope</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">order</span><span class="p">(</span><span class="nb">id</span><span class="p">:</span> <span class="ss">:desc</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="c1">#or default_scope { order(id: :desc) }</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>官方文件：
-<a href="http://guides.rubyonrails.org/active_record_querying.html#scopes">Guides</a>
-<a href="http://rails.ruby.tw/active_record_querying.html#%E4%BD%9C%E7%94%A8%E5%9F%9F">Guides 中文</a>
+<h1>DRY</h1>
+
+<p>where(approved: true)重複了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:post</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:approved</span><span class="p">,</span> <span class="o">-&gt;</span><span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">approved</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:with_approved_comments</span><span class="p">,</span>
+</span><span class='line'>    <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s1">&#39;comments.approved = ?&#39;</span><span class="p">,</span> <span class="kp">true</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Post 改成用 merge 方式，去呼叫另一個 scope</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:with_approved_comments</span><span class="p">,</span>
+</span><span class='line'>    <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">joins</span><span class="p">(</span><span class="ss">:comments</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="no">Comment</span><span class="o">.</span><span class="n">approved</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Rails3 vs Rails4</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>   <span class="n">scope</span> <span class="ss">:active</span><span class="p">,</span>   <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">state</span><span class="p">:</span> <span class="s1">&#39;active&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>   <span class="n">scope</span> <span class="ss">:inactive</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">state</span><span class="p">:</span> <span class="s1">&#39;inactive&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#Rails3</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">active</span><span class="o">.</span><span class="n">inactive</span>
+</span><span class='line'><span class="c1">#SELECT * FROM users WHERE state = &#39;inactive&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#Rails4</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">active</span><span class="o">.</span><span class="n">inactive</span>
+</span><span class='line'><span class="c1">#SELECT * FROM posts WHERE state = &#39;active&#39; AND state = &#39;inactive&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#Rails4 要跟Rails3 一樣就加上merge</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">active</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="no">User</span><span class="o">.</span><span class="n">inactive</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#SELECT * FROM users WHERE state = &#39;inactive&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html#scopes">Guides</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html#%E4%BD%9C%E7%94%A8%E5%9F%9F">Guides 中文</a><br/>
 <a href="http://apidock.com/rails/ActiveRecord/NamedScope/ClassMethods/scope">apidock</a></p>
 
 <p>參考資料：

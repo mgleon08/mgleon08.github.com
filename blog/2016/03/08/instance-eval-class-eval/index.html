@@ -222,6 +222,101 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h3>instance_eval</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Tweet</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="n">user</span>
+</span><span class='line'>    <span class="vi">@tweet</span> <span class="o">=</span> <span class="o">[]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">submit_to_twitter</span>
+</span><span class='line'>    <span class="n">tweet_text</span> <span class="o">=</span> <span class="vi">@tweet</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39; &#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="vi">@user</span><span class="si">}</span><span class="s2">: </span><span class="si">#{</span><span class="n">tweet_text</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@tweet</span> <span class="o">&lt;&lt;</span> <span class="n">str</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">hashtag</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@tweet</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;#&quot;</span> <span class="o">+</span> <span class="n">str</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">mention</span><span class="p">(</span><span class="o">*</span><span class="n">users</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">users</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>      <span class="vi">@tweet</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;@&quot;</span> <span class="o">+</span> <span class="n">user</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">text</span><span class="p">(</span><span class="n">str</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@tweet</span> <span class="o">&lt;&lt;</span> <span class="n">str</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">tweet_as</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">text</span> <span class="o">=</span> <span class="kp">nil</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">tweet</span> <span class="o">=</span> <span class="no">Tweet</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">tweet</span><span class="o">.</span><span class="n">text</span><span class="p">(</span><span class="n">text</span><span class="p">)</span> <span class="k">if</span> <span class="n">text</span>
+</span><span class='line'>  <span class="n">tweet</span><span class="o">.</span><span class="n">instance_eval</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span> <span class="k">if</span> <span class="nb">block_given?</span>
+</span><span class='line'>  <span class="n">tweet</span><span class="o">.</span><span class="n">submit_to_twitter</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">tweet_as</span> <span class="s1">&#39;markkendall&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">mention</span> <span class="s1">&#39;foo&#39;</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span>
+</span><span class='line'>  <span class="n">text</span> <span class="s1">&#39;I made a DSL!&#39;</span>
+</span><span class='line'>  <span class="n">hashtag</span> <span class="s1">&#39;hooray&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <p>參考文件：<br/>
 <a href="http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php">Understanding class_eval and instance_eval</a><br/>
 <a href="http://openhome.cc/Gossip/Ruby/Eval.html">eval</a></p>

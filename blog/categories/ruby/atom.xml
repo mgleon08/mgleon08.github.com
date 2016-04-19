@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-04-01T10:34:55+08:00</updated>
+  <updated>2016-04-20T00:45:52+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,271 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Method Missing]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/04/19/method-missing/"/>
+    <updated>2016-04-19T22:18:09+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/04/19/method-missing</id>
+    <content type="html"><![CDATA[<p>當 ruby 找不到 method 就會 call 這個 method</p>
+
+<!-- more -->
+
+
+<pre><code class="ruby">class Post
+  #自己建立 method_missing 呼叫
+  def method_missing(method_name, *args)
+    puts "You tried to call #{method_name} with these arguments: #{args}"
+    super #default method_missing handling raises a NoMethodError
+  end
+end
+Post.new.submit(1, "Here's a post.")
+</code></pre>
+
+<p>用找不到 method 會 call <code>method_missing</code> 的特性，直接自己定義 method_missing 去定義呼叫其他的 method</p>
+
+<blockquote><p>它的執行效率並不好，所以只適合用在沒辦法預先知道方法名稱的情況下</p></blockquote>
+
+<pre><code class="ruby">class Post
+  DELEGATED_METHODS = [:username, :avatar]
+  def initialize(user)
+    @user = user
+  end
+
+  def method_missing(method_name, *args)
+    if DELEGATED_METHODS.include?(method_name)
+      @user.send(method_name, *args)
+    else
+      super #沒有在設定的 DELEGATED_METHODS 裡面，就呼叫 default method_missing handling raises a NoMethodError
+    end
+  end 
+end
+</code></pre>
+
+<pre><code class="ruby">class Post
+  def initialize(text)
+    @text = text
+  end
+  def to_s
+    @text
+  end
+  def method_missing(method_name, *args)
+    match = method_name.to_s.match(/^hash_(\w+)/) #找前面是 hash_
+    if match
+      @text &lt;&lt; " #" + match[1]
+    else
+      super 
+    end
+  end
+￼end
+
+
+post = Post.new("HI")
+post.hash_ruby
+post.hash_metaprogramming
+puts post
+#=&gt; HI #ruby #metaprogramming
+</code></pre>
+
+<h3>respond_to?</h3>
+
+<pre><code class="ruby">post = Post.new 
+post.respond_to?(:to_s) # =&gt; true
+post.hash_ruby #再 method_missing 有定義所以呼叫得到
+post.respond_to?(:hash_ruby) # =&gt; false #但在 respond_to 卻回傳 false
+</code></pre>
+
+<p>因此必須自己定義 respond_to?</p>
+
+<pre><code class="ruby">class Post
+  def respond_to?(method_name)
+    method_name =~ /^hash_\w+/ || super
+  end 
+end
+</code></pre>
+
+<p>但是 <code>post.method(:hash_ruby)</code> 還是會出現 <code>NameError: undefined method</code></p>
+
+<p>所以要改成另一個 <code>respond_to_missing?</code></p>
+
+<pre><code class="ruby">class Post
+  def respond_to_missing?(method_name) 
+    method_name =~ /^hash_\w+/ ||super
+  end 
+end
+</code></pre>
+
+<h1>￼DEFINE_METHOD REVISITED</h1>
+
+<pre><code class="ruby">class Post
+  def initialize(text)
+    @text = text
+  end
+  def to_s
+    @text
+  end
+  def method_missing(method_name, *args)
+    match = method_name.to_s.match(/^hash_(\w+)/)
+    if match #有 match 到 hash_ 就建立出新的 method
+      self.class.class_eval do
+        define_method(method_name) do
+          @text &lt;&lt; " #" + match[1]
+        end
+      end 
+      send(method_name) #並且呼叫 method
+    else
+      super #沒有就 raises a NoMethodError
+    end
+  end
+end
+
+#當 call post.hash_codeschool 就會定義出下面的 method 
+
+def hash_codeschool
+  @text &lt;&lt; " #" + "codeschool"
+end
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://apidock.com/ruby/BasicObject/method_missing">method_missing</a><br/>
+<a href="http://ruby-doc.org/core-2.2.0/MatchData.html">MatchData</a><br/>
+<a href="http://ruby-doc.org/core-2.1.1/Regexp.html">Regexp</a></p>
+
+<p>參考文件：  <br/>
+<a href="https://ihower.tw/blog/archives/4797">如何設計出漂亮的 Ruby APIs</a><br/>
+<a href="https://ruby-china.org/topics/3434">method_missing，一個Ruby 程序員的夢中情人</a><br/>
+<a href="http://stackoverflow.com/questions/13793060/respond-to-vs-respond-to-missing">respond_to? vs. respond_to_missing?</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Dynamic Classes & Methods]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods/"/>
+    <updated>2016-04-19T22:16:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods</id>
+    <content type="html"><![CDATA[<p>ruby 可以很幫變的動態產生 Classes 和 Methods</p>
+
+<!-- more -->
+
+
+<h1>Struct</h1>
+
+<pre><code class="ruby">class Post  attr_accessor :user, :status  def initialize(user, status)    @user, @status = user, status  end 
+
+  def to_s    "#{user}: #{status}"  end
+end
+
+#上下相等
+
+Post = Struct.new(:user, :status) do 
+  def to_s    "#{user}: #{status}"  endend
+</code></pre>
+
+<h1>send()</h1>
+
+<p>```rubypost.say= post.send(:say)= post.send(&ldquo;say&rdquo;)</p>
+
+<h1>也可以 call 到 private 的 method```</h1>
+
+<h1>alias_method</h1>
+
+<pre><code class="rubyclass Post">  attr_reader :foo #=&gt; return @foo
+  #一定要在定義好的 method 後面還 call 得到
+  alias_method :bar, :foo #=&gt; the same method 別名/原名
+
+  def initialize(foo = [])
+    @foo = foo
+  end
+end
+</code></pre>
+
+<h1>define_method</h1>
+
+<pre><code class="ruby">
+class Post  def draft    @status = :draft
+  end  
+  def posted    @status = :posted  end
+    def deleted    @status = :deleted  endend
+
+#上下相等
+
+class Post  states = [:draft, :posted, :deleted]  states.each do |status|    define_method status do      @status = status    end  end 
+end
+</code></pre>
+
+<h1>method()</h1>
+
+<pre><code class="ruby">
+class Post
+  def initialize(foo)
+    @posts = posts
+  end
+  def contents
+    @foo
+  end
+  def show_tweet(index)
+    puts @foo[index]
+  end 
+end
+</code></pre>
+
+<pre><code class="ruby">
+foo = ['Compiling!', 'Bundling...']
+post = Post.new(foo)
+
+content_method = post.method(:contents)
+content_method.call
+#=&gt; ["Compiling!", "Bundling..."]
+
+show_method = post.method(:show_tweet)
+
+￼(0..1).each(&amp;show_method)
+￼#上下相等
+show_method.call(0)
+show_method.call(1)
+</code></pre>
+
+<h1>EX: log_method</h1>
+
+<pre><code class="ruby">
+class MethodLogger
+  def log_method(klass, method_name)
+    klass.class_eval do
+      alias_method "#{method_name}_original", method_name
+      define_method method_name do |*args, &amp;block|
+        puts "#{Time.now}: Called #{method_name}"
+        send "#{method_name}_original", *args, &amp;block
+      end
+    end
+  end
+end
+
+class Post
+  def say_hi
+    puts "Hi"
+  end
+end
+
+logger = MethodLogger.new
+logger.log_method(Post, :say_hi)
+Post.new.say_hi
+
+#=&gt; 2016-04-05 12:14:01 +0800: Called say_hi
+#=&gt; Hi
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.2.0/Struct.html">Struct</a><br/>
+<a href="http://apidock.com/ruby/Object/__send__">send()</a><br/>
+<a href="http://apidock.com/ruby/Module/alias_method">alias_method()</a><br/>
+<a href="http://apidock.com/ruby/Module/define_method">method define_method</a></p>
+
+<p>參考文件：<br/>
+<a href="http://stackoverflow.com/questions/3337285/what-does-send-do-in-ruby">What does send() do in Ruby?</a><br/>
+<a href="https://gist.github.com/plusor/6104625">alias vs alias_method</a>  <br/>
+<a href="https://ihower.tw/blog/archives/4797">如何設計出漂亮的 Ruby APIs</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Module vs Class]]></title>
@@ -144,6 +409,7 @@ module Sample
   def self.included(base)
     base.class_eval do # 用 class_eval 在該 class 新增 Class method
       #scope :disabled, -&gt; { where(disabled: true) } 可以定義 scope
+      #has_many :post 可以定義關聯
       def self.foo
           "這裡是 class 的 method"
       end
@@ -522,139 +788,6 @@ sample(1,2,3, 4, 5)
 
 sample(1,2,'a':1, 'b':2)
 #=&gt; [1, 2, [{:a=&gt;1, :b=&gt;2}]]
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Instance_eval & Class_eval 自己加 Method!]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/08/instance-eval-class-eval/"/>
-    <updated>2016-03-08T22:46:28+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/08/instance-eval-class-eval</id>
-    <content type="html"><![CDATA[<p>有時候會發現有些 object，沒有設定 setter &amp; getter ，剛好又需要用到，這時就可以派上用場拉。</p>
-
-<!-- more -->
-
-
-<h1>instance_eval &amp; class_eval</h1>
-
-<p><code>instance_eval</code> Use ClassName.instance_eval to define a class method (one associated with the class object but not visible to instances).</p>
-
-<p><code>class_eval</code> Use ClassName.class_eval to define an instance method (one that applies to all of the instances of ClassName).</p>
-
-<p>簡單的來說，就是自己定義 class or instance 的 method</p>
-
-<pre><code class="ruby">class MyClass
-  def initialize(num)
-    @num = num
-  end
-end
-
-a = MyClass.new(1)
-b = MyClass.new(2)
-</code></pre>
-
-<p>錯誤，因為沒有 getter or setter methods</p>
-
-<pre><code class="ruby">a.num
-#=&gt;NoMethodError: undefined method `num' for #&lt;MyClass:0x007fba5c02c858 @num="1"&gt;
-</code></pre>
-
-<p>自行加 instance method</p>
-
-<pre><code class="ruby">a.instance_eval { @num }
-#=&gt; 1
-</code></pre>
-
-<p>也可以直接定義 method，這樣就可以一直重複使用</p>
-
-<pre><code class="ruby">a.instance_eval do
-   def num
-     @num
-   end
-end
-
-a.num
-#=&gt; 1
-b.num
-#NoMethodError: undefined method `num' for #&lt;MyClass:0x007fba5c08e5f8 @num="2"&gt;
-</code></pre>
-
-<p>上述指定義了 a 的 <code>instance method</code> 所以 b 會錯誤。<br/>
-因此可以直接定義在 <code>class instance</code></p>
-
-<pre><code class="ruby">MyClass.class_eval do
-  def num
-    @num
-  end
-end
-
-a.num
-#=&gt; 1
-b.num
-#=&gt; 2
-</code></pre>
-
-<p>參考文件：<br/>
-<a href="http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php">Understanding class_eval and instance_eval</a><br/>
-<a href="http://openhome.cc/Gossip/Ruby/Eval.html">eval</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[有什麼事，就問 Ruby 吧!]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/08/ask-ruby/"/>
-    <updated>2016-03-08T22:43:33+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/08/ask-ruby</id>
-    <content type="html"><![CDATA[<p>ruby 有趣的事，什麼都可以問它XD</p>
-
-<!-- more -->
-
-
-<pre><code class="ruby">a = [1,2,3]
-
-#問 a 的方法有哪些
-a.methods
-#=&gt; [:inspect, :to_s, :to_a, :to_h, :to_ary, :frozen?, :==, :eql?, :hash...]
-
-a.public_methods    #取得實例上public方法
-a.protected_methods #取得實例上protected方法
-a.private_methods   #取得實例上private方法
-
-a.instance_methods           #可取得類別或模組上定義的非private實例方法
-a.public_instance_methods    #可取得類別或模組上定義的public實例方法
-a.protected_instance_methods #可取得類別或模組上定義的protected實例方法
-a.private_instance_methods   #可取得類別或模組上定義的private實例方法
-
-a.instance_methods(false)
-如果呼叫方法時加上false，表示僅取得類別或模組中定義的實例方法，排除繼承或含括而來的實例方法。
-
-a.public_class_method  #取得public的模組或類別方法
-a.private_class_method #取得private的模組或類別方法
-
-local_variables    #區域變數清單
-global_variables   #全域變數清單
-instance_variables #物件的實例變數
-class_variables    #類別或模組變數
-
-defined? #知道變數是哪個範圍的變數 local? global?
-
-#問它是否有這個方法
-a.respond_to? :to_s
-#=&gt; true
-
-#問它的 class 是什麼
-a.class
-#=&gt; Array
-
-#問爸爸的class 是什麼
-Array.superclass  =&gt; Object   
-
-#直接列出祖宗十八代
-Array.ancestors
-#=&gt; [Array, JSON::Ext::Generator::GeneratorMethods::Array, Enumerable, Object, ActiveSupport::Dependencies::Loadable, PP::ObjectMixin, JSON::Ext::Generator::GeneratorMethods::Object, Kernel, BasicObject]
-
-Array.included_modules
 </code></pre>
 ]]></content>
   </entry>

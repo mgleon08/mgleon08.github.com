@@ -1,0 +1,886 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Backend | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/backend/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2016-04-20T00:45:52+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[淺談 Backend 課程筆記 3]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-3/"/>
+    <updated>2016-04-19T22:29:24+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-3</id>
+    <content type="html"><![CDATA[<p>課程筆記3</p>
+
+<!-- more -->
+
+
+<h1>理想的 Backend 系統</h1>
+
+<h3>越少模組越好</h3>
+
+<ul>
+<li>需要監控和管理的模組變越少</li>
+<li>團隊要掌握的語言/技術變越少</li>
+</ul>
+
+
+<h3>通用 vs 專精</h3>
+
+<p>ex : 是否使用ElasticSearch?</p>
+
+<ul>
+<li>需要 tokenization 嗎？(和民居食屋，若打民居是否要顯示出來?)</li>
+<li>能不能先在 RDBMS 做 search?</li>
+</ul>
+
+
+<h3>安全 vs 快速開發</h3>
+
+<p>ex : 應該把呼叫 GCM 放到獨立的 worker?</p>
+
+<ul>
+<li>多一個 worker，多一個 worker 要管，也要建立 MQ server</li>
+</ul>
+
+
+<h3>沒有 Single Point of Failure</h3>
+
+<p>所謂「SPOF」是指當某個零件故障會造成整個系統無法正當運作，那麼這個零件就是整個系統中
+的 Single Points Of Failure。</p>
+
+<ul>
+<li>每一系統模組(System Component)，都應該要有 standby instance (備用實例)
+
+<ul>
+<li>但 standby instance 只能保護單一隨機性的災難</li>
+</ul>
+</li>
+<li>一旦監控系統發現某一模組當掉，就把它停掉，並用 standby instance 取代</li>
+<li>一旦某模組當掉，你的設計應該讓系統停在 Consistent 狀態
+
+<ul>
+<li>除非為了效能，而故意犧牲 Consistency</li>
+</ul>
+</li>
+</ul>
+
+
+<p>/ping/ 回傳的是 204 無法發現有什麼問題，正確是回傳 200</p>
+
+<h3>對 Surge 有抵抗性</h3>
+
+<ul>
+<li>動態加開 AS 會有幫助，但加開的速度不一定能追上流量</li>
+<li>READ 可以用 Cache 支撐，但 Write 不行</li>
+<li>吃大量資源的 end point 可以考慮轉用 async 模式</li>
+<li>別再 AS 上執行 async API 的工作，會害 AS 當掉</li>
+</ul>
+
+
+<h3>不需要即時人員支援</h3>
+
+<ul>
+<li>停用 Load Balancer 下，一台 AS 當掉便自動停用，只讓系統損失 1/n 的運算能力</li>
+<li>監察系統發現 Master RDBMS 當掉後，應該懂得自動把 Slave DB 提升成 Master 並進行運算</li>
+<li>交給 Job Farm 的工作，在本來的 Worker Instance 當掉後，會自動由其他 Worker 重做</li>
+</ul>
+
+
+<h1>Backend 架構</h1>
+
+<h3>DNS</h3>
+
+<ul>
+<li>對大型網站，會有多個 data center 的，DNS 會回答該地區最近的 data center 的 IP</li>
+<li>對大型網站，一個 domain name 可能對應多個 IP
+
+<ul>
+<li>單一 load balancer 有其物理極限的(頻寬/CPU)，因此要多個 load balancer</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Load Balancer</h3>
+
+<ul>
+<li>通常 LB 會把 HTTPS 轉成 HTTP ，然後才把 Request 轉給 AS</li>
+<li>高階的 LB 能根據 url(甚至是 Request body) 做 routing
+
+<ul>
+<li> AWS 沒有(陽春的LoadBalance)，HAproxy 有，所以可以在 EC2 上架 HAproxy，就能依 url、request body 做 routing，但是AWS ELB的網路流量比EC2好很多</li>
+</ul>
+</li>
+<li>AS 架構沒問題的話，round robin （輪詢） 跟 least conn （最少連線數） 沒什麼差別</li>
+<li>如果 AS 不是 Stateless
+
+<ul>
+<li>source 只能在非流動用戶上(手機ip會改)</li>
+<li>sticky 需要 LB 解讀 Request 並抽取像 SessionId 的變數，然後根據之前歷史派到特定 AS 上。對 LB 有極高性能要求。</li>
+</ul>
+</li>
+</ul>
+
+
+<blockquote><p>Stateless（Client與Server的溝通不需依賴狀態，每一個 Request 必須包含所有需要的資訊，而不需依賴其他 Request 的狀態。）</p></blockquote>
+
+<p>參考文件：<br/>
+<a href="https://dotblogs.com.tw/jimmyyu/2010/10/16/difference-between-stateful-and-stateless">Stateful與Stateless</a><br/>
+<a href="http://caryhsu.blogspot.tw/2011/03/sql-server-load-balancing.htmll">SQL Server 負載平衡架構介紹(Load Balancing)</a></p>
+
+<h3>Application Server</h3>
+
+<ul>
+<li>好的 AS 應該是 Stateless
+
+<ul>
+<li> 這樣可以是流量加開 AS</li>
+<li> LB 便不用昂貴的 sticky mode 了</li>
+</ul>
+</li>
+<li>AS中 ，不應跑會吃大量資源的工作
+
+<ul>
+<li> LB才能使用 round robin / random 模式</li>
+<li> AS 才不會凍結掉</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>Long Polling Server (LPS)</h3>
+
+<ul>
+<li>如果要將 message 推送到手機，請使用 GCM/APNS ，別自行架 Server</li>
+<li>除非系統流量很大，用 AS 來處理 Long Polling 變好</li>
+<li>使用獨立 LPS 的好處
+
+<ul>
+<li>你能專精負責 long polling 語言</li>
+<li>不用擔心 AS execution worker pool 被用光</li>
+</ul>
+</li>
+</ul>
+
+
+<p>參考文件：<br/>
+<a href="http://blogger.gtwang.org/2014/01/websocket-protocol.html">WebSocket 通訊協定簡介：比較 Polling、Long-Polling 與 Streaming 的運作原理</a></p>
+
+<h3>Main DB</h3>
+
+<ul>
+<li>別輕易使用 noSQL （noSQL 沒有 transation）</li>
+<li>RAID 只能保護單一 SSD 故障</li>
+<li>Master/Slave Replication 保護不了壞人刪除數據</li>
+<li>只有離線儲存的備份數據，才真正安全</li>
+<li>效能，數據安全性，低成本 三者最多只能要兩種</li>
+</ul>
+
+
+<h3>Cache cluster</h3>
+
+<ul>
+<li>對小型系統，單獨一台大記憶體的機器做 Caching 也許比較方便</li>
+<li>對大型系統，單獨一台機器做 Caching 不合成本效益，所以要用多台機器</li>
+<li>要知道物件放在哪台機器上，最簡單方法 MD5(key) mod n</li>
+<li>為 Cache cluster 增加/刪減機器時，小心別引發 total cache miss</li>
+</ul>
+
+
+<h3>Hot Data DB</h3>
+
+<ul>
+<li>跟 cache 是不同的</li>
+<li>暫時性的，丟失了也死不了的數據</li>
+<li>在為了效能犧牲 Consistency 的情況下，要延後寫入 main DB 的數據</li>
+<li>一般來說 Hot Data 數據量不會太多，所以不需要 Clustering</li>
+<li>建議做 Replication 去保護資料</li>
+</ul>
+
+
+<h3>Search DB</h3>
+
+<ul>
+<li>沒錢別額外架 Search DB</li>
+<li>數據儲存結構有特別為搜尋做特化</li>
+<li>有 tokenization 和 auto correction 等等幫助搜尋的重要功能</li>
+<li>很多時候 Search DB 的數據和 Main DB 的數據會有時間差</li>
+</ul>
+
+
+<h3>Report DB</h3>
+
+<ul>
+<li>專門的 Report DB，很可能採用 denormalized schema
+
+<ul>
+<li>需要高度專業性</li>
+<li>需要很多很多的錢</li>
+</ul>
+</li>
+<li>Random Sampling 是否能解決問題</li>
+</ul>
+
+
+<h3>File DB</h3>
+
+<ul>
+<li>有人說 File 應該以 BLOB 物件被放到 Main DB，但是..
+
+<ul>
+<li>一般建立後極少被改動</li>
+<li>RDBMS 一般用上系統中最高級的 SSD，而 File 一般不需要這種效能</li>
+</ul>
+</li>
+<li>延伸思考，在檔案名字中額外加上 MD5，能解決很多 File caching 問題</li>
+</ul>
+
+
+<h3>Message Queue</h3>
+
+<ul>
+<li>Message
+
+<ul>
+<li>會裝有 Json/XML 格式的工作內容</li>
+<li>會有 MessageId</li>
+</ul>
+</li>
+<li>Producer
+
+<ul>
+<li>訊息生產者，一般來說是 AS 要建立工作</li>
+<li>一個 Queue 能有多於一個 Producer</li>
+</ul>
+</li>
+<li>Consumer
+
+<ul>
+<li>訊息消耗者，一般來說是 Worker 要執行工作</li>
+<li>Queue 中沒有 Message 時，Consumer 會被 blocking，不佔用 CPU</li>
+<li>一個 Queue 能有多於一個 Consumer</li>
+<li>一份訊息，在同一時間內只會讓一個 Consumer 收到</li>
+</ul>
+</li>
+<li>有些 MQ 不保證絕對性的 FIFO 和 no-duplicate，使用上請注意(ex:Amazon SQS)</li>
+<li>如果應用較簡單，Redia 某程度上也能當做 MQ 使用</li>
+<li>沒有人和 message 佔用 CPU 為 0，因為 worker 都被 blocked</li>
+</ul>
+
+
+<h3>Worker Farm</h3>
+
+<ul>
+<li>一個 Message 同一時間只會一個 worker 收到</li>
+<li>可以視 Queue 中的剩餘 Message 量，動態決定增減 Worker Server</li>
+</ul>
+
+
+<h3>Cron job worker</h3>
+
+<ul>
+<li>跟async task worker 有點不同，只在預定時間睡醒，把工作做完便死亡</li>
+<li>為了不要深夜撲火，應該在多於一台機器上執行
+
+<ul>
+<li>為了一份工作不被多個 worker 執行，需要 execution control 機制</li>
+<li>Database-as-IPC 是很嚴重的 anti-pattren，但如果有很少量的 data exchange 還算可以接受</li>
+</ul>
+</li>
+<li>理想的 Cron job 即使當掉，也無需 data cleanup，單純重跑即可</li>
+<li>同時間多個 Worker 執行時，也懂的自動分工，不會出錯</li>
+</ul>
+
+
+<p>簡報：<br/>
+<a href="https://github.com/TritonHo/slides">TritonHo/slides</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[淺談 Backend 課程筆記 2]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-2/"/>
+    <updated>2016-04-19T22:29:22+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-2</id>
+    <content type="html"><![CDATA[<p>課程筆記2</p>
+
+<!-- more -->
+
+
+<h1>淺談系統安全</h1>
+
+<ul>
+<li>所謂的安全，都是基於 <code>Design Flaw（設計錯誤）</code> 導致的</li>
+<li>大多都是網路上看別人範例，指理解一半然後再自行創作，導致嚴重安全問題
+
+<ul>
+<li>前人的架構大都經過充分論證，相對上不易有漏洞（ex:https）</li>
+</ul>
+</li>
+<li>Denfense-in-depth
+
+<ul>
+<li>多種的安全措施，即使一種安全措施被攻陷，還是有其他安全措施能夠將傷害減到最低</li>
+<li>心理戰，讓 hacker 需要一直花時間來破解讓他不耐煩</li>
+</ul>
+</li>
+<li>沒人會花時間去 hack 系統，除非有錢!!（氣象局 vs 銀行）</li>
+</ul>
+
+
+<h1>淺談 HTTPS</h1>
+
+<ul>
+<li>HTTPS = HTTP + TLS（前身 SSL）</li>
+<li>2016年標準，所有網站都應該使用 HTTPS
+
+<ul>
+<li>Google 搜尋也會加分</li>
+</ul>
+</li>
+<li>能有效防止各式各樣的攻擊，但不要..
+
+<ul>
+<li>使用太舊的加密方法，ex：DES</li>
+<li>CNNIC</li>
+</ul>
+</li>
+</ul>
+
+
+<p>參考文件：<br/>
+<a href="https://zh.wikipedia.org/wiki/%E5%82%B3%E8%BC%B8%E5%B1%A4%E5%AE%89%E5%85%A8%E5%8D%94%E8%AD%B0">傳輸層安全協議TLS</a></p>
+
+<h3>HTTPS流程</h3>
+
+<ul>
+<li>在TCP handshake 後 server 把證書(公開)傳給 client</li>
+<li>Client 收到證書後，根據發行者資訊，再拿出存於 Client 的發行者 public key 對證書驗證</li>
+<li>Client 產生對稱鑰匙，並且以證書中的 public key 進行加密，傳給 Server
+
+<ul>
+<li>對稱式比非對稱式所使用的 CPU 還小</li>
+</ul>
+</li>
+<li>Server 使用證書中的 private key 進行解密，拿到 Client 傳來的對稱鑰匙</li>
+<li>指此 TLS handshaking 已經完成。之後通訊權使用對稱鑰匙加密。其他人則無法。</li>
+</ul>
+
+
+<blockquote><p>現在 https 不安全是因為中國的 CNNIC，所以要將中國的 CNNIC 憑證都刪除!! 中國的銀行也都是用美國的憑證</p></blockquote>
+
+<h1>Load Balancing</h1>
+
+<ul>
+<li>有用 Load Balancing 會將 HTTPS 放在 LB，在用 HTTP 和 Application Server 連線</li>
+</ul>
+
+
+<p>參考文件：<br/>
+<a href="http://www.ithome.com.tw/node/81790">負載平衡是分散式資源串連之鑰</a></p>
+
+<h1>MITM 中間人攻擊</h1>
+
+<p>參考文件：<br/>
+<a href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E9%97%B4%E4%BA%BA%E6%94%BB%E5%87%BB">MITM</a><br/>
+<a href="http://mmdays.com/2008/11/10/mitm/">神不知，鬼不覺，你的帳號密碼是如何被竊聽的？─中間人攻擊〈Man-in-the-middle Attack〉初探</a></p>
+
+<h1>One way hashing （H）</h1>
+
+<ul>
+<li>hash 接受任意長度的資料，然後輸出固定長度結果的東西</li>
+<li>One way 的特性，只看 <code>function output</code> 和 <code>function</code> 本身，不能輕易找出 <code>funciton input</code></li>
+<li>將用戶密碼進行 H 然後將結果存到資料庫，之後用戶登入，把用戶的password 進行一次 hashing 跟資料庫的 password 比對即可</li>
+</ul>
+
+
+<h3>Rainbow attack</h3>
+
+<ul>
+<li>將大量的 string 進行 H，只要這個表夠大，就能夠去比對</li>
+</ul>
+
+
+<p><a href="https://zh.wikipedia.org/wiki/%E5%BD%A9%E8%99%B9%E8%A1%A8">彩虹表Rainbow Table</a> 是壞人建立表時，大幅節省空間的手法</p>
+
+<p>參考文件：<br/>
+<a href="http://recover.pixnet.net/blog/post/4535917-rainbow-hash-table-%E8%88%87%E5%AF%86%E7%A2%BC%E7%A0%B4%E8%A7%A3">Rainbow Hash Table 與密碼破解</a><br/>
+<a href="http://www.ha97.com/4009.html">（總結）密碼破解之王：Ophcrack彩虹表(Rainbow Tables)原理詳解（附：120G彩虹表下載）</a></p>
+
+<h3>防止Rainbow attack</h3>
+
+<ul>
+<li>建立新用戶識，先產生一個隨機（最好使用線上的 random funciton 不要自己來弄）的 string（salt），然後把 H（salt+password） 和 salt 存到資料庫</li>
+<li>用戶登入，系統就先將 salt 拿出來，再來比對 H（salt+password）和資料庫的值</li>
+<li>這樣壞人就需要為每一個 salt 建立獨立的一張表，所以 CPU 和 Memory 成本變成本來的 N 倍</li>
+</ul>
+
+
+<h1>預防 SQL injection</h1>
+
+<ul>
+<li>記住 parameter escaping 不是絕對安全的方式</li>
+<li>只有 Parameterization(使用參數或參數標記代替常量值的操作) 才是真正安全
+
+<ul>
+<li>請善用其底層是用 Parameterization 來工作的 ORM，輕鬆又安全</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>多層資料庫權限</h1>
+
+<ul>
+<li>一個好的資料庫，至少有這三種用戶，admin_user, normal_user, readonly_user</li>
+<li>admin_user
+
+<ul>
+<li>資料庫的擁有者，有所有權限</li>
+<li>除了要更動 database schema，或是新減資料庫，否則絕不使用</li>
+<li>最信任的人員持有</li>
+</ul>
+</li>
+<li>normal_user
+
+<ul>
+<li>給 Application server 使用</li>
+<li>沒有建立刪除資料庫權限</li>
+<li>沒有 truncate table 權限</li>
+<li>只有 select/insert/update/delete 權限</li>
+<li>只有對 stored procedure 執行權限</li>
+</ul>
+</li>
+<li>readonly_user
+
+<ul>
+<li>一般不應輕易連上 production database 來除錯，除非是最後手段</li>
+<li>別拿 admin_user &amp; normal_user 來除錯</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Audit table</h1>
+
+<ul>
+<li>對於敏感資料，我們會想記錄其所有的改動
+
+<ul>
+<li>例如想紀錄 user_balances 的改動，便會建立 user_balances_audit 來紀錄</li>
+<li>然後在 user_balances 建立 on insert, on update, on delete 的 trigger 把改動自動抄到 user_balances_audit</li>
+<li>normal_user 不應對 audit tables 有任何權限</li>
+<li>trigger 擁有者是 admin_user</li>
+<li>trigger 權限要基於建立者而不是執行者
+
+<ul>
+<li>不同的 RDBMS 具體指令會有分別，但理念相同</li>
+<li>ex: PostgreSQL 建立 trigger function 時需要 <code>SECURITY DEFINER</code> 關鍵字</li>
+</ul>
+</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>SessionId</h1>
+
+<ul>
+<li>用戶登入流程
+
+<ul>
+<li>產生一組SessionId</li>
+<li>把 SessionId->(UserId) 存到 Redis，並且 TTL 設定為 30 分鐘</li>
+<li>把 SessionId 傳回用戶</li>
+</ul>
+</li>
+<li>之後用戶所有的 request 都會把 SessionId 放在 http authorization header
+
+<ul>
+<li>伺服器利用 SessionId 從 Redis 中找回 Userid 便能知道發出 request 的用戶</li>
+<li>然後伺服器再把 Redis 中該 SessionId 重新設定 TTL 為 30 分鐘</li>
+</ul>
+</li>
+<li>缺點
+
+<ul>
+<li>所有的 Request 都要先檢查 Redis 去查 SessionId 是否正確</li>
+<li>萬一 Redis 當掉，所有用戶都需登入</li>
+<li>一旦壞人突破防火牆接觸到 Redis 便能建立受害用戶的 Session，並偽裝成用戶</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>JWT</h1>
+
+<p><a href="https://jwt.io/">jwt</a></p>
+
+<ul>
+<li>Header
+
+<ul>
+<li>alg : 說明 jwt signature 所使用的演算法（建議 RS256/RS512）</li>
+</ul>
+</li>
+</ul>
+
+
+<pre><code>{
+  "alg": "HS256",
+  "typ": "JWT"
+}
+</code></pre>
+
+<ul>
+<li>Payload
+
+<ul>
+<li>放什麼都可以，一般至少放上 userid 和 exp(到期時間)</li>
+<li>jwt 到期時間</li>
+</ul>
+</li>
+</ul>
+
+
+<pre><code>{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "admin": true
+}
+</code></pre>
+
+<ul>
+<li>Signature
+
+<ul>
+<li>把 header, payload 和 secret(HMAC)/private key(RSA) 一起計算出的 SHA256/SHA512</li>
+<li>因為 secret(HMAC)/private key(RSA) 只會放在 server, 所以用戶沒法自行產生，用戶偷改 header, payload 其 Signature 也不會吻合</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>jwt 流程</h3>
+
+<ul>
+<li>用戶登入系統，伺服器會檢查用戶密碼是否正確
+
+<ul>
+<li>建立jwt</li>
+<li>將 jwt 傳給用戶</li>
+</ul>
+</li>
+<li>之後用戶的所有 request，都會將 jwt 放在 http authorization header
+
+<ul>
+<li>伺服器利用 public key 驗證 jwt 是否正確，並檢查 exp 是否過期，在從 payload 中找回 UserId，便能知道發出 request 的用戶</li>
+</ul>
+</li>
+<li>jwt 快到期前，client side 會發出 renew jwt request，像 server 拿新的 jwt （exp 現在為 30分鐘）
+
+<ul>
+<li>不建議在每個 response 都傳回新的 jwt</li>
+</ul>
+</li>
+</ul>
+
+
+<h3>jwt 好壞</h3>
+
+<ul>
+<li>好
+
+<ul>
+<li>沒有了 Redis，不用當心 redis 當掉，Session 流失問題</li>
+</ul>
+</li>
+<li>壞
+
+<ul>
+<li>Client side 要定期更新 jwt</li>
+<li>一旦壞人拿到 secret(HMAC)/private key(RSA) 便能偽裝用戶</li>
+<li>建議用 RS 演算法，並把 jwt 發行放在獨立機器</li>
+</ul>
+</li>
+</ul>
+
+
+<p>參考文件：<br/>
+<a href="http://blog.rainy.im/2015/06/10/react-jwt-pretty-good-practice/">JWT 在前後端分離中的應用與實踐</a><br/>
+<a href="http://obeyo-blog.logdown.com/posts/208001">OBeyTech JWT - JSON Web Token</a></p>
+
+<h1>進階API設計概念</h1>
+
+<h3>API 版本控制</h3>
+
+<ul>
+<li>API = 規格，定下來就不要一直更改</li>
+<li>要進行更改可以利用 v1/v2/v3 版本來去做新的更動，才不會導致錯誤，即使原本的版本有 bug，但對方可能已經自行解決或將 bug 當作 feature</li>
+<li>因此要先新舊版本 API 並行，確定轉到新版 API 在刪除舊版本的</li>
+</ul>
+
+
+<h3>middleware</h3>
+
+<ul>
+<li>用戶丟 <code>/v1/emailAuth?token={token}</code></li>
+<li>我們可以在用戶和 Application Server 建立一層 middleware ，將 <code>/v1/emailAuth?token={token}</code>（GET）轉乘 <code>/v1/emailAuth</code> 並且把 token 放進 HTTP header，然後再把 Request 丟給 Application Server</li>
+<li>一版來說企業客戶會有很多保安要求，為每個客戶在主城市增加額外的 API 只會讓程式越來越亂，這時就應該交給 middleware 解決</li>
+</ul>
+
+
+<h3>違反 RESTful</h3>
+
+<ul>
+<li>用 uniform interface 的 API 便會有 <code>/v1/cats</code> 和 <code>/v1/cats/{catId}/catFoods/{catFoolId}</code></li>
+<li>這就會有很多 POST request 造成大量的 network over head</li>
+<li>改成 <code>/v1/catAndCatFoods</code>(post)
+
+<ul>
+<li>雖然違反 uniform interface，但更關鍵的 Stateless protocol 並沒有違反</li>
+</ul>
+</li>
+<li>正常系統設計流程
+
+<ul>
+<li>用戶使用流程</li>
+<li>討論</li>
+<li>API 設計</li>
+</ul>
+</li>
+<li>完整的 request 是基於 商業邏輯和用戶體驗的</li>
+</ul>
+
+
+<h1>Idempotent</h1>
+
+<ul>
+<li>不管多少次的 resquest ， response 都是一樣的</li>
+<li>POST 是 non-Idempotent
+
+<ul>
+<li>要改成 Idempotent 就將 response 透過 Redis 來處理，後續 response 都會先去 redis 看有沒有相同，有相同就回覆一樣的 response</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Optimistic lock</h1>
+
+<p><a href="http://openhome.cc/Gossip/HibernateGossip/OptimisticLocking.html">樂觀鎖定（Optimistic Locking</a></p>
+
+<h1>Stateless protocol</h1>
+
+<h1>Long polling</h1>
+
+<p><a href="http://blogger.gtwang.org/2014/01/websocket-protocol.html">WebSocket 通訊協定簡介：比較 Polling、Long-Polling 與 Streaming 的運作原理</a></p>
+
+<h1>Asynchronous API</h1>
+
+<h1>2PC(Two-phase Commit)</h1>
+
+<p><a href="https://zh.wikipedia.org/wiki/%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4">Two-phase Commit</a></p>
+
+<p>簡報：<br/>
+<a href="https://github.com/TritonHo/slides">TritonHo/slides</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[淺談 Backend 課程筆記 1]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-1/"/>
+    <updated>2016-04-19T22:29:19+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-1</id>
+    <content type="html"><![CDATA[<p>課程筆記1</p>
+
+<!-- more -->
+
+
+<h1>淺談MVC</h1>
+
+<ul>
+<li>M - 系統中各種抽象物件，一改動會主動告知view</li>
+<li>V - 把 model 顯示給用戶看，有控制項，可將用戶行動傳送給 controller</li>
+<li>C - 根據用戶的行動，去改變model</li>
+<li><h1>M+V+C!= MVC</h1></li>
+<li>在MVC中，model 改動後需要以 Observer Pattern 去主動告知 view 更新; 但在HTTP中，極少進行 Server Push，而是由 Controller 回應給 View</li>
+<li>MVC 針對的是單機軟體溝通（不需網路，用 function call 即可），而現今都是以 HTTP  RESTful來去溝通</li>
+<li>而且每家 framework 的 MVC 都不盡相同</li>
+</ul>
+
+
+<blockquote><p>不要提自己是用MVC，只要說有架構分開</p></blockquote>
+
+<h1>淺談 Backend 基本概念</h1>
+
+<ul>
+<li>backend 目前最注重 <code>throughput(系統總容量，處理能力)</code>，每一個 request 處理速度相對的比較不重要
+
+<blockquote><p>當 <code>execution time</code> 壓到某一個程度，<code>network latency</code> 會變成主因</p></blockquote></li>
+<li><code>throughput(系統總容量)</code> = <code>concurrent execution</code> / <code>execution time per task</code></li>
+<li>對 Application Server 來說，增加機台便能無痛增加 <code>throughput</code></li>
+<li>而 <code>RDBMS</code> 只有單一的 <code>Master</code> 通常會成為系統效能瓶頸</li>
+</ul>
+
+
+<blockquote><p>所以不要說什麼語言慢，而是要去增加機台!!</p></blockquote>
+
+<h1>Strong Type vs Weakly Type</h1>
+
+<ul>
+<li>ST 多花時間在 <code>coding</code>，但是少花時間在 <code>testing</code></li>
+<li>對老手說 WT 可能會比較快一點點</li>
+</ul>
+
+
+<blockquote><p>所以看要多花時間在 <code>coding</code> 還是在 <code>testing</code><br/>
+真正吐血的是在 Race Condition/Design Flaw</p></blockquote>
+
+<h1>Good Code</h1>
+
+<ul>
+<li>降低 <code>bug rate</code></li>
+<li>主動將有危險的 code 做註記</li>
+</ul>
+
+
+<h1>CRUD 到 backend framework</h1>
+
+<p><a href="https://github.com/TritonHo/demo">backdemo</a></p>
+
+<h3>問題</h3>
+
+<ul>
+<li>密碼放在程式碼中</li>
+<li><code>URL Routing</code>資訊雜亂
+  *要知道 /v1/cats/(GET)，必須知道 <code>main.go</code>，再細看 <code>cat.go</code></li>
+<li>要自己編寫簡單的SQL</li>
+<li>輸入處理和商業邏輯混在一起</li>
+<li>Partial Update 的輸入處理冗長</li>
+<li>輸入檢查散落在 <code>Create</code> 和 <code>Update</code></li>
+<li>輸出時，大量的重複的程式碼</li>
+<li>Handler 共用 <code>global variable</code></li>
+</ul>
+
+
+<blockquote><p>總結 DRY 將同樣邏輯的封裝在一起</p></blockquote>
+
+<h3>精簡程式</h3>
+
+<ul>
+<li>引入 <code>mux library</code> 支援以 Regular Expression 做 routing</li>
+<li>建立 <code>lib/config</code> 用來讀取環境變數，把密碼，用戶名稱都放到環境變數中</li>
+<li>20/80 80% automate ，集中精力解決剩下的 20%</li>
+<li>使用 ORM 也好，還是要好好學 SQL（用 ORM 解決簡單的，用 SQL 來解決複雜的)</li>
+<li>使用了 ORM 之後改動 table schema ，只要改動 Model Class</li>
+<li>建立 <code>lib/httputil</code> 來做處理輸入</li>
+<li>使用 reflection 來支持 Partial Update 並且跟 ORM 整合</li>
+<li>簡單的 single attribute checking 能放到 struct tag，然後在 input binding 檢查</li>
+<li>理想的 handler 應該只有 business login，輸入輸出都跟它沒關係
+
+<ul>
+<li>只會返回 statusCode, error/output object</li>
+<li>middleware 接受以上資料在做 HTTP Response</li>
+</ul>
+</li>
+<li>handler 需要的是 transaction 不是 db</li>
+<li>乾脆將 db 丟到 middleware，然後以 parameter 方式將 transaction 丟給 Handler，即使 Handler 遇上問題，也不用自己Rollback，因為在 middleware 那層解決</li>
+<li>將每個 endpoint，應該要抽出來變成 procedure</li>
+</ul>
+
+
+<h3>authorization</h3>
+
+<ul>
+<li>除非有特殊原因，auth token 請放在 <code>Http Authorization Header</code></li>
+<li>別把 user password 存到資料庫</li>
+</ul>
+
+
+<h3>Application Server 中主要的模組</h3>
+
+<ul>
+<li>Router</li>
+<li>Middleware</li>
+<li>Auth</li>
+<li>Input Binder</li>
+<li>Basic Validater</li>
+<li>Transaction Manager</li>
+<li>Database connector/ORM</li>
+<li>Output Utlity</li>
+<li>MQ connector</li>
+<li>Logger</li>
+<li>File Manager</li>
+</ul>
+
+
+<h1>others</h1>
+
+<h3>Connection Pool</h3>
+
+<p>Connection Pool(連線池) 是一種資料庫連線管理的機制，它介於應用程式與資料庫之間；
+集中管理資料庫的連線，能有效提升應用程式存取資料庫的效能及減少連線的錯誤。</p>
+
+<ul>
+<li>get 到 tomcat，後會先去檢查已經建好的 Connection Pool 有哪個 Connection 是有空的，就將 request 丟過去</li>
+<li>為什麼 Connection Pool 要用 <code>global variable</code>
+
+<ul>
+<li>生長週期是整個server</li>
+</ul>
+</li>
+<li>一個 application 都有一個 Connection Pool</li>
+</ul>
+
+
+<p>使用Connection Pool的好處有:</p>
+
+<ol>
+<li>Pool會keep住與DB的連線。程式需要使用時跟pool要即可。
+不用再重複地跟DB建立連線然後又釋放掉。</li>
+<li>可設定與DB最大的連線數，避免超過DB所能負擔的連線數。</li>
+<li>Pool可幫忙驗證Connectin是否還正常，若不正常時，便再與DB建立好的正常連線，
+確保程式取得的Connection都是正常可使用的。</li>
+<li>額外功能的提供。如幫忙檢查Connection State或幫忙關閉Statement等。
+不同的Connection Pool其額外提供的功能當然也會有所不同。</li>
+</ol>
+
+
+<p>參考文件：<br/>
+<a href="http://peggg327.blogspot.tw/2014/11/connection-pool.html">連接池(Connection Pool)介紹</a></p>
+
+<h3>reflection</h3>
+
+<ul>
+<li>Reflection的作用：得知自己的外觀，甚至自我修改與複製</li>
+<li>簡單的來說，能讓程式在 runtime 時知道一個 <code>structure object</code> 資訊
+
+<ul>
+<li>例如連帶有什麼 methods 和 attributes</li>
+</ul>
+</li>
+<li>雖然會讓效能變慢，但很多 library 都不能不用</li>
+<li>除非有特殊原因，一般不會在 handler 中使用 reflection (如果不是在寫 library 不該使用 reflection)</li>
+</ul>
+
+
+<p>參考文件：<br/>
+<a href="http://www.ithome.com.tw/node/57227">Reflection增加了程式的彈性</a><br/>
+<a href="https://github.com/JustinSDK/JavaSE6Tutorial/blob/master/docs/CH16.md">第 16 章 反射（Reflection）</a></p>
+
+<p>簡報：<br/>
+<a href="https://github.com/TritonHo/slides">TritonHo/slides</a></p>
+]]></content>
+  </entry>
+  
+</feed>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-04-01T10:34:55+08:00</updated>
+  <updated>2016-04-20T00:45:52+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,123 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[HTTP HEADER]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/04/19/http-header/"/>
+    <updated>2016-04-19T22:22:30+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/04/19/http-header</id>
+    <content type="html"><![CDATA[<p>透過 HTTP HEADER 有很多資訊可以做傳遞</p>
+
+<!-- more -->
+
+
+<h1>mime_types</h1>
+
+<p>MIME(Multipurpose Internet Mail Extensions) 格式</p>
+
+<p>主要用在 HTTP 通訊協定中的請求標頭 Accept 和回應標頭 Content-Type 中，來說明此文件的格式。</p>
+
+<p>Rails 會在 Controller 的 respond_to 方法中辨識並回應所請求的格式樣板，例如瀏覽器請求 application/json 就會回應 json 格式</p>
+
+<pre><code class="ruby">Mime::SET.collect(&amp;:to_s)
+=&gt; ["text/html",
+ "text/plain",
+ "text/javascript",
+ "text/css",
+ "text/calendar",
+ "text/csv",
+ "text/vcard",
+ "image/png",
+ "image/jpeg",
+ "image/gif",
+ "image/bmp",
+ "image/tiff",
+ "video/mpeg",
+ "application/xml",
+ "application/rss+xml",
+ "application/atom+xml",
+ "application/x-yaml",
+ "multipart/form-data",
+ "application/x-www-form-urlencoded",
+ "application/json",
+ "application/pdf",
+ "application/zip"]
+</code></pre>
+
+<h1>Accept-Language</h1>
+
+<p>可以根據瀏覽器的語言，來切換網站的語言</p>
+
+<pre><code class="ruby">￼class ApplicationController &lt; ActionController::Base￼  protect_from_forgery with: :exception  before_action :set_locale￼  
+  protected
+  def set_locale    I18n.locale = request.headers['Accept-Language']  endend
+</code></pre>
+
+<p>搭配 <code>http_accept_language</code> gem</p>
+
+<pre><code class="ruby">class ApplicationController &lt; ActionController::Base  protect_from_forgery with: :exception  before_action :set_locale
+
+  ￼protected  def set_locale￼￼￼    locales = I18n.available_locales    I18n.locale = http_accept_language.compatible_language_from(locales)  end
+end
+</code></pre>
+
+<h1>USING THE ACCEPT HEADER</h1>
+
+<pre><code class="ruby">#config/routes.rb
+require 'api_version'
+
+scope defaults: { format: 'json' } do  scope module: :v1, constraints: ApiVersion.new('v1') do￼￼￼    resources :zombies  end￼￼￼￼  scope module: :v2, constraints: ApiVersion.new('v2', true) do    resources :zombies￼￼￼  end 
+end
+</code></pre>
+
+<pre><code class="ruby">#lib/api_version.rb
+class ApiVersion  def initialize(version, default=false)    @version, @default = version, default￼￼￼￼￼￼  end
+  private  def check_headers(headers)    accept = headers['Accept']  end￼  def matches?(request)    @default || check_headers(request.headers)    accept &amp;&amp; accept.include?("application/vnd.apocalypse.#{@version}+json")  endend
+
+application
+#payload is application-specificvnd.apocalypse#media type is vendor-specific[.version]
+#API version+json#response format should be JSON
+</code></pre>
+
+<h1>Token</h1>
+
+<pre><code class="ruby">#app/models/user.rb
+class User &lt; ActiveRecord::Base
+  before_create :set_auth_token
+
+  private
+  ￼def set_auth_token    return if auth_token.present?    self.auth_token = generate_auth_token
+  end
+
+  def generate_auth_token
+    loop do      token = SecureRandom.hex
+      break token unless self.class.exists?(auth_token: token)    end
+￼  end
+end
+</code></pre>
+
+<pre><code class="ruby">#app/controllers/posts_controller.rb
+class EpisodesController &lt; ApplicationController   before_action :authenticate
+
+   ￼protected
+   def authenticate     authenticate_token || render_unauthorized
+   end
+
+   ￼def authenticate_token     authenticate_with_http_token do |token, options|
+       User.find_by(auth_token: token)     end
+   end
+end
+</code></pre>
+
+<p>gem：<br/>
+<a href="https://github.com/iain/http_accept_language">http_accept_language</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/environments-and-bundler.html">mime types</a><br/>
+<a href="http://www.rails365.net/articles/gem-jie-shao-yuan-ma-fen-xi-http-accept-language-si">gem介紹及源碼分析之http_accept_language(四)</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails Routes設定]]></title>
@@ -26,7 +143,6 @@
 
 <pre><code class="ruby">#直接設定
 get '/patients/:id', to: 'patients#show'
-
 
 #REST
 #設定 scope 有點像資料夾的概念，可用來區分後台可控制範圍
@@ -88,13 +204,6 @@ get '/stories/:name', to: redirect('/articles/%{name}')
 <pre><code class="ruby">#過濾id
 get 'photos/:id', to: 'photos#show', id: /[A-Z]\d{5}/
 
-#設定子網域
-namespace :admin do
-  constraints subdomain: 'admin' do
-    resources :photos
-  end
-end
-
 #黑名單
 class BlacklistConstraint
   def initialize
@@ -117,6 +226,105 @@ Rails.application.routes.draw do
   get '*path', to: 'blacklist#index',
     constraints: lambda { |request| Blacklist.retrieve_ips.include?(request.remote_ip) }
 end
+</code></pre>
+
+<h3>子網域</h3>
+
+<p><code>rubyresources :posts, constraints: { subdomain: 'api' }
+</code></p>
+
+<p><code>ruby￼constraints subdomain: 'api' do  resources :posts  #http://api.mgleon08.com/posts￼end
+</code></p>
+
+<pre><code class="ruby">namespace :api do
+  constraints subdomain: 'api' do
+    resources :posts
+  end
+end
+
+#產生兩個 api
+#http://api.mgleon08.com/api/posts
+
+constraints subdomain: 'api' do 
+    namespace :api, path: '/' do #加上 path 就可以消去後面的     resources :zombies   endend
+#上下一樣
+namespace :api, path: '/', constraints: { subdomain: 'api' } do
+  resources :zombiesend
+
+#http://api.mgleon08.com/posts
+</code></pre>
+
+<h1>DRY</h1>
+
+<h3>concern</h3>
+
+<pre><code class="ruby">concern :sociable do |options| 
+  resources :comments, options
+  resources :categories, options 
+  resources :tags, optionsend
+resources :messages, concerns: :sociableresources :posts,    concerns: :sociable￼resources :items do  concerns :sociable, only: :createend
+</code></pre>
+
+<h3>or</h3>
+
+<pre><code class="ruby">concern :sociable, Sociable
+resources :messages, concerns: :sociable 
+resources :posts, concerns: :sociable 
+resources :items do  concerns :sociable, only: :createend
+</code></pre>
+
+<pre><code class="ruby">#app/concerns/sociable.rbclass Sociable  def self.call(mapper, options)    mapper.resources :comments, options 
+    mapper.resources :categories, options 
+    mapper.resources :tags, options  end 
+end
+</code></pre>
+
+<h3>合併</h3>
+
+<pre><code class="ruby">resources :zombies, only: :index 
+resources :humans, only: :inde
+</code></pre>
+
+<pre><code class="ruby">￼with_options only: :index do |list_only|   list_only.resources :zombies   list_only.resources :humans   list_only.resources :medical_kits￼￼￼￼end
+</code></pre>
+
+<h1>將 module 名稱改為大寫</h1>
+
+<pre><code class="ruby">#app/controllers/api/posts_controller.rb
+￼module Api #通常是camelcase   class PostController &lt; ApplicationController   end
+end
+</code></pre>
+
+<pre><code class="ruby">#config/initializers/inflections.rb
+￼ActiveSupport::Inflector.inflections(:en) do |inflect|￼  inflect.acronym 'API'￼end
+</code></pre>
+
+<h1>CURL</h1>
+
+<p>可以用 command line 來測試 get</p>
+
+<pre><code class="ruby">curl -i localhost:3000/posts
+#-i 詳細資訊
+
+curl -IH "Accept: application/json" localhost:3000/posts
+curl -IH "Accept: application/xml" localhost:3000/posts
+#H HEAD
+
+curl -i -X POST -d 'episode[title]=ZombieApocalypseNow' http://localhost:3000/posts
+
+#-X the -X option specifies the method
+#-d use -d to send data on the request
+
+curl -Iu 'carlos:secret' http://localhost:3000/posts
+#上下一樣
+curl -I http://carlos:secret@localhost:3000/episodes
+#send Basic Auth credentials with the -u option
+
+curl -IH "Accept: application/json" -u 'carlos:fakesecret' http://localhost:3000/posts
+#client asks for JSON
+
+curl -IH "Authorization: Token token=16d7d6089b8fe0c5e19bfe10bb156832" http://localhost:3000/posts
+#Set token on Authorization header
 </code></pre>
 
 <p>官方文件：<br/>
@@ -513,68 +721,6 @@ end
 
 <p>參考資料：
 <a href="https://ihower.tw/rails4/rails-recipes.html">錦囊妙計</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Outputting XML]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/08/outputting-xml/"/>
-    <updated>2016-03-08T23:03:49+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/08/outputting-xml</id>
-    <content type="html"><![CDATA[<p>在 <code>rails</code> 當中，可以用 <code>xml.builder</code> 來輕鬆的輸出 <code>xml</code></p>
-
-<!-- more -->
-
-
-<h1>Format</h1>
-
-<p>可以直接在 <code>routes</code> ，設定 format 格式</p>
-
-<pre><code class="ruby">get  :l, :defaults =&gt; { :format =&gt; 'xml' }
-</code></pre>
-
-<p>或是 controller</p>
-
-<pre><code class="ruby">require 'csv'
-class PeopleController &lt; ApplicationController
-
-def index
-    @people = Person.all
-    respond_to do |format|
-      format.html
-      format.json{ render :json =&gt; @person.to_json }
-      format.xml { render :xml =&gt; @person.to_xml }
-    end
-end
-</code></pre>
-
-<h1>View</h1>
-
-<p><code>index.xml.builder</code></p>
-
-<pre><code class="ruby">xml.instruct!
-xml.xml do
-  xml.linkXml do
-    xml.phone  @user
-    xml.age    @age
-  end
-end
-
-#&lt;xml&gt;
-  #&lt;linkXml&gt;
-    #&lt;phone&gt;1234-5678&lt;/phone&gt;
-    #&lt;age&gt;20&lt;/age&gt;
-  #&lt;/linkXml&gt;
-#&lt;/xml&gt;
-</code></pre>
-
-<p>gem：<br/>
-<a href="https://github.com/jimweirich/builder">builder</a></p>
-
-<p>參考文件：<br/>
-<a href="https://richonrails.com/articles/outputting-xml-using-ruby-on-rails">Outputting XML Using Ruby on Rails
-</a>
-<a href="https://ihower.tw/rails4/actionview.html">Action View - 樣板設計</a></p>
 ]]></content>
   </entry>
   

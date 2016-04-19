@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Angular | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/angular/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-04-01T10:34:55+08:00</updated>
+  <updated>2016-04-20T00:45:52+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,174 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Angular 筆記2]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/04/19/angular-notes2/"/>
+    <updated>2016-04-19T22:12:20+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/04/19/angular-notes2</id>
+    <content type="html"><![CDATA[<p>一些 angular 的紀錄!</p>
+
+<!-- more -->
+
+
+<h1>vaildation</h1>
+
+<p><code>novalidate</code> <code>required</code> Turn Off Default HTML Validation</p>
+
+<pre><code class="js">￼&lt;form name="reviewForm" ng-controller="ReviewController as reviewCtrl"                        ng-submit="reviewForm.$valid &amp;&amp; reviewCtrl.addReview(product)" novalidate&gt;&lt;select ng-model="reviewCtrl.review.stars" required&gt; &lt;option value="1"&gt;1 star&lt;/option&gt; ￼￼...  &lt;/select&gt;Mark Required Fields￼￼&lt;textarea name="body" ng-model="reviewCtrl.review.body" required&gt;&lt;/textarea&gt;&lt;label&gt;by:&lt;/label&gt;&lt;input name="author" ng-model="reviewCtrl.review.author" type="email" required/&gt;￼&lt;div&gt; reviewForm is  &lt;/div&gt;&lt;input type="submit" value="Submit" /&gt;  &lt;/form&gt;
+</code></pre>
+
+<hr />
+
+<h1>AngularJS q deferred 和 promise</h1>
+
+<p><a href="http://roxannera.blogspot.tw/2014/03/angularjs-q-deferred-promise.html">AngularJS q deferred 和 promise</a>  <br/>
+<a href="https://checkcheckzz.gitbooks.io/angularjs-learning-notes/content/chapter11/11-2.html">廣義回調管理</a></p>
+
+<hr />
+
+<h1>Factory Service Provider</h1>
+
+<p><code>$factory</code> <code>$service</code> <code>$provider</code>
+這三個都能夠做到同樣的事情，有點像是 rails 裡的 service object</p>
+
+<p>差別在於</p>
+
+<h3>factory 方法</h3>
+
+<p>必須提供一個工廠方法，並自己建立一個 Service Object</p>
+
+<pre><code class="js">var app = angular.module("app", []);
+
+app.service("helloService", function(){
+     return {
+        foo: function(name){
+        return console.log('Hi' + name);
+     }
+});
+</code></pre>
+
+<h3>service 方法</h3>
+
+<p>必須提供一個建構子，由 AngularJS 會利用 new，建立 Service Object</p>
+
+<pre><code class="js">var app = angular.module("app", []);
+
+app.service("helloService", function(){
+    this.foo = function(name){
+        return console.log('Hi' + name);
+    };
+
+});
+</code></pre>
+
+<h3>Provider 方法</h3>
+
+<p>與其他兩個最大的不同在於它能夠對 Service Object 做額外的設定(Configured)，且必須包含一個 <code>$get</code> 的函式</p>
+
+<pre><code class="js">var app = angular.module("app", []);
+
+app.provider("helloService", function(){
+return {  //It's Provider Object
+    $get: function(){
+            return {  //It's Service Object
+               foo: function(name){
+                   console.log('Hi' + name);
+               }
+            };
+        }
+    }
+});
+</code></pre>
+
+<h3>Decorator</h3>
+
+<p>可以攔截並且去做客製化</p>
+
+<pre><code class="js">angular.module('app', []);
+
+angular.module('app')
+    .value('version', 1);
+
+angular.module('app')
+    .config(function ($provide) {
+    $provide.decorator('version', function ($delegate) {
+        return 'Version - ' + $delegate;
+    });
+});
+
+angular.module('app')
+    .controller('MainCtrl', function ($scope, version) {
+    $scope.version = version;
+});
+
+//=&gt; Version - 1
+</code></pre>
+
+<h3>Constant</h3>
+
+<p>常數，無法透過 decorator 去攔截<br/>
+無法修改<br/>
+可被注入到 Config</p>
+
+<pre><code class="js">angualr.module('app')
+    .constant('version', 1);
+</code></pre>
+
+<h3>Value</h3>
+
+<p>可透過 decorator 去攔截<br/>
+可修改 <br/>
+可被注入到 Config</p>
+
+<pre><code class="js">angular.module('app')
+    .value('version', 1);
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="https://docs.angularjs.org/api/auto/service/$provide">provide</a></p>
+
+<p>參考文件：<br/>
+<a href="http://programer-learn.blogspot.tw/p/angularjs.html">AngularJS 系列</a><br/>
+<a href="http://kirkchen.logdown.com/posts/245678-angularjs-talking-about-the-angularjs-provider-mechanisms">淺談Angular.js的Provider機制</a><br/>
+<a href="http://hellobug.github.io/blog/angularjs-providers/">[AngularJS系列(4)] 那傷不起的provider們啊~ (Provider, Value, Constant, Service, Factory, Decorator)</a><br/>
+<a href="http://blog.xebia.com/differences-between-providers-in-angularjs/">Differences Between Providers In AngularJS</a></p>
+
+<hr />
+
+<h1>$rootScope $emit $broadcast $on</h1>
+
+<p><code>$rootScope</code> 是 AngularJS app 中最上層的 scope，一個 app(ng-app) 只會有一個 <code>$rootScope</code>，也就是說同一個 app 可以共用同一個 <code>$rootScope</code> 的值</p>
+
+<p>可以看作</p>
+
+<ul>
+<li><code>$scope</code> 區域變數。</li>
+<li><code>$rootScope</code> 全域變數。</li>
+</ul>
+
+
+<p>可以搭配 <code>$emit</code>(向父級) , <code>$broadcast</code>(向子級) and <code>$on</code>(接收) ，跟別的 controller 溝通</p>
+
+<p>參考文件：<br/>
+<a href="http://www.angularjs.cn/A08c">angularjs的事件$broadcast and $emit and $on</a><br/>
+<a href="http://www.cnblogs.com/CraryPrimitiveMan/p/3679552.html">AngularJS的學習&ndash;on、emit和broadcast的使用</a><br/>
+<a href="http://hamisme.blogspot.tw/2013/07/emit-broadcast-and-on.html">$emit , $broadcast and $on的用途 &ndash; AngularJS</a></p>
+
+<hr />
+
+<h1>ngResource</h1>
+
+<p><a href="http://jasonlamswatow.com/angularjs-restful/">AngularJS 取用外部伺服之：取用 RESTful APIs</a></p>
+
+<hr />
+
+<h1>理解watch ，apply 和digest</h1>
+
+<p><a href="http://www.angularjs.cn/A0a6">理解watch ，apply 和digest &mdash; 理解數據綁定過程</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Angular Custom Directive]]></title>
@@ -240,6 +408,15 @@ app
                 $scope.posts = data;
         });
     };
+     //也可這樣寫
+     //$http({ method: "GET",
+             //url: "/posts",
+             //data: {
+                //name: foo
+            //}
+      //}).success(function(data){
+            //$scope.posts = data;
+      //});
 
     //這裏馬上執行，因為一定要有 data 才能做其他事
     getPost()
@@ -426,9 +603,9 @@ $watch和ng-change是在改變內容值的時候，觸發事件，ng-click則只
 
 <p><code>filter</code></p>
 
-<pre><code>test
+<p><code>test</code></p>
 
-currency  貨幣符號
+<pre><code>currency  貨幣符號
 date      將 Date 轉成指定格式的日期
 filter    可以篩選陣列中的內容
 json      json
