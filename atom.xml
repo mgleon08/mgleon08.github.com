@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-04-20T00:45:52+08:00</updated>
+  <updated>2016-04-20T00:51:53+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -1437,7 +1437,7 @@
 </span><span class='line'>          <span class="vi">@text</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot; #&quot;</span> <span class="o">+</span> <span class="n">match</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
 </span><span class='line'>        <span class="k">end</span>
 </span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>      <span class="nb">send</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span>  <span class="c1">#並且呼叫 method</span>
+</span><span class='line'>      <span class="nb">send</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span> <span class="c1">#並且呼叫 method</span>
 </span><span class='line'>    <span class="k">else</span>
 </span><span class='line'>      <span class="k">super</span> <span class="c1">#沒有就 raises a NoMethodError</span>
 </span><span class='line'>    <span class="k">end</span>
@@ -1517,64 +1517,45 @@
 
 <h1>send()</h1>
 
-<figure class='code'><figcaption><span>post.say= post.send(:say)= post.send("say")</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#也可以 call 到 private 的 method</span>
-</span><span class='line'><span class="sb">```</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">say</span>
+</span><span class='line'><span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:say</span><span class="p">)</span>
+</span><span class='line'><span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;say&quot;</span><span class="p">)</span>
 </span><span class='line'>
-</span><span class='line'><span class="sb">#alias_method</span>
+</span><span class='line'><span class="c1">#也可以 call 到 private 的 method</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>rubyclass Post
-  attr_reader :foo #=> return @foo
-  #一定要在定義好的 method 後面還 call 得到
-  alias_method :bar, :foo #=> the same method 別名/原名</p>
+<h1>alias_method</h1>
 
-<p>  def initialize(foo = [])
-    @foo = foo
-  end
-end</p>
-
-<figure class='code'><figcaption><span>post.say= post.send(:say)= post.send("say")</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#define_method</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:foo</span> <span class="c1">#=&gt; return @foo</span>
+</span><span class='line'>  <span class="c1">#一定要在定義好的 method 後面還 call 得到</span>
+</span><span class='line'>  <span class="n">alias_method</span> <span class="ss">:bar</span><span class="p">,</span> <span class="ss">:foo</span> <span class="c1">#=&gt; the same method 別名/原名</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">foo</span> <span class="o">=</span> <span class="o">[]</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@foo</span> <span class="o">=</span> <span class="n">foo</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>ruby</p>
+<h1>define_method</h1>
 
-<p>class Post  def draft    @status = :draft
-  end<br/>
-  def posted    @status = :posted  end
-    def deleted    @status = :deleted  endend</p>
-
-<h1>上下相等</h1>
-
-<p>class Post  states = [:draft, :posted, :deleted]  states.each do |status|    define_method status do      @status = status    end  end
-end</p>
-
-<figure class='code'><figcaption><span>post.say= post.send(:say)= post.send("say")</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#method()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>ruby</p>
-
-<p>class Post
-  def initialize(foo)
-    @posts = posts
-  end
-  def contents
-    @foo
-  end
-  def show_tweet(index)
-    puts @foo[index]
-  end
-end</p>
-
-<figure class='code'><figcaption><span>post.say= post.send(:say)= post.send("say")</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -1589,21 +1570,97 @@ end</p>
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
 <span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sb">```ruby</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">draft</span>
+</span><span class='line'>    <span class="vi">@status</span> <span class="o">=</span> <span class="ss">:draft</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="sb">foo = [&#39;Compiling!&#39;, &#39;Bundling...&#39;]</span>
-</span><span class='line'><span class="sb">post = Post.new(foo)</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">posted</span>
+</span><span class='line'>    <span class="vi">@status</span> <span class="o">=</span> <span class="ss">:posted</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="sb">content_method = post.method(:contents)</span>
-</span><span class='line'><span class="sb">content_method.call</span>
-</span><span class='line'><span class="sb">#=&gt; [&quot;Compiling!&quot;, &quot;Bundling...&quot;]</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">deleted</span>
+</span><span class='line'>    <span class="vi">@status</span> <span class="o">=</span> <span class="ss">:deleted</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="sb">show_method = post.method(:show_tweet)</span>
+</span><span class='line'><span class="c1">#上下相等</span>
 </span><span class='line'>
-</span><span class='line'><span class="sb">￼(0..1).each(&amp;show_method)</span>
-</span><span class='line'><span class="sb">￼#上下相等</span>
-</span><span class='line'><span class="sb">show_method.call(0)</span>
-</span><span class='line'><span class="sb">show_method.call(1)</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="n">states</span> <span class="o">=</span> <span class="o">[</span><span class="ss">:draft</span><span class="p">,</span> <span class="ss">:posted</span><span class="p">,</span> <span class="ss">:deleted</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">states</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">status</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">define_method</span> <span class="n">status</span> <span class="k">do</span>
+</span><span class='line'>      <span class="vi">@status</span> <span class="o">=</span> <span class="n">status</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>method()</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="n">posts</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">contents</span>
+</span><span class='line'>    <span class="vi">@foo</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show_tweet</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="vi">@foo</span><span class="o">[</span><span class="n">index</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">foo</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;Compiling!&#39;</span><span class="p">,</span> <span class="s1">&#39;Bundling...&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">content_method</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="ss">:contents</span><span class="p">)</span>
+</span><span class='line'><span class="n">content_method</span><span class="o">.</span><span class="n">call</span>
+</span><span class='line'><span class="c1">#=&gt; [&quot;Compiling!&quot;, &quot;Bundling...&quot;]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">show_method</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="ss">:show_tweet</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">￼</span><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="o">&amp;</span><span class="n">show_method</span><span class="p">)</span>
+</span><span class='line'><span class="err">￼</span><span class="c1">#上下相等</span>
+</span><span class='line'><span class="n">show_method</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class='line'><span class="n">show_method</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
