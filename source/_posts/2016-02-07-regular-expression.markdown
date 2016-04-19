@@ -6,7 +6,7 @@ comments: true
 categories: regular
 ---
 
-在網頁中經常要確認一些格式，像是身分證格式必須要 10 碼，開頭是大寫 A-Z ，第二個數字必須是 0 or 1，這時就能夠用 `Regular Expression` 來做判斷。
+在網頁中經常要確認一些格式，像是身分證格式必須要 10 碼，開頭是大寫 A-Z ，第二個數字必須是 1 or 2，這時就能夠用 `Regular Expression` 來做判斷。
 
 <!-- more -->
 

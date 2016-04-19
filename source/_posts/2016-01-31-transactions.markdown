@@ -27,4 +27,10 @@ end
 
 因此必須改用 `after_commit`這個回呼，才能確保讀取到交易完成後的資料。
 
+```ruby
+class User < ActiveRecord::Base  def foo    self.class.transaction do￼￼      self.update!(name: 'bar')    end 
+  endend
+```
+
+參考文件：  
 [ActiveRecord - 進階功能](https://ihower.tw/rails4/activerecord-others.html)

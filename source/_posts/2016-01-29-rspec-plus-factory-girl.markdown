@@ -425,6 +425,9 @@ describe Zombie do  it_behaves_like 'the undead', Zombie.newend
 #spec/support/shared_examples_for_undead.rbshared_examples_for 'the undead' do |undead|  it 'does not have a pulse' doundead.pulse.should == false endend
 ```
 
+[Shared context](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-context)  
+[Shared examples](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-examples)
+
 ###custom matcher
 
 ```ruby

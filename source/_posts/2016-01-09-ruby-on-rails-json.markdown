@@ -241,3 +241,9 @@ gem：
 [jbuilder](https://github.com/rails/jbuilder)  
 [rest-client](https://github.com/rest-client/rest-client)
 
+其他相關gem：  
+[active_model_serializers'](https://github.com/rails-api/active_model_serializers)  
+[rabl](https://github.com/nesquena/rabl)  
+[在Rails中使用active_model_serializers 構建json response](http://toozhao.com/2015/03/21/active-model-serializers/)  
+[用啥来 render json ?](https://ruby-china.org/topics/12892)  
+[jbuilder vs rails-api/active_model_serializers for JSON handling in Rails 4](http://stackoverflow.com/questions/26097563/jbuilder-vs-rails-api-active-model-serializers-for-json-handling-in-rails-4)

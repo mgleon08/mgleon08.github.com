@@ -91,6 +91,42 @@ class Book < ActiveRecord::Base
 end
 ```
 
+#DRY
+
+where(approved: true)重複了
+
+```ruby
+class Comment < ActiveRecord  belongs_to :post  scope :approved, ->{ where(approved: true) }end
+
+class Post < ActiveRecord  has_many :comments  scope :with_approved_comments,    -> { joins(:comments).where('comments.approved = ?', true) }end
+```
+
+Post 改成用 merge 方式，去呼叫另一個 scope
+
+```ruby
+class Post < ActiveRecord  has_many :comments  scope :with_approved_comments,    -> { joins(:comments).merge(Comment.approved) }end
+```
+
+#Rails3 vs Rails4
+
+```ruby
+class User < ActiveRecord::Base   scope :active,   -> { where(state: 'active') }   scope :inactive, -> { where(state: 'inactive') }end
+```
+
+```ruby
+#Rails3
+User.active.inactive
+#SELECT * FROM users WHERE state = 'inactive'
+
+#Rails4
+User.active.inactive
+#SELECT * FROM posts WHERE state = 'active' AND state = 'inactive'
+
+#Rails4 要跟Rails3 一樣就加上merge
+User.active.merge(User.inactive)
+#SELECT * FROM users WHERE state = 'inactive'
+```
+
 官方文件：  
 [Guides](http://guides.rubyonrails.org/active_record_querying.html#scopes)  
 [Guides 中文](http://rails.ruby.tw/active_record_querying.html#%E4%BD%9C%E7%94%A8%E5%9F%9F)  
