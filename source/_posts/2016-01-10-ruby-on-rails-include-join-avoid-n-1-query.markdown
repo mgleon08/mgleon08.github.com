@@ -33,7 +33,7 @@ end
 <% end %>
 ```
 
-以上的關聯，就是透過 `User` 和 `Post 的關聯` ，在 `view` 中一筆一筆去資料庫找相關的 `post` ，而這每一筆去資料庫的動作，就會有以下的查詢，然後造成 `N+1 query` 的問題。
+以上的關聯，就是透過 `User` 和 `Skill 的關聯` ，在 `view` 中一筆一筆去資料庫找相關的 `post` ，而這每一筆去資料庫的動作，就會有以下的查詢，然後造成 `N+1 query` 的問題。
 
 N+1就是指說，迴圈中查詢 N 筆資料，加上一開始的第一筆。
 
@@ -59,13 +59,20 @@ SELECT `skills`.* FROM `skills` WHERE `skills`.`user_id` IN (1, 2, 3)
 可以看到後面有 `IN (1, 2, 3)`，就是將上面一筆一筆查詢，變成這種方式一次撈出來。這樣在 `view` 中執行 `user.skills` 就不會再去資料庫查詢，因為已經都先撈出來了。
 
 ```ruby
-也可以一次 includes 多個關聯
+#也可以一次 includes 多個關聯
 
 User.includes(skills: :profile)
 User.includes(skills: [:cees, :dees])
+
+#多重查詢
+includes(skills: :profile)
+.where(date: date)
+.joins(skills: : profile)
+.where(skills:  { enable:true })
+.where(profile: { status:true })
 ```
 
-#joins
+#joins (inner join)
 
 `joins` 則是關聯其他資料庫，可以進行查詢，但並不會將關聯的資料拉出來。
 
@@ -80,13 +87,33 @@ User Load (0.4ms)  SELECT `users`.* FROM `users` INNER JOIN `skills` ON `skills`
 ```
 回傳的是所有有 `skill` 的 `user`，但並不會將 `skill` 資料撈出來，只是去做比對，因此再用 `user.skills` ，一樣會去資料庫中撈出資料。
 
+#joins和include的區別
 
-官方資料：
+* include 主要是將其他關聯的 table 一起拉進來，後續查詢時，就不會再去查
+* joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做塞選
+
+```ruby
+User.includes(:skills)
+#回傳所有的 User，並將相關聯的 skill 一併做查詢
+#後續再去關聯的話就不會去 query
+
+User.joins(:skills)
+#查詢所有包含 user_id 的 skills ，並回傳該 skill 所屬的 user
+#因此 has_many 若有很多 skills 屬於同一個 user 就會回傳很多次重複的，可用 uniq 去掉，belong_to & has_one 則不會
+#後續再去關聯的話，還是會去 query
+```
+
+![](http://jbcdn2.b0.upaiyun.com/2013/05/SQL-Joins.jpg)
+
+官方資料：  
 [Active Record Query Interface](http://guides.rubyonrails.org/active_record_querying.html)
 [Active Record 查詢](http://rails.ruby.tw/active_record_querying.html)
 
-參考資料：
-[網站效能](https://ihower.tw/rails4/performance.html)
-[ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)
-[Rails使用 include 和 join 避免 N+1 query](http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query)
-
+參考資料：  
+[網站效能](https://ihower.tw/rails4/performance.html)  
+[ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)  
+[Rails使用 include 和 join 避免 N+1 query](http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query)  
+[Rails 用巢狀include和查表方式來避免 n+1 query](http://motion-express.com/blog/rails-advanced-query)  
+[preload, eager_load, includes, references, and joins in Rails](http://blog.ifyouseewendy.com/blog/2015/11/11/preload-eager_load-includes-references-joins/)  
+[Preload, Eagerload, Includes and Joins](http://blog.bigbinary.com/2013/07/01/preload-vs-eager-load-vs-joins-vs-includes.html)  
+[3 ways to do eager loading (preloading) in Rails 3 & 4](http://blog.arkency.com/2013/12/rails4-preloading/)

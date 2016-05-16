@@ -141,6 +141,12 @@ namespace :generate do
 end
 ```
 
+#Rake
+
+`rake -T` 可以看到定義好 `desc` 裡的內容
+
+[Ruby 語法放大鏡之「常在終端機裡下 rake db:migrate 指令，這個 rake 是什麼，後面那個 db:migrate 又是怎麼回事?」](http://kaochenlong.com/2016/04/30/rake/)
+
 之前寫的Json
 [Json](http://mgleon08.github.io/blog/2016/01/09/ruby-on-rails-json/)
 

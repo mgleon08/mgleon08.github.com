@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "Dynamic Classes & Methods"
+title: "Dynamic Classes & Methods (Struct, send(), alias_method, alias_attribute, define_method)"
 date: 2016-04-19 22:16:35 +0800
 comments: true
 categories: ruby
 --- 
-ruby 可以很幫變的動態產生 Classes 和 Methods
+ruby 可以很方便的動態產生 Classes 和 Methods
 
 <!-- more -->
 
@@ -53,6 +53,25 @@ class Post
     @foo = foo
   end
 end
+```
+
+#alias_attribute
+
+```ruby
+class Content < ActiveRecord::Base
+  # has a title attribute
+end
+
+class Email < Content
+  alias_attribute :subject, :title
+end
+
+e = Email.find(1)
+e.title    # => "Superstars"
+e.subject  # => "Superstars"
+e.subject? # => true
+e.subject = "Megastars"
+e.title    # => "Megastars"
 ```
 
 #define_method

@@ -57,10 +57,28 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 ###add
 * `git add .` 將當前目錄`所有`檔案加入到 Staging Area。(雖然方便但很容易會不小心加入一些其他不必要的檔案)
 * `git add [filename]` 將檔案加入到 Staging Area。
-* `git add -p`，可以選擇只加入檔案中修改的其中一部分。
-* `git add -i`，會以互動方式詢問要加入到Staging Area裡的檔案。
 * `git add -u`，只註冊已提交過的檔案到索引。
+* `git add -i`，會以互動方式詢問要加入到Staging Area裡的檔案。
+* `git add -p`，可以選擇只加入檔案中修改的其中一部分。
 
+[Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)
+
+```
+`y` stage this hunk for the next commit  
+`n` do not stage this hunk for the next commit  
+`q` quit; do not stage this hunk or any of the remaining ones  
+`a` stage this hunk and all later hunks in the file  
+`d` do not stage this hunk or any of the later hunks in the file  
+`g` select a hunk to go to  
+`/` search for a hunk matching the given regex  
+`j` leave this hunk undecided, see next undecided hunk  
+`J` leave this hunk undecided, see next hunk  
+`k` leave this hunk undecided, see previous undecided hunk  
+`K` leave this hunk undecided, see previous hunk  
+`s` split the current hunk into smaller hunks  
+`e` manually edit the current hunk  
+`?` print help
+```
 ###rm
 * `git rm [filename]` 刪除檔案，包括實體檔案。(此刪除檔案的動作會列入版本控制中)
 * `git rm --cached a.txt` 只想刪除索引檔中的該檔，又要保留工作目錄下的實體檔案。
@@ -151,6 +169,7 @@ exec   = 執行一條指令
 * `git stash pop` 復原最新的操作並將他從暫存清單中移除。
 * `git stash apply` 復原最新的操作，與`pop`唯一差別則是取回該版本 (其實是執行合併動作) 後，該暫存版還會留在 stash 清單上。
 * `git stash drop` 刪除最新的暫存操作。
+* `git stash show stash@{0}` 看暫存陣列裡的第一個
 
 >指定stash ID（如：stash@{1}），則可以復原特定的操作
 
@@ -204,17 +223,50 @@ exec   = 執行一條指令
 	* 可以添加註解
 	* 可以添加簽名
 
+#commit 順序
+
+```
+schema
+refactor 現有的架構
+new feture
+refactor new feature
+hotfix
+```
+
+#Blame
+* `git blame [filename]` 可以看最後一個 commit 的人是誰
+* `git blame -L [開始行數],[結束行數] [filename]`
+
+
+#submodule
+[Git Submodule 用法筆記](http://blog.chh.tw/posts/git-submodule/)
+
+
+#git-bisect
+利用 git 的 二分找法，來找出當初錯誤的版本是從哪個開始
+
+```ruby
+git bisect start #開始
+
+git bisect good 4b274b160 #設定好的 commit SHA1
+git bisect bad  079944e6  #設定壞的 commit SHA1
+
+#接著就會從兩個 commit 中間的 commit 去問，是否這個 commit 是好的，可以回答
+#git bisect good
+#git bisect bad
+#就會根據回答，再下去做二分法，直到找到，一開始壞的 commit 在哪
+
+git bisect reset #結束
+```
+
 #其他
+###gitkeep
 * `.gitkeep` 空目錄不會被 commit，必要時在目錄裡放 `.gitkeep`。
+
+###.gitignore
 * `vi .gitignore` 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。
-* [.gitignore ⼤集合](https://github.com/github/gitignore)
-* [移除 git 上敏感檔案](https://help.github.com/articles/remove-sensitive-data/)
 
-```
-git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch 檔案名稱' --prune-empty --tag-name-filter cat -- --all
-```
-* `.gitignore` not working
-
+[.gitignore ⼤集合](https://github.com/github/gitignore)  
 [.gitignore not working](http://stackoverflow.com/questions/11451535/gitignore-not-working)
 
 ```ruby
@@ -222,19 +274,36 @@ git rm -r --cached .
 git add .
 git commit -m "fixed untracked files"
 ```
-* 開乾淨的 branch
+
+###移除已經上 github 的敏感檔案
+* [移除 git 上敏感檔案](https://help.github.com/articles/remove-sensitive-data/)
+
+```
+git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch 檔案名稱' --prune-empty --tag-name-filter cat -- --all
+```
+
+###開乾淨的 branch
 [How to create a new empty branch for a new project](http://stackoverflow.com/questions/13969050/how-to-create-a-new-empty-branch-for-a-new-project)
+
 ```ruby
 git checkout --orphan <branchname>
 ```
-* 直接複製遠端的 branch
 
-先到遠端的 branch，在遠端的 branch 複製切到本地
+###複製遠端的 branch 到本地新的 branch
+
+1. 先 `git checkout` 到遠端的 branch，在遠端的 branch `git checkout branch`複製切到本地
 
 ```ruby
 git checkout origin/development
 git checkout -b development
 ```
+
+2. 直接 fetch 遠端 branch 下來到新的 branch
+
+```
+git fetch origin <remote_branch_name>:<local_branch_name>
+```
+
 #alias
 自己設定的一些 alias
 
@@ -291,7 +360,8 @@ alias gsta='git stash'
 alias gstd='git stash drop'
 alias gstl='git stash list'
 alias gstp='git stash pop'
-alias gsts='git stash show --text'
+alias gsts='git stash show'
+alias gstst='git stash show --text'
 
 #git log
 alias gl='git log'
@@ -306,17 +376,18 @@ alias glola="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Crese
 alias glog='git log --oneline --decorate --color --graph'
 ```
 
-官方文件：
-[Git Pro](http://git-scm.com/book/zh-tw/v1)
+官方文件：  
+[Git Pro](http://git-scm.com/book/zh-tw/v1)  
 
-參考資料：
-[Git 版本控制系統](https://ihower.tw/git/)
-[30 天精通 Git 版本控管](https://github.com/doggy8088/Learn-Git-in-30-days)
-[連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)
-[好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)
+參考資料：  
+[Git 版本控制系統](https://ihower.tw/git/)  
+[30 天精通 Git 版本控管](https://github.com/doggy8088/Learn-Git-in-30-days)  
+[連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)  
+[好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)  
+[Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)
 
-練習：
-[codeschool](https://try.github.io/levels/1/challenges/1)
-[Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)
-[learnGitBranching](http://pcottle.github.io/learnGitBranching/)
 
+練習：  
+[codeschool](https://try.github.io/levels/1/challenges/1)  
+[Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)  
+[learnGitBranching](http://pcottle.github.io/learnGitBranching/)  

@@ -93,6 +93,15 @@ rvm 2.2.3@rails4.2.4
 # ruby 和 gemset 一起切換
 ```
 
+#other
+另一個版本控制是 `rbenv` 聽說比較輕量
+project 要加上 `.ruby-version` 裡面寫 ruby 版本
+
+```ruby
+2.2.3
+```
+才能加入控管
+
 官方文件：  
 [rvm](https://rvm.io/)
 

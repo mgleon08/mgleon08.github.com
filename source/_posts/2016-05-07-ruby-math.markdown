@@ -1,0 +1,133 @@
+---
+layout: post
+title: "Ruby 中的數字 & BigDecimal"
+date: 2016-05-07 10:42:25 +0800
+comments: true
+categories: ruby
+---
+
+在程式中的運算可能跟我們平常接觸的會不一樣，ruby 也是!因此來瞭解一下吧!
+
+<!-- more -->
+
+![](http://ithelp.ithome.com.tw/upload/images/20141005/20141005190053543124e558797_resize_600.png)
+
+#integer
+```ruby
+1.class
+#=> Fixnum
+(2/3).class
+#=> Fixnum
+#20 位數會開始變成 Bignum
+('1'+'0'*18).to_i.class
+#=> Fixnum
+('1'+'0'*19).to_i.class
+#=> Bignum
+1.2.to_i
+#=> 1
+```
+
+#float
+
+只要分子或分母出現浮點數，結果才會是 float
+
+>兩個運算元皆為整數，則會進行截尾整數除法(truncating integer division)運算
+
+```ruby
+3.14.class
+#=> Float
+1/2
+#=> 0
+1/2.0
+#=> 0.5
+1.0/2
+#=> 0.5
+1.to_f
+#=> 1.0
+```
+
+#運算
+```ruby
+餘數
+10%3
+#=> 1
+
+次方
+2**10
+#=> 1024
+2**-1
+#=> (1/2)
+
+絕對值
+-1234.abs
+#=> 1234
+
+四捨五入
+(3.3).round
+#=> 3
+(4.5).round
+#=> 5
+
+回傳小於該數學的最大整數
+(2.1).floor
+#=> 2
+(-2.1).floor
+#=> -3
+
+回傳大於該數學的最小整數
+(2.1).ceil
+#=> 3
+(-2.1).ceil
+#=> -2
+ 
+#只適用於Fixnum
+2.zero?
+#=> false
+0.zero?
+#=> true
+
+1.0 / 0    # Infinity
+-1.0 / 0   # -Infinity
+0.0 / 0.0  # NaN
+```
+
+#BigDecimal
+主要是用來做精確的數字
+
+```ruby
+sum = 0
+for i in (1..10000)
+  sum = sum + 0.0001
+end
+print sum
+#=> 0.9999999999999062
+#因為在電腦中的浮點數其實只是近似值，浮點數中的整數可能只是精確度到達一定程度而已
+```
+
+```ruby
+require 'bigdecimal'
+
+sum = BigDecimal.new("0")
+for i in (1..10000)
+  sum = sum + BigDecimal.new("0.0001")
+end
+print sum
+#=> 0.1E1
+
+E代表後面有幾個10的次方
+0.1E1 = 0.1 * (10**1)
+#=> 1.0
+0.2E1 = 0.2 * (10**1)
+#=> 2.0
+0.2E2 = 0.2 * (10**2)
+#=> 20.0
+2E3   =   2 * (10**3)
+#=> 2000.0
+```
+
+官方文件：  
+[BigDecimal](http://ruby-doc.org/stdlib-1.9.3/libdoc/bigdecimal/rdoc/BigDecimal.html)
+
+參考文件：  
+[Ruby的數學跟老師教的數學都不一樣？](http://blog.annideas.com/2014/10/05/ruby-girl-5-ruby-math-intro/)  
+[[Ruby教學]Numeric Class](https://gradyli.wordpress.com/2007/11/16/numeric-class/)

@@ -50,9 +50,12 @@ is used to create the structure of the JSON as a Hash, and the rendering of that
 }
 ```
 
+還有另外一個 `serializable_hash`，可以另外接 `except` `only` `methods` 等方法
+
 官方文件：  
 [as_json](http://api.rubyonrails.org/classes/ActiveModel/Serializers/JSON.html#method-i-as_json)  
-[to_json](http://apidock.com/rails/Hash/to_json)
+[to_json](http://apidock.com/rails/Hash/to_json)  
+[serializable_hash](http://api.rubyonrails.org/classes/ActiveModel/Serialization.html#method-i-serializable_hash)
 
 參考文件：  
 [Rails to_json or as_json?](http://jonathanjulian.com/2010/04/rails-to_json-or-as_json/)  

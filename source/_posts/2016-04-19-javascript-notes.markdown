@@ -37,6 +37,23 @@ closure2();
 ```
 closure2 則是在 local 就找到了 x 所以輸出的就是 5。
 
+
+```js
+function closure1(){
+  var x = 0;
+  return function(){
+    x++;
+    console.log(x);
+  };
+};
+number = closure1();
+number(); //1
+number(); //2
+number(); //3
+number(); //4
+```
+x 會存活在，number 的 function 裡面
+
 [用 Node.js 學 JavaScript 語言（3）函數、參數與閉包](http://www.codedata.com.tw/javascript/using-nodejs-to-learn-javascript-3-function-parameter-closure)  
 [閉包（Closure）](http://openhome.cc/Gossip/JavaScript/Closure.html)
 

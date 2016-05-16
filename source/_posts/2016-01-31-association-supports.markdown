@@ -214,12 +214,40 @@ class Supplier < ActiveRecord::Base
 end
 ```
 
-官方文件：
-[has_many Association Reference](http://guides.rubyonrails.org/association_basics.html#has-many-association-reference)
-[has_many Association Reference 中文](http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)
-[belongs_to 關聯手冊](http://rails.ruby.tw/association_basics.html#belongs-to-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)
-[has_one 關聯手冊](http://rails.ruby.tw/association_basics.html#has-one-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)
+#關聯很多的 table 來找資料
+
+```ruby
+class Publication < ActiveRecord::Base
+  has_many :publication_contributors
+  has_many :contributors, :through => :publication_contributors
+end
+
+class Contributor < ActiveRecord::Base
+  has_many :publication_contributors
+  has_many :publications, :through => :publication_contributors
+end
+
+class PublicationContributor < ActiveRecord::Base
+  belongs_to :publication
+  belongs_to :contributor
+end
+```
+```ruby
+Publication
+  .joins( :publication_contributors => :contributor )
+  .where( :publication_contributors => {:contributor_type => "Author"}, 
+          :contributors             => {:name => params[:authors]} ) 
+```
+
+[Rails: Finding a deeply nested association with a where clause](http://stackoverflow.com/questions/14527051/rails-finding-a-deeply-nested-association-with-a-where-clause)
+
+官方文件：  
+[has_many Association Reference](http://guides.rubyonrails.org/association_basics.html#has-many-association-reference)  
+[has_many Association Reference 中文](http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)  
+[belongs_to 關聯手冊](http://rails.ruby.tw/association_basics.html#belongs-to-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)  
+[has_one 關聯手冊](http://rails.ruby.tw/association_basics.html#has-one-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)  
 [has_many 關聯](http://rails.ruby.tw/association_basics.html#has-many-%E9%97%9C%E8%81%AF%E5%8F%83%E8%80%83%E6%89%8B%E5%86%8A)
 
-參考文件：
-[ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)
+參考文件：  
+[ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)  
+[The 10 Most Underused ActiveRecord::Relation Methods](http://www.mitchcrowe.com/10-most-underused-activerecord-relation-methods/)

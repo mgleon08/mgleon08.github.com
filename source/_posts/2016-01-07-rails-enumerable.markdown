@@ -34,7 +34,8 @@ hash.map {|k, v| v }
 
 #Select
 
-對物件，挑出指定欄位的值，並回傳 `ActiveRecord::Relation`
+對物件，挑出指定欄位的值，並回傳 `ActiveRecord::Relation`  
+另一個則是，回傳 block 為 `true` 的值，成一個新的 `array`
 
 ```ruby
 User.all.select(:id)
@@ -492,6 +493,15 @@ a.zip([1, 2], [8])
 [Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
 [partition](http://apidock.com/ruby/Enumerable/partition)
 
+#each_slice
+```ruby
+(1..10).each_slice(3) { |a| p a }
+#[1, 2, 3]
+#[4, 5, 6]
+#[7, 8, 9]
+#[10]
+```
+
 #&:
 
 ```ruby
@@ -536,7 +546,8 @@ size   勝於 length
 [many?](http://apidock.com/rails/Enumerable/many%3F)  
 [all?](http://apidock.com/ruby/Enumerable/all%3F)  
 [any?](http://apidock.com/ruby/Enumerable/any%3F)  
-[chunk](http://apidock.com/ruby/Enumerable/chunk) 
+[chunk](http://apidock.com/ruby/Enumerable/chunk)  
+[each_slice](http://ruby-doc.org/core-2.3.1/Enumerable.html#method-i-each_slice)
 
 參考文件：  
 [Rails Pluck vs Select and Map/Collect](http://rubyinrails.com/2014/06/05/rails-pluck-vs-select-map-collect/)  
