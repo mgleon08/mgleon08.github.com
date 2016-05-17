@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Git | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/git/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-04-20T00:51:53+08:00</updated>
+  <updated>2016-05-17T20:22:26+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -108,11 +108,29 @@
 <ul>
 <li><code>git add .</code> 將當前目錄<code>所有</code>檔案加入到 Staging Area。(雖然方便但很容易會不小心加入一些其他不必要的檔案)</li>
 <li><code>git add [filename]</code> 將檔案加入到 Staging Area。</li>
-<li><code>git add -p</code>，可以選擇只加入檔案中修改的其中一部分。</li>
-<li><code>git add -i</code>，會以互動方式詢問要加入到Staging Area裡的檔案。</li>
 <li><code>git add -u</code>，只註冊已提交過的檔案到索引。</li>
+<li><code>git add -i</code>，會以互動方式詢問要加入到Staging Area裡的檔案。</li>
+<li><code>git add -p</code>，可以選擇只加入檔案中修改的其中一部分。</li>
 </ul>
 
+
+<p><a href="http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git">Commit only part of a file in Git</a></p>
+
+<pre><code>`y` stage this hunk for the next commit  
+`n` do not stage this hunk for the next commit  
+`q` quit; do not stage this hunk or any of the remaining ones  
+`a` stage this hunk and all later hunks in the file  
+`d` do not stage this hunk or any of the later hunks in the file  
+`g` select a hunk to go to  
+`/` search for a hunk matching the given regex  
+`j` leave this hunk undecided, see next undecided hunk  
+`J` leave this hunk undecided, see next hunk  
+`k` leave this hunk undecided, see previous undecided hunk  
+`K` leave this hunk undecided, see previous hunk  
+`s` split the current hunk into smaller hunks  
+`e` manually edit the current hunk  
+`?` print help
+</code></pre>
 
 <h3>rm</h3>
 
@@ -250,6 +268,7 @@ exec   = 執行一條指令
 <li><code>git stash pop</code> 復原最新的操作並將他從暫存清單中移除。</li>
 <li><code>git stash apply</code> 復原最新的操作，與<code>pop</code>唯一差別則是取回該版本 (其實是執行合併動作) 後，該暫存版還會留在 stash 清單上。</li>
 <li><code>git stash drop</code> 刪除最新的暫存操作。</li>
+<li><code>git stash show stash@{0}</code> 看暫存陣列裡的第一個</li>
 </ul>
 
 
@@ -336,12 +355,71 @@ exec   = 執行一條指令
 </ol>
 </blockquote>
 
+<h1>commit 順序</h1>
+
+<pre><code>schema
+refactor 現有的架構
+new feture
+refactor new feature
+hotfix
+</code></pre>
+
+<h1>Blame</h1>
+
+<ul>
+<li><code>git blame [filename]</code> 可以看最後一個 commit 的人是誰</li>
+<li><code>git blame -L [開始行數],[結束行數] [filename]</code></li>
+</ul>
+
+
+<h1>submodule</h1>
+
+<p><a href="http://blog.chh.tw/posts/git-submodule/">Git Submodule 用法筆記</a></p>
+
+<h1>git-bisect</h1>
+
+<p>利用 git 的 二分找法，來找出當初錯誤的版本是從哪個開始</p>
+
+<pre><code class="ruby">git bisect start #開始
+
+git bisect good 4b274b160 #設定好的 commit SHA1
+git bisect bad  079944e6  #設定壞的 commit SHA1
+
+#接著就會從兩個 commit 中間的 commit 去問，是否這個 commit 是好的，可以回答
+#git bisect good
+#git bisect bad
+#就會根據回答，再下去做二分法，直到找到，一開始壞的 commit 在哪
+
+git bisect reset #結束
+</code></pre>
+
 <h1>其他</h1>
+
+<h3>gitkeep</h3>
 
 <ul>
 <li><code>.gitkeep</code> 空目錄不會被 commit，必要時在目錄裡放 <code>.gitkeep</code>。</li>
+</ul>
+
+
+<h3>.gitignore</h3>
+
+<ul>
 <li><code>vi .gitignore</code> 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。</li>
-<li><a href="https://github.com/github/gitignore">.gitignore ⼤集合</a></li>
+</ul>
+
+
+<p><a href="https://github.com/github/gitignore">.gitignore ⼤集合</a><br/>
+<a href="http://stackoverflow.com/questions/11451535/gitignore-not-working">.gitignore not working</a></p>
+
+<pre><code class="ruby">git rm -r --cached .
+git add .
+git commit -m "fixed untracked files"
+</code></pre>
+
+<h3>移除已經上 github 的敏感檔案</h3>
+
+<ul>
 <li><a href="https://help.github.com/articles/remove-sensitive-data/">移除 git 上敏感檔案</a></li>
 </ul>
 
@@ -349,32 +427,30 @@ exec   = 執行一條指令
 <pre><code>git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch 檔案名稱' --prune-empty --tag-name-filter cat -- --all
 </code></pre>
 
-<ul>
-<li><code>.gitignore</code> not working</li>
-</ul>
+<h3>開乾淨的 branch</h3>
 
+<p><a href="http://stackoverflow.com/questions/13969050/how-to-create-a-new-empty-branch-for-a-new-project">How to create a new empty branch for a new project</a></p>
 
-<p><a href="http://stackoverflow.com/questions/11451535/gitignore-not-working">.gitignore not working</a></p>
-
-<pre><code class="ruby">git rm -r --cached .
-git add .
-git commit -m "fixed untracked files"
+<pre><code class="ruby">git checkout --orphan &lt;branchname&gt;
 </code></pre>
 
-<ul>
-<li>開乾淨的 branch
-<a href="http://stackoverflow.com/questions/13969050/how-to-create-a-new-empty-branch-for-a-new-project">How to create a new empty branch for a new project</a>
-<code>ruby
-git checkout --orphan &lt;branchname&gt;
-</code></li>
-<li>直接複製遠端的 branch</li>
-</ul>
+<h3>複製遠端的 branch 到本地新的 branch</h3>
 
+<ol>
+<li>先 <code>git checkout</code> 到遠端的 branch，在遠端的 branch <code>git checkout branch</code>複製切到本地</li>
+</ol>
 
-<p>先到遠端的 branch，在遠端的 branch 複製切到本地</p>
 
 <pre><code class="ruby">git checkout origin/development
 git checkout -b development
+</code></pre>
+
+<ol>
+<li>直接 fetch 遠端 branch 下來到新的 branch</li>
+</ol>
+
+
+<pre><code>git fetch origin &lt;remote_branch_name&gt;:&lt;local_branch_name&gt;
 </code></pre>
 
 <h1>alias</h1>
@@ -433,7 +509,8 @@ alias gsta='git stash'
 alias gstd='git stash drop'
 alias gstl='git stash list'
 alias gstp='git stash pop'
-alias gsts='git stash show --text'
+alias gsts='git stash show'
+alias gstst='git stash show --text'
 
 #git log
 alias gl='git log'
@@ -448,18 +525,19 @@ alias glola="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Crese
 alias glog='git log --oneline --decorate --color --graph'
 </code></pre>
 
-<p>官方文件：
+<p>官方文件：<br/>
 <a href="http://git-scm.com/book/zh-tw/v1">Git Pro</a></p>
 
-<p>參考資料：
-<a href="https://ihower.tw/git/">Git 版本控制系統</a>
-<a href="https://github.com/doggy8088/Learn-Git-in-30-days">30 天精通 Git 版本控管</a>
-<a href="https://backlogtool.com/git-guide/tw/reference/">連猴子都能懂的git入門</a>
-<a href="http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/">好麻煩部落格</a></p>
+<p>參考資料：<br/>
+<a href="https://ihower.tw/git/">Git 版本控制系統</a><br/>
+<a href="https://github.com/doggy8088/Learn-Git-in-30-days">30 天精通 Git 版本控管</a><br/>
+<a href="https://backlogtool.com/git-guide/tw/reference/">連猴子都能懂的git入門</a><br/>
+<a href="http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/">好麻煩部落格</a><br/>
+<a href="http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git">Commit only part of a file in Git</a></p>
 
-<p>練習：
-<a href="https://try.github.io/levels/1/challenges/1">codeschool</a>
-<a href="http://dylandy.github.io/Easy-Git-Tutorial/">Easy-Git-Tutorial</a>
+<p>練習：<br/>
+<a href="https://try.github.io/levels/1/challenges/1">codeschool</a><br/>
+<a href="http://dylandy.github.io/Easy-Git-Tutorial/">Easy-Git-Tutorial</a><br/>
 <a href="http://pcottle.github.io/learnGitBranching/">learnGitBranching</a></p>
 ]]></content>
   </entry>

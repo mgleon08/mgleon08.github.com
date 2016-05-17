@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-04-20T00:51:53+08:00</updated>
+  <updated>2016-05-17T20:22:26+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,540 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby 中的數字 & BigDecimal]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/05/07/ruby-math/"/>
+    <updated>2016-05-07T10:42:25+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/05/07/ruby-math</id>
+    <content type="html"><![CDATA[<p>在程式中的運算可能跟我們平常接觸的會不一樣，ruby 也是!因此來瞭解一下吧!</p>
+
+<!-- more -->
+
+
+<p><img src="http://ithelp.ithome.com.tw/upload/images/20141005/20141005190053543124e558797_resize_600.png" alt="" /></p>
+
+<h1>integer</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">1</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'><span class="c1">#=&gt; Fixnum</span>
+</span><span class='line'><span class="p">(</span><span class="mi">2</span><span class="o">/</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'><span class="c1">#=&gt; Fixnum</span>
+</span><span class='line'><span class="c1">#20 位數會開始變成 Bignum</span>
+</span><span class='line'><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="o">+</span><span class="s1">&#39;0&#39;</span><span class="o">*</span><span class="mi">18</span><span class="p">)</span><span class="o">.</span><span class="n">to_i</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'><span class="c1">#=&gt; Fixnum</span>
+</span><span class='line'><span class="p">(</span><span class="s1">&#39;1&#39;</span><span class="o">+</span><span class="s1">&#39;0&#39;</span><span class="o">*</span><span class="mi">19</span><span class="p">)</span><span class="o">.</span><span class="n">to_i</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'><span class="c1">#=&gt; Bignum</span>
+</span><span class='line'><span class="mi">1</span><span class="o">.</span><span class="mi">2</span><span class="o">.</span><span class="n">to_i</span>
+</span><span class='line'><span class="c1">#=&gt; 1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>float</h1>
+
+<p>只要分子或分母出現浮點數，結果才會是 float</p>
+
+<blockquote><p>兩個運算元皆為整數，則會進行截尾整數除法(truncating integer division)運算</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">3</span><span class="o">.</span><span class="mi">14</span><span class="o">.</span><span class="n">class</span>
+</span><span class='line'><span class="c1">#=&gt; Float</span>
+</span><span class='line'><span class="mi">1</span><span class="o">/</span><span class="mi">2</span>
+</span><span class='line'><span class="c1">#=&gt; 0</span>
+</span><span class='line'><span class="mi">1</span><span class="o">/</span><span class="mi">2</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'><span class="c1">#=&gt; 0.5</span>
+</span><span class='line'><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">/</span><span class="mi">2</span>
+</span><span class='line'><span class="c1">#=&gt; 0.5</span>
+</span><span class='line'><span class="mi">1</span><span class="o">.</span><span class="n">to_f</span>
+</span><span class='line'><span class="c1">#=&gt; 1.0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>運算</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">餘數</span>
+</span><span class='line'><span class="mi">10</span><span class="o">%</span><span class="mi">3</span>
+</span><span class='line'><span class="c1">#=&gt; 1</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">次方</span>
+</span><span class='line'><span class="mi">2</span><span class="o">**</span><span class="mi">10</span>
+</span><span class='line'><span class="c1">#=&gt; 1024</span>
+</span><span class='line'><span class="mi">2</span><span class="o">**-</span><span class="mi">1</span>
+</span><span class='line'><span class="c1">#=&gt; (1/2)</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">絕對值</span>
+</span><span class='line'><span class="o">-</span><span class="mi">1234</span><span class="o">.</span><span class="n">abs</span>
+</span><span class='line'><span class="c1">#=&gt; 1234</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">四捨五入</span>
+</span><span class='line'><span class="p">(</span><span class="mi">3</span><span class="o">.</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">round</span>
+</span><span class='line'><span class="c1">#=&gt; 3</span>
+</span><span class='line'><span class="p">(</span><span class="mi">4</span><span class="o">.</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">round</span>
+</span><span class='line'><span class="c1">#=&gt; 5</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">回傳小於該數學的最大整數</span>
+</span><span class='line'><span class="p">(</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span>
+</span><span class='line'><span class="c1">#=&gt; 2</span>
+</span><span class='line'><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">floor</span>
+</span><span class='line'><span class="c1">#=&gt; -3</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">回傳大於該數學的最小整數</span>
+</span><span class='line'><span class="p">(</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">ceil</span>
+</span><span class='line'><span class="c1">#=&gt; 3</span>
+</span><span class='line'><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="o">.</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">ceil</span>
+</span><span class='line'><span class="c1">#=&gt; -2</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#只適用於Fixnum</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="n">zero?</span>
+</span><span class='line'><span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="mi">0</span><span class="o">.</span><span class="n">zero?</span>
+</span><span class='line'><span class="c1">#=&gt; true</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">1</span><span class="o">.</span><span class="mi">0</span> <span class="o">/</span> <span class="mi">0</span>    <span class="c1"># Infinity</span>
+</span><span class='line'><span class="o">-</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span> <span class="o">/</span> <span class="mi">0</span>   <span class="c1"># -Infinity</span>
+</span><span class='line'><span class="mi">0</span><span class="o">.</span><span class="mi">0</span> <span class="o">/</span> <span class="mi">0</span><span class="o">.</span><span class="mi">0</span>  <span class="c1"># NaN</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>BigDecimal</h1>
+
+<p>主要是用來做精確的數字</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sum</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">10000</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="mi">0</span><span class="o">.</span><span class="mo">0001</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="nb">print</span> <span class="n">sum</span>
+</span><span class='line'><span class="c1">#=&gt; 0.9999999999999062</span>
+</span><span class='line'><span class="c1">#因為在電腦中的浮點數其實只是近似值，浮點數中的整數可能只是精確度到達一定程度而已</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;bigdecimal&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">sum</span> <span class="o">=</span> <span class="no">BigDecimal</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;0&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">for</span> <span class="n">i</span> <span class="k">in</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">10000</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">sum</span> <span class="o">=</span> <span class="n">sum</span> <span class="o">+</span> <span class="no">BigDecimal</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;0.0001&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="nb">print</span> <span class="n">sum</span>
+</span><span class='line'><span class="c1">#=&gt; 0.1E1</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">E</span><span class="err">代表後面有幾個</span><span class="mi">10</span><span class="err">的次方</span>
+</span><span class='line'><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="no">E1</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">1</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 1.0</span>
+</span><span class='line'><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="no">E1</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 2.0</span>
+</span><span class='line'><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="no">E2</span> <span class="o">=</span> <span class="mi">0</span><span class="o">.</span><span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">2</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 20.0</span>
+</span><span class='line'><span class="mi">2</span><span class="no">E3</span>   <span class="o">=</span>   <span class="mi">2</span> <span class="o">*</span> <span class="p">(</span><span class="mi">10</span><span class="o">**</span><span class="mi">3</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 2000.0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/stdlib-1.9.3/libdoc/bigdecimal/rdoc/BigDecimal.html">BigDecimal</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.annideas.com/2014/10/05/ruby-girl-5-ruby-math-intro/">Ruby的數學跟老師教的數學都不一樣？</a><br/>
+<a href="https://gradyli.wordpress.com/2007/11/16/numeric-class/">[Ruby教學]Numeric Class</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Includes Preload Joins Eager_load References]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/04/21/includes-preload-joins-eager-load-references/"/>
+    <updated>2016-04-21T00:41:09+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/04/21/includes-preload-joins-eager-load-references</id>
+    <content type="html"><![CDATA[<p>rails 當中有很多方便可以做資料查詢的功能，可以好好研究一下。</p>
+
+<!-- more -->
+
+
+<h1>modle</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Blog</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:posts</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># t.string   &quot;name&quot;</span>
+</span><span class='line'>  <span class="c1"># t.string   &quot;author&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Post</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:blog</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># t.string   &quot;title&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>includes</h1>
+
+<ul>
+<li><code>includes</code> 主要用於可以直接將相關連的資料，在同一筆查詢，一起撈出來</li>
+<li>two separate queries</li>
+<li>跟 preload 類似，加上 <code>reference</code> 則和 <code>eager_load</code> 類似</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span>
+</span><span class='line'><span class="no">Blog</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span>
+</span><span class='line'><span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;posts&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">IN</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 2, name: &quot;Blog 2&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 3, name: &quot;Blog 3&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;]&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 回傳所有 User 和 關聯的 posts</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到後面有 <code>IN (1, 2, 3)</code>，就是將上面一筆一筆查詢，變成這種方式一次撈出來。這樣在 <code>view</code> 中執行 <code>user.posts</code> 就不會再去資料庫查詢，因為已經都先撈出來了。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#也可以一次 includes 多個關聯</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">posts</span><span class="p">:</span> <span class="ss">:profile</span><span class="p">)</span>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">posts</span><span class="p">:</span> <span class="o">[</span><span class="ss">:foo</span><span class="p">,</span> <span class="ss">:bar</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#blog 關聯到 posts，posts 關聯到 foo, bar</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="ss">comments</span><span class="p">:</span> <span class="o">[</span><span class="ss">:user</span><span class="p">,</span> <span class="p">{</span> <span class="ss">replies</span><span class="p">:</span> <span class="o">[</span><span class="ss">:user</span><span class="o">]</span> <span class="p">}</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#更複雜的關聯</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>preload</h1>
+
+<ul>
+<li>跟 includes 類似，主要差別在於無法用 where 條件去查關聯到的 table 欄位</li>
+<li>two separate queries</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">preload</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">Blog</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span>
+</span><span class='line'>  <span class="no">Post</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">3</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;posts&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">IN</span> <span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 2, name: &quot;Blog 2&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 3, name: &quot;Blog 3&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;]&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#無法透過關聯的欄位做搜尋</span>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">preload</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">posts</span><span class="p">:</span> <span class="p">{</span> <span class="ss">title</span><span class="p">:</span><span class="s2">&quot;Post 1-1&quot;</span> <span class="p">}</span> <span class="p">)</span>
+</span><span class='line'>  <span class="no">Blog</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="o">=</span> <span class="p">?</span>  <span class="o">[[</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;Post 1-1&quot;</span><span class="o">]]</span>
+</span><span class='line'><span class="o">=&gt;</span><span class="c1"># ActiveRecord::StatementInvalid: SQLite3::SQLException: no such column: posts.title: SELECT &quot;blogs&quot;.* FROM &quot;blogs&quot; WHERE &quot;posts&quot;.&quot;title&quot; = ?</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">preload</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;posts.title = &#39;Post 1-1&#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">references</span><span class="p">(</span><span class="ss">:post</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">Blog</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">4</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">WHERE</span> <span class="p">(</span><span class="n">posts</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Post 1-1&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="o">=&gt;</span><span class="c1"># ActiveRecord::StatementInvalid: SQLite3::SQLException: no such column: posts.title: SELECT &quot;blogs&quot;.* FROM &quot;blogs&quot; WHERE (posts.title = &#39;Post 1-1&#39;)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#用 includes 就沒問題，不過這就是 eager_load</span>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">posts</span><span class="p">:</span> <span class="p">{</span> <span class="ss">title</span><span class="p">:</span><span class="s2">&quot;Post 1-1&quot;</span> <span class="p">}</span> <span class="p">)</span>
+</span><span class='line'>  <span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t0_r0</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="no">AS</span> <span class="n">t0_r1</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;author&quot;</span> <span class="no">AS</span> <span class="n">t0_r2</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r3</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t1_r0</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="no">AS</span> <span class="n">t1_r1</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r2</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;user_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r3</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r5</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">LEFT</span> <span class="no">OUTER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="o">=</span> <span class="p">?</span>  <span class="o">[[</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;Post 1-1&quot;</span><span class="o">]]</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;]&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#另一種寫法 </span>
+</span><span class='line'> <span class="no">Blog</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="s2">&quot;posts.title = &#39;Post 1-1&#39;&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">references</span><span class="p">(</span><span class="ss">:post</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">3</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t0_r0</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="no">AS</span> <span class="n">t0_r1</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;author&quot;</span> <span class="no">AS</span> <span class="n">t0_r2</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r3</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t1_r0</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="no">AS</span> <span class="n">t1_r1</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r2</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;user_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r3</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r5</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">LEFT</span> <span class="no">OUTER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">WHERE</span> <span class="p">(</span><span class="n">posts</span><span class="o">.</span><span class="n">title</span> <span class="o">=</span> <span class="s1">&#39;Post 1-1&#39;</span><span class="p">)</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;]&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>joins (inner join)</h1>
+
+<p><code>joins</code> 則是關聯其他資料庫，可以進行查詢，但並不會將關聯的資料拉出來。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">Blog</span> <span class="no">Load</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="n">*</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">INNER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 2, name: &quot;Blog 2&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 2, name: &quot;Blog 2&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 2, name: &quot;Blog 2&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 2, name: &quot;Blog 2&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 2, name: &quot;Blog 2&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, ...]&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>   <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="no">COUNT</span><span class="p">(</span><span class="o">*</span><span class="p">)</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">INNER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="mi">15</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#因為資料庫裡面總共有四個，但只有三個室有關聯到 posts，因此 joins 會回傳有關聯的，blog</span>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">uniq</span><span class="o">.</span><span class="n">size</span>
+</span><span class='line'>   <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">3</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="no">DISTINCT</span> <span class="no">COUNT</span><span class="p">(</span><span class="no">DISTINCT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">INNER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="mi">3</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#回傳所有，有 post 的 blog</span>
+</span><span class='line'><span class="c1">#因為同一個 blog 可能有多個 post ，這樣就會撈出重複的 blog 出來 ， 一個 post 一個 blog，因此可以用 .uniq 來去除重複的資料。</span>
+</span><span class='line'><span class="c1">#如果是一對一就不會有這個問題了</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#eager_load 則是透過 rails filter 後的</span>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">eager_load</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">3</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t0_r0</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="no">AS</span> <span class="n">t0_r1</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;author&quot;</span> <span class="no">AS</span> <span class="n">t0_r2</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r3</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t1_r0</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="no">AS</span> <span class="n">t1_r1</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r2</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;user_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r3</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r5</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">LEFT</span> <span class="no">OUTER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 2, name: &quot;Blog 2&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 3, name: &quot;Blog 3&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 4, name: &quot;Blog 2&quot;, author: nil, created_at: &quot;2016-04-20 16:01:54&quot;, updated_at: &quot;2016-04-20 16:01:54&quot;&gt;]&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#因為是 LEFT OUTER JOINed 所以沒有關聯的也會抓進來</span>
+</span><span class='line'> <span class="no">Blog</span><span class="o">.</span><span class="n">eager_load</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">count</span>
+</span><span class='line'>   <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="no">COUNT</span><span class="p">(</span><span class="no">DISTINCT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span><span class="p">)</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">LEFT</span> <span class="no">OUTER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="mi">4</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>回傳的是所有有 <code>post</code> 的 <code>blog</code>，但並不會將 <code>post</code> 資料撈出來，只是去做比對，因此再用 <code>blog.posts</code> ，一樣會去資料庫中撈出資料。</p>
+
+<h1>joins和include的區別</h1>
+
+<ul>
+<li>include 主要是將其他關聯的 table 一起拉進來，後續查詢時，就不會再去查</li>
+<li>joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做塞選</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#回傳所有的 Blog，並將相關聯的 post 一併做查詢</span>
+</span><span class='line'><span class="c1">#後續再去關聯的話就不會去 query</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#查詢所有包含 user_id 的 posts ，並回傳該 post 所屬的 blog</span>
+</span><span class='line'><span class="c1">#因此 has_many 若有很多 posts 屬於同一個 blog 就會回傳很多次重複的( 或是用 `distinct` User.joins(:posts).select(&#39;distinct users.*&#39;))，可用 uniq 去掉，belong_to &amp; has_one 則不會</span>
+</span><span class='line'><span class="c1">#後續再去關聯的話，還是會去 query</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>eager_load</h1>
+
+<ul>
+<li>One query, LEFT OUTER JOINed in any query rather than loaded separately.</li>
+<li>Works just the same as <code>includes</code> + <code>references</code></li>
+<li>因此要小心，includers 後在接上 references 就會變成 eager_load</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">eager_load</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">3</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t0_r0</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="no">AS</span> <span class="n">t0_r1</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;author&quot;</span> <span class="no">AS</span> <span class="n">t0_r2</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r3</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t1_r0</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="no">AS</span> <span class="n">t1_r1</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r2</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;user_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r3</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r5</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">LEFT</span> <span class="no">OUTER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 2, name: &quot;Blog 2&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 3, name: &quot;Blog 3&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;, #&lt;Blog id: 4, name: &quot;Blog 2&quot;, author: nil, created_at: &quot;2016-04-20 16:01:54&quot;, updated_at: &quot;2016-04-20 16:01:54&quot;&gt;]&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">eager_load</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Blog 1&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">3</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t0_r0</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="no">AS</span> <span class="n">t0_r1</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;author&quot;</span> <span class="no">AS</span> <span class="n">t0_r2</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r3</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t1_r0</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="no">AS</span> <span class="n">t1_r1</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r2</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;user_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r3</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r5</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">LEFT</span> <span class="no">OUTER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="o">=</span> <span class="p">?</span>  <span class="o">[[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Blog 1&quot;</span><span class="o">]]</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;]&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">eager_load</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Blog 1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">posts</span><span class="p">:</span> <span class="p">{</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Post 1-1&#39;</span><span class="p">})</span>
+</span><span class='line'>  <span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">3</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t0_r0</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="no">AS</span> <span class="n">t0_r1</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;author&quot;</span> <span class="no">AS</span> <span class="n">t0_r2</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r3</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t1_r0</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="no">AS</span> <span class="n">t1_r1</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r2</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;user_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r3</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r5</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">LEFT</span> <span class="no">OUTER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">AND</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="o">=</span> <span class="p">?</span>  <span class="o">[[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Blog 1&quot;</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;Post 1-1&quot;</span><span class="o">]]</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;]&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># includes + references </span>
+</span><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Blog 1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">posts</span><span class="p">:</span> <span class="p">{</span><span class="ss">title</span><span class="p">:</span> <span class="s1">&#39;Post 1-1&#39;</span><span class="p">})</span>
+</span><span class='line'>  <span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t0_r0</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="no">AS</span> <span class="n">t0_r1</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;author&quot;</span> <span class="no">AS</span> <span class="n">t0_r2</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r3</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t1_r0</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="no">AS</span> <span class="n">t1_r1</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r2</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;user_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r3</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r5</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">LEFT</span> <span class="no">OUTER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="o">=</span> <span class="p">?</span> <span class="no">AND</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="o">=</span> <span class="p">?</span>  <span class="o">[[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Blog 1&quot;</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="s2">&quot;title&quot;</span><span class="p">,</span> <span class="s2">&quot;Post 1-1&quot;</span><span class="o">]]</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;]&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>references</h1>
+
+<ul>
+<li>只有在 includes 可以使用，主要是讓 includes 像 eager_load</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Blog</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Blog 1&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">references</span><span class="p">(</span><span class="ss">:posts</span><span class="p">)</span>
+</span><span class='line'>  <span class="no">SQL</span> <span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="mi">2</span><span class="n">ms</span><span class="p">)</span>  <span class="no">SELECT</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t0_r0</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="no">AS</span> <span class="n">t0_r1</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;author&quot;</span> <span class="no">AS</span> <span class="n">t0_r2</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r3</span><span class="p">,</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t0_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">AS</span> <span class="n">t1_r0</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;title&quot;</span> <span class="no">AS</span> <span class="n">t1_r1</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r2</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;user_id&quot;</span> <span class="no">AS</span> <span class="n">t1_r3</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;created_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r4</span><span class="p">,</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;updated_at&quot;</span> <span class="no">AS</span> <span class="n">t1_r5</span> <span class="no">FROM</span> <span class="s2">&quot;blogs&quot;</span> <span class="no">LEFT</span> <span class="no">OUTER</span> <span class="no">JOIN</span> <span class="s2">&quot;posts&quot;</span> <span class="no">ON</span> <span class="s2">&quot;posts&quot;</span><span class="o">.</span><span class="s2">&quot;blog_id&quot;</span> <span class="o">=</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;id&quot;</span> <span class="no">WHERE</span> <span class="s2">&quot;blogs&quot;</span><span class="o">.</span><span class="s2">&quot;name&quot;</span> <span class="o">=</span> <span class="p">?</span>  <span class="o">[[</span><span class="s2">&quot;name&quot;</span><span class="p">,</span> <span class="s2">&quot;Blog 1&quot;</span><span class="o">]]</span>
+</span><span class='line'> <span class="o">=&gt;</span> <span class="c1">#&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: &quot;Blog 1&quot;, author: &quot;someone&quot;, created_at: &quot;2016-04-20 14:26:01&quot;, updated_at: &quot;2016-04-20 14:26:01&quot;&gt;]&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://jbcdn2.b0.upaiyun.com/2013/05/SQL-Joins.jpg" alt="" /></p>
+
+<p>官方資料：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html">Active Record 查詢</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/performance.html">網站效能</a><br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">ActiveRecord - 資料表關聯</a><br/>
+<a href="http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query">Rails使用 include 和 join 避免 N+1 query</a><br/>
+<a href="http://blog.ifyouseewendy.com/blog/2015/11/11/preload-eager_load-includes-references-joins/">preload, eager_load, includes, references, and joins in Rails</a><br/>
+<a href="http://blog.bigbinary.com/2013/07/01/preload-vs-eager-load-vs-joins-vs-includes.html">Preload, Eagerload, Includes and Joins</a><br/>
+<a href="http://blog.arkency.com/2013/12/rails4-preloading/">3 ways to do eager loading (preloading) in Rails 3 &amp; 4</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[淺談 Backend 課程筆記 3]]></title>
@@ -1465,11 +1999,11 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Dynamic Classes & Methods]]></title>
+    <title type="html"><![CDATA[Dynamic Classes & Methods (Struct, Send(), Alias_method, Alias_attribute, Define_method)]]></title>
     <link href="http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods/"/>
     <updated>2016-04-19T22:16:35+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods</id>
-    <content type="html"><![CDATA[<p>ruby 可以很幫變的動態產生 Classes 和 Methods</p>
+    <content type="html"><![CDATA[<p>ruby 可以很方便的動態產生 Classes 和 Methods</p>
 
 <!-- more -->
 
@@ -1550,6 +2084,39 @@
 </span><span class='line'>    <span class="vi">@foo</span> <span class="o">=</span> <span class="n">foo</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>alias_attribute</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Content</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="c1"># has a title attribute</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Email</span> <span class="o">&lt;</span> <span class="no">Content</span>
+</span><span class='line'>  <span class="n">alias_attribute</span> <span class="ss">:subject</span><span class="p">,</span> <span class="ss">:title</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">e</span> <span class="o">=</span> <span class="no">Email</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">title</span>    <span class="c1"># =&gt; &quot;Superstars&quot;</span>
+</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">subject</span>  <span class="c1"># =&gt; &quot;Superstars&quot;</span>
+</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">subject?</span> <span class="c1"># =&gt; true</span>
+</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">subject</span> <span class="o">=</span> <span class="s2">&quot;Megastars&quot;</span>
+</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">title</span>    <span class="c1"># =&gt; &quot;Megastars&quot;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1782,6 +2349,35 @@
 
 
 <p>closure2 則是在 local 就找到了 x 所以輸出的就是 5。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">closure1</span><span class="p">(){</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">return</span> <span class="kd">function</span><span class="p">(){</span>
+</span><span class='line'>    <span class="nx">x</span><span class="o">++</span><span class="p">;</span>
+</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span><span class="p">);</span>
+</span><span class='line'>  <span class="p">};</span>
+</span><span class='line'><span class="p">};</span>
+</span><span class='line'><span class="nx">number</span> <span class="o">=</span> <span class="nx">closure1</span><span class="p">();</span>
+</span><span class='line'><span class="nx">number</span><span class="p">();</span> <span class="c1">//1</span>
+</span><span class='line'><span class="nx">number</span><span class="p">();</span> <span class="c1">//2</span>
+</span><span class='line'><span class="nx">number</span><span class="p">();</span> <span class="c1">//3</span>
+</span><span class='line'><span class="nx">number</span><span class="p">();</span> <span class="c1">//4</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>x 會存活在，number 的 function 裡面</p>
 
 <p><a href="http://www.codedata.com.tw/javascript/using-nodejs-to-learn-javascript-3-function-parameter-closure">用 Node.js 學 JavaScript 語言（3）函數、參數與閉包</a><br/>
 <a href="http://openhome.cc/Gossip/JavaScript/Closure.html">閉包（Closure）</a></p>
@@ -4437,562 +5033,6 @@ ui.router 的語法，用來顯示透過 angular 拉回來的 view ，有點像�
 <a href="http://adz.cool/posts/210893-rails-use-case-mixin-and-concerns">rails use case - mixin &amp; concerns</a><br/>
 <a href="https://www.viget.com/articles/slimming-down-your-models-and-controllers">Slimming Down Your Models and Controllers with Concerns, Service Objects, and Tableless Models</a><br/>
 <a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Lib vs Service Object]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/26/lib-and-service-object/"/>
-    <updated>2016-03-26T09:31:32+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/26/lib-and-service-object</id>
-    <content type="html"><![CDATA[<p>大家都知道，fat models, skinny controllers<br/>
-但要將 code 放在哪邊，才會比較好維護?這就有很多方式了</p>
-
-<!-- more -->
-
-
-<h1>/lib:</h1>
-
-<ul>
-<li>It is not coupled to my app&rsquo;s domain models.</li>
-<li>It can be reused on other projects.</li>
-<li>It can potentially become its own gem. Thus, putting it in lib/ is the first step in that direction.</li>
-</ul>
-
-
-<p>簡單的來說，<code>/lib</code> 放的比較像是，很多 project 都可以重複使用，並沒有專屬某個 project，並且可以包成一個 gem 給大家使用。</p>
-
-<p>舉例: <code>FacebookAuth</code> <code>GithubAuth</code></p>
-
-<h1>/app/services:</h1>
-
-<ul>
-<li>They tend to know a decent amount about the inner workings of domain models.</li>
-<li>Perform work that is specific to business domain in my app.</li>
-<li>Tend to be coupled to specific models.</li>
-</ul>
-
-
-<p>而 <code>/app/services</code> 比較像是，專屬於某個 <code>project</code>，並且與 business logic 息息相關，就像是某個服務一樣。</p>
-
-<p>舉例: <code>UserAuthenticator</code> <code>開立發票</code> <code>寄密碼提醒信</code></p>
-
-<h1>Service Object使用時機</h1>
-
-<ul>
-<li>The action is complex (e.g. closing the books at the end of an accounting period)</li>
-<li>The action reaches across multiple models (e.g. an e-commerce purchase using Order, CreditCard and Customer objects)</li>
-<li>The action interacts with an external service (e.g. posting to social networks)</li>
-<li>The action is not a core concern of the underlying model (e.g. sweeping up outdated data after a certain time period).</li>
-<li>There are multiple ways of performing the action (e.g. authenticating with an access token or password). This is the Gang of Four Strategy pattern.</li>
-</ul>
-
-
-<p>大致上就是</p>
-
-<ol>
-<li>邏輯複雜</li>
-<li>牽扯到很多 model 關係 (ex: 兩個 model 的資料運算)</li>
-<li>與外部服務相關 (ex: slack 通知)</li>
-<li>與核心無關 (ex: 定時清理過期數據)</li>
-<li>會經常重複使用</li>
-</ol>
-
-
-<h3>約定</h3>
-
-<ul>
-<li>一個Service Object 只做一件事。</li>
-<li>每個Service Object 一個文件，統一放在app/services 目錄下。</li>
-<li>命名採用動作，比如SignEstimate ，而不是EstimateSigner 。</li>
-<li>instance級別實現兩個接口，initialize負責傳入所有依賴，call負責調用。</li>
-<li>class級別實現一個接口call，用於簡單的實例化Service Object然後調用call 。</li>
-<li>call的返回值默認為true/false，也可以有更複雜的形式，比如StatusObject 。</li>
-</ul>
-
-
-<blockquote><p>以上約定主要都是看個人習慣，也有人會放在 <code>app/controller</code> 底下<br/>
-<a href="http://vrybas.github.io/blog/2014/08/15/a-way-to-organize-poros-in-rails/">A Way to Organize POROs in Rails</a></p></blockquote>
-
-<h1>concern vs service object</h1>
-
-<ul>
-<li>concern</li>
-<li>簡單說就是，有許多 model 有共用的邏輯片段，可以拆出來</li>
-<li>service object</li>
-<li><p>與 concern 不同的地方是，存放的是比較完成的 code，簡單多你丟什麼給它，他就會丟相對應的資料給你。</p></li>
-<li><p>兩個搭配使用</p></li>
-<li>將許多 service object 搬到 concern</li>
-</ul>
-
-
-<p>參考文件：<br/>
-<a href="https://ruby-china.org/topics/18401">什麼時候使用Concerns，什麼時候使用Services？</a><br/>
-<a href="https://ruby-china.org/topics/23892">Service Object 整理和小結</a><br/>
-<a href="http://brewhouse.io/blog/2014/04/30/gourmet-service-objects.html">Gourmet Service Objects</a><br/>
-<a href="http://blog.codeclimate.com/blog/2012/10/17/7-ways-to-decompose-fat-activerecord-models/">7 Patterns to Refactor Fat ActiveRecord Models</a><br/>
-<a href="http://motion-express.com/blog/20141007-rails-service-object">Rails code 整理系列- Service Object 初探</a><br/>
-<a href="http://stackoverflow.com/questions/16159021/rails-service-objects-vs-lib-classes">Rails service objects vs lib classes</a><br/>
-<a href="http://www.johnnyji.me/rails/2015/05/19/lib-folder-vs-services-in-rails.html">Lib Folder vs. Services in Rails</a><br/>
-<a href="http://tech.gadii.net/blog/2014/08/25/Service-Objects-%E6%95%B4%E7%90%86%E6%9E%B6%E6%A7%8B/">Service Objects 整理架構</a><br/>
-<a href="https://blog.engineyard.com/2014/keeping-your-rails-controllers-dry-with-services">Using Services to Keep Your Rails Controllers Clean and DRY</a> <br/>
-<a href="https://www.viget.com/articles/slimming-down-your-models-and-controllers">Slimming Down Your Models and Controllers with Concerns, Service Objects, and Tableless Models</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[引數的傳遞 Argument Parameter]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/26/argument-parameter/"/>
-    <updated>2016-03-26T09:28:59+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/26/argument-parameter</id>
-    <content type="html"><![CDATA[<p>經常會看到 <code>argument</code> 和 <code>parameter</code> 兩個很類似，卻代表的不同意義。<br/>
-另外也有許多符號 * ** &amp; 可以使用。</p>
-
-<!-- more -->
-
-
-<h1>介紹</h1>
-
-<ul>
-<li><p>argument(actual argument 實際的值) 引數<br/>
-「呼叫端」傳給呼叫對象的「值」</p></li>
-<li><p>parameter(formal parameter 代表參數的符號) = 參數<br/>
-「被呼叫端」用來接收引數的「變數」</p></li>
-</ul>
-
-
-<h1>範例</h1>
-
-<p>有預設值的 <code>parameter</code> 要相連在一起</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">]</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>傳入參數時，會先將值帶入沒有預設值的 <code>a</code>，在緊接著給最左邊的 <code>c</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="o">=</span><span class="mi">3</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [3, 2, 3]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [3, 1, 3]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>預設值的位置不同，結果也不一樣</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, 2, 3] #直接給沒有預設值的 c</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [3, 2, 1] #有兩個值，會先將第一個值給有預設值的第一個 a，第二個才補到 c</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>* Array</h1>
-
-<ul>
-<li>當 <code>parameter</code> 前面加上 <code>*</code> 代表 <code>Array</code> 的意思</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#必須和有預設值得放在一起</span>
-</span><span class='line'><span class="c1">#若要放中間，最後面不能放預設值(因為有預設值要擺在一起)，可以放變數</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">,</span><span class="mi">6</span><span class="p">,</span><span class="mi">7</span><span class="p">,</span><span class="mi">8</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [4, 5, [6, 7, 8]]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">*</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">)</span> <span class="c1">#至少兩個參數</span>
-</span><span class='line'><span class="c1">#=&gt; [1, [], 2]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, [2], 3]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, [2, 3], 4]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="p">,</span><span class="mi">5</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, [2, 3, 4], 5]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>另一種用法將 Array 展開來</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">array</span> <span class="o">=</span> <span class="o">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="o">]</span>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [[4, 5, 6, 7, 8], 2, []] #將 numble 當成一個參數了ˊˋ</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="o">*</span><span class="n">array</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [4, 5, [6, 7, 8]] #將 Array 給展開來</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="o">*</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">array</span> <span class="o">=</span> <span class="o">[</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">8</span><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="n">array</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, [], [4, 5, 6, 7, 8]]</span>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="o">*</span><span class="n">array</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [4, [5, 6, 7], 8]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>** Hash</h1>
-
-<ul>
-<li>當 <code>parameter</code> 前面加上 <code>**</code> 代表 <code>Hash</code> 的意思</li>
-<li>一定要擺到最後一個</li>
-<li>只能有一個</li>
-<li>並且要傳入的是 <code>Hash</code></li>
-<li>傳入的值若不是在最後面，要加上 <code>{}</code>,預設會將後面所有的 <code>key-value</code> 包成一個 <code>Hash</code></li>
-</ul>
-
-
-<blockquote><p>即使後面不加 <code>**</code> 預設也會將後面的值都包成一個 hash</p></blockquote>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="o">=</span><span class="mi">1</span><span class="p">,</span> <span class="n">b</span><span class="o">=</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="s1">&#39;j&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="mi">6</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, 2, {:j=&gt;4, :q=&gt;5, :k=&gt;6}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">({</span><span class="s1">&#39;j&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;q&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;k&#39;</span><span class="p">:</span><span class="mi">6</span><span class="p">},</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span> <span class="c1"># 放在前面加上 {}</span>
-</span><span class='line'><span class="c1">#=&gt; [{:j=&gt;4, :q=&gt;5, :k=&gt;6}, 3, 4]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># &#39;b&#39;:1 傳入的值必須 key-value 並且要對到 key</span>
-</span><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="ss">b</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="ss">c</span><span class="p">:</span><span class="mi">3</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span><span class="mi">22</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span><span class="mi">33</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span><span class="mi">44</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [{:a=&gt;11, :v=&gt;22, :c=&gt;33, :s=&gt;44}, 2, 3]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">({</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mi">11</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span><span class="mi">22</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span><span class="mi">33</span><span class="p">,</span> <span class="s1">&#39;s&#39;</span><span class="p">:</span><span class="mi">44</span><span class="p">},</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="mi">100</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [{:a=&gt;11, :v=&gt;22, :c=&gt;33, :s=&gt;44}, 100, 3]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">c</span><span class="p">)</span> <span class="c1"># sample(a, b, c)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [4, {:a=&gt;1}, {}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span><span class="mi">3</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [4, 5, {:a=&gt;1, :b=&gt;2, :c=&gt;3}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [4, {:a=&gt;1, :v=&gt;2, :c=&gt;4}, {}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">({</span><span class="s1">&#39;z&#39;</span><span class="p">:</span><span class="mi">5</span><span class="p">},</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">},</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [{:z=&gt;5}, {:a=&gt;1, :v=&gt;2}, {:c=&gt;4}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">4</span><span class="p">,</span> <span class="p">{</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;v&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">},</span> <span class="s1">&#39;c&#39;</span><span class="p">:</span><span class="mi">4</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [4, {:a=&gt;1, :v=&gt;2}, {:c=&gt;4}]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>另一種用法將 Hash 展開</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">hash</span>  <span class="o">=</span> <span class="p">{</span><span class="ss">:q</span><span class="o">=&gt;</span><span class="mi">4</span><span class="p">,</span> <span class="ss">:w</span><span class="o">=&gt;</span><span class="mi">5</span><span class="p">,</span> <span class="ss">:e</span><span class="o">=&gt;</span><span class="mi">6</span><span class="p">}</span>
-</span><span class='line'><span class="n">hash2</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:r</span><span class="o">=&gt;</span><span class="mi">4</span><span class="p">,</span> <span class="ss">:t</span><span class="o">=&gt;</span><span class="p">{</span><span class="ss">:y</span><span class="o">=&gt;</span><span class="mi">5</span><span class="p">,</span> <span class="ss">:u</span><span class="o">=&gt;</span><span class="mi">6</span><span class="p">}}</span>
-</span><span class='line'><span class="n">hash3</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:i</span><span class="o">=&gt;</span><span class="mi">4</span><span class="p">,</span> <span class="ss">:o</span><span class="o">=&gt;</span><span class="mi">5</span><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">hash</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt;  [1, {:q=&gt;4, :w=&gt;5, :e=&gt;6}, {}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="nb">hash</span><span class="p">,</span> <span class="n">hash2</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, {:q=&gt;4, :w=&gt;5, :e=&gt;6}, {:r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#將兩個 hash 合併成一個</span>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span> <span class="p">,</span><span class="o">**</span><span class="nb">hash</span><span class="p">,</span> <span class="o">**</span><span class="n">hash2</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, {:q=&gt;4, :w=&gt;5, :e=&gt;6, :r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}}, {}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#展開後，後面就可以繼續塞 hash</span>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="o">**</span><span class="nb">hash</span><span class="p">,</span> <span class="s1">&#39;foo&#39;</span><span class="p">:</span><span class="mi">123</span><span class="p">,</span> <span class="s1">&#39;bar&#39;</span><span class="p">:</span><span class="mi">456</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, 2, {:q=&gt;4, :w=&gt;5, :e=&gt;6, :foo=&gt;123, :bar=&gt;456}]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="ss">a</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="ss">b</span><span class="p">:</span><span class="mi">2</span><span class="p">,</span> <span class="o">**</span><span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">hash</span>  <span class="o">=</span> <span class="p">{</span><span class="ss">:q</span><span class="o">=&gt;</span><span class="mi">4</span><span class="p">,</span> <span class="ss">:w</span><span class="o">=&gt;</span><span class="mi">5</span><span class="p">,</span> <span class="ss">:e</span><span class="o">=&gt;</span><span class="mi">6</span><span class="p">}</span>
-</span><span class='line'><span class="n">hash2</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:r</span><span class="o">=&gt;</span><span class="mi">4</span><span class="p">,</span> <span class="ss">:t</span><span class="o">=&gt;</span><span class="p">{</span><span class="ss">:y</span><span class="o">=&gt;</span><span class="mi">5</span><span class="p">,</span> <span class="ss">:u</span><span class="o">=&gt;</span><span class="mi">6</span><span class="p">}}</span>
-</span><span class='line'><span class="n">hash3</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:i</span><span class="o">=&gt;</span><span class="mi">4</span><span class="p">,</span> <span class="ss">:o</span><span class="o">=&gt;</span><span class="mi">5</span><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="o">**</span><span class="nb">hash</span><span class="p">,</span> <span class="o">**</span><span class="n">hash2</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="mi">100</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, 100, {:j=&gt;4, :q=&gt;5, :k=&gt;6, :c=&gt;{:q=&gt;5, :k=&gt;6}}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="o">**</span><span class="nb">hash</span><span class="p">,</span> <span class="o">**</span><span class="n">hash2</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">:</span><span class="mi">100</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, 100, {:q=&gt;4, :w=&gt;5, :e=&gt;6, :r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="o">**</span><span class="nb">hash</span><span class="p">,</span> <span class="o">**</span><span class="n">hash2</span><span class="p">,</span> <span class="s1">&#39;test&#39;</span><span class="p">:</span><span class="mi">100</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="mi">123</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, 123, {:q=&gt;4, :w=&gt;5, :e=&gt;6, :r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}, :test=&gt;100}]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>&amp; 區塊傳遞</h1>
-
-<p>若要調用在變數，前綴一個『&amp;』符號，並且要放在最後一個</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Array</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">iterate!</span><span class="p">(</span><span class="o">&amp;</span><span class="n">code</span><span class="p">)</span>
-</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="p">,</span> <span class="n">i</span><span class="o">|</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">[</span><span class="n">i</span><span class="o">]</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">n</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">array</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">array</span><span class="o">.</span><span class="n">iterate!</span> <span class="k">do</span> <span class="o">|</span><span class="n">n</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">n</span> <span class="o">**</span> <span class="mi">2</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">puts</span> <span class="n">array</span><span class="o">.</span><span class="n">inspect</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>綜合使用</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="o">*</span><span class="n">b</span><span class="p">,</span> <span class="o">**</span><span class="n">c</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">d</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;a=</span><span class="si">#{</span><span class="n">a</span><span class="si">}</span><span class="s2">, b=</span><span class="si">#{</span><span class="n">b</span><span class="si">}</span><span class="s2">, c=</span><span class="si">#{</span><span class="n">c</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="n">d</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span><span class="ss">x</span><span class="p">:</span><span class="mi">4</span><span class="p">,</span><span class="ss">y</span><span class="p">:</span><span class="mi">5</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">x</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#=&gt; a=1, b=[2, 3], c={:x=&gt;4, :y=&gt;5}</span>
-</span><span class='line'><span class="c1">#=&gt; 100</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>若最後面是 * 不限制長度，塞很多變數，或是後面接 hash 都不會錯</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">sample</span><span class="p">(</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="o">*</span><span class="n">c</span><span class="p">)</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="o">[</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="o">].</span><span class="n">inspect</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, 2, [3, 4, 5]]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">sample</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="p">,</span><span class="s1">&#39;a&#39;</span><span class="p">:</span><span class="mi">1</span><span class="p">,</span> <span class="s1">&#39;b&#39;</span><span class="p">:</span><span class="mi">2</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#=&gt; [1, 2, [{:a=&gt;1, :b=&gt;2}]]</span>
-</span></code></pre></td></tr></table></div></figure>
-
 ]]></content>
   </entry>
   

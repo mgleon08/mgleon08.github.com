@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-04-20T00:51:53+08:00</updated>
+  <updated>2016-05-17T20:22:26+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,202 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Includes Preload Joins Eager_load References]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/04/21/includes-preload-joins-eager-load-references/"/>
+    <updated>2016-04-21T00:41:09+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/04/21/includes-preload-joins-eager-load-references</id>
+    <content type="html"><![CDATA[<p>rails 當中有很多方便可以做資料查詢的功能，可以好好研究一下。</p>
+
+<!-- more -->
+
+
+<h1>modle</h1>
+
+<pre><code class="ruby">class Blog &lt; ActiveRecord::Base
+  has_many :posts
+
+  # t.string   "name"
+  # t.string   "author"
+end
+
+class Post &lt; ActiveRecord::Base
+  belongs_to :blog
+
+  # t.string   "title"
+end
+</code></pre>
+
+<h1>includes</h1>
+
+<ul>
+<li><code>includes</code> 主要用於可以直接將相關連的資料，在同一筆查詢，一起撈出來</li>
+<li>two separate queries</li>
+<li>跟 preload 類似，加上 <code>reference</code> 則和 <code>eager_load</code> 類似</li>
+</ul>
+
+
+<pre><code class="ruby">Blog.includes(:posts)
+Blog Load (0.1ms)  SELECT "blogs".* FROM "blogs"
+Post Load (0.2ms)  SELECT "posts".* FROM "posts" WHERE "posts"."blog_id" IN (1, 2, 3)
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 2, name: "Blog 2", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 3, name: "Blog 3", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;]&gt;
+
+# 回傳所有 User 和 關聯的 posts
+</code></pre>
+
+<p>可以看到後面有 <code>IN (1, 2, 3)</code>，就是將上面一筆一筆查詢，變成這種方式一次撈出來。這樣在 <code>view</code> 中執行 <code>user.posts</code> 就不會再去資料庫查詢，因為已經都先撈出來了。</p>
+
+<pre><code class="ruby">#也可以一次 includes 多個關聯
+
+Blog.includes(posts: :profile)
+Blog.includes(posts: [:foo, :bar])
+#blog 關聯到 posts，posts 關聯到 foo, bar
+
+Blog.includes(:user, comments: [:user, { replies: [:user] }])
+#更複雜的關聯
+</code></pre>
+
+<h1>preload</h1>
+
+<ul>
+<li>跟 includes 類似，主要差別在於無法用 where 條件去查關聯到的 table 欄位</li>
+<li>two separate queries</li>
+</ul>
+
+
+<pre><code class="ruby">Blog.preload(:posts)
+  Blog Load (0.1ms)  SELECT "blogs".* FROM "blogs"
+  Post Load (0.3ms)  SELECT "posts".* FROM "posts" WHERE "posts"."blog_id" IN (1, 2, 3)
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 2, name: "Blog 2", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 3, name: "Blog 3", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;]&gt;
+</code></pre>
+
+<pre><code class="ruby">#無法透過關聯的欄位做搜尋
+Blog.preload(:posts).where(posts: { title:"Post 1-1" } )
+  Blog Load (0.4ms)  SELECT "blogs".* FROM "blogs" WHERE "posts"."title" = ?  [["title", "Post 1-1"]]
+=&gt;# ActiveRecord::StatementInvalid: SQLite3::SQLException: no such column: posts.title: SELECT "blogs".* FROM "blogs" WHERE "posts"."title" = ?
+
+Blog.preload(:posts).where("posts.title = 'Post 1-1'").references(:post)
+  Blog Load (0.4ms)  SELECT "blogs".* FROM "blogs" WHERE (posts.title = 'Post 1-1')
+=&gt;# ActiveRecord::StatementInvalid: SQLite3::SQLException: no such column: posts.title: SELECT "blogs".* FROM "blogs" WHERE (posts.title = 'Post 1-1')
+
+#用 includes 就沒問題，不過這就是 eager_load
+Blog.includes(:posts).where(posts: { title:"Post 1-1" } )
+  SQL (0.2ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id" WHERE "posts"."title" = ?  [["title", "Post 1-1"]]
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;]&gt;
+
+#另一種寫法 
+ Blog.includes(:posts).where("posts.title = 'Post 1-1'").references(:post)
+  SQL (0.3ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id" WHERE (posts.title = 'Post 1-1')
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;]&gt;
+</code></pre>
+
+<h1>joins (inner join)</h1>
+
+<p><code>joins</code> 則是關聯其他資料庫，可以進行查詢，但並不會將關聯的資料拉出來。</p>
+
+<pre><code class="ruby">Blog.joins(:posts)
+  Blog Load (0.2ms)  SELECT "blogs".* FROM "blogs" INNER JOIN "posts" ON "posts"."blog_id" = "blogs"."id"
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 2, name: "Blog 2", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 2, name: "Blog 2", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 2, name: "Blog 2", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 2, name: "Blog 2", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 2, name: "Blog 2", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, ...]&gt;
+
+Blog.joins(:posts).count
+   (0.1ms)  SELECT COUNT(*) FROM "blogs" INNER JOIN "posts" ON "posts"."blog_id" = "blogs"."id"
+ =&gt; 15
+
+#因為資料庫裡面總共有四個，但只有三個室有關聯到 posts，因此 joins 會回傳有關聯的，blog
+Blog.joins(:posts).uniq.size
+   (0.3ms)  SELECT DISTINCT COUNT(DISTINCT "blogs"."id") FROM "blogs" INNER JOIN "posts" ON "posts"."blog_id" = "blogs"."id"
+ =&gt; 3
+
+#回傳所有，有 post 的 blog
+#因為同一個 blog 可能有多個 post ，這樣就會撈出重複的 blog 出來 ， 一個 post 一個 blog，因此可以用 .uniq 來去除重複的資料。
+#如果是一對一就不會有這個問題了
+
+#eager_load 則是透過 rails filter 後的
+Blog.eager_load(:posts)
+  SQL (0.3ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id"
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 2, name: "Blog 2", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 3, name: "Blog 3", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 4, name: "Blog 2", author: nil, created_at: "2016-04-20 16:01:54", updated_at: "2016-04-20 16:01:54"&gt;]&gt;
+
+#因為是 LEFT OUTER JOINed 所以沒有關聯的也會抓進來
+ Blog.eager_load(:posts).count
+   (0.2ms)  SELECT COUNT(DISTINCT "blogs"."id") FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id"
+ =&gt; 4
+</code></pre>
+
+<p>回傳的是所有有 <code>post</code> 的 <code>blog</code>，但並不會將 <code>post</code> 資料撈出來，只是去做比對，因此再用 <code>blog.posts</code> ，一樣會去資料庫中撈出資料。</p>
+
+<h1>joins和include的區別</h1>
+
+<ul>
+<li>include 主要是將其他關聯的 table 一起拉進來，後續查詢時，就不會再去查</li>
+<li>joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做塞選</li>
+</ul>
+
+
+<pre><code class="ruby">Blog.includes(:posts)
+#回傳所有的 Blog，並將相關聯的 post 一併做查詢
+#後續再去關聯的話就不會去 query
+
+Blog.joins(:posts)
+#查詢所有包含 user_id 的 posts ，並回傳該 post 所屬的 blog
+#因此 has_many 若有很多 posts 屬於同一個 blog 就會回傳很多次重複的( 或是用 `distinct` User.joins(:posts).select('distinct users.*'))，可用 uniq 去掉，belong_to &amp; has_one 則不會
+#後續再去關聯的話，還是會去 query
+</code></pre>
+
+<h1>eager_load</h1>
+
+<ul>
+<li>One query, LEFT OUTER JOINed in any query rather than loaded separately.</li>
+<li>Works just the same as <code>includes</code> + <code>references</code></li>
+<li>因此要小心，includers 後在接上 references 就會變成 eager_load</li>
+</ul>
+
+
+<pre><code class="ruby">Blog.eager_load(:posts)
+  SQL (0.3ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id"
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 2, name: "Blog 2", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 3, name: "Blog 3", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;, #&lt;Blog id: 4, name: "Blog 2", author: nil, created_at: "2016-04-20 16:01:54", updated_at: "2016-04-20 16:01:54"&gt;]&gt;
+
+Blog.eager_load(:posts).where(name: 'Blog 1')
+  SQL (0.3ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id" WHERE "blogs"."name" = ?  [["name", "Blog 1"]]
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;]&gt;
+
+Blog.eager_load(:posts).where(name: 'Blog 1').where(posts: {title: 'Post 1-1'})
+  SQL (0.3ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id" WHERE "blogs"."name" = ? AND "posts"."title" = ?  [["name", "Blog 1"], ["title", "Post 1-1"]]
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;]&gt;
+
+# includes + references 
+Blog.includes(:posts).where(name: 'Blog 1').where(posts: {title: 'Post 1-1'})
+  SQL (0.2ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id" WHERE "blogs"."name" = ? AND "posts"."title" = ?  [["name", "Blog 1"], ["title", "Post 1-1"]]
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;]&gt;
+</code></pre>
+
+<h1>references</h1>
+
+<ul>
+<li>只有在 includes 可以使用，主要是讓 includes 像 eager_load</li>
+</ul>
+
+
+<pre><code class="ruby">Blog.includes(:posts).where(name: 'Blog 1').references(:posts)
+  SQL (0.2ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id" WHERE "blogs"."name" = ?  [["name", "Blog 1"]]
+ =&gt; #&lt;ActiveRecord::Relation [#&lt;Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01"&gt;]&gt;
+</code></pre>
+
+<p><img src="http://jbcdn2.b0.upaiyun.com/2013/05/SQL-Joins.jpg" alt="" /></p>
+
+<p>官方資料：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html">Active Record 查詢</a></p>
+
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/performance.html">網站效能</a><br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">ActiveRecord - 資料表關聯</a><br/>
+<a href="http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query">Rails使用 include 和 join 避免 N+1 query</a><br/>
+<a href="http://blog.ifyouseewendy.com/blog/2015/11/11/preload-eager_load-includes-references-joins/">preload, eager_load, includes, references, and joins in Rails</a><br/>
+<a href="http://blog.bigbinary.com/2013/07/01/preload-vs-eager-load-vs-joins-vs-includes.html">Preload, Eagerload, Includes and Joins</a><br/>
+<a href="http://blog.arkency.com/2013/12/rails4-preloading/">3 ways to do eager loading (preloading) in Rails 3 &amp; 4</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[HTTP HEADER]]></title>
@@ -574,153 +770,6 @@ config.action_mailer.delivery_method = :letter_opener
 <a href="http://tech.gadii.net/blog/2014/08/25/Service-Objects-%E6%95%B4%E7%90%86%E6%9E%B6%E6%A7%8B/">Service Objects 整理架構</a><br/>
 <a href="https://blog.engineyard.com/2014/keeping-your-rails-controllers-dry-with-services">Using Services to Keep Your Rails Controllers Clean and DRY</a> <br/>
 <a href="https://www.viget.com/articles/slimming-down-your-models-and-controllers">Slimming Down Your Models and Controllers with Concerns, Service Objects, and Tableless Models</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[自己定義 Rake Tasks]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/10/custom-tasks/"/>
-    <updated>2016-03-10T21:29:39+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/10/custom-tasks</id>
-    <content type="html"><![CDATA[<p>在寫 rails 當中，經常會用到 rake xxx，現在也可以自己定義了!</p>
-
-<!-- more -->
-
-
-<p>檔案放在 <code>/config/tasks/xxx.rake</code>
-記得後面副檔名是 <code>rake</code></p>
-
-<h1><a href="http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5">Ubike</a></h1>
-
-<p>get 台北 Uike 資料，並存取到資料庫。</p>
-
-<p>可以用 <a href="https://github.com/rest-client/rest-client">rest-client</a> 這個gem
-先用 <code>get</code> 取得資料，再用 <code>JSON.parse</code> 來將 <code>string</code> 解析成 <code>hash</code></p>
-
-<p><code>rake dev:fetch_ubike</code></p>
-
-<pre><code class="ruby">#lib/tasks/dev.rake
-
-desc "get Ubike date" # 新增訊息在 rake --tasks 裡面
-namespace :dev do
-
-  task :fetch_ubike =&gt; :environment do
-    puts "fetching ubike"
-
-    url = "http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&amp;rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5"
-
-    raw_content = RestClient.get(url)
-
-    data = JSON.parse( raw_content )
-
-    data["result"]["results"].each do |u|
-      a = Ubike.find_by_ubike_id( u["_id"] )
-
-      if a == nil
-        # maybe update it!
-        Ubike.create( :ubike_id =&gt; u["_id"], :name =&gt; u["sna"])
-      else
-        Ubike.update( :ubike_id =&gt; u["_id"], :name =&gt; u["sna"])
-      end
-    end
-
-  end
-
-end
-</code></pre>
-
-<p>這樣只要打 <code>rake dev:fetch_ubike</code> 就會自動跑了!</p>
-
-<h1><a href="http://vote.ly.g0v.tw/api/vote/?page=1">立委資料</a></h1>
-
-<p><code>rake vote:fetch_raw_vote</code></p>
-
-<pre><code class="ruby">#立委資料，資料相當大，很多分頁
-
-desc "get vote data" # 新增訊息在 rake --tasks 裡面
-namespace :vote do
-
- task :fetch_raw_vote =&gt; :environment do
-   puts "fetching raw_vote"
-
-   url = "http://vote.ly.g0v.tw/api/vote/?page=1"
-   raw_content = RestClient.get(url)
-   data = JSON.parse( raw_content )
-     while data["next"] != nil
-        data["results"].each do |r|
-
-           Vote.create( :url =&gt; r["url"],
-                           :uid =&gt; r["uid"],
-                           :sitting_id =&gt; r["sitting_id"],
-                           :vote_seq =&gt; r["vote_seq"],
-                           :content =&gt; r["content"],
-                           :conflict =&gt; r["conflict"],
-                           :results =&gt; r["results"],
-                           :result =&gt; r["result"])
-         end
-
-         url = data["next"]
-         raw_content = RestClient.get(url)
-         data = JSON.parse( raw_content )
-      end
-
- end
-
-end
-</code></pre>
-
-<h1>secret.yml</h1>
-
-<p>或是定義可以直接下指令新增 <code>secret.yml</code></p>
-
-<p><code>rake generate:secrets</code></p>
-
-<pre><code class="ruby">def paste_secrets
-  text = "
-    # Be sure to restart your server when you modify this file.
-
-    # Your secret key is used for verifying the integrity of signed cookies.
-    # If you change this key, all old signed cookies will become invalid!
-
-    # Make sure the secret is at least 30 characters and all random,
-    # no regular words or you'll be exposed to dictionary attacks.
-    # You can use `rake secret` to generate a secure secret key.
-
-    # Make sure the secrets in this file are kept private
-    # if you're sharing your code publicly.
-
-    development:
-      secret_key_base: #{`rake secret`.strip}
-
-    test:
-      secret_key_base: #{`rake secret`.gsub('\n','')}
-
-    # Do not keep production secrets in the repository,
-    # instead read values from the environment.
-    production:
-      secret_key_base: #{`rake secret`.gsub('\n','')}
-  "
-  path = "#{Rails.root}/config/secrets.yml"
-  File.open(path,"w"){|file|
-    file.write(text)
-  }
-end
-
-desc "Add secrets.yml" # 新增訊息在 rake --tasks 裡面
-namespace :generate do
-  task :secrets do
-    puts "Generating: #{Rails.root}/config/secrets.yml"
-    paste_secrets
-    puts "Done!"
-  end
-end
-</code></pre>
-
-<p>之前寫的Json
-<a href="http://mgleon08.github.io/blog/2016/01/09/ruby-on-rails-json/">Json</a></p>
-
-<p>參考資料：
-<a href="https://ihower.tw/rails4/rails-recipes.html">錦囊妙計</a></p>
 ]]></content>
   </entry>
   

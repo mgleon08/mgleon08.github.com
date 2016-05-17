@@ -5,19 +5,16 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>自定 Module 和 Class 檔案 - Leon's Blogging</title>
+  <title>自定 Module 和 Class 檔案 Monkey Patching 手法 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="在 rails 當中，可以自訂一些好用方便的檔案，在適當的時機來使用。 method 在 lib/require/object.rb，可以自行新增 class 1
+  <meta name="description" content="在 rails 當中，可以自訂一些好用方便的檔案，在適當的時機來使用。 method 在 lib/require/object.rb，可以自行新增 class or lib/core_ext/object/object.rb
+lib/core_ext/hash/hash.rb 1
 2
 3
 4
-5
-6
-7
-8
-class Object def is?(*objects) for object in objects &hellip;">
+5 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -109,7 +106,7 @@ class Object def is?(*objects) for object in objects &hellip;">
   <header>
     
       
-        <h1 class="entry-title">自定 Module 和 Class 檔案</h1>
+        <h1 class="entry-title">自定 Module 和 Class 檔案 Monkey Patching 手法</h1>
       
     
     
@@ -138,6 +135,11 @@ class Object def is?(*objects) for object in objects &hellip;">
 
 <p>在 <code>lib/require/object.rb</code>，可以自行新增 class</p>
 
+<p>or</p>
+
+<p><code>lib/core_ext/object/object.rb</code><br/>
+<code>lib/core_ext/hash/hash.rb</code></p>
+
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -164,6 +166,10 @@ class Object def is?(*objects) for object in objects &hellip;">
 <p>也可以直接在 <code>config/initializer</code> 新增 <code>require.rb</code> 檔案，將檔案 require 進來，就不用每個檔案上面都 require 了。</p>
 
 <blockquote><p><code>initializer</code> 裡面的檔案，程式一執行就會全部都執行了</p></blockquote>
+
+<p>require</p>
+
+<p><code>config/initializers/monkey_patches.rb</code></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -210,6 +216,60 @@ class Object def is?(*objects) for object in objects &hellip;">
 </span><span class='line'><span class="s2">#=&gt; false</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<h1>Refinement</h1>
+
+<p>「猴子補丁 (Monkey Patching)」的手法，有些人覺得很不嚴謹</p>
+
+<p>Ruby 2.0 之後推出 Refinement 的設計，可以稍微控制一下 Open Class 影響範圍。</p>
+
+<h3>原本</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">String</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">say_hello</span>
+</span><span class='line'>    <span class="s2">&quot;hello, </span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Refinement</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">MyHelloString</span>
+</span><span class='line'>  <span class="n">refine</span> <span class="nb">String</span> <span class="k">do</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">say_hello</span>
+</span><span class='line'>      <span class="s2">&quot;hello, </span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>變成必須先 <code>using MyHelloString</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">using</span> <span class="no">MyHelloString</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="s2">&quot;kitty&quot;</span><span class="o">.</span><span class="n">say_hello</span>  <span class="c1"># =&gt; &quot;hello, kitty&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件：<br/>
+<a href="http://kaochenlong.com/2016/04/26/open-class/">Ruby 語法放大鏡之「為什麼 2.days.ago 在內建的 irb 會找不到這個方法? 這不是 Ruby 語法嗎?」</a></p>
 </div>
 
 

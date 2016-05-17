@@ -214,10 +214,42 @@
 <ul>
 <li><code>git add .</code> 將當前目錄<code>所有</code>檔案加入到 Staging Area。(雖然方便但很容易會不小心加入一些其他不必要的檔案)</li>
 <li><code>git add [filename]</code> 將檔案加入到 Staging Area。</li>
-<li><code>git add -p</code>，可以選擇只加入檔案中修改的其中一部分。</li>
-<li><code>git add -i</code>，會以互動方式詢問要加入到Staging Area裡的檔案。</li>
 <li><code>git add -u</code>，只註冊已提交過的檔案到索引。</li>
+<li><code>git add -i</code>，會以互動方式詢問要加入到Staging Area裡的檔案。</li>
+<li><code>git add -p</code>，可以選擇只加入檔案中修改的其中一部分。</li>
 </ul>
+
+
+<p><a href="http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git">Commit only part of a file in Git</a></p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>`y` stage this hunk for the next commit  
+</span><span class='line'>`n` do not stage this hunk for the next commit  
+</span><span class='line'>`q` quit; do not stage this hunk or any of the remaining ones  
+</span><span class='line'>`a` stage this hunk and all later hunks in the file  
+</span><span class='line'>`d` do not stage this hunk or any of the later hunks in the file  
+</span><span class='line'>`g` select a hunk to go to  
+</span><span class='line'>`/` search for a hunk matching the given regex  
+</span><span class='line'>`j` leave this hunk undecided, see next undecided hunk  
+</span><span class='line'>`J` leave this hunk undecided, see next hunk  
+</span><span class='line'>`k` leave this hunk undecided, see previous undecided hunk  
+</span><span class='line'>`K` leave this hunk undecided, see previous hunk  
+</span><span class='line'>`s` split the current hunk into smaller hunks  
+</span><span class='line'>`e` manually edit the current hunk  
+</span><span class='line'>`?` print help</span></code></pre></td></tr></table></div></figure>
 
 
 <h3>rm</h3>
@@ -362,6 +394,7 @@
 <li><code>git stash pop</code> 復原最新的操作並將他從暫存清單中移除。</li>
 <li><code>git stash apply</code> 復原最新的操作，與<code>pop</code>唯一差別則是取回該版本 (其實是執行合併動作) 後，該暫存版還會留在 stash 清單上。</li>
 <li><code>git stash drop</code> 刪除最新的暫存操作。</li>
+<li><code>git stash show stash@{0}</code> 看暫存陣列裡的第一個</li>
 </ul>
 
 
@@ -448,26 +481,79 @@
 </ol>
 </blockquote>
 
+<h1>commit 順序</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>schema
+</span><span class='line'>refactor 現有的架構
+</span><span class='line'>new feture
+</span><span class='line'>refactor new feature
+</span><span class='line'>hotfix</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Blame</h1>
+
+<ul>
+<li><code>git blame [filename]</code> 可以看最後一個 commit 的人是誰</li>
+<li><code>git blame -L [開始行數],[結束行數] [filename]</code></li>
+</ul>
+
+
+<h1>submodule</h1>
+
+<p><a href="http://blog.chh.tw/posts/git-submodule/">Git Submodule 用法筆記</a></p>
+
+<h1>git-bisect</h1>
+
+<p>利用 git 的 二分找法，來找出當初錯誤的版本是從哪個開始</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">bisect</span> <span class="n">start</span> <span class="c1">#開始</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">git</span> <span class="n">bisect</span> <span class="n">good</span> <span class="mi">4</span><span class="n">b274b160</span> <span class="c1">#設定好的 commit SHA1</span>
+</span><span class='line'><span class="n">git</span> <span class="n">bisect</span> <span class="n">bad</span>  <span class="mo">07</span><span class="mi">9944</span><span class="n">e6</span>  <span class="c1">#設定壞的 commit SHA1</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#接著就會從兩個 commit 中間的 commit 去問，是否這個 commit 是好的，可以回答</span>
+</span><span class='line'><span class="c1">#git bisect good</span>
+</span><span class='line'><span class="c1">#git bisect bad</span>
+</span><span class='line'><span class="c1">#就會根據回答，再下去做二分法，直到找到，一開始壞的 commit 在哪</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">git</span> <span class="n">bisect</span> <span class="n">reset</span> <span class="c1">#結束</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>其他</h1>
+
+<h3>gitkeep</h3>
 
 <ul>
 <li><code>.gitkeep</code> 空目錄不會被 commit，必要時在目錄裡放 <code>.gitkeep</code>。</li>
-<li><code>vi .gitignore</code> 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。</li>
-<li><a href="https://github.com/github/gitignore">.gitignore ⼤集合</a></li>
-<li><a href="https://help.github.com/articles/remove-sensitive-data/">移除 git 上敏感檔案</a></li>
 </ul>
 
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch 檔案名稱' --prune-empty --tag-name-filter cat -- --all</span></code></pre></td></tr></table></div></figure>
-
+<h3>.gitignore</h3>
 
 <ul>
-<li><code>.gitignore</code> not working</li>
+<li><code>vi .gitignore</code> 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。</li>
 </ul>
 
 
-<p><a href="http://stackoverflow.com/questions/11451535/gitignore-not-working">.gitignore not working</a></p>
+<p><a href="https://github.com/github/gitignore">.gitignore ⼤集合</a><br/>
+<a href="http://stackoverflow.com/questions/11451535/gitignore-not-working">.gitignore not working</a></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -478,28 +564,48 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h3>移除已經上 github 的敏感檔案</h3>
+
 <ul>
-<li>開乾淨的 branch
-<a href="http://stackoverflow.com/questions/13969050/how-to-create-a-new-empty-branch-for-a-new-project">How to create a new empty branch for a new project</a></li>
+<li><a href="https://help.github.com/articles/remove-sensitive-data/">移除 git 上敏感檔案</a></li>
 </ul>
 
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">filter</span><span class="o">-</span><span class="n">branch</span> <span class="o">--</span><span class="n">force</span> <span class="o">--</span><span class="n">index</span><span class="o">-</span><span class="n">filter</span> <span class="s1">&#39;git rm --cached --ignore-unmatch 檔案名稱&#39;</span> <span class="o">--</span><span class="n">prune</span><span class="o">-</span><span class="n">empty</span> <span class="o">--</span><span class="n">tag</span><span class="o">-</span><span class="nb">name</span><span class="o">-</span><span class="n">filter</span> <span class="n">cat</span> <span class="o">--</span> <span class="o">--</span><span class="n">all</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>開乾淨的 branch</h3>
+
+<p><a href="http://stackoverflow.com/questions/13969050/how-to-create-a-new-empty-branch-for-a-new-project">How to create a new empty branch for a new project</a></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="o">--</span><span class="n">orphan</span> <span class="o">&lt;</span><span class="n">branchname</span><span class="o">&gt;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<ul>
-<li>直接複製遠端的 branch</li>
-</ul>
+<h3>複製遠端的 branch 到本地新的 branch</h3>
 
+<ol>
+<li>先 <code>git checkout</code> 到遠端的 branch，在遠端的 branch <code>git checkout branch</code>複製切到本地</li>
+</ol>
 
-<p>先到遠端的 branch，在遠端的 branch 複製切到本地</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="n">origin</span><span class="o">/</span><span class="n">development</span>
 </span><span class='line'><span class="n">git</span> <span class="n">checkout</span> <span class="o">-</span><span class="n">b</span> <span class="n">development</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ol>
+<li>直接 fetch 遠端 branch 下來到新的 branch</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">git</span> <span class="n">fetch</span> <span class="n">origin</span> <span class="o">&lt;</span><span class="n">remote_branch_name</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">local_branch_name</span><span class="o">&gt;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -572,6 +678,7 @@
 <span class='line-number'>63</span>
 <span class='line-number'>64</span>
 <span class='line-number'>65</span>
+<span class='line-number'>66</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">alias</span> <span class="n">g</span><span class="o">=</span><span class="s1">&#39;git&#39;</span>
 </span><span class='line'>
 </span><span class='line'><span class="k">alias</span> <span class="n">grs</span><span class="o">=</span><span class="s1">&#39;git reset&#39;</span>
@@ -624,7 +731,8 @@
 </span><span class='line'><span class="k">alias</span> <span class="n">gstd</span><span class="o">=</span><span class="s1">&#39;git stash drop&#39;</span>
 </span><span class='line'><span class="k">alias</span> <span class="n">gstl</span><span class="o">=</span><span class="s1">&#39;git stash list&#39;</span>
 </span><span class='line'><span class="k">alias</span> <span class="n">gstp</span><span class="o">=</span><span class="s1">&#39;git stash pop&#39;</span>
-</span><span class='line'><span class="k">alias</span> <span class="n">gsts</span><span class="o">=</span><span class="s1">&#39;git stash show --text&#39;</span>
+</span><span class='line'><span class="k">alias</span> <span class="n">gsts</span><span class="o">=</span><span class="s1">&#39;git stash show&#39;</span>
+</span><span class='line'><span class="k">alias</span> <span class="n">gstst</span><span class="o">=</span><span class="s1">&#39;git stash show --text&#39;</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">#git log</span>
 </span><span class='line'><span class="k">alias</span> <span class="n">gl</span><span class="o">=</span><span class="s1">&#39;git log&#39;</span>
@@ -640,18 +748,19 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>官方文件：
+<p>官方文件：<br/>
 <a href="http://git-scm.com/book/zh-tw/v1">Git Pro</a></p>
 
-<p>參考資料：
-<a href="https://ihower.tw/git/">Git 版本控制系統</a>
-<a href="https://github.com/doggy8088/Learn-Git-in-30-days">30 天精通 Git 版本控管</a>
-<a href="https://backlogtool.com/git-guide/tw/reference/">連猴子都能懂的git入門</a>
-<a href="http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/">好麻煩部落格</a></p>
+<p>參考資料：<br/>
+<a href="https://ihower.tw/git/">Git 版本控制系統</a><br/>
+<a href="https://github.com/doggy8088/Learn-Git-in-30-days">30 天精通 Git 版本控管</a><br/>
+<a href="https://backlogtool.com/git-guide/tw/reference/">連猴子都能懂的git入門</a><br/>
+<a href="http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/">好麻煩部落格</a><br/>
+<a href="http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git">Commit only part of a file in Git</a></p>
 
-<p>練習：
-<a href="https://try.github.io/levels/1/challenges/1">codeschool</a>
-<a href="http://dylandy.github.io/Easy-Git-Tutorial/">Easy-Git-Tutorial</a>
+<p>練習：<br/>
+<a href="https://try.github.io/levels/1/challenges/1">codeschool</a><br/>
+<a href="http://dylandy.github.io/Easy-Git-Tutorial/">Easy-Git-Tutorial</a><br/>
 <a href="http://pcottle.github.io/learnGitBranching/">learnGitBranching</a></p>
 </div>
 

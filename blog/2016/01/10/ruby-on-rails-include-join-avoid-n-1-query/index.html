@@ -176,7 +176,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>以上的關聯，就是透過 <code>User</code> 和 <code>Post 的關聯</code> ，在 <code>view</code> 中一筆一筆去資料庫找相關的 <code>post</code> ，而這每一筆去資料庫的動作，就會有以下的查詢，然後造成 <code>N+1 query</code> 的問題。</p>
+<p>以上的關聯，就是透過 <code>User</code> 和 <code>Skill 的關聯</code> ，在 <code>view</code> 中一筆一筆去資料庫找相關的 <code>post</code> ，而這每一筆去資料庫的動作，就會有以下的查詢，然後造成 <code>N+1 query</code> 的問題。</p>
 
 <p>N+1就是指說，迴圈中查詢 N 筆資料，加上一開始的第一筆。</p>
 
@@ -214,14 +214,28 @@
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">也可以一次</span> <span class="n">includes</span> <span class="err">多個關聯</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#也可以一次 includes 多個關聯</span>
 </span><span class='line'>
 </span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">skills</span><span class="p">:</span> <span class="ss">:profile</span><span class="p">)</span>
 </span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">skills</span><span class="p">:</span> <span class="o">[</span><span class="ss">:cees</span><span class="p">,</span> <span class="ss">:dees</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#多重查詢</span>
+</span><span class='line'><span class="n">includes</span><span class="p">(</span><span class="ss">skills</span><span class="p">:</span> <span class="ss">:profile</span><span class="p">)</span>
+</span><span class='line'><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">date</span><span class="p">:</span> <span class="n">date</span><span class="p">)</span>
+</span><span class='line'><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">skills</span><span class="p">:</span> <span class="p">:</span> <span class="n">profile</span><span class="p">)</span>
+</span><span class='line'><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">skills</span><span class="p">:</span>  <span class="p">{</span> <span class="ss">enable</span><span class="p">:</span><span class="kp">true</span> <span class="p">})</span>
+</span><span class='line'><span class="o">.</span><span class="n">where</span><span class="p">(</span><span class="ss">profile</span><span class="p">:</span> <span class="p">{</span> <span class="ss">status</span><span class="p">:</span><span class="kp">true</span> <span class="p">})</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>joins</h1>
+<h1>joins (inner join)</h1>
 
 <p><code>joins</code> 則是關聯其他資料庫，可以進行查詢，但並不會將關聯的資料拉出來。</p>
 
@@ -244,14 +258,47 @@
 
 <p>回傳的是所有有 <code>skill</code> 的 <code>user</code>，但並不會將 <code>skill</code> 資料撈出來，只是去做比對，因此再用 <code>user.skills</code> ，一樣會去資料庫中撈出資料。</p>
 
-<p>官方資料：
+<h1>joins和include的區別</h1>
+
+<ul>
+<li>include 主要是將其他關聯的 table 一起拉進來，後續查詢時，就不會再去查</li>
+<li>joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做塞選</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">:skills</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#回傳所有的 User，並將相關聯的 skill 一併做查詢</span>
+</span><span class='line'><span class="c1">#後續再去關聯的話就不會去 query</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:skills</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#查詢所有包含 user_id 的 skills ，並回傳該 skill 所屬的 user</span>
+</span><span class='line'><span class="c1">#因此 has_many 若有很多 skills 屬於同一個 user 就會回傳很多次重複的，可用 uniq 去掉，belong_to &amp; has_one 則不會</span>
+</span><span class='line'><span class="c1">#後續再去關聯的話，還是會去 query</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="http://jbcdn2.b0.upaiyun.com/2013/05/SQL-Joins.jpg" alt="" /></p>
+
+<p>官方資料：<br/>
 <a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a>
 <a href="http://rails.ruby.tw/active_record_querying.html">Active Record 查詢</a></p>
 
-<p>參考資料：
-<a href="https://ihower.tw/rails4/performance.html">網站效能</a>
-<a href="https://ihower.tw/rails4/activerecord-relationships.html">ActiveRecord - 資料表關聯</a>
-<a href="http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query">Rails使用 include 和 join 避免 N+1 query</a></p>
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/performance.html">網站效能</a><br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">ActiveRecord - 資料表關聯</a><br/>
+<a href="http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query">Rails使用 include 和 join 避免 N+1 query</a><br/>
+<a href="http://motion-express.com/blog/rails-advanced-query">Rails 用巢狀include和查表方式來避免 n+1 query</a><br/>
+<a href="http://blog.ifyouseewendy.com/blog/2015/11/11/preload-eager_load-includes-references-joins/">preload, eager_load, includes, references, and joins in Rails</a><br/>
+<a href="http://blog.bigbinary.com/2013/07/01/preload-vs-eager-load-vs-joins-vs-includes.html">Preload, Eagerload, Includes and Joins</a><br/>
+<a href="http://blog.arkency.com/2013/12/rails4-preloading/">3 ways to do eager loading (preloading) in Rails 3 &amp; 4</a></p>
 </div>
 
 

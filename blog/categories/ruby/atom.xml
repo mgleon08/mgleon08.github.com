@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-04-20T00:51:53+08:00</updated>
+  <updated>2016-05-17T20:22:26+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,138 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby 中的數字 & BigDecimal]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/05/07/ruby-math/"/>
+    <updated>2016-05-07T10:42:25+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/05/07/ruby-math</id>
+    <content type="html"><![CDATA[<p>在程式中的運算可能跟我們平常接觸的會不一樣，ruby 也是!因此來瞭解一下吧!</p>
+
+<!-- more -->
+
+
+<p><img src="http://ithelp.ithome.com.tw/upload/images/20141005/20141005190053543124e558797_resize_600.png" alt="" /></p>
+
+<h1>integer</h1>
+
+<pre><code class="ruby">1.class
+#=&gt; Fixnum
+(2/3).class
+#=&gt; Fixnum
+#20 位數會開始變成 Bignum
+('1'+'0'*18).to_i.class
+#=&gt; Fixnum
+('1'+'0'*19).to_i.class
+#=&gt; Bignum
+1.2.to_i
+#=&gt; 1
+</code></pre>
+
+<h1>float</h1>
+
+<p>只要分子或分母出現浮點數，結果才會是 float</p>
+
+<blockquote><p>兩個運算元皆為整數，則會進行截尾整數除法(truncating integer division)運算</p></blockquote>
+
+<pre><code class="ruby">3.14.class
+#=&gt; Float
+1/2
+#=&gt; 0
+1/2.0
+#=&gt; 0.5
+1.0/2
+#=&gt; 0.5
+1.to_f
+#=&gt; 1.0
+</code></pre>
+
+<h1>運算</h1>
+
+<pre><code class="ruby">餘數
+10%3
+#=&gt; 1
+
+次方
+2**10
+#=&gt; 1024
+2**-1
+#=&gt; (1/2)
+
+絕對值
+-1234.abs
+#=&gt; 1234
+
+四捨五入
+(3.3).round
+#=&gt; 3
+(4.5).round
+#=&gt; 5
+
+回傳小於該數學的最大整數
+(2.1).floor
+#=&gt; 2
+(-2.1).floor
+#=&gt; -3
+
+回傳大於該數學的最小整數
+(2.1).ceil
+#=&gt; 3
+(-2.1).ceil
+#=&gt; -2
+
+#只適用於Fixnum
+2.zero?
+#=&gt; false
+0.zero?
+#=&gt; true
+
+1.0 / 0    # Infinity
+-1.0 / 0   # -Infinity
+0.0 / 0.0  # NaN
+</code></pre>
+
+<h1>BigDecimal</h1>
+
+<p>主要是用來做精確的數字</p>
+
+<pre><code class="ruby">sum = 0
+for i in (1..10000)
+  sum = sum + 0.0001
+end
+print sum
+#=&gt; 0.9999999999999062
+#因為在電腦中的浮點數其實只是近似值，浮點數中的整數可能只是精確度到達一定程度而已
+</code></pre>
+
+<pre><code class="ruby">require 'bigdecimal'
+
+sum = BigDecimal.new("0")
+for i in (1..10000)
+  sum = sum + BigDecimal.new("0.0001")
+end
+print sum
+#=&gt; 0.1E1
+
+E代表後面有幾個10的次方
+0.1E1 = 0.1 * (10**1)
+#=&gt; 1.0
+0.2E1 = 0.2 * (10**1)
+#=&gt; 2.0
+0.2E2 = 0.2 * (10**2)
+#=&gt; 20.0
+2E3   =   2 * (10**3)
+#=&gt; 2000.0
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/stdlib-1.9.3/libdoc/bigdecimal/rdoc/BigDecimal.html">BigDecimal</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.annideas.com/2014/10/05/ruby-girl-5-ruby-math-intro/">Ruby的數學跟老師教的數學都不一樣？</a><br/>
+<a href="https://gradyli.wordpress.com/2007/11/16/numeric-class/">[Ruby教學]Numeric Class</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Method Missing]]></title>
@@ -150,11 +282,11 @@ end
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Dynamic Classes & Methods]]></title>
+    <title type="html"><![CDATA[Dynamic Classes & Methods (Struct, Send(), Alias_method, Alias_attribute, Define_method)]]></title>
     <link href="http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods/"/>
     <updated>2016-04-19T22:16:35+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods</id>
-    <content type="html"><![CDATA[<p>ruby 可以很幫變的動態產生 Classes 和 Methods</p>
+    <content type="html"><![CDATA[<p>ruby 可以很方便的動態產生 Classes 和 Methods</p>
 
 <!-- more -->
 
@@ -201,6 +333,24 @@ end
     @foo = foo
   end
 end
+</code></pre>
+
+<h1>alias_attribute</h1>
+
+<pre><code class="ruby">class Content &lt; ActiveRecord::Base
+  # has a title attribute
+end
+
+class Email &lt; Content
+  alias_attribute :subject, :title
+end
+
+e = Email.find(1)
+e.title    # =&gt; "Superstars"
+e.subject  # =&gt; "Superstars"
+e.subject? # =&gt; true
+e.subject = "Megastars"
+e.title    # =&gt; "Megastars"
 </code></pre>
 
 <h1>define_method</h1>
@@ -554,269 +704,6 @@ end
 <a href="http://adz.cool/posts/210893-rails-use-case-mixin-and-concerns">rails use case - mixin &amp; concerns</a><br/>
 <a href="https://www.viget.com/articles/slimming-down-your-models-and-controllers">Slimming Down Your Models and Controllers with Concerns, Service Objects, and Tableless Models</a><br/>
 <a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[引數的傳遞 Argument Parameter]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/26/argument-parameter/"/>
-    <updated>2016-03-26T09:28:59+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/26/argument-parameter</id>
-    <content type="html"><![CDATA[<p>經常會看到 <code>argument</code> 和 <code>parameter</code> 兩個很類似，卻代表的不同意義。<br/>
-另外也有許多符號 * ** &amp; 可以使用。</p>
-
-<!-- more -->
-
-
-<h1>介紹</h1>
-
-<ul>
-<li><p>argument(actual argument 實際的值) 引數<br/>
-「呼叫端」傳給呼叫對象的「值」</p></li>
-<li><p>parameter(formal parameter 代表參數的符號) = 參數<br/>
-「被呼叫端」用來接收引數的「變數」</p></li>
-</ul>
-
-
-<h1>範例</h1>
-
-<p>有預設值的 <code>parameter</code> 要相連在一起</p>
-
-<pre><code class="ruby">def sample(a=1, b=2, c)
-    puts [a, b, c]
-end
-</code></pre>
-
-<p>傳入參數時，會先將值帶入沒有預設值的 <code>a</code>，在緊接著給最左邊的 <code>c</code></p>
-
-<pre><code class="ruby">def sample(a, b=2, c=3)
-  puts [a, b, c].inspect
-end
-
-sample(3)
-#=&gt; [3, 2, 3]
-
-sample(3, 1)
-#=&gt; [3, 1, 3]
-</code></pre>
-
-<p>預設值的位置不同，結果也不一樣</p>
-
-<pre><code class="ruby">def sample(a=1, b=2, c)
-  puts [a, b, c].inspect
-end
-
-sample(3)
-#=&gt; [1, 2, 3] #直接給沒有預設值的 c
-
-sample(3, 1)
-#=&gt; [3, 2, 1] #有兩個值，會先將第一個值給有預設值的第一個 a，第二個才補到 c
-</code></pre>
-
-<h1>* Array</h1>
-
-<ul>
-<li>當 <code>parameter</code> 前面加上 <code>*</code> 代表 <code>Array</code> 的意思</li>
-</ul>
-
-
-<pre><code class="ruby">#必須和有預設值得放在一起
-#若要放中間，最後面不能放預設值(因為有預設值要擺在一起)，可以放變數
-
-def sample(a=1, b=2, *c)
-  puts [a, b, c].inspect
-end
-
-sample(4,5,6,7,8)
-#=&gt; [4, 5, [6, 7, 8]]
-</code></pre>
-
-<pre><code class="ruby">def sample(a, *b, c)
-  puts [a, b, c].inspect
-end
-
-sample(1,2) #至少兩個參數
-#=&gt; [1, [], 2]
-
-sample(1,2,3)
-#=&gt; [1, [2], 3]
-
-sample(1,2,3,4)
-#=&gt; [1, [2, 3], 4]
-
-sample(1,2,3,4,5)
-#=&gt; [1, [2, 3, 4], 5]
-</code></pre>
-
-<h3>另一種用法將 Array 展開來</h3>
-
-<pre><code class="ruby">def sample(a=1, b=2, *c)
-  puts [a, b, c].inspect
-end
-
-array = [4, 5, 6, 7, 8]
-sample(array)
-#=&gt; [[4, 5, 6, 7, 8], 2, []] #將 numble 當成一個參數了ˊˋ
-
-sample(*array)
-#=&gt; [4, 5, [6, 7, 8]] #將 Array 給展開來
-</code></pre>
-
-<pre><code class="ruby">def sample(a=1, *b, c)
-  puts [a, b, c].inspect
-end
-
-array = [4, 5, 6, 7, 8]
-
-sample(array)
-#=&gt; [1, [], [4, 5, 6, 7, 8]]
-sample(*array)
-#=&gt; [4, [5, 6, 7], 8]
-</code></pre>
-
-<h1>** Hash</h1>
-
-<ul>
-<li>當 <code>parameter</code> 前面加上 <code>**</code> 代表 <code>Hash</code> 的意思</li>
-<li>一定要擺到最後一個</li>
-<li>只能有一個</li>
-<li>並且要傳入的是 <code>Hash</code></li>
-<li>傳入的值若不是在最後面，要加上 <code>{}</code>,預設會將後面所有的 <code>key-value</code> 包成一個 <code>Hash</code></li>
-</ul>
-
-
-<blockquote><p>即使後面不加 <code>**</code> 預設也會將後面的值都包成一個 hash</p></blockquote>
-
-<pre><code class="ruby">def sample(a=1, b=2, **c)
-  puts [a, b, c].inspect
-end
-
-sample('j':4, 'q':5, 'k':6)
-#=&gt; [1, 2, {:j=&gt;4, :q=&gt;5, :k=&gt;6}]
-
-sample({'j':4, 'q':5, 'k':6}, 3, 4) # 放在前面加上 {}
-#=&gt; [{:j=&gt;4, :q=&gt;5, :k=&gt;6}, 3, 4]
-</code></pre>
-
-<pre><code class="ruby"># 'b':1 傳入的值必須 key-value 並且要對到 key
-def sample(a, b:2, c:3)  
-  puts [a, b, c].inspect
-end
-sample('a':11, 'v':22, 'c':33, 's':44)
-#=&gt; [{:a=&gt;11, :v=&gt;22, :c=&gt;33, :s=&gt;44}, 2, 3]
-
-sample({'a':11, 'v':22, 'c':33, 's':44}, 'b':100)
-#=&gt; [{:a=&gt;11, :v=&gt;22, :c=&gt;33, :s=&gt;44}, 100, 3]
-</code></pre>
-
-<pre><code class="ruby">def sample(a, b, **c) # sample(a, b, c)
-  puts [a, b, c].inspect
-end
-
-sample(4, 'a':1) 
-#=&gt; [4, {:a=&gt;1}, {}]
-
-sample(4, 5, 'a':1, 'b':2, 'c':3)
-#=&gt; [4, 5, {:a=&gt;1, :b=&gt;2, :c=&gt;3}]
-
-sample(4, 'a':1, 'v':2, 'c':4)
-#=&gt; [4, {:a=&gt;1, :v=&gt;2, :c=&gt;4}, {}]
-
-sample({'z':5}, {'a':1, 'v':2}, 'c':4)
-#=&gt; [{:z=&gt;5}, {:a=&gt;1, :v=&gt;2}, {:c=&gt;4}]
-
-sample(4, {'a':1, 'v':2}, 'c':4)
-#=&gt; [4, {:a=&gt;1, :v=&gt;2}, {:c=&gt;4}]
-</code></pre>
-
-<h3>另一種用法將 Hash 展開</h3>
-
-<pre><code class="ruby">def sample(a, b, **c)
-  puts [a, b, c].inspect
-end
-
-hash  = {:q=&gt;4, :w=&gt;5, :e=&gt;6}
-hash2 = {:r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}}
-hash3 = {:i=&gt;4, :o=&gt;5}
-
-sample(1,hash)
-#=&gt;  [1, {:q=&gt;4, :w=&gt;5, :e=&gt;6}, {}]
-
-sample(1,hash, hash2)
-#=&gt; [1, {:q=&gt;4, :w=&gt;5, :e=&gt;6}, {:r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}}]
-
-#將兩個 hash 合併成一個
-sample(1 ,**hash, **hash2)
-#=&gt; [1, {:q=&gt;4, :w=&gt;5, :e=&gt;6, :r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}}, {}]
-
-#展開後，後面就可以繼續塞 hash
-sample(1,2,**hash, 'foo':123, 'bar':456)
-#=&gt; [1, 2, {:q=&gt;4, :w=&gt;5, :e=&gt;6, :foo=&gt;123, :bar=&gt;456}]
-</code></pre>
-
-<pre><code class="ruby">def sample(a:1, b:2, **c)
-  puts [a, b, c].inspect
-end
-
-hash  = {:q=&gt;4, :w=&gt;5, :e=&gt;6}
-hash2 = {:r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}}
-hash3 = {:i=&gt;4, :o=&gt;5}
-
-sample(**hash, **hash2, 'b':100)
-#=&gt; [1, 100, {:j=&gt;4, :q=&gt;5, :k=&gt;6, :c=&gt;{:q=&gt;5, :k=&gt;6}}]
-
-sample(**hash, **hash2, 'test':100)
-#=&gt; [1, 100, {:q=&gt;4, :w=&gt;5, :e=&gt;6, :r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}}]
-
-sample(**hash, **hash2, 'test':100, 'b':123)
-#=&gt; [1, 123, {:q=&gt;4, :w=&gt;5, :e=&gt;6, :r=&gt;4, :t=&gt;{:y=&gt;5, :u=&gt;6}, :test=&gt;100}]
-</code></pre>
-
-<h1>&amp; 區塊傳遞</h1>
-
-<p>若要調用在變數，前綴一個『&amp;』符號，並且要放在最後一個</p>
-
-<pre><code class="ruby">class Array
-  def iterate!(&amp;code)
-    self.each_with_index do |n, i|
-      self[i] = code.call(n)
-    end
-  end
-end
-
-array = [1, 2, 3, 4]
-
-array.iterate! do |n|
-  n ** 2
-end
-
-puts array.inspect
-</code></pre>
-
-<h1>綜合使用</h1>
-
-<pre><code class="ruby">def sample(a, *b, **c, &amp;d)  
-  puts "a=#{a}, b=#{b}, c=#{c}"  
-  d.call(100)  
-end  
-sample(1,2,3,x:4,y:5) { |x| puts x }  
-
-#=&gt; a=1, b=[2, 3], c={:x=&gt;4, :y=&gt;5}
-#=&gt; 100
-</code></pre>
-
-<p>若最後面是 * 不限制長度，塞很多變數，或是後面接 hash 都不會錯</p>
-
-<pre><code class="ruby">def sample(a, b, *c)
-  puts [a, b, c].inspect
-end
-
-sample(1,2,3, 4, 5)
-#=&gt; [1, 2, [3, 4, 5]]
-
-sample(1,2,'a':1, 'b':2)
-#=&gt; [1, 2, [{:a=&gt;1, :b=&gt;2}]]
-</code></pre>
 ]]></content>
   </entry>
   
