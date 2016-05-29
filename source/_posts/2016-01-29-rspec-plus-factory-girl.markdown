@@ -327,12 +327,31 @@ end
 subject (:zombie) { Zombie.new(name:'john') }
 let(:axe){ Weapon.new(name:'axe') }
 ```
+
+`subject`
+>Subject blocks allow you to control the initialization of the subject under test. If you don’t have any custom initialization required, then you’re given a default subject method already. All it does is call new on the class you’re testing.
+
+`let`
+>Let blocks allow you to provide some input to the subject block that change in various contexts. This way you can simply provide an alternative let block for a given value and not have to duplicate the setup code for the subject over again. Let blocks also work inside of before :each blocks if you need them.
+
 `let`  只有在用到時才會執行  
 `let!` 每個測試前都會執行
+
+```ruby
+describe User do
+  subject(:user){ described_class.new firstname:firstname } #described_class = User
+	
+  context '' do 
+    let(:firstname) {'test'}
+  end
+end
+```
 
 * [subject](http://betterspecs.org/#subject)
 * [let](http://betterspecs.org/#let)
 * [RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)
+* [Difference between subject and let #6](https://github.com/reachlocal/rspec-style-guide/issues/6)  
+* [Dry Up Your Rspec Files With Subject & Let Blocks](http://benscheirman.com/2011/05/dry-up-your-rspec-files-with-subject-let-blocks/)
 
 ###focus
 當想要只跑指定的測試時，可以加上 focus
@@ -407,7 +426,7 @@ end
 
 [Define helper methods in a module](https://www.relishapp.com/rspec/rspec-core/docs/helper-methods/define-helper-methods-in-a-module)
 
-###shared_examples
+###shared_examples_for
 
 ```ruby
 describe Vampire do   it_behaves_like 'the undead'
@@ -423,6 +442,30 @@ shared_examples_for 'the undead' do  #RSpec.shared_examples  it 'does not have 
 describe Zombie do  it_behaves_like 'the undead', Zombie.newend
 
 #spec/support/shared_examples_for_undead.rbshared_examples_for 'the undead' do |undead|  it 'does not have a pulse' doundead.pulse.should == false endend
+```
+
+```ruby
+describe '#fullname' do
+  shared_example_for 'a fullname' do |(first, middle, last), output|
+    subject(fullname){ User.fullname }
+    
+    let(:firstname) {first}
+    let(:middlename) {middle}
+    let(:lastname)   {last}
+	
+    it { is_expected.to eq output }
+  end 
+end
+
+  {
+	[nil, 'two', 'three'] => 'two three',
+	[one, 'two', 'three'] => 'one two three',
+	[nil, 'two', nil]     => 'two',
+	[one, 'nil', 'three'] => 'one three',
+  }.each do |name_set, output|
+    it_behaves_like 'a fullname', name_set, output
+  end
+end
 ```
 
 [Shared context](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-context)  
@@ -452,6 +495,26 @@ describe Zombie do  it_behaves_like 'the undead', Zombie.newend
    def with_message(message)     @message = message     self   end
 end
 ```
+
+
+```ruby
+require 'rspec/expectations'
+
+RSpec::Matchers.define :be_a_multiple_of do |expected|
+  match do |actual|
+    actual % expected == 0
+  emd
+end
+
+RSpec.describe 9 do
+  it { is_expeced.to be_a_multiple_of(3)}
+end
+```
+
+###expected_to
+* is_expected is defined simply as expect(subject) and is designed for when you are using rspec-expectations with its newer expect-based syntax.
+
+[One-liner syntax](https://www.relishapp.com/rspec/rspec-core/docs/subject/one-liner-syntax)
 
 ###CURL
 
@@ -654,7 +717,8 @@ Gem：
 [capybara](https://github.com/jnicklas/capybara)  
 [shoulda-matchers](https://github.com/thoughtbot/shoulda-matchers)  
 [SimpleCov](https://github.com/colszowka/simplecov)  
-[database_cleaner](https://github.com/DatabaseCleaner/database_cleaner)
+[database_cleaner](https://github.com/DatabaseCleaner/database_cleaner)  
+[approvals](https://github.com/kytrinyx/approvals)
 
 參考文件：  
 [自動化測試](https://ihower.tw/rails4/testing.html)  
@@ -667,3 +731,7 @@ Gem：
 [保齡球練習](http://www.sportcalculators.com/bowling-score-calculator)  
 [对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)  
 [RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)  
+
+RailsPacific：  
+[#RailsPacific - Taming Chaotic Specs - RSpec Design Patterns by Adam Cuppy](https://speakerdeck.com/acuppy/number-railspacific-taming-chaotic-specs-rspec-design-patterns)  
+[Courageous Software](http://randycoulman.com/blog/categories/getting-testy/)

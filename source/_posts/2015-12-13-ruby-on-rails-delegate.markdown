@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Ruby on rails - delegate"
+title: "Ruby on rails - delegate 委派"
 date: 2015-12-13 12:25:16 +0800
 comments: true
 categories: rails
@@ -10,13 +10,15 @@ categories: rails
 
 <!-- more -->
 
->說穿了其實是讓 class 的 object 可以直接呼叫到另一個 class 的 method
+>Provides a delegate class method to easily expose contained objects’ public methods as your own.
+>
+>說穿了其實是可以讓一個 class 直接取用另外一個關聯 class 的 method
 
 還是看範例比較快
 
 ```ruby
 class Cart < ActiveRecord::Base
-  has_many :cart_items
+  has_many :line_items
   delegate :empty?, :clear, to: :line_items
 end
 ```
@@ -27,7 +29,7 @@ end
 ```
 
 上面有兩個 model 的關係是 one-to-many
-一般正常來說必須要`@cart.cart_items.empty?` 才能夠從 cart 關聯到 cart_items 在呼叫他的方法 `empty?`
+一般正常來說必須要`@cart.line_items.empty?` 才能夠從 cart 關聯到 cart_items 在呼叫他的方法 `empty?`
 
 不過因為加上了
 
@@ -40,7 +42,7 @@ delegate :empty?, :clear, to: :line_items
 
 ```ruby
 def empty?
-    cart_items.empty?
+    line_items.empty?
 end
 ```
 
@@ -50,7 +52,7 @@ end
 delegate :empty?, :clear, to: :line_items, prefix: true
 ```
 
-變成直接呼叫 `@cart.cart_items_empty?` 字面上面的更加清楚!
+變成直接呼叫 `@cart.cart_items_empty?` 沒有 `.` 字面上面的更加清楚!
 
 在官方API文件上甚至可以看到
 可以加上 `allow_nil: true` 允許 nil

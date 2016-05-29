@@ -167,7 +167,7 @@ exec   = 執行一條指令
 * `git stash list` 顯示出所有的暫存清單。
 * `git stash clear` 清除所有暫存。
 * `git stash pop` 復原最新的操作並將他從暫存清單中移除。
-* `git stash apply` 復原最新的操作，與`pop`唯一差別則是取回該版本 (其實是執行合併動作) 後，該暫存版還會留在 stash 清單上。
+* `git stash apply` 復原最新的操作，與`pop`唯一差別則是取回該版本 (其實是執行合併動作) 後，該暫存版還會留在 stash 清單上。(取出最新的一筆 stash 暫存資料. 但是 stash 資料不移除)
 * `git stash drop` 刪除最新的暫存操作。
 * `git stash show stash@{0}` 看暫存陣列裡的第一個
 

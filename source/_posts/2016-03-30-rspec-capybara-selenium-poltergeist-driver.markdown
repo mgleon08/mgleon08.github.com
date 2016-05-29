@@ -102,4 +102,5 @@ gem：
 [Test CSRF in feature test using Capybara](http://blog.tomoyukikashiro.me/post/test-csrf-in-feature-test-using-capybara/)        
 [Capybara (and Selenium) with RSpec & Rails 3: quick tutorial](http://www.opinionatedprogrammer.com/2011/02/capybara-and-selenium-with-rspec-and-rails-3/)  
 [Devise: How To: Test with Capybara](https://github.com/plataformatec/devise/wiki/How-To:-Test-with-Capybara)  
-[Difference between truncation, transaction and deletion database strategies](http://stackoverflow.com/questions/10904996/difference-between-truncation-transaction-and-deletion-database-strategies)
+[Difference between truncation, transaction and deletion database strategies](http://stackoverflow.com/questions/10904996/difference-between-truncation-transaction-and-deletion-database-strategies)  
+[使用 RSpec + Capybara 简单 BDD 入门 -目录](https://ruby-china.org/topics/7770)
