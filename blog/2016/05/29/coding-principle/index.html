@@ -5,12 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>遠端 SSH 免密碼登入(key) - Leon's Blogging</title>
+  <title>Coding Principle 程式設計原則 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="用 ssh 連線到遠端 server 的時候，一般都要輸入帳號密碼來登入，但這會有幾點缺點 輸入帳號密碼的同時，也會增加帳密被竊取的可能
-當登入的頻率很高的時候，或是有很多台機器要登入的時候，就會覺得相當煩！！ 因此可以透過公開金鑰（Public Key）和私密金鑰（Private Key） &hellip;">
+  <meta name="description" content="在 Coding 的世界中，有許多重要的 Principle 值得我們去遵循 SOLID Single Responsibility Principle(單一責任原則SRP) 定義： 對一個類別而言，應該僅有一個引起它變化的原因（職責）
+降低單一類別被「改變」所影響的機會 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/05/29/coding-principle">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -102,7 +102,7 @@
   <header>
     
       
-        <h1 class="entry-title">遠端 SSH 免密碼登入(key)</h1>
+        <h1 class="entry-title">Coding Principle 程式設計原則</h1>
       
     
     
@@ -112,7 +112,7 @@
 
 
 
-<time class='entry-date' datetime='2015-12-14T19:12:27+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>7:12 pm</span></time>
+<time class='entry-date' datetime='2016-05-29T20:27:06+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:27 pm</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -122,113 +122,191 @@
   </header>
 
 
-<div class="entry-content"><p>用 ssh 連線到遠端 server 的時候，一般都要輸入帳號密碼來登入，但這會有幾點缺點</p>
-
-<ol>
-<li>輸入帳號密碼的同時，也會增加帳密被竊取的可能</li>
-<li>當登入的頻率很高的時候，或是有很多台機器要登入的時候，就會覺得相當煩！！</li>
-</ol>
-
-
-<p>因此可以透過公開金鑰（Public Key）和私密金鑰（Private Key）對應的方式，去做登入，這樣以後就不用輸入密碼拉~</p>
+<div class="entry-content"><p>在 Coding 的世界中，有許多重要的 Principle 值得我們去遵循</p>
 
 <!-- more -->
 
 
-<h3>Step 1.</h3>
+<h1>SOLID</h1>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh root@123.123.12.1
-</span><span class='line'>sudo adduser --disabled-password deploy
-</span><span class='line'>sudo su deploy</span></code></pre></td></tr></table></div></figure>
+<h1>Single Responsibility Principle(單一責任原則SRP)</h1>
 
-
-<p>首先會先連到遠端 server 開新的帳號
-（因為root帳號權限很大，我們不希望每個人都用到root權限，而且root帳號是固定的，不夠安全）</p>
-
-<p>先開個新帳號 deploy，就會產生 <code>home/deploy</code></p>
+<h3>定義：</h3>
 
 <ul>
-<li><code>--disabled-password</code> 讓 deploy 無法用密碼登入</li>
-<li><code>su</code> 就是切換身份</li>
+<li>對一個類別而言，應該僅有一個引起它變化的原因（職責）</li>
+<li>降低單一類別被「改變」所影響的機會</li>
+<li>只有一個理由需要更改這個class，如果有一個以上的理由就表示：這個class負責超過一個以上的責任</li>
 </ul>
 
 
-<h3>Step 2.</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh-keygen -t rsa
-</span><span class='line'>
-</span><span class='line'>#Enter file in which to save the key (/root/.ssh/id_rsa): (不輸入，直接按Enter)
-</span><span class='line'>#Enter passphrase (empty for no passphrase): (不輸入，直接按Enter)
-</span><span class='line'>#Enter same passphrase again: (不輸入，直接按Enter)</span></code></pre></td></tr></table></div></figure>
-
-
-<p>再（本機）輸入 <code>ssh-keygen -t rsa</code> 產生出 <code>id_rsa（private key）</code> 和 <code>id_rsa.pub （public key）</code></p>
-
-<p>接著複製（本機）的 <code>~/.ssh/id_rsa.pub</code> 到 <code>/home/deploy/.ssh/authorized_keys</code>(自己新增 .ssh 資料夾和 authorized_keys 檔案)</p>
-
-<blockquote><p>之後連線, 就會用（本機）的 <code>id_rsa（private key）</code> 與遠端電腦的 <code>authorized_keys(public key)</code> 做認證</p></blockquote>
+<h3>說明：</h3>
 
 <ul>
-<li>可以先在 (本機) <code>cat ~/.ssh/id_rsa.pub</code> 將 &lsquo;所有&rsquo; 字串複製</li>
-<li>再到 (遠端)新增 <code>vi /home/deploy/.ssh/authorized_keys</code> ，將字串貼上去後 <code>:wq</code> 離開</li>
+<li>若一個類別有多重職責，職責之間會互相耦合，一個職責的變化可能會影響該類別完成其他職責的能力。</li>
 </ul>
 
 
-<h3>Step 3.</h3>
+<p><a href="http://ithelp.ithome.com.tw/articles/10100557">軟體路上不孤單Day10-物件導向原則介紹3[SRP]</a></p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> chmod 644 /home/deploy/.ssh/authorized_keys
-</span><span class='line'> chown deploy:deploy /home/deploy/.ssh/authorized_keys</span></code></pre></td></tr></table></div></figure>
+<h1>Open/Close Principle (開放關閉原則OCP)</h1>
+
+<h3>定義：</h3>
+
+<ul>
+<li>軟體模組（class, method, module）應該對擴展開放，對修改關閉</li>
+<li>讓模組容易增加(擴展)功能，而不必去修改原有程式碼</li>
+<li>讓主要類別不會因為新增需求而改變</li>
+</ul>
 
 
-<p>更改權限，讓 group 和 other 可以讀
-<code>chmod</code> 改變權限
-<code>chown</code> 改變檔案擁有者</p>
+<h3>說明：</h3>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<ul>
+<li>對有相似行為類別的建立抽象層，如 abstract class, 或是 interface。</li>
+<li>將公共屬性或方法提取到抽象層中，當需要擴展行為（新增）時只需要建立新的子類別並繼承抽象層，不必修改原有的行為。</li>
+</ul>
+
+
+<blockquote><p>注意：實作 OCP 抽象層需要花費時間和精力，也可能會造成複雜度的上升，OCP 應該只運用在程序中頻繁發生的變化上。</p></blockquote>
+
+<p><a href="http://ithelp.ithome.com.tw/articles/10100008">軟體路上不孤單Day08-物件導向原則介紹1[OCP]</a></p>
+
+<h1>Liskov Substitution Principle (Liskov替換原則LSP)</h1>
+
+<h3>定義：</h3>
+
+<ul>
+<li>子類別(Sub Type)必須能夠替換成他們的基本類別(Base Type)</li>
+<li>子類別應該可以替換任何基本類別出現的位置，且程序還能正常工作</li>
+<li>避免繼承時子類別所造成的「行為改變」</li>
+</ul>
+
+
+<h3>說明：</h3>
+
+<ol>
+<li>不能僅用 is-a 的關係就建立繼承，必須考慮是否在基本類別中有些方法對子類別而言是不需要或是無意義的。</li>
+</ol>
+
+
+<p>這些沒有意義的方法會造成不可預期的結果。</p>
+
+<ol>
+<li>建立一個抽象層並提取公共方法，並讓子類別派生抽象層。</li>
+</ol>
+
+
+<blockquote><p>注意：必須要有繼承關係才需要考慮 LSP ，而 LSP 是讓設計達到 OCP 的規則之一 。</p></blockquote>
+
+<p><a href="http://ithelp.ithome.com.tw/articles/10100827">軟體路上不孤單Day11-物件導向原則介紹4[LSP]</a></p>
+
+<h1>Law of Demeter(迪米特原則LOD, LKD)</h1>
+
+<h3>定義：</h3>
+
+<ul>
+<li>也稱最少知識原則(Principle of Least Knowledge)</li>
+<li>避免曝露過多資訊造成用戶端因流程調整而改變</li>
+<li>模組應該儘可能的減少其他模組交互，目的在於降低彼此之間的依賴。</li>
+</ul>
+
+
+<h3>說明：</h3>
+
+<p>以下為必須遵循 LOD 的條件</p>
+
+<p>類別 O 的任何方法 m 只能呼叫屬於以下情況的方法</p>
+
+<ol>
+<li>類別 O 本身的方法</li>
+<li>傳入 m 的參數的方法</li>
+<li>在 m 中建立對象的方法</li>
+<li>任何直接持有的對象方法</li>
+</ol>
+
+
+<p><a href="http://ithelp.ithome.com.tw/articles/10101265">軟體路上不孤單Day13-物件導向原則介紹6[LoD]</a></p>
+
+<h1>Interface Segregation Principle(介面隔離ISP)</h1>
+
+<h3>定義：</h3>
+
+<ul>
+<li>使用單純簡單的 interface , 比使用一個複雜過大的 interface 來的好。</li>
+<li>用戶不應該被迫相依於他們用不到的函示</li>
+<li>降低用戶端因為不相關介面而被改變</li>
+</ul>
+
+
+<h3>說明：</h3>
+
+<p>一個過大的 interface ，通常代表其中有某些功能是客戶端不需要的，如果客戶端實作了不需要的功能 ，這些功能會造成不必要的耦合。</p>
+
+<p>我們可以把過大的 interface 分離，將其中某些功能拆離到另一個 interface 中。</p>
+
+<p><a href="http://ithelp.ithome.com.tw/articles/10101106">軟體路上不孤單Day12-物件導向原則介紹5[ISP]</a></p>
+
+<h1>Dependency Inversion Principle (相依性反轉DIP)</h1>
+
+<h3>定義：</h3>
+
+<ul>
+<li>高層模組不應該相依於低層模組，兩者都應該相依於抽象</li>
+<li>避免高階程式因為低階程式改變而被迫改變</li>
+<li>抽象不應該相依於具體，具體應該相依於抽象。</li>
+</ul>
+
+
+<h3>說明：</h3>
+
+<p>對象的引用盡量是抽象型態而不是具體型態。</p>
+
+<blockquote><p>注意：若是具體型態已經相當穩定，不太會變化，依賴於該具體類別也是無妨。</p></blockquote>
+
+<p><a href="http://ithelp.ithome.com.tw/articles/10101486">軟體路上不孤單Day14-物件導向原則介紹7[DIP]</a></p>
+
+<hr />
+
+<h1>Do not repeat yourself(DRY)</h1>
+
+<h3>定義：</h3>
+
+<ul>
+<li>當有相同的 code 時，應該整合成一個，不該重複出現</li>
+</ul>
+
+
+<p><a href="http://ithelp.ithome.com.tw/articles/10100309">軟體路上不孤單Day09-物件導向原則介紹2[DRY]</a></p>
+
+<h1>duck type(鴨子類型)</h1>
+
+<h3>定義：</h3>
+
+<ul>
+<li>當我看到一隻鳥，它走路像鴨子，游泳像鴨子，叫聲像鴨子，我就稱其為鴨子</li>
+</ul>
+
+
+<h3>說明：</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>644 權限
-</span><span class='line'>owner  = rw- = 4+2+0 = 6
-</span><span class='line'>group  = r-- = 4+0+0 = 4
-</span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">hello</span><span class="p">(</span><span class="n">x</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">x</span><span class="o">.</span><span class="n">hi</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#x61;&#x69;&#108;&#116;&#111;&#x3a;&#100;&#101;&#x70;&#108;&#x6f;&#x79;&#64;&#49;&#50;&#51;&#x2e;&#49;&#x32;&#51;&#46;&#49;&#50;&#46;&#x31;">&#x64;&#x65;&#x70;&#108;&#111;&#x79;&#x40;&#x31;&#x32;&#x33;&#46;&#x31;&#x32;&#51;&#46;&#49;&#x32;&#x2e;&#49;</a> 就連進去囉!!</p>
+<p>因此只要 x 將帶有 <code>hi</code> 的方法都可以使用，不管是人或是動物</p>
 
-<h1>設定快捷鍵</h1>
+<p><a href="http://www.ithome.com.tw/voice/88063">進一步思考Duck typing</a></p>
 
-<p>可以直接 <code>sudo .ssh/config</code> 設定</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Host [自訂名稱]
-</span><span class='line'>    HostName [hostname 網址或ip]
-</span><span class='line'>    Port 22
-</span><span class='line'>    User deploy</span></code></pre></td></tr></table></div></figure>
-
-
-<p>接著就可以直接 <code>ssh [自訂名稱]</code> 就會登入 deploy 的帳號了。</p>
-
-<h1>SSH agent forwarding</h1>
-
-<p><a href="https://developer.github.com/guides/using-ssh-agent-forwarding/">Using SSH agent forwarding</a><br/>
-<a href="https://ihower.tw/blog/archives/7837">SSH agent forwarding 的應用</a></p>
-
-<p>權限指令參考：<br/>
-<a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chown">鳥哥的私房菜</a></p>
+<p>參考文件：<br/>
+<a href="http://rockssdlog.blogspot.tw/2012/03/oo-solid.html">白話- OO設計原則 (SOLID原則) - 附生活實例</a> <br/>
+<a href="http://ithelp.ithome.com.tw/search?tab=article&amp;search=%E8%BB%9F%E9%AB%94%E8%B7%AF%E4%B8%8A%E4%B8%8D%E5%AD%A4%E5%96%AE&amp;page=1">軟體路上不孤單</a><br/>
+<a href="http://122.146.238.121/wordpress/?cat=95">Design Principle</a></p>
 </div>
 
 
@@ -251,13 +329,13 @@
 
 
 
-<time class='entry-date' datetime='2015-12-14T19:12:27+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>7:12 pm</span></time>
+<time class='entry-date' datetime='2016-05-29T20:27:06+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:27 pm</span></time>
       
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/server/'>server</a>
+    <a class='category' href='/blog/categories/clean-code/'>clean_code</a>
   
 </span>
 
@@ -266,7 +344,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/" data-via="" data-counturl="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/05/29/coding-principle/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/05/29/coding-principle/" >Tweet</a>
   
   
   
@@ -277,10 +355,8 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/12/14/ruby-on-rails-virtual-attribute/" title="Previous Post: Ruby on Rails - 虛擬屬性Virtual Attribute">&laquo; Ruby on Rails - 虛擬屬性Virtual Attribute</a>
+        <a class="basic-alignment left" href="/blog/2016/05/29/conding-principle/" title="Previous Post: conding Principle">&laquo; conding Principle</a>
       
-      
-        <a class="basic-alignment right" href="/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/" title="Next Post: .nil? .empty? .blank? .present? 傻傻分不清楚？">.nil? .empty? .blank? .present? 傻傻分不清楚？ &raquo;</a>
       
     </p>
   </footer>
@@ -310,8 +386,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/05/29/coding-principle/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/05/29/coding-principle/';
         var disqus_script = 'embed.js';
       
     (function () {

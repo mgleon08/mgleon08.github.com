@@ -700,13 +700,40 @@ A stub with an expectations that the method gets called.<br/>
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p><code>subject</code></p>
+
+<blockquote><p>Subject blocks allow you to control the initialization of the subject under test. If you don’t have any custom initialization required, then you’re given a default subject method already. All it does is call new on the class you’re testing.</p></blockquote>
+
+<p><code>let</code></p>
+
+<blockquote><p>Let blocks allow you to provide some input to the subject block that change in various contexts. This way you can simply provide an alternative let block for a given value and not have to duplicate the setup code for the subject over again. Let blocks also work inside of before :each blocks if you need them.</p></blockquote>
+
 <p><code>let</code>  只有在用到時才會執行<br/>
 <code>let!</code> 每個測試前都會執行</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="no">User</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">subject</span><span class="p">(</span><span class="ss">:user</span><span class="p">){</span> <span class="n">described_class</span><span class="o">.</span><span class="n">new</span> <span class="ss">firstname</span><span class="p">:</span><span class="n">firstname</span> <span class="p">}</span> <span class="c1">#described_class = User</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="n">context</span> <span class="s1">&#39;&#39;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:firstname</span><span class="p">)</span> <span class="p">{</span><span class="s1">&#39;test&#39;</span><span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <ul>
 <li><a href="http://betterspecs.org/#subject">subject</a></li>
 <li><a href="http://betterspecs.org/#let">let</a></li>
 <li><a href="https://ruby-china.org/topics/9271">RSpec 中 let 和 subject 的区别是什么？</a></li>
+<li><a href="https://github.com/reachlocal/rspec-style-guide/issues/6">Difference between subject and let #6</a></li>
+<li><a href="http://benscheirman.com/2011/05/dry-up-your-rspec-files-with-subject-let-blocks/">Dry Up Your Rspec Files With Subject &amp; Let Blocks</a></li>
 </ul>
 
 
@@ -832,7 +859,7 @@ A stub with an expectations that the method gets called.<br/>
 
 <p><a href="https://www.relishapp.com/rspec/rspec-core/docs/helper-methods/define-helper-methods-in-a-module">Define helper methods in a module</a></p>
 
-<h3>shared_examples</h3>
+<h3>shared_examples_for</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -880,6 +907,53 @@ A stub with an expectations that the method gets called.<br/>
 </span><span class='line'><span class="n">shared_examples_for</span> <span class="s1">&#39;the undead&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">undead</span><span class="o">|</span>
 </span><span class='line'>  <span class="n">it</span> <span class="s1">&#39;does not have a pulse&#39;</span> <span class="k">do</span>
 </span><span class='line'><span class="n">undead</span><span class="o">.</span><span class="n">pulse</span><span class="o">.</span><span class="n">should</span> <span class="o">==</span> <span class="kp">false</span> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">describe</span> <span class="s1">&#39;#fullname&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">shared_example_for</span> <span class="s1">&#39;a fullname&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="p">(</span><span class="n">first</span><span class="p">,</span> <span class="n">middle</span><span class="p">,</span> <span class="n">last</span><span class="p">),</span> <span class="n">output</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">subject</span><span class="p">(</span><span class="n">fullname</span><span class="p">){</span> <span class="no">User</span><span class="o">.</span><span class="n">fullname</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:firstname</span><span class="p">)</span> <span class="p">{</span><span class="n">first</span><span class="p">}</span>
+</span><span class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:middlename</span><span class="p">)</span> <span class="p">{</span><span class="n">middle</span><span class="p">}</span>
+</span><span class='line'>    <span class="n">let</span><span class="p">(</span><span class="ss">:lastname</span><span class="p">)</span>   <span class="p">{</span><span class="n">last</span><span class="p">}</span>
+</span><span class='line'>  
+</span><span class='line'>    <span class="n">it</span> <span class="p">{</span> <span class="n">is_expected</span><span class="o">.</span><span class="n">to</span> <span class="n">eq</span> <span class="n">output</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">{</span>
+</span><span class='line'>  <span class="o">[</span><span class="kp">nil</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="s1">&#39;three&#39;</span><span class="o">]</span> <span class="o">=&gt;</span> <span class="s1">&#39;two three&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="o">[</span><span class="n">one</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="s1">&#39;three&#39;</span><span class="o">]</span> <span class="o">=&gt;</span> <span class="s1">&#39;one two three&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="o">[</span><span class="kp">nil</span><span class="p">,</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span> <span class="kp">nil</span><span class="o">]</span>     <span class="o">=&gt;</span> <span class="s1">&#39;two&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="o">[</span><span class="n">one</span><span class="p">,</span> <span class="s1">&#39;nil&#39;</span><span class="p">,</span> <span class="s1">&#39;three&#39;</span><span class="o">]</span> <span class="o">=&gt;</span> <span class="s1">&#39;one three&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">name_set</span><span class="p">,</span> <span class="n">output</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">it_behaves_like</span> <span class="s1">&#39;a fullname&#39;</span><span class="p">,</span> <span class="n">name_set</span><span class="p">,</span> <span class="n">output</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -986,6 +1060,42 @@ A stub with an expectations that the method gets called.<br/>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rspec/expectations&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RSpec</span><span class="o">::</span><span class="no">Matchers</span><span class="o">.</span><span class="n">define</span> <span class="ss">:be_a_multiple_of</span> <span class="k">do</span> <span class="o">|</span><span class="n">expected</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">match</span> <span class="k">do</span> <span class="o">|</span><span class="n">actual</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">actual</span> <span class="o">%</span> <span class="n">expected</span> <span class="o">==</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="n">emd</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RSpec</span><span class="o">.</span><span class="n">describe</span> <span class="mi">9</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">it</span> <span class="p">{</span> <span class="n">is_expeced</span><span class="o">.</span><span class="n">to</span> <span class="n">be_a_multiple_of</span><span class="p">(</span><span class="mi">3</span><span class="p">)}</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>expected_to</h3>
+
+<ul>
+<li>is_expected is defined simply as expect(subject) and is designed for when you are using rspec-expectations with its newer expect-based syntax.</li>
+</ul>
+
+
+<p><a href="https://www.relishapp.com/rspec/rspec-core/docs/subject/one-liner-syntax">One-liner syntax</a></p>
 
 <h3>CURL</h3>
 
@@ -1304,7 +1414,8 @@ A stub with an expectations that the method gets called.<br/>
 <a href="https://github.com/jnicklas/capybara">capybara</a><br/>
 <a href="https://github.com/thoughtbot/shoulda-matchers">shoulda-matchers</a><br/>
 <a href="https://github.com/colszowka/simplecov">SimpleCov</a><br/>
-<a href="https://github.com/DatabaseCleaner/database_cleaner">database_cleaner</a></p>
+<a href="https://github.com/DatabaseCleaner/database_cleaner">database_cleaner</a><br/>
+<a href="https://github.com/kytrinyx/approvals">approvals</a></p>
 
 <p>參考文件：<br/>
 <a href="https://ihower.tw/rails4/testing.html">自動化測試</a><br/>
@@ -1317,6 +1428,10 @@ A stub with an expectations that the method gets called.<br/>
 <a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a><br/>
 <a href="https://ruby-china.org/topics/10977">对 stub 和 mock 的理解</a><br/>
 <a href="https://ruby-china.org/topics/9271">RSpec 中 let 和 subject 的区别是什么？</a></p>
+
+<p>RailsPacific：<br/>
+<a href="https://speakerdeck.com/acuppy/number-railspacific-taming-chaotic-specs-rspec-design-patterns">#RailsPacific - Taming Chaotic Specs - RSpec Design Patterns by Adam Cuppy</a><br/>
+<a href="http://randycoulman.com/blog/categories/getting-testy/">Courageous Software</a></p>
 </div>
 
 

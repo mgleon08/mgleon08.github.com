@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rspec | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rspec/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-05-17T20:22:26+08:00</updated>
+  <updated>2016-05-29T20:37:29+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -112,7 +112,8 @@ end
 <a href="http://blog.tomoyukikashiro.me/post/test-csrf-in-feature-test-using-capybara/">Test CSRF in feature test using Capybara</a>      <br/>
 <a href="http://www.opinionatedprogrammer.com/2011/02/capybara-and-selenium-with-rspec-and-rails-3/">Capybara (and Selenium) with RSpec &amp; Rails 3: quick tutorial</a><br/>
 <a href="https://github.com/plataformatec/devise/wiki/How-To:-Test-with-Capybara">Devise: How To: Test with Capybara</a><br/>
-<a href="http://stackoverflow.com/questions/10904996/difference-between-truncation-transaction-and-deletion-database-strategies">Difference between truncation, transaction and deletion database strategies</a></p>
+<a href="http://stackoverflow.com/questions/10904996/difference-between-truncation-transaction-and-deletion-database-strategies">Difference between truncation, transaction and deletion database strategies</a><br/>
+<a href="https://ruby-china.org/topics/7770">使用 RSpec + Capybara 简单 BDD 入门 -目录</a></p>
 ]]></content>
   </entry>
   
@@ -513,13 +514,32 @@ end
 let(:axe){ Weapon.new(name:'axe') }
 </code></pre>
 
+<p><code>subject</code></p>
+
+<blockquote><p>Subject blocks allow you to control the initialization of the subject under test. If you don’t have any custom initialization required, then you’re given a default subject method already. All it does is call new on the class you’re testing.</p></blockquote>
+
+<p><code>let</code></p>
+
+<blockquote><p>Let blocks allow you to provide some input to the subject block that change in various contexts. This way you can simply provide an alternative let block for a given value and not have to duplicate the setup code for the subject over again. Let blocks also work inside of before :each blocks if you need them.</p></blockquote>
+
 <p><code>let</code>  只有在用到時才會執行<br/>
 <code>let!</code> 每個測試前都會執行</p>
+
+<pre><code class="ruby">describe User do
+  subject(:user){ described_class.new firstname:firstname } #described_class = User
+
+  context '' do 
+    let(:firstname) {'test'}
+  end
+end
+</code></pre>
 
 <ul>
 <li><a href="http://betterspecs.org/#subject">subject</a></li>
 <li><a href="http://betterspecs.org/#let">let</a></li>
 <li><a href="https://ruby-china.org/topics/9271">RSpec 中 let 和 subject 的区别是什么？</a></li>
+<li><a href="https://github.com/reachlocal/rspec-style-guide/issues/6">Difference between subject and let #6</a></li>
+<li><a href="http://benscheirman.com/2011/05/dry-up-your-rspec-files-with-subject-let-blocks/">Dry Up Your Rspec Files With Subject &amp; Let Blocks</a></li>
 </ul>
 
 
@@ -595,7 +615,7 @@ end
 
 <p><a href="https://www.relishapp.com/rspec/rspec-core/docs/helper-methods/define-helper-methods-in-a-module">Define helper methods in a module</a></p>
 
-<h3>shared_examples</h3>
+<h3>shared_examples_for</h3>
 
 <pre><code class="ruby">describe Vampire do   it_behaves_like 'the undead'
    #let(:undead) { Zombie.new }end
@@ -609,6 +629,29 @@ shared_examples_for 'the undead' do  #RSpec.shared_examples  it 'does not have a
 describe Zombie do  it_behaves_like 'the undead', Zombie.newend
 
 #spec/support/shared_examples_for_undead.rbshared_examples_for 'the undead' do |undead|  it 'does not have a pulse' doundead.pulse.should == false endend
+</code></pre>
+
+<pre><code class="ruby">describe '#fullname' do
+  shared_example_for 'a fullname' do |(first, middle, last), output|
+    subject(fullname){ User.fullname }
+
+    let(:firstname) {first}
+    let(:middlename) {middle}
+    let(:lastname)   {last}
+
+    it { is_expected.to eq output }
+  end 
+end
+
+  {
+    [nil, 'two', 'three'] =&gt; 'two three',
+    [one, 'two', 'three'] =&gt; 'one two three',
+    [nil, 'two', nil]     =&gt; 'two',
+    [one, 'nil', 'three'] =&gt; 'one three',
+  }.each do |name_set, output|
+    it_behaves_like 'a fullname', name_set, output
+  end
+end
 </code></pre>
 
 <p><a href="https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-context">Shared context</a><br/>
@@ -636,6 +679,28 @@ describe Zombie do  it_behaves_like 'the undead', Zombie.newend
    def with_message(message)     @message = message     self   end
 end
 </code></pre>
+
+<pre><code class="ruby">require 'rspec/expectations'
+
+RSpec::Matchers.define :be_a_multiple_of do |expected|
+  match do |actual|
+    actual % expected == 0
+  emd
+end
+
+RSpec.describe 9 do
+  it { is_expeced.to be_a_multiple_of(3)}
+end
+</code></pre>
+
+<h3>expected_to</h3>
+
+<ul>
+<li>is_expected is defined simply as expect(subject) and is designed for when you are using rspec-expectations with its newer expect-based syntax.</li>
+</ul>
+
+
+<p><a href="https://www.relishapp.com/rspec/rspec-core/docs/subject/one-liner-syntax">One-liner syntax</a></p>
 
 <h3>CURL</h3>
 
@@ -841,7 +906,8 @@ feature 比較像是QA在寫的
 <a href="https://github.com/jnicklas/capybara">capybara</a><br/>
 <a href="https://github.com/thoughtbot/shoulda-matchers">shoulda-matchers</a><br/>
 <a href="https://github.com/colszowka/simplecov">SimpleCov</a><br/>
-<a href="https://github.com/DatabaseCleaner/database_cleaner">database_cleaner</a></p>
+<a href="https://github.com/DatabaseCleaner/database_cleaner">database_cleaner</a><br/>
+<a href="https://github.com/kytrinyx/approvals">approvals</a></p>
 
 <p>參考文件：<br/>
 <a href="https://ihower.tw/rails4/testing.html">自動化測試</a><br/>
@@ -854,6 +920,10 @@ feature 比較像是QA在寫的
 <a href="http://www.sportcalculators.com/bowling-score-calculator">保齡球練習</a><br/>
 <a href="https://ruby-china.org/topics/10977">对 stub 和 mock 的理解</a><br/>
 <a href="https://ruby-china.org/topics/9271">RSpec 中 let 和 subject 的区别是什么？</a></p>
+
+<p>RailsPacific：<br/>
+<a href="https://speakerdeck.com/acuppy/number-railspacific-taming-chaotic-specs-rspec-design-patterns">#RailsPacific - Taming Chaotic Specs - RSpec Design Patterns by Adam Cuppy</a><br/>
+<a href="http://randycoulman.com/blog/categories/getting-testy/">Courageous Software</a></p>
 ]]></content>
   </entry>
   

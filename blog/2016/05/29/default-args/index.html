@@ -5,12 +5,21 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>遠端 SSH 免密碼登入(key) - Leon's Blogging</title>
+  <title>Default Args - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="用 ssh 連線到遠端 server 的時候，一般都要輸入帳號密碼來登入，但這會有幾點缺點 輸入帳號密碼的同時，也會增加帳密被竊取的可能
-當登入的頻率很高的時候，或是有很多台機器要登入的時候，就會覺得相當煩！！ 因此可以透過公開金鑰（Public Key）和私密金鑰（Private Key） &hellip;">
+  <meta name="description" content="很常時候，需要給變數一個預設值，因此有以下方法，都可以設定預設值 || 只要是空值，或是 false, nil 就會回傳後面的預設值 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+h = { &quot;a&quot; =&gt; 100, &quot;b&quot; =&gt; false , &# &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -19,7 +28,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/05/29/default-args">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -102,7 +111,7 @@
   <header>
     
       
-        <h1 class="entry-title">遠端 SSH 免密碼登入(key)</h1>
+        <h1 class="entry-title">Default Args</h1>
       
     
     
@@ -112,7 +121,7 @@
 
 
 
-<time class='entry-date' datetime='2015-12-14T19:12:27+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>7:12 pm</span></time>
+<time class='entry-date' datetime='2016-05-29T20:22:19+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:22 pm</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -122,113 +131,85 @@
   </header>
 
 
-<div class="entry-content"><p>用 ssh 連線到遠端 server 的時候，一般都要輸入帳號密碼來登入，但這會有幾點缺點</p>
-
-<ol>
-<li>輸入帳號密碼的同時，也會增加帳密被竊取的可能</li>
-<li>當登入的頻率很高的時候，或是有很多台機器要登入的時候，就會覺得相當煩！！</li>
-</ol>
-
-
-<p>因此可以透過公開金鑰（Public Key）和私密金鑰（Private Key）對應的方式，去做登入，這樣以後就不用輸入密碼拉~</p>
+<div class="entry-content"><p>很常時候，需要給變數一個預設值，因此有以下方法，都可以設定預設值</p>
 
 <!-- more -->
 
 
-<h3>Step 1.</h3>
+<h1>||</h1>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh root@123.123.12.1
-</span><span class='line'>sudo adduser --disabled-password deploy
-</span><span class='line'>sudo su deploy</span></code></pre></td></tr></table></div></figure>
+<p>只要是空值，或是 false, nil 就會回傳後面的預設值</p>
 
-
-<p>首先會先連到遠端 server 開新的帳號
-（因為root帳號權限很大，我們不希望每個人都用到root權限，而且root帳號是固定的，不夠安全）</p>
-
-<p>先開個新帳號 deploy，就會產生 <code>home/deploy</code></p>
-
-<ul>
-<li><code>--disabled-password</code> 讓 deploy 無法用密碼登入</li>
-<li><code>su</code> 就是切換身份</li>
-</ul>
-
-
-<h3>Step 2.</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh-keygen -t rsa
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="kp">false</span> <span class="p">,</span> <span class="s1">&#39;c&#39;</span> <span class="o">=&gt;</span> <span class="kp">nil</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;false, &quot;c&quot;=&gt;nil}</span>
+</span><span class='line'><span class="n">h</span><span class="o">[</span><span class="s1">&#39;a&#39;</span><span class="o">]</span> <span class="o">||</span> <span class="mi">8</span>
+</span><span class='line'><span class="c1">#=&gt; 100</span>
+</span><span class='line'><span class="n">h</span><span class="o">[</span><span class="s1">&#39;b&#39;</span><span class="o">]</span> <span class="o">||</span> <span class="mi">8</span>
+</span><span class='line'><span class="c1">#=&gt; 8</span>
+</span><span class='line'><span class="n">h</span><span class="o">[</span><span class="s1">&#39;c&#39;</span><span class="o">]</span> <span class="o">||</span> <span class="mi">8</span>
+</span><span class='line'><span class="c1">#=&gt; 8</span>
+</span><span class='line'><span class="n">h</span><span class="o">[</span><span class="s1">&#39;d&#39;</span><span class="o">]</span> <span class="o">||</span> <span class="mi">8</span>
+</span><span class='line'><span class="c1">#=&gt; 8</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>fetch</h1>
+
+<p>即使是 nil, false 也會回傳，只有在空值的時候回傳預設值</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="kp">false</span> <span class="p">,</span> <span class="s1">&#39;c&#39;</span> <span class="o">=&gt;</span> <span class="kp">nil</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;false, &quot;c&quot;=&gt;nil}</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 100</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; nil</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 8</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>merge</h1>
+
+<p>只有在 merge 的參數裡有同樣的值，才會覆蓋掉 default 的值</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">default</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="kp">false</span> <span class="p">,</span> <span class="s1">&#39;c&#39;</span> <span class="o">=&gt;</span> <span class="kp">nil</span> <span class="p">}</span>
+</span><span class='line'><span class="n">args</span>    <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">8</span> <span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'>#Enter file in which to save the key (/root/.ssh/id_rsa): (不輸入，直接按Enter)
-</span><span class='line'>#Enter passphrase (empty for no passphrase): (不輸入，直接按Enter)
-</span><span class='line'>#Enter same passphrase again: (不輸入，直接按Enter)</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="n">default</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;8, &quot;b&quot;=&gt;false, &quot;c&quot;=&gt;nil}</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>再（本機）輸入 <code>ssh-keygen -t rsa</code> 產生出 <code>id_rsa（private key）</code> 和 <code>id_rsa.pub （public key）</code></p>
-
-<p>接著複製（本機）的 <code>~/.ssh/id_rsa.pub</code> 到 <code>/home/deploy/.ssh/authorized_keys</code>(自己新增 .ssh 資料夾和 authorized_keys 檔案)</p>
-
-<blockquote><p>之後連線, 就會用（本機）的 <code>id_rsa（private key）</code> 與遠端電腦的 <code>authorized_keys(public key)</code> 做認證</p></blockquote>
-
-<ul>
-<li>可以先在 (本機) <code>cat ~/.ssh/id_rsa.pub</code> 將 &lsquo;所有&rsquo; 字串複製</li>
-<li>再到 (遠端)新增 <code>vi /home/deploy/.ssh/authorized_keys</code> ，將字串貼上去後 <code>:wq</code> 離開</li>
-</ul>
-
-
-<h3>Step 3.</h3>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> chmod 644 /home/deploy/.ssh/authorized_keys
-</span><span class='line'> chown deploy:deploy /home/deploy/.ssh/authorized_keys</span></code></pre></td></tr></table></div></figure>
-
-
-<p>更改權限，讓 group 和 other 可以讀
-<code>chmod</code> 改變權限
-<code>chown</code> 改變檔案擁有者</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>644 權限
-</span><span class='line'>owner  = rw- = 4+2+0 = 6
-</span><span class='line'>group  = r-- = 4+0+0 = 4
-</span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
-
-
-<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#x61;&#x69;&#108;&#116;&#111;&#x3a;&#100;&#101;&#x70;&#108;&#x6f;&#x79;&#64;&#49;&#50;&#51;&#x2e;&#49;&#x32;&#51;&#46;&#49;&#50;&#46;&#x31;">&#x64;&#x65;&#x70;&#108;&#111;&#x79;&#x40;&#x31;&#x32;&#x33;&#46;&#x31;&#x32;&#51;&#46;&#49;&#x32;&#x2e;&#49;</a> 就連進去囉!!</p>
-
-<h1>設定快捷鍵</h1>
-
-<p>可以直接 <code>sudo .ssh/config</code> 設定</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Host [自訂名稱]
-</span><span class='line'>    HostName [hostname 網址或ip]
-</span><span class='line'>    Port 22
-</span><span class='line'>    User deploy</span></code></pre></td></tr></table></div></figure>
-
-
-<p>接著就可以直接 <code>ssh [自訂名稱]</code> 就會登入 deploy 的帳號了。</p>
-
-<h1>SSH agent forwarding</h1>
-
-<p><a href="https://developer.github.com/guides/using-ssh-agent-forwarding/">Using SSH agent forwarding</a><br/>
-<a href="https://ihower.tw/blog/archives/7837">SSH agent forwarding 的應用</a></p>
-
-<p>權限指令參考：<br/>
-<a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chown">鳥哥的私房菜</a></p>
+<p>官方文件：<br/>
+<a href="http://apidock.com/ruby/Hash/fetch">fetch</a><br/>
+<a href="http://apidock.com/ruby/Hash/merge">merge</a></p>
 </div>
 
 
@@ -251,13 +232,13 @@
 
 
 
-<time class='entry-date' datetime='2015-12-14T19:12:27+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>14</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>7:12 pm</span></time>
+<time class='entry-date' datetime='2016-05-29T20:22:19+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>8:22 pm</span></time>
       
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/server/'>server</a>
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>
   
 </span>
 
@@ -266,7 +247,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/" data-via="" data-counturl="http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/05/29/default-args/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/05/29/default-args/" >Tweet</a>
   
   
   
@@ -277,10 +258,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2015/12/14/ruby-on-rails-virtual-attribute/" title="Previous Post: Ruby on Rails - 虛擬屬性Virtual Attribute">&laquo; Ruby on Rails - 虛擬屬性Virtual Attribute</a>
+        <a class="basic-alignment left" href="/blog/2016/05/29/struct-vs-openstruct/" title="Previous Post: Struct vs OpenStruct">&laquo; Struct vs OpenStruct</a>
       
       
-        <a class="basic-alignment right" href="/blog/2015/12/16/ruby-on-rail-nil-empty-blank-present/" title="Next Post: .nil? .empty? .blank? .present? 傻傻分不清楚？">.nil? .empty? .blank? .present? 傻傻分不清楚？ &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2016/05/29/conding-principle/" title="Next Post: conding Principle">conding Principle &raquo;</a>
       
     </p>
   </footer>
@@ -310,8 +291,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2015/12/14/ssh-no-password/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/05/29/default-args/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/05/29/default-args/';
         var disqus_script = 'embed.js';
       
     (function () {

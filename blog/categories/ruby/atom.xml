@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-05-17T20:22:26+08:00</updated>
+  <updated>2016-05-29T20:37:29+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,367 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Default Args]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/05/29/default-args/"/>
+    <updated>2016-05-29T20:22:19+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/05/29/default-args</id>
+    <content type="html"><![CDATA[<p>很常時候，需要給變數一個預設值，因此有以下方法，都可以設定預設值</p>
+
+<!-- more -->
+
+
+<h1>||</h1>
+
+<p>只要是空值，或是 false, nil 就會回傳後面的預設值</p>
+
+<pre><code class="ruby">h = { "a" =&gt; 100, "b" =&gt; false , 'c' =&gt; nil}
+#=&gt; {"a"=&gt;100, "b"=&gt;false, "c"=&gt;nil}
+h['a'] || 8
+#=&gt; 100
+h['b'] || 8
+#=&gt; 8
+h['c'] || 8
+#=&gt; 8
+h['d'] || 8
+#=&gt; 8
+</code></pre>
+
+<h1>fetch</h1>
+
+<p>即使是 nil, false 也會回傳，只有在空值的時候回傳預設值</p>
+
+<pre><code class="ruby">h = { "a" =&gt; 100, "b" =&gt; false , 'c' =&gt; nil}
+#=&gt; {"a"=&gt;100, "b"=&gt;false, "c"=&gt;nil}
+h.fetch('a', 8)
+#=&gt; 100
+h.fetch('b', 8)
+#=&gt; false
+h.fetch('c', 8)
+#=&gt; nil
+h.fetch('d', 8)
+#=&gt; 8
+</code></pre>
+
+<h1>merge</h1>
+
+<p>只有在 merge 的參數裡有同樣的值，才會覆蓋掉 default 的值</p>
+
+<pre><code class="ruby">default = { "a" =&gt; 100, "b" =&gt; false , 'c' =&gt; nil }
+args    = { "a" =&gt; 8 }
+
+default.merge(args)
+#=&gt; {"a"=&gt;8, "b"=&gt;false, "c"=&gt;nil}
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://apidock.com/ruby/Hash/fetch">fetch</a><br/>
+<a href="http://apidock.com/ruby/Hash/merge">merge</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Struct vs OpenStruct]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/05/29/struct-vs-openstruct/"/>
+    <updated>2016-05-29T20:18:53+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/05/29/struct-vs-openstruct</id>
+    <content type="html"><![CDATA[<p>在 ruby 當中，經常會要定義一個新的類別，如果覺得每次都要寫 <code>class xxx</code> 太麻煩，就可以用 struct &amp; OpenStruct 快速的產生出來!</p>
+
+<!-- more -->
+
+
+<h1>Class</h1>
+
+<pre><code class="ruby">class People
+  attr_accessor :name, :phone
+
+  def initialize(name, phone)
+    @name  = name
+    @phone = phone
+  end
+
+  def to_ary
+    [name, phone]
+  end
+end
+
+a = People.new("foo", 1234)
+#=&gt; #&lt;People:0x007fcaabcf5328 @name="foo", @phone=1234&gt;
+a.name
+#=&gt; "foo"
+a.phone
+#=&gt; 1234
+a.to_ary
+#=&gt; ["foo", 1234]
+</code></pre>
+
+<h1>Struct</h1>
+
+<pre><code class="ruby">#method 要用 block 來傳遞，Attribute 一開始就固定了
+People = Struct.new(:name, :phone) do
+  def to_ary
+    [name, phone]
+  end
+end
+# =&gt; People
+
+a = People.new("foo", 1234)
+#=&gt; #&lt;struct People name="foo", phone=1234&gt;
+a.name
+#=&gt; "foo"
+a.phone
+#=&gt; 1234
+a.to_ary
+#=&gt; ["foo", 1234]
+</code></pre>
+
+<h3>其他取 Attribute Value 的方法</h3>
+
+<p>Class則無法</p>
+
+<pre><code class="ruby">a[:name]
+#=&gt; "foo"
+a["name"]
+#=&gt; "foo"
+a[0]
+#=&gt; "foo"
+</code></pre>
+
+<h1>OpenStruct</h1>
+
+<p>主要差異點是在於，比 Struct 更有彈性, 因為它可以任意增加 Attribute , 不像 Struct 要先限制好有哪些 Attribute</p>
+
+<p>但比較可惜的是，無法定義 method</p>
+
+<pre><code class="ruby">#在 console 記得先 require
+require 'ostruct'
+
+People = OpenStruct.new
+#=&gt; #&lt;OpenStruct&gt;
+or
+People = OpenStruct.new(name: 'foo', phone: 1234)
+#=&gt; #&lt;OpenStruct name="foo", phone=1234&gt;
+
+可以自由新增
+People.name = 'foo'
+#=&gt; "foo"
+People.phone = 1234
+#=&gt; 1234
+People.age = 18
+#=&gt; 18
+People
+#=&gt; #&lt;OpenStruct name="foo", phone=1234, age=18&gt;
+</code></pre>
+
+<h3>WHEN TO USE?</h3>
+
+<ul>
+<li>As a temporary data structure 暫時的 data 結構</li>
+<li>As internal class data 內部的 class data</li>
+</ul>
+
+
+<blockquote><p>也許另一個 class 還不至於明確到可以獨立成一個 class，因此先暫存在別的 class 裡，直到有明確的行為，足夠讓它獨立出去</p></blockquote>
+
+<pre><code class="ruby">class Person
+  Address = Struct.new(:street_1, :street_2, :city)
+
+  attr_accessor :name, :address
+
+  def initialize(name, opts)
+    @name = name
+    @address = Address.new(opts[:street_1], opts[:street_2], opts[:city])
+  end
+end
+
+leigh = Person.new("Leigh Halliday", {
+  street_1: "123 Road",
+  city: "Toronto",
+})
+
+puts leigh.address.inspect
+# &lt;struct Person::Address street_1="123 Road", street_2=nil, city="Toronto", province="Ontario", country="Canada", postal_code="M5E 0A3"&gt;
+</code></pre>
+
+<ul>
+<li>As a testing stub</li>
+</ul>
+
+
+<pre><code class="ruby">KCup = Struct.new(:size, :brewing_time, :brewing_temp)
+colombian = KCup.new(:small, 60, 85)
+
+brewer = Brewer.new(colombian)
+expect(brewer.brew).to eq(true)
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.2.0/Struct.html">Struct</a><br/>
+<a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/ostruct/rdoc/OpenStruct.html">OpenStruct</a></p>
+
+<p>參考文件：<br/>
+<a href="http://stackoverflow.com/questions/1177594/when-should-i-use-struct-vs-openstruct#answer-4459132">When should I use Struct vs. OpenStruct?</a><br/>
+<a href="https://www.leighhalliday.com/ruby-struct">The simple but powerful Ruby Struct</a><br/>
+<a href="http://motion-express.com/blog/20150406-ruby-struct-and-ostruct">模擬class物件：Ruby當中Struct及OpenStruct的使用</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Forwardable 轉發 & Delegate 委派]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/05/29/forwardable-and-delegate/"/>
+    <updated>2016-05-29T20:15:26+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/05/29/forwardable-and-delegate</id>
+    <content type="html"><![CDATA[<p>在 OO 的世界裡，經常會去用到不同 class 的 method，因此透過這個方法，可以將不同 class 的 method <code>轉發</code> 過來!</p>
+
+<!-- more -->
+
+
+<h1>Forwardable</h1>
+
+<p>顧名思義，將訊息 <code>轉發</code> 給別的物件。</p>
+
+<pre><code class="ruby">Account = Struct.new(:first_name, :last_name)
+
+class User
+  attr_reader :account
+
+  def initialize(account)
+    @account = account
+  end
+
+  def first_name
+    account.first_name
+  end
+
+  def last_name
+    account.last_name
+  end
+
+  def full_name
+    "#{first_name} #{last_name}"
+  end
+end
+
+user = User.new(Account.new('foo', 'bar'))
+
+puts user.first_name
+puts user.last_name
+puts user.full_name
+#=&gt;foo
+#=&gt;bar
+#=&gt;foo bar
+</code></pre>
+
+<p>上述有許多重複的 account，此時就可以使用 Forwardable 來簡化：<br/>
+將 first_name、last_name <code>轉發</code> 給 account。</p>
+
+<pre><code class="ruby">require 'forwardable'
+
+Account = Struct.new(:first_name, :last_name)
+
+class User
+  attr_reader :account
+  extend Forwardable
+  def_delegators :account, :first_name, :last_name
+
+  #若 User 不想對外開放，attr_reader :account，可以改成實例變數，如以下
+  #extend Forwardable
+  #def_delegators :@account, :first_name, :last_name
+
+  def initialize(account)
+    @account = account
+  end
+
+  def full_name
+    "#{first_name} #{last_name}"
+  end
+end
+
+user = User.new(Account.new('foo', 'bar'))
+
+puts user.first_name
+puts user.last_name
+puts user.full_name
+#=&gt;foo
+#=&gt;bar
+#=&gt;foo bar
+</code></pre>
+
+<h3>def_delegator(accessor, method, ali = method)</h3>
+
+<p> 一次只能 &lsquo;轉發&rsquo; 一個方法，第三個參數是（可選的）別名。</p>
+
+<pre><code class="`ruby">class MyQueue
+  extend Forwardable
+  attr_reader :queue
+  def initialize
+    @queue = []
+  end
+
+  def_delegator :@queue, :push, :mypush
+end
+
+q = MyQueue.new
+q.mypush 42
+q.queue    #=&gt; [42]
+q.push 23  #=&gt; NoMethodError
+</code></pre>
+
+<h3>def_delegators(accessor, *methods)</h3>
+
+<p>一次可以 &lsquo;轉發&rsquo; 多個方法。</p>
+
+<pre><code class="ruby">def_delegators :@account, :first_name, :last_name
+</code></pre>
+
+<h3>delegate [method, method, &hellip;] => accessor</h3>
+
+<p>接受Hash</p>
+
+<pre><code class="ruby">delegate [:first_name, :last_name] =&gt; :account
+</code></pre>
+
+<p>看是如何 work</p>
+
+<pre><code class="ruby">module Forwardable
+  def delegate(hash)
+    hash.each{ |methods, accessor|
+      methods.each{ |method|
+        instance_eval %{
+          def #{method}(*args, &amp;block)
+            #{accessor}.__send__(:#{method}, *args, &amp;block)
+          end
+        }
+      }
+    }
+  end
+end
+</code></pre>
+
+<h1>Other</h1>
+
+<ul>
+<li><code>instance_delegate</code> alias <code>delegate</code></li>
+<li><code>def_instance_delegator</code> alias <code>def_delegator</code></li>
+<li><p><code>def_instance_delegators</code> alias <code>def_delegators</code></p></li>
+<li><p><a href="http://mgleon08.github.io/blog/2015/12/13/ruby-on-rails-delegate/">rails-delegate</a> 之前就有寫到，可以參考!</p></li>
+</ul>
+
+
+<p>官方文件：<br/>
+<a href="http://apidock.com/ruby/Forwardable/instance_delegate">instance_delegate</a><br/>
+<a href="http://apidock.com/ruby/Forwardable/def_instance_delegator">def_instance_delegator</a><br/>
+<a href="http://apidock.com/ruby/Forwardable/def_instance_delegators">def_instance_delegators</a><br/>
+<a href="http://apidock.com/ruby/Forwardable">Forwardable</a><br/>
+<a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/forwardable/rdoc/Forwardable.html">Forwardable</a></p>
+
+<p>參考文件：<br/>
+<a href="http://juanitofatas.com/2014/06/30/ruby-stdlib-forwardable/">Ruby 標準函式庫 Forwardable</a><br/>
+<a href="http://qiita.com/xiangzhuyuan/items/409c87da8cc4a882419b">深入理解和学习Ruby的Forwardable</a><br/>
+<a href="http://vaidehijoshi.github.io/blog/2015/03/31/delegating-all-of-the-things-with-ruby-forwardable/">Delegating All of the Things With Ruby Forwardable</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby 中的數字 & BigDecimal]]></title>
@@ -278,432 +639,6 @@ end
 <a href="https://ihower.tw/blog/archives/4797">如何設計出漂亮的 Ruby APIs</a><br/>
 <a href="https://ruby-china.org/topics/3434">method_missing，一個Ruby 程序員的夢中情人</a><br/>
 <a href="http://stackoverflow.com/questions/13793060/respond-to-vs-respond-to-missing">respond_to? vs. respond_to_missing?</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Dynamic Classes & Methods (Struct, Send(), Alias_method, Alias_attribute, Define_method)]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods/"/>
-    <updated>2016-04-19T22:16:35+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods</id>
-    <content type="html"><![CDATA[<p>ruby 可以很方便的動態產生 Classes 和 Methods</p>
-
-<!-- more -->
-
-
-<h1>Struct</h1>
-
-<pre><code class="ruby">class Post
-  attr_accessor :user, :status
-  def initialize(user, status)
-    @user, @status = user, status
-  end 
-
-  def to_s
-    "#{user}: #{status}"
-  end
-end
-
-#上下相等
-
-Post = Struct.new(:user, :status) do 
-  def to_s
-    "#{user}: #{status}"
-  end
-end
-</code></pre>
-
-<h1>send()</h1>
-
-<pre><code class="ruby">post.say
-= post.send(:say)
-= post.send("say")
-
-#也可以 call 到 private 的 method
-</code></pre>
-
-<h1>alias_method</h1>
-
-<pre><code class="ruby">class Post
-  attr_reader :foo #=&gt; return @foo
-  #一定要在定義好的 method 後面還 call 得到
-  alias_method :bar, :foo #=&gt; the same method 別名/原名
-
-  def initialize(foo = [])
-    @foo = foo
-  end
-end
-</code></pre>
-
-<h1>alias_attribute</h1>
-
-<pre><code class="ruby">class Content &lt; ActiveRecord::Base
-  # has a title attribute
-end
-
-class Email &lt; Content
-  alias_attribute :subject, :title
-end
-
-e = Email.find(1)
-e.title    # =&gt; "Superstars"
-e.subject  # =&gt; "Superstars"
-e.subject? # =&gt; true
-e.subject = "Megastars"
-e.title    # =&gt; "Megastars"
-</code></pre>
-
-<h1>define_method</h1>
-
-<pre><code class="ruby">
-class Post
-  def draft
-    @status = :draft
-  end
-
-  def posted
-    @status = :posted
-  end
-
-  def deleted
-    @status = :deleted
-  end
-end
-
-#上下相等
-
-class Post
-  states = [:draft, :posted, :deleted]
-  states.each do |status|
-    define_method status do
-      @status = status
-    end
-  end 
-end
-</code></pre>
-
-<h1>method()</h1>
-
-<pre><code class="ruby">
-class Post
-  def initialize(foo)
-    @posts = posts
-  end
-  def contents
-    @foo
-  end
-  def show_tweet(index)
-    puts @foo[index]
-  end 
-end
-</code></pre>
-
-<pre><code class="ruby">
-foo = ['Compiling!', 'Bundling...']
-post = Post.new(foo)
-
-content_method = post.method(:contents)
-content_method.call
-#=&gt; ["Compiling!", "Bundling..."]
-
-show_method = post.method(:show_tweet)
-
-￼(0..1).each(&amp;show_method)
-￼#上下相等
-show_method.call(0)
-show_method.call(1)
-</code></pre>
-
-<h1>EX: log_method</h1>
-
-<pre><code class="ruby">
-class MethodLogger
-  def log_method(klass, method_name)
-    klass.class_eval do
-      alias_method "#{method_name}_original", method_name
-      define_method method_name do |*args, &amp;block|
-        puts "#{Time.now}: Called #{method_name}"
-        send "#{method_name}_original", *args, &amp;block
-      end
-    end
-  end
-end
-
-class Post
-  def say_hi
-    puts "Hi"
-  end
-end
-
-logger = MethodLogger.new
-logger.log_method(Post, :say_hi)
-Post.new.say_hi
-
-#=&gt; 2016-04-05 12:14:01 +0800: Called say_hi
-#=&gt; Hi
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.2.0/Struct.html">Struct</a><br/>
-<a href="http://apidock.com/ruby/Object/__send__">send()</a><br/>
-<a href="http://apidock.com/ruby/Module/alias_method">alias_method()</a><br/>
-<a href="http://apidock.com/ruby/Module/define_method">method define_method</a></p>
-
-<p>參考文件：<br/>
-<a href="http://stackoverflow.com/questions/3337285/what-does-send-do-in-ruby">What does send() do in Ruby?</a><br/>
-<a href="https://gist.github.com/plusor/6104625">alias vs alias_method</a>  <br/>
-<a href="https://ihower.tw/blog/archives/4797">如何設計出漂亮的 Ruby APIs</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Module vs Class]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/26/module-and-class/"/>
-    <updated>2016-03-26T09:34:18+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/26/module-and-class</id>
-    <content type="html"><![CDATA[<p>在 ruby 中經常會使用到 <code>Class</code>，也常常看到 <code>Module</code>
-那到底什麼時候要用哪個?</p>
-
-<!-- more -->
-
-
-<p>先看看兩者的差異</p>
-
-<h1>Module</h1>
-
-<ul>
-<li>無法 instantiated（也就是沒有 new method）</li>
-<li>可以被 include &amp; extend</li>
-</ul>
-
-
-<h1>Class</h1>
-
-<ul>
-<li>可以 instantiated</li>
-<li>無法被 include</li>
-</ul>
-
-
-<p>簡單的來說，module 有點像是沒有 new 的 Class</p>
-
-<p>並且可以用 <code>include</code> &amp; <code>extend</code> mixin 到 Class 裡面，變成 Class 的 <code>class method</code> or <code>instance method</code></p>
-
-<p><a href="http://mgleon08.github.io/blog/2016/02/24/include-extend-require/">Ruby 中的 Include Extend Require Load</a></p>
-
-<p>基本上兩種方式都有辦法達成同樣的效果，但差別就在於維護上</p>
-
-<h1>維護</h1>
-
-<p>用 Class 的話，勢必一定要先 new 出來，並且預設會執行 <code>initialize</code> 這個method<br/>
-就可以預先設定好一些參數，看起來就會比較簡潔</p>
-
-<pre><code class="ruby">class Pepole
-  def initialize(name)
-    @name = name
-  end
-
-  def hi
-    "hi, #{@name}"
-  end
-
-  def yo
-    "yo, #{@name}"
-  end
-end
-
-p = People.new('leon')
-p.hi #=&gt; 'hi leon'
-p.yo #=&gt; 'yo leon'
-</code></pre>
-
-<p>用 Module 的話，就必須每次呼叫 <code>hi</code> <code>yo</code> method 時都要在傳入參數進去。</p>
-
-<pre><code class="ruby">module Man
-  def hi(name)
-    "hi, #{@name}"
-  end
-
-  def yo
-    "yo, #{@name}"
-  end
-end
-
-Man.hi('leon') #=&gt; 'hi leon'
-Man.yo('leon') #=&gt; 'yo leon'
-</code></pre>
-
-<p>另外是當 Class include 很多 module 時，都會變成 Class 的 <code>class method</code> or <code>instance method</code>，這時就很難去分辨是從哪個 module 來的 method。</p>
-
-<p>因此使用上，看習慣，可維護性等等，去判斷要用 module or class<br/>
-再細分要放在 <code>cocern</code> or <code>service object</code> or <code>lib</code></p>
-
-<p>參考文件：<br/>
-<a href="http://mgleon08.github.io/blog/2016/02/24/include-extend-require/">module include extend</a>
-<a href="http://railsfun.tw/t/class-module-class/402">class與module的差異? class如何繼承</a><br/>
-<a href="http://stackoverflow.com/questions/151505/difference-between-a-class-and-a-module">Difference between a class and a module</a><br/>
-<a href="http://motion-express.com/blog/20141011-rails-module-model">Rails利用Module整理Model
-</a><br/>
-<a href="http://motion-express.com/blog/20141209-ruby-class-inheritance">Ruby class 基本的覆寫(override)及繼承(inheritance)</a><br/>
-<a href="http://motion-express.com/blog/20141208-class-method-and-instance-method">Ruby當中的class method和instance method差在哪？</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Concern 來整理 Code]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/26/concern/"/>
-    <updated>2016-03-26T09:32:30+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/26/concern</id>
-    <content type="html"><![CDATA[<p>當有相當多地方用到同樣的東西時，就可以用 concern 來讓 code 變得更乾淨。</p>
-
-<!--more-->
-
-
-<h1>使用時機</h1>
-
-<ul>
-<li>DRYing up model codes</li>
-<li><p>Skin Fat Models.</p></li>
-<li><p>將可重用的功能抽出來，讓多個 model 共用</p></li>
-<li>model 太肥大，將相關的邏輯的 code 放到不同的 concern 裡</li>
-<li>ActiveSupport::Concern 的風格</li>
-</ul>
-
-
-<h1>ActiveSupport::Concern</h1>
-
-<p>任務是讓管理 modules 之間的 dependencies 變得容易。<br/>
-也可以用 <code>include</code> 同時達成 <code>class methods</code> <code>instance methods</code>
-（原本必須 include + extend 才能達成）</p>
-
-<h1>原本作法</h1>
-
-<pre><code class="ruby"># app/models/concerns/sample.rb
-
-module Sample
-  include Sample2
-  # self.included 會在 Sample 被 include 時執行
-  # base 傳入是誰哪個 Class include 了這個 module
-  def self.included(base)
-    base.class_eval do # 用 class_eval 在該 class 新增 Class method
-      #scope :disabled, -&gt; { where(disabled: true) } 可以定義 scope
-      #has_many :post 可以定義關聯
-      def self.foo
-          "這裡是 class 的 method"
-      end
-    end
-  end
-
-  def bar
-     "這裡是 instance 的 method"
-  end
-end
-</code></pre>
-
-<pre><code class="ruby">#app/models/test.rb
-class Test &lt; ActiveRecord::Base
-  include Samples
-end
-
-Test.foo
-=&gt; "這裡是 class 的 method"
-
-Test.new.bar
-=&gt; "這裡是 instance 的 method"
-</code></pre>
-
-<p>兩個 module 可以互相 include</p>
-
-<pre><code class="ruby"># app/models/concerns/sample2.rb
-module Sample2
-  def self.included(base)
-    base.class_eval do
-      #do something method
-    end
-  end
-end
-</code></pre>
-
-<pre><code class="ruby">#app/models/test.rb
-class Test &lt; ActiveRecord::Base
-  include Sample
-  # include Sample，再透過 Sample 去 include Sample2 ,這樣就不用一次 include 兩個 module了
-end
-</code></pre>
-
-<p>以上看起來蠻理想的<br/>
-但因為 include <code>Sample2</code> 的是 <code>Sample</code><br/>
-所以 <code>Sample2</code> 的 base 就變成了 <code>Sample</code> ， 不是我們要的 <code>Test</code></p>
-
-<h1>更改</h1>
-
-<pre><code class="ruby"># app/models/concerns/sample.rb
-module Sample
-  include Sample2
-  extend ActiveSupport::Concern
-    included do
-      self.send(:method) # base 改成 self
-    end
-end
-</code></pre>
-
-<pre><code class="ruby"># app/models/concerns/sample2.rb
-module Sample2
-  extend ActiveSupport::Concern
-
-  included do
-    self.send(:methods)  # base 改成 self
-    # 可以在這裡放當 include 時要執行的東西
-    # 可以存取所有 class level 的東西
-    # ex1: 宣告 shared scope
-    # ex2: 可寫 shared validation
-  end
-
-#可以直接定義 ClassMethods 不需再 send(:extend, ClassMethods) 或是用 class_eval 去定義
-   module ClassMethods  
-      def foo
-        # do something
-      end
-   end
-
-#可以直接定義 InstanceMethods 不需再 send(:include, InstanceMethods)或是用 instance_eval 去定義
-   module InstanceMethods  #也可以不用特別定義 module InstanceMethods
-      def bar
-         # do something
-      end
-   end
-end
-</code></pre>
-
-<pre><code class="ruby">#app/models/test.rb
-class Test &lt; ActiveRecord::Base
-  include Sample
-end
-</code></pre>
-
-<h1>concern vs service object</h1>
-
-<ul>
-<li>concern</li>
-<li>簡單說就是，有許多 model 有共用的邏輯片段，可以拆出來</li>
-<li>service object</li>
-<li><p>與 concern 不同</p></li>
-<li><p>兩個搭配使用</p></li>
-<li>將許多 service object 搬到 concern</li>
-</ul>
-
-
-<p>官方文件：<br/>
-<a href="http://api.rubyonrails.org/classes/ActiveSupport/Concern.html">ActiveSupport</a></p>
-
-<p>參考文件：<br/>
-<a href="https://ruby-china.org/topics/18401">什麼時候使用Concerns，什麼時候使用Services？</a><br/>
-<a href="https://ihower.tw/blog/archives/3949">深入Rails3: ActiveSupport::Concern</a><br/>
-<a href="http://stackoverflow.com/questions/14541823/how-to-use-concerns-in-rails-4">How to use concerns in Rails 4</a><br/>
-<a href="https://ruby-china.org/topics/19812">ActiveSupport::Concern 小結</a><br/>
-<a href="http://adz.cool/posts/210893-rails-use-case-mixin-and-concerns">rails use case - mixin &amp; concerns</a><br/>
-<a href="https://www.viget.com/articles/slimming-down-your-models-and-controllers">Slimming Down Your Models and Controllers with Concerns, Service Objects, and Tableless Models</a><br/>
-<a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a></p>
 ]]></content>
   </entry>
   
