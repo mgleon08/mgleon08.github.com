@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-05-29T20:37:29+08:00</updated>
+  <updated>2016-05-29T20:41:08+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -203,15 +203,6 @@
 <a href="http://rockssdlog.blogspot.tw/2012/03/oo-solid.html">白話- OO設計原則 (SOLID原則) - 附生活實例</a> <br/>
 <a href="http://ithelp.ithome.com.tw/search?tab=article&amp;search=%E8%BB%9F%E9%AB%94%E8%B7%AF%E4%B8%8A%E4%B8%8D%E5%AD%A4%E5%96%AE&amp;page=1">軟體路上不孤單</a><br/>
 <a href="http://122.146.238.121/wordpress/?cat=95">Design Principle</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Conding Principle]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/05/29/conding-principle/"/>
-    <updated>2016-05-29T20:25:38+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/05/29/conding-principle</id>
-    <content type="html"><![CDATA[
 ]]></content>
   </entry>
   
@@ -4615,6 +4606,192 @@ ui.router 的語法，用來顯示透過 angular 拉回來的 view ，有點像�
 <a href="http://blog.darkthread.net/post-2014-06-11-angularjs-notes-1.aspx">NG筆記1-AngularJS學習資源與術語</a><br/>
 <a href="https://github.com/jmcunningham/AngularJS-Learning/blob/master/ZH-TW.md">學習 AngularJS</a><br/>
 <a href="http://ithelp.ithome.com.tw/profile/share?id=20091340&amp;page=2">初學 AngularJS 的路</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[用 Pundit 來做權限管理]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/03/26/pundit-gem/"/>
+    <updated>2016-03-26T09:47:16+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/03/26/pundit-gem</id>
+    <content type="html"><![CDATA[<p>可以搭配 <a href="http://mgleon08.github.io/blog/2016/03/08/enum/">enum</a> 簡單快速地做出權限管理。</p>
+
+<!--more-->
+
+
+<h1>指令</h1>
+
+<p>產生資料夾 <code>app/policies/</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="ss">pundit</span><span class="p">:</span><span class="n">install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>設定</h1>
+
+<p>接著就可以根據你的每個 controller action 去個別設定是否有這權限<br/>
+通常會搭配 <a href="http://mgleon08.github.io/blog/2016/01/21/devise-rolify-cancan/">devise</a> 和 <a href="http://mgleon08.github.io/blog/2016/03/08/enum/">enum</a>  加上欄位 role 去做調整。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">PostPolicy</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:user</span><span class="p">,</span> <span class="ss">:post</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">post</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="n">user</span>
+</span><span class='line'>    <span class="vi">@post</span> <span class="o">=</span> <span class="n">post</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">update?</span>
+</span><span class='line'>    <span class="n">user</span><span class="o">.</span><span class="n">admin?</span> <span class="ow">or</span> <span class="ow">not</span> <span class="n">post</span><span class="o">.</span><span class="n">published?</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Controller</h1>
+
+<p>在 controller 就可以藉由 <code>authorize</code> 來設定要授權的是什麼</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">update</span>
+</span><span class='line'>  <span class="vi">@post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="n">params</span><span class="o">[</span><span class="ss">:id</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">authorize</span> <span class="vi">@post</span>
+</span><span class='line'>  <span class="k">if</span> <span class="vi">@post</span><span class="o">.</span><span class="n">update</span><span class="p">(</span><span class="n">post_params</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">redirect_to</span> <span class="vi">@post</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">:edit</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>記得要 <code>include Pundit</code><br/>
+也可以加上 <code>verify_authorized</code> method 來確保每個 action 都有做好設定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Pundit</span>
+</span><span class='line'>  <span class="n">after_action</span> <span class="ss">:verify_authorized</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>錯誤處理 rescue</h1>
+
+<p>可以在 <code>ApplicationController</code> 上面直接做處理，相當方便</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">protect_from_forgery</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Pundit</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">rescue_from</span> <span class="no">Pundit</span><span class="o">::</span><span class="no">NotAuthorizedError</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:user_not_authorized</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">user_not_authorized</span>
+</span><span class='line'>    <span class="n">flash</span><span class="o">[</span><span class="ss">:alert</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;You are not authorized to perform this action.&quot;</span>
+</span><span class='line'>    <span class="n">redirect_to</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">referrer</span> <span class="o">||</span> <span class="n">root_path</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>RSPEC</h1>
+
+<p>基本上 github 上面就非常清楚了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#rails_helper.rb</span>
+</span><span class='line'><span class="nb">require</span> <span class="s2">&quot;pundit/rspec&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#spec/policies</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">describe</span> <span class="no">PostPolicy</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">subject</span> <span class="p">{</span> <span class="n">described_class</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">permissions</span> <span class="ss">:update?</span><span class="p">,</span> <span class="ss">:edit?</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;denies access if post is published&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">not_to</span> <span class="n">permit</span><span class="p">(</span><span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">admin</span><span class="p">:</span> <span class="kp">false</span><span class="p">),</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">published</span><span class="p">:</span> <span class="kp">true</span><span class="p">))</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;grants access if post is published and user is an admin&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">permit</span><span class="p">(</span><span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">admin</span><span class="p">:</span> <span class="kp">true</span><span class="p">),</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">published</span><span class="p">:</span> <span class="kp">true</span><span class="p">))</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">it</span> <span class="s2">&quot;grants access if post is unpublished&quot;</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">expect</span><span class="p">(</span><span class="n">subject</span><span class="p">)</span><span class="o">.</span><span class="n">to</span> <span class="n">permit</span><span class="p">(</span><span class="no">User</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">admin</span><span class="p">:</span> <span class="kp">false</span><span class="p">),</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">published</span><span class="p">:</span> <span class="kp">false</span><span class="p">))</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>gem：
+<a href="https://github.com/elabs/pundit">pundit</a></p>
+
+<p>參考資料：<br/>
+<a href="http://voice.lawrencesun.info/posts/2014/12/13/rails-notes-authorization-using-pundit/">Rails Notes: Authorization Using Pundit</a><br/>
+<a href="http://www.learning-rails.net/2015/09/rail-authorization-with-pundit-and.html">Rail Authorization with pundit and devise</a></p>
 ]]></content>
   </entry>
   
