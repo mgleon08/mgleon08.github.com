@@ -511,6 +511,33 @@ User.all.map(&:name)
  `&:` 代表代入一個Proc
  `(&:name)` = `{|name| user.name}` 的概念XD。
 
+#partition
+
+回傳兩個 array，第一個符合條件，第二個是條件以外
+
+```ruby
+(1..6).partition { |v| v.even? }  #=> [[2, 4, 6], [1, 3, 5]]
+
+a, b = (1..6).partition { |v| v.even? }
+#=> [[2, 4, 6], [1, 3, 5]]
+a
+#=> [2, 4, 6]
+b
+#=> [1, 3, 5]
+```
+[partition](http://ruby-doc.org/core-2.3.1/Enumerable.html#method-i-partition)
+
+#detect
+
+找出符合條件的第一個
+
+```ruby
+(1..10).detect   { |i| i % 5 == 0 and i % 7 == 0 }   #=> nil
+(1..100).find    { |i| i % 5 == 0 and i % 7 == 0 }   #=> 35
+```
+
+[detect](http://ruby-doc.org/core-2.3.1/Enumerable.html#method-i-detect)
+
 #Benchmark
 
 上面其實很多都很類似，主要差異的話就是速度吧

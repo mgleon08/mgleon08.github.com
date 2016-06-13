@@ -54,6 +54,10 @@ a.phone
 #=> 1234
 a.to_ary
 #=> ["foo", 1234]
+
+也可以直接用繼承的方式
+class Test < struct.new(:foo, :bar)
+end
 ```
 ###其他取 Attribute Value 的方法
 Class則無法
@@ -90,7 +94,14 @@ People.age = 18
 #=> 18
 People
 #=> #<OpenStruct name="foo", phone=1234, age=18>
+
+也可以直接用繼承的方式
+class Test < OpenStruct
+end
 ```
+
+* Struct: 接受的是按順序排列的初始化參數
+* Openstruct: 接受的則是散列表的參數
 
 ###WHEN TO USE?
 

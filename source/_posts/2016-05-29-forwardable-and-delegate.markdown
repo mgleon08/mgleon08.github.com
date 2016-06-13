@@ -138,6 +138,67 @@ module Forwardable
   end
 end
 ```
+
+#example
+
+```ruby
+require 'forwardable'
+class Bicycle
+  attr_reader :size, :parts
+
+  def initialize(args={})
+    @size  = args[:size]
+    @parts = args[:parts]
+  end
+
+  def spares
+    parts.spares
+  end
+end
+
+class Parts
+  extend Forwardable
+  #@parts 是一個 Array，因此將 size 和 each 委派給 Parts 實例物件 
+  def_delegators :@parts, :size, :each
+  #為了要讓實例可以直接用 select，select 又會用到 each 所以上面要委派
+  include Enumerable
+
+  def initialize(parts)
+    @parts = parts
+  end
+
+  def spares
+  	 #所以這裡才可以直接用 select，不用 @parts.select
+    select{ |part| part.needs_spare}
+  end
+end
+
+class Part
+  attr_reader :name, :description, :needs_spare
+
+  def initialize(args)
+    @name        = args[:name]
+    @description = args[:description]
+    @needs_spare = args.fetch(:needs_spare, true)
+  end
+end
+
+chain     = Part.new(name: 'chain',     description: '10-speed')
+tire_size = Part.new(name: 'tire_size', description: '23')
+tap_color = Part.new(name: 'tap_color', description: 'red')
+
+
+road_bike = Bicycle.new(
+              size:'L',
+              parts: Parts.new([chain, tire_size, tap_color])
+              )
+
+puts road_bike.parts.size
+puts '*'*10
+puts road_bike.spares.size
+puts '*'*10
+```
+
 #Other
 * `instance_delegate` alias `delegate`
 * `def_instance_delegator` alias `def_delegator`

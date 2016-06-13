@@ -109,7 +109,6 @@ end
 
 #Rspec
 
-
 ### model
 ```ruby
 require 'rails_helper' #必須載入才能使用裡面的方法
@@ -244,17 +243,60 @@ let(:user){User.new(:name => "hello")}
 
 ###預期會執行某一個class的methd
 
-```
+```ruby
  expect(Clsss).to receive(:method).with(params)
+```
+
+###測試 Pattern
+
+Four-Phase Test
+
+* Setup （準備測試資料）
+* Exercie （實際執行測試）
+* Verification （驗證測試結果）
+* Teardown （拆解測試）
+
+
+###double
+假物件，可用於 mock 中指定回傳的值
+
+```ruby
+require 'rails_helper'
+
+RSpec.describe BooksCalculator do
+  describe "#books_count" do 
+    it "returns books count" do 
+      course = double(:books_count => 5 )
+      book_calculator = StudentsCalculator.new(course)
+      expect(book_calculator.books_count).to eq(5)
+    end
+  end
+end
 ```
 
 ###Stub
 
 `Stub:`
 For replacing a method with code that returns a specified result.  
-用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。
-  
-專注於要測試的東西，如果 method 有呼叫其他 method 就可以 stub 掉
+
+* 用stub 假造 method，讓它忽略這個 method，或是指定回傳東西，可以避免在測試時，測試不必要的東西。  
+* 專注於要測試的東西，如果 method 有呼叫其他 method 就可以 stub 掉
+* 製造假物件，指定這個假物件能回應哪些訊息，還有對應的回傳值，讓要測試的主角，在執行過程中一些地方，能獲得一致的結果
+
+* 要測試的 model
+
+```ruby
+class Zombie < ActiveRecord::Base
+  has_one :weapon
+
+  def decapitate
+    weapon.slice(self, :head)
+    self.status = "dead again"
+  end
+end
+```
+
+* 我们要測試 decapitate 方法, 但裡面調用了 weapon 的 slice 方法, 所以我們要把它 stub 掉
 
 ```ruby
 describe Zombie do
@@ -262,7 +304,8 @@ describe Zombie do
 
   context "#decapitate" do
     it "sets status to dead again" do
-      zombie.weapon.stub(:slice)  #模擬 slice 阻斷掉他
+      allow(zombie.weapon).to receive(:slice) #Rspec 3 之後的語法
+      #zombie.weapon.stub(:slice)  #模擬 slice 阻斷掉他 Rspec 2
       zombie.decapitate
       zombie.status.should == "dead again"
     end
@@ -270,11 +313,15 @@ describe Zombie do
 end
 ```
 
-###mock
+###Mock
 
 `Mock:`
 A stub with an expectations that the method gets called.  
-假造 method，不只忽略這個 method ，並且期望被呼叫到
+
+* 假造 method，不只忽略這個 method ，並且期望被呼叫到
+* 「模擬」與一個「協作者」的互動，設立一個「會收到指定訊息」的期望，去驗證互動是否真的有發生。
+* 簡單來說 mock 就是 stub + expectation , 說它是 stub 是因為它也可以像 stub 一樣偽造方法, 阻斷對原來方法的調用, expectation 是說它不僅偽造了這個方法,它還期望你(必須)調用這個方法,如果沒有被調用到,這個 test 就 fail 了
+* 一樣製造假物件，但是現在我們改對這個假物件斷言，在主角的執行過程中，應該要收到什麼訊息、收到的訊息應該夾帶什麼參數、訊息收到的次數...等等，但是會有程式碼的流程些微不自然的問題（準備、斷言、（準備）、執行）
 
 ```ruby
 # simulate a not found resource
@@ -318,12 +365,23 @@ end
 ￼￼￼￼￼#/spec/models/zombie_spec.rbit "returns properly formatted lat, long" do  loc = stub(latitude: 2, longitude: 3)  Zoogle.stub(:graveyard_locator).returns(loc)  zombie.geolocate_with_object.should == "2, 3"end
 ```
 
+###Spies
+* 類似 mocks ，一樣製造假物件，一樣是對假物件斷言，但是透過測試工具的功能，而改善了測試程式碼的可讀性，流程更自然（準備、執行、斷言）
+
+
+Stubs, Mocks and Spies，都是測試的技巧 or 手法!!
+
 [Stubs, Mocks and Spies in RSpec](https://about.futurelearn.com/blog/stubs-mocks-spies-rspec/)  
-[了解 Stubs, Mocks, and Spies](https://github.com/festime/stubs-mocks-spies-in-rspec)
+[了解 Stubs, Mocks, and Spies](https://github.com/festime/stubs-mocks-spies-in-rspec)  
+[对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)  
+[[RSpec] subject , expect , context, is_expected, be_xxx](http://blog.xdite.net/posts/2016/06/10/rspec-subject-expect-context-is-expected-be)  
+[[RSpec] 進階測試系列概念](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-0)
 
 ###let & subject
 
 ```ruby
+#subject 是主要要測的物件
+#let 則是測試中主要物件時，提供不同的條件
 subject (:zombie) { Zombie.new(name:'john') }
 let(:axe){ Weapon.new(name:'axe') }
 ```
@@ -347,11 +405,14 @@ describe User do
 end
 ```
 
-* [subject](http://betterspecs.org/#subject)
-* [let](http://betterspecs.org/#let)
-* [RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)
-* [Difference between subject and let #6](https://github.com/reachlocal/rspec-style-guide/issues/6)  
-* [Dry Up Your Rspec Files With Subject & Let Blocks](http://benscheirman.com/2011/05/dry-up-your-rspec-files-with-subject-let-blocks/)
+參考文件：  
+[subject](http://betterspecs.org/#subject)  
+[let](http://betterspecs.org/#let)  
+[RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)  
+[Difference between subject and let #6](https://github.com/reachlocal/rspec-style-guide/issues/6)  
+[Dry Up Your Rspec Files With Subject & Let Blocks](http://benscheirman.com/2011/05/dry-up-your-rspec-files-with-subject-let-blocks/)  
+[RSpec before vs let](https://www.launchacademy.com/codecabulary/learn-test-driven-development/rspec/before-vs-let)  
+[Rails - RSpec - Difference between “let” and “let!”](http://stackoverflow.com/questions/10173097/rails-rspec-difference-between-let-and-let)
 
 ###focus
 當想要只跑指定的測試時，可以加上 focus
@@ -468,8 +529,12 @@ end
 end
 ```
 
+參考文件：  
+[DRY up your specs using RSpec's shared_examples_for](https://niallburkley.com/blog/rspecs-shared_examples_for/)  
+[Correct way to use shared_examples_for](http://stackoverflow.com/questions/11058502/correct-way-to-use-shared-examples-for)  
 [Shared context](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-context)  
-[Shared examples](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-examples)
+[Shared examples](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-examples)  
+[Shared example group](https://www.relishapp.com/rspec/rspec-core/v/2-0/docs/example-groups/shared-example-group) 
 
 ###custom matcher
 
@@ -554,6 +619,19 @@ RSpec.configure do |config|
   config.include FactoryGirl::Syntax::Methods
 end
 ```
+
+設定好後原本需要
+
+```ruby
+FactoryGirl.create(:user)
+```
+
+就不用加前面的 FactoryGirl 直接
+
+```ruby
+create(:user)
+```
+
 在 `spec` 底下新增 `factories` 資料夾，接著在裡面新增相對應的物件名稱，像是 `user.rb`
 
 `spec/factories/user.rb`
@@ -619,6 +697,8 @@ config.generators do |g|
   g.fixture_replacement :factory_girl, :dir => "spec/factories"
 end
 ```
+參考文件：  
+[Factory Girl](http://www.slideshare.net/gabevanslv/factory-girl-15924188)
 
 #Capybara
 RSpec除了可以拿來寫單元程式，我們也可以把測試的層級拉高做整合性測試，以Web應用程式來說，就是去自動化瀏覽器的操作，實際去向網站伺服器請求，然後驗證出來的HTML是正確的輸出。
@@ -731,6 +811,8 @@ Gem：
 [保齡球練習](http://www.sportcalculators.com/bowling-score-calculator)  
 [对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)  
 [RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)  
+[[RSpec] subject , expect , context, is_expected, be_xxx](http://blog.xdite.net/posts/2016/06/10/rspec-subject-expect-context-is-expected-be)  
+[[RSpec] 進階測試系列概念](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-0)
 
 RailsPacific：  
 [#RailsPacific - Taming Chaotic Specs - RSpec Design Patterns by Adam Cuppy](https://speakerdeck.com/acuppy/number-railspacific-taming-chaotic-specs-rspec-design-patterns)  

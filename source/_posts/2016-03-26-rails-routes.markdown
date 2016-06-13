@@ -10,8 +10,6 @@ categories: rails
 
 <!-- more -->
 
-
-
 ```ruby
 #直接設定
 get '/patients/:id', to: 'patients#show'
@@ -208,6 +206,27 @@ curl -IH "Accept: application/json" -u 'carlos:fakesecret' http://localhost:3000
 curl -IH "Authorization: Token token=16d7d6089b8fe0c5e19bfe10bb156832" http://localhost:3000/posts
 #Set token on Authorization header
 ```
+
+#路由參數
+```ruby
+get '/clients/:status' => 'clients#index', foo: 'bar'
+```
+當使用者打開 /clients/active 這一頁，params[:status] 便會被設成 "active"，params[:foo] 也會被設成 "bar"，就像是我們原本透過 Query String 傳進去那樣。同樣的，params[:action] 也會被設成 index。
+
+#default_url_options
+
+每次都會在指定的參數進來
+
+```ruby
+class ApplicationController < ActionController::Base
+  def default_url_options
+    { locale: I18n.locale }
+  end
+end
+```
+
+[路由參數](http://rails.ruby.tw/action_controller_overview.html#%E8%B7%AF%E7%94%B1%E5%8F%83%E6%95%B8)  
+[default_url_options](http://apidock.com/rails/ActionController/Base/default_url_options)
 
 官方文件：  
 [Rails Routing from the Outside In](http://guides.rubyonrails.org/routing.html)  

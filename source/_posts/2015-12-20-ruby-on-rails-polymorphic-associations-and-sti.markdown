@@ -126,6 +126,22 @@ comment.commentable => #<Article id: 1, ....>
 
 ![Polymorphic Associations](http://i.imgur.com/9t6JGzp.png)
 
+###eager-load-polymorphic
+
+因為用了 Polymorphic，所以在用像是 includes 關聯的時候，因為不知道 _id 會指到哪個 table，所以會出現錯誤 `Can not eagerly load the polymorphic association : commentable`  
+
+這是就要另外加上以下這兩個關聯才行
+
+```ruby
+class Comment < ActiveRecord::Base
+  belongs_to :commentable, :polymorphic => true
+  belongs_to :article, -> { where(comments: {contract_type: 'Article'}) }, foreign_key: 'commentable_id'
+  belongs_to :photo, -> { where(comments: {contract_type: 'Photo'}) }, foreign_key: 'commentable_id'
+end
+```
+
+[eager-load-polymorphic](http://stackoverflow.com/questions/16123492/eager-load-polymorphic)
+
 官方文件：
 [Guides](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations)
 [Guides 中文](http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF)

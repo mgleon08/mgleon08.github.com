@@ -132,6 +132,10 @@ def hash_codeschool
 end
 ```
 
+#const_missing
+另一個跟 method_missing 一樣的，主要是常數找不到時會 call  
+[const_missing](http://apidock.com/ruby/Module/const_missing)
+
 官方文件：  
 [method_missing](http://apidock.com/ruby/BasicObject/method_missing)  
 [MatchData](http://ruby-doc.org/core-2.2.0/MatchData.html)  
