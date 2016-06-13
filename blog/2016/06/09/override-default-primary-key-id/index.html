@@ -5,13 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Lib vs Service Object - Leon's Blogging</title>
+  <title>Override Default Primary Key Id - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="大家都知道，fat models, skinny controllers
-但要將 code 放在哪邊，才會比較好維護?這就有很多方式了 /lib: It is not coupled to my app&rsquo;s domain models.
-It can be reused on &hellip;">
+  <meta name="description" content="有時候在處理一些 table 時，會不希望 Primary Key 是一開始預設的 id 流水號 像是當 table 會不斷清空又重建，若是流水號，就會一直不斷的壘加上去，這時我們就會希望 table 的 Primary Key 可以自己設定 migration 可以很方便做到這件事， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +18,7 @@ It can be reused on &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/03/26/lib-and-service-object">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/06/09/override-default-primary-key-id">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -103,7 +101,7 @@ It can be reused on &hellip;">
   <header>
     
       
-        <h1 class="entry-title">Lib vs Service Object</h1>
+        <h1 class="entry-title">Override Default Primary Key Id</h1>
       
     
     
@@ -113,7 +111,7 @@ It can be reused on &hellip;">
 
 
 
-<time class='entry-date' datetime='2016-03-26T09:31:32+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:31 am</span></time>
+<time class='entry-date' datetime='2016-06-09T22:37:33+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:37 pm</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -123,98 +121,103 @@ It can be reused on &hellip;">
   </header>
 
 
-<div class="entry-content"><p>大家都知道，fat models, skinny controllers<br/>
-但要將 code 放在哪邊，才會比較好維護?這就有很多方式了</p>
+<div class="entry-content"><p>有時候在處理一些 table 時，會不希望 Primary Key 是一開始預設的 id 流水號</p>
 
 <!-- more -->
 
 
-<h1>/lib:</h1>
+<p>像是當 table 會不斷清空又重建，若是流水號，就會一直不斷的壘加上去，這時我們就會希望 table 的 Primary Key 可以自己設定</p>
+
+<p>migration 可以很方便做到這件事，也可以改成複合健(兩個 primary key，預設是無法，可以靠 composite_primary_keys  gem 來達成)</p>
+
+<!-- more -->
+
+
+<p>先將原本 id 移除</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">up</span>
+</span><span class='line'>  <span class="n">remove_column</span> <span class="ss">:products</span><span class="p">,</span> <span class="ss">:id</span> <span class="c1"># remove existing primary key</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">down</span>
+</span><span class='line'>  <span class="n">add_column</span> <span class="ss">:products</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:primary_key</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>加上新的 primary key id</p>
 
 <ul>
-<li>It is not coupled to my app&rsquo;s domain models.</li>
-<li>It can be reused on other projects.</li>
-<li>It can potentially become its own gem. Thus, putting it in lib/ is the first step in that direction.</li>
+<li>ex1:</li>
 </ul>
 
 
-<p>簡單的來說，<code>/lib</code> 放的比較像是，很多 project 都可以重複使用，並沒有專屬某個 project，並且可以包成一個 gem 給大家使用。</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">create_table</span> <span class="ss">:products</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="kp">false</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:sku</span><span class="p">,</span> <span class="ss">primary</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
-<p>舉例: <code>FacebookAuth</code> <code>GithubAuth</code></p>
-
-<h1>/app/services:</h1>
 
 <ul>
-<li>They tend to know a decent amount about the inner workings of domain models.</li>
-<li>Perform work that is specific to business domain in my app.</li>
-<li>Tend to be coupled to specific models.</li>
+<li>ex2:</li>
 </ul>
 
 
-<p>而 <code>/app/services</code> 比較像是，專屬於某個 <code>project</code>，並且與 business logic 息息相關，就像是某個服務一樣。</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">create_table</span> <span class="ss">:products</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="kp">false</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:sku</span><span class="p">,</span> <span class="ss">primary_key</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
-<p>舉例: <code>UserAuthenticator</code> <code>開立發票</code> <code>寄密碼提醒信</code></p>
-
-<h1>Service Object使用時機</h1>
 
 <ul>
-<li>The action is complex (e.g. closing the books at the end of an accounting period)</li>
-<li>The action reaches across multiple models (e.g. an e-commerce purchase using Order, CreditCard and Customer objects)</li>
-<li>The action interacts with an external service (e.g. posting to social networks)</li>
-<li>The action is not a core concern of the underlying model (e.g. sweeping up outdated data after a certain time period).</li>
-<li>There are multiple ways of performing the action (e.g. authenticating with an access token or password). This is the Gang of Four Strategy pattern.</li>
+<li>ex3:</li>
 </ul>
 
 
-<p>大致上就是</p>
-
-<ol>
-<li>邏輯複雜</li>
-<li>牽扯到很多 model 關係 (ex: 兩個 model 的資料運算)</li>
-<li>與外部服務相關 (ex: slack 通知)</li>
-<li>與核心無關 (ex: 定時清理過期數據)</li>
-<li>會經常重複使用</li>
-</ol>
-
-
-<h3>約定</h3>
-
-<ul>
-<li>一個Service Object 只做一件事。</li>
-<li>每個Service Object 一個文件，統一放在app/services 目錄下。</li>
-<li>命名採用動作，比如SignEstimate ，而不是EstimateSigner 。</li>
-<li>instance級別實現兩個接口，initialize負責傳入所有依賴，call負責調用。</li>
-<li>class級別實現一個接口call，用於簡單的實例化Service Object然後調用call 。</li>
-<li>call的返回值默認為true/false，也可以有更複雜的形式，比如StatusObject 。</li>
-</ul>
-
-
-<blockquote><p>以上約定主要都是看個人習慣，也有人會放在 <code>app/controller</code> 底下<br/>
-<a href="http://vrybas.github.io/blog/2014/08/15/a-way-to-organize-poros-in-rails/">A Way to Organize POROs in Rails</a></p></blockquote>
-
-<h1>concern vs service object</h1>
-
-<ul>
-<li>concern</li>
-<li>簡單說就是，有許多 model 有共用的邏輯片段，可以拆出來</li>
-<li>service object</li>
-<li><p>與 concern 不同的地方是，存放的是比較完成的 code，簡單多你丟什麼給它，他就會丟相對應的資料給你。</p></li>
-<li><p>兩個搭配使用</p></li>
-<li>將許多 service object 搬到 concern</li>
-</ul>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>  <span class="n">create_table</span> <span class="ss">:products</span><span class="p">,</span> <span class="nb">id</span><span class="p">:</span> <span class="kp">false</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:sku</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="n">timestamps</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">add_index</span> <span class="ss">:products</span><span class="p">,</span> <span class="ss">:sku</span><span class="p">,</span> <span class="ss">unique</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">execute</span> <span class="sx">%Q{ ALTER TABLE &quot;products&quot; ADD PRIMARY KEY (&quot;sku&quot;); }</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>參考文件：<br/>
-<a href="https://ruby-china.org/topics/18401">什麼時候使用Concerns，什麼時候使用Services？</a><br/>
-<a href="https://ruby-china.org/topics/23892">Service Object 整理和小結</a><br/>
-<a href="http://brewhouse.io/blog/2014/04/30/gourmet-service-objects.html">Gourmet Service Objects</a><br/>
-<a href="http://blog.codeclimate.com/blog/2012/10/17/7-ways-to-decompose-fat-activerecord-models/">7 Patterns to Refactor Fat ActiveRecord Models</a><br/>
-<a href="http://motion-express.com/blog/20141007-rails-service-object">Rails code 整理系列- Service Object 初探</a><br/>
-<a href="http://stackoverflow.com/questions/16159021/rails-service-objects-vs-lib-classes">Rails service objects vs lib classes</a><br/>
-<a href="http://www.johnnyji.me/rails/2015/05/19/lib-folder-vs-services-in-rails.html">Lib Folder vs. Services in Rails</a><br/>
-<a href="http://tech.gadii.net/blog/2014/08/25/Service-Objects-%E6%95%B4%E7%90%86%E6%9E%B6%E6%A7%8B/">Service Objects 整理架構</a><br/>
-<a href="https://blog.engineyard.com/2014/keeping-your-rails-controllers-dry-with-services">Using Services to Keep Your Rails Controllers Clean and DRY</a> <br/>
-<a href="https://www.viget.com/articles/slimming-down-your-models-and-controllers">Slimming Down Your Models and Controllers with Concerns, Service Objects, and Tableless Models</a></p>
+<a href="http://ruby-journal.com/how-to-override-default-primary-key-id-in-rails/">How to Override Default Primary Key Id in Rails</a><br/>
+<a href="https://github.com/composite-primary-keys/composite_primary_keys">composite_primary_keys</a><br/>
+<a href="http://stackoverflow.com/questions/23848388/change-primary-key-issue-rails-4-0">Change Primary Key Issue Rails 4.0</a></p>
 </div>
 
 
@@ -237,7 +240,7 @@ It can be reused on &hellip;">
 
 
 
-<time class='entry-date' datetime='2016-03-26T09:31:32+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>9:31 am</span></time>
+<time class='entry-date' datetime='2016-06-09T22:37:33+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:37 pm</span></time>
       
       
 
@@ -252,7 +255,7 @@ It can be reused on &hellip;">
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/03/26/lib-and-service-object/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/03/26/lib-and-service-object/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/06/09/override-default-primary-key-id/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/06/09/override-default-primary-key-id/" >Tweet</a>
   
   
   
@@ -263,10 +266,10 @@ It can be reused on &hellip;">
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2016/03/26/argument-parameter/" title="Previous Post: 引數的傳遞 argument parameter ***">&laquo; 引數的傳遞 argument parameter ***</a>
+        <a class="basic-alignment left" href="/blog/2016/06/09/class-macro/" title="Previous Post: Class Macro (Ruby’s declarative style)">&laquo; Class Macro (Ruby’s declarative style)</a>
       
       
-        <a class="basic-alignment right" href="/blog/2016/03/26/concern/" title="Next Post: 用 Concern 來整理 code ">用 Concern 來整理 code  &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2016/06/10/garbage-collection/" title="Next Post: Garbage Collection">Garbage Collection &raquo;</a>
       
     </p>
   </footer>
@@ -296,8 +299,8 @@ It can be reused on &hellip;">
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/03/26/lib-and-service-object/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2016/03/26/lib-and-service-object/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/06/09/override-default-primary-key-id/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/06/09/override-default-primary-key-id/';
         var disqus_script = 'embed.js';
       
     (function () {

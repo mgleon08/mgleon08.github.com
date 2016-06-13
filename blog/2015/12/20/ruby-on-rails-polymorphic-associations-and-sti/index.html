@@ -305,6 +305,27 @@
 
 <p><img src="http://i.imgur.com/9t6JGzp.png" alt="Polymorphic Associations" /></p>
 
+<h3>eager-load-polymorphic</h3>
+
+<p>因為用了 Polymorphic，所以在用像是 includes 關聯的時候，因為不知道 _id 會指到哪個 table，所以會出現錯誤 <code>Can not eagerly load the polymorphic association : commentable</code></p>
+
+<p>這是就要另外加上以下這兩個關聯才行</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:commentable</span><span class="p">,</span> <span class="ss">:polymorphic</span> <span class="o">=&gt;</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:article</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">comments</span><span class="p">:</span> <span class="p">{</span><span class="ss">contract_type</span><span class="p">:</span> <span class="s1">&#39;Article&#39;</span><span class="p">})</span> <span class="p">},</span> <span class="ss">foreign_key</span><span class="p">:</span> <span class="s1">&#39;commentable_id&#39;</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:photo</span><span class="p">,</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">where</span><span class="p">(</span><span class="ss">comments</span><span class="p">:</span> <span class="p">{</span><span class="ss">contract_type</span><span class="p">:</span> <span class="s1">&#39;Photo&#39;</span><span class="p">})</span> <span class="p">},</span> <span class="ss">foreign_key</span><span class="p">:</span> <span class="s1">&#39;commentable_id&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://stackoverflow.com/questions/16123492/eager-load-polymorphic">eager-load-polymorphic</a></p>
+
 <p>官方文件：
 <a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations">Guides</a>
 <a href="http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF">Guides 中文</a></p>

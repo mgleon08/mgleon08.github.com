@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-05-29T20:41:08+08:00</updated>
+  <updated>2016-06-13T23:26:16+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,392 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Cache Etag Memcache]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/06/13/cache-etag-memcache/"/>
+    <updated>2016-06-13T23:22:01+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/06/13/cache-etag-memcache</id>
+    <content type="html"><![CDATA[<p>當有資料不常去做更動，就能夠用 cache 去讀取增加速度!</p>
+
+<!-- more -->
+
+
+<ul>
+<li>cache 處太多，程式會變複雜，增加維護的難度</li>
+<li>cache 會增加除錯難度，資料不再只有唯一的資料庫版本</li>
+<li>cache 如果沒寫好，可能會產生資料不一致的Bug、時間顯示相關的Bug(例如顯示資料的時間雖然時間不會變，但是如果是要顯示多少小時以前，就會變動了)等等</li>
+<li>cache 增加了寫程式的難度，像是Expire過期資料、資料的安全性(放在cache 層的資料也需要被保護注意安全)</li>
+<li>會增加撰寫UI的難度，因為 cache 相關的程式可能會混在樣本中</li>
+</ul>
+
+
+<h1>Cache Store</h1>
+
+<ul>
+<li>預設的 memory_store 只適合單機開發，重啟 Rails cache 資料就不見了。</li>
+<li>正式上線的網站會推薦使用 <code>Memcached</code></li>
+<li>它是一套Name-Value Pair(NVP)分散式記憶體快取系統，當你有多個Rails伺服器的時候，也可以很方便的共用快取資料。</li>
+</ul>
+
+
+<h1>Etag</h1>
+
+<p>ETag 是用來辨識當前的頁面是否有所改變（Rails 預設就有使用了）</p>
+
+<p>第一次</p>
+
+<ol>
+<li>Client 發 Request</li>
+<li>Rails 流程
+
+<ul>
+<li><ol>
+<li>Render body</li>
+</ol>
+</li>
+<li><ol>
+<li>Create ETag</li>
+</ol>
+</li>
+<li><ol>
+<li>Body &amp; ETag included in response(<code>headers['ETag'] = Digest::MD5.hexdigest(body)</code>)</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>Rails 發 Response
+
+<ul>
+<li>200 Success Head 裡包含 ￼headers[&lsquo;ETag&rsquo;]</li>
+</ul>
+</li>
+<li>Client 接收並 caches response</li>
+</ol>
+
+
+<p>第二次</p>
+
+<ol>
+<li>Client 發 Request 並帶著 <code>headers['If-None-Match']</code> 就是 Etag 但不知道為什麼要叫這名字</li>
+<li>Rails 流程
+
+<ul>
+<li><ol>
+<li>Render body</li>
+</ol>
+</li>
+<li><ol>
+<li>Create ETag</li>
+</ol>
+</li>
+<li><ol>
+<li>Compare ETag</li>
+</ol>
+</li>
+<li><ol>
+<li>If ETags match then body not included in response</li>
+</ol>
+</li>
+</ul>
+</li>
+<li>Rails 發 Response
+
+<ul>
+<li>304 Not Modified</li>
+</ul>
+</li>
+<li>Client 接收並 reads response from cache</li>
+</ol>
+
+
+<p>以上雖然就不需要再重新 response body，但是每次 request 都必須再把整個 body 去 generate 一次 ETag 這是相當沒有效率的事</p>
+
+<p>所以可以透過 Customer Etag 來改善</p>
+
+<pre><code class="ruby">class ItemsController &lt; ApplicationController
+  etag {current_user.id}
+    def show    @item = Item.find(params[:id])￼    fresh_when(@item)
+    #headers['ETag'] = Digest::MD5.hexdigest(@item.cache_key)
+    #加上面的 etag {current_user.id} 等於 fresh_when([@item, current_user.id])，可以有更多參數去判斷是否有改變  endend
+</code></pre>
+
+<p>這樣一來就只要 id 和 update_at 兩個就可以知道到底整個頁面有沒有東西變動過</p>
+
+<h1>memcache store uses dalli</h1>
+
+<p>Dalli is a high performance pure Ruby client for accessing memcached servers</p>
+
+<ol>
+<li>Approximately 20% faster than memcache-client.</li>
+<li>Provides proper failover with recovery and adjustable timeouts.</li>
+<li>Easier to integrate with monitoring tools like NewRelic RPM in order to track usage. 4. ThreadSafe.</li>
+<li><p>Backwards compatible with the previous memcache-client API.</p></li>
+<li><p>安裝Memcached</p></li>
+</ol>
+
+
+<pre><code class="ruby">brew install memcached
+</code></pre>
+
+<ul>
+<li>加上memcached的函式庫</li>
+</ul>
+
+
+<pre><code class="ruby">gem "dalli"
+</code></pre>
+
+<p>編輯<code>config/environments/development.rb</code>和<code>production.rb</code>加上</p>
+
+<pre><code class="ruby">config.action_controller.perform_caching = true
+config.cache_store = :dalli_store
+</code></pre>
+
+<pre><code class="ruby"># 存入
+Rails.cache.write('first', Post.first)
+# 取出
+Rails.cache.read('first')
+# 删除
+Rails.cache.delete('first')
+# 查看
+Rails.cache.exist?('first')
+# fetch: 檢查 key 是否存在, 不存在, 把 block 里的结果作為 value, 并返回结果. 如果存在, 就不去執行 block 的内容
+Rails.cache.fetch('last_post') { Post.last }
+# =&gt; blah
+# 还可以设定过期时间
+Rails.cache.fetch('time', expires_in: 4.seconds) { Time.now }
+</code></pre>
+
+<h3>使用時機</h3>
+
+<p>資料庫裡不常變動的資料，ex:所有國家</p>
+
+<p>使用</p>
+
+<pre><code class="ruby">def cached_skills
+  Rails.cache.fetch([self.class.name, id, :skills], expires_in: 240.hours) {
+    skills.to_a
+  }
+end
+</code></pre>
+
+<ul>
+<li>[self.class.name, id, :skills]這是存儲的關鍵</li>
+<li>cache 將會在240小時後過期</li>
+<li>如果不轉 array (to_a)直接將 active-record 的 relations 儲存到 cache 的話，每次訪問 cache 這個 relations 還是會查詢資料庫的</li>
+</ul>
+
+
+<p>gem：<br/>
+<a href="https://github.com/petergoldstein/dalli">dalli</a></p>
+
+<p>官方文件：<br/>
+<a href="http://guides.ruby-china.org/caching_with_rails.html">Rails 缓存简介</a><br/>
+<a href="http://guides.rubyonrails.org/caching_with_rails.html">Caching with Rails: An overview</a><br/>
+<a href="https://memcached.org/">memcached</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/caching.html">快取</a><br/>
+<a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching">Google Developers: HTTP 快取</a><br/>
+<a href="http://grantcss.com/blog/2014/12/04/introduce-dalli/">數據緩存提升性能gem - Dalli介紹</a><br/>
+<a href="https://ihower.tw/blog/archives/1768">如何使用 memcached 做快取</a><br/>
+<a href="https://danielzhangqinglong.github.io/2015/03/19/rails-caching/">Rails中使用memcached內存緩存技術</a><br/>
+<a href="https://danielzhangqinglong.github.io/2015/04/03/intro-http-caching-with-rails/">译 ~ 介绍Rails中的条件HTTP缓存</a><br/>
+<a href="https://ruby-china.org/topics/24996">Rails 3 和 Rails 4 中 ETags 工作原理</a><br/>
+<a href="http://enginechang.logdown.com/posts/249025-discussion-on-memory-cache">淺談memory cache</a><br/>
+<a href="https://ruby-china.org/topics/19389">总结 Web 应用中常用的各种 Cache</a><br/>
+<a href="http://rails-everyday.group.iteye.com/group/wiki/1160">Rails Cache</a><br/>
+<a href="https://www.nateberkopec.com/2015/07/15/the-complete-guide-to-rails-caching.html">Speed Up Your Rails App by 66% - The Complete Guide to Rails Caching</a><br/>
+<a href="https://www.fastly.com/blog/accelerating-rails-part-1-built-caching">Accelerating Rails, Part 1: Built-in Caching</a><br/>
+<a href="https://www.fastly.com/blog/accelerating-rails-part-2-dynamic-http-caching">Accelerating Rails, Part 2: Dynamic HTTP Caching</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Cookie & Session]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/06/12/cookie-and-session/"/>
+    <updated>2016-06-12T20:34:20+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/06/12/cookie-and-session</id>
+    <content type="html"><![CDATA[<p>用於讓 server 記住 client 的行為與資料。</p>
+
+<!-- more -->
+
+
+<h1>Cookie</h1>
+
+<p>由於 HTTP 協定是無狀態((Stateless)的，server 端無法得知使用者在前端的操作內容，阻礙了前端與後端對話，因此 cookie 就是被設計來解決這個問題的機制。</p>
+
+<ul>
+<li>當 server 想要儲存使用者的某些狀態時，就可以發送 cookie 給 client</li>
+<li>http header 裡面其中一個欄位</li>
+<li>key / value 的形式儲</li>
+<li>檔案大小最多 4Kb</li>
+<li>以明文的方式在網際網路上傳輸及在 Client 端電腦儲存，所以不建議儲存敏感資料</li>
+<li>儲存在 client 的瀏覽器</li>
+<li>儲存位置
+
+<ul>
+<li>記憶體 cookie：由瀏覽器維護，當瀏覽器關閉，cookie也隨之消失，為非持久性的</li>
+<li>硬碟 cookie：存在用戶端硬碟中，有一個過期時間，除非使用者手動清理cookie或是超過過期時間，否則cookie不會消失，為持久性的</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>Session</h1>
+
+<ul>
+<li>儲存在 server 端</li>
+<li>session 需要 cookie 的輔助才能產生運作</li>
+<li>server 會傳送帶有 session id 的 cookie 給 client，當下一個 request 及cookie 再被送至 server 端時，會用 cookie 中的 session id 來辨認每個使用者所儲存的狀態與 data。</li>
+<li>相對於 cookies，session 多用來儲存敏感的資料，也常常成為攻擊的目標 <a href="http://guides.rubyonrails.org/security.html#session-hijacking">Session Hijacking</a></li>
+</ul>
+
+
+<h1>rails 裡的 Session &amp; Cookie</h1>
+
+<h3>session</h3>
+
+<pre><code class="ruby">#設定
+session[:current_user_id] = user.id
+#移除
+session[:current_user_id] = nil
+session.delete(: current_user_id)
+#整個 session 清掉
+reset_session
+</code></pre>
+
+<h3>session store</h3>
+
+<p><code>config/initializers/session_store.rb</code> 裡面可以設定</p>
+
+<ul>
+<li><code>:cookie_store</code>（預設）</li>
+<li><code>:active_record_store</code> 使用資料庫來儲存（安全性較高）
+
+<ul>
+<li>需搭配 activerecord-session_store gem，產生sessions資料表</li>
+</ul>
+</li>
+<li><code>:mem_cache_store</code> 使用Memcached快取系統來儲存，適合逾須兼顧效能的高流量網站</li>
+</ul>
+
+
+<blockquote><p>Rails預設採用 Cookies session storage 來儲存 Session 資料，它是將 Session 資料透過 config/secrets.yml 的 secret_key_base 編碼後放到瀏覽器的 Cookie 之中</p></blockquote>
+
+<h3>cookie</h3>
+
+<pre><code class="ruby">#設定
+cookies[:commenter_name] = @comment.author
+#移除
+cookies.delete(:commenter_name)
+#保護不能讓使用者亂改 signed
+cookies.signed[:user_preference] = @current_user.preferences
+#盡可能永遠留在使用者瀏覽器的資料 permanent
+cookies.permanent[:remember_me] = [current_user.id, current_user.salt]
+#可一起用
+cookies.permanent.signed[:remember_me] = [current_user.id, current_user.salt]
+</code></pre>
+
+<pre><code class="ruby">#Rails 3 是 digitally signed cookie 可以用這方法 decode
+#Rails 4 則改為 Encrypted cookies 就無法
+require 'rack'cookie = "BAh7CUkiD3Nlc3Npb25faWQGOgZFRkkiJ(...)"Rack::Session::Cookie::Base64::Marshal.new.decode(cookie)
+</code></pre>
+
+<p>官方文件：<br/>
+<a href="http://rails.ruby.tw/action_controller_overview.html#session">session</a><br/>
+<a href="http://rails.ruby.tw/action_controller_overview.html#cookies">cookie</a><br/>
+<a href="http://guides.rubyonrails.org/security.html#sessions">RailsGuide</a></p>
+
+<p>參考文件：<br/>
+<a href="http://blog.andikan.me/2012/10/03/cookie-and-session/">Cookie 和 Session 的神秘關係</a><br/>
+<a href="https://ihower.tw/rails4/actioncontroller.html">Action Controller - 控制 HTTP 流程</a><br/>
+<a href="http://fred-zone.blogspot.tw/2014/01/web-session.html">Web 技術中的 Session 是什麼？</a><br/>
+<a href="http://railsfun.tw/t/session-cookie/380">session / cookie 解釋</a><br/>
+<a href="http://lucaswu.logdown.com/posts/735841-rails-sessions-cookies-and-flash">Rails - Sessions, Cookies and Flash</a>
+<a href="http://grantcss.com/blog/2015/03/23/how-rails-sessions-work/">[译] Rails Sessions 是如何工作的？</a><br/>
+<a href="http://www.rails365.net/articles/cookie-yuan-li-yu-shi-xian-rails-pian">cookie原理与实现(rails篇)</a><br/>
+<a href="http://www.rails365.net/articles/session-yuan-li-yu-shi-xian-rails-pian">session原理与实现(rails篇)</a><br/>
+<a href="https://read01.com/NyARK.html">COOKIE與SESSION比較</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Override Default Primary Key Id]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/06/09/override-default-primary-key-id/"/>
+    <updated>2016-06-09T22:37:33+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/06/09/override-default-primary-key-id</id>
+    <content type="html"><![CDATA[<p>有時候在處理一些 table 時，會不希望 Primary Key 是一開始預設的 id 流水號</p>
+
+<!-- more -->
+
+
+<p>像是當 table 會不斷清空又重建，若是流水號，就會一直不斷的壘加上去，這時我們就會希望 table 的 Primary Key 可以自己設定</p>
+
+<p>migration 可以很方便做到這件事，也可以改成複合健(兩個 primary key，預設是無法，可以靠 composite_primary_keys  gem 來達成)</p>
+
+<!-- more -->
+
+
+<p>先將原本 id 移除</p>
+
+<pre><code class="ruby">def up
+  remove_column :products, :id # remove existing primary key
+end
+
+def down
+  add_column :products, :id, :primary_key
+end
+</code></pre>
+
+<p>加上新的 primary key id</p>
+
+<ul>
+<li>ex1:</li>
+</ul>
+
+
+<pre><code class="ruby">create_table :products, id: false do |t|
+  t.string :sku, primary: true
+
+  t.timestamps
+end
+</code></pre>
+
+<ul>
+<li>ex2:</li>
+</ul>
+
+
+<pre><code class="ruby">create_table :products, id: false do |t|
+  t.string :sku, primary_key: true
+
+  t.timestamps
+end
+</code></pre>
+
+<ul>
+<li>ex3:</li>
+</ul>
+
+
+<pre><code class="ruby">def change
+  create_table :products, id: false do |t|
+    t.string :sku, null: false
+    t.timestamps   
+  end
+  add_index :products, :sku, unique: true
+  execute %Q{ ALTER TABLE "products" ADD PRIMARY KEY ("sku"); }
+end
+</code></pre>
+
+<p>參考文件：<br/>
+<a href="http://ruby-journal.com/how-to-override-default-primary-key-id-in-rails/">How to Override Default Primary Key Id in Rails</a><br/>
+<a href="https://github.com/composite-primary-keys/composite_primary_keys">composite_primary_keys</a><br/>
+<a href="http://stackoverflow.com/questions/23848388/change-primary-key-issue-rails-4-0">Change Primary Key Issue Rails 4.0</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Includes Preload Joins Eager_load References]]></title>
@@ -323,453 +709,6 @@ end
 <p>參考文件：<br/>
 <a href="https://ihower.tw/rails4/environments-and-bundler.html">mime types</a><br/>
 <a href="http://www.rails365.net/articles/gem-jie-shao-yuan-ma-fen-xi-http-accept-language-si">gem介紹及源碼分析之http_accept_language(四)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rails Routes設定]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/26/rails-routes/"/>
-    <updated>2016-03-26T09:37:30+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/26/rails-routes</id>
-    <content type="html"><![CDATA[<p>要如何設計網站的 router 是非常重要的一件事。<br/>
-在 rails 當中也有許多方法可以做設定。</p>
-
-<!-- more -->
-
-
-<pre><code class="ruby">#直接設定
-get '/patients/:id', to: 'patients#show'
-
-#REST
-#設定 scope 有點像資料夾的概念，可用來區分後台可控制範圍
-namespace do 
-  #也可用單數 resource (會少了 index，然後不用帶id)
-  resources :articles, only: [:index, :show] do 
-    member do #Acts on a single resource
-      post :follow
-    end
-    collection do #Acts on a collection of resources
-      get :follow
-    end
-  end
-end
-</code></pre>
-
-<h1>scope</h1>
-
-<pre><code class="ruby">get 'foo/meetings/:id', :to =&gt; 'events#show'
-post 'foo/meetings', :to =&gt; 'events#create'
-
-可以改寫成
-
-scope :controller =&gt; "events", :path =&gt; "/foo", :as =&gt; "bar" do
-  get 'meetings/:id' =&gt; :show, :as =&gt; "meeting"
-  post 'meetings' =&gt; ':create   , :as =&gt; "meetings"
-end
-
-scope :path =&gt; '/api/v1/', :module =&gt; "api_v1", :as =&gt; 'v1' do
-  resources :projects
-end
-</code></pre>
-
-<p><code>:as</code> 增加 vi_path(相對路徑) 和 v1_url(絕對路徑)<br/>
-<code>: path</code>網址 <code>/api/v1/projects</code> <br/>
-<code>:controller</code> 指定 controller 是哪個<br/>
-<code>:module</code> 指定 controller 對應到 ApiV1::ProjectsController</p>
-
-<h1>導向</h1>
-
-<pre><code class="ruby">#靜態
-get "/welcome" to: redirect("/hello")
-
-#動態
-get '/stories/:name', to: redirect('/articles/%{name}')
-</code></pre>
-
-<p><code>redirect</code> 將網址導向到另一個網址</p>
-
-<h1>設定沒有指定的 path 都導向同一個頁面</h1>
-
-<pre><code class="ruby">get "*path", to: "welcome#welcome", :defaults =&gt; { :format =&gt; :json }
-</code></pre>
-
-<p><code>defaults</code> 設定此 routes 輸出都是 json 格式</p>
-
-<h1>特殊條件限定</h1>
-
-<pre><code class="ruby">#過濾id
-get 'photos/:id', to: 'photos#show', id: /[A-Z]\d{5}/
-
-#黑名單
-class BlacklistConstraint
-  def initialize
-    @ips = Blacklist.retrieve_ips
-  end
-
-  def matches?(request)
-    @ips.include?(request.remote_ip)
-  end
-end
-
-Rails.application.routes.draw do
-  get '*path', to: 'blacklist#index',
-    constraints: BlacklistConstraint.new
-end
-
-or
-
-Rails.application.routes.draw do
-  get '*path', to: 'blacklist#index',
-    constraints: lambda { |request| Blacklist.retrieve_ips.include?(request.remote_ip) }
-end
-</code></pre>
-
-<h3>子網域</h3>
-
-<p><code>rubyresources :posts, constraints: { subdomain: 'api' }
-</code></p>
-
-<p><code>ruby￼constraints subdomain: 'api' do  resources :posts  #http://api.mgleon08.com/posts￼end
-</code></p>
-
-<pre><code class="ruby">namespace :api do
-  constraints subdomain: 'api' do
-    resources :posts
-  end
-end
-
-#產生兩個 api
-#http://api.mgleon08.com/api/posts
-
-constraints subdomain: 'api' do 
-    namespace :api, path: '/' do #加上 path 就可以消去後面的     resources :zombies   endend
-#上下一樣
-namespace :api, path: '/', constraints: { subdomain: 'api' } do
-  resources :zombiesend
-
-#http://api.mgleon08.com/posts
-</code></pre>
-
-<h1>DRY</h1>
-
-<h3>concern</h3>
-
-<pre><code class="ruby">concern :sociable do |options| 
-  resources :comments, options
-  resources :categories, options 
-  resources :tags, optionsend
-resources :messages, concerns: :sociableresources :posts,    concerns: :sociable￼resources :items do  concerns :sociable, only: :createend
-</code></pre>
-
-<h3>or</h3>
-
-<pre><code class="ruby">concern :sociable, Sociable
-resources :messages, concerns: :sociable 
-resources :posts, concerns: :sociable 
-resources :items do  concerns :sociable, only: :createend
-</code></pre>
-
-<pre><code class="ruby">#app/concerns/sociable.rbclass Sociable  def self.call(mapper, options)    mapper.resources :comments, options 
-    mapper.resources :categories, options 
-    mapper.resources :tags, options  end 
-end
-</code></pre>
-
-<h3>合併</h3>
-
-<pre><code class="ruby">resources :zombies, only: :index 
-resources :humans, only: :inde
-</code></pre>
-
-<pre><code class="ruby">￼with_options only: :index do |list_only|   list_only.resources :zombies   list_only.resources :humans   list_only.resources :medical_kits￼￼￼￼end
-</code></pre>
-
-<h1>將 module 名稱改為大寫</h1>
-
-<pre><code class="ruby">#app/controllers/api/posts_controller.rb
-￼module Api #通常是camelcase   class PostController &lt; ApplicationController   end
-end
-</code></pre>
-
-<pre><code class="ruby">#config/initializers/inflections.rb
-￼ActiveSupport::Inflector.inflections(:en) do |inflect|￼  inflect.acronym 'API'￼end
-</code></pre>
-
-<h1>CURL</h1>
-
-<p>可以用 command line 來測試 get</p>
-
-<pre><code class="ruby">curl -i localhost:3000/posts
-#-i 詳細資訊
-
-curl -IH "Accept: application/json" localhost:3000/posts
-curl -IH "Accept: application/xml" localhost:3000/posts
-#H HEAD
-
-curl -i -X POST -d 'episode[title]=ZombieApocalypseNow' http://localhost:3000/posts
-
-#-X the -X option specifies the method
-#-d use -d to send data on the request
-
-curl -Iu 'carlos:secret' http://localhost:3000/posts
-#上下一樣
-curl -I http://carlos:secret@localhost:3000/episodes
-#send Basic Auth credentials with the -u option
-
-curl -IH "Accept: application/json" -u 'carlos:fakesecret' http://localhost:3000/posts
-#client asks for JSON
-
-curl -IH "Authorization: Token token=16d7d6089b8fe0c5e19bfe10bb156832" http://localhost:3000/posts
-#Set token on Authorization header
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/routing.html">Rails Routing from the Outside In</a><br/>
-<a href="http://rails.ruby.tw/routing.html">Rails 路由：深入淺出</a></p>
-
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/routing.html">路由(Routing)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Email 寄信通知]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/26/rails-email/"/>
-    <updated>2016-03-26T09:35:21+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/26/rails-email</id>
-    <content type="html"><![CDATA[<p>網站中經常會使用寄信來通知用戶，像是註冊信件，確認更改密碼等等之類的。</p>
-
-<!--more-->
-
-
-<h1>指令</h1>
-
-<pre><code class="ruby">rails g mailer TestMailer notify_job_apply
-</code></pre>
-
-<h1>產生檔案</h1>
-
-<pre><code class="ruby"># app/mailers/application_mailer.rb
-class ApplicationMailer &lt; ActionMailer::Base
-  default from: "from@example.com"
-  layout 'mailer'
-
- #寄信給多個收件者
- #default to: Proc.new { Admin.pluck(:email) }, from: 'notification@example.com'
-end
-
-#app/mailer/test_mailer.rb
-class TestMailer &lt; ApplicationMailer
-  # Subject can be set in your I18n file at config/locales/en.yml
-  # with the following lookup:
-  #
-  #   en.test_mailer.notify_job_apply.subject
-  #
-  def notify_job_apply
-    @greeting = "Hi"
-
-    #附件檔案
-    attachments['filename.jpg'] = File.read('/path/to/filename.jpg')
-    mail to: "to@example.org"
-    mail to: ["email"], bcc:["sub-email"], subject: "Title"
-
-  end
-end
-</code></pre>
-
-<h1>信件內容</h1>
-
-<p>因為不是每個人都可以顯示 html 檔案，因此要有兩份</p>
-
-<p>```ruby</p>
-
-<h1>app/views/test_mailer/notify_job_apply.html.erb</h1>
-
-<h1>TestMailer#notify_job_apply</h1>
-
-
-<p><p>
-  &lt;%= @greeting %>, find me in app/views/test_mailer/notify_job_apply.html.erb
-</p>
-&lt;%= image_tag attachments[&lsquo;image.jpg&rsquo;].url, alt: &lsquo;My Photo&rsquo;, class: &lsquo;photos&rsquo; %>
-```</p>
-
-<p>純文字檔</p>
-
-<pre><code class="ruby">#app/views/test_mailer/notify_job_apply.text.erb 
-TestMailer#notify_job_apply
-&lt;%= @greeting %&gt;, find me in app/views/test_mailer/notify_job_apply.text.erb
-</code></pre>
-
-<pre><code class="ruby">#app/model/user.rb
-class User &lt; ActiveRecord::Base
-  after_save : notify_job_apply_notification, if: : notify_job_apply?
-    private    def notify_job_apply_notification
-      UserMailer.notify_job_apply(self).deliver 
-      #deliver_now! 立即送出
-      #deliver_later! 非同步去處理 ex: sidekiq
-    end
-  edn
-</code></pre>
-
-<h1>設定</h1>
-
-<pre><code class="ruby">#config/environments
-
-#忽略任何寄信錯誤
-config.action_mailer.raise_delivery_errors = false
-#測試用，不會真的寄信
-config.action_mailer.delivery_method = :test
-#用什麼方式傳遞
-config.action_mailer.delivery_method = :smtp
-#網站網址
-config.action_mailer.default_url_options = { host: "http://localhost:3000" }
-#一定要轉 symbol 不然會吃不到
-config.action_mailer.smtp_settings = config_for(:email).symbolize_keys
-#使用 sidekiq 做背景處理
-config.active_job.queue_adapter = :sidekiq 
-</code></pre>
-
-<p>設定擋</p>
-
-<pre><code class="ruby">#config/email.yml
-development:
-  address: "smtp.mailgun.org"
-  port: 587
-  domain: "google.com"
-  authentication: "plain"
-  user_name: "postmaster@leon.tw"
-  password: "1234567890"
-  enable_starttls_auto: true
-</code></pre>
-
-<h1>預覽測試</h1>
-
-<p><a href="https://github.com/ryanb/letter_opener">letter_opener</a> 這個 gem 可以不用真的寄信，而是直接在畫面上顯示寄信內容，就可以拿來做測試</p>
-
-<pre><code class="ruby">#config/environments
-config.action_mailer.delivery_method = :letter_opener
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://guides.rubyonrails.org/action_mailer_basics.html">Action Mailer</a>  <br/>
-<a href="http://rails.ruby.tw/action_mailer_basics.html">Action Mailer 中文</a></p>
-
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/actionmailer.html">ActionMailer - E-mail 發送</a><br/>
-<a href="https://ihower.tw/blog/archives/3481">如何正確發送(大量) Email 信件</a></p>
-
-<p>gem：<br/>
-<a href="https://github.com/madmimi/madmimi-gem">madmimi-gem</a><br/>
-<a href="https://github.com/mailgun/mailgun-ruby">mailgun-ruby</a><br/>
-<a href="https://github.com/ryanb/letter_opener">letter_opener</a></p>
-
-<p>email:<br/>
-<a href="https://madmimi.com/">madmimi.com</a><br/>
-<a href="https://www.mailgun.com/">mailgun</a><br/>
-<a href="http://aws.amazon.com/tw/ses/">aws</a><br/>
-<a href="http://mailchimp.com/">mailchimp</a><br/>
-<a href="http://sendgrid.com/">SendGrid</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Lib vs Service Object]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/03/26/lib-and-service-object/"/>
-    <updated>2016-03-26T09:31:32+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/03/26/lib-and-service-object</id>
-    <content type="html"><![CDATA[<p>大家都知道，fat models, skinny controllers<br/>
-但要將 code 放在哪邊，才會比較好維護?這就有很多方式了</p>
-
-<!-- more -->
-
-
-<h1>/lib:</h1>
-
-<ul>
-<li>It is not coupled to my app&rsquo;s domain models.</li>
-<li>It can be reused on other projects.</li>
-<li>It can potentially become its own gem. Thus, putting it in lib/ is the first step in that direction.</li>
-</ul>
-
-
-<p>簡單的來說，<code>/lib</code> 放的比較像是，很多 project 都可以重複使用，並沒有專屬某個 project，並且可以包成一個 gem 給大家使用。</p>
-
-<p>舉例: <code>FacebookAuth</code> <code>GithubAuth</code></p>
-
-<h1>/app/services:</h1>
-
-<ul>
-<li>They tend to know a decent amount about the inner workings of domain models.</li>
-<li>Perform work that is specific to business domain in my app.</li>
-<li>Tend to be coupled to specific models.</li>
-</ul>
-
-
-<p>而 <code>/app/services</code> 比較像是，專屬於某個 <code>project</code>，並且與 business logic 息息相關，就像是某個服務一樣。</p>
-
-<p>舉例: <code>UserAuthenticator</code> <code>開立發票</code> <code>寄密碼提醒信</code></p>
-
-<h1>Service Object使用時機</h1>
-
-<ul>
-<li>The action is complex (e.g. closing the books at the end of an accounting period)</li>
-<li>The action reaches across multiple models (e.g. an e-commerce purchase using Order, CreditCard and Customer objects)</li>
-<li>The action interacts with an external service (e.g. posting to social networks)</li>
-<li>The action is not a core concern of the underlying model (e.g. sweeping up outdated data after a certain time period).</li>
-<li>There are multiple ways of performing the action (e.g. authenticating with an access token or password). This is the Gang of Four Strategy pattern.</li>
-</ul>
-
-
-<p>大致上就是</p>
-
-<ol>
-<li>邏輯複雜</li>
-<li>牽扯到很多 model 關係 (ex: 兩個 model 的資料運算)</li>
-<li>與外部服務相關 (ex: slack 通知)</li>
-<li>與核心無關 (ex: 定時清理過期數據)</li>
-<li>會經常重複使用</li>
-</ol>
-
-
-<h3>約定</h3>
-
-<ul>
-<li>一個Service Object 只做一件事。</li>
-<li>每個Service Object 一個文件，統一放在app/services 目錄下。</li>
-<li>命名採用動作，比如SignEstimate ，而不是EstimateSigner 。</li>
-<li>instance級別實現兩個接口，initialize負責傳入所有依賴，call負責調用。</li>
-<li>class級別實現一個接口call，用於簡單的實例化Service Object然後調用call 。</li>
-<li>call的返回值默認為true/false，也可以有更複雜的形式，比如StatusObject 。</li>
-</ul>
-
-
-<blockquote><p>以上約定主要都是看個人習慣，也有人會放在 <code>app/controller</code> 底下<br/>
-<a href="http://vrybas.github.io/blog/2014/08/15/a-way-to-organize-poros-in-rails/">A Way to Organize POROs in Rails</a></p></blockquote>
-
-<h1>concern vs service object</h1>
-
-<ul>
-<li>concern</li>
-<li>簡單說就是，有許多 model 有共用的邏輯片段，可以拆出來</li>
-<li>service object</li>
-<li><p>與 concern 不同的地方是，存放的是比較完成的 code，簡單多你丟什麼給它，他就會丟相對應的資料給你。</p></li>
-<li><p>兩個搭配使用</p></li>
-<li>將許多 service object 搬到 concern</li>
-</ul>
-
-
-<p>參考文件：<br/>
-<a href="https://ruby-china.org/topics/18401">什麼時候使用Concerns，什麼時候使用Services？</a><br/>
-<a href="https://ruby-china.org/topics/23892">Service Object 整理和小結</a><br/>
-<a href="http://brewhouse.io/blog/2014/04/30/gourmet-service-objects.html">Gourmet Service Objects</a><br/>
-<a href="http://blog.codeclimate.com/blog/2012/10/17/7-ways-to-decompose-fat-activerecord-models/">7 Patterns to Refactor Fat ActiveRecord Models</a><br/>
-<a href="http://motion-express.com/blog/20141007-rails-service-object">Rails code 整理系列- Service Object 初探</a><br/>
-<a href="http://stackoverflow.com/questions/16159021/rails-service-objects-vs-lib-classes">Rails service objects vs lib classes</a><br/>
-<a href="http://www.johnnyji.me/rails/2015/05/19/lib-folder-vs-services-in-rails.html">Lib Folder vs. Services in Rails</a><br/>
-<a href="http://tech.gadii.net/blog/2014/08/25/Service-Objects-%E6%95%B4%E7%90%86%E6%9E%B6%E6%A7%8B/">Service Objects 整理架構</a><br/>
-<a href="https://blog.engineyard.com/2014/keeping-your-rails-controllers-dry-with-services">Using Services to Keep Your Rails Controllers Clean and DRY</a> <br/>
-<a href="https://www.viget.com/articles/slimming-down-your-models-and-controllers">Slimming Down Your Models and Controllers with Concerns, Service Objects, and Tableless Models</a></p>
 ]]></content>
   </entry>
   

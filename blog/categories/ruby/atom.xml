@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-05-29T20:41:08+08:00</updated>
+  <updated>2016-06-13T23:26:16+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,266 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Garbage Collection]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/06/10/garbage-collection/"/>
+    <updated>2016-06-10T12:18:42+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/06/10/garbage-collection</id>
+    <content type="html"><![CDATA[<p>在 ruby 當中，經常會看到 : 的符號，代表 symbol</p>
+
+<!-- more -->
+
+
+<p>跟一般 string 的差異在於</p>
+
+<ul>
+<li>同樣的 string，會產生不同的 記憶體</li>
+<li>同樣的 symbol，一樣的記憶體</li>
+</ul>
+
+
+<pre><code class="ruby">3.times do
+  puts "foo".object_id
+end
+#=&gt;70302331020060
+#=&gt;70302331019980
+#=&gt;70302331019920
+
+3.times do
+  puts :foo.object_id
+end
+#=&gt;1091868
+#=&gt;1091868
+#=&gt;1091868
+
+#將字串 freeze 起來，object_id 也會是一樣
+3.times do
+  puts "foo".freeze.object_id
+end
+#=&gt;70172682147320
+#=&gt;70172682147320
+#=&gt;70172682147320
+</code></pre>
+
+<h1>Garbage Collection</h1>
+
+<ul>
+<li><p>在 ruby 2.2 之前，symbol 所佔用的記憶體沒辦法被自動回收，要釋放就必須重啟動程式，因此會造成 memory leak 的問題</p></li>
+<li><p>但在 2.2 之後，Symbol GC(Garbage Collection) ，那些動態用 to_sym 或 intern 長出來的 Symbol 就可以跟一般物件一樣被回收了。</p></li>
+</ul>
+
+
+<h3>ruby2.1</h3>
+
+<pre><code class="ruby"># Ruby 2.1
+before = Symbol.all_symbols.size
+100_000.times do |i|
+  "sym#{i}".to_sym
+end
+GC.start
+after = Symbol.all_symbols.size
+puts after - before
+# =&gt; 100001
+</code></pre>
+
+<h3>ruby 2.2</h3>
+
+<pre><code class="ruby"># Ruby 2.2
+before = Symbol.all_symbols.size
+100_000.times do |i|
+  "sym#{i}".to_sym
+end
+GC.start
+after = Symbol.all_symbols.size
+puts after - before
+# =&gt; 1
+</code></pre>
+
+<p>參考文件：<br/>
+<a href="http://kaochenlong.com/2016/04/25/string-and-symbol/">Ruby 語法放大鏡之「有的變數變前面有一個冒號(例如 :name)，是什麼意思?」</a><br/>
+<a href="https://www.sitepoint.com/symbol-gc-ruby-2-2/">Symbol GC in Ruby 2.2</a><br/>
+<a href="http://grantcss.com/blog/2015/01/26/symbol-gc-in-ruby-2-dot-2/">[译] 在 Ruby 2.2 中的 Symbol GC</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Class Macro (Ruby’s Declarative Style)]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/06/09/class-macro/"/>
+    <updated>2016-06-09T20:14:09+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/06/09/class-macro</id>
+    <content type="html"><![CDATA[<p>Class Macro 就是在 rails 的 ActiveRecord 中，經常會看到，<code>validates``belongs_to``hsa_manay</code>等等的宣告</p>
+
+<!-- more -->
+
+
+<pre><code class="ruby">class User &lt; ActiveRecord::Base
+  validates  :name, presence: true
+  belongs_to :group
+  has_many   :posts
+end
+</code></pre>
+
+<p>範例:</p>
+
+<pre><code class="ruby">module ActiveRecord
+  class Base
+    def self.has_many(name)
+      puts "#{self} has many #{name}"
+
+      #定義 Dynamic method
+      define_method(name) do
+        puts "Select * From #{name} Where.."
+        puts "Return #{name}"
+        []
+      end
+    end
+  end
+end
+
+class Movie &lt; ActiveRecord::Base
+  #self.has_many(:reviews)
+  has_many :reviews
+  has_many :genres
+end
+
+class Project &lt; ActiveRecord::Base
+  has_many :tasks
+end
+
+movie = Movie.new
+movie.reviews
+project = Project.new
+project.tasks
+
+#=&gt;Movie has many reviews
+#=&gt;Movie has many genres
+#=&gt;Project has many tasks
+#=&gt;Select * From reviews Where..
+#=&gt;Return reviews
+#=&gt;Select * From tasks Where..
+#=&gt;Return tasks
+</code></pre>
+
+<p>之前有寫過
+<a href="http://mgleon08.github.io/blog/2016/04/19/dynamic-classes-and-methods/">Dynamic Classes &amp; Methods</a></p>
+
+<p>另一個範例，可以動態的將取出來的值做改變</p>
+
+<pre><code class="ruby">module Precentage
+  def transform(*columns, precentage: nil)
+    columns.each do |column|
+      #這裡做了 alias_method 主要是希望，如果想知道原本的價錢，還可以呼叫 xx_origin
+      alias_method "#{column}_origin", column
+      if precentage
+        #動態產生新的 method 去取代原本
+        define_method(column) do
+          send(precentage) * send("#{column}_origin")
+        end
+      end
+    end
+  end
+end
+
+class Book
+  extend Precentage
+  attr_reader :price, :precentage
+
+  def initialize(options)
+    @price      = options[:price]
+    @precentage = options[:precentage]
+  end
+
+  transform :price, precentage: :precentage
+end
+
+book = Book.new(price: 100, precentage:0.8)
+puts book.precentage
+puts book.price
+puts book.price_origin
+
+#=&gt; 0.8
+#=&gt; 80.0
+#=&gt; 100
+</code></pre>
+
+<p>參考文件：<br/>
+<a href="https://pragmaticstudio.com/blog/2015/4/14/ruby-macros">How To Write &ldquo;Macros&rdquo; in Ruby</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Range]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/06/09/ruby-range/"/>
+    <updated>2016-06-09T20:13:54+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/06/09/ruby-range</id>
+    <content type="html"><![CDATA[<p>經常會使用 range 去判斷某個值，是否在某個區間<br/>
+ruby 也提供很多好用的方法去判斷，cover?, include? 等等</p>
+
+<!-- more -->
+
+
+<h1>Range</h1>
+
+<pre><code class="ruby">#... 不包含結尾
+(-1..-5).to_a      #=&gt; []
+(-5..-1).to_a      #=&gt; [-5, -4, -3, -2, -1]
+('a'..'e').to_a    #=&gt; ["a", "b", "c", "d", "e"]
+('a'...'e').to_a   #=&gt; ["a", "b", "c", "d"]
+
+(0..2) == Range.new(0,2)    #=&gt; true
+(0..2) == (0...2)           #=&gt; false
+</code></pre>
+
+<h1>begin/end first/last</h1>
+
+<pre><code class="ruby">r1 = 3..6
+r2 = 3...6
+r1a, r1b = r1.first, r1.last    #=&gt; 3, 6
+r1c, r1d = r1.begin, r1.end     #=&gt; 3, 6
+r2a, r2b = r2.begin, r2.end     #=&gt; 3, 6 (注意：不是3和5)
+r1.first(2)                     #=&gt; [3, 4]
+</code></pre>
+
+<h1>step</h1>
+
+<p>從 0..20 中取出 0，5，10，20</p>
+
+<pre><code class="ruby">a = 0..20
+a.step(5).to_a
+#=&gt; [0, 5, 10, 15, 20]
+</code></pre>
+
+<h1>include?/cover?</h1>
+
+<p>判斷值，是否在 range 當中</p>
+
+<pre><code class="ruby">r = 1 .. 5
+r.include?(1)     #=&gt; true
+r.include?(0)     #=&gt; false
+r.cover?(1)       #=&gt; true
+r.cover?(0)       #=&gt; false
+
+("a".."z").include?("ab")     # =&gt; false 
+("a".."z").cover?("ab")       # =&gt; true 
+</code></pre>
+
+<p>主要差異是</p>
+
+<ul>
+<li>include? 會將所有值一一拿出來做比對，因此效率較差</li>
+<li>cover?   只會取出開頭和結尾，去比對，值 > 開頭 &amp;&amp; 值 &lt;= 結尾，效能比較好</li>
+</ul>
+
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-1.9.3/Range.html">ruby-doc Range</a></p>
+
+<p>參考文件：<br/>
+<a href="http://stackoverflow.com/questions/21608935/what-is-the-difference-between-rangeinclude-and-rangecover">What is the difference between Range#include? and Range#cover? ?</a>  <br/>
+<a href="https://blog.8thlight.com/makis-otman/2014/09/03/setting-date-ranges-in-ruby.html">Apprentice Blog of the Week: Setting Date Ranges in Ruby</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Default Args]]></title>
@@ -125,6 +385,10 @@ a.phone
 #=&gt; 1234
 a.to_ary
 #=&gt; ["foo", 1234]
+
+也可以直接用繼承的方式
+class Test &lt; struct.new(:foo, :bar)
+end
 </code></pre>
 
 <h3>其他取 Attribute Value 的方法</h3>
@@ -163,7 +427,17 @@ People.age = 18
 #=&gt; 18
 People
 #=&gt; #&lt;OpenStruct name="foo", phone=1234, age=18&gt;
+
+也可以直接用繼承的方式
+class Test &lt; OpenStruct
+end
 </code></pre>
+
+<ul>
+<li>Struct: 接受的是按順序排列的初始化參數</li>
+<li>Openstruct: 接受的則是散列表的參數</li>
+</ul>
+
 
 <h3>WHEN TO USE?</h3>
 
@@ -215,430 +489,6 @@ expect(brewer.brew).to eq(true)
 <a href="http://stackoverflow.com/questions/1177594/when-should-i-use-struct-vs-openstruct#answer-4459132">When should I use Struct vs. OpenStruct?</a><br/>
 <a href="https://www.leighhalliday.com/ruby-struct">The simple but powerful Ruby Struct</a><br/>
 <a href="http://motion-express.com/blog/20150406-ruby-struct-and-ostruct">模擬class物件：Ruby當中Struct及OpenStruct的使用</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Forwardable 轉發 & Delegate 委派]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/05/29/forwardable-and-delegate/"/>
-    <updated>2016-05-29T20:15:26+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/05/29/forwardable-and-delegate</id>
-    <content type="html"><![CDATA[<p>在 OO 的世界裡，經常會去用到不同 class 的 method，因此透過這個方法，可以將不同 class 的 method <code>轉發</code> 過來!</p>
-
-<!-- more -->
-
-
-<h1>Forwardable</h1>
-
-<p>顧名思義，將訊息 <code>轉發</code> 給別的物件。</p>
-
-<pre><code class="ruby">Account = Struct.new(:first_name, :last_name)
-
-class User
-  attr_reader :account
-
-  def initialize(account)
-    @account = account
-  end
-
-  def first_name
-    account.first_name
-  end
-
-  def last_name
-    account.last_name
-  end
-
-  def full_name
-    "#{first_name} #{last_name}"
-  end
-end
-
-user = User.new(Account.new('foo', 'bar'))
-
-puts user.first_name
-puts user.last_name
-puts user.full_name
-#=&gt;foo
-#=&gt;bar
-#=&gt;foo bar
-</code></pre>
-
-<p>上述有許多重複的 account，此時就可以使用 Forwardable 來簡化：<br/>
-將 first_name、last_name <code>轉發</code> 給 account。</p>
-
-<pre><code class="ruby">require 'forwardable'
-
-Account = Struct.new(:first_name, :last_name)
-
-class User
-  attr_reader :account
-  extend Forwardable
-  def_delegators :account, :first_name, :last_name
-
-  #若 User 不想對外開放，attr_reader :account，可以改成實例變數，如以下
-  #extend Forwardable
-  #def_delegators :@account, :first_name, :last_name
-
-  def initialize(account)
-    @account = account
-  end
-
-  def full_name
-    "#{first_name} #{last_name}"
-  end
-end
-
-user = User.new(Account.new('foo', 'bar'))
-
-puts user.first_name
-puts user.last_name
-puts user.full_name
-#=&gt;foo
-#=&gt;bar
-#=&gt;foo bar
-</code></pre>
-
-<h3>def_delegator(accessor, method, ali = method)</h3>
-
-<p> 一次只能 &lsquo;轉發&rsquo; 一個方法，第三個參數是（可選的）別名。</p>
-
-<pre><code class="`ruby">class MyQueue
-  extend Forwardable
-  attr_reader :queue
-  def initialize
-    @queue = []
-  end
-
-  def_delegator :@queue, :push, :mypush
-end
-
-q = MyQueue.new
-q.mypush 42
-q.queue    #=&gt; [42]
-q.push 23  #=&gt; NoMethodError
-</code></pre>
-
-<h3>def_delegators(accessor, *methods)</h3>
-
-<p>一次可以 &lsquo;轉發&rsquo; 多個方法。</p>
-
-<pre><code class="ruby">def_delegators :@account, :first_name, :last_name
-</code></pre>
-
-<h3>delegate [method, method, &hellip;] => accessor</h3>
-
-<p>接受Hash</p>
-
-<pre><code class="ruby">delegate [:first_name, :last_name] =&gt; :account
-</code></pre>
-
-<p>看是如何 work</p>
-
-<pre><code class="ruby">module Forwardable
-  def delegate(hash)
-    hash.each{ |methods, accessor|
-      methods.each{ |method|
-        instance_eval %{
-          def #{method}(*args, &amp;block)
-            #{accessor}.__send__(:#{method}, *args, &amp;block)
-          end
-        }
-      }
-    }
-  end
-end
-</code></pre>
-
-<h1>Other</h1>
-
-<ul>
-<li><code>instance_delegate</code> alias <code>delegate</code></li>
-<li><code>def_instance_delegator</code> alias <code>def_delegator</code></li>
-<li><p><code>def_instance_delegators</code> alias <code>def_delegators</code></p></li>
-<li><p><a href="http://mgleon08.github.io/blog/2015/12/13/ruby-on-rails-delegate/">rails-delegate</a> 之前就有寫到，可以參考!</p></li>
-</ul>
-
-
-<p>官方文件：<br/>
-<a href="http://apidock.com/ruby/Forwardable/instance_delegate">instance_delegate</a><br/>
-<a href="http://apidock.com/ruby/Forwardable/def_instance_delegator">def_instance_delegator</a><br/>
-<a href="http://apidock.com/ruby/Forwardable/def_instance_delegators">def_instance_delegators</a><br/>
-<a href="http://apidock.com/ruby/Forwardable">Forwardable</a><br/>
-<a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/forwardable/rdoc/Forwardable.html">Forwardable</a></p>
-
-<p>參考文件：<br/>
-<a href="http://juanitofatas.com/2014/06/30/ruby-stdlib-forwardable/">Ruby 標準函式庫 Forwardable</a><br/>
-<a href="http://qiita.com/xiangzhuyuan/items/409c87da8cc4a882419b">深入理解和学习Ruby的Forwardable</a><br/>
-<a href="http://vaidehijoshi.github.io/blog/2015/03/31/delegating-all-of-the-things-with-ruby-forwardable/">Delegating All of the Things With Ruby Forwardable</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby 中的數字 & BigDecimal]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/05/07/ruby-math/"/>
-    <updated>2016-05-07T10:42:25+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/05/07/ruby-math</id>
-    <content type="html"><![CDATA[<p>在程式中的運算可能跟我們平常接觸的會不一樣，ruby 也是!因此來瞭解一下吧!</p>
-
-<!-- more -->
-
-
-<p><img src="http://ithelp.ithome.com.tw/upload/images/20141005/20141005190053543124e558797_resize_600.png" alt="" /></p>
-
-<h1>integer</h1>
-
-<pre><code class="ruby">1.class
-#=&gt; Fixnum
-(2/3).class
-#=&gt; Fixnum
-#20 位數會開始變成 Bignum
-('1'+'0'*18).to_i.class
-#=&gt; Fixnum
-('1'+'0'*19).to_i.class
-#=&gt; Bignum
-1.2.to_i
-#=&gt; 1
-</code></pre>
-
-<h1>float</h1>
-
-<p>只要分子或分母出現浮點數，結果才會是 float</p>
-
-<blockquote><p>兩個運算元皆為整數，則會進行截尾整數除法(truncating integer division)運算</p></blockquote>
-
-<pre><code class="ruby">3.14.class
-#=&gt; Float
-1/2
-#=&gt; 0
-1/2.0
-#=&gt; 0.5
-1.0/2
-#=&gt; 0.5
-1.to_f
-#=&gt; 1.0
-</code></pre>
-
-<h1>運算</h1>
-
-<pre><code class="ruby">餘數
-10%3
-#=&gt; 1
-
-次方
-2**10
-#=&gt; 1024
-2**-1
-#=&gt; (1/2)
-
-絕對值
--1234.abs
-#=&gt; 1234
-
-四捨五入
-(3.3).round
-#=&gt; 3
-(4.5).round
-#=&gt; 5
-
-回傳小於該數學的最大整數
-(2.1).floor
-#=&gt; 2
-(-2.1).floor
-#=&gt; -3
-
-回傳大於該數學的最小整數
-(2.1).ceil
-#=&gt; 3
-(-2.1).ceil
-#=&gt; -2
-
-#只適用於Fixnum
-2.zero?
-#=&gt; false
-0.zero?
-#=&gt; true
-
-1.0 / 0    # Infinity
--1.0 / 0   # -Infinity
-0.0 / 0.0  # NaN
-</code></pre>
-
-<h1>BigDecimal</h1>
-
-<p>主要是用來做精確的數字</p>
-
-<pre><code class="ruby">sum = 0
-for i in (1..10000)
-  sum = sum + 0.0001
-end
-print sum
-#=&gt; 0.9999999999999062
-#因為在電腦中的浮點數其實只是近似值，浮點數中的整數可能只是精確度到達一定程度而已
-</code></pre>
-
-<pre><code class="ruby">require 'bigdecimal'
-
-sum = BigDecimal.new("0")
-for i in (1..10000)
-  sum = sum + BigDecimal.new("0.0001")
-end
-print sum
-#=&gt; 0.1E1
-
-E代表後面有幾個10的次方
-0.1E1 = 0.1 * (10**1)
-#=&gt; 1.0
-0.2E1 = 0.2 * (10**1)
-#=&gt; 2.0
-0.2E2 = 0.2 * (10**2)
-#=&gt; 20.0
-2E3   =   2 * (10**3)
-#=&gt; 2000.0
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/stdlib-1.9.3/libdoc/bigdecimal/rdoc/BigDecimal.html">BigDecimal</a></p>
-
-<p>參考文件：<br/>
-<a href="http://blog.annideas.com/2014/10/05/ruby-girl-5-ruby-math-intro/">Ruby的數學跟老師教的數學都不一樣？</a><br/>
-<a href="https://gradyli.wordpress.com/2007/11/16/numeric-class/">[Ruby教學]Numeric Class</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Method Missing]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/04/19/method-missing/"/>
-    <updated>2016-04-19T22:18:09+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/04/19/method-missing</id>
-    <content type="html"><![CDATA[<p>當 ruby 找不到 method 就會 call 這個 method</p>
-
-<!-- more -->
-
-
-<pre><code class="ruby">class Post
-  #自己建立 method_missing 呼叫
-  def method_missing(method_name, *args)
-    puts "You tried to call #{method_name} with these arguments: #{args}"
-    super #default method_missing handling raises a NoMethodError
-  end
-end
-Post.new.submit(1, "Here's a post.")
-</code></pre>
-
-<p>用找不到 method 會 call <code>method_missing</code> 的特性，直接自己定義 method_missing 去定義呼叫其他的 method</p>
-
-<blockquote><p>它的執行效率並不好，所以只適合用在沒辦法預先知道方法名稱的情況下</p></blockquote>
-
-<pre><code class="ruby">class Post
-  DELEGATED_METHODS = [:username, :avatar]
-  def initialize(user)
-    @user = user
-  end
-
-  def method_missing(method_name, *args)
-    if DELEGATED_METHODS.include?(method_name)
-      @user.send(method_name, *args)
-    else
-      super #沒有在設定的 DELEGATED_METHODS 裡面，就呼叫 default method_missing handling raises a NoMethodError
-    end
-  end 
-end
-</code></pre>
-
-<pre><code class="ruby">class Post
-  def initialize(text)
-    @text = text
-  end
-  def to_s
-    @text
-  end
-  def method_missing(method_name, *args)
-    match = method_name.to_s.match(/^hash_(\w+)/) #找前面是 hash_
-    if match
-      @text &lt;&lt; " #" + match[1]
-    else
-      super 
-    end
-  end
-￼end
-
-
-post = Post.new("HI")
-post.hash_ruby
-post.hash_metaprogramming
-puts post
-#=&gt; HI #ruby #metaprogramming
-</code></pre>
-
-<h3>respond_to?</h3>
-
-<pre><code class="ruby">post = Post.new 
-post.respond_to?(:to_s) # =&gt; true
-post.hash_ruby #再 method_missing 有定義所以呼叫得到
-post.respond_to?(:hash_ruby) # =&gt; false #但在 respond_to 卻回傳 false
-</code></pre>
-
-<p>因此必須自己定義 respond_to?</p>
-
-<pre><code class="ruby">class Post
-  def respond_to?(method_name)
-    method_name =~ /^hash_\w+/ || super
-  end 
-end
-</code></pre>
-
-<p>但是 <code>post.method(:hash_ruby)</code> 還是會出現 <code>NameError: undefined method</code></p>
-
-<p>所以要改成另一個 <code>respond_to_missing?</code></p>
-
-<pre><code class="ruby">class Post
-  def respond_to_missing?(method_name) 
-    method_name =~ /^hash_\w+/ ||super
-  end 
-end
-</code></pre>
-
-<h1>￼DEFINE_METHOD REVISITED</h1>
-
-<pre><code class="ruby">class Post
-  def initialize(text)
-    @text = text
-  end
-  def to_s
-    @text
-  end
-  def method_missing(method_name, *args)
-    match = method_name.to_s.match(/^hash_(\w+)/)
-    if match #有 match 到 hash_ 就建立出新的 method
-      self.class.class_eval do
-        define_method(method_name) do
-          @text &lt;&lt; " #" + match[1]
-        end
-      end 
-      send(method_name) #並且呼叫 method
-    else
-      super #沒有就 raises a NoMethodError
-    end
-  end
-end
-
-#當 call post.hash_codeschool 就會定義出下面的 method 
-
-def hash_codeschool
-  @text &lt;&lt; " #" + "codeschool"
-end
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://apidock.com/ruby/BasicObject/method_missing">method_missing</a><br/>
-<a href="http://ruby-doc.org/core-2.2.0/MatchData.html">MatchData</a><br/>
-<a href="http://ruby-doc.org/core-2.1.1/Regexp.html">Regexp</a></p>
-
-<p>參考文件：  <br/>
-<a href="https://ihower.tw/blog/archives/4797">如何設計出漂亮的 Ruby APIs</a><br/>
-<a href="https://ruby-china.org/topics/3434">method_missing，一個Ruby 程序員的夢中情人</a><br/>
-<a href="http://stackoverflow.com/questions/13793060/respond-to-vs-respond-to-missing">respond_to? vs. respond_to_missing?</a></p>
 ]]></content>
   </entry>
   

@@ -346,6 +346,121 @@ q.push 23  #=&gt; NoMethodError
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>example</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;forwardable&#39;</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Bicycle</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:size</span><span class="p">,</span> <span class="ss">:parts</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">args</span><span class="o">=</span><span class="p">{})</span>
+</span><span class='line'>    <span class="vi">@size</span>  <span class="o">=</span> <span class="n">args</span><span class="o">[</span><span class="ss">:size</span><span class="o">]</span>
+</span><span class='line'>    <span class="vi">@parts</span> <span class="o">=</span> <span class="n">args</span><span class="o">[</span><span class="ss">:parts</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">spares</span>
+</span><span class='line'>    <span class="n">parts</span><span class="o">.</span><span class="n">spares</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Parts</span>
+</span><span class='line'>  <span class="kp">extend</span> <span class="no">Forwardable</span>
+</span><span class='line'>  <span class="c1">#@parts 是一個 Array，因此將 size 和 each 委派給 Parts 實例物件 </span>
+</span><span class='line'>  <span class="n">def_delegators</span> <span class="ss">:@parts</span><span class="p">,</span> <span class="ss">:size</span><span class="p">,</span> <span class="ss">:each</span>
+</span><span class='line'>  <span class="c1">#為了要讓實例可以直接用 select，select 又會用到 each 所以上面要委派</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Enumerable</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@parts</span> <span class="o">=</span> <span class="n">parts</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">spares</span>
+</span><span class='line'>       <span class="c1">#所以這裡才可以直接用 select，不用 @parts.select</span>
+</span><span class='line'>    <span class="nb">select</span><span class="p">{</span> <span class="o">|</span><span class="n">part</span><span class="o">|</span> <span class="n">part</span><span class="o">.</span><span class="n">needs_spare</span><span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Part</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:description</span><span class="p">,</span> <span class="ss">:needs_spare</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@name</span>        <span class="o">=</span> <span class="n">args</span><span class="o">[</span><span class="ss">:name</span><span class="o">]</span>
+</span><span class='line'>    <span class="vi">@description</span> <span class="o">=</span> <span class="n">args</span><span class="o">[</span><span class="ss">:description</span><span class="o">]</span>
+</span><span class='line'>    <span class="vi">@needs_spare</span> <span class="o">=</span> <span class="n">args</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:needs_spare</span><span class="p">,</span> <span class="kp">true</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">chain</span>     <span class="o">=</span> <span class="no">Part</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;chain&#39;</span><span class="p">,</span>     <span class="ss">description</span><span class="p">:</span> <span class="s1">&#39;10-speed&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">tire_size</span> <span class="o">=</span> <span class="no">Part</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;tire_size&#39;</span><span class="p">,</span> <span class="ss">description</span><span class="p">:</span> <span class="s1">&#39;23&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">tap_color</span> <span class="o">=</span> <span class="no">Part</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;tap_color&#39;</span><span class="p">,</span> <span class="ss">description</span><span class="p">:</span> <span class="s1">&#39;red&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">road_bike</span> <span class="o">=</span> <span class="no">Bicycle</span><span class="o">.</span><span class="n">new</span><span class="p">(</span>
+</span><span class='line'>              <span class="ss">size</span><span class="p">:</span><span class="s1">&#39;L&#39;</span><span class="p">,</span>
+</span><span class='line'>              <span class="ss">parts</span><span class="p">:</span> <span class="no">Parts</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">[</span><span class="n">chain</span><span class="p">,</span> <span class="n">tire_size</span><span class="p">,</span> <span class="n">tap_color</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>              <span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">road_bike</span><span class="o">.</span><span class="n">parts</span><span class="o">.</span><span class="n">size</span>
+</span><span class='line'><span class="nb">puts</span> <span class="s1">&#39;*&#39;</span><span class="o">*</span><span class="mi">10</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">road_bike</span><span class="o">.</span><span class="n">spares</span><span class="o">.</span><span class="n">size</span>
+</span><span class='line'><span class="nb">puts</span> <span class="s1">&#39;*&#39;</span><span class="o">*</span><span class="mi">10</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>Other</h1>
 
 <ul>

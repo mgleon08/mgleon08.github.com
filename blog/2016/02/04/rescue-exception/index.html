@@ -242,6 +242,157 @@ rescue =&gt; e # 例外發生時的處理措施 &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>rescue from</h1>
+
+<p>可以透過 rescue from 將所有例外集中處理，這樣就不用每個地方都要 rescue</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">rescue_from</span> <span class="no">User</span><span class="o">::</span><span class="no">NotAuthorized</span><span class="p">,</span> <span class="ss">:with</span> <span class="o">=&gt;</span> <span class="ss">:deny_access</span> <span class="c1"># self defined exception</span>
+</span><span class='line'>  <span class="n">rescue_from</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">RecordInvalid</span><span class="p">,</span> <span class="ss">:with</span> <span class="o">=&gt;</span> <span class="ss">:show_errors</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">rescue_from</span> <span class="s1">&#39;MyAppError::Base&#39;</span> <span class="k">do</span> <span class="o">|</span><span class="n">exception</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">:xml</span> <span class="o">=&gt;</span> <span class="n">exception</span><span class="p">,</span> <span class="ss">:status</span> <span class="o">=&gt;</span> <span class="mi">500</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">protected</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">deny_access</span>
+</span><span class='line'>      <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">show_errors</span><span class="p">(</span><span class="n">exception</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">exception</span><span class="o">.</span><span class="n">record</span><span class="o">.</span><span class="n">new_record?</span> <span class="p">?</span> <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>rescue_from 通常是用在像是某些第三方函式庫，會丟出一些例外，必須來處理</p>
+
+<p>例如在 pundit 這個檢查權限的套件，如果發生權限不夠的情況，會丟出Pundit::NotAuthorizedError 的例外，這時候就可以捕捉這個例外，改成回到首頁：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rescue_from</span> <span class="no">Pundit</span><span class="o">::</span><span class="no">NotAuthorizedError</span><span class="p">,</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:user_not_authorized</span>
+</span><span class='line'>
+</span><span class='line'><span class="kp">protected</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">user_not_authorized</span>
+</span><span class='line'> <span class="n">flash</span><span class="o">[</span><span class="ss">:alert</span><span class="o">]</span> <span class="o">=</span> <span class="no">I18n</span><span class="o">.</span><span class="n">t</span><span class="p">(</span><span class="ss">:user_not_authorized</span><span class="p">)</span>
+</span><span class='line'> <span class="n">redirect_to</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">referrer</span> <span class="o">||</span> <span class="n">root_path</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>不要做 rescue_from Exception 或 rescue_from StandardError，除非有很好的理由。因為這會帶來嚴重的副作用（譬如無法得知異常的細節、無法在開發時追蹤 Backtrace）</p></blockquote>
+
+<p><a href="http://rails.ruby.tw/action_controller_overview.html#rescue-from">rescue-from</a><br/>
+<a href="https://ihower.tw/rails4/actioncontroller.html">Action Controller - 控制 HTTP 流程</a><br/>
+<a href="http://edgeapi.rubyonrails.org/classes/ActiveSupport/Rescuable/ClassMethods.html">Rescuable</a><br/>
+<a href="https://simonecarletti.com/blog/2009/12/inside-ruby-on-rails-rescuable-and-rescue_from/">Understanding Ruby and Rails: Rescuable and rescue_from</a><br/>
+<a href="http://www.rubytutorial.io/rails-rescue_from/">Rails' rescue_from</a></p>
+
+<h1>自訂錯誤頁面</h1>
+
+<p>可以使用 Controller 與 View 來自己客製化錯誤處理的版面。首先定義顯示錯誤頁面的路由。</p>
+
+<p>config/application.rb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">exceptions_app</span> <span class="o">=</span> <span class="nb">self</span><span class="o">.</span><span class="n">routes</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>config/routes.rb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">match</span> <span class="s1">&#39;/404&#39;</span><span class="p">,</span> <span class="ss">via</span><span class="p">:</span> <span class="ss">:all</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;errors#not_found&#39;</span>
+</span><span class='line'><span class="n">match</span> <span class="s1">&#39;/422&#39;</span><span class="p">,</span> <span class="ss">via</span><span class="p">:</span> <span class="ss">:all</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;errors#unprocessable_entity&#39;</span>
+</span><span class='line'><span class="n">match</span> <span class="s1">&#39;/500&#39;</span><span class="p">,</span> <span class="ss">via</span><span class="p">:</span> <span class="ss">:all</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;errors#server_error&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>建立 Controller 與 View。</li>
+</ul>
+
+
+<p>app/controllers/errors_controller.rb</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ErrorsController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">layout</span> <span class="s1">&#39;error&#39;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">not_found</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">status</span><span class="p">:</span> <span class="ss">:not_found</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">unprocessable_entity</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">status</span><span class="p">:</span> <span class="ss">:unprocessable_entity</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">server_error</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">status</span><span class="p">:</span> <span class="ss">:server_error</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>app/views</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">errors</span><span class="o">/</span>
+</span><span class='line'>  <span class="n">not_found</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">erb</span>
+</span><span class='line'>  <span class="n">unprocessable_entity</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">erb</span>
+</span><span class='line'>  <span class="n">server_error</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">erb</span>
+</span><span class='line'><span class="n">layouts</span><span class="o">/</span>
+</span><span class='line'>  <span class="n">error</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">erb</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <p>參考文件：<br/>
 <a href="http://blog.xuite.net/yschu/wretch/104912690-Ruby+-+Chapter+09+%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86(exception">Ruby - Chapter 09 例外處理(exception)</a>)<br/>
 <a href="http://blog.tonycube.com/2011/07/ruby8.html">Ruby學習筆記(8) – 錯誤與例外處理</a></p>
