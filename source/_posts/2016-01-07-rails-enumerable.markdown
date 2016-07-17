@@ -254,6 +254,12 @@ end
 #=> {:label=>"總分", :student=>[{:math=>10, :english=>20, :chinese=>30}, {:math=>90, :english=>80, :chinese=>90}], :math=>100, :english=>100, :chinese=>120}
 ```
 
+>Note that you can’t use immutable objects like numbers, true or false as the memo. You would think the following returns 120, but since the memo is never changed, it does not.
+
+```ruby
+(1..5).each_with_object(1) { |value, memo| memo *= value } # => 1
+```
+
 [Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  
 [each_with_object](http://apidock.com/rails/Enumerable/each_with_object)  
 #merge
@@ -500,6 +506,18 @@ a.zip([1, 2], [8])
 #[4, 5, 6]
 #[7, 8, 9]
 #[10]
+```
+
+#flat_map
+
+```ruby
+[[1,2],[3,4]].flat_map {|i| i }   #=> [1, 2, 3, 4]
+```
+
+#reverse_each
+
+```ruby
+(1..3).reverse_each {|v| p v }
 ```
 
 #&:

@@ -52,4 +52,5 @@ end
 
 參考文件：  
 [RailsFun](https://www.youtube.com/watch?v=6XUnYRB0Zpo&list=PLJ6M-k9dQEQ3VsyOZQwjZ5GdjaLJH3eB_)  
-[Ruby Crawler 輕輕鬆鬆做個 Ruby 爬蟲機器人](http://tonytonyjan.net/slides/2014-07-03-simple-crawler/)
+[Ruby Crawler 輕輕鬆鬆做個 Ruby 爬蟲機器人](http://tonytonyjan.net/slides/2014-07-03-simple-crawler/)  
+[第十一篇 - 第一次自幹爬蟲就上手 - 使用 Ruby](http://yukaihuang93.logdown.com/posts/243459/how-to-write-web-crawler-for-the-first-time-using-ruby)

@@ -46,4 +46,7 @@ a.changes
 
 
 官方文件：  
-[api - Dirty](http://api.rubyonrails.org/classes/ActiveModel/Dirty.html)
+[api - Dirty](http://api.rubyonrails.org/classes/ActiveModel/Dirty.html)  
+
+參考文件：  
+[ActiveRecord - 進階功能](https://ihower.tw/rails4/activerecord-others.html)

@@ -412,6 +412,14 @@ a.method(:coding).call('ruby')
 
 [取得 Method](http://openhome.cc/Gossip/Ruby/Method.html)
 
+#Other
+
+```ruby
+even = ->(x) { (x % 2) == 0 }even === 4 # => trueeven === 9 # => false
+
+#=== 等於是 call
+```
+
 參考文件：  
 [理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。](http://rubyer.me/blog/917/)  
 [聊聊 Ruby 中的 block, proc 和 lambda](https://ruby-china.org/topics/10414)  

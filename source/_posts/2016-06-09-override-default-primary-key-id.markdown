@@ -65,4 +65,6 @@ end
 參考文件：  
 [How to Override Default Primary Key Id in Rails](http://ruby-journal.com/how-to-override-default-primary-key-id-in-rails/)  
 [composite_primary_keys](https://github.com/composite-primary-keys/composite_primary_keys)  
-[Change Primary Key Issue Rails 4.0](http://stackoverflow.com/questions/23848388/change-primary-key-issue-rails-4-0)
+[Change Primary Key Issue Rails 4.0](http://stackoverflow.com/questions/23848388/change-primary-key-issue-rails-4-0)  
+[create_table](http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-create_table)  
+[Active Record 遷移](http://rails.ruby.tw/active_record_migrations.html)

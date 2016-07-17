@@ -91,6 +91,7 @@ User Load (0.4ms)  SELECT `users`.* FROM `users` INNER JOIN `skills` ON `skills`
 
 * include 主要是將其他關聯的 table 一起拉進來，後續查詢時，就不會再去查
 * joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做塞選
+* joins 為 inner join ， include 為 left outer join
 
 ```ruby
 User.includes(:skills)
@@ -103,7 +104,59 @@ User.joins(:skills)
 #後續再去關聯的話，還是會去 query
 ```
 
-![](http://jbcdn2.b0.upaiyun.com/2013/05/SQL-Joins.jpg)
+![](http://www.codeproject.com/KB/database/Visual_SQL_Joins/Visual_SQL_JOINS_orig.jpg)
+
+#joins 範例
+```ruby
+class Category < ActiveRecord::Base
+  has_many :articles
+end
+ 
+class Article < ActiveRecord::Base
+  belongs_to :category
+  has_many :comments
+  has_many :tags
+end
+ 
+class Comment < ActiveRecord::Base
+  belongs_to :article
+  has_one :guest
+end
+ 
+class Guest < ActiveRecord::Base
+  belongs_to :comment
+end
+ 
+class Tag < ActiveRecord::Base
+  belongs_to :article
+end
+```
+
+```ruby
+Category.joins(:articles)
+#“依文章分類來回傳分類物件”。注意到如果有 article 是相同類別，會看到重複的分類物件。若要去掉重複結果，可以使用 Category.joins(:articles).uniq。
+#SELECT categories.* FROM categories
+  #INNER JOIN articles ON articles.category_id = categories.id
+  
+Article.joins(:category, :comments)
+#“依分類來回傳文章物件，且文章至少有一則評論”。有多則評論的文章將會出現很多次
+#SELECT articles.* FROM articles
+  #INNER JOIN categories ON articles.category_id = categories.id
+  #INNER JOIN comments ON comments.article_id = articles.id
+  
+Article.joins(comments: :guest)
+#“回傳所有有訪客評論的文章”
+#SELECT articles.* FROM articles
+  #INNER JOIN comments ON comments.article_id = articles.id
+  #INNER JOIN guests ON guests.comment_id = comments.id
+
+Category.joins(articles: [{comments: :guest}, :tags])
+#SELECT categories.* FROM categories
+  #INNER JOIN articles ON articles.category_id = categories.id
+  #INNER JOIN comments ON comments.article_id = articles.id
+  #INNER JOIN guests ON guests.comment_id = comments.id
+  #INNER JOIN tags ON tags.article_id = articles.id
+```
 
 官方資料：  
 [Active Record Query Interface](http://guides.rubyonrails.org/active_record_querying.html)

@@ -122,10 +122,63 @@ Blog.eager_load(:posts)
 
 回傳的是所有有 `post` 的 `blog`，但並不會將 `post` 資料撈出來，只是去做比對，因此再用 `blog.posts` ，一樣會去資料庫中撈出資料。
 
+#joins 範例
+```ruby
+class Category < ActiveRecord::Base
+  has_many :articles
+end
+ 
+class Article < ActiveRecord::Base
+  belongs_to :category
+  has_many :comments
+  has_many :tags
+end
+ 
+class Comment < ActiveRecord::Base
+  belongs_to :article
+  has_one :guest
+end
+ 
+class Guest < ActiveRecord::Base
+  belongs_to :comment
+end
+ 
+class Tag < ActiveRecord::Base
+  belongs_to :article
+end
+```
+
+```ruby
+Category.joins(:articles)
+#“依文章分類來回傳分類物件”。注意到如果有 article 是相同類別，會看到重複的分類物件。若要去掉重複結果，可以使用 Category.joins(:articles).uniq。
+#SELECT categories.* FROM categories
+  #INNER JOIN articles ON articles.category_id = categories.id
+  
+Article.joins(:category, :comments)
+#“依分類來回傳文章物件，且文章至少有一則評論”。有多則評論的文章將會出現很多次
+#SELECT articles.* FROM articles
+  #INNER JOIN categories ON articles.category_id = categories.id
+  #INNER JOIN comments ON comments.article_id = articles.id
+  
+Article.joins(comments: :guest)
+#“回傳所有有訪客評論的文章”
+#SELECT articles.* FROM articles
+  #INNER JOIN comments ON comments.article_id = articles.id
+  #INNER JOIN guests ON guests.comment_id = comments.id
+
+Category.joins(articles: [{comments: :guest}, :tags])
+#SELECT categories.* FROM categories
+  #INNER JOIN articles ON articles.category_id = categories.id
+  #INNER JOIN comments ON comments.article_id = articles.id
+  #INNER JOIN guests ON guests.comment_id = comments.id
+  #INNER JOIN tags ON tags.article_id = articles.id
+```
+
 #joins和include的區別
 
 * include 主要是將其他關聯的 table 一起拉進來，後續查詢時，就不會再去查
 * joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做塞選
+* joins 為 inner join ， include 為 left outer join
 
 ```ruby
 Blog.includes(:posts)
@@ -138,10 +191,12 @@ Blog.joins(:posts)
 #後續再去關聯的話，還是會去 query
 ```
 
-#eager_load
+#eager_loading
 * One query, LEFT OUTER JOINed in any query rather than loaded separately.
 * Works just the same as `includes` + `references` 
 * 因此要小心，includers 後在接上 references 就會變成 eager_load
+* Eager loading 是載入由 Model.find 回傳的物件關聯記錄的機制，將查詢數降到最低。
+* Active Record 透過使用 Model.find 搭配 includes 方法，可預先指定所有會載入的關聯。有了 includes，Active Record 確保所有指定的關聯，加載的查詢減到最少。
 
 ```ruby
 Blog.eager_load(:posts)
@@ -165,6 +220,9 @@ Blog.includes(:posts).where(name: 'Blog 1').where(posts: {title: 'Post 1-1'})
 
 #references
 * 只有在 includes 可以使用，主要是讓 includes 像 eager_load
+* where 的這種用法只對參數是 Hash 有效。傳入參數是 SQL 片段，要使用 references 來強制連接資料表。
+
+[#eager-loading](http://rails.ruby.tw/active_record_querying.html#eager-loading-%E9%97%9C%E8%81%AF)
 
 ```ruby
 Blog.includes(:posts).where(name: 'Blog 1').references(:posts)
@@ -172,7 +230,7 @@ Blog.includes(:posts).where(name: 'Blog 1').references(:posts)
  => #<ActiveRecord::Relation [#<Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01">]>
 ```
 
-![](http://jbcdn2.b0.upaiyun.com/2013/05/SQL-Joins.jpg)
+![](http://www.codeproject.com/KB/database/Visual_SQL_Joins/Visual_SQL_JOINS_orig.jpg)
 
 官方資料：  
 [Active Record Query Interface](http://guides.rubyonrails.org/active_record_querying.html)  

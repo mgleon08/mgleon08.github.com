@@ -304,6 +304,16 @@ git checkout -b development
 git fetch origin <remote_branch_name>:<local_branch_name>
 ```
 
+###移除 untracked file
+
+```ruby
+#Show what will be deleted with the -n option
+git clean -f -n
+git clean -f
+```
+
+[How do I remove local (untracked) files from my current Git branch?](http://stackoverflow.com/questions/61212/how-do-i-remove-local-untracked-files-from-my-current-git-branch)
+
 #alias
 自己設定的一些 alias
 
@@ -311,20 +321,24 @@ git fetch origin <remote_branch_name>:<local_branch_name>
 alias g='git'
 
 alias grs='git reset'
-alias gci='git commit'
-alias gcim='git commit -m'
-alias gcim!='git commit --amend -m'
 alias gst='git status'
-alias gpl='git pull'
-alias gplo='git pull origin'
-alias gm='git merge'
-alias gmo='git merge origin'
 alias gd='git diff'
+alias gdca='git diff --cached'
 
 #git add
 alias ga='git add'
 alias gaa='git add --all'
 alias gap='git add --patch'
+
+#git commit
+alias gc='git commit'
+alias gcm='git commit -m'
+alias gcm!='git commit --amend -m'
+alias gcam='git commit -a -m'
+
+#git merge
+alias gm='git merge'
+alias gmo='git merge origin'
 
 #branch
 alias gb='git branch'
@@ -342,10 +356,18 @@ compdef _git gpoat=git-push
 alias gpu='git push upstream'
 alias gpv='git push -v'
 
+#git pull
+alias gpl='git pull'
+alias gplo='git pull origin'
+
 #git checkout
 alias gco='git checkout'
 alias gcob='git checkout -b'
 alias gcom='git checkout master'
+
+#git fetch origin
+alias gf='git fetch'
+alias gfo='git fetch origin'
 
 #git rebase
 alias grb='git rebase'
@@ -356,12 +378,14 @@ alias grbm='git rebase master'
 alias grbs='git rebase --skip'
 
 #git stash
-alias gsta='git stash'
+alias gsta='git stash save'
+alias gstaa='git stash apply'
 alias gstd='git stash drop'
 alias gstl='git stash list'
 alias gstp='git stash pop'
 alias gsts='git stash show'
-alias gstst='git stash show --text'
+alias gstc='git stash clear'
+alias gsts='git stash show --text'
 
 #git log
 alias gl='git log'
@@ -384,8 +408,8 @@ alias glog='git log --oneline --decorate --color --graph'
 [30 天精通 Git 版本控管](https://github.com/doggy8088/Learn-Git-in-30-days)  
 [連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)  
 [好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)  
-[Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)
-
+[Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)  
+[Git 風格指南](https://github.com/JuanitoFatas/git-style-guide)
 
 練習：  
 [codeschool](https://try.github.io/levels/1/challenges/1)  

@@ -90,6 +90,7 @@ gem 'pry-nav'
 `ls、methods` 可以看目前的 class 或 scope 內有什麼樣的 variable 或 method 可以使用  
 `continue` 繼續執行，如果有下一個 `binding.pry`就會停下來  
 `exit` 離開 pry ，繼續執行程式  
+`;` 行末加上一個分號，這是讓 pry 不會預覽回傳值。
 
 >要有 `gem 'pry-nav'` 才會有 next、step ，一步一步 debug
 

@@ -34,7 +34,7 @@ Ruby 的測試 DSL (Domain-specific language)
 
 #慣例
 
-* ⼀個 rb 檔案配⼀個同名的 _spec.rb 檔案
+* ⼀個 rb 檔案配⼀個同名的 _spec.rb 檔案 (非常重要，如果檔名後面沒加 _spec 就不會跑)
 * guard 等⼯具容易設定
 [guard-rspec](https://github.com/guard/guard-rspec) 程式⼀修改完存檔，⾃動跑對應的測試（bundle後，輸入 guard init repec 初始化，打guard（bundle exec guard 真正執行））
 * editor 有⽀援快速鍵
@@ -258,7 +258,9 @@ Four-Phase Test
 
 
 ###double
-假物件，可用於 mock 中指定回傳的值
+假物件，可用於 mock 中指定回傳的值  
+
+mock 主要是用來模擬「外部邏輯」，因此可以使用 mock objects，在 RSpec 裡面叫做 double（替身）。
 
 ```ruby
 require 'rails_helper'
@@ -323,6 +325,8 @@ A stub with an expectations that the method gets called.
 * 簡單來說 mock 就是 stub + expectation , 說它是 stub 是因為它也可以像 stub 一樣偽造方法, 阻斷對原來方法的調用, expectation 是說它不僅偽造了這個方法,它還期望你(必須)調用這個方法,如果沒有被調用到,這個 test 就 fail 了
 * 一樣製造假物件，但是現在我們改對這個假物件斷言，在主角的執行過程中，應該要收到什麼訊息、收到的訊息應該夾帶什麼參數、訊息收到的次數...等等，但是會有程式碼的流程些微不自然的問題（準備、斷言、（準備）、執行）
 
+使用 mock objects，在 RSpec 裡面叫做 double（替身），來取代「外部邏輯」資料
+
 ```ruby
 # simulate a not found resource
 context "when not found" do
@@ -368,6 +372,7 @@ end
 ###Spies
 * 類似 mocks ，一樣製造假物件，一樣是對假物件斷言，但是透過測試工具的功能，而改善了測試程式碼的可讀性，流程更自然（準備、執行、斷言）
 
+[[RSpec] 進階測試系列概念 - Part 6 Mocking V.S. Spying](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-6)
 
 Stubs, Mocks and Spies，都是測試的技巧 or 手法!!
 
@@ -534,7 +539,10 @@ end
 [Correct way to use shared_examples_for](http://stackoverflow.com/questions/11058502/correct-way-to-use-shared-examples-for)  
 [Shared context](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-context)  
 [Shared examples](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-examples)  
-[Shared example group](https://www.relishapp.com/rspec/rspec-core/v/2-0/docs/example-groups/shared-example-group) 
+[Shared example group](https://www.relishapp.com/rspec/rspec-core/v/2-0/docs/example-groups/shared-example-group)  
+[Relish](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-examples)   
+[betterspecs](http://betterspecs.org/#sharedexamples)  
+[Single Table Inheritance with Factory Girl in Rails](http://stackoverflow.com/questions/23470209/single-table-inheritance-with-factory-girl-in-rails)
 
 ###custom matcher
 
@@ -580,6 +588,11 @@ end
 * is_expected is defined simply as expect(subject) and is designed for when you are using rspec-expectations with its newer expect-based syntax.
 
 [One-liner syntax](https://www.relishapp.com/rspec/rspec-core/docs/subject/one-liner-syntax)
+
+
+###RSpec Testing for a JSON API
+[RSpec Testing for a JSON API](http://blog.ianmiller.nyc/2014/04/18/rspec-testing-for-a-json-api/)  
+[Testing Rails jBuilder JSON APIs With RSpec](http://ahimmelstoss.github.io/blog/2014/07/27/testing-a-rails-api-with-rspec/)
 
 ###CURL
 
@@ -816,4 +829,8 @@ Gem：
 
 RailsPacific：  
 [#RailsPacific - Taming Chaotic Specs - RSpec Design Patterns by Adam Cuppy](https://speakerdeck.com/acuppy/number-railspacific-taming-chaotic-specs-rspec-design-patterns)  
-[Courageous Software](http://randycoulman.com/blog/categories/getting-testy/)
+[Courageous Software](http://randycoulman.com/blog/categories/getting-testy/)  
+
+Rspec-Style-Guide:  
+[rspec-style-guide(reachlocal)](https://github.com/reachlocal/rspec-style-guide)  
+[rspec-style-guide(howaboutwe)](https://github.com/howaboutwe/rspec-style-guide)

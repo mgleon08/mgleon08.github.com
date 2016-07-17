@@ -32,6 +32,9 @@ Rack::Test::UploadedFile.new(File.open(File.join(Rails.root, '/spec/fixtures/fil
 ```ruby
 @file1 = fixture_file_upload('files/1.jpg', 'image/jpg')
 @file2 = fixture_file_upload('files/2.pdf', 'application/pdf')
+
+#若出現 NoMethodError，可加上
+extend ActionDispatch::TestProcess
 ```
 
 以上兩個擇一，這樣就可以在 `create` 將 `@file` 帶入到 params

@@ -66,7 +66,12 @@ cookies.delete(:commenter_name)
 #保護不能讓使用者亂改 signed
 cookies.signed[:user_preference] = @current_user.preferences
 #盡可能永遠留在使用者瀏覽器的資料 permanent
+cookies[:remember_token] = { value:   remember_token,
+                             expires: 20.years.from_now.utc }
+#上下相等
 cookies.permanent[:remember_me] = [current_user.id, current_user.salt]
+#permanent 預設為 20 年後過期 = 20.years.from_now
+
 #可一起用
 cookies.permanent.signed[:remember_me] = [current_user.id, current_user.salt]
 ```
@@ -91,4 +96,5 @@ require 'rack'cookie = "BAh7CUkiD3Nlc3Npb25faWQGOgZFRkkiJ(...)"Rack::Session::
 [[译] Rails Sessions 是如何工作的？](http://grantcss.com/blog/2015/03/23/how-rails-sessions-work/)  
 [cookie原理与实现(rails篇)](http://www.rails365.net/articles/cookie-yuan-li-yu-shi-xian-rails-pian)  
 [session原理与实现(rails篇)](http://www.rails365.net/articles/session-yuan-li-yu-shi-xian-rails-pian)  
-[COOKIE與SESSION比較](https://read01.com/NyARK.html) 
+[COOKIE與SESSION比較](https://read01.com/NyARK.html)  
+[第 8 章 登录和退出](http://railstutorial-china.org/rails42/chapter8.html#logging-in)

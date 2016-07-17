@@ -65,11 +65,12 @@ end
 這樣 Guest 和 Member 就必須有自己的資料表了。
 
 
-官方文件：
+官方文件：  
 [Guides 中文](http://rails.ruby.tw/association_basics.html#%E5%96%AE%E8%A1%A8%E7%B9%BC%E6%89%BF)
 
-參考文件：
-[Ruby on Rails 實戰聖經](https://ihower.tw/rails4/activerecord-others.html)
+參考文件：  
+[Ruby on Rails 實戰聖經](https://ihower.tw/rails4/activerecord-others.html)  
+[Single Table Inheritance with Rails 4 (Part 1)](https://samurails.com/tutorial/single-table-inheritance-with-rails-4-part-1/)
 
 #多型關聯(Polymorphic Associations)
 
@@ -128,9 +129,20 @@ comment.commentable => #<Article id: 1, ....>
 
 ###eager-load-polymorphic
 
-因為用了 Polymorphic，所以在用像是 includes 關聯的時候，因為不知道 _id 會指到哪個 table，所以會出現錯誤 `Can not eagerly load the polymorphic association : commentable`  
+```ruby
+#單純去 include 是沒問題的
+Comment.includes(commentable: :user)
 
-這是就要另外加上以下這兩個關聯才行
+#當要做排序就會出現
+#ActiveRecord::StatementInvalid: Mysql2::Error: Unknown column 'users. commentable_type' in 'where clause':
+Comment.includes(commentable: :user).order("users.id DESC")
+```
+
+因為用了 Polymorphic，所以在用像是 includes 關聯的時候，因為不知道 _id 會指到哪個 table(並不存在 commentable)，所以會出現錯誤 
+ 
+`Can not eagerly load the polymorphic association : commentable`  
+
+這是就要另外加上以下這兩個關聯才行，明確讓他知道關聯到哪個 table
 
 ```ruby
 class Comment < ActiveRecord::Base
@@ -140,11 +152,17 @@ class Comment < ActiveRecord::Base
 end
 ```
 
+```ruby
+#就能夠透過 include 明確知道是要關聯到哪個 table，再根據該 table 去做排序
+Comment.includes(article: :user).order("articles.id DESC")
+```
+
 [eager-load-polymorphic](http://stackoverflow.com/questions/16123492/eager-load-polymorphic)
 
-官方文件：
-[Guides](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations)
+官方文件：  
+[Guides](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations)  
 [Guides 中文](http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF)
 
-參考資料：
-[Ruby on Rails 實戰聖經](https://ihower.tw/rails4/activerecord-relationships.html)
+參考資料：  
+[Ruby on Rails 實戰聖經](https://ihower.tw/rails4/activerecord-relationships.html)  
+[eager-load-polymorphic](http://stackoverflow.com/questions/16123492/eager-load-polymorphic)

@@ -130,6 +130,11 @@ end
 [Understanding Ruby and Rails: Rescuable and rescue_from](https://simonecarletti.com/blog/2009/12/inside-ruby-on-rails-rescuable-and-rescue_from/)  
 [Rails' rescue_from](http://www.rubytutorial.io/rails-rescue_from/)  
 
+#自訂錯誤類型
+[Where to define custom error types in Ruby and/or Rails?](http://stackoverflow.com/questions/5200842/where-to-define-custom-error-types-in-ruby-and-or-rails)  
+[Raise custom Exception with arguments](http://stackoverflow.com/questions/11636874/raise-custom-exception-with-arguments)  
+[RAISING AND RESCUING CUSTOM ERRORS IN RAILS](https://wearestac.com/blog/raising-and-rescuing-custom-errors-in-rails)
+
 #自訂錯誤頁面
 
 可以使用 Controller 與 View 來自己客製化錯誤處理的版面。首先定義顯示錯誤頁面的路由。
@@ -181,6 +186,171 @@ layouts/
   error.html.erb
 ```
 
+#other
+
+```ruby
+begin
+  do_something()
+rescue => e
+  puts e # e is an exception object containing info about the error. 
+end
+```
+```ruby
+begin
+  do_something()
+rescue ActiveRecord::RecordNotFound => e
+  puts e # Only rescues RecordNotFound exceptions, or classes that inherit from RecordNotFound
+end
+```
+
+###Don't do this.
+
+```ruby
+begin
+  do_something()
+rescue Exception => e
+  # Don't do this. This will swallow every single exception. Nothing gets past it. 
+end
+```
+[Ruby's Exception vs StandardError: What's the difference?](http://blog.honeybadger.io/ruby-exception-vs-standarderror-whats-the-difference/)
+
+#Raise four step
+
+###Step 1:Call #exception to get the exception
+
+`raise` 主要是會去執行 `self.class` 的 `#exception` 因此可以覆蓋過去
+
+```ruby
+def raise(error_class_or_obj, message, backtrace) 
+	error = error_class_or_obj.exception(message)# ...end
+```
+
+```ruby
+require 'net/http'
+
+class Net::HTTPInternalServerError
+  def exception(message="Internal server error")
+    RuntimeError.new(message)
+  end
+end
+
+class Net::HTTPNotFound
+  def exception(message="哈囉")
+    RuntimeError.new(message)
+  end
+end
+
+response = Net::HTTP.get_response(
+  URI.parse("http://avdi.org/notexist"))
+
+if response.code.to_i >= 400
+  raise response
+end
+```
+
+###Step 2: #set_backtrace
+
+追蹤錯誤來源
+
+>in order to get a stack trace which includes the current line, you must call #caller passing 0 for the “start” parameter 
+
+```ruby
+def foo
+  puts "#caller: "
+  puts *caller
+  puts "----------"
+  puts "#caller(0)"
+  puts *caller(0)
+end
+def bar
+  foo
+end
+bar
+
+##caller:
+#3.set_back_trace.rb:9:in `bar'
+#3.set_back_trace.rb:11:in `<main>'
+#----------
+##caller(0)
+#3.set_back_trace.rb:6:in `foo'
+#3.set_back_trace.rb:9:in `bar'
+#3.set_back_trace.rb:11:in `<main>'
+```
+###Step 3: Set the global exception variable
+
+`$ERROR_INFO` alias for `$!`
+
+```ruby
+require 'English'
+puts $!.inspect
+
+begin
+  raise "Oops"
+rescue
+  puts $!.inspect
+  puts $ERROR_INFO.inspect
+end
+puts $!.inspect
+```
+
+[English](http://ruby-doc.org/stdlib-2.0.0/libdoc/English/rdoc/English.html)
+
+###Step 4: Raise the exception up the call stack
+
+Limitations on exception matchers
+
+```ruby
+def errors_with_message(pattern)
+  #Generate an anonymous "matcher module" with a custom threequals
+  m = Module.new
+  (class << m; self; end).instance_eval do
+    define_method(:===) do |e|
+      pattern === e.message
+    end
+  end
+  m
+end
+
+puts "About to raise"
+begin
+  raise "Timeout while reading from socket"
+rescue errors_with_message(/socket/)
+  puts "Ignoring socket error"
+end
+puts "Continuing..."
+```
+A custom exception matcher.
+
+```ruby
+def errors_matching(&block)
+  m = Module.new
+  (class << m; self; end).instance_eval do
+    define_method(:===, &block)
+  end
+  m
+end
+
+class RetryableError < StandardError
+  attr_reader :num_tries
+  def initialize(message, num_tries)
+    @num_tries = num_tries
+    super("#{message} (##{num_tries})")
+  end
+end
+
+puts "About to raise"
+
+begin
+  raise RetryableError.new("Connection timeout", 2)
+rescue errors_matching{|e| e.num_tries < 3} => e
+  puts "Ignoring #{e.message}"
+end
+puts "Continuing..."
+```
+
+官方文件：  
+[Exception](http://ruby-doc.org/core-2.2.0/Exception.html)
+
 參考文件：  
 [Ruby - Chapter 09 例外處理(exception)](http://blog.xuite.net/yschu/wretch/104912690-Ruby+-+Chapter+09+%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86(exception))  
-[Ruby學習筆記(8) – 錯誤與例外處理](http://blog.tonycube.com/2011/07/ruby8.html)
+[Ruby學習筆記(8) – 錯誤與例外處理](http://blog.tonycube.com/2011/07/ruby8.html)  

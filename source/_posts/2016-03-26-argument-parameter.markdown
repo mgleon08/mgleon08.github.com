@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "引數的傳遞 argument parameter ***"
+title: "引數的傳遞 argument parameter *** (extract_options!)"
 date: 2016-03-26 09:28:59 +0800
 comments: true
 categories: ruby
@@ -56,6 +56,7 @@ sample(3, 1)
 
 #* Array
 * 當 `parameter` 前面加上 `*` 代表 `Array` 的意思
+* [extract_options!](http://apidock.com/rails/ActiveSupport/CoreExtensions/Array/ExtractOptions/extract_options!)
 
 ```ruby
 [1..100]

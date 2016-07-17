@@ -102,9 +102,20 @@ FileUtils.copy_entry("dir", "new_dir")
 # 複製整個資料夾內容
 ```
 
-官方文件：
-[File](http://ruby-doc.org/core-2.3.0/File.html)
+#pathname
+
+```ruby
+require 'pathname'
+file = Pathname("./test.rb").expand_path
+File.open(file)
+
+#A Pathname is not a String, but File#open doesn't care, because it can be converted to a Wlename String via its #to_path method.
+#File.open 預設會去找 to_path 的 method
+```
+
+官方文件：  
+[File](http://ruby-doc.org/core-2.3.0/File.html)  
 [FileUtils](http://ruby-doc.org/stdlib-2.2.2/libdoc/fileutils/rdoc/FileUtils.html#method-c-cd)
 
-參考文件：
+參考文件：  
 [用Ruby Scripting維護系統](http://motion-express.com/trainings/scripting-in-ruby/screencasts/manipulating-files)

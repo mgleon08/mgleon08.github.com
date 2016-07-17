@@ -50,6 +50,8 @@ is used to create the structure of the JSON as a Hash, and the rendering of that
 }
 ```
 
+### serializable_hash
+
 還有另外一個 `serializable_hash`，可以另外接 `except` `only` `methods` 等方法
 
 官方文件：  

@@ -33,7 +33,7 @@ option:
 ```ruby
 require "yaml"
 
-SAMPLE = YAML.load(File.read(File.expand_path('../sample.yml', __FILE__))).freeze
+SAMPLE = YAML.load(File.read(File.expand_path('../sample.yml', __FILE__))).symbolize_keys.freeze
 
 or
 
@@ -47,6 +47,11 @@ SAMPLE = YAML.load_file('sample.yml')
 #		]
 #	}
 ```
+
+###symbolize_keys
+
+[symbolize_keys](http://apidock.com/rails/Hash/symbolize_keys)  
+[freeze](http://apidock.com/rails/Thread/freeze)
 
 #設定檔
 
@@ -74,7 +79,40 @@ fb_config["app_id"] #=> xxxxxxxxxxxxxxxx
 fb_config["secret"] #=> xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
 ```
 
+#在 yaml 寫 ruby code
+
+`config/urls.yml`
+
+```ruby
+development:
+  PATH: <%= Rails.public_path %>
+
+test:
+  PATH: <%= Rails.public_path %>
+  
+production:
+  PATH: <%= Rails.public_path %>
+```
+
+`config/initializers/load_config.rb`
+
+```ruby
+#用 ERB.new().result 將檔案讀出時，透過此 method 轉成 ruby code
+URL = YAML.load(ERB.new(File.read("#{Rails.root}/config/urls.yml")).result)[Rails.env].symbolize_keys.freeze
+```
+
+```ruby
+config_for(:urls)
+Rails.application.config_for(:urls)
+#自動就會判斷環境設定
+```
+也可以用 rails 內建的 `config_for` 來讀取 `.yml` 檔案  
+
 [config_for](http://apidock.com/rails/v4.2.1/Rails/Application/config_for)
 
 官方文件：  
 [Yaml](http://ruby-doc.org/stdlib-1.8.6/libdoc/yaml/rdoc/YAML.html)  
+[ERB.html](http://ruby-doc.org/stdlib-2.3.1/libdoc/erb/rdoc/ERB.html)  
+
+參考文件：  
+[Using ERB in YAML Configuration File](http://urgetopunt.com/rails/2009/09/12/yaml-config-with-erb.html)  

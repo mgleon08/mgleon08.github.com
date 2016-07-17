@@ -5,7 +5,7 @@ date: 2016-06-09 20:14:09 +0800
 comments: true
 categories: ruby
 ---
-Class Macro 就是在 rails 的 ActiveRecord 中，經常會看到，`validates``belongs_to``hsa_manay`等等的宣告
+Class Macro 就是在 rails 的 ActiveRecord 中，經常會看到，`validates` `belongs_to` `hsa_manay` 等等的宣告
 
 <!-- more -->
 
