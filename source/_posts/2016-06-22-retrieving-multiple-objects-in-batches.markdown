@@ -6,8 +6,6 @@ comments: true
 categories: rails
 ---
 
-#Retrieving Multiple Objects in Batches
-
 當要處理多筆資料時，一般都會用 User.all 去取資料  
 
 <!-- more -->
