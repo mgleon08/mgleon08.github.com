@@ -333,11 +333,112 @@ class Blog &lt; ActiveRecord::Base has_many :posts # t.string &quot;name&quot; #
 
 <p>回傳的是所有有 <code>post</code> 的 <code>blog</code>，但並不會將 <code>post</code> 資料撈出來，只是去做比對，因此再用 <code>blog.posts</code> ，一樣會去資料庫中撈出資料。</p>
 
+<h1>joins 範例</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Category</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:articles</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Article</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:category</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:tags</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:article</span>
+</span><span class='line'>  <span class="n">has_one</span> <span class="ss">:guest</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Guest</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:comment</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Tag</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:article</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Category</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:articles</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#“依文章分類來回傳分類物件”。注意到如果有 article 是相同類別，會看到重複的分類物件。若要去掉重複結果，可以使用 Category.joins(:articles).uniq。</span>
+</span><span class='line'><span class="c1">#SELECT categories.* FROM categories</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN articles ON articles.category_id = categories.id</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Article</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:category</span><span class="p">,</span> <span class="ss">:comments</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#“依分類來回傳文章物件，且文章至少有一則評論”。有多則評論的文章將會出現很多次</span>
+</span><span class='line'><span class="c1">#SELECT articles.* FROM articles</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN categories ON articles.category_id = categories.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN comments ON comments.article_id = articles.id</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Article</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">comments</span><span class="p">:</span> <span class="ss">:guest</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#“回傳所有有訪客評論的文章”</span>
+</span><span class='line'><span class="c1">#SELECT articles.* FROM articles</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN comments ON comments.article_id = articles.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN guests ON guests.comment_id = comments.id</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Category</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">articles</span><span class="p">:</span> <span class="o">[</span><span class="p">{</span><span class="ss">comments</span><span class="p">:</span> <span class="ss">:guest</span><span class="p">},</span> <span class="ss">:tags</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#SELECT categories.* FROM categories</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN articles ON articles.category_id = categories.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN comments ON comments.article_id = articles.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN guests ON guests.comment_id = comments.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN tags ON tags.article_id = articles.id</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>joins和include的區別</h1>
 
 <ul>
 <li>include 主要是將其他關聯的 table 一起拉進來，後續查詢時，就不會再去查</li>
 <li>joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做塞選</li>
+<li>joins 為 inner join ， include 為 left outer join</li>
 </ul>
 
 
@@ -360,12 +461,14 @@ class Blog &lt; ActiveRecord::Base has_many :posts # t.string &quot;name&quot; #
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>eager_load</h1>
+<h1>eager_loading</h1>
 
 <ul>
 <li>One query, LEFT OUTER JOINed in any query rather than loaded separately.</li>
 <li>Works just the same as <code>includes</code> + <code>references</code></li>
 <li>因此要小心，includers 後在接上 references 就會變成 eager_load</li>
+<li>Eager loading 是載入由 Model.find 回傳的物件關聯記錄的機制，將查詢數降到最低。</li>
+<li>Active Record 透過使用 Model.find 搭配 includes 方法，可預先指定所有會載入的關聯。有了 includes，Active Record 確保所有指定的關聯，加載的查詢減到最少。</li>
 </ul>
 
 
@@ -408,8 +511,11 @@ class Blog &lt; ActiveRecord::Base has_many :posts # t.string &quot;name&quot; #
 
 <ul>
 <li>只有在 includes 可以使用，主要是讓 includes 像 eager_load</li>
+<li>where 的這種用法只對參數是 Hash 有效。傳入參數是 SQL 片段，要使用 references 來強制連接資料表。</li>
 </ul>
 
+
+<p><a href="http://rails.ruby.tw/active_record_querying.html#eager-loading-%E9%97%9C%E8%81%AF">#eager-loading</a></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -420,7 +526,7 @@ class Blog &lt; ActiveRecord::Base has_many :posts # t.string &quot;name&quot; #
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><img src="http://jbcdn2.b0.upaiyun.com/2013/05/SQL-Joins.jpg" alt="" /></p>
+<p><img src="http://www.codeproject.com/KB/database/Visual_SQL_Joins/Visual_SQL_JOINS_orig.jpg" alt="" /></p>
 
 <p>官方資料：<br/>
 <a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a><br/>

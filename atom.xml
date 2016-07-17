@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-06-13T23:30:06+08:00</updated>
+  <updated>2016-07-17T20:01:54+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,561 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Custom Seed File]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/07/04/custom-seed-file/"/>
+    <updated>2016-07-04T22:27:18+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/07/04/custom-seed-file</id>
+    <content type="html"><![CDATA[<p>在 <code>db</code> 下有個 seed.rb，可以寫一些假資料 or 要匯入的資料，在執行 <code>rake db:seed</code> 就會執行了<br/>
+但是當有多個檔案，就可以自己寫個 <code>task</code> 來覆蓋原本的 <code>rake db:seed</code></p>
+
+<!-- more -->
+
+
+<p></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#檔案可以放在 db/seeds 資料夾底下</span>
+</span><span class='line'><span class="c1">#db/seeds/hello.rb</span>
+</span><span class='line'><span class="nb">puts</span> <span class="s1">&#39;hello&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#lib/tasks/custom_seed.rake</span>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:db</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">namespace</span> <span class="ss">:seed</span> <span class="k">do</span>
+</span><span class='line'>    <span class="no">Dir</span><span class="o">[</span><span class="no">File</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="p">,</span> <span class="s1">&#39;db&#39;</span><span class="p">,</span> <span class="s1">&#39;seeds&#39;</span><span class="p">,</span> <span class="s1">&#39;*.rb&#39;</span><span class="p">)</span><span class="o">].</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">filename</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">task_name</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">filename</span><span class="p">,</span> <span class="s1">&#39;.rb&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">intern</span>
+</span><span class='line'>      <span class="n">task</span> <span class="n">task_name</span> <span class="o">=&gt;</span> <span class="ss">:environment</span> <span class="k">do</span>
+</span><span class='line'>        <span class="nb">load</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span> <span class="k">if</span> <span class="no">File</span><span class="o">.</span><span class="n">exist?</span><span class="p">(</span><span class="n">filename</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">end</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著執行</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="ss">seed</span><span class="p">:</span><span class="n">hello</span>
+</span><span class='line'><span class="c1">#=&gt;hello</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件： <br/>
+<a href="http://stackoverflow.com/questions/19872271/adding-a-custom-seed-file">Adding a custom seed file</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[好用的 Hash Method]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/07/04/rails-hash/"/>
+    <updated>2016-07-04T21:58:11+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/07/04/rails-hash</id>
+    <content type="html"><![CDATA[<p>在 rails 當中經常會使用 hash，rails 也提供很多方便的 methods</p>
+
+<!--more-->
+
+
+<h1>Hash</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Hash</span><span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="mi">200</span><span class="o">]</span>             <span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;200}</span>
+</span><span class='line'><span class="no">Hash</span><span class="o">[</span> <span class="o">[</span> <span class="o">[</span><span class="s2">&quot;a&quot;</span><span class="p">,</span> <span class="mi">100</span><span class="o">]</span><span class="p">,</span> <span class="o">[</span><span class="s2">&quot;b&quot;</span><span class="p">,</span> <span class="mi">200</span><span class="o">]</span> <span class="o">]</span> <span class="o">]</span>   <span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;200}</span>
+</span><span class='line'><span class="no">Hash</span><span class="o">[</span><span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="mi">200</span><span class="o">]</span>         <span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;200}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>merge &amp; merge!</h1>
+
+<p>回傳新的 hash，後面一樣的 key 則會覆蓋前面的</p>
+
+<blockquote><p>以後面的為優先</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="mi">200</span> <span class="p">}</span>
+</span><span class='line'><span class="n">h2</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="mi">254</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span> <span class="o">=&gt;</span> <span class="mi">300</span> <span class="p">}</span>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>   <span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;254, &quot;c&quot;=&gt;300}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#將重複的做其他處理</span>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">h2</span><span class="p">){</span><span class="o">|</span><span class="n">key</span><span class="p">,</span> <span class="n">oldval</span><span class="p">,</span> <span class="n">newval</span><span class="o">|</span> <span class="n">newval</span> <span class="o">-</span> <span class="n">oldval</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;54,  &quot;c&quot;=&gt;300}</span>
+</span><span class='line'><span class="n">h1</span>             <span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;200}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>merge!</code> 直接改變原先的 hash</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">merge!</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;254, &quot;c&quot;=&gt;300}</span>
+</span><span class='line'><span class="n">h1</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;254, &quot;c&quot;=&gt;300}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>reverse_merge &amp; reverse_merge!</h1>
+
+<p>回傳新的 hash，前面一樣的 key 則會覆蓋後面的</p>
+
+<p>通常用在指定hash的預設值</p>
+
+<blockquote><p>以前面的為優先</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="mi">200</span> <span class="p">}</span>
+</span><span class='line'><span class="n">h2</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="mi">254</span><span class="p">,</span> <span class="s2">&quot;c&quot;</span> <span class="o">=&gt;</span> <span class="mi">300</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;254, &quot;c&quot;=&gt;300}</span>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">reverse_merge</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;b&quot;=&gt;200, &quot;c&quot;=&gt;300, &quot;a&quot;=&gt;100}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>deep_merge &amp; deep_merge!</h1>
+
+<p>在兩個hash的鍵值相同，而值也是個hash的情況下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:a</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="ss">:b</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">}}</span>
+</span><span class='line'><span class="n">h2</span> <span class="o">=</span> <span class="p">{</span><span class="ss">:a</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="ss">:c</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">}}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {:a=&gt;{:c=&gt;2}} error</span>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">deep_merge</span><span class="p">(</span><span class="n">h2</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {:a=&gt;{:b=&gt;1, :c=&gt;2}}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>fetch</h1>
+
+<p>即使是 nil, false 也會回傳，只有在空值的時候回傳預設值</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="kp">false</span> <span class="p">,</span> <span class="s1">&#39;c&#39;</span> <span class="o">=&gt;</span> <span class="kp">nil</span><span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;false, &quot;c&quot;=&gt;nil}</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;a&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 100</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;b&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;c&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; nil</span>
+</span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 8</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>except &amp; except!</h1>
+
+<p>通常用在確保某些欄位不要被傳進來的參數修改到</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">a</span><span class="p">:</span><span class="mi">100</span><span class="p">,</span> <span class="ss">b</span><span class="p">:</span><span class="mi">200</span> <span class="p">}</span>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">except</span><span class="p">(</span><span class="ss">:a</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>symbolize_keys &amp; symbolize_keys!</h1>
+
+<p>回傳新的 hash，key 值轉成 symbol</p>
+
+<blockquote><p>通常用在確保 key 的一致性</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span> <span class="s1">&#39;name&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;Rob&#39;</span><span class="p">,</span> <span class="s1">&#39;age&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;28&#39;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">hash</span><span class="o">.</span><span class="n">symbolize_keys</span>
+</span><span class='line'><span class="c1"># =&gt; {:name=&gt;&quot;Rob&quot;, :age=&gt;&quot;28&quot;}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>stringify_keys &amp; stringify_keys!</h1>
+
+<p>回傳新的 hash，key 值轉成 string</p>
+
+<p>alias <code>to_options</code> &amp; <code>to_options!</code></p>
+
+<blockquote><p>通常用在確保 key 的一致性</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Rob&#39;</span><span class="p">,</span> <span class="ss">age</span><span class="p">:</span> <span class="s1">&#39;28&#39;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">hash</span><span class="o">.</span><span class="n">stringify_keys</span>
+</span><span class='line'><span class="c1">#=&gt; { &quot;name&quot; =&gt; &quot;Rob&quot;, &quot;age&quot; =&gt; &quot;28&quot; }</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#若有衝突已後面為優先</span>
+</span><span class='line'><span class="p">{</span><span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">:a</span> <span class="o">=&gt;</span> <span class="mi">2</span><span class="p">}</span><span class="o">.</span><span class="n">stringify_keys</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;2}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>slice &amp; slice!</h1>
+
+<p>有 <code>!</code> 行為會不太一樣，要注意</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="mi">200</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">slice</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100}</span>
+</span><span class='line'><span class="n">h1</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100, &quot;b&quot;=&gt;200}</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">slice!</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;b&quot;=&gt;200}</span>
+</span><span class='line'><span class="n">h1</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>extract!</h1>
+
+<p>將需要的值提取出來，成為新的 hash</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h1</span> <span class="o">=</span> <span class="p">{</span> <span class="s2">&quot;a&quot;</span> <span class="o">=&gt;</span> <span class="mi">100</span><span class="p">,</span> <span class="s2">&quot;b&quot;</span> <span class="o">=&gt;</span> <span class="mi">200</span> <span class="p">}</span>
+</span><span class='line'><span class="n">h1</span><span class="o">.</span><span class="n">extract!</span><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;a&quot;=&gt;100}</span>
+</span><span class='line'><span class="n">h1</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;b&quot;=&gt;200}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>to_query</h1>
+
+<p>Alias for Hash#to_query</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">{</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;David&#39;</span><span class="p">,</span> <span class="ss">nationality</span><span class="p">:</span> <span class="s1">&#39;Danish&#39;</span><span class="p">}</span><span class="o">.</span><span class="n">to_query</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;name=David&amp;nationality=Danish&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;David&#39;</span><span class="p">,</span> <span class="ss">nationality</span><span class="p">:</span> <span class="s1">&#39;Danish&#39;</span><span class="p">}</span><span class="o">.</span><span class="n">to_query</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; &quot;user%5Bname%5D=David&amp;user%5Bnationality%5D=Danish&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>other</h1>
+
+<h3>attributes</h3>
+
+<p>將物件轉成 hash</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">foo</span> <span class="o">=</span> <span class="no">Book</span><span class="o">.</span><span class="n">first</span>
+</span><span class='line'><span class="c1">#=&gt; #&lt;Book id: 22, name: &quot;book&quot;, desc: &quot;desc&quot;, created_at: &quot;xxx&quot;, updated_at: &quot;xxx&quot;&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">foo</span><span class="o">.</span><span class="n">attributes</span>
+</span><span class='line'><span class="c1">#=&gt; {&quot;id&quot;=&gt;22, &quot;name&quot;=&gt;&quot;book&quot;, &quot;desc&quot;=&gt;&quot;desc&quot;, &quot;star&quot;=&gt;1, &quot;created_at&quot;=&gt;xxx, &quot;updated_at&quot;=&gt;xxx}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.1.5/Hash.html">Ruby Doc Hash</a><br/>
+<a href="http://apidock.com/rails/v4.2.1/Hash">Hash apidock</a></p>
+
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Class << Self]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/07/04/class-self/"/>
+    <updated>2016-07-04T00:01:37+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/07/04/class-self</id>
+    <content type="html"><![CDATA[<p>有時會看到這種特別的寫法 <code>class &lt;&lt; self</code>，有兩種不同的用法</p>
+
+<!-- more -->
+
+
+<h1>class method</h1>
+
+<p>將所以需要 <code>self.</code> 全部包在裡面，就不用一個一個 <code>self.</code><br/>
+不過這比較看是個人偏好，有些人會覺得 <code>self.</code> 可讀性較高</p>
+
+<p><a href="http://stackoverflow.com/questions/10964081/class-self-vs-self-method-with-ruby-whats-better">class &lt;&lt; self vs self.method with Ruby: what&rsquo;s better?</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">bar</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;bar&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">bar2</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;bar2&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">.</span><span class="n">bar</span>
+</span><span class='line'><span class="c1">#bar</span>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">.</span><span class="n">bar2</span>
+</span><span class='line'><span class="c1">#bar2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上下相等</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
+</span><span class='line'>  <span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="nb">self</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">bar</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;bar&#39;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">bar2</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;bar2&#39;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">.</span><span class="n">bar</span>
+</span><span class='line'><span class="c1">#bar</span>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">.</span><span class="n">bar2</span>
+</span><span class='line'><span class="c1">#bar2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>對單一物件，宣告出一個類別</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">foo</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;foo&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">f1</span> <span class="o">=</span> <span class="no">Foo</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">f2</span> <span class="o">=</span> <span class="no">Foo</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f1</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># foo</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f2</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># foo</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 只對f1 修改方法</span>
+</span><span class='line'><span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="n">f1</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">foo</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;Edit foo&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f1</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># Edit foo</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f2</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># foo</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 只對f1 新增方法</span>
+</span><span class='line'><span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="n">f1</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">bar</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;bar&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f1</span><span class="o">.</span><span class="n">bar</span> <span class="c1"># bar</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f2</span><span class="o">.</span><span class="n">bar</span> <span class="c1"># undefined method `bar&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件：<br/>
+<a href="http://wemee.blogspot.tw/2014/07/ruby-class.html">Ruby: class &lt;&lt; self</a><br/>
+<a href="http://stackoverflow.com/questions/10964081/class-self-vs-self-method-with-ruby-whats-better">class &lt;&lt; self vs self.method with Ruby: what&rsquo;s better?</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Retrieving Multiple Objects in Batches 批次取出多筆記錄]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/06/22/retrieving-multiple-objects-in-batches/"/>
+    <updated>2016-06-22T00:32:45+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/06/22/retrieving-multiple-objects-in-batches</id>
+    <content type="html"><![CDATA[<h1>Retrieving Multiple Objects in Batches</h1>
+
+<p>當要處理多筆資料時，一般都會用 User.all 去取資料</p>
+
+<!-- more -->
+
+
+<p>但是當資料相當龐大，一次取出那麼多會非常佔用記憶體<br/>
+因此有以下解決方式，一次拿一部分（預設為1000）</p>
+
+<h1>find_each</h1>
+
+<ul>
+<li>一筆一筆放入區塊。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">find_each</span><span class="p">(</span><span class="ss">start</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span> <span class="ss">batch_size</span><span class="p">:</span> <span class="mi">5000</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">NewsMailer</span><span class="o">.</span><span class="n">weekly</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">deliver_now</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#:start 選項可以設定批次的起始 ID。</span>
+</span><span class='line'><span class="c1">#:batch_size 選項允許你在將各筆記錄傳進區塊前，指定一批要取多少筆記錄。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>find_in_batches</h1>
+
+<ul>
+<li>取出記錄放入陣列傳至區塊</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Invoice</span><span class="o">.</span><span class="n">find_in_batches</span> <span class="k">do</span> <span class="o">|</span><span class="n">invoices</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">export</span><span class="o">.</span><span class="n">add_invoices</span><span class="p">(</span><span class="n">invoices</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#和 find_each 一樣的選項 :batch_size 與 :start。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方資料：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html">Active Record 查詢</a></p>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Cache Etag Memcache]]></title>
@@ -351,6 +906,11 @@
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#設定</span>
 </span><span class='line'><span class="n">cookies</span><span class="o">[</span><span class="ss">:commenter_name</span><span class="o">]</span> <span class="o">=</span> <span class="vi">@comment</span><span class="o">.</span><span class="n">author</span>
 </span><span class='line'><span class="c1">#移除</span>
@@ -358,7 +918,12 @@
 </span><span class='line'><span class="c1">#保護不能讓使用者亂改 signed</span>
 </span><span class='line'><span class="n">cookies</span><span class="o">.</span><span class="n">signed</span><span class="o">[</span><span class="ss">:user_preference</span><span class="o">]</span> <span class="o">=</span> <span class="vi">@current_user</span><span class="o">.</span><span class="n">preferences</span>
 </span><span class='line'><span class="c1">#盡可能永遠留在使用者瀏覽器的資料 permanent</span>
+</span><span class='line'><span class="n">cookies</span><span class="o">[</span><span class="ss">:remember_token</span><span class="o">]</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">value</span><span class="p">:</span>   <span class="n">remember_token</span><span class="p">,</span>
+</span><span class='line'>                             <span class="ss">expires</span><span class="p">:</span> <span class="mi">20</span><span class="o">.</span><span class="n">years</span><span class="o">.</span><span class="n">from_now</span><span class="o">.</span><span class="n">utc</span> <span class="p">}</span>
+</span><span class='line'><span class="c1">#上下相等</span>
 </span><span class='line'><span class="n">cookies</span><span class="o">.</span><span class="n">permanent</span><span class="o">[</span><span class="ss">:remember_me</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="n">current_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">current_user</span><span class="o">.</span><span class="n">salt</span><span class="o">]</span>
+</span><span class='line'><span class="c1">#permanent 預設為 20 年後過期 = 20.years.from_now</span>
+</span><span class='line'>
 </span><span class='line'><span class="c1">#可一起用</span>
 </span><span class='line'><span class="n">cookies</span><span class="o">.</span><span class="n">permanent</span><span class="o">.</span><span class="n">signed</span><span class="o">[</span><span class="ss">:remember_me</span><span class="o">]</span> <span class="o">=</span> <span class="o">[</span><span class="n">current_user</span><span class="o">.</span><span class="n">id</span><span class="p">,</span> <span class="n">current_user</span><span class="o">.</span><span class="n">salt</span><span class="o">]</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -393,12 +958,13 @@
 <a href="http://grantcss.com/blog/2015/03/23/how-rails-sessions-work/">[译] Rails Sessions 是如何工作的？</a><br/>
 <a href="http://www.rails365.net/articles/cookie-yuan-li-yu-shi-xian-rails-pian">cookie原理与实现(rails篇)</a><br/>
 <a href="http://www.rails365.net/articles/session-yuan-li-yu-shi-xian-rails-pian">session原理与实现(rails篇)</a><br/>
-<a href="https://read01.com/NyARK.html">COOKIE與SESSION比較</a></p>
+<a href="https://read01.com/NyARK.html">COOKIE與SESSION比較</a><br/>
+<a href="http://railstutorial-china.org/rails42/chapter8.html#logging-in">第 8 章 登录和退出</a></p>
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Garbage Collection]]></title>
+    <title type="html"><![CDATA[Garbage Collection (GC)]]></title>
     <link href="http://mgleon08.github.com/blog/2016/06/10/garbage-collection/"/>
     <updated>2016-06-10T12:18:42+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/06/10/garbage-collection</id>
@@ -622,7 +1188,9 @@
 <p>參考文件：<br/>
 <a href="http://ruby-journal.com/how-to-override-default-primary-key-id-in-rails/">How to Override Default Primary Key Id in Rails</a><br/>
 <a href="https://github.com/composite-primary-keys/composite_primary_keys">composite_primary_keys</a><br/>
-<a href="http://stackoverflow.com/questions/23848388/change-primary-key-issue-rails-4-0">Change Primary Key Issue Rails 4.0</a></p>
+<a href="http://stackoverflow.com/questions/23848388/change-primary-key-issue-rails-4-0">Change Primary Key Issue Rails 4.0</a><br/>
+<a href="http://api.rubyonrails.org/classes/ActiveRecord/ConnectionAdapters/SchemaStatements.html#method-i-create_table">create_table</a><br/>
+<a href="http://rails.ruby.tw/active_record_migrations.html">Active Record 遷移</a></p>
 ]]></content>
   </entry>
   
@@ -631,7 +1199,7 @@
     <link href="http://mgleon08.github.com/blog/2016/06/09/class-macro/"/>
     <updated>2016-06-09T20:14:09+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/06/09/class-macro</id>
-    <content type="html"><![CDATA[<p>Class Macro 就是在 rails 的 ActiveRecord 中，經常會看到，<code>validates``belongs_to``hsa_manay</code>等等的宣告</p>
+    <content type="html"><![CDATA[<p>Class Macro 就是在 rails 的 ActiveRecord 中，經常會看到，<code>validates</code> <code>belongs_to</code> <code>hsa_manay</code> 等等的宣告</p>
 
 <!-- more -->
 
@@ -2235,11 +2803,112 @@ q.push 23  #=&gt; NoMethodError
 
 <p>回傳的是所有有 <code>post</code> 的 <code>blog</code>，但並不會將 <code>post</code> 資料撈出來，只是去做比對，因此再用 <code>blog.posts</code> ，一樣會去資料庫中撈出資料。</p>
 
+<h1>joins 範例</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Category</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:articles</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Article</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:category</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:comments</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:tags</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Comment</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:article</span>
+</span><span class='line'>  <span class="n">has_one</span> <span class="ss">:guest</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Guest</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:comment</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Tag</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:article</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Category</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:articles</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#“依文章分類來回傳分類物件”。注意到如果有 article 是相同類別，會看到重複的分類物件。若要去掉重複結果，可以使用 Category.joins(:articles).uniq。</span>
+</span><span class='line'><span class="c1">#SELECT categories.* FROM categories</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN articles ON articles.category_id = categories.id</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Article</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">:category</span><span class="p">,</span> <span class="ss">:comments</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#“依分類來回傳文章物件，且文章至少有一則評論”。有多則評論的文章將會出現很多次</span>
+</span><span class='line'><span class="c1">#SELECT articles.* FROM articles</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN categories ON articles.category_id = categories.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN comments ON comments.article_id = articles.id</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Article</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">comments</span><span class="p">:</span> <span class="ss">:guest</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#“回傳所有有訪客評論的文章”</span>
+</span><span class='line'><span class="c1">#SELECT articles.* FROM articles</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN comments ON comments.article_id = articles.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN guests ON guests.comment_id = comments.id</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Category</span><span class="o">.</span><span class="n">joins</span><span class="p">(</span><span class="ss">articles</span><span class="p">:</span> <span class="o">[</span><span class="p">{</span><span class="ss">comments</span><span class="p">:</span> <span class="ss">:guest</span><span class="p">},</span> <span class="ss">:tags</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#SELECT categories.* FROM categories</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN articles ON articles.category_id = categories.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN comments ON comments.article_id = articles.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN guests ON guests.comment_id = comments.id</span>
+</span><span class='line'>  <span class="c1">#INNER JOIN tags ON tags.article_id = articles.id</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>joins和include的區別</h1>
 
 <ul>
 <li>include 主要是將其他關聯的 table 一起拉進來，後續查詢時，就不會再去查</li>
 <li>joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做塞選</li>
+<li>joins 為 inner join ， include 為 left outer join</li>
 </ul>
 
 
@@ -2262,12 +2931,14 @@ q.push 23  #=&gt; NoMethodError
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>eager_load</h1>
+<h1>eager_loading</h1>
 
 <ul>
 <li>One query, LEFT OUTER JOINed in any query rather than loaded separately.</li>
 <li>Works just the same as <code>includes</code> + <code>references</code></li>
 <li>因此要小心，includers 後在接上 references 就會變成 eager_load</li>
+<li>Eager loading 是載入由 Model.find 回傳的物件關聯記錄的機制，將查詢數降到最低。</li>
+<li>Active Record 透過使用 Model.find 搭配 includes 方法，可預先指定所有會載入的關聯。有了 includes，Active Record 確保所有指定的關聯，加載的查詢減到最少。</li>
 </ul>
 
 
@@ -2310,8 +2981,11 @@ q.push 23  #=&gt; NoMethodError
 
 <ul>
 <li>只有在 includes 可以使用，主要是讓 includes 像 eager_load</li>
+<li>where 的這種用法只對參數是 Hash 有效。傳入參數是 SQL 片段，要使用 references 來強制連接資料表。</li>
 </ul>
 
+
+<p><a href="http://rails.ruby.tw/active_record_querying.html#eager-loading-%E9%97%9C%E8%81%AF">#eager-loading</a></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -2322,7 +2996,7 @@ q.push 23  #=&gt; NoMethodError
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><img src="http://jbcdn2.b0.upaiyun.com/2013/05/SQL-Joins.jpg" alt="" /></p>
+<p><img src="http://www.codeproject.com/KB/database/Visual_SQL_Joins/Visual_SQL_JOINS_orig.jpg" alt="" /></p>
 
 <p>官方資料：<br/>
 <a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a><br/>
@@ -3494,1027 +4168,6 @@ q.push 23  #=&gt; NoMethodError
 <p>參考文件：<br/>
 <a href="https://ihower.tw/rails4/environments-and-bundler.html">mime types</a><br/>
 <a href="http://www.rails365.net/articles/gem-jie-shao-yuan-ma-fen-xi-http-accept-language-si">gem介紹及源碼分析之http_accept_language(四)</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Foreman 管理進程]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/04/19/foreman/"/>
-    <updated>2016-04-19T22:20:41+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/04/19/foreman</id>
-    <content type="html"><![CDATA[<p>若專案依賴各種外部的進程使用 foreman 來管理它們。</p>
-
-<!-- more -->
-
-
-<h1>設定</h1>
-
-<p>在根目錄底下新增 Procfile 檔案</p>
-
-<p>設定所有要跑的指令</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#Procfile</span>
-</span><span class='line'><span class="ss">web</span><span class="p">:</span>    <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rails</span> <span class="n">s</span> <span class="o">-</span><span class="nb">p</span> <span class="vg">$PORT</span>
-</span><span class='line'><span class="ss">worker</span><span class="p">:</span> <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rake</span> <span class="n">worker</span>
-</span><span class='line'><span class="ss">urgentworker</span><span class="p">:</span> <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rake</span> <span class="n">urgent_worker</span>
-</span><span class='line'><span class="ss">scheduler</span><span class="p">:</span>  <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rake</span> <span class="n">scheduler</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>安裝gem foreman</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">foreman</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">foreman</span> <span class="n">start</span>
-</span><span class='line'><span class="mi">13</span><span class="p">:</span><span class="mi">44</span><span class="p">:</span><span class="mi">20</span> <span class="n">web</span><span class="o">.</span><span class="mi">1</span>          <span class="o">|</span> <span class="n">started</span> <span class="n">with</span> <span class="n">pid</span> <span class="mi">82891</span>
-</span><span class='line'><span class="mi">13</span><span class="p">:</span><span class="mi">44</span><span class="p">:</span><span class="mi">20</span> <span class="n">worker</span><span class="o">.</span><span class="mi">1</span>       <span class="o">|</span> <span class="n">started</span> <span class="n">with</span> <span class="n">pid</span> <span class="mi">82892</span>
-</span><span class='line'><span class="mi">13</span><span class="p">:</span><span class="mi">44</span><span class="p">:</span><span class="mi">20</span> <span class="n">urgentworker</span><span class="o">.</span><span class="mi">1</span> <span class="o">|</span> <span class="n">started</span> <span class="n">with</span> <span class="n">pid</span> <span class="mi">82893</span>
-</span><span class='line'><span class="err">￼</span><span class="mi">13</span><span class="p">:</span><span class="mi">44</span><span class="p">:</span><span class="mi">20</span> <span class="n">scheduler</span><span class="o">.</span><span class="mi">1</span>    <span class="o">|</span> <span class="n">started</span> <span class="n">with</span> <span class="n">pid</span> <span class="mi">82894</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>gem：<br/>
-<a href="https://github.com/ddollar/foreman">foreman</a></p>
-
-<p>參考文件：<br/>
-<a href="http://arthurpai.logdown.com/posts/2014/07/09/heroku-worker-processes-setting">Heroku Worker Processes setting</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Method Missing]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/04/19/method-missing/"/>
-    <updated>2016-04-19T22:18:09+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/04/19/method-missing</id>
-    <content type="html"><![CDATA[<p>當 ruby 找不到 method 就會 call 這個 method</p>
-
-<!-- more -->
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="c1">#自己建立 method_missing 呼叫</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;You tried to call </span><span class="si">#{</span><span class="n">method_name</span><span class="si">}</span><span class="s2"> with these arguments: </span><span class="si">#{</span><span class="n">args</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>    <span class="k">super</span> <span class="c1">#default method_missing handling raises a NoMethodError</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">submit</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;Here&#39;s a post.&quot;</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>用找不到 method 會 call <code>method_missing</code> 的特性，直接自己定義 method_missing 去定義呼叫其他的 method</p>
-
-<blockquote><p>它的執行效率並不好，所以只適合用在沒辦法預先知道方法名稱的情況下</p></blockquote>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="no">DELEGATED_METHODS</span> <span class="o">=</span> <span class="o">[</span><span class="ss">:username</span><span class="p">,</span> <span class="ss">:avatar</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">user</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@user</span> <span class="o">=</span> <span class="n">user</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="no">DELEGATED_METHODS</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span>
-</span><span class='line'>      <span class="vi">@user</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="k">super</span> <span class="c1">#沒有在設定的 DELEGATED_METHODS 裡面，就呼叫 default method_missing handling raises a NoMethodError</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@text</span> <span class="o">=</span> <span class="n">text</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">to_s</span>
-</span><span class='line'>    <span class="vi">@text</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">match</span> <span class="o">=</span> <span class="n">method_name</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sr">/^hash_(\w+)/</span><span class="p">)</span> <span class="c1">#找前面是 hash_</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">match</span>
-</span><span class='line'>      <span class="vi">@text</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot; #&quot;</span> <span class="o">+</span> <span class="n">match</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="k">super</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="err">￼</span><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;HI&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">hash_ruby</span>
-</span><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">hash_metaprogramming</span>
-</span><span class='line'><span class="nb">puts</span> <span class="n">post</span>
-</span><span class='line'><span class="c1">#=&gt; HI #ruby #metaprogramming</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>respond_to?</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="ss">:to_s</span><span class="p">)</span> <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">hash_ruby</span> <span class="c1">#再 method_missing 有定義所以呼叫得到</span>
-</span><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="ss">:hash_ruby</span><span class="p">)</span> <span class="c1"># =&gt; false #但在 respond_to 卻回傳 false</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>因此必須自己定義 respond_to?</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">respond_to?</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">method_name</span> <span class="o">=~</span> <span class="sr">/^hash_\w+/</span> <span class="o">||</span> <span class="k">super</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>但是 <code>post.method(:hash_ruby)</code> 還是會出現 <code>NameError: undefined method</code></p>
-
-<p>所以要改成另一個 <code>respond_to_missing?</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">respond_to_missing?</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">method_name</span> <span class="o">=~</span> <span class="sr">/^hash_\w+/</span> <span class="o">||</span><span class="k">super</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>￼DEFINE_METHOD REVISITED</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">text</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@text</span> <span class="o">=</span> <span class="n">text</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">to_s</span>
-</span><span class='line'>    <span class="vi">@text</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">method_missing</span><span class="p">(</span><span class="n">method_name</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">match</span> <span class="o">=</span> <span class="n">method_name</span><span class="o">.</span><span class="n">to_s</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sr">/^hash_(\w+)/</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">match</span> <span class="c1">#有 match 到 hash_ 就建立出新的 method</span>
-</span><span class='line'>      <span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
-</span><span class='line'>        <span class="n">define_method</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'>          <span class="vi">@text</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot; #&quot;</span> <span class="o">+</span> <span class="n">match</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
-</span><span class='line'>        <span class="k">end</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>      <span class="nb">send</span><span class="p">(</span><span class="n">method_name</span><span class="p">)</span> <span class="c1">#並且呼叫 method</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>      <span class="k">super</span> <span class="c1">#沒有就 raises a NoMethodError</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#當 call post.hash_codeschool 就會定義出下面的 method </span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">hash_codeschool</span>
-</span><span class='line'>  <span class="vi">@text</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot; #&quot;</span> <span class="o">+</span> <span class="s2">&quot;codeschool&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>const_missing</h1>
-
-<p>另一個跟 method_missing 一樣的，主要是常數找不到時會 call<br/>
-<a href="http://apidock.com/ruby/Module/const_missing">const_missing</a></p>
-
-<p>官方文件：<br/>
-<a href="http://apidock.com/ruby/BasicObject/method_missing">method_missing</a><br/>
-<a href="http://ruby-doc.org/core-2.2.0/MatchData.html">MatchData</a><br/>
-<a href="http://ruby-doc.org/core-2.1.1/Regexp.html">Regexp</a></p>
-
-<p>參考文件：  <br/>
-<a href="https://ihower.tw/blog/archives/4797">如何設計出漂亮的 Ruby APIs</a><br/>
-<a href="https://ruby-china.org/topics/3434">method_missing，一個Ruby 程序員的夢中情人</a><br/>
-<a href="http://stackoverflow.com/questions/13793060/respond-to-vs-respond-to-missing">respond_to? vs. respond_to_missing?</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Dynamic Classes & Methods (Struct, Send(), Alias_method, Alias_attribute, Define_method)]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods/"/>
-    <updated>2016-04-19T22:16:35+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/04/19/dynamic-classes-and-methods</id>
-    <content type="html"><![CDATA[<p>ruby 可以很方便的動態產生 Classes 和 Methods</p>
-
-<!-- more -->
-
-
-<h1>Struct</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="kp">attr_accessor</span> <span class="ss">:user</span><span class="p">,</span> <span class="ss">:status</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">user</span><span class="p">,</span> <span class="n">status</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@user</span><span class="p">,</span> <span class="vi">@status</span> <span class="o">=</span> <span class="n">user</span><span class="p">,</span> <span class="n">status</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">to_s</span>
-</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="n">user</span><span class="si">}</span><span class="s2">: </span><span class="si">#{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#上下相等</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Post</span> <span class="o">=</span> <span class="no">Struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:user</span><span class="p">,</span> <span class="ss">:status</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">to_s</span>
-</span><span class='line'>    <span class="s2">&quot;</span><span class="si">#{</span><span class="n">user</span><span class="si">}</span><span class="s2">: </span><span class="si">#{</span><span class="n">status</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>send()</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">post</span><span class="o">.</span><span class="n">say</span>
-</span><span class='line'><span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="ss">:say</span><span class="p">)</span>
-</span><span class='line'><span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="s2">&quot;say&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#也可以 call 到 private 的 method</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>alias_method</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:foo</span> <span class="c1">#=&gt; return @foo</span>
-</span><span class='line'>  <span class="c1">#一定要在定義好的 method 後面還 call 得到</span>
-</span><span class='line'>  <span class="n">alias_method</span> <span class="ss">:bar</span><span class="p">,</span> <span class="ss">:foo</span> <span class="c1">#=&gt; the same method 別名/原名</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">foo</span> <span class="o">=</span> <span class="o">[]</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@foo</span> <span class="o">=</span> <span class="n">foo</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>alias_attribute</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Content</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="c1"># has a title attribute</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Email</span> <span class="o">&lt;</span> <span class="no">Content</span>
-</span><span class='line'>  <span class="n">alias_attribute</span> <span class="ss">:subject</span><span class="p">,</span> <span class="ss">:title</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">e</span> <span class="o">=</span> <span class="no">Email</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">title</span>    <span class="c1"># =&gt; &quot;Superstars&quot;</span>
-</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">subject</span>  <span class="c1"># =&gt; &quot;Superstars&quot;</span>
-</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">subject?</span> <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">subject</span> <span class="o">=</span> <span class="s2">&quot;Megastars&quot;</span>
-</span><span class='line'><span class="n">e</span><span class="o">.</span><span class="n">title</span>    <span class="c1"># =&gt; &quot;Megastars&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>define_method</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">draft</span>
-</span><span class='line'>    <span class="vi">@status</span> <span class="o">=</span> <span class="ss">:draft</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">posted</span>
-</span><span class='line'>    <span class="vi">@status</span> <span class="o">=</span> <span class="ss">:posted</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">deleted</span>
-</span><span class='line'>    <span class="vi">@status</span> <span class="o">=</span> <span class="ss">:deleted</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#上下相等</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="n">states</span> <span class="o">=</span> <span class="o">[</span><span class="ss">:draft</span><span class="p">,</span> <span class="ss">:posted</span><span class="p">,</span> <span class="ss">:deleted</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">states</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">status</span><span class="o">|</span>
-</span><span class='line'>    <span class="n">define_method</span> <span class="n">status</span> <span class="k">do</span>
-</span><span class='line'>      <span class="vi">@status</span> <span class="o">=</span> <span class="n">status</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>method()</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@posts</span> <span class="o">=</span> <span class="n">posts</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">contents</span>
-</span><span class='line'>    <span class="vi">@foo</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">show_tweet</span><span class="p">(</span><span class="n">index</span><span class="p">)</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="vi">@foo</span><span class="o">[</span><span class="n">index</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">foo</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;Compiling!&#39;</span><span class="p">,</span> <span class="s1">&#39;Bundling...&#39;</span><span class="o">]</span>
-</span><span class='line'><span class="n">post</span> <span class="o">=</span> <span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">foo</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">content_method</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="ss">:contents</span><span class="p">)</span>
-</span><span class='line'><span class="n">content_method</span><span class="o">.</span><span class="n">call</span>
-</span><span class='line'><span class="c1">#=&gt; [&quot;Compiling!&quot;, &quot;Bundling...&quot;]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">show_method</span> <span class="o">=</span> <span class="n">post</span><span class="o">.</span><span class="n">method</span><span class="p">(</span><span class="ss">:show_tweet</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">￼</span><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="o">&amp;</span><span class="n">show_method</span><span class="p">)</span>
-</span><span class='line'><span class="err">￼</span><span class="c1">#上下相等</span>
-</span><span class='line'><span class="n">show_method</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
-</span><span class='line'><span class="n">show_method</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>EX: log_method</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MethodLogger</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">log_method</span><span class="p">(</span><span class="n">klass</span><span class="p">,</span> <span class="n">method_name</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">klass</span><span class="o">.</span><span class="n">class_eval</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">alias_method</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">method_name</span><span class="si">}</span><span class="s2">_original&quot;</span><span class="p">,</span> <span class="n">method_name</span>
-</span><span class='line'>      <span class="n">define_method</span> <span class="n">method_name</span> <span class="k">do</span> <span class="o">|*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="o">|</span>
-</span><span class='line'>        <span class="nb">puts</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="no">Time</span><span class="o">.</span><span class="n">now</span><span class="si">}</span><span class="s2">: Called </span><span class="si">#{</span><span class="n">method_name</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>        <span class="nb">send</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">method_name</span><span class="si">}</span><span class="s2">_original&quot;</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span>
-</span><span class='line'>      <span class="k">end</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Post</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">say_hi</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Hi&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">logger</span> <span class="o">=</span> <span class="no">MethodLogger</span><span class="o">.</span><span class="n">new</span>
-</span><span class='line'><span class="n">logger</span><span class="o">.</span><span class="n">log_method</span><span class="p">(</span><span class="no">Post</span><span class="p">,</span> <span class="ss">:say_hi</span><span class="p">)</span>
-</span><span class='line'><span class="no">Post</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">say_hi</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#=&gt; 2016-04-05 12:14:01 +0800: Called say_hi</span>
-</span><span class='line'><span class="c1">#=&gt; Hi</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.2.0/Struct.html">Struct</a><br/>
-<a href="http://apidock.com/ruby/Object/__send__">send()</a><br/>
-<a href="http://apidock.com/ruby/Module/alias_method">alias_method()</a><br/>
-<a href="http://apidock.com/ruby/Module/define_method">method define_method</a></p>
-
-<p>參考文件：<br/>
-<a href="http://stackoverflow.com/questions/3337285/what-does-send-do-in-ruby">What does send() do in Ruby?</a><br/>
-<a href="https://gist.github.com/plusor/6104625">alias vs alias_method</a>  <br/>
-<a href="https://ihower.tw/blog/archives/4797">如何設計出漂亮的 Ruby APIs</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Javascript 筆記]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/04/19/javascript-notes/"/>
-    <updated>2016-04-19T22:12:34+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/04/19/javascript-notes</id>
-    <content type="html"><![CDATA[<p>javascript 的一些紀錄!</p>
-
-<!-- more -->
-
-
-<h1>Closure</h1>
-
-<p>Closure 閉包</p>
-
-<p>一般來說每個變數都會生存在自己的 scope 裡面， function 裡面只能用到裡面定義好的 <code>Local Variable</code>，但在 javascript 卻能夠動用到外部的 variable</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
-</span><span class='line'><span class="nx">funtion</span> <span class="nx">closure1</span><span class="p">(){</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nx">closure1</span><span class="p">();</span>
-</span><span class='line'><span class="c1">//=&gt; 8</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>在 closure1 雖然 function 裡並沒有 var x 但卻輸出外面的 8<br/>
-主要是因為在 javascript 當中，在 local 中找不到 x 值的話，就會繼續往上一層去找</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
-</span><span class='line'><span class="nx">funtion</span> <span class="nx">closure2</span><span class="p">(){</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nx">closure2</span><span class="p">();</span>
-</span><span class='line'><span class="c1">//=&gt; 5</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>closure2 則是在 local 就找到了 x 所以輸出的就是 5。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">closure1</span><span class="p">(){</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'>  <span class="k">return</span> <span class="kd">function</span><span class="p">(){</span>
-</span><span class='line'>    <span class="nx">x</span><span class="o">++</span><span class="p">;</span>
-</span><span class='line'>    <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span><span class="p">);</span>
-</span><span class='line'>  <span class="p">};</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="nx">number</span> <span class="o">=</span> <span class="nx">closure1</span><span class="p">();</span>
-</span><span class='line'><span class="nx">number</span><span class="p">();</span> <span class="c1">//1</span>
-</span><span class='line'><span class="nx">number</span><span class="p">();</span> <span class="c1">//2</span>
-</span><span class='line'><span class="nx">number</span><span class="p">();</span> <span class="c1">//3</span>
-</span><span class='line'><span class="nx">number</span><span class="p">();</span> <span class="c1">//4</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>x 會存活在，number 的 function 裡面</p>
-
-<p><a href="http://www.codedata.com.tw/javascript/using-nodejs-to-learn-javascript-3-function-parameter-closure">用 Node.js 學 JavaScript 語言（3）函數、參數與閉包</a><br/>
-<a href="http://openhome.cc/Gossip/JavaScript/Closure.html">閉包（Closure）</a></p>
-
-<h1>Hoisting</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">function</span> <span class="nx">test</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">){</span>
-</span><span class='line'>  <span class="k">if</span> <span class="p">(</span><span class="nx">x</span> <span class="o">==</span> <span class="nx">y</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">foo</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">else</span><span class="p">{</span>
-</span><span class='line'>    <span class="nx">bar</span><span class="p">();</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="kd">function</span> <span class="nx">foo</span><span class="p">(){</span>
-</span><span class='line'>    <span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;FOO&#39;</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="kc">false</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="kd">function</span> <span class="nx">bar</span><span class="p">(){</span>
-</span><span class='line'>    <span class="nx">alert</span><span class="p">(</span><span class="s1">&#39;BAR&#39;</span><span class="p">);</span>
-</span><span class='line'>    <span class="k">return</span> <span class="kc">true</span><span class="p">;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">hoisting1</span><span class="p">(){</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">hoisting1</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">//=&gt; undefined</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>照上面的 <code>closure</code> 特性，應該輸出的要是 8 才對，因為裡面的宣告是放在下面<br/>
-可是卻輸出的是 <code>undefined</code></p>
-
-<p>這就是另一個 <code>hoisting</code> 的特性<br/>
-<code>hoisting</code> 會將宣告提升到 scope 的頂端，因此上面的程式應該是</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">hoisting2</span><span class="p">(){</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">x</span><span class="p">;</span>   
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span><span class="p">);</span>
-</span><span class='line'>  <span class="nx">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nx">hoisting2</span><span class="p">()</span>
-</span><span class='line'><span class="c1">//=&gt; undefined</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>看到上面多出一個 <code>var x;</code> 就是 <code>hoisting</code> 提升的，因此下面的 <code>console.log(x)</code> 才會出現 <code>undefined</code></p>
-
-<p>要解決有兩種方式</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">8</span><span class="p">;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">hoisting3</span><span class="p">(){</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span><span class="p">);</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="nx">hoisting3</span><span class="p">()</span>
-</span><span class='line'><span class="c1">//=&gt; 5</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">//var x = 8; 要拿掉這行否則會 call 到它 </span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">function</span> <span class="nx">hoisting4</span><span class="p">(){</span>
-</span><span class='line'>  <span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span><span class="nx">x</span><span class="p">);</span>
-</span><span class='line'>  <span class="nx">x</span> <span class="o">=</span> <span class="mi">5</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">hoisting4</span><span class="p">()</span>
-</span><span class='line'><span class="c1">//=&gt; 5</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="http://www.puritys.me/docs-blog/article-242-Javascript-Hoisting-%E8%88%87-Closure.html">Javascript Hoisting 與 Closure</a></p>
-
-<h1>callback</h1>
-
-<p><a href="http://dreamerslab.com/blog/tw/javascript-callbacks/">Javascript callbacks</a><br/>
-<a href="http://fireqqtw.logdown.com/posts/258823-javascript-function-notes">【javascript】了解函式(function)很重要的筆記</a><br/>
-<a href="http://mao.li/javascript/javascript-callback-function/">JavaScript callback function 理解</a><br/>
-<a href="http://www.victsao.com/blog/81-javascript/292-javascript-function-callback">回呼函式(callback function)</a></p>
-
-<h1>JavaScript Memory_leaks</h1>
-
-<p><a href="https://developer.mozilla.org/zh-TW/docs/Web/JavaScript/%E9%87%8D%E6%96%B0%E4%BB%8B%E7%B4%B9_JavaScript#Memory_leaks">Mozilla - Memory_leaks</a><br/>
-<a href="http://blogger.gtwang.org/2014/01/javascript-memory-leak-patterns.html">JavaScript 記憶體洩漏（Memory Leak）問題</a><br/>
-<a href="http://blog.smlsun.com/2013/12/javascript-memory-leaks_3701.html">javascript: Memory Leaks 的情況以及如何解決與偵測</a><br/>
-<a href="http://javascript.info/tutorial/memory-leaks#memory-management-in-javascript">Memory management in JavaScript</a></p>
-
-<hr />
-
-<h1>PROTOTYPE</h1>
-
-<h1>￼OBJECT! PROTOTYPE</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">constructor</span><span class="p">()</span>
-</span><span class='line'><span class="nx">valueOf</span><span class="p">()</span>
-</span><span class='line'><span class="nx">toLocaleString</span><span class="p">()</span>
-</span><span class='line'><span class="nx">isPrototypeOf</span><span class="p">()</span>
-</span><span class='line'><span class="err">￼￼</span><span class="nx">toString</span><span class="p">()</span>
-</span><span class='line'><span class="nx">propertyIsEnumerable</span><span class="p">()</span>
-</span><span class='line'><span class="nx">hasOwnProperty</span><span class="p">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>ARRAY! Prototype</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">length</span>
-</span><span class='line'><span class="nx">pop</span><span class="p">()</span>
-</span><span class='line'><span class="nx">push</span><span class="p">()</span>
-</span><span class='line'><span class="nx">shift</span><span class="p">()</span>
-</span><span class='line'><span class="nx">reverse</span><span class="p">()</span>
-</span><span class='line'><span class="nx">sort</span><span class="p">()</span>
-</span><span class='line'><span class="nx">join</span><span class="p">()</span>
-</span><span class='line'><span class="nx">reduce</span><span class="p">()</span>
-</span><span class='line'><span class="nx">slice</span><span class="p">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>STRING! Prototype</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">length</span>
-</span><span class='line'><span class="nx">chartAt</span><span class="p">()</span>
-</span><span class='line'><span class="nx">trim</span><span class="p">()</span>
-</span><span class='line'><span class="nx">concat</span><span class="p">()</span>
-</span><span class='line'><span class="nx">indexOf</span><span class="p">()</span>
-</span><span class='line'><span class="nx">replace</span><span class="p">()</span>
-</span><span class='line'><span class="nx">toUpperCase</span><span class="p">()</span>
-</span><span class='line'><span class="nx">toLowerCase</span><span class="p">()</span>
-</span><span class='line'><span class="err">￼￼￼￼￼￼￼￼</span><span class="nx">substring</span><span class="p">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>NUMBER! Prototype</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">toFixed</span><span class="p">()</span>
-</span><span class='line'><span class="nx">toExponential</span>
-</span><span class='line'><span class="nx">toPrecision</span><span class="p">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>FUNCTION! Prototype</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">name</span>
-</span><span class='line'><span class="nx">call</span><span class="p">()</span>
-</span><span class='line'><span class="nx">bind</span><span class="p">()</span>
-</span><span class='line'><span class="nx">apply</span><span class="p">()</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><a href="http://fireqqtw.logdown.com/posts/258035-javascriptcall-and-apply">【javascript】call 和 apply</a></p>
-
-<h1>Custom function in Prototype</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nb">String</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">countAll</span> <span class="o">=</span> <span class="kd">function</span> <span class="p">(</span> <span class="nx">letter</span> <span class="p">){</span> <span class="kd">var</span> <span class="nx">letterCount</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span>
-</span><span class='line'><span class="k">for</span> <span class="p">(</span><span class="kd">var</span> <span class="nx">i</span> <span class="o">=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span><span class="o">&lt;</span><span class="k">this</span><span class="p">.</span><span class="nx">length</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">if</span> <span class="p">(</span> <span class="k">this</span><span class="p">.</span><span class="nx">charAt</span><span class="p">(</span><span class="nx">i</span><span class="p">).</span><span class="nx">toUpperCase</span><span class="p">()</span> <span class="o">==</span> <span class="nx">letter</span><span class="p">.</span><span class="nx">toUpperCase</span><span class="p">()</span> <span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>           <span class="nx">letterCount</span><span class="o">++</span><span class="p">;</span>
-</span><span class='line'>        <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">letterCount</span><span class="p">;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="err">￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼￼</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
-
-<h1>build objects</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">￼</span><span class="kd">var</span> <span class="nx">myBox</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">height</span><span class="o">:</span> <span class="mi">6</span><span class="p">,</span> <span class="nx">width</span><span class="o">:</span> <span class="mi">8</span><span class="p">,</span> <span class="nx">length</span><span class="o">:</span> <span class="mi">10</span><span class="p">,</span> <span class="nx">volume</span><span class="o">:</span> <span class="mi">480</span><span class="p">,</span> <span class="nx">material</span><span class="o">:</span> <span class="s2">&quot;cardboard&quot;</span><span class="p">,</span> <span class="nx">contents</span><span class="o">:</span> <span class="p">[</span><span class="s2">&quot;Great Expectations&quot;</span><span class="p">,</span> <span class="s2">&quot;The Remains of the Day&quot;</span><span class="p">,</span> <span class="s2">&quot;Peter Pan&quot;</span><span class="p">]</span>
-</span><span class='line'>            <span class="p">};</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">shoe</span> <span class="o">=</span> <span class="p">{</span> <span class="nx">size</span><span class="o">:</span> <span class="mi">6</span><span class="p">,</span> <span class="nx">gender</span><span class="o">:</span> <span class="s2">&quot;women&quot;</span><span class="p">,</span> <span class="nx">construction</span><span class="o">:</span> <span class="s2">&quot;slipper&quot;</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'><span class="err">￼</span><span class="kd">var</span> <span class="nx">magicShoe</span> <span class="o">=</span> <span class="nb">Object</span><span class="p">.</span><span class="nx">create</span><span class="p">(</span> <span class="nx">shoe</span> <span class="p">);</span>
-</span><span class='line'><span class="err">￼￼￼￼</span><span class="nx">console</span><span class="p">.</span><span class="nx">log</span><span class="p">(</span> <span class="nx">magicShoe</span> <span class="p">);</span>
-</span><span class='line'><span class="c1">//=&gt; Object { size: 6, gender: &quot;women&quot;, construction: &quot;slipper&quot; }</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="err">￼</span><span class="nb">Object</span><span class="p">.</span><span class="nx">prototype</span><span class="p">.</span><span class="nx">isPrototypeOf</span><span class="p">(</span><span class="nx">show</span><span class="p">)</span>
-</span><span class='line'><span class="c1">//=&gt;true</span>
-</span><span class='line'><span class="nx">shoe</span><span class="p">.</span><span class="nx">isPrototypeOf</span><span class="p">(</span><span class="nx">magicShoe</span><span class="p">)</span>
-</span><span class='line'><span class="err">￼￼￼￼￼</span><span class="c1">//=&gt;true</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>constructor function for a shoe Object</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="err">￼</span><span class="kd">function</span> <span class="nx">Shoe</span> <span class="p">(</span><span class="nx">shoeSize</span><span class="p">,</span> <span class="nx">shoeColor</span><span class="p">,</span> <span class="nx">forGender</span><span class="p">,</span> <span class="nx">constructStyle</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>   <span class="k">this</span><span class="p">.</span><span class="nx">size</span> <span class="o">=</span> <span class="nx">shoeSize</span><span class="p">;</span>
-</span><span class='line'>   <span class="k">this</span><span class="p">.</span><span class="nx">color</span> <span class="o">=</span> <span class="nx">shoeColor</span><span class="p">;</span>
-</span><span class='line'>   <span class="k">this</span><span class="p">.</span><span class="nx">gender</span> <span class="o">=</span> <span class="nx">forGender</span><span class="p">;</span>
-</span><span class='line'>   <span class="k">this</span><span class="p">.</span><span class="nx">construction</span> <span class="o">=</span> <span class="nx">constructStyle</span><span class="p">;</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">Shoe</span><span class="p">.</span><span class="nx">prototype</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">putOn</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="nx">alert</span> <span class="p">(</span><span class="s2">&quot;Your &quot;</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">construction</span> <span class="o">+</span> <span class="s2">&quot;’s&quot;</span> <span class="o">+</span> <span class="s2">&quot;on!&quot;</span><span class="p">);</span> <span class="p">},</span>
-</span><span class='line'>  <span class="nx">takeOff</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span> <span class="nx">alert</span> <span class="p">(</span><span class="s2">&quot;Phew! Somebody’s size &quot;</span> <span class="o">+</span> <span class="k">this</span><span class="p">.</span><span class="nx">size</span> <span class="o">+</span> <span class="s2">&quot;’s&quot;</span> <span class="o">+</span><span class="s2">&quot; are fragrant! &quot;</span><span class="p">);</span> <span class="p">}</span>
-</span><span class='line'><span class="p">};</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">beachShoe</span> <span class="o">=</span> <span class="k">new</span> <span class="nx">Shoe</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="s2">&quot;blue&quot;</span><span class="p">,</span> <span class="s2">&quot;women&quot;</span><span class="p">,</span> <span class="s2">&quot;flipflop&quot;</span><span class="p">);</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<hr />
 ]]></content>
   </entry>
   

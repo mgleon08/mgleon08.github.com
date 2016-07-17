@@ -5,33 +5,12 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Garbage Collection (GC) - Leon's Blogging</title>
+  <title>Class << Self - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="在 ruby 當中，經常會看到 : 的符號，代表 symbol 跟一般 string 的差異在於 同樣的 string，會產生不同的 記憶體
-同樣的 symbol，一樣的記憶體 1
-2
-3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-3. &hellip;">
+  <meta name="description" content="有時會看到這種特別的寫法 class &lt;&lt; self，有兩種不同的用法 class method 將所以需要 self. 全部包在裡面，就不用一個一個 self.
+不過這比較看是個人偏好，有些人會覺得 self. 可讀性較高 class &lt;&lt; self vs self. &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -40,7 +19,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/06/10/garbage-collection">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/07/04/class-self">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -123,7 +102,7 @@
   <header>
     
       
-        <h1 class="entry-title">Garbage Collection (GC)</h1>
+        <h1 class="entry-title">Class << Self</h1>
       
     
     
@@ -133,7 +112,7 @@
 
 
 
-<time class='entry-date' datetime='2016-06-10T12:18:42+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>12:18 pm</span></time>
+<time class='entry-date' datetime='2016-07-04T00:01:37+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>12:01 am</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -143,18 +122,83 @@
   </header>
 
 
-<div class="entry-content"><p>在 ruby 當中，經常會看到 : 的符號，代表 symbol</p>
+<div class="entry-content"><p>有時會看到這種特別的寫法 <code>class &lt;&lt; self</code>，有兩種不同的用法</p>
 
 <!-- more -->
 
 
-<p>跟一般 string 的差異在於</p>
+<h1>class method</h1>
 
-<ul>
-<li>同樣的 string，會產生不同的 記憶體</li>
-<li>同樣的 symbol，一樣的記憶體</li>
-</ul>
+<p>將所以需要 <code>self.</code> 全部包在裡面，就不用一個一個 <code>self.</code><br/>
+不過這比較看是個人偏好，有些人會覺得 <code>self.</code> 可讀性較高</p>
 
+<p><a href="http://stackoverflow.com/questions/10964081/class-self-vs-self-method-with-ruby-whats-better">class &lt;&lt; self vs self.method with Ruby: what&rsquo;s better?</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">bar</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;bar&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">bar2</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;bar2&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">.</span><span class="n">bar</span>
+</span><span class='line'><span class="c1">#bar</span>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">.</span><span class="n">bar2</span>
+</span><span class='line'><span class="c1">#bar2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上下相等</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
+</span><span class='line'>  <span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="nb">self</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">bar</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;bar&#39;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">bar2</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s1">&#39;bar2&#39;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">.</span><span class="n">bar</span>
+</span><span class='line'><span class="c1">#bar</span>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">.</span><span class="n">bar2</span>
+</span><span class='line'><span class="c1">#bar2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>對單一物件，宣告出一個類別</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -177,88 +221,53 @@
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
 <span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">3</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;foo&quot;</span><span class="o">.</span><span class="n">object_id</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Foo</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">foo</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;foo&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="c1">#=&gt;70302331020060</span>
-</span><span class='line'><span class="c1">#=&gt;70302331019980</span>
-</span><span class='line'><span class="c1">#=&gt;70302331019920</span>
 </span><span class='line'>
-</span><span class='line'><span class="mi">3</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="ss">:foo</span><span class="o">.</span><span class="n">object_id</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="c1">#=&gt;1091868</span>
-</span><span class='line'><span class="c1">#=&gt;1091868</span>
-</span><span class='line'><span class="c1">#=&gt;1091868</span>
+</span><span class='line'><span class="n">f1</span> <span class="o">=</span> <span class="no">Foo</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">f2</span> <span class="o">=</span> <span class="no">Foo</span><span class="o">.</span><span class="n">new</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#將字串 freeze 起來，object_id 也會是一樣</span>
-</span><span class='line'><span class="mi">3</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;foo&quot;</span><span class="o">.</span><span class="n">freeze</span><span class="o">.</span><span class="n">object_id</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f1</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># foo</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f2</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># foo</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 只對f1 修改方法</span>
+</span><span class='line'><span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="n">f1</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">foo</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;Edit foo&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="c1">#=&gt;70172682147320</span>
-</span><span class='line'><span class="c1">#=&gt;70172682147320</span>
-</span><span class='line'><span class="c1">#=&gt;70172682147320</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Garbage Collection</h1>
-
-<ul>
-<li><p>在 ruby 2.2 之前，symbol 所佔用的記憶體沒辦法被自動回收，要釋放就必須重啟動程式，因此會造成 memory leak 的問題</p></li>
-<li><p>但在 2.2 之後，Symbol GC(Garbage Collection) ，那些動態用 to_sym 或 intern 長出來的 Symbol 就可以跟一般物件一樣被回收了。</p></li>
-</ul>
-
-
-<h3>ruby2.1</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Ruby 2.1</span>
-</span><span class='line'><span class="n">before</span> <span class="o">=</span> <span class="no">Symbol</span><span class="o">.</span><span class="n">all_symbols</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="mi">100_000</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
-</span><span class='line'>  <span class="s2">&quot;sym</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">to_sym</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f1</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># Edit foo</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f2</span><span class="o">.</span><span class="n">foo</span> <span class="c1"># foo</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 只對f1 新增方法</span>
+</span><span class='line'><span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="n">f1</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">bar</span>
+</span><span class='line'>    <span class="k">return</span> <span class="s1">&#39;bar&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="no">GC</span><span class="o">.</span><span class="n">start</span>
-</span><span class='line'><span class="n">after</span> <span class="o">=</span> <span class="no">Symbol</span><span class="o">.</span><span class="n">all_symbols</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="nb">puts</span> <span class="n">after</span> <span class="o">-</span> <span class="n">before</span>
-</span><span class='line'><span class="c1"># =&gt; 100001</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>ruby 2.2</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Ruby 2.2</span>
-</span><span class='line'><span class="n">before</span> <span class="o">=</span> <span class="no">Symbol</span><span class="o">.</span><span class="n">all_symbols</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="mi">100_000</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
-</span><span class='line'>  <span class="s2">&quot;sym</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">to_sym</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="no">GC</span><span class="o">.</span><span class="n">start</span>
-</span><span class='line'><span class="n">after</span> <span class="o">=</span> <span class="no">Symbol</span><span class="o">.</span><span class="n">all_symbols</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="nb">puts</span> <span class="n">after</span> <span class="o">-</span> <span class="n">before</span>
-</span><span class='line'><span class="c1"># =&gt; 1</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f1</span><span class="o">.</span><span class="n">bar</span> <span class="c1"># bar</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f2</span><span class="o">.</span><span class="n">bar</span> <span class="c1"># undefined method `bar&#39;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <p>參考文件：<br/>
-<a href="http://kaochenlong.com/2016/04/25/string-and-symbol/">Ruby 語法放大鏡之「有的變數變前面有一個冒號(例如 :name)，是什麼意思?」</a><br/>
-<a href="https://www.sitepoint.com/symbol-gc-ruby-2-2/">Symbol GC in Ruby 2.2</a><br/>
-<a href="http://grantcss.com/blog/2015/01/26/symbol-gc-in-ruby-2-dot-2/">[译] 在 Ruby 2.2 中的 Symbol GC</a></p>
+<a href="http://wemee.blogspot.tw/2014/07/ruby-class.html">Ruby: class &lt;&lt; self</a><br/>
+<a href="http://stackoverflow.com/questions/10964081/class-self-vs-self-method-with-ruby-whats-better">class &lt;&lt; self vs self.method with Ruby: what&rsquo;s better?</a></p>
 </div>
 
 
@@ -281,13 +290,13 @@
 
 
 
-<time class='entry-date' datetime='2016-06-10T12:18:42+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>12:18 pm</span></time>
+<time class='entry-date' datetime='2016-07-04T00:01:37+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>4</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>12:01 am</span></time>
       
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby/'>ruby</a>
+    <a class='category' href='/blog/categories/rails/'>rails</a>
   
 </span>
 
@@ -296,7 +305,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/06/10/garbage-collection/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/06/10/garbage-collection/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/07/04/class-self/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/07/04/class-self/" >Tweet</a>
   
   
   
@@ -307,10 +316,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2016/06/09/override-default-primary-key-id/" title="Previous Post: Override Default Primary Key Id">&laquo; Override Default Primary Key Id</a>
+        <a class="basic-alignment left" href="/blog/2016/06/22/retrieving-multiple-objects-in-batches/" title="Previous Post: Retrieving Multiple Objects in Batches 批次取出多筆記錄">&laquo; Retrieving Multiple Objects in Batches 批次取出多筆記錄</a>
       
       
-        <a class="basic-alignment right" href="/blog/2016/06/12/cookie-and-session/" title="Next Post: Cookie & Session">Cookie & Session &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2016/07/04/rails-hash/" title="Next Post: 好用的 Hash method">好用的 Hash method &raquo;</a>
       
     </p>
   </footer>
@@ -340,8 +349,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/06/10/garbage-collection/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2016/06/10/garbage-collection/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/07/04/class-self/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/07/04/class-self/';
         var disqus_script = 'embed.js';
       
     (function () {

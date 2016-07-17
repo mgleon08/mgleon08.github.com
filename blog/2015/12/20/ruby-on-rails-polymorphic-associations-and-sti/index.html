@@ -208,11 +208,12 @@
 
 <p>這樣 Guest 和 Member 就必須有自己的資料表了。</p>
 
-<p>官方文件：
+<p>官方文件：<br/>
 <a href="http://rails.ruby.tw/association_basics.html#%E5%96%AE%E8%A1%A8%E7%B9%BC%E6%89%BF">Guides 中文</a></p>
 
-<p>參考文件：
-<a href="https://ihower.tw/rails4/activerecord-others.html">Ruby on Rails 實戰聖經</a></p>
+<p>參考文件：<br/>
+<a href="https://ihower.tw/rails4/activerecord-others.html">Ruby on Rails 實戰聖經</a><br/>
+<a href="https://samurails.com/tutorial/single-table-inheritance-with-rails-4-part-1/">Single Table Inheritance with Rails 4 (Part 1)</a></p>
 
 <h1>多型關聯(Polymorphic Associations)</h1>
 
@@ -307,9 +308,26 @@
 
 <h3>eager-load-polymorphic</h3>
 
-<p>因為用了 Polymorphic，所以在用像是 includes 關聯的時候，因為不知道 _id 會指到哪個 table，所以會出現錯誤 <code>Can not eagerly load the polymorphic association : commentable</code></p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#單純去 include 是沒問題的</span>
+</span><span class='line'><span class="no">Comment</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">commentable</span><span class="p">:</span> <span class="ss">:user</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#當要做排序就會出現</span>
+</span><span class='line'><span class="c1">#ActiveRecord::StatementInvalid: Mysql2::Error: Unknown column &#39;users. commentable_type&#39; in &#39;where clause&#39;:</span>
+</span><span class='line'><span class="no">Comment</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">commentable</span><span class="p">:</span> <span class="ss">:user</span><span class="p">)</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;users.id DESC&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
 
-<p>這是就要另外加上以下這兩個關聯才行</p>
+
+<p>因為用了 Polymorphic，所以在用像是 includes 關聯的時候，因為不知道 _id 會指到哪個 table(並不存在 commentable)，所以會出現錯誤</p>
+
+<p><code>Can not eagerly load the polymorphic association : commentable</code></p>
+
+<p>這是就要另外加上以下這兩個關聯才行，明確讓他知道關聯到哪個 table</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -324,14 +342,24 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#就能夠透過 include 明確知道是要關聯到哪個 table，再根據該 table 去做排序</span>
+</span><span class='line'><span class="no">Comment</span><span class="o">.</span><span class="n">includes</span><span class="p">(</span><span class="ss">article</span><span class="p">:</span> <span class="ss">:user</span><span class="p">)</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="s2">&quot;articles.id DESC&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <p><a href="http://stackoverflow.com/questions/16123492/eager-load-polymorphic">eager-load-polymorphic</a></p>
 
-<p>官方文件：
-<a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations">Guides</a>
+<p>官方文件：<br/>
+<a href="http://guides.rubyonrails.org/association_basics.html#polymorphic-associations">Guides</a><br/>
 <a href="http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF">Guides 中文</a></p>
 
-<p>參考資料：
-<a href="https://ihower.tw/rails4/activerecord-relationships.html">Ruby on Rails 實戰聖經</a></p>
+<p>參考資料：<br/>
+<a href="https://ihower.tw/rails4/activerecord-relationships.html">Ruby on Rails 實戰聖經</a><br/>
+<a href="http://stackoverflow.com/questions/16123492/eager-load-polymorphic">eager-load-polymorphic</a></p>
 </div>
 
 

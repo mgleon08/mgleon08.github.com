@@ -178,7 +178,7 @@ option: - a: &hellip;">
 <span class='line-number'>15</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;yaml&quot;</span>
 </span><span class='line'>
-</span><span class='line'><span class="no">SAMPLE</span> <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="s1">&#39;../sample.yml&#39;</span><span class="p">,</span> <span class="bp">__FILE__</span><span class="p">)))</span><span class="o">.</span><span class="n">freeze</span>
+</span><span class='line'><span class="no">SAMPLE</span> <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="s1">&#39;../sample.yml&#39;</span><span class="p">,</span> <span class="bp">__FILE__</span><span class="p">)))</span><span class="o">.</span><span class="n">symbolize_keys</span><span class="o">.</span><span class="n">freeze</span>
 </span><span class='line'>
 </span><span class='line'><span class="ow">or</span>
 </span><span class='line'>
@@ -193,6 +193,11 @@ option: - a: &hellip;">
 </span><span class='line'><span class="c1">#    }</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<h3>symbolize_keys</h3>
+
+<p><a href="http://apidock.com/rails/Hash/symbolize_keys">symbolize_keys</a><br/>
+<a href="http://apidock.com/rails/Thread/freeze">freeze</a></p>
 
 <h1>設定檔</h1>
 
@@ -231,10 +236,59 @@ option: - a: &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>在 yaml 寫 ruby code</h1>
+
+<p><code>config/urls.yml</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">development</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">PATH</span><span class="p">:</span> <span class="o">&lt;</span><span class="sx">%= Rails.public_path %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">test:</span>
+</span><span class='line'><span class="sx">  PATH: &lt;%=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">public_path</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  </span>
+</span><span class='line'><span class="sx">production:</span>
+</span><span class='line'><span class="sx">  PATH: &lt;%= Rails.public_path %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>config/initializers/load_config.rb</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#用 ERB.new().result 將檔案讀出時，透過此 method 轉成 ruby code</span>
+</span><span class='line'><span class="no">URL</span> <span class="o">=</span> <span class="no">YAML</span><span class="o">.</span><span class="n">load</span><span class="p">(</span><span class="no">ERB</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="si">}</span><span class="s2">/config/urls.yml&quot;</span><span class="p">))</span><span class="o">.</span><span class="n">result</span><span class="p">)</span><span class="o">[</span><span class="no">Rails</span><span class="o">.</span><span class="n">env</span><span class="o">].</span><span class="n">symbolize_keys</span><span class="o">.</span><span class="n">freeze</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config_for</span><span class="p">(</span><span class="ss">:urls</span><span class="p">)</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">config_for</span><span class="p">(</span><span class="ss">:urls</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#自動就會判斷環境設定</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也可以用 rails 內建的 <code>config_for</code> 來讀取 <code>.yml</code> 檔案</p>
+
 <p><a href="http://apidock.com/rails/v4.2.1/Rails/Application/config_for">config_for</a></p>
 
 <p>官方文件：<br/>
-<a href="http://ruby-doc.org/stdlib-1.8.6/libdoc/yaml/rdoc/YAML.html">Yaml</a></p>
+<a href="http://ruby-doc.org/stdlib-1.8.6/libdoc/yaml/rdoc/YAML.html">Yaml</a><br/>
+<a href="http://ruby-doc.org/stdlib-2.3.1/libdoc/erb/rdoc/ERB.html">ERB.html</a></p>
+
+<p>參考文件：<br/>
+<a href="http://urgetopunt.com/rails/2009/09/12/yaml-config-with-erb.html">Using ERB in YAML Configuration File</a></p>
 </div>
 
 

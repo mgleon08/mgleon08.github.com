@@ -9,7 +9,7 @@
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="當內建的驗證沒有自己的需求時，可以自訂驗證的 method 來使用。 1
+  <meta name="description" content="當內建的驗證沒有自己的需求時，可以自訂驗證的 method 來使用。 Custom method 也可以寫方法來驗證 Model 的狀態，並在 Model 狀態無效的情況下將錯誤加入 errors 集合。必須使用 validate 這個類別方法來註冊。 1
 2
 3
 4
@@ -18,12 +18,7 @@
 7
 8
 9
-10
-11
-12
-13
-14
-class Picture &lt; ActiveRecord::Base belongs_to :user validate :picture_size # &hellip;">
+10 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -140,7 +135,9 @@ class Picture &lt; ActiveRecord::Base belongs_to :user validate :picture_size # 
 <!-- more -->
 
 
+<h1>Custom method</h1>
 
+<p>也可以寫方法來驗證 Model 的狀態，並在 Model 狀態無效的情況下將錯誤加入 errors 集合。必須使用 validate 這個類別方法來註冊。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -158,7 +155,7 @@ class Picture &lt; ActiveRecord::Base belongs_to :user validate :picture_size # 
 <span class='line-number'>14</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Picture</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
 </span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:user</span>
-</span><span class='line'>  <span class="n">validate</span>  <span class="ss">:picture_size</span>  <span class="c1">#注意沒有加 &#39;s&#39;</span>
+</span><span class='line'>  <span class="n">validate</span>  <span class="ss">:picture_size</span><span class="p">,</span> <span class="ss">on</span><span class="p">:</span> <span class="ss">:create</span>  <span class="c1">#注意沒有加 &#39;s&#39;</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="kp">private</span>
 </span><span class='line'>
@@ -173,9 +170,11 @@ class Picture &lt; ActiveRecord::Base belongs_to :user validate :picture_size # 
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>Performing Custom Validations</h1>
+<h1>Custom Validations</h1>
 
-<p>也可以將 <code>validator</code> 拉出來，比較乾淨。</p>
+<p>自定 Validator 是擴展 ActiveModel::Validator 的類別，且必須實作 validate 方法，此方法接受 record 作為參數，驗證行為寫在這個方法裡。寫好 Validator，使用時則是用 validates_with。</p>
+
+<h3>validates_with</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -198,8 +197,10 @@ class Picture &lt; ActiveRecord::Base belongs_to :user validate :picture_size # 
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
 <span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#app/validators/photo_size_validator.rb</span>
-</span><span class='line'>
 </span><span class='line'><span class="k">class</span> <span class="nc">PhotoSizeValidator</span> <span class="o">&lt;</span> <span class="no">ActiveModel</span><span class="o">::</span><span class="no">Validator</span>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">validate</span> <span class="n">record</span>
 </span><span class='line'>    <span class="k">unless</span> <span class="n">validated?</span> <span class="n">record</span>
@@ -215,14 +216,67 @@ class Picture &lt; ActiveRecord::Base belongs_to :user validate :picture_size # 
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">#models/photo.rb</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">PhotoValidator</span> <span class="o">&lt;</span> <span class="no">ActiveModel</span><span class="o">::</span><span class="no">EachValidator</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">PhotoValidator</span>
 </span><span class='line'>  <span class="kp">include</span> <span class="no">ActiveModel</span><span class="o">::</span><span class="no">Validations</span>
 </span><span class='line'>  <span class="n">validates_with</span> <span class="no">PhotoSizeValidator</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">#也可帶入其他參數</span>
+</span><span class='line'>  <span class="c1">#validates_with PhotoSizeValidator, fields: [:size]</span>
+</span><span class='line'>  <span class="c1">#預設會被放入 options Hash，options[:size]</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>or</p>
+<p>以上在應用程式生命週期內只會實體化一次，而不是每次驗證時就實體化一次。所以使用實體變數時要很小心。</p>
+
+<p>如果驗證類別足夠複雜的話，需要用到實體變數，可以用純 Ruby 物件（Plain Old Ruby Object, PORO）</p>
+
+<h3>PORO範例</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Person</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">validate</span> <span class="k">do</span> <span class="o">|</span><span class="n">person</span><span class="o">|</span>
+</span><span class='line'>    <span class="no">GoodnessValidator</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">person</span><span class="p">)</span><span class="o">.</span><span class="n">validate</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">GoodnessValidator</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">person</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@person</span> <span class="o">=</span> <span class="n">person</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">validate</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">some_complex_condition_involving_ivars_and_private_methods?</span>
+</span><span class='line'>      <span class="vi">@person</span><span class="o">.</span><span class="n">errors</span><span class="o">[</span><span class="ss">:base</span><span class="o">]</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;This person is evil&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>validate_each</h3>
+
+<p>加入自定 Validator 來驗證每一個屬性的最簡單方法是使用 ActiveModel::EachValidator。在這個例子裡，自定的 Validator 類別必須實作一個 validate_each 方法，接受三個參數，record、attribute 以及 value，分別對應到要驗證的紀錄、屬性、屬性值。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -249,10 +303,54 @@ class Picture &lt; ActiveRecord::Base belongs_to :user validate :picture_size # 
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>內建：</p>
+<p>這個方法採用區塊（block）來驗證屬性。沒有預先定義的驗證功能。可以在程式碼區塊裡寫要驗證的行為，validates_each 指定的每個屬性，會傳入區塊做驗證。比如下例檢查名與姓是否以小寫字母開頭：</p>
 
-<p><code>rubyvalidates_presence_of :statusvalidates_numericality_of :fingersvalidates_uniqueness_of :toothmarksvalidates_confirmation_of :passwordvalidates_acceptance_of :zombificationvalidates_length_of :password, minimum: 3validates_format_of :email, with: /regex/ivalidates_inclusion_of :age, in: 21..99validates_exclusion_of :age, in: 0...21, message: “Sorry you must be over 21”
-</code></p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Person</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="n">validates_each</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:surname</span> <span class="k">do</span> <span class="o">|</span><span class="n">record</span><span class="p">,</span> <span class="kp">attr</span><span class="p">,</span> <span class="n">value</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">record</span><span class="o">.</span><span class="n">errors</span><span class="o">.</span><span class="n">add</span><span class="p">(</span><span class="kp">attr</span><span class="p">,</span> <span class="s1">&#39;must start with upper case&#39;</span><span class="p">)</span> <span class="k">if</span> <span class="n">value</span> <span class="o">=~</span> <span class="sr">/\A[[:lower:]]/</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這個區塊接受記錄、屬性名稱、屬性值。在區塊裡可以寫任何驗證行為。驗證失敗時應給 Model 新增錯誤訊息，才能把記錄標記成非法的。</p>
+
+<h1>Other</h1>
+
+<p>其他要注意的是，並不是每個方法都會去做驗證的動作<br/>
+以下方法會忽略驗證</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">decrement!</span>
+</span><span class='line'><span class="n">decrement_counter</span>
+</span><span class='line'><span class="n">increment!</span>
+</span><span class='line'><span class="n">increment_counter</span>
+</span><span class='line'><span class="n">toggle!</span>
+</span><span class='line'><span class="n">touch</span>
+</span><span class='line'><span class="n">update_all</span>
+</span><span class='line'><span class="n">update_attribute</span>
+</span><span class='line'><span class="n">update_column</span>
+</span><span class='line'><span class="n">update_columns</span>
+</span><span class='line'><span class="n">update_counters</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>其他內建驗證直接參考官網</p>
 
 <p>官方文件：<br/>
 <a href="http://guides.rubyonrails.org/active_record_validations.html">Active Record 驗證</a><br/>

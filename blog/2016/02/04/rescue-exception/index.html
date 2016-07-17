@@ -314,6 +314,12 @@ rescue =&gt; e # 例外發生時的處理措施 &hellip;">
 <a href="https://simonecarletti.com/blog/2009/12/inside-ruby-on-rails-rescuable-and-rescue_from/">Understanding Ruby and Rails: Rescuable and rescue_from</a><br/>
 <a href="http://www.rubytutorial.io/rails-rescue_from/">Rails' rescue_from</a></p>
 
+<h1>自訂錯誤類型</h1>
+
+<p><a href="http://stackoverflow.com/questions/5200842/where-to-define-custom-error-types-in-ruby-and-or-rails">Where to define custom error types in Ruby and/or Rails?</a><br/>
+<a href="http://stackoverflow.com/questions/11636874/raise-custom-exception-with-arguments">Raise custom Exception with arguments</a><br/>
+<a href="https://wearestac.com/blog/raising-and-rescuing-custom-errors-in-rails">RAISING AND RESCUING CUSTOM ERRORS IN RAILS</a></p>
+
 <h1>自訂錯誤頁面</h1>
 
 <p>可以使用 Controller 與 View 來自己客製化錯誤處理的版面。首先定義顯示錯誤頁面的路由。</p>
@@ -392,6 +398,290 @@ rescue =&gt; e # 例外發生時的處理措施 &hellip;">
 </span><span class='line'>  <span class="n">error</span><span class="o">.</span><span class="n">html</span><span class="o">.</span><span class="n">erb</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<h1>other</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="n">do_something</span><span class="p">()</span>
+</span><span class='line'><span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">e</span> <span class="c1"># e is an exception object containing info about the error. </span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="n">do_something</span><span class="p">()</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">RecordNotFound</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="n">e</span> <span class="c1"># Only rescues RecordNotFound exceptions, or classes that inherit from RecordNotFound</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Don&rsquo;t do this.</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="n">do_something</span><span class="p">()</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">Exception</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="c1"># Don&#39;t do this. This will swallow every single exception. Nothing gets past it. </span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://blog.honeybadger.io/ruby-exception-vs-standarderror-whats-the-difference/">Ruby&rsquo;s Exception vs StandardError: What&rsquo;s the difference?</a></p>
+
+<h1>Raise four step</h1>
+
+<h3>Step 1:Call #exception to get the exception</h3>
+
+<p><code>raise</code> 主要是會去執行 <code>self.class</code> 的 <code>#exception</code> 因此可以覆蓋過去</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">raise</span><span class="p">(</span><span class="n">error_class_or_obj</span><span class="p">,</span> <span class="n">message</span><span class="p">,</span> <span class="n">backtrace</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">error</span> <span class="o">=</span> <span class="n">error_class_or_obj</span><span class="o">.</span><span class="n">exception</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;net/http&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Net</span><span class="o">::</span><span class="no">HTTPInternalServerError</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">exception</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;Internal server error&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">RuntimeError</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Net</span><span class="o">::</span><span class="no">HTTPNotFound</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">exception</span><span class="p">(</span><span class="n">message</span><span class="o">=</span><span class="s2">&quot;哈囉&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">RuntimeError</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">message</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">response</span> <span class="o">=</span> <span class="no">Net</span><span class="o">::</span><span class="no">HTTP</span><span class="o">.</span><span class="n">get_response</span><span class="p">(</span>
+</span><span class='line'>  <span class="no">URI</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="s2">&quot;http://avdi.org/notexist&quot;</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="n">response</span><span class="o">.</span><span class="n">code</span><span class="o">.</span><span class="n">to_i</span> <span class="o">&gt;=</span> <span class="mi">400</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="n">response</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Step 2: #set_backtrace</h3>
+
+<p>追蹤錯誤來源</p>
+
+<blockquote><p>in order to get a stack trace which includes the current line, you must call #caller passing 0 for the “start” parameter</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">foo</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;#caller: &quot;</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="o">*</span><span class="nb">caller</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;----------&quot;</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;#caller(0)&quot;</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="o">*</span><span class="nb">caller</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">bar</span>
+</span><span class='line'>  <span class="n">foo</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="n">bar</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">##caller:</span>
+</span><span class='line'><span class="c1">#3.set_back_trace.rb:9:in `bar&#39;</span>
+</span><span class='line'><span class="c1">#3.set_back_trace.rb:11:in `&lt;main&gt;&#39;</span>
+</span><span class='line'><span class="c1">#----------</span>
+</span><span class='line'><span class="c1">##caller(0)</span>
+</span><span class='line'><span class="c1">#3.set_back_trace.rb:6:in `foo&#39;</span>
+</span><span class='line'><span class="c1">#3.set_back_trace.rb:9:in `bar&#39;</span>
+</span><span class='line'><span class="c1">#3.set_back_trace.rb:11:in `&lt;main&gt;&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Step 3: Set the global exception variable</h3>
+
+<p><code>$ERROR_INFO</code> alias for <code>$!</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;English&#39;</span>
+</span><span class='line'><span class="nb">puts</span> <span class="vg">$!</span><span class="o">.</span><span class="n">inspect</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="s2">&quot;Oops&quot;</span>
+</span><span class='line'><span class="k">rescue</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="vg">$!</span><span class="o">.</span><span class="n">inspect</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="vg">$ERROR_INFO</span><span class="o">.</span><span class="n">inspect</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="nb">puts</span> <span class="vg">$!</span><span class="o">.</span><span class="n">inspect</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="http://ruby-doc.org/stdlib-2.0.0/libdoc/English/rdoc/English.html">English</a></p>
+
+<h3>Step 4: Raise the exception up the call stack</h3>
+
+<p>Limitations on exception matchers</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">errors_with_message</span><span class="p">(</span><span class="n">pattern</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1">#Generate an anonymous &quot;matcher module&quot; with a custom threequals</span>
+</span><span class='line'>  <span class="n">m</span> <span class="o">=</span> <span class="no">Module</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="p">(</span><span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="n">m</span><span class="p">;</span> <span class="nb">self</span><span class="p">;</span> <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="n">instance_eval</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">define_method</span><span class="p">(</span><span class="ss">:===</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">e</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">pattern</span> <span class="o">===</span> <span class="n">e</span><span class="o">.</span><span class="n">message</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">m</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="s2">&quot;About to raise&quot;</span>
+</span><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="s2">&quot;Timeout while reading from socket&quot;</span>
+</span><span class='line'><span class="k">rescue</span> <span class="n">errors_with_message</span><span class="p">(</span><span class="sr">/socket/</span><span class="p">)</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Ignoring socket error&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="nb">puts</span> <span class="s2">&quot;Continuing...&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>A custom exception matcher.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">errors_matching</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">m</span> <span class="o">=</span> <span class="no">Module</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="p">(</span><span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="n">m</span><span class="p">;</span> <span class="nb">self</span><span class="p">;</span> <span class="k">end</span><span class="p">)</span><span class="o">.</span><span class="n">instance_eval</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">define_method</span><span class="p">(</span><span class="ss">:===</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">m</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">RetryableError</span> <span class="o">&lt;</span> <span class="no">StandardError</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:num_tries</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">message</span><span class="p">,</span> <span class="n">num_tries</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@num_tries</span> <span class="o">=</span> <span class="n">num_tries</span>
+</span><span class='line'>    <span class="k">super</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="n">message</span><span class="si">}</span><span class="s2"> (#</span><span class="si">#{</span><span class="n">num_tries</span><span class="si">}</span><span class="s2">)&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="s2">&quot;About to raise&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">begin</span>
+</span><span class='line'>  <span class="k">raise</span> <span class="no">RetryableError</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;Connection timeout&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'><span class="k">rescue</span> <span class="n">errors_matching</span><span class="p">{</span><span class="o">|</span><span class="n">e</span><span class="o">|</span> <span class="n">e</span><span class="o">.</span><span class="n">num_tries</span> <span class="o">&lt;</span> <span class="mi">3</span><span class="p">}</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;Ignoring </span><span class="si">#{</span><span class="n">e</span><span class="o">.</span><span class="n">message</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="nb">puts</span> <span class="s2">&quot;Continuing...&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/core-2.2.0/Exception.html">Exception</a></p>
 
 <p>參考文件：<br/>
 <a href="http://blog.xuite.net/yschu/wretch/104912690-Ruby+-+Chapter+09+%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86(exception">Ruby - Chapter 09 例外處理(exception)</a>)<br/>

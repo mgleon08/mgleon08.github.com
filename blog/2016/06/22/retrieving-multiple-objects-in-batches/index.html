@@ -5,33 +5,15 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Garbage Collection (GC) - Leon's Blogging</title>
+  <title>Retrieving Multiple Objects in Batches 批次取出多筆記錄 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="在 ruby 當中，經常會看到 : 的符號，代表 symbol 跟一般 string 的差異在於 同樣的 string，會產生不同的 記憶體
-同樣的 symbol，一樣的記憶體 1
+  <meta name="description" content="Retrieving Multiple Objects in Batches 當要處理多筆資料時，一般都會用 User.all 去取資料 但是當資料相當龐大，一次取出那麼多會非常佔用記憶體
+因此有以下解決方式，一次拿一部分（預設為1000） find_each 一筆一筆放入區塊。 1
 2
 3
-4
-5
-6
-7
-8
-9
-10
-11
-12
-13
-14
-15
-16
-17
-18
-19
-20
-21
-3. &hellip;">
+4 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -40,7 +22,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/06/10/garbage-collection">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/06/22/retrieving-multiple-objects-in-batches">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -123,7 +105,7 @@
   <header>
     
       
-        <h1 class="entry-title">Garbage Collection (GC)</h1>
+        <h1 class="entry-title">Retrieving Multiple Objects in Batches 批次取出多筆記錄</h1>
       
     
     
@@ -133,7 +115,7 @@
 
 
 
-<time class='entry-date' datetime='2016-06-10T12:18:42+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>12:18 pm</span></time>
+<time class='entry-date' datetime='2016-06-22T00:32:45+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>22</span><span class='date-suffix'>nd</span>, <span class='date-year'>2016</span></span> <span class='time'>12:32 am</span></time>
         
          | <a href="#disqus_thread">Comments</a>
         
@@ -143,16 +125,20 @@
   </header>
 
 
-<div class="entry-content"><p>在 ruby 當中，經常會看到 : 的符號，代表 symbol</p>
+<div class="entry-content"><h1>Retrieving Multiple Objects in Batches</h1>
+
+<p>當要處理多筆資料時，一般都會用 User.all 去取資料</p>
 
 <!-- more -->
 
 
-<p>跟一般 string 的差異在於</p>
+<p>但是當資料相當龐大，一次取出那麼多會非常佔用記憶體<br/>
+因此有以下解決方式，一次拿一部分（預設為1000）</p>
+
+<h1>find_each</h1>
 
 <ul>
-<li>同樣的 string，會產生不同的 記憶體</li>
-<li>同樣的 symbol，一樣的記憶體</li>
+<li>一筆一筆放入區塊。</li>
 </ul>
 
 
@@ -162,103 +148,38 @@
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">3</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;foo&quot;</span><span class="o">.</span><span class="n">object_id</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">find_each</span><span class="p">(</span><span class="ss">start</span><span class="p">:</span> <span class="mi">2000</span><span class="p">,</span> <span class="ss">batch_size</span><span class="p">:</span> <span class="mi">5000</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">user</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">NewsMailer</span><span class="o">.</span><span class="n">weekly</span><span class="p">(</span><span class="n">user</span><span class="p">)</span><span class="o">.</span><span class="n">deliver_now</span>
 </span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="c1">#=&gt;70302331020060</span>
-</span><span class='line'><span class="c1">#=&gt;70302331019980</span>
-</span><span class='line'><span class="c1">#=&gt;70302331019920</span>
 </span><span class='line'>
-</span><span class='line'><span class="mi">3</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="ss">:foo</span><span class="o">.</span><span class="n">object_id</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="c1">#=&gt;1091868</span>
-</span><span class='line'><span class="c1">#=&gt;1091868</span>
-</span><span class='line'><span class="c1">#=&gt;1091868</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#將字串 freeze 起來，object_id 也會是一樣</span>
-</span><span class='line'><span class="mi">3</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span>
-</span><span class='line'>  <span class="nb">puts</span> <span class="s2">&quot;foo&quot;</span><span class="o">.</span><span class="n">freeze</span><span class="o">.</span><span class="n">object_id</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="c1">#=&gt;70172682147320</span>
-</span><span class='line'><span class="c1">#=&gt;70172682147320</span>
-</span><span class='line'><span class="c1">#=&gt;70172682147320</span>
+</span><span class='line'><span class="c1">#:start 選項可以設定批次的起始 ID。</span>
+</span><span class='line'><span class="c1">#:batch_size 選項允許你在將各筆記錄傳進區塊前，指定一批要取多少筆記錄。</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>Garbage Collection</h1>
+<h1>find_in_batches</h1>
 
 <ul>
-<li><p>在 ruby 2.2 之前，symbol 所佔用的記憶體沒辦法被自動回收，要釋放就必須重啟動程式，因此會造成 memory leak 的問題</p></li>
-<li><p>但在 2.2 之後，Symbol GC(Garbage Collection) ，那些動態用 to_sym 或 intern 長出來的 Symbol 就可以跟一般物件一樣被回收了。</p></li>
+<li>取出記錄放入陣列傳至區塊</li>
 </ul>
 
 
-<h3>ruby2.1</h3>
-
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Ruby 2.1</span>
-</span><span class='line'><span class="n">before</span> <span class="o">=</span> <span class="no">Symbol</span><span class="o">.</span><span class="n">all_symbols</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="mi">100_000</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
-</span><span class='line'>  <span class="s2">&quot;sym</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">to_sym</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Invoice</span><span class="o">.</span><span class="n">find_in_batches</span> <span class="k">do</span> <span class="o">|</span><span class="n">invoices</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">export</span><span class="o">.</span><span class="n">add_invoices</span><span class="p">(</span><span class="n">invoices</span><span class="p">)</span>
 </span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="no">GC</span><span class="o">.</span><span class="n">start</span>
-</span><span class='line'><span class="n">after</span> <span class="o">=</span> <span class="no">Symbol</span><span class="o">.</span><span class="n">all_symbols</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="nb">puts</span> <span class="n">after</span> <span class="o">-</span> <span class="n">before</span>
-</span><span class='line'><span class="c1"># =&gt; 100001</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#和 find_each 一樣的選項 :batch_size 與 :start。</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>ruby 2.2</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Ruby 2.2</span>
-</span><span class='line'><span class="n">before</span> <span class="o">=</span> <span class="no">Symbol</span><span class="o">.</span><span class="n">all_symbols</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="mi">100_000</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span>
-</span><span class='line'>  <span class="s2">&quot;sym</span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="s2">&quot;</span><span class="o">.</span><span class="n">to_sym</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="no">GC</span><span class="o">.</span><span class="n">start</span>
-</span><span class='line'><span class="n">after</span> <span class="o">=</span> <span class="no">Symbol</span><span class="o">.</span><span class="n">all_symbols</span><span class="o">.</span><span class="n">size</span>
-</span><span class='line'><span class="nb">puts</span> <span class="n">after</span> <span class="o">-</span> <span class="n">before</span>
-</span><span class='line'><span class="c1"># =&gt; 1</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件：<br/>
-<a href="http://kaochenlong.com/2016/04/25/string-and-symbol/">Ruby 語法放大鏡之「有的變數變前面有一個冒號(例如 :name)，是什麼意思?」</a><br/>
-<a href="https://www.sitepoint.com/symbol-gc-ruby-2-2/">Symbol GC in Ruby 2.2</a><br/>
-<a href="http://grantcss.com/blog/2015/01/26/symbol-gc-in-ruby-2-dot-2/">[译] 在 Ruby 2.2 中的 Symbol GC</a></p>
+<p>官方資料：<br/>
+<a href="http://guides.rubyonrails.org/active_record_querying.html">Active Record Query Interface</a><br/>
+<a href="http://rails.ruby.tw/active_record_querying.html">Active Record 查詢</a></p>
 </div>
 
 
@@ -281,13 +202,13 @@
 
 
 
-<time class='entry-date' datetime='2016-06-10T12:18:42+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>12:18 pm</span></time>
+<time class='entry-date' datetime='2016-06-22T00:32:45+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>22</span><span class='date-suffix'>nd</span>, <span class='date-year'>2016</span></span> <span class='time'>12:32 am</span></time>
       
       
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby/'>ruby</a>
+    <a class='category' href='/blog/categories/rails/'>rails</a>
   
 </span>
 
@@ -296,7 +217,7 @@
     
       <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/06/10/garbage-collection/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/06/10/garbage-collection/" >Tweet</a>
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/06/22/retrieving-multiple-objects-in-batches/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/06/22/retrieving-multiple-objects-in-batches/" >Tweet</a>
   
   
   
@@ -307,10 +228,10 @@
     
     <p class="meta">
       
-        <a class="basic-alignment left" href="/blog/2016/06/09/override-default-primary-key-id/" title="Previous Post: Override Default Primary Key Id">&laquo; Override Default Primary Key Id</a>
+        <a class="basic-alignment left" href="/blog/2016/06/13/cache-etag-memcache/" title="Previous Post: Cache Etag Memcache">&laquo; Cache Etag Memcache</a>
       
       
-        <a class="basic-alignment right" href="/blog/2016/06/12/cookie-and-session/" title="Next Post: Cookie & Session">Cookie & Session &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2016/07/04/class-self/" title="Next Post: class << self">class << self &raquo;</a>
       
     </p>
   </footer>
@@ -340,8 +261,8 @@
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/06/10/garbage-collection/';
-        var disqus_url = 'http://mgleon08.github.com/blog/2016/06/10/garbage-collection/';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/06/22/retrieving-multiple-objects-in-batches/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/06/22/retrieving-multiple-objects-in-batches/';
         var disqus_script = 'embed.js';
       
     (function () {
