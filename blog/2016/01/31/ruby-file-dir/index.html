@@ -24,11 +24,10 @@
 13
 14
 15
-16
-17
-18
-File.new(&quot;ruby.rb&quot;, &quot;w&quot;) # w 覆寫整個檔案
-# a &hellip;">
+# r 讀取，檔案必須存在
+# w 會主動建立空檔案，檔案已存在則會被覆蓋
+# a 寫入。主動建檔，檔案已存在則追加在後。
+# r+ 讀取 / 寫入， &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -162,27 +161,134 @@ File.new(&quot;ruby.rb&quot;, &quot;w&quot;) # w 覆寫整個檔案
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
 <span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;ruby.rb&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># r  讀取，檔案必須存在</span>
+</span><span class='line'><span class="c1"># w  會主動建立空檔案，檔案已存在則會被覆蓋</span>
+</span><span class='line'><span class="c1"># a  寫入。主動建檔，檔案已存在則追加在後。</span>
+</span><span class='line'><span class="c1"># r+ 讀取 / 寫入，不會主動建檔，將內容加在檔案最前面，會覆蓋原有內容，檔案必須存在)</span>
+</span><span class='line'><span class="c1"># w+ 讀取 / 寫入。同 w 功能</span>
+</span><span class='line'><span class="c1"># a+ 讀取 / 寫入。同 a 功能</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1"># w 覆寫整個檔案</span>
-</span><span class='line'><span class="c1"># a 將內容加到檔案後方</span>
-</span><span class='line'><span class="c1"># r 將內容加在檔案最前面</span>
+</span><span class='line'><span class="c1">#在每個模式後面加上&quot;b&quot;</span>
+</span><span class='line'><span class="c1">#例如 &quot;rb&quot; 或 &quot;rb+&quot;，就可以開啟「二進位」模式 </span>
 </span><span class='line'>
-</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;/home/work/ruby.rb&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;ruby.rb&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;/home/work/ruby.rb&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">close</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">closed?</span> <span class="c1">#檢查是否關閉</span>
+</span><span class='line'><span class="c1">#若後面沒有 block (結束會自動關閉) 必須要再加上，io.close，關閉檔案，否則會出錯</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 打開檔案，並寫入文字（若沒檔案會直接新增）</span>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;langs&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">f</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;Ruby&quot;</span>
+</span><span class='line'>  <span class="n">f</span><span class="o">.</span><span class="n">write</span> <span class="s2">&quot;Java</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="n">f</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;Python</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#查看檔案是否存在，建立時間，檔案大小</span>
+</span><span class='line'><span class="nb">puts</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span> <span class="s1">&#39;tempfile&#39;</span>
 </span><span class='line'>
-</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;ruby.rb&quot;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">f</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;puts &#39;hello world&#39;&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="c1"># 打開檔案，並寫入文字（若沒檔案會直接新增）</span>
+</span><span class='line'><span class="n">f</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">new</span> <span class="s1">&#39;tempfile&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span>
+</span><span class='line'><span class="nb">puts</span> <span class="no">File</span><span class="o">.</span><span class="n">mtime</span> <span class="s1">&#39;tempfile&#39;</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f</span><span class="o">.</span><span class="n">size</span>
 </span><span class='line'>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">rename</span> <span class="s1">&#39;tempfile&#39;</span><span class="p">,</span> <span class="s1">&#39;tempfile2&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">f</span><span class="o">.</span><span class="n">close</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#逐一行印出</span>
+</span><span class='line'><span class="n">f</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;stones&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">while</span> <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gets</span> <span class="k">do</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="n">line</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="n">f</span><span class="o">.</span><span class="n">close</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#逐一行顯示</span>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span> <span class="s2">&quot;ruby.rb&quot;</span> <span class="p">,</span> <span class="s2">&quot;r&quot;</span> <span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+</span><span class='line'>  <span class="k">while</span> <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gets</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="n">line</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#刪除檔案</span>
 </span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/home/work/ruby.rb&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#刪除檔案</span>
 </span><span class='line'>
-</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;ruby.rb&quot;</span><span class="p">)</span>
 </span><span class='line'><span class="c1">#讀取檔案</span>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;ruby.rb&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>指標</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;ruby.rb&quot;</span><span class="p">,</span> <span class="s1">&#39;a+&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;123&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 3</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#因為 a 若有檔案在會寫在檔案後面，此時指標會指向最後面，因此可以用 rewind 將指標移致最前面</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">rewind</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'><span class="c1">#=&gt; 123</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -318,11 +424,55 @@ File.new(&quot;ruby.rb&quot;, &quot;w&quot;) # w 覆寫整個檔案
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>#!/usr/bin/env ruby</h1>
+
+<p>在執行檔上加上以下這行，執行時就會知道是要執行 ruby code</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#!/usr/bin/env ruby</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#主要是讓你的程式在不同的系統上都能適用</span>
+</span><span class='line'><span class="c1">#不管你的 ruby 是在 /usr/bin/ruby 還是 /usr/local/bin/ruby，會自動的在 PATH 變數中所定義的目錄中尋找ruby來執行</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-</span><span class="n">P</span><span class="err">參數</span>
+</span><span class='line'><span class="c1">#!/usr/bin/env -S -P/usr/local/bin:/usr/bin ruby</span>
+</span><span class='line'><span class="c1">#在 /usr/local/bin 和 /usr/bin 目錄下尋找ruby</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">-</span><span class="n">S</span><span class="o">-</span><span class="n">P</span><span class="err">參數</span>
+</span><span class='line'><span class="c1">#!/usr/bin/env -S-P/usr/local/bin:/usr/bin:${PATH} ruby</span>
+</span><span class='line'><span class="c1">#那麼它除了在這兩個目錄尋找之外還會在PATH變數中定義的目錄中尋找</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>檔案權限</h1>
+
+<p>如果要將該檔案變成可執行檔，並且不要讓其他人修改此一檔案的話， 那麼就需要-rwxr-xr-x這樣的權限，此時就得要下達：<code>chmod 755 test.sh</code> 的指令囉！</p>
+
+<ul>
+<li><a href="http://s2.naes.tn.edu.tw/~kv/file.htm">檔案權限</a></li>
+<li><a href="http://linux.vbird.org/linux_basic/0210filepermission.php">第五章、Linux 的檔案權限與目錄配置</a></li>
+</ul>
+
+
 <p>官方文件：<br/>
+<a href="https://ruby-doc.org/core-2.2.0/Dir.html">Dir</a><br/>
 <a href="http://ruby-doc.org/core-2.3.0/File.html">File</a><br/>
 <a href="http://ruby-doc.org/stdlib-2.2.2/libdoc/fileutils/rdoc/FileUtils.html#method-c-cd">FileUtils</a></p>
 
 <p>參考文件：<br/>
+<a href="http://zetcode.com/lang/rubytutorial/io/">Input &amp; output in Ruby</a><br/>
+<a href="https://blog.alphacamp.co/2016/06/30/ruby-open/">Ruby#open 知多少？</a> <br/>
 <a href="http://motion-express.com/trainings/scripting-in-ruby/screencasts/manipulating-files">用Ruby Scripting維護系統</a></p>
 </div>
 

@@ -190,6 +190,65 @@ h = { &quot;a&quot; =&gt; 100, &quot;b&quot; =&gt; false , &# &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>在處理應該存在的哈希鍵時，使用 fetch。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">heroes</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">batman</span><span class="p">:</span> <span class="s1">&#39;Bruce Wayne&#39;</span><span class="p">,</span> <span class="ss">superman</span><span class="p">:</span> <span class="s1">&#39;Clark Kent&#39;</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># bad - if we make a mistake we might not spot it right away</span>
+</span><span class='line'><span class="n">heroes</span><span class="o">[</span><span class="ss">:batman</span><span class="o">]</span> <span class="c1"># =&gt; &quot;Bruce Wayne&quot;</span>
+</span><span class='line'><span class="n">heroes</span><span class="o">[</span><span class="ss">:supermann</span><span class="o">]</span> <span class="c1"># =&gt; nil</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good - fetch raises a KeyError making the problem obvious</span>
+</span><span class='line'><span class="n">heroes</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:supermann</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在使用 fetch 時，使用第二個參數設置默認值而不是使用自定義的邏輯。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">batman</span> <span class="o">=</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Bruce Wayne&#39;</span><span class="p">,</span> <span class="ss">is_evil</span><span class="p">:</span> <span class="kp">false</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># bad - if we just use || operator with falsy value we won&#39;t get the expected result</span>
+</span><span class='line'><span class="n">batman</span><span class="o">[</span><span class="ss">:is_evil</span><span class="o">]</span> <span class="o">||</span> <span class="kp">true</span> <span class="c1"># =&gt; true</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good - fetch work correctly with falsy values</span>
+</span><span class='line'><span class="n">batman</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:is_evil</span><span class="p">,</span> <span class="kp">true</span><span class="p">)</span> <span class="c1"># =&gt; false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>盡量用 fetch 加區塊而不是直接設定默認值。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">batman</span> <span class="o">=</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Bruce Wayne&#39;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># bad - if we use the default value, we eager evaluate it</span>
+</span><span class='line'><span class="c1"># so it can slow the program down if done multiple times</span>
+</span><span class='line'><span class="n">batman</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:powers</span><span class="p">,</span> <span class="n">get_batman_powers</span><span class="p">)</span> <span class="c1"># get_batman_powers is an expensive call</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good - blocks are lazy evaluated, so only triggered in case of KeyError exception</span>
+</span><span class='line'><span class="n">batman</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:powers</span><span class="p">)</span> <span class="p">{</span> <span class="n">get_batman_powers</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>merge</h1>
 
 <p>只有在 merge 的參數裡有同樣的值，才會覆蓋掉 default 的值</p>
@@ -261,7 +320,7 @@ h = { &quot;a&quot; =&gt; 100, &quot;b&quot; =&gt; false , &# &hellip;">
         <a class="basic-alignment left" href="/blog/2016/05/29/struct-vs-openstruct/" title="Previous Post: Struct vs OpenStruct">&laquo; Struct vs OpenStruct</a>
       
       
-        <a class="basic-alignment right" href="/blog/2016/05/29/coding-principle/" title="Next Post: Coding Principle 程式設計原則">Coding Principle 程式設計原則 &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2016/05/29/coding-principle/" title="Next Post: Coding Principle 程式設計原則 SOLID">Coding Principle 程式設計原則 SOLID &raquo;</a>
       
     </p>
   </footer>

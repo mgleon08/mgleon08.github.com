@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>例外處理 Rescue Exception - Leon's Blogging</title>
+  <title>例外處理 Rescue Exception, Error Handling, Custom Error Pages - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
@@ -110,7 +110,7 @@ rescue =&gt; e # 例外發生時的處理措施 &hellip;">
   <header>
     
       
-        <h1 class="entry-title">例外處理 Rescue Exception</h1>
+        <h1 class="entry-title">例外處理 Rescue Exception, Error Handling, Custom Error Pages</h1>
       
     
     
@@ -308,17 +308,48 @@ rescue =&gt; e # 例外發生時的處理措施 &hellip;">
 
 <blockquote><p>不要做 rescue_from Exception 或 rescue_from StandardError，除非有很好的理由。因為這會帶來嚴重的副作用（譬如無法得知異常的細節、無法在開發時追蹤 Backtrace）</p></blockquote>
 
-<p><a href="http://rails.ruby.tw/action_controller_overview.html#rescue-from">rescue-from</a><br/>
-<a href="https://ihower.tw/rails4/actioncontroller.html">Action Controller - 控制 HTTP 流程</a><br/>
-<a href="http://edgeapi.rubyonrails.org/classes/ActiveSupport/Rescuable/ClassMethods.html">Rescuable</a><br/>
-<a href="https://simonecarletti.com/blog/2009/12/inside-ruby-on-rails-rescuable-and-rescue_from/">Understanding Ruby and Rails: Rescuable and rescue_from</a><br/>
-<a href="http://www.rubytutorial.io/rails-rescue_from/">Rails' rescue_from</a></p>
+<ul>
+<li><a href="http://rails.ruby.tw/action_controller_overview.html#rescue-from">rescue-from</a></li>
+<li><a href="https://ihower.tw/rails4/actioncontroller.html">Action Controller - 控制 HTTP 流程</a></li>
+<li><a href="http://edgeapi.rubyonrails.org/classes/ActiveSupport/Rescuable/ClassMethods.html">Rescuable</a></li>
+<li><a href="https://simonecarletti.com/blog/2009/12/inside-ruby-on-rails-rescuable-and-rescue_from/">Understanding Ruby and Rails: Rescuable and rescue_from</a></li>
+<li><a href="http://www.rubytutorial.io/rails-rescue_from/">Rails' rescue_from</a></li>
+</ul>
+
 
 <h1>自訂錯誤類型</h1>
 
-<p><a href="http://stackoverflow.com/questions/5200842/where-to-define-custom-error-types-in-ruby-and-or-rails">Where to define custom error types in Ruby and/or Rails?</a><br/>
-<a href="http://stackoverflow.com/questions/11636874/raise-custom-exception-with-arguments">Raise custom Exception with arguments</a><br/>
-<a href="https://wearestac.com/blog/raising-and-rescuing-custom-errors-in-rails">RAISING AND RESCUING CUSTOM ERRORS IN RAILS</a></p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Errors</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">WhatError</span> <span class="o">&lt;</span> <span class="no">StandardError</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">raise</span> <span class="no">Errors</span><span class="o">::</span><span class="no">WhatError</span><span class="p">,</span> <span class="s1">&#39;Message&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">rescue</span> <span class="no">Errors</span><span class="o">::</span><span class="no">WhatError</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://stackoverflow.com/questions/5200842/where-to-define-custom-error-types-in-ruby-and-or-rails">Where to define custom error types in Ruby and/or Rails?</a></li>
+<li><a href="http://stackoverflow.com/questions/11636874/raise-custom-exception-with-arguments">Raise custom Exception with arguments</a></li>
+<li><a href="https://wearestac.com/blog/raising-and-rescuing-custom-errors-in-rails">RAISING AND RESCUING CUSTOM ERRORS IN RAILS</a></li>
+</ul>
+
 
 <h1>自訂錯誤頁面</h1>
 
@@ -399,7 +430,19 @@ rescue =&gt; e # 例外發生時的處理措施 &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1>other</h1>
+<h3>Dynamic Error Pages</h3>
+
+<ul>
+<li><a href="https://mattbrictson.com/dynamic-rails-error-pages">Dynamic Rails Error Pages</a></li>
+<li><a href="http://stackoverflow.com/questions/2385799/how-to-redirect-to-a-404-in-rails">How to redirect to a 404 in Rails?</a></li>
+<li><a href="http://thepugautomatic.com/2014/08/404-with-rails-4/">Custom 404 error page with Rails 4</a></li>
+<li><a href="https://wearestac.com/blog/dynamic-error-pages-in-rails">DYNAMIC ERROR PAGES IN RAILS</a></li>
+<li><a href="https://samurails.com/jutsu/rails-jutsu/jutsu-12-custom-error-pages-in-rails-4/">Jutsu #12: Custom Error Pages in Rails 4+</a></li>
+<li><a href="https://solidfoundationwebdev.com/blog/posts/creating-custom-error-pages-with-rails">Creating Custom Error Pages With Rails</a></li>
+</ul>
+
+
+<h1>Don&rsquo;t use rescue Exception => e</h1>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -442,7 +485,92 @@ rescue =&gt; e # 例外發生時的處理措施 &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><a href="http://blog.honeybadger.io/ruby-exception-vs-standarderror-whats-the-difference/">Ruby&rsquo;s Exception vs StandardError: What&rsquo;s the difference?</a></p>
+<h3>why</h3>
+
+<p>因為</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#會將所有的 exception 給 rescue 包括，ruby 自行產生的</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">Exception</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#只抓自己專案裡面的 error 都是繼承自 StandardError</span>
+</span><span class='line'><span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'><span class="err">等同於</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">StandardError</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>The Exception Tree</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Exception</span>
+</span><span class='line'> <span class="no">NoMemoryError</span>
+</span><span class='line'> <span class="no">ScriptError</span>
+</span><span class='line'>   <span class="no">LoadError</span>
+</span><span class='line'>   <span class="no">NotImplementedError</span>
+</span><span class='line'>   <span class="no">SyntaxError</span>
+</span><span class='line'> <span class="no">SignalException</span>
+</span><span class='line'>   <span class="no">Interrupt</span>
+</span><span class='line'> <span class="no">StandardError</span>
+</span><span class='line'>   <span class="no">ArgumentError</span>
+</span><span class='line'>   <span class="no">IOError</span>
+</span><span class='line'>     <span class="no">EOFError</span>
+</span><span class='line'>   <span class="no">IndexError</span>
+</span><span class='line'>   <span class="no">LocalJumpError</span>
+</span><span class='line'>   <span class="no">NameError</span>
+</span><span class='line'>     <span class="no">NoMethodError</span>
+</span><span class='line'>   <span class="no">RangeError</span>
+</span><span class='line'>     <span class="no">FloatDomainError</span>
+</span><span class='line'>   <span class="no">RegexpError</span>
+</span><span class='line'>   <span class="no">RuntimeError</span>
+</span><span class='line'>   <span class="no">SecurityError</span>
+</span><span class='line'>   <span class="no">SystemCallError</span>
+</span><span class='line'>   <span class="no">SystemStackError</span>
+</span><span class='line'>   <span class="no">ThreadError</span>
+</span><span class='line'>   <span class="no">TypeError</span>
+</span><span class='line'>   <span class="no">ZeroDivisionError</span>
+</span><span class='line'> <span class="no">SystemExit</span>
+</span><span class='line'> <span class="n">fatal</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://blog.honeybadger.io/ruby-exception-vs-standarderror-whats-the-difference/">Ruby&rsquo;s Exception vs StandardError: What&rsquo;s the difference?</a></li>
+</ul>
+
 
 <h1>Raise four step</h1>
 
@@ -683,9 +811,14 @@ rescue =&gt; e # 例外發生時的處理措施 &hellip;">
 <p>官方文件：<br/>
 <a href="http://ruby-doc.org/core-2.2.0/Exception.html">Exception</a></p>
 
-<p>參考文件：<br/>
-<a href="http://blog.xuite.net/yschu/wretch/104912690-Ruby+-+Chapter+09+%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86(exception">Ruby - Chapter 09 例外處理(exception)</a>)<br/>
-<a href="http://blog.tonycube.com/2011/07/ruby8.html">Ruby學習筆記(8) – 錯誤與例外處理</a></p>
+<p>參考文件：</p>
+
+<ul>
+<li><a href="http://blog.xuite.net/yschu/wretch/104912690-Ruby+-+Chapter+09+%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86(exception">Ruby - Chapter 09 例外處理(exception)</a>)</li>
+<li><a href="http://blog.tonycube.com/2011/07/ruby8.html">Ruby學習筆記(8) – 錯誤與例外處理</a></li>
+<li><a href="https://medium.com/rails-ember-beyond/error-handling-in-rails-the-modular-way-9afcddd2fe1b#.nbq2qjk4a">Error Handling in Rails — The Modular Way</a></li>
+</ul>
+
 </div>
 
 

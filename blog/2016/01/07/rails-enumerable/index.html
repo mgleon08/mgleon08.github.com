@@ -883,12 +883,21 @@
 
 <h1>flat_map</h1>
 
+<ul>
+<li>傾向使用 <code>flat_map</code> 而不是 <code>map</code> + <code>flatten</code> 的組合。</li>
+<li>這並不適用於深度大於2 的數組，舉個例子，如果 <code>users.first.songs == ['a', ['b', 'c']]</code> ，則使用 <code>map</code> + <code>flatten</code> 的組合，而不是使用 <code>flat_map</code> 。</li>
+<li><code>flat_map</code> 將數組變平坦一個層級，而 <code>flatten</code> 會將整個數組變平坦。</li>
+</ul>
+
+
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[[</span><span class="mi">1</span><span class="p">,</span><span class="mi">2</span><span class="o">]</span><span class="p">,</span><span class="o">[</span><span class="mi">3</span><span class="p">,</span><span class="mi">4</span><span class="o">]].</span><span class="n">flat_map</span> <span class="p">{</span><span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="n">i</span> <span class="p">}</span>   <span class="c1">#=&gt; [1, 2, 3, 4]</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <h1>reverse_each</h1>
+
+<p>使用 <code>reverse_each</code> 代替 <code>reverse.each</code>。 <code>reverse_each</code> 不會分配一個新數組並且這是好事。</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">reverse_each</span> <span class="p">{</span><span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="nb">p</span> <span class="n">v</span> <span class="p">}</span>
@@ -963,6 +972,43 @@
 </span><span class='line'><span class="nb">select</span> <span class="err">勝於</span> <span class="n">find_all</span>
 </span><span class='line'><span class="n">reduce</span> <span class="err">勝於</span> <span class="n">inject</span>
 </span><span class='line'><span class="n">size</span>   <span class="err">勝於</span> <span class="n">length</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>自建 methods</h1>
+
+<h3>mash</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Enumerable</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">mash</span><span class="p">(</span><span class="o">&amp;</span><span class="n">block</span><span class="p">)</span>
+</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">inject</span><span class="p">({})</span> <span class="k">do</span> <span class="o">|</span><span class="n">output</span><span class="p">,</span> <span class="n">item</span><span class="o">|</span>
+</span><span class='line'>      <span class="nb">binding</span><span class="o">.</span><span class="n">pry</span>
+</span><span class='line'>      <span class="n">key</span><span class="p">,</span> <span class="n">value</span> <span class="o">=</span> <span class="nb">block_given?</span> <span class="p">?</span> <span class="k">yield</span><span class="p">(</span><span class="n">item</span><span class="p">)</span> <span class="p">:</span> <span class="n">item</span>
+</span><span class='line'>      <span class="n">output</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">key</span> <span class="o">=&gt;</span> <span class="n">value</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">[</span><span class="s2">&quot;functional&quot;</span><span class="p">,</span> <span class="s2">&quot;programming&quot;</span><span class="p">,</span> <span class="s2">&quot;rules&quot;</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">s</span><span class="o">|</span> <span class="o">[</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">length</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">mash</span>
+</span><span class='line'><span class="c1"># {&quot;functional&quot;=&gt;10, &quot;programming&quot;=&gt;11, &quot;rules&quot;=&gt;5}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">[</span><span class="s2">&quot;functional&quot;</span><span class="p">,</span> <span class="s2">&quot;programming&quot;</span><span class="p">,</span> <span class="s2">&quot;rules&quot;</span><span class="o">].</span><span class="n">mash</span> <span class="p">{</span> <span class="o">|</span><span class="n">s</span><span class="o">|</span> <span class="o">[</span><span class="n">s</span><span class="p">,</span> <span class="n">s</span><span class="o">.</span><span class="n">length</span><span class="o">]</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># {&quot;functional&quot;=&gt;10, &quot;programming&quot;=&gt;11, &quot;rules&quot;=&gt;5}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 

@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-07-17T20:03:23+08:00</updated>
+  <updated>2016-08-28T14:56:31+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,1145 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Rake 任務管理工具]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/08/11/rake/"/>
+    <updated>2016-08-11T20:53:30+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/08/11/rake</id>
+    <content type="html"><![CDATA[<p>rake 是個任務管理工具，可以將許多任務，寫成一個 rake，之後只要執行指令，就會將所有任務都完成，例如 rake db:create 中的 db:create 就是 Rails 提供的任務。</p>
+
+<!-- more -->
+
+
+<p>Rakefile</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;rspec/core/rake_task&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">desc</span> <span class="s2">&quot;Run specs&quot;</span>
+</span><span class='line'><span class="no">RSpec</span><span class="o">::</span><span class="no">Core</span><span class="o">::</span><span class="no">RakeTask</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:spec</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">t</span><span class="o">.</span><span class="n">pattern</span> <span class="o">=</span> <span class="s2">&quot;spec/**/*_spec.rb&quot;</span> <span class="c1">#所有測試文件的位置</span>
+</span><span class='line'>  <span class="n">t</span><span class="o">.</span><span class="n">verbose</span> <span class="o">=</span> <span class="kp">true</span> <span class="c1">#輸出 Rake::TestTask 執行的具體Ruby命令</span>
+</span><span class='line'>  <span class="n">t</span><span class="o">.</span><span class="n">ruby_opts</span> <span class="o">=</span> <span class="s2">&quot;-rtesthelper&quot;</span> <span class="c1">#避免每個測試文件重複 require &quot;test_helper&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Cucumber</span><span class="o">::</span><span class="no">Rake</span><span class="o">::</span><span class="no">Task</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:features</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">t</span><span class="o">.</span><span class="n">cucumber_opts</span> <span class="o">=</span> <span class="s2">&quot;features --format progress&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">task</span> <span class="ss">:default</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="ss">:spec</span><span class="p">,</span> <span class="ss">:features</span><span class="o">]</span>
+</span><span class='line'><span class="c1">#設定 default 要跑的 task，之後只要執行 rake or rake default 就會去執行，spec 和 feature 的 task</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>之前文章：<br/>
+<a href="http://mgleon08.github.io/blog/2016/03/10/custom-tasks/">自己定義 Rake Tasks</a></p>
+
+<p>官方文件：<br/>
+<a href="http://rake.rubyforge.org/">RAKE – Ruby Make</a><br/>
+<a href="https://relishapp.com/rspec/rspec-core/v/3-4/docs/command-line/rake-task">Rake task rspec</a><br/>
+<a href="http://rake.rubyforge.org/classes/Rake/TestTask.html">Class Rake::TestTask</a></p>
+
+<p>參考文件：<br/>
+<a href="http://kaochenlong.com/2016/04/30/rake/">Ruby 語法放大鏡之「常在終端機裡下 rake db:migrate 指令，這個 rake 是什麼，後面那個 db:migrate 又是怎麼回事?」</a><br/>
+<a href="http://code.oneapm.com/ruby/2015/05/28/ruby-rake-testtask/">Rake::TestTask 介绍</a><br/>
+<a href="http://stackoverflow.com/questions/19200734/how-to-convert-array-of-activerecord-models-to-csv">How to convert array of ActiveRecord models to CSV?</a></p>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[更改 Rails 命名規則 Inflector]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/08/11/inflector/"/>
+    <updated>2016-08-11T20:49:39+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/08/11/inflector</id>
+    <content type="html"><![CDATA[<p>在 rails 當中，有許多命名的慣例</p>
+
+<!-- more -->
+
+
+<ul>
+<li>像是 <code>hello_controller</code> 檔案，裡面慣例對應到的 Class 就是 <code>Hello_Controller</code></li>
+<li>但若是像 <code>api_controller</code>，就會是 <code>Api_Controller</code></li>
+</ul>
+
+
+<p>雖然不是不行，但 API 本來就是縮寫，硬要改成 Api 可能會讓人覺得怪怪的</p>
+
+<p>因此 rails 有提供解決辦法，就能夠將 <code>api_Controller</code> 改成 <code>API_Controller</code></p>
+
+<p>rails 內建有 <code>Inflector</code> 就是用來處理命名規則用的</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">/</span><span class="n">initializers</span><span class="o">/</span><span class="n">inflections</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Inflector</span><span class="o">.</span><span class="n">inflections</span><span class="p">(</span><span class="ss">:en</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">inflect</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">inflect</span><span class="o">.</span><span class="n">acronym</span> <span class="s1">&#39;API&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是 Rails 轉單複數單字，有錯誤時，可以定義</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#錯誤</span>
+</span><span class='line'><span class="s2">&quot;Business&quot;</span><span class="o">.</span><span class="n">singularize</span>  <span class="o">=&gt;</span> <span class="s2">&quot;Busines&quot;</span>
+</span><span class='line'><span class="s2">&quot;moose&quot;</span><span class="o">.</span><span class="n">pluralize</span> <span class="o">=&gt;</span> <span class="s2">&quot;mooses&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">/</span><span class="n">initializers</span><span class="o">/</span><span class="n">inflections</span><span class="o">.</span><span class="n">rb</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Inflector</span><span class="o">.</span><span class="n">inflections</span><span class="p">(</span><span class="ss">:en</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">inflect</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">inflect</span><span class="o">.</span><span class="n">irregular</span> <span class="s1">&#39;tooth&#39;</span><span class="p">,</span> <span class="s1">&#39;teeth&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>other</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Be sure to restart your server when you modify this file.</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Add new inflection rules using the following format. Inflections</span>
+</span><span class='line'><span class="c1"># are locale specific, and you may define rules for as many different</span>
+</span><span class='line'><span class="c1"># locales as you wish. All of these examples are active by default:</span>
+</span><span class='line'><span class="c1"># ActiveSupport::Inflector.inflections(:en) do |inflect|</span>
+</span><span class='line'><span class="c1">#   inflect.plural /^(ox)$/i, &#39;\1en&#39;</span>
+</span><span class='line'><span class="c1">#   inflect.singular /^(ox)en/i, &#39;\1&#39;</span>
+</span><span class='line'><span class="c1">#   inflect.irregular &#39;person&#39;, &#39;people&#39;</span>
+</span><span class='line'><span class="c1">#   inflect.uncountable %w( fish sheep )</span>
+</span><span class='line'><span class="c1"># end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># These inflection rules are supported but not enabled by default:</span>
+</span><span class='line'><span class="c1"># ActiveSupport::Inflector.inflections(:en) do |inflect|</span>
+</span><span class='line'><span class="c1">#   inflect.acronym &#39;RESTful&#39;</span>
+</span><span class='line'><span class="c1"># end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>官方文件：</p>
+
+<ul>
+<li><a href="http://api.rubyonrails.org/classes/ActiveSupport/Inflector.html">Inflector</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://ruby-china.org/topics/19242">&lsquo;APIController&rsquo; is not a supported controller name</a></li>
+<li><a href="https://ihower.tw/rails4/environments-and-bundler.html">環境設定與Bundler</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby on Rails 裝機趴 (Only Mac)]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/07/22/install-ruby-on-rails/"/>
+    <updated>2016-07-22T19:58:37+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/07/22/install-ruby-on-rails</id>
+    <content type="html"><![CDATA[<p>最近剛好新來了一台電腦，所有東西都要重新安裝，就順手把需要的東西都紀錄了一下，以便之後可以快速的安裝起來!</p>
+
+<!-- more -->
+
+
+<h3>目錄</h3>
+
+<ul>
+<li><a href="#iterm2">iTerm2</a></li>
+<li><a href="#homebrew">Homebrew</a></li>
+<li><a href="#git">Git</a></li>
+<li><a href="#github">GitHub</a></li>
+<li><a href="#zsh">zsh &amp; oh-my-zsh</a></li>
+<li><a href="#rvmorrbenv">rvm or rbenv</a></li>
+<li><a href="#rubygems">RubyGems</a></li>
+<li><a href="#rails">Rails</a></li>
+<li><a href="#bundle">Bundle</a></li>
+<li><a href="#nvm">NVM</a></li>
+<li><a href="#npm">NPM</a></li>
+<li><a href="#sublime">Sublime Text</a></li>
+<li><a href="#vim">Vim</a></li>
+<li><a href="#linux">Linux</a></li>
+<li><a href="#other">Other</a></li>
+</ul>
+
+
+<h1><span id="iterm2">iTerm2</span></h1>
+
+<blockquote><p>Terminal 終端機</p></blockquote>
+
+<ul>
+<li><a href="https://www.iterm2.com/">iTerm2</a></li>
+</ul>
+
+
+<h3>tmux</h3>
+
+<ul>
+<li><a href="http://blog.chh.tw/posts/tmux-terminal-multiplexer/">終端機必備的多工良伴：tmux</a></li>
+</ul>
+
+
+<h1><span id="homebrew">Homebrew</span></h1>
+
+<blockquote><p>Mac OS X 上的套件管理程式</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#安裝</span>
+</span><span class='line'><span class="sr">/usr/</span><span class="n">bin</span><span class="o">/</span><span class="n">ruby</span> <span class="o">-</span><span class="n">e</span> <span class="s2">&quot;$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#homebrew檢查 </span>
+</span><span class='line'><span class="n">brew</span> <span class="n">doctor</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#已經裝了哪些套件</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">list</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#homebrew更新</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">update</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#搜尋套件</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">search</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#查詢套件資訊</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">info</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#module會裝到/usr/local/opt/xxx</span>
+</span><span class='line'><span class="c1">#安裝xxx模組 </span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">xxx</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#更新xxx模組 </span>
+</span><span class='line'><span class="n">brew</span> <span class="n">upgrade</span> <span class="n">xxx</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://brew.sh/">Homebrew</a></li>
+</ul>
+
+
+<p>推薦套件</p>
+
+<p><a href="http://searchbrew.com/">searchbrew</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#postgresql</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">postgresql</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">pg</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#mysql</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">mysql</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">mysql2</span>
+</span><span class='line'><span class="n">mysql</span><span class="o">.</span><span class="n">server</span> <span class="n">start</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#redis</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">redis</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#背景啟動</span>
+</span><span class='line'><span class="n">redis</span><span class="o">-</span><span class="n">server</span> <span class="o">--</span><span class="n">daemonize</span> <span class="n">yes</span>
+</span><span class='line'><span class="n">redis</span><span class="o">-</span><span class="n">server</span><span class="o">&amp;&amp;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#imagemagick</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">imagemagick</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">rmagick</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#ffmpeg</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">ffmpeg</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#MediaInfo</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">mediainfo</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#wget</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">wget</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1><span id="git">Git</span></h1>
+
+<blockquote><p>版本控制</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#安裝 git</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">git</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#設定輸出顏色</span>
+</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">color</span><span class="o">.</span><span class="n">ui</span> <span class="kp">true</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#設定 git 的 user 和 email</span>
+</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">user</span><span class="o">.</span><span class="n">name</span> <span class="s2">&quot;YOUR NAME&quot;</span>
+</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">user</span><span class="o">.</span><span class="n">email</span> <span class="s2">&quot;YOUR@EMAIL.com&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#空白對有些語言是有影響的(像是Ruby)，因此我們會希望 Git 去忽略空白的變化</span>
+</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">apply</span><span class="o">.</span><span class="n">whitespace</span> <span class="n">nowarn</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#讓 git 記住你，不需每次上傳 code 都要打帳號密碼</span>
+</span><span class='line'><span class="n">git</span> <span class="n">config</span> <span class="o">--</span><span class="n">global</span> <span class="n">credential</span><span class="o">.</span><span class="n">helper</span> <span class="n">store</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Git GUI</h3>
+
+<ul>
+<li><a href="https://www.sourcetreeapp.com/">SourceTree</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#建立 command line 快捷</span>
+</span><span class='line'><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="sr">/Applications/</span><span class="no">SourceTree</span><span class="o">.</span><span class="n">app</span><span class="o">/</span><span class="no">Contents</span><span class="o">/</span><span class="no">Resources</span><span class="o">/</span><span class="n">stree</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://gitx.frim.nl/">GitX</a></li>
+<li><a href="http://jonas.nitro.dk/tig/manual.html#view-scrolling">tig</a></li>
+</ul>
+
+
+<h3>Git 指令</h3>
+
+<ul>
+<li><a href="http://mgleon08.github.io/blog/2015/12/27/git-command/">Git 指令操作手冊</a></li>
+</ul>
+
+
+<h1><span id="github">GitHub</span></h1>
+
+<p>設定SSH連接</p>
+
+<blockquote><p>若要沿用舊電腦的 key ， 將舊電腦的 id_rsa &amp; public key 複製過來即可，但因為新電腦第一次登入，會要求輸入就電腦的 key 的密碼</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#本機產生 ssh key (id_rsa（private key）id_rsa.pub（public key）) ~/.ssh/</span>
+</span><span class='line'><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span> <span class="o">-</span><span class="n">t</span> <span class="n">rsa</span> <span class="o">-</span><span class="n">C</span> <span class="o">[</span><span class="n">email</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#設定權限(預設應該就有設好，若是自己新開檔案就要設定)</span>
+</span><span class='line'><span class="n">chmod</span> <span class="mi">600</span> <span class="n">id_rsa</span>
+</span><span class='line'><span class="n">chmod</span> <span class="mi">644</span> <span class="n">id_rsa</span><span class="o">.</span><span class="n">pub</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#在 github 上新增新的 ssh</span>
+</span><span class='line'><span class="err">將</span> <span class="n">id_rsa</span><span class="o">.</span><span class="n">pub</span> <span class="err">內容複製過去</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#測試是否能連上 github</span>
+</span><span class='line'><span class="n">ssh</span> <span class="o">-</span><span class="n">T</span> <span class="n">git</span><span class="vi">@github</span><span class="o">.</span><span class="n">com</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#查看 ssh 功能</span>
+</span><span class='line'><span class="n">man</span> <span class="n">ssh</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#將 key 加入 ssh-agent memory</span>
+</span><span class='line'><span class="n">ssh</span><span class="o">-</span><span class="n">add</span> <span class="o">~</span><span class="sr">/.ssh/i</span><span class="n">d_dsa</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#檢查目前的 key</span>
+</span><span class='line'><span class="n">ssh</span><span class="o">-</span><span class="n">add</span> <span class="o">-</span><span class="n">l</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#刪除 ssh-agent key</span>
+</span><span class='line'><span class="n">ssh</span><span class="o">-</span><span class="n">add</span> <span class="o">-</span><span class="n">d</span> <span class="o">~</span><span class="sr">/.ssh/i</span><span class="n">d_dsa</span><span class="o">.</span><span class="n">pub</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#刪除所有 ssh-agent key</span>
+</span><span class='line'><span class="n">ssh</span><span class="o">-</span><span class="n">add</span> <span class="o">-</span><span class="n">D</span> <span class="o">~</span><span class="sr">/.ssh/i</span><span class="n">d_dsa</span><span class="o">.</span><span class="n">pub</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#將 key 永久紀錄</span>
+</span><span class='line'><span class="n">ssh</span><span class="o">-</span><span class="n">add</span> <span class="o">-</span><span class="n">K</span> <span class="o">[</span><span class="n">path</span><span class="o">/</span><span class="n">to</span><span class="o">/</span><span class="n">your</span><span class="o">/</span><span class="n">ssh</span><span class="o">-</span><span class="n">key</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://developer.github.com/guides/using-ssh-agent-forwarding/">Using SSH agent forwarding</a></li>
+<li><a href="https://ihower.tw/blog/archives/7837">SSH agent forwarding 的應用</a></li>
+<li><a href="http://man.linuxde.net/ssh">ssh命令</a></li>
+<li><a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chmod">鳥哥的私房菜 - 權限指令</a></li>
+</ul>
+
+
+<h1><span id="zsh">zsh &amp; oh-my-zsh</span></h1>
+
+<blockquote><p>shell &amp; zsh 的 framework 套件</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#安裝 zsh</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">zsh</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#將 shell 預設改成 zsh，改完記得重開 iterm or source ~/.zshrc</span>
+</span><span class='line'><span class="n">chsh</span> <span class="o">-</span><span class="n">s</span> <span class="sr">/bin/</span><span class="n">zsh</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#查看目前使用是哪個 shell</span>
+</span><span class='line'><span class="n">echo</span> <span class="vg">$SHELL</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#下載 oh-my-zsh</span>
+</span><span class='line'><span class="n">git</span> <span class="nb">clone</span> <span class="ss">git</span><span class="p">:</span><span class="sr">//</span><span class="n">github</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">robbyrussell</span><span class="o">/</span><span class="n">oh</span><span class="o">-</span><span class="n">my</span><span class="o">-</span><span class="n">zsh</span><span class="o">.</span><span class="n">git</span> <span class="o">~</span><span class="sr">/.oh-my-zsh</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#將 oh-my-zsh 預設的設定複製到 ./</span><span class="o">.</span><span class="n">zshrc</span> <span class="p">(</span><span class="o">.</span><span class="n">zshrc</span> <span class="err">需要自行產生</span><span class="p">)</span>
+</span><span class='line'><span class="n">cp</span> <span class="o">~</span><span class="sr">/.oh-my-zsh/</span><span class="n">templates</span><span class="o">/</span><span class="n">zshrc</span><span class="o">.</span><span class="n">zsh</span><span class="o">-</span><span class="n">template</span> <span class="o">~</span><span class="sr">/.zshrc</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#安裝 zsh-completions</span>
+</span><span class='line'><span class="sr">brew install zsh-completions</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#加入以下兩行來啟動 zsh-completions</span>
+</span><span class='line'><span class="sr">#zsh-completions</span>
+</span><span class='line'><span class="sr">fpath=(/us</span><span class="n">r</span><span class="o">/</span><span class="n">local</span><span class="o">/</span><span class="n">share</span><span class="o">/</span><span class="n">zsh</span><span class="o">-</span><span class="n">completions</span> <span class="vg">$fpath</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#同時還需要 rebuild zsh 的 .zcompdump</span>
+</span><span class='line'><span class="n">rm</span> <span class="o">-</span><span class="n">f</span> <span class="o">~</span><span class="sr">/.zcompdump; compinit</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#更改 theme ( 到 .zshrc 更改 ZSH_THEME 參數 )</span>
+</span><span class='line'><span class="sr">ZSH_THEME=&quot;edvardm&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#啟動 oh-my-zsh 內建的套件，要看有哪些套件可以去 ~/</span><span class="o">.</span><span class="n">oh</span><span class="o">-</span><span class="n">my</span><span class="o">-</span><span class="n">zsh</span> <span class="err">裡面的</span> <span class="n">plugins</span> <span class="err">看裡面的設定</span><span class="p">(</span> <span class="err">到</span> <span class="o">.</span><span class="n">zshrc</span> <span class="err">更改</span> <span class="n">plugins</span> <span class="err">參數</span> <span class="p">)</span>
+</span><span class='line'><span class="n">plugins</span><span class="o">=</span><span class="p">(</span><span class="n">git</span> <span class="n">ruby</span> <span class="n">rbenv</span> <span class="n">github</span> <span class="n">gitignore</span> <span class="n">rails</span> <span class="n">rake</span> <span class="n">python</span> <span class="n">z</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a></li>
+<li><a href="http://icarus4.logdown.com/posts/177661-from-bash-to-zsh-setup-tips">bash 轉移 zsh (oh-my-zsh) 設定心得</a></li>
+</ul>
+
+
+<h1><span id="rvmorrbenv">rvm or rbenv</span></h1>
+
+<blockquote><p>管理 ruby &amp; gem 工具</p></blockquote>
+
+<h3>rvm</h3>
+
+<ul>
+<li><a href="http://mgleon08.github.io/blog/2016/02/15/rvm-and-gemsets/">RVM and Gemsets Ruby版本控制</a></li>
+<li><a href="https://ruby-china.org/wiki/rvm-guide">rvm 使用指南</a></li>
+</ul>
+
+
+<h3>rbenv</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#安裝</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">rbenv</span> <span class="n">ruby</span><span class="o">-</span><span class="n">build</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#將指令放到 ~/.zshrc or ~/.bashrc</span>
+</span><span class='line'><span class="n">export</span> <span class="no">PATH</span><span class="o">=</span><span class="s2">&quot;$HOME/.rbenv/bin:$PATH&quot;</span>
+</span><span class='line'><span class="nb">eval</span> <span class="s2">&quot;$(rbenv init -)&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#列出所有 ruby 版本</span>
+</span><span class='line'><span class="n">rbenv</span> <span class="n">install</span> <span class="o">--</span><span class="n">list</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#列出安装的版本</span>
+</span><span class='line'><span class="n">rbenv</span> <span class="n">versions</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#列出正在使用的版本</span>
+</span><span class='line'><span class="n">rbenv</span> <span class="n">version</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#安裝 ruby (請依照當下最新的版本)</span>
+</span><span class='line'><span class="n">rbenv</span> <span class="n">install</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#設定預設版本</span>
+</span><span class='line'><span class="n">rbenv</span> <span class="n">global</span> <span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#確定目前使用的 ruby 是透過 rbenv 而不是內建的(記得重開視窗)</span>
+</span><span class='line'><span class="n">which</span> <span class="n">ruby</span>
+</span><span class='line'><span class="c1">#=&gt; 確保有 .rbenv/shims/ruby</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#project 加上 .ruby-version 檔案裡面寫 ruby 版本 才能加入控管</span>
+</span><span class='line'><span class="mi">2</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">1</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#rbenv 指令</span>
+</span><span class='line'><span class="no">Some</span> <span class="n">useful</span> <span class="n">rbenv</span> <span class="n">commands</span> <span class="ss">are</span><span class="p">:</span>
+</span><span class='line'>   <span class="n">commands</span>    <span class="no">List</span> <span class="n">all</span> <span class="n">available</span> <span class="n">rbenv</span> <span class="n">commands</span>
+</span><span class='line'>   <span class="n">local</span>       <span class="no">Set</span> <span class="ow">or</span> <span class="n">show</span> <span class="n">the</span> <span class="n">local</span> <span class="n">application</span><span class="o">-</span><span class="n">specific</span> <span class="no">Ruby</span> <span class="n">version</span>
+</span><span class='line'>   <span class="n">global</span>      <span class="no">Set</span> <span class="ow">or</span> <span class="n">show</span> <span class="n">the</span> <span class="n">global</span> <span class="no">Ruby</span> <span class="n">version</span>
+</span><span class='line'>   <span class="n">shell</span>       <span class="no">Set</span> <span class="ow">or</span> <span class="n">show</span> <span class="n">the</span> <span class="n">shell</span><span class="o">-</span><span class="n">specific</span> <span class="no">Ruby</span> <span class="n">version</span>
+</span><span class='line'>   <span class="n">install</span>     <span class="no">Install</span> <span class="n">a</span> <span class="no">Ruby</span> <span class="n">version</span> <span class="n">using</span> <span class="n">ruby</span><span class="o">-</span><span class="n">build</span>
+</span><span class='line'>   <span class="n">uninstall</span>   <span class="no">Uninstall</span> <span class="n">a</span> <span class="n">specific</span> <span class="no">Ruby</span> <span class="n">version</span>
+</span><span class='line'>   <span class="n">rehash</span>      <span class="no">Rehash</span> <span class="n">rbenv</span> <span class="n">shims</span> <span class="p">(</span><span class="n">run</span> <span class="n">this</span> <span class="n">after</span> <span class="n">installing</span> <span class="n">executables</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">version</span>     <span class="no">Show</span> <span class="n">the</span> <span class="n">current</span> <span class="no">Ruby</span> <span class="n">version</span> <span class="ow">and</span> <span class="n">its</span> <span class="n">origin</span>
+</span><span class='line'>   <span class="n">versions</span>    <span class="no">List</span> <span class="n">all</span> <span class="no">Ruby</span> <span class="n">versions</span> <span class="n">available</span> <span class="n">to</span> <span class="n">rbenv</span>
+</span><span class='line'>   <span class="n">which</span>       <span class="no">Display</span> <span class="n">the</span> <span class="n">full</span> <span class="n">path</span> <span class="n">to</span> <span class="n">an</span> <span class="n">executable</span>
+</span><span class='line'>   <span class="n">whence</span>      <span class="no">List</span> <span class="n">all</span> <span class="no">Ruby</span> <span class="n">versions</span> <span class="n">that</span> <span class="n">contain</span> <span class="n">the</span> <span class="n">given</span> <span class="n">executable</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>rbenv-gemset</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#安裝 rbenv-gemset</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">rbenv</span><span class="o">-</span><span class="n">gemset</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#rbenv gemset 指令</span>
+</span><span class='line'><span class="n">possible</span> <span class="n">commands</span> <span class="ss">are</span><span class="p">:</span>
+</span><span class='line'>  <span class="n">active</span>
+</span><span class='line'>  <span class="n">create</span> <span class="o">[</span><span class="n">version</span><span class="o">]</span> <span class="o">[</span><span class="n">gemset</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">delete</span> <span class="o">[</span><span class="n">version</span><span class="o">]</span> <span class="o">[</span><span class="n">gemset</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">file</span>
+</span><span class='line'>  <span class="n">init</span> <span class="o">[</span><span class="n">gemset</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">list</span>
+</span><span class='line'>  <span class="n">version</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#使用方法</span>
+</span><span class='line'><span class="err">將想要使用的</span> <span class="n">gemset</span> <span class="err">名稱，放到</span> <span class="o">.</span><span class="n">rbenv</span><span class="o">-</span><span class="n">gemsets</span> <span class="err">檔案即可，在該專案執行</span> <span class="n">bundle</span> <span class="err">就會對設定好的</span> <span class="n">gemset</span> <span class="err">進行操作</span>
+</span><span class='line'><span class="err">若是沒有設定該檔案就會是</span> <span class="n">global</span> <span class="err">的</span> <span class="n">bundle</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://ruby-china.org/wiki/rbenv-guide">rbenv 使用指南</a></li>
+</ul>
+
+
+<h1><span id="rubygems">RubyGems</span></h1>
+
+<blockquote><p>RubyGems 是 Ruby 的套件管理系統，讓你輕易安裝及管理 Ruby 函式庫。</p></blockquote>
+
+<p><a href="https://rubygems.org/">RubyGems.org</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#RubyGems 的版本</span>
+</span><span class='line'><span class="n">gem</span> <span class="o">-</span><span class="n">v</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#升級RubyGems的版本</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">update</span> <span class="o">--</span><span class="nb">system</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#安裝某個套件(加上 --no-ri --no-rdoc 可以不要產生預設的 RDoc和ri文件)</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">gem_name</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">ri</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">rdoc</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#列出安裝的套件</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">list</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#更新最新版本</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">update</span> <span class="n">gem_name</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#更新所有你安裝的Gems</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">update</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#安裝特定版本</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="o">-</span><span class="n">v</span> <span class="n">x</span><span class="o">.</span><span class="n">x</span><span class="o">.</span><span class="n">x</span> <span class="n">gemname</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#反安裝</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">uninstall</span> <span class="n">gem_name</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1><span id="rails">Rails</span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#後面的參數是不下載文件，可以省很多安裝時間</span>
+</span><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">rails</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">ri</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">rdoc</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1><span id="bundle">Bundle</span></h1>
+
+<blockquote><p>管理應用程式 Gem 依存性(dependencies)管理工具，它會根據 Gemfile 的設定自動下載及安裝 Gem 套件</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">bundler</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://bundler.io/">bundle</a></li>
+</ul>
+
+
+<h1><span id="nvm">NVM</span></h1>
+
+<blockquote><p>管理 npm 工具，類似 rvm</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#根據當下最新版本</span>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="n">o</span><span class="o">-</span> <span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">raw</span><span class="o">.</span><span class="n">githubusercontent</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">creationix</span><span class="o">/</span><span class="n">nvm</span><span class="o">/</span><span class="n">v0</span><span class="o">.</span><span class="mi">31</span><span class="o">.</span><span class="mi">4</span><span class="o">/</span><span class="n">install</span><span class="o">.</span><span class="n">sh</span> <span class="o">|</span> <span class="n">bash</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#將以下放到自己的 ~/.zshrc or ~/.bashrc or .bash_profile 下面（預設會自動放好，但還是去確定一下）</span>
+</span><span class='line'><span class="n">export</span> <span class="no">NVM_DIR</span><span class="o">=</span><span class="s2">&quot;/Users/leon/.nvm&quot;</span>
+</span><span class='line'><span class="o">[</span> <span class="o">-</span><span class="n">s</span> <span class="s2">&quot;$NVM_DIR/nvm.sh&quot;</span> <span class="o">]</span> <span class="o">&amp;&amp;</span> <span class="o">.</span> <span class="s2">&quot;$NVM_DIR/nvm.sh&quot;</span>  <span class="c1"># This loads nvm%</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#重新載入 Shell</span>
+</span><span class='line'><span class="o">.</span> <span class="o">~</span><span class="sr">/.nvm/n</span><span class="n">vm</span><span class="o">.</span><span class="n">sh</span> <span class="ow">or</span> <span class="n">source</span> <span class="o">~</span><span class="sr">/.zshrc</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr"># 安裝穩定版本的 NodeJS</span>
+</span><span class='line'><span class="sr">nvm install stable </span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#顯示目前可以安裝的版本</span>
+</span><span class='line'><span class="sr">nvm ls-remote</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#安裝 NodeJS</span>
+</span><span class='line'><span class="sr">nvm install &lt;version&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#安裝穩定版本的 NodeJS</span>
+</span><span class='line'><span class="sr">nvm install stable </span>
+</span><span class='line'><span class="sr"> </span>
+</span><span class='line'><span class="sr">#使用版本，只有在當下，重新開新tab就會消失</span>
+</span><span class='line'><span class="sr">nvm use stable </span>
+</span><span class='line'><span class="sr"> </span>
+</span><span class='line'><span class="sr">#設定預設版本，永久</span>
+</span><span class='line'><span class="sr">nvm alias default stable</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#看目前安裝所有版本</span>
+</span><span class='line'><span class="sr">ls -a ~/</span><span class="o">.</span><span class="n">nvm</span><span class="o">/</span><span class="n">versions</span><span class="o">/</span><span class="n">node</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://segmentfault.com/a/1190000004404505">node版本管理工具nvm-Mac下安装及使用</a></li>
+<li><a href="https://tenten.co/blog/install-gulp-grunt-bower-sass-susy-on-mac-with-nvm-rvm/">在 Mac 上裝 NVM, RVM 等跑 Gulp, Grunt, Bower 環境</a></li>
+<li><a href="http://icarus4.logdown.com/posts/175092-nodejs-installation-guide">Node.js 安裝與版本切換教學 (for MAC)</a></li>
+</ul>
+
+
+<h1><span id="npm">NPM</span></h1>
+
+<blockquote><p>套件管理</p></blockquote>
+
+<p><a href="https://www.npmjs.com/">npm</a></p>
+
+<p>資料夾一定會有 package.json</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#搜尋 npm 套件，但建議去網站上比較快</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">search</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#本地安裝，會安裝在當前專案的 node_modules 目錄下</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">&lt;</span><span class="n">package</span> <span class="nb">name</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#全域安裝，會將套件安裝在統一的 npm 目錄底下</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">-</span><span class="n">g</span> <span class="o">&lt;</span><span class="n">package</span> <span class="nb">name</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#列出專案使用套件</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">ls</span> <span class="p">(</span><span class="o">-</span><span class="n">g</span> <span class="err">全域套件</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#更新專案套件</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">update</span> <span class="p">(</span><span class="o">-</span><span class="n">g</span> <span class="err">全域套件</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#移除專案套件</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">uninstall</span> <span class="o">&lt;</span><span class="n">package</span> <span class="nb">name</span><span class="o">&gt;</span> <span class="p">(</span><span class="o">-</span><span class="n">g</span> <span class="err">全域套件</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#清快取</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">cache</span> <span class="n">clean</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#查詢 npm 儲存路徑</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">config</span> <span class="n">get</span> <span class="n">prefix</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#自動安裝 package.json 套件定義檔中定義的所有套件</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">install</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#安裝套件並儲存在 package.json 中</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">&lt;</span><span class="n">package</span> <span class="nb">name</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">save</span> <span class="c1">#套件發行時宣告的相依套件</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">install</span> <span class="o">&lt;</span><span class="n">package</span> <span class="nb">name</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">save</span><span class="o">-</span><span class="n">dev</span> <span class="c1">#開發環境開發時需要的套件</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>package.json</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#自動產生 package.json</span>
+</span><span class='line'><span class="n">npm</span> <span class="n">init</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'> <span class="err"> </span><span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="err"> </span><span class="s2">&quot;version&quot;</span><span class="p">:</span> <span class="s2">&quot;1.0.0&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="err"> </span><span class="s2">&quot;description&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="err"> </span><span class="s2">&quot;main&quot;</span><span class="p">:</span> <span class="s2">&quot;index.js&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="err"> </span><span class="s2">&quot;scripts&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'> <span class="err"> </span> <span class="err"> </span><span class="s2">&quot;test&quot;</span><span class="p">:</span> <span class="s2">&quot;echo </span><span class="se">\&quot;</span><span class="s2">Error: no test specified</span><span class="se">\&quot;</span><span class="s2"> &amp;&amp; exit 1&quot;</span>
+</span><span class='line'> <span class="err"> </span><span class="p">},</span>
+</span><span class='line'> <span class="err"> </span><span class="s2">&quot;author&quot;</span><span class="p">:</span> <span class="s2">&quot;&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="err"> </span><span class="s2">&quot;license&quot;</span><span class="p">:</span> <span class="s2">&quot;ISC&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="err"> </span><span class="s2">&quot;dependencies&quot;</span><span class="p">:{</span><span class="c1">#套件相依</span>
+</span><span class='line'> <span class="err"> </span><span class="p">},</span>
+</span><span class='line'> <span class="err"> </span><span class="s2">&quot;devDependencies&quot;</span><span class="p">:</span> <span class="p">{</span><span class="c1">#開發套件相依</span>
+</span><span class='line'><span class="err">    </span><span class="s2">&quot;lodash&quot;</span><span class="p">:</span> <span class="s2">&quot;^4.15.0&quot;</span> <span class="c1">#示範加上去的</span>
+</span><span class='line'> <span class="err"> </span><span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://www.slideshare.net/wantingj/npm-46801372">Npm 套件管理 &amp; 常用開發工具介紹</a></li>
+</ul>
+
+
+<h1><span id="sublime">Sublime Text</span></h1>
+
+<blockquote><p>編輯器</p></blockquote>
+
+<p>安裝好用的套件管理 <a href="https://packagecontrol.io/installation">package control</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">All</span> <span class="no">Autocomplete</span>
+</span><span class='line'><span class="no">AutoFileName</span>
+</span><span class='line'><span class="no">Alignment</span>
+</span><span class='line'><span class="no">Color</span> <span class="no">Highlighter</span>
+</span><span class='line'><span class="no">CovertToUTF8</span>
+</span><span class='line'><span class="no">Emmet</span>
+</span><span class='line'><span class="no">GitGutter</span>
+</span><span class='line'><span class="no">SideBarEnhancement</span>
+</span><span class='line'><span class="no">BracketHighlighter</span>
+</span><span class='line'><span class="no">SublimeCodeIntel</span>
+</span><span class='line'><span class="no">PrettyRuby</span>
+</span><span class='line'><span class="no">PrettyJson</span>
+</span><span class='line'><span class="no">PrettyYaml</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#theme</span>
+</span><span class='line'><span class="no">Spacegray</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://github.com/kkga/spacegray">Spacegray</a></p>
+
+<p>Prefrences > Setting-User</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;font_size&quot;</span><span class="p">:</span> <span class="mi">22</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;hightlight_line&quot;</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;tab_size&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;translate_tabs_to_spaces&quot;</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;trim_trailing_white_space_on_save&quot;</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;ignored_packages&quot;</span><span class="p">:</span>
+</span><span class='line'>  <span class="o">[</span>
+</span><span class='line'>      <span class="s2">&quot;Vintage&quot;</span>
+</span><span class='line'>  <span class="o">]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>建立快速鍵</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">{</span> <span class="s2">&quot;keys&quot;</span><span class="p">:</span> <span class="o">[</span><span class="s2">&quot;super+shift+h&quot;</span><span class="o">]</span><span class="p">,</span> <span class="s2">&quot;command&quot;</span><span class="p">:</span> <span class="s2">&quot;pretty_ruby_format&quot;</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>設定快速command <code>subl .</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#建立 bin 資料夾，建立軟連結到指定的檔案</span>
+</span><span class='line'><span class="n">mkdir</span> <span class="o">~</span><span class="sr">/bin </span>
+</span><span class='line'><span class="sr">ln -s &quot;/</span><span class="no">Applications</span><span class="o">/</span><span class="no">Sublime</span> <span class="no">Text</span><span class="o">.</span><span class="n">app</span><span class="o">/</span><span class="no">Contents</span><span class="o">/</span><span class="no">SharedSupport</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">subl</span><span class="s2">&quot; ~/bin/subl</span>
+</span><span class='line'>
+</span><span class='line'><span class="s2">#若是 echo $PATH 沒有相對應的路徑，可以在 .zshrc 加上</span>
+</span><span class='line'><span class="s2">export PATH=&quot;</span><span class="vg">$HOME</span><span class="o">/</span><span class="ss">bin</span><span class="p">:</span><span class="vg">$PATH</span><span class="s2">&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://packagecontrol.io/installation">package control</a></li>
+<li><a href="https://www.sublimetext.com/">Sublime Text</a></li>
+</ul>
+
+
+<h1><span id="vim">Vim</span></h1>
+
+<p>介面優化，新增 <code>.vimrc</code> 檔案</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#顯示行號：對於 debug 相當有幫助! (加上 run 數字會跟著跑)</span>
+</span><span class='line'><span class="ss">:set</span> <span class="n">nu</span> <span class="n">rnu</span>
+</span><span class='line'><span class="c1">#自動對齊縮排：如果上一行有兩個 tab 的寬度，按 enter 繼續編輯下一行時會自動保留兩個 tab 鍵的寬度。</span>
+</span><span class='line'><span class="ss">:set</span> <span class="n">ai</span>
+</span><span class='line'><span class="c1">#光標底線：光標所在的那一行會有底線，幫助尋找光標位置</span>
+</span><span class='line'><span class="ss">:set</span> <span class="n">cursorline</span>
+</span><span class='line'><span class="c1">#上色模式-針對亮背景上色，預設為亮背景(白色等)上色，但是終端機的初始背景色為深紫色，會出現文字失蹤 ( 例如註解為深藍色 ) 的情況。將這一行換成 :set bg=dark 即可。</span>
+</span><span class='line'><span class="ss">:set</span> <span class="n">bg</span><span class="o">=</span><span class="n">light</span>
+</span><span class='line'><span class="c1">#縮排間隔數 ( 預設為 8 個空白對齊 )，也就是說按一次 tab 鍵，游標會自動跳 4 格空白字元的寬度。雖有多個空格但實際上只有一個 tab 字元。注意：也就是說，在其他環境下，看到 tab 字元，依舊是 8 個空白寬</span>
+</span><span class='line'><span class="ss">:set</span> <span class="n">tabstop</span><span class="o">=</span><span class="mi">4</span>
+</span><span class='line'><span class="c1">#自動縮排對齊間隔數：向右或向左一個縮排的寬度</span>
+</span><span class='line'><span class="ss">:set</span> <span class="n">shiftwidth</span><span class="o">=</span><span class="mi">4</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://wiki.csie.ncku.edu.tw/vim/vimrc">vimrc設定教學</a></li>
+<li><a href="http://www2.nsysu.edu.tw/csmlab/unix/vi_command.htm">vi指令說明(完整版)</a></li>
+</ul>
+
+
+<h1><span id="linux">Linux 常用指令</span></h1>
+
+<ul>
+<li><a href="http://jdev.tw/blog/3599/linux-terminal-commands-and-shortcuts">Linux常用Terminal命令與快捷鍵參考</a></li>
+</ul>
+
+
+<h1><span id="other">other</span></h1>
+
+<ul>
+<li><a href="http://macdown.uranusjr.com/">MacDown</a></li>
+<li><a href="http://www.sequelpro.com/">Sequel Pro</a></li>
+<li><a href="https://eggerapps.at/postico/">Postico</a></li>
+<li><a href="https://www.getpostman.com/app/postman-osx">PostMan</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://github.com/yuyueugene84/ntu_ror_training_course/blob/master/installation_mac.md">Ruby on Rails Mac 安裝教學</a></li>
+<li><a href="https://ihower.tw/rails4/installation.html">安裝 Rails 開發環境</a></li>
+<li><a href="https://tenten.co/blog/install-gulp-grunt-bower-sass-susy-on-mac-with-nvm-rvm/">在 Mac 上裝 NVM, RVM 等跑 Gulp, Grunt, Bower 環境</a></li>
+<li><a href="https://segmentfault.com/a/1190000004404505">node版本管理工具nvm-Mac下安装及使用</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Custom Seed File]]></title>
@@ -205,6 +1344,65 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>在處理應該存在的哈希鍵時，使用 fetch。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">heroes</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">batman</span><span class="p">:</span> <span class="s1">&#39;Bruce Wayne&#39;</span><span class="p">,</span> <span class="ss">superman</span><span class="p">:</span> <span class="s1">&#39;Clark Kent&#39;</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># bad - if we make a mistake we might not spot it right away</span>
+</span><span class='line'><span class="n">heroes</span><span class="o">[</span><span class="ss">:batman</span><span class="o">]</span> <span class="c1"># =&gt; &quot;Bruce Wayne&quot;</span>
+</span><span class='line'><span class="n">heroes</span><span class="o">[</span><span class="ss">:supermann</span><span class="o">]</span> <span class="c1"># =&gt; nil</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good - fetch raises a KeyError making the problem obvious</span>
+</span><span class='line'><span class="n">heroes</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:supermann</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在使用 fetch 時，使用第二個參數設置默認值而不是使用自定義的邏輯。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">batman</span> <span class="o">=</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Bruce Wayne&#39;</span><span class="p">,</span> <span class="ss">is_evil</span><span class="p">:</span> <span class="kp">false</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># bad - if we just use || operator with falsy value we won&#39;t get the expected result</span>
+</span><span class='line'><span class="n">batman</span><span class="o">[</span><span class="ss">:is_evil</span><span class="o">]</span> <span class="o">||</span> <span class="kp">true</span> <span class="c1"># =&gt; true</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good - fetch work correctly with falsy values</span>
+</span><span class='line'><span class="n">batman</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:is_evil</span><span class="p">,</span> <span class="kp">true</span><span class="p">)</span> <span class="c1"># =&gt; false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>盡量用 fetch 加區塊而不是直接設定默認值。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">batman</span> <span class="o">=</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Bruce Wayne&#39;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># bad - if we use the default value, we eager evaluate it</span>
+</span><span class='line'><span class="c1"># so it can slow the program down if done multiple times</span>
+</span><span class='line'><span class="n">batman</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:powers</span><span class="p">,</span> <span class="n">get_batman_powers</span><span class="p">)</span> <span class="c1"># get_batman_powers is an expensive call</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good - blocks are lazy evaluated, so only triggered in case of KeyError exception</span>
+</span><span class='line'><span class="n">batman</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:powers</span><span class="p">)</span> <span class="p">{</span> <span class="n">get_batman_powers</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>except &amp; except!</h1>
 
 <p>通常用在確保某些欄位不要被傳進來的參數修改到</p>
@@ -320,6 +1518,23 @@
 </span><span class='line'>
 </span><span class='line'><span class="p">{</span><span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;David&#39;</span><span class="p">,</span> <span class="ss">nationality</span><span class="p">:</span> <span class="s1">&#39;Danish&#39;</span><span class="p">}</span><span class="o">.</span><span class="n">to_query</span><span class="p">(</span><span class="s1">&#39;user&#39;</span><span class="p">)</span>
 </span><span class='line'><span class="c1"># =&gt; &quot;user%5Bname%5D=David&amp;user%5Bnationality%5D=Danish&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>values_at</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># bad</span>
+</span><span class='line'><span class="n">email</span> <span class="o">=</span> <span class="n">data</span><span class="o">[</span><span class="s1">&#39;email&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">nickname</span> <span class="o">=</span> <span class="n">data</span><span class="o">[</span><span class="s1">&#39;nickname&#39;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good</span>
+</span><span class='line'><span class="n">email</span><span class="p">,</span> <span class="n">username</span> <span class="o">=</span> <span class="n">data</span><span class="o">.</span><span class="n">values_at</span><span class="p">(</span><span class="s1">&#39;email&#39;</span><span class="p">,</span> <span class="s1">&#39;nickname&#39;</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1081,7 +2296,11 @@
 <p>參考文件：<br/>
 <a href="http://kaochenlong.com/2016/04/25/string-and-symbol/">Ruby 語法放大鏡之「有的變數變前面有一個冒號(例如 :name)，是什麼意思?」</a><br/>
 <a href="https://www.sitepoint.com/symbol-gc-ruby-2-2/">Symbol GC in Ruby 2.2</a><br/>
-<a href="http://grantcss.com/blog/2015/01/26/symbol-gc-in-ruby-2-dot-2/">[译] 在 Ruby 2.2 中的 Symbol GC</a></p>
+<a href="http://grantcss.com/blog/2015/01/26/symbol-gc-in-ruby-2-dot-2/">[译] 在 Ruby 2.2 中的 Symbol GC</a><br/>
+<a href="https://ruby-china.org/topics/21498">Ruby 2.2 的 可回收 symbol</a><br/>
+<a href="https://ruby-china.org/topics/17575">升级 Ruby 2.1 以及 GC 调整</a><br/>
+<a href="https://ruby-china.org/topics/13740">Ruby 的 GC 不释放内存给回系统的？</a><br/>
+<a href="https://ruby-china.org/topics/28127">画说 Ruby 与 Python 垃圾回收</a></p>
 ]]></content>
   </entry>
   
@@ -1482,7 +2701,7 @@ ruby 也提供很多好用的方法去判斷，cover?, include? 等等</p>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Coding Principle 程式設計原則]]></title>
+    <title type="html"><![CDATA[Coding Principle 程式設計原則 SOLID]]></title>
     <link href="http://mgleon08.github.com/blog/2016/05/29/coding-principle/"/>
     <updated>2016-05-29T20:27:06+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/05/29/coding-principle</id>
@@ -1670,7 +2889,8 @@ ruby 也提供很多好用的方法去判斷，cover?, include? 等等</p>
 <p>參考文件：<br/>
 <a href="http://rockssdlog.blogspot.tw/2012/03/oo-solid.html">白話- OO設計原則 (SOLID原則) - 附生活實例</a> <br/>
 <a href="http://ithelp.ithome.com.tw/search?tab=article&amp;search=%E8%BB%9F%E9%AB%94%E8%B7%AF%E4%B8%8A%E4%B8%8D%E5%AD%A4%E5%96%AE&amp;page=1">軟體路上不孤單</a><br/>
-<a href="http://122.146.238.121/wordpress/?cat=95">Design Principle</a></p>
+<a href="http://122.146.238.121/wordpress/?cat=95">Design Principle</a><br/>
+<a href="http://slides.com/jaceju/design-patterns-by-examples/#/">從實例學設計模式</a></p>
 ]]></content>
   </entry>
   
@@ -1735,6 +2955,65 @@ ruby 也提供很多好用的方法去判斷，cover?, include? 等等</p>
 </span><span class='line'><span class="c1">#=&gt; nil</span>
 </span><span class='line'><span class="n">h</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s1">&#39;d&#39;</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
 </span><span class='line'><span class="c1">#=&gt; 8</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在處理應該存在的哈希鍵時，使用 fetch。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">heroes</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">batman</span><span class="p">:</span> <span class="s1">&#39;Bruce Wayne&#39;</span><span class="p">,</span> <span class="ss">superman</span><span class="p">:</span> <span class="s1">&#39;Clark Kent&#39;</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># bad - if we make a mistake we might not spot it right away</span>
+</span><span class='line'><span class="n">heroes</span><span class="o">[</span><span class="ss">:batman</span><span class="o">]</span> <span class="c1"># =&gt; &quot;Bruce Wayne&quot;</span>
+</span><span class='line'><span class="n">heroes</span><span class="o">[</span><span class="ss">:supermann</span><span class="o">]</span> <span class="c1"># =&gt; nil</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good - fetch raises a KeyError making the problem obvious</span>
+</span><span class='line'><span class="n">heroes</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:supermann</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在使用 fetch 時，使用第二個參數設置默認值而不是使用自定義的邏輯。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">batman</span> <span class="o">=</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Bruce Wayne&#39;</span><span class="p">,</span> <span class="ss">is_evil</span><span class="p">:</span> <span class="kp">false</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># bad - if we just use || operator with falsy value we won&#39;t get the expected result</span>
+</span><span class='line'><span class="n">batman</span><span class="o">[</span><span class="ss">:is_evil</span><span class="o">]</span> <span class="o">||</span> <span class="kp">true</span> <span class="c1"># =&gt; true</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good - fetch work correctly with falsy values</span>
+</span><span class='line'><span class="n">batman</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:is_evil</span><span class="p">,</span> <span class="kp">true</span><span class="p">)</span> <span class="c1"># =&gt; false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>盡量用 fetch 加區塊而不是直接設定默認值。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">batman</span> <span class="o">=</span> <span class="p">{</span> <span class="nb">name</span><span class="p">:</span> <span class="s1">&#39;Bruce Wayne&#39;</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># bad - if we use the default value, we eager evaluate it</span>
+</span><span class='line'><span class="c1"># so it can slow the program down if done multiple times</span>
+</span><span class='line'><span class="n">batman</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:powers</span><span class="p">,</span> <span class="n">get_batman_powers</span><span class="p">)</span> <span class="c1"># get_batman_powers is an expensive call</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># good - blocks are lazy evaluated, so only triggered in case of KeyError exception</span>
+</span><span class='line'><span class="n">batman</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:powers</span><span class="p">)</span> <span class="p">{</span> <span class="n">get_batman_powers</span> <span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1836,10 +3115,6 @@ ruby 也提供很多好用的方法去判斷，cover?, include? 等等</p>
 <span class='line-number'>14</span>
 <span class='line-number'>15</span>
 <span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#method 要用 block 來傳遞，Attribute 一開始就固定了</span>
 </span><span class='line'><span class="no">People</span> <span class="o">=</span> <span class="no">Struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:phone</span><span class="p">)</span> <span class="k">do</span>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">to_ary</span>
@@ -1856,9 +3131,14 @@ ruby 也提供很多好用的方法去判斷，cover?, include? 等等</p>
 </span><span class='line'><span class="c1">#=&gt; 1234</span>
 </span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">to_ary</span>
 </span><span class='line'><span class="c1">#=&gt; [&quot;foo&quot;, 1234]</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">也可以直接用繼承的方式</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">Test</span> <span class="o">&lt;</span> <span class="n">struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:foo</span><span class="p">,</span> <span class="ss">:bar</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>也可以直接用繼承的方式</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">People</span> <span class="o">&lt;</span> <span class="n">struct</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:phone</span><span class="p">)</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -1881,6 +3161,11 @@ ruby 也提供很多好用的方法去判斷，cover?, include? 等等</p>
 </span><span class='line'><span class="c1">#=&gt; &quot;foo&quot;</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<h3>other</h3>
+
+<p>不要去 extend 一個 Struct.new - 它已經是一個新的 class。擴展它會產生一個多餘的 class 層級
+並且可能會產生怪異的錯誤如果文件被加載多次。</p>
 
 <h1>OpenStruct</h1>
 
@@ -3300,872 +4585,6 @@ q.push 23  #=&gt; NoMethodError
 
 <p>簡報：<br/>
 <a href="https://github.com/TritonHo/slides">TritonHo/slides</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[淺談 Backend 課程筆記 2]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-2/"/>
-    <updated>2016-04-19T22:29:22+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-2</id>
-    <content type="html"><![CDATA[<p>課程筆記2</p>
-
-<!-- more -->
-
-
-<h1>淺談系統安全</h1>
-
-<ul>
-<li>所謂的安全，都是基於 <code>Design Flaw（設計錯誤）</code> 導致的</li>
-<li>大多都是網路上看別人範例，指理解一半然後再自行創作，導致嚴重安全問題
-
-<ul>
-<li>前人的架構大都經過充分論證，相對上不易有漏洞（ex:https）</li>
-</ul>
-</li>
-<li>Denfense-in-depth
-
-<ul>
-<li>多種的安全措施，即使一種安全措施被攻陷，還是有其他安全措施能夠將傷害減到最低</li>
-<li>心理戰，讓 hacker 需要一直花時間來破解讓他不耐煩</li>
-</ul>
-</li>
-<li>沒人會花時間去 hack 系統，除非有錢!!（氣象局 vs 銀行）</li>
-</ul>
-
-
-<h1>淺談 HTTPS</h1>
-
-<ul>
-<li>HTTPS = HTTP + TLS（前身 SSL）</li>
-<li>2016年標準，所有網站都應該使用 HTTPS
-
-<ul>
-<li>Google 搜尋也會加分</li>
-</ul>
-</li>
-<li>能有效防止各式各樣的攻擊，但不要..
-
-<ul>
-<li>使用太舊的加密方法，ex：DES</li>
-<li>CNNIC</li>
-</ul>
-</li>
-</ul>
-
-
-<p>參考文件：<br/>
-<a href="https://zh.wikipedia.org/wiki/%E5%82%B3%E8%BC%B8%E5%B1%A4%E5%AE%89%E5%85%A8%E5%8D%94%E8%AD%B0">傳輸層安全協議TLS</a></p>
-
-<h3>HTTPS流程</h3>
-
-<ul>
-<li>在TCP handshake 後 server 把證書(公開)傳給 client</li>
-<li>Client 收到證書後，根據發行者資訊，再拿出存於 Client 的發行者 public key 對證書驗證</li>
-<li>Client 產生對稱鑰匙，並且以證書中的 public key 進行加密，傳給 Server
-
-<ul>
-<li>對稱式比非對稱式所使用的 CPU 還小</li>
-</ul>
-</li>
-<li>Server 使用證書中的 private key 進行解密，拿到 Client 傳來的對稱鑰匙</li>
-<li>指此 TLS handshaking 已經完成。之後通訊權使用對稱鑰匙加密。其他人則無法。</li>
-</ul>
-
-
-<blockquote><p>現在 https 不安全是因為中國的 CNNIC，所以要將中國的 CNNIC 憑證都刪除!! 中國的銀行也都是用美國的憑證</p></blockquote>
-
-<h1>Load Balancing</h1>
-
-<ul>
-<li>有用 Load Balancing 會將 HTTPS 放在 LB，在用 HTTP 和 Application Server 連線</li>
-</ul>
-
-
-<p>參考文件：<br/>
-<a href="http://www.ithome.com.tw/node/81790">負載平衡是分散式資源串連之鑰</a></p>
-
-<h1>MITM 中間人攻擊</h1>
-
-<p>參考文件：<br/>
-<a href="https://zh.wikipedia.org/wiki/%E4%B8%AD%E9%97%B4%E4%BA%BA%E6%94%BB%E5%87%BB">MITM</a><br/>
-<a href="http://mmdays.com/2008/11/10/mitm/">神不知，鬼不覺，你的帳號密碼是如何被竊聽的？─中間人攻擊〈Man-in-the-middle Attack〉初探</a></p>
-
-<h1>One way hashing （H）</h1>
-
-<ul>
-<li>hash 接受任意長度的資料，然後輸出固定長度結果的東西</li>
-<li>One way 的特性，只看 <code>function output</code> 和 <code>function</code> 本身，不能輕易找出 <code>funciton input</code></li>
-<li>將用戶密碼進行 H 然後將結果存到資料庫，之後用戶登入，把用戶的password 進行一次 hashing 跟資料庫的 password 比對即可</li>
-</ul>
-
-
-<h3>Rainbow attack</h3>
-
-<ul>
-<li>將大量的 string 進行 H，只要這個表夠大，就能夠去比對</li>
-</ul>
-
-
-<p><a href="https://zh.wikipedia.org/wiki/%E5%BD%A9%E8%99%B9%E8%A1%A8">彩虹表Rainbow Table</a> 是壞人建立表時，大幅節省空間的手法</p>
-
-<p>參考文件：<br/>
-<a href="http://recover.pixnet.net/blog/post/4535917-rainbow-hash-table-%E8%88%87%E5%AF%86%E7%A2%BC%E7%A0%B4%E8%A7%A3">Rainbow Hash Table 與密碼破解</a><br/>
-<a href="http://www.ha97.com/4009.html">（總結）密碼破解之王：Ophcrack彩虹表(Rainbow Tables)原理詳解（附：120G彩虹表下載）</a></p>
-
-<h3>防止Rainbow attack</h3>
-
-<ul>
-<li>建立新用戶識，先產生一個隨機（最好使用線上的 random funciton 不要自己來弄）的 string（salt），然後把 H（salt+password） 和 salt 存到資料庫</li>
-<li>用戶登入，系統就先將 salt 拿出來，再來比對 H（salt+password）和資料庫的值</li>
-<li>這樣壞人就需要為每一個 salt 建立獨立的一張表，所以 CPU 和 Memory 成本變成本來的 N 倍</li>
-</ul>
-
-
-<h1>預防 SQL injection</h1>
-
-<ul>
-<li>記住 parameter escaping 不是絕對安全的方式</li>
-<li>只有 Parameterization(使用參數或參數標記代替常量值的操作) 才是真正安全
-
-<ul>
-<li>請善用其底層是用 Parameterization 來工作的 ORM，輕鬆又安全</li>
-</ul>
-</li>
-</ul>
-
-
-<h1>多層資料庫權限</h1>
-
-<ul>
-<li>一個好的資料庫，至少有這三種用戶，admin_user, normal_user, readonly_user</li>
-<li>admin_user
-
-<ul>
-<li>資料庫的擁有者，有所有權限</li>
-<li>除了要更動 database schema，或是新減資料庫，否則絕不使用</li>
-<li>最信任的人員持有</li>
-</ul>
-</li>
-<li>normal_user
-
-<ul>
-<li>給 Application server 使用</li>
-<li>沒有建立刪除資料庫權限</li>
-<li>沒有 truncate table 權限</li>
-<li>只有 select/insert/update/delete 權限</li>
-<li>只有對 stored procedure 執行權限</li>
-</ul>
-</li>
-<li>readonly_user
-
-<ul>
-<li>一般不應輕易連上 production database 來除錯，除非是最後手段</li>
-<li>別拿 admin_user &amp; normal_user 來除錯</li>
-</ul>
-</li>
-</ul>
-
-
-<h1>Audit table</h1>
-
-<ul>
-<li>對於敏感資料，我們會想記錄其所有的改動
-
-<ul>
-<li>例如想紀錄 user_balances 的改動，便會建立 user_balances_audit 來紀錄</li>
-<li>然後在 user_balances 建立 on insert, on update, on delete 的 trigger 把改動自動抄到 user_balances_audit</li>
-<li>normal_user 不應對 audit tables 有任何權限</li>
-<li>trigger 擁有者是 admin_user</li>
-<li>trigger 權限要基於建立者而不是執行者
-
-<ul>
-<li>不同的 RDBMS 具體指令會有分別，但理念相同</li>
-<li>ex: PostgreSQL 建立 trigger function 時需要 <code>SECURITY DEFINER</code> 關鍵字</li>
-</ul>
-</li>
-</ul>
-</li>
-</ul>
-
-
-<h1>SessionId</h1>
-
-<ul>
-<li>用戶登入流程
-
-<ul>
-<li>產生一組SessionId</li>
-<li>把 SessionId->(UserId) 存到 Redis，並且 TTL 設定為 30 分鐘</li>
-<li>把 SessionId 傳回用戶</li>
-</ul>
-</li>
-<li>之後用戶所有的 request 都會把 SessionId 放在 http authorization header
-
-<ul>
-<li>伺服器利用 SessionId 從 Redis 中找回 Userid 便能知道發出 request 的用戶</li>
-<li>然後伺服器再把 Redis 中該 SessionId 重新設定 TTL 為 30 分鐘</li>
-</ul>
-</li>
-<li>缺點
-
-<ul>
-<li>所有的 Request 都要先檢查 Redis 去查 SessionId 是否正確</li>
-<li>萬一 Redis 當掉，所有用戶都需登入</li>
-<li>一旦壞人突破防火牆接觸到 Redis 便能建立受害用戶的 Session，並偽裝成用戶</li>
-</ul>
-</li>
-</ul>
-
-
-<h1>JWT</h1>
-
-<p><a href="https://jwt.io/">jwt</a></p>
-
-<ul>
-<li>Header
-
-<ul>
-<li>alg : 說明 jwt signature 所使用的演算法（建議 RS256/RS512）</li>
-</ul>
-</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{
-</span><span class='line'>  "alg": "HS256",
-</span><span class='line'>  "typ": "JWT"
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Payload
-
-<ul>
-<li>放什麼都可以，一般至少放上 userid 和 exp(到期時間)</li>
-<li>jwt 到期時間</li>
-</ul>
-</li>
-</ul>
-
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>{
-</span><span class='line'>  "sub": "1234567890",
-</span><span class='line'>  "name": "John Doe",
-</span><span class='line'>  "admin": true
-</span><span class='line'>}</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>Signature
-
-<ul>
-<li>把 header, payload 和 secret(HMAC)/private key(RSA) 一起計算出的 SHA256/SHA512</li>
-<li>因為 secret(HMAC)/private key(RSA) 只會放在 server, 所以用戶沒法自行產生，用戶偷改 header, payload 其 Signature 也不會吻合</li>
-</ul>
-</li>
-</ul>
-
-
-<h3>jwt 流程</h3>
-
-<ul>
-<li>用戶登入系統，伺服器會檢查用戶密碼是否正確
-
-<ul>
-<li>建立jwt</li>
-<li>將 jwt 傳給用戶</li>
-</ul>
-</li>
-<li>之後用戶的所有 request，都會將 jwt 放在 http authorization header
-
-<ul>
-<li>伺服器利用 public key 驗證 jwt 是否正確，並檢查 exp 是否過期，在從 payload 中找回 UserId，便能知道發出 request 的用戶</li>
-</ul>
-</li>
-<li>jwt 快到期前，client side 會發出 renew jwt request，像 server 拿新的 jwt （exp 現在為 30分鐘）
-
-<ul>
-<li>不建議在每個 response 都傳回新的 jwt</li>
-</ul>
-</li>
-</ul>
-
-
-<h3>jwt 好壞</h3>
-
-<ul>
-<li>好
-
-<ul>
-<li>沒有了 Redis，不用當心 redis 當掉，Session 流失問題</li>
-</ul>
-</li>
-<li>壞
-
-<ul>
-<li>Client side 要定期更新 jwt</li>
-<li>一旦壞人拿到 secret(HMAC)/private key(RSA) 便能偽裝用戶</li>
-<li>建議用 RS 演算法，並把 jwt 發行放在獨立機器</li>
-</ul>
-</li>
-</ul>
-
-
-<p>參考文件：<br/>
-<a href="http://blog.rainy.im/2015/06/10/react-jwt-pretty-good-practice/">JWT 在前後端分離中的應用與實踐</a><br/>
-<a href="http://obeyo-blog.logdown.com/posts/208001">OBeyTech JWT - JSON Web Token</a></p>
-
-<h1>進階API設計概念</h1>
-
-<h3>API 版本控制</h3>
-
-<ul>
-<li>API = 規格，定下來就不要一直更改</li>
-<li>要進行更改可以利用 v1/v2/v3 版本來去做新的更動，才不會導致錯誤，即使原本的版本有 bug，但對方可能已經自行解決或將 bug 當作 feature</li>
-<li>因此要先新舊版本 API 並行，確定轉到新版 API 在刪除舊版本的</li>
-</ul>
-
-
-<h3>middleware</h3>
-
-<ul>
-<li>用戶丟 <code>/v1/emailAuth?token={token}</code></li>
-<li>我們可以在用戶和 Application Server 建立一層 middleware ，將 <code>/v1/emailAuth?token={token}</code>（GET）轉乘 <code>/v1/emailAuth</code> 並且把 token 放進 HTTP header，然後再把 Request 丟給 Application Server</li>
-<li>一版來說企業客戶會有很多保安要求，為每個客戶在主城市增加額外的 API 只會讓程式越來越亂，這時就應該交給 middleware 解決</li>
-</ul>
-
-
-<h3>違反 RESTful</h3>
-
-<ul>
-<li>用 uniform interface 的 API 便會有 <code>/v1/cats</code> 和 <code>/v1/cats/{catId}/catFoods/{catFoolId}</code></li>
-<li>這就會有很多 POST request 造成大量的 network over head</li>
-<li>改成 <code>/v1/catAndCatFoods</code>(post)
-
-<ul>
-<li>雖然違反 uniform interface，但更關鍵的 Stateless protocol 並沒有違反</li>
-</ul>
-</li>
-<li>正常系統設計流程
-
-<ul>
-<li>用戶使用流程</li>
-<li>討論</li>
-<li>API 設計</li>
-</ul>
-</li>
-<li>完整的 request 是基於 商業邏輯和用戶體驗的</li>
-</ul>
-
-
-<h1>Idempotent</h1>
-
-<ul>
-<li>不管多少次的 resquest ， response 都是一樣的</li>
-<li>POST 是 non-Idempotent
-
-<ul>
-<li>要改成 Idempotent 就將 response 透過 Redis 來處理，後續 response 都會先去 redis 看有沒有相同，有相同就回覆一樣的 response</li>
-</ul>
-</li>
-</ul>
-
-
-<h1>Optimistic lock</h1>
-
-<p><a href="http://openhome.cc/Gossip/HibernateGossip/OptimisticLocking.html">樂觀鎖定（Optimistic Locking</a></p>
-
-<h1>Stateless protocol</h1>
-
-<h1>Long polling</h1>
-
-<p><a href="http://blogger.gtwang.org/2014/01/websocket-protocol.html">WebSocket 通訊協定簡介：比較 Polling、Long-Polling 與 Streaming 的運作原理</a></p>
-
-<h1>Asynchronous API</h1>
-
-<h1>2PC(Two-phase Commit)</h1>
-
-<p><a href="https://zh.wikipedia.org/wiki/%E4%BA%8C%E9%98%B6%E6%AE%B5%E6%8F%90%E4%BA%A4">Two-phase Commit</a></p>
-
-<p>簡報：<br/>
-<a href="https://github.com/TritonHo/slides">TritonHo/slides</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[淺談 Backend 課程筆記 1]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-1/"/>
-    <updated>2016-04-19T22:29:19+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/04/19/backend-lesson-notes-1</id>
-    <content type="html"><![CDATA[<p>課程筆記1</p>
-
-<!-- more -->
-
-
-<h1>淺談MVC</h1>
-
-<ul>
-<li>M - 系統中各種抽象物件，一改動會主動告知view</li>
-<li>V - 把 model 顯示給用戶看，有控制項，可將用戶行動傳送給 controller</li>
-<li>C - 根據用戶的行動，去改變model</li>
-<li><h1>M+V+C!= MVC</h1></li>
-<li>在MVC中，model 改動後需要以 Observer Pattern 去主動告知 view 更新; 但在HTTP中，極少進行 Server Push，而是由 Controller 回應給 View</li>
-<li>MVC 針對的是單機軟體溝通（不需網路，用 function call 即可），而現今都是以 HTTP  RESTful來去溝通</li>
-<li>而且每家 framework 的 MVC 都不盡相同</li>
-</ul>
-
-
-<blockquote><p>不要提自己是用MVC，只要說有架構分開</p></blockquote>
-
-<h1>淺談 Backend 基本概念</h1>
-
-<ul>
-<li>backend 目前最注重 <code>throughput(系統總容量，處理能力)</code>，每一個 request 處理速度相對的比較不重要
-
-<blockquote><p>當 <code>execution time</code> 壓到某一個程度，<code>network latency</code> 會變成主因</p></blockquote></li>
-<li><code>throughput(系統總容量)</code> = <code>concurrent execution</code> / <code>execution time per task</code></li>
-<li>對 Application Server 來說，增加機台便能無痛增加 <code>throughput</code></li>
-<li>而 <code>RDBMS</code> 只有單一的 <code>Master</code> 通常會成為系統效能瓶頸</li>
-</ul>
-
-
-<blockquote><p>所以不要說什麼語言慢，而是要去增加機台!!</p></blockquote>
-
-<h1>Strong Type vs Weakly Type</h1>
-
-<ul>
-<li>ST 多花時間在 <code>coding</code>，但是少花時間在 <code>testing</code></li>
-<li>對老手說 WT 可能會比較快一點點</li>
-</ul>
-
-
-<blockquote><p>所以看要多花時間在 <code>coding</code> 還是在 <code>testing</code><br/>
-真正吐血的是在 Race Condition/Design Flaw</p></blockquote>
-
-<h1>Good Code</h1>
-
-<ul>
-<li>降低 <code>bug rate</code></li>
-<li>主動將有危險的 code 做註記</li>
-</ul>
-
-
-<h1>CRUD 到 backend framework</h1>
-
-<p><a href="https://github.com/TritonHo/demo">backdemo</a></p>
-
-<h3>問題</h3>
-
-<ul>
-<li>密碼放在程式碼中</li>
-<li><code>URL Routing</code>資訊雜亂
-  *要知道 /v1/cats/(GET)，必須知道 <code>main.go</code>，再細看 <code>cat.go</code></li>
-<li>要自己編寫簡單的SQL</li>
-<li>輸入處理和商業邏輯混在一起</li>
-<li>Partial Update 的輸入處理冗長</li>
-<li>輸入檢查散落在 <code>Create</code> 和 <code>Update</code></li>
-<li>輸出時，大量的重複的程式碼</li>
-<li>Handler 共用 <code>global variable</code></li>
-</ul>
-
-
-<blockquote><p>總結 DRY 將同樣邏輯的封裝在一起</p></blockquote>
-
-<h3>精簡程式</h3>
-
-<ul>
-<li>引入 <code>mux library</code> 支援以 Regular Expression 做 routing</li>
-<li>建立 <code>lib/config</code> 用來讀取環境變數，把密碼，用戶名稱都放到環境變數中</li>
-<li>20/80 80% automate ，集中精力解決剩下的 20%</li>
-<li>使用 ORM 也好，還是要好好學 SQL（用 ORM 解決簡單的，用 SQL 來解決複雜的)</li>
-<li>使用了 ORM 之後改動 table schema ，只要改動 Model Class</li>
-<li>建立 <code>lib/httputil</code> 來做處理輸入</li>
-<li>使用 reflection 來支持 Partial Update 並且跟 ORM 整合</li>
-<li>簡單的 single attribute checking 能放到 struct tag，然後在 input binding 檢查</li>
-<li>理想的 handler 應該只有 business login，輸入輸出都跟它沒關係
-
-<ul>
-<li>只會返回 statusCode, error/output object</li>
-<li>middleware 接受以上資料在做 HTTP Response</li>
-</ul>
-</li>
-<li>handler 需要的是 transaction 不是 db</li>
-<li>乾脆將 db 丟到 middleware，然後以 parameter 方式將 transaction 丟給 Handler，即使 Handler 遇上問題，也不用自己Rollback，因為在 middleware 那層解決</li>
-<li>將每個 endpoint，應該要抽出來變成 procedure</li>
-</ul>
-
-
-<h3>authorization</h3>
-
-<ul>
-<li>除非有特殊原因，auth token 請放在 <code>Http Authorization Header</code></li>
-<li>別把 user password 存到資料庫</li>
-</ul>
-
-
-<h3>Application Server 中主要的模組</h3>
-
-<ul>
-<li>Router</li>
-<li>Middleware</li>
-<li>Auth</li>
-<li>Input Binder</li>
-<li>Basic Validater</li>
-<li>Transaction Manager</li>
-<li>Database connector/ORM</li>
-<li>Output Utlity</li>
-<li>MQ connector</li>
-<li>Logger</li>
-<li>File Manager</li>
-</ul>
-
-
-<h1>others</h1>
-
-<h3>Connection Pool</h3>
-
-<p>Connection Pool(連線池) 是一種資料庫連線管理的機制，它介於應用程式與資料庫之間；
-集中管理資料庫的連線，能有效提升應用程式存取資料庫的效能及減少連線的錯誤。</p>
-
-<ul>
-<li>get 到 tomcat，後會先去檢查已經建好的 Connection Pool 有哪個 Connection 是有空的，就將 request 丟過去</li>
-<li>為什麼 Connection Pool 要用 <code>global variable</code>
-
-<ul>
-<li>生長週期是整個server</li>
-</ul>
-</li>
-<li>一個 application 都有一個 Connection Pool</li>
-</ul>
-
-
-<p>使用Connection Pool的好處有:</p>
-
-<ol>
-<li>Pool會keep住與DB的連線。程式需要使用時跟pool要即可。
-不用再重複地跟DB建立連線然後又釋放掉。</li>
-<li>可設定與DB最大的連線數，避免超過DB所能負擔的連線數。</li>
-<li>Pool可幫忙驗證Connectin是否還正常，若不正常時，便再與DB建立好的正常連線，
-確保程式取得的Connection都是正常可使用的。</li>
-<li>額外功能的提供。如幫忙檢查Connection State或幫忙關閉Statement等。
-不同的Connection Pool其額外提供的功能當然也會有所不同。</li>
-</ol>
-
-
-<p>參考文件：<br/>
-<a href="http://peggg327.blogspot.tw/2014/11/connection-pool.html">連接池(Connection Pool)介紹</a></p>
-
-<h3>reflection</h3>
-
-<ul>
-<li>Reflection的作用：得知自己的外觀，甚至自我修改與複製</li>
-<li>簡單的來說，能讓程式在 runtime 時知道一個 <code>structure object</code> 資訊
-
-<ul>
-<li>例如連帶有什麼 methods 和 attributes</li>
-</ul>
-</li>
-<li>雖然會讓效能變慢，但很多 library 都不能不用</li>
-<li>除非有特殊原因，一般不會在 handler 中使用 reflection (如果不是在寫 library 不該使用 reflection)</li>
-</ul>
-
-
-<p>參考文件：<br/>
-<a href="http://www.ithome.com.tw/node/57227">Reflection增加了程式的彈性</a><br/>
-<a href="https://github.com/JustinSDK/JavaSE6Tutorial/blob/master/docs/CH16.md">第 16 章 反射（Reflection）</a></p>
-
-<p>簡報：<br/>
-<a href="https://github.com/TritonHo/slides">TritonHo/slides</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[HTTP HEADER]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/04/19/http-header/"/>
-    <updated>2016-04-19T22:22:30+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/04/19/http-header</id>
-    <content type="html"><![CDATA[<p>透過 HTTP HEADER 有很多資訊可以做傳遞</p>
-
-<!-- more -->
-
-
-<h1>mime_types</h1>
-
-<p>MIME(Multipurpose Internet Mail Extensions) 格式</p>
-
-<p>主要用在 HTTP 通訊協定中的請求標頭 Accept 和回應標頭 Content-Type 中，來說明此文件的格式。</p>
-
-<p>Rails 會在 Controller 的 respond_to 方法中辨識並回應所請求的格式樣板，例如瀏覽器請求 application/json 就會回應 json 格式</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Mime</span><span class="o">::</span><span class="no">SET</span><span class="o">.</span><span class="n">collect</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:to_s</span><span class="p">)</span>
-</span><span class='line'><span class="o">=&gt;</span> <span class="o">[</span><span class="s2">&quot;text/html&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;text/plain&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;text/javascript&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;text/css&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;text/calendar&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;text/csv&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;text/vcard&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;image/png&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;image/jpeg&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;image/gif&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;image/bmp&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;image/tiff&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;video/mpeg&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;application/xml&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;application/rss+xml&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;application/atom+xml&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;application/x-yaml&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;multipart/form-data&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;application/x-www-form-urlencoded&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;application/json&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;application/pdf&quot;</span><span class="p">,</span>
-</span><span class='line'> <span class="s2">&quot;application/zip&quot;</span><span class="o">]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Accept-Language</h1>
-
-<p>可以根據瀏覽器的語言，來切換網站的語言</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">￼</span><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'><span class="err">￼</span>  <span class="n">protect_from_forgery</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:exception</span>
-</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:set_locale</span>
-</span><span class='line'><span class="err">￼</span>
-</span><span class='line'>  <span class="kp">protected</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">set_locale</span>
-</span><span class='line'>    <span class="no">I18n</span><span class="o">.</span><span class="n">locale</span> <span class="o">=</span> <span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="o">[</span><span class="s1">&#39;Accept-Language&#39;</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>搭配 <code>http_accept_language</code> gem</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">protect_from_forgery</span> <span class="ss">with</span><span class="p">:</span> <span class="ss">:exception</span>
-</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:set_locale</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="err">￼</span><span class="kp">protected</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">set_locale</span>
-</span><span class='line'><span class="err">￼￼￼</span>    <span class="n">locales</span> <span class="o">=</span> <span class="no">I18n</span><span class="o">.</span><span class="n">available_locales</span>
-</span><span class='line'>    <span class="no">I18n</span><span class="o">.</span><span class="n">locale</span> <span class="o">=</span> <span class="n">http_accept_language</span><span class="o">.</span><span class="n">compatible_language_from</span><span class="p">(</span><span class="n">locales</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>USING THE ACCEPT HEADER</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#config/routes.rb</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;api_version&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">scope</span> <span class="ss">defaults</span><span class="p">:</span> <span class="p">{</span> <span class="nb">format</span><span class="p">:</span> <span class="s1">&#39;json&#39;</span> <span class="p">}</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">scope</span> <span class="ss">module</span><span class="p">:</span> <span class="ss">:v1</span><span class="p">,</span> <span class="ss">constraints</span><span class="p">:</span> <span class="no">ApiVersion</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;v1&#39;</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'><span class="err">￼￼￼</span>    <span class="n">resources</span> <span class="ss">:zombies</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">￼￼￼￼</span>  <span class="n">scope</span> <span class="ss">module</span><span class="p">:</span> <span class="ss">:v2</span><span class="p">,</span> <span class="ss">constraints</span><span class="p">:</span> <span class="no">ApiVersion</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s1">&#39;v2&#39;</span><span class="p">,</span> <span class="kp">true</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">resources</span> <span class="ss">:zombies</span>
-</span><span class='line'><span class="err">￼￼￼</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#lib/api_version.rb</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">ApiVersion</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">version</span><span class="p">,</span> <span class="n">default</span><span class="o">=</span><span class="kp">false</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@version</span><span class="p">,</span> <span class="vi">@default</span> <span class="o">=</span> <span class="n">version</span><span class="p">,</span> <span class="n">default</span>
-</span><span class='line'><span class="err">￼￼￼￼￼￼</span>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">check_headers</span><span class="p">(</span><span class="n">headers</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">accept</span> <span class="o">=</span> <span class="n">headers</span><span class="o">[</span><span class="s1">&#39;Accept&#39;</span><span class="o">]</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="err">￼</span>  <span class="k">def</span> <span class="nf">matches?</span><span class="p">(</span><span class="n">request</span><span class="p">)</span>
-</span><span class='line'>    <span class="vi">@default</span> <span class="o">||</span> <span class="n">check_headers</span><span class="p">(</span><span class="n">request</span><span class="o">.</span><span class="n">headers</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">accept</span> <span class="o">&amp;&amp;</span> <span class="n">accept</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s2">&quot;application/vnd.apocalypse.</span><span class="si">#{</span><span class="vi">@version</span><span class="si">}</span><span class="s2">+json&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">application</span>
-</span><span class='line'><span class="c1">#payload is application-specific</span>
-</span><span class='line'><span class="n">vnd</span><span class="o">.</span><span class="n">apocalypse</span>
-</span><span class='line'><span class="c1">#media type is vendor-specific</span>
-</span><span class='line'><span class="o">[.</span><span class="n">version</span><span class="o">]</span>
-</span><span class='line'><span class="c1">#API version</span>
-</span><span class='line'><span class="o">+</span><span class="n">json</span>
-</span><span class='line'><span class="c1">#response format should be JSON</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Token</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#app/models/user.rb</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
-</span><span class='line'>  <span class="n">before_create</span> <span class="ss">:set_auth_token</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kp">private</span>
-</span><span class='line'>  <span class="err">￼</span><span class="k">def</span> <span class="nf">set_auth_token</span>
-</span><span class='line'>    <span class="k">return</span> <span class="k">if</span> <span class="n">auth_token</span><span class="o">.</span><span class="n">present?</span>
-</span><span class='line'>    <span class="nb">self</span><span class="o">.</span><span class="n">auth_token</span> <span class="o">=</span> <span class="n">generate_auth_token</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">generate_auth_token</span>
-</span><span class='line'>    <span class="kp">loop</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">token</span> <span class="o">=</span> <span class="no">SecureRandom</span><span class="o">.</span><span class="n">hex</span>
-</span><span class='line'>      <span class="k">break</span> <span class="n">token</span> <span class="k">unless</span> <span class="nb">self</span><span class="o">.</span><span class="n">class</span><span class="o">.</span><span class="n">exists?</span><span class="p">(</span><span class="ss">auth_token</span><span class="p">:</span> <span class="n">token</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'><span class="err">￼</span>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#app/controllers/posts_controller.rb</span>
-</span><span class='line'><span class="k">class</span> <span class="nc">EpisodesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
-</span><span class='line'>   <span class="n">before_action</span> <span class="ss">:authenticate</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="err">￼</span><span class="kp">protected</span>
-</span><span class='line'>   <span class="k">def</span> <span class="nf">authenticate</span>
-</span><span class='line'>     <span class="n">authenticate_token</span> <span class="o">||</span> <span class="n">render_unauthorized</span>
-</span><span class='line'>   <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="err">￼</span><span class="k">def</span> <span class="nf">authenticate_token</span>
-</span><span class='line'>     <span class="n">authenticate_with_http_token</span> <span class="k">do</span> <span class="o">|</span><span class="n">token</span><span class="p">,</span> <span class="n">options</span><span class="o">|</span>
-</span><span class='line'>       <span class="no">User</span><span class="o">.</span><span class="n">find_by</span><span class="p">(</span><span class="ss">auth_token</span><span class="p">:</span> <span class="n">token</span><span class="p">)</span>
-</span><span class='line'>     <span class="k">end</span>
-</span><span class='line'>   <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>gem：<br/>
-<a href="https://github.com/iain/http_accept_language">http_accept_language</a></p>
-
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/environments-and-bundler.html">mime types</a><br/>
-<a href="http://www.rails365.net/articles/gem-jie-shao-yuan-ma-fen-xi-http-accept-language-si">gem介紹及源碼分析之http_accept_language(四)</a></p>
 ]]></content>
   </entry>
   
