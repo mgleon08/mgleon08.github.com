@@ -8,27 +8,86 @@ categories: ruby
 用 ruby 來操作 file ＆ Dir 檔案。
 
 <!-- more -->
+
 #File 檔案操作
 
 ```ruby
-File.new("ruby.rb", "w")
+# r  讀取，檔案必須存在
+# w  會主動建立空檔案，檔案已存在則會被覆蓋
+# a  寫入。主動建檔，檔案已存在則追加在後。
+# r+ 讀取 / 寫入，不會主動建檔，將內容加在檔案最前面，會覆蓋原有內容，檔案必須存在)
+# w+ 讀取 / 寫入。同 w 功能
+# a+ 讀取 / 寫入。同 a 功能
 
-# w 覆寫整個檔案
-# a 將內容加到檔案後方
-# r 將內容加在檔案最前面
+#在每個模式後面加上"b"
+#例如 "rb" 或 "rb+"，就可以開啟「二進位」模式 
 
-File.open("/home/work/ruby.rb")
+io = File.new("ruby.rb", "w")
+io = File.open("/home/work/ruby.rb")
+io.close
+io.closed? #檢查是否關閉
+#若後面沒有 block (結束會自動關閉) 必須要再加上，io.close，關閉檔案，否則會出錯
+```
 
-File.open("ruby.rb", 'w') { |f|
-  f.write("puts 'hello world'")
-}
+```ruby
 # 打開檔案，並寫入文字（若沒檔案會直接新增）
+File.open('langs', 'w') do |f|
+  f.puts "Ruby"
+  f.write "Java\n"
+  f << "Python\n"
+end
+```
 
-File.delete("/home/work/ruby.rb")
+```ruby
+#查看檔案是否存在，建立時間，檔案大小
+puts File.exists? 'tempfile'
+
+f = File.new 'tempfile', 'w'
+puts File.mtime 'tempfile'
+puts f.size
+
+File.rename 'tempfile', 'tempfile2'
+
+f.close
+```
+
+```ruby
+#逐一行印出
+f = File.open("stones")
+while line = f.gets do
+    puts line
+end
+f.close
+
+#逐一行顯示
+File.open( "ruby.rb" , "r" ) do |f|
+	while line = f.gets
+	  puts line
+	end
+end
+```
+
+```ruby
 #刪除檔案
+File.delete("/home/work/ruby.rb")
 
-File.read("ruby.rb")
 #讀取檔案
+File.read("ruby.rb")
+```
+
+###指標
+
+```ruby
+io = File.open("ruby.rb", 'a+')
+io.write("123")
+#=> 3
+io.read
+#=> ""
+
+#因為 a 若有檔案在會寫在檔案後面，此時指標會指向最後面，因此可以用 rewind 將指標移致最前面
+io.rewind
+io.read
+#=> 123
 ```
 
 #Path
@@ -113,9 +172,39 @@ File.open(file)
 #File.open 預設會去找 to_path 的 method
 ```
 
+#\#!/usr/bin/env ruby
+
+在執行檔上加上以下這行，執行時就會知道是要執行 ruby code
+
+```ruby
+#!/usr/bin/env ruby
+
+#主要是讓你的程式在不同的系統上都能適用
+#不管你的 ruby 是在 /usr/bin/ruby 還是 /usr/local/bin/ruby，會自動的在 PATH 變數中所定義的目錄中尋找ruby來執行
+
+-P參數
+#!/usr/bin/env -S -P/usr/local/bin:/usr/bin ruby
+#在 /usr/local/bin 和 /usr/bin 目錄下尋找ruby
+
+-S-P參數
+#!/usr/bin/env -S-P/usr/local/bin:/usr/bin:${PATH} ruby
+#那麼它除了在這兩個目錄尋找之外還會在PATH變數中定義的目錄中尋找
+```
+
+#檔案權限
+
+如果要將該檔案變成可執行檔，並且不要讓其他人修改此一檔案的話， 那麼就需要-rwxr-xr-x這樣的權限，此時就得要下達：`chmod 755 test.sh` 的指令囉！
+
+* [檔案權限](http://s2.naes.tn.edu.tw/~kv/file.htm)
+* [第五章、Linux 的檔案權限與目錄配置](http://linux.vbird.org/linux_basic/0210filepermission.php)
+
 官方文件：  
+[Dir](https://ruby-doc.org/core-2.2.0/Dir.html)  
 [File](http://ruby-doc.org/core-2.3.0/File.html)  
 [FileUtils](http://ruby-doc.org/stdlib-2.2.2/libdoc/fileutils/rdoc/FileUtils.html#method-c-cd)
 
 參考文件：  
-[用Ruby Scripting維護系統](http://motion-express.com/trainings/scripting-in-ruby/screencasts/manipulating-files)
+[Input & output in Ruby](http://zetcode.com/lang/rubytutorial/io/)  
+[Ruby#open 知多少？](https://blog.alphacamp.co/2016/06/30/ruby-open/)   
+[用Ruby Scripting維護系統](http://motion-express.com/trainings/scripting-in-ruby/screencasts/manipulating-files)  
+  

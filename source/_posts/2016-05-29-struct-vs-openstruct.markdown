@@ -54,11 +54,14 @@ a.phone
 #=> 1234
 a.to_ary
 #=> ["foo", 1234]
+```
 
-也可以直接用繼承的方式
-class Test < struct.new(:foo, :bar)
+###也可以直接用繼承的方式
+```ruby
+class People < struct.new(:name, :phone)
 end
 ```
+
 ###其他取 Attribute Value 的方法
 Class則無法
 
@@ -70,6 +73,11 @@ a["name"]
 a[0]
 #=> "foo"
 ```
+
+###other
+不要去 extend 一個 Struct.new - 它已經是一個新的 class。擴展它會產生一個多餘的 class 層級
+並且可能會產生怪異的錯誤如果文件被加載多次。
+
 #OpenStruct
 主要差異點是在於，比 Struct 更有彈性, 因為它可以任意增加 Attribute , 不像 Struct 要先限制好有哪些 Attribute
 

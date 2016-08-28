@@ -73,4 +73,8 @@ puts after - before
 參考文件：  
 [Ruby 語法放大鏡之「有的變數變前面有一個冒號(例如 :name)，是什麼意思?」](http://kaochenlong.com/2016/04/25/string-and-symbol/)  
 [Symbol GC in Ruby 2.2](https://www.sitepoint.com/symbol-gc-ruby-2-2/)  
-[[译] 在 Ruby 2.2 中的 Symbol GC](http://grantcss.com/blog/2015/01/26/symbol-gc-in-ruby-2-dot-2/)
+[[译] 在 Ruby 2.2 中的 Symbol GC](http://grantcss.com/blog/2015/01/26/symbol-gc-in-ruby-2-dot-2/)  
+[Ruby 2.2 的 可回收 symbol](https://ruby-china.org/topics/21498)  
+[升级 Ruby 2.1 以及 GC 调整](https://ruby-china.org/topics/17575)  
+[Ruby 的 GC 不释放内存给回系统的？](https://ruby-china.org/topics/13740)  
+[画说 Ruby 与 Python 垃圾回收](https://ruby-china.org/topics/28127)

@@ -184,6 +184,7 @@ exec   = 執行一條指令
 
 
 * `git push --force` 可將 github 上的 `commit` 全部覆蓋掉。
+* `git pull --rebase origin [brance]` pull 遠端用 rebase 的方式。
 
 
 #差異
@@ -314,6 +315,13 @@ git clean -f
 
 [How do I remove local (untracked) files from my current Git branch?](http://stackoverflow.com/questions/61212/how-do-i-remove-local-untracked-files-from-my-current-git-branch)
 
+###針對每個節點刪除特定檔案
+
+```ruby
+git fliter-branch --tree--filter "rm -f config/password.txt"
+```
+
+
 #alias
 自己設定的一些 alias
 
@@ -359,6 +367,8 @@ alias gpv='git push -v'
 #git pull
 alias gpl='git pull'
 alias gplo='git pull origin'
+alias gplrb='git pull --rebase'
+alias gplrbo='git pull --rebase origin'
 
 #git checkout
 alias gco='git checkout'
@@ -415,3 +425,10 @@ alias glog='git log --oneline --decorate --color --graph'
 [codeschool](https://try.github.io/levels/1/challenges/1)  
 [Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)  
 [learnGitBranching](http://pcottle.github.io/learnGitBranching/)  
+
+其他技巧：  
+[使用 git rebase 避免無謂的 merge](https://ihower.tw/blog/archives/3843)  
+[Git flow 開發流程](https://ihower.tw/blog/archives/5140)  
+[A successful Git branching model](http://nvie.com/posts/a-successful-git-branching-model/)  
+[git-flow 備忘清單](http://danielkummer.github.io/git-flow-cheatsheet/index.zh_TW.html)  
+[The magical (and not harmful) rebase](http://jeffkreeftmeijer.com/2010/the-magical-and-not-harmful-rebase/)

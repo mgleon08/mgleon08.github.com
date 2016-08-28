@@ -82,7 +82,8 @@ Host [自訂名稱]
 
 #SSH agent forwarding  
 [Using SSH agent forwarding](https://developer.github.com/guides/using-ssh-agent-forwarding/)  
-[SSH agent forwarding 的應用](https://ihower.tw/blog/archives/7837)
+[SSH agent forwarding 的應用](https://ihower.tw/blog/archives/7837)  
+[ssh命令](http://man.linuxde.net/ssh)  
 
 權限指令參考：  
-[鳥哥的私房菜](http://linux.vbird.org/linux_basic/0210filepermission.php#chown)
+[鳥哥的私房菜](http://linux.vbird.org/linux_basic/0210filepermission.php#chmod)

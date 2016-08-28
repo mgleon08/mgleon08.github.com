@@ -181,7 +181,6 @@ symbol 都有 `to_proc` 這個 method 因此可以改寫成
 #=> "abc"
 ```
 
-
 有些 method 甚至連 `&` 也可以省略
 
 ```ruby
@@ -195,23 +194,31 @@ symbol 都有 `to_proc` 這個 method 因此可以改寫成
 
 ###proc into block
 
-Calling a method with & in front of a parameter
-```ruby
+Calling a method with & in front of a parameter  
+
+```ruby
 tweets.each(&printer) 
 ```
+
 turns a proc into block 
 
 ###block into a proc
 
-Defining a method with & in front of a parameter
+Defining a method with & in front of a parameter  
 
-```rubydef each(&block)
+```ruby
+def each(&block)
 ```
-turns a block into a proc,so it can be assigned to parameter
+turns a block into a proc,so it can be assigned to parameter
 
 ###togeter
 
-```rubyclass Timeline  attr_accessor :tweets  def each(&block) #block into a proc    tweets.each(&block) #proc into block  end 
+```ruby
+class Timeline
+  attr_accessor :tweets
+  def each(&block) #block into a proc
+    tweets.each(&block) #proc into block
+  end 
 end
 ```
 
@@ -219,21 +226,32 @@ end
 
 ```ruby
 tweets.map { |tweet| tweet.user }
-#上下相等tweets.map(&:user)
+#上下相等
+tweets.map(&:user)
 ```
 
 ###optional
 
 ```ruby
-def print  if block_given? #可判對是否有傳進 block    tweets.each { |tweet| puts yield tweet }  else    puts tweets.join(", ")  endend
+def print
+  if block_given? #可判對是否有傳進 block
+    tweets.each { |tweet| puts yield tweet }
+  else
+    puts tweets.join(", ")
+  end
+end
 ```
 
 ###closure
 
-```rubydef tweet_as(user)  lambda { |tweet| puts "#{user}: #{tweet}" }end
-gregg_tweet = tweet_as("greggpollack")
+```ruby
+def tweet_as(user)
+  lambda { |tweet| puts "#{user}: #{tweet}" }
+end
+gregg_tweet = tweet_as("greggpollack")
 #=> lambda { |tweet| puts "greggpollack: #{tweet}" }
-gregg_tweet.call("Mind blowing!")# => greggpollack: Mind blowing!
+gregg_tweet.call("Mind blowing!")
+# => greggpollack: Mind blowing!
 ```
 
 #procedure (proc)
@@ -305,7 +323,6 @@ lam.call(123)
 #=> nil
 ```
 
-
 lambda 跟 proc 非常類似，主要有兩個差異  
 
 ###1.lambda 會檢查參數的個數
@@ -322,6 +339,7 @@ args(Proc.new{|a, b, c| puts "Give me a #{a} and a #{b} and a #{c.class}"})
 args(lambda{|a, b, c| puts "Give me a #{a} and a #{b} and a #{c.class}"})
 # *.rb:8: ArgumentError: wrong number of arguments (2 for 3) (ArgumentError)
 ```
+
 ###2.lambda 的return 會繼續執行，proc 則會直接終止
 
 `lambda` 比較像是一個 method 的 return，會 return 值回去，並且繼續執行   
@@ -415,9 +433,83 @@ a.method(:coding).call('ruby')
 #Other
 
 ```ruby
-even = ->(x) { (x % 2) == 0 }even === 4 # => trueeven === 9 # => false
+even = ->(x) { (x % 2) == 0 }
+even === 4 # => true
+even === 9 # => false
 
 #=== 等於是 call
+```
+
+```ruby
+# wants a proc, a lambda, AND a block
+def three_ways(proc, lambda, &block)
+  proc.call
+  lambda.call
+  yield # like block.call
+  puts "#{proc.inspect} #{lambda.inspect} #{block.inspect}"
+end
+
+anonymous = Proc.new { puts "I'm a Proc for sure." }
+nameless  = lambda { puts "But what about me?" }
+
+three_ways(anonymous, nameless) do
+  puts "I'm a block, but could it be???"
+end
+ #=> I'm a Proc for sure.
+ #=> But what about me?
+ #=> I'm a block, but could it be???
+ #=> #<Proc:0x00089d64> #<Proc:0x00089c74> #<Proc:0x00089b34>
+```
+
+#Style
+
+用 `->(){}` 而不是 `lambda{}`
+
+```ruby
+# bad
+l = lambda { |a, b| a + b }
+l.call(1, 2)
+
+# correct, but looks extremely awkward
+l = ->(a, b) do
+  tmp = a * 7
+  tmp * b / 50
+end
+
+# good
+l = ->(a, b) { a + b }
+l.call(1, 2)
+
+l = lambda do |a, b|
+  tmp = a * 7
+  tmp * b / 50
+end
+```
+
+用 `proc` 而不是 `Proc.new`
+
+```ruby
+# bad
+p = Proc.new { |n| puts n }
+
+# good
+p = proc { |n| puts n }
+```
+
+用 `proc.call()` 而不是 `proc[]` 或 `proc.()`
+
+```ruby
+# bad - looks similar to Enumeration access
+l = ->(v) { puts v }
+l[1]
+
+# also bad - uncommon syntax
+l = ->(v) { puts v }
+l.(1)
+
+# good
+l = ->(v) { puts v }
+l.call(1)
 ```
 
 參考文件：  

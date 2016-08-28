@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Coding Principle 程式設計原則"
+title: "Coding Principle 程式設計原則 SOLID"
 date: 2016-05-29 20:27:06 +0800
 comments: true
 categories: clean_code
@@ -126,4 +126,5 @@ end
 參考文件：  
 [白話- OO設計原則 (SOLID原則) - 附生活實例](http://rockssdlog.blogspot.tw/2012/03/oo-solid.html)   
 [軟體路上不孤單](http://ithelp.ithome.com.tw/search?tab=article&search=%E8%BB%9F%E9%AB%94%E8%B7%AF%E4%B8%8A%E4%B8%8D%E5%AD%A4%E5%96%AE&page=1)  
-[Design Principle](http://122.146.238.121/wordpress/?cat=95)
+[Design Principle](http://122.146.238.121/wordpress/?cat=95)  
+[從實例學設計模式](http://slides.com/jaceju/design-patterns-by-examples/#/)

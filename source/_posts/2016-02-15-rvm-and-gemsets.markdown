@@ -107,5 +107,6 @@ project 要加上 `.ruby-version` 裡面寫 ruby 版本
 
 參考文件：  
 [Ruby gem 想要一機裝多個版本？RVM來幫你！](http://motion-express.com/blog/20141005-ruby-rvm-gemset)  
-[RVM and Gemsets](http://blog.eddie.com.tw/2011/04/08/rvm-and-gemsets/)
+[RVM and Gemsets](http://blog.eddie.com.tw/2011/04/08/rvm-and-gemsets/)  
+[rvm 使用指南](https://ruby-china.org/wiki/rvm-guide)  
 

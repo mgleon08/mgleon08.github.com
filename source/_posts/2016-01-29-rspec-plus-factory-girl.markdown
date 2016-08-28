@@ -11,7 +11,15 @@ categories: rails gem rspec
 
 <!-- more -->
 
-#RSpec
+###目錄
+* [Rspec](#rspec)
+* [Factory Girl](#factory_girl)
+* [Capybara](#capybara)
+* [CI Server](#ci)
+* [Other](#other)
+
+#<span id="rspec">RSpec</span>
+
 Ruby 的測試 DSL (Domain-specific language)
 
 - Semantic Code：⽐ Test::Unit 更好讀，寫的⼈ 更容易描述測試⺫的
@@ -70,10 +78,15 @@ rails generate rspec:install
 
 ### 顏色描述
 ```ruby
-#vi .rspec檔案輸入
+#vim .rspec檔案輸入
+#Require spec_helper automatically in your *_spec.rb
 --require spec_helper
---color #顯示顏色
---format documentation #顯示描述
+
+#顯示顏色
+--color
+
+#顯示描述
+--format documentation 
 ```
 ###將不需要的檔案關閉
 generate 新的 controller 或是 model 時，rails 就會很聰明的順便新增 sepc 檔案，但有時候我們會希望用到的時候再去建立即可，所以需要關閉就輸入以下指令。
@@ -623,7 +636,7 @@ curl -IH "Authorization: Token token=16d7d6089b8fe0c5e19bfe10bb156832" http://lo
 #Set token on Authorization header
 ```
 
-#factory_girl
+#<span id="factory_girl">Factory Girl</span>
 
 到 `spec/rails_helper.rb` 設定
 
@@ -713,14 +726,16 @@ end
 參考文件：  
 [Factory Girl](http://www.slideshare.net/gabevanslv/factory-girl-15924188)
 
-#Capybara
+#<span id="capybara">Capybara</span>
 RSpec除了可以拿來寫單元程式，我們也可以把測試的層級拉高做整合性測試，以Web應用程式來說，就是去自動化瀏覽器的操作，實際去向網站伺服器請求，然後驗證出來的HTML是正確的輸出。
 
 [capybara](https://github.com/jnicklas/capybara)就是一套可以搭配的工具，用來模擬瀏覽器行為  
 
 如果真的需要打開瀏覽器測試，例如需要測試JavaScript和Ajax介面，可以使用 [seleniumhq](http://docs.seleniumhq.org/) 或[ Watir](http://watir.com/) 工具
 
-#CI server
+[RSpec & Capybara 整合測試(Selenium and Poltergeist Driver)](http://mgleon08.github.io/blog/2016/03/30/rspec-capybara-selenium-poltergeist-driver/)
+
+#<span id="ci">CI server</span>
 CI(Continuous Integration)
 伺服器的用處是每次有人Commit就會自動執行編譯及測試(Ruby不用編譯，所以主要的用處是跑測試)，並回報結果，如果有人送交的程式搞砸了回歸測試，馬上就有回饋可以知道。
 
@@ -777,7 +792,8 @@ production:
 接著到 [circleci.com](https://circleci.com) 和 github 帳號做連結。
 接著將要跑的 project 加進去，之後只要 push 到 github 就會自動跑了！
 
-#Other
+#<span id="other">Other</span>
+
 [guard-rspec](https://github.com/guard/guard-rspec)   
 `Continuous Testing` 的工具。程式修改完存檔，自動跑對應的測試。
 

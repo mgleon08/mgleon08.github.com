@@ -510,11 +510,17 @@ a.zip([1, 2], [8])
 
 #flat_map
 
+* 傾向使用 `flat_map` 而不是 `map` + `flatten` 的組合。
+* 這並不適用於深度大於2 的數組，舉個例子，如果 `users.first.songs == ['a', ['b', 'c']]` ，則使用 `map` + `flatten` 的組合，而不是使用 `flat_map` 。
+* `flat_map` 將數組變平坦一個層級，而 `flatten` 會將整個數組變平坦。
+
 ```ruby
 [[1,2],[3,4]].flat_map {|i| i }   #=> [1, 2, 3, 4]
 ```
 
 #reverse_each
+
+使用 `reverse_each` 代替 `reverse.each`。 `reverse_each` 不會分配一個新數組並且這是好事。
 
 ```ruby
 (1..3).reverse_each {|v| p v }
@@ -573,6 +579,29 @@ select 勝於 find_all
 reduce 勝於 inject
 size   勝於 length
 ```
+
+#自建 methods
+
+### mash 
+
+```ruby
+module Enumerable
+  def mash(&block)
+    self.inject({}) do |output, item|
+      binding.pry
+      key, value = block_given? ? yield(item) : item
+      output.merge(key => value)
+    end
+  end
+end
+
+["functional", "programming", "rules"].map { |s| [s, s.length] }.mash
+# {"functional"=>10, "programming"=>11, "rules"=>5}
+
+["functional", "programming", "rules"].mash { |s| [s, s.length] }
+# {"functional"=>10, "programming"=>11, "rules"=>5}
+```
+
 
 官方文件：  
 [Enumerable](http://ruby-doc.org/core-2.1.0/Enumerable.html)  

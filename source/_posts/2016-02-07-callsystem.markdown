@@ -23,7 +23,8 @@ value.class
 
 * Built-in syntax, `%x( cmd )`  
 
-Returns the result of the shell command, just like the backticks.
+Returns the result of the shell command, just like the backticks.  
+會以字串形式回傳結果
 
 ```ruby
 value = %x( echo 'hi' )
@@ -32,7 +33,8 @@ value = %x[ #{cmd} ]
 
 * Kernel# `system`
 
-Return: true if the command was found and ran successfully, false otherwise
+Return: true if the command was found and ran successfully, false otherwise  
+指令執行結果成功與否回傳布林值
 
 ```ruby
 wasGood = system( "echo 'hi'" )
@@ -55,5 +57,7 @@ exec( cmd ) # Note: this will never be reached because of the line above
 [Open3 - 可執行精密的操作](http://ruby-doc.org/stdlib-2.3.0/libdoc/open3/rdoc/Open3.html#method-c-pipeline)
 
 參考文件：   
+[Input & output in Ruby](http://zetcode.com/lang/rubytutorial/io/)  
 [Calling shell commands from Ruby](http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby)  
-[6 Ways to Run Shell Commands in Ruby Tuesday](http://tech.natemurray.com/2007/03/ruby-shell-commands.html)
+[6 Ways to Run Shell Commands in Ruby Tuesday](http://tech.natemurray.com/2007/03/ruby-shell-commands.html)  
+[Ruby#open 知多少？](https://blog.alphacamp.co/2016/06/30/ruby-open/)

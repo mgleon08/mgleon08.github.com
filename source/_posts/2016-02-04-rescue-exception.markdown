@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "例外處理 rescue exception"
+title: "例外處理 rescue exception, Error Handling, Custom Error Pages"
 date: 2016-02-04 21:51:38 +0800
 comments: true
 categories: rails
@@ -124,16 +124,33 @@ end
 
 >不要做 rescue_from Exception 或 rescue_from StandardError，除非有很好的理由。因為這會帶來嚴重的副作用（譬如無法得知異常的細節、無法在開發時追蹤 Backtrace）
 
-[rescue-from](http://rails.ruby.tw/action_controller_overview.html#rescue-from)  
-[Action Controller - 控制 HTTP 流程](https://ihower.tw/rails4/actioncontroller.html)  
-[Rescuable](http://edgeapi.rubyonrails.org/classes/ActiveSupport/Rescuable/ClassMethods.html)  
-[Understanding Ruby and Rails: Rescuable and rescue_from](https://simonecarletti.com/blog/2009/12/inside-ruby-on-rails-rescuable-and-rescue_from/)  
-[Rails' rescue_from](http://www.rubytutorial.io/rails-rescue_from/)  
+
+* [rescue-from](http://rails.ruby.tw/action_controller_overview.html#rescue-from)  
+* [Action Controller - 控制 HTTP 流程](https://ihower.tw/rails4/actioncontroller.html)  
+* [Rescuable](http://edgeapi.rubyonrails.org/classes/ActiveSupport/Rescuable/ClassMethods.html)  
+* [Understanding Ruby and Rails: Rescuable and rescue_from](https://simonecarletti.com/blog/2009/12/inside-ruby-on-rails-rescuable-and-rescue_from/)  
+* [Rails' rescue_from](http://www.rubytutorial.io/rails-rescue_from/)  
 
 #自訂錯誤類型
-[Where to define custom error types in Ruby and/or Rails?](http://stackoverflow.com/questions/5200842/where-to-define-custom-error-types-in-ruby-and-or-rails)  
-[Raise custom Exception with arguments](http://stackoverflow.com/questions/11636874/raise-custom-exception-with-arguments)  
-[RAISING AND RESCUING CUSTOM ERRORS IN RAILS](https://wearestac.com/blog/raising-and-rescuing-custom-errors-in-rails)
+
+```ruby
+module Errors
+  class WhatError < StandardError
+  end
+end
+```
+
+```ruby
+raise Errors::WhatError, 'Message'
+```
+
+```ruby
+rescue Errors::WhatError => e
+```
+
+* [Where to define custom error types in Ruby and/or Rails?](http://stackoverflow.com/questions/5200842/where-to-define-custom-error-types-in-ruby-and-or-rails)  
+* [Raise custom Exception with arguments](http://stackoverflow.com/questions/11636874/raise-custom-exception-with-arguments)  
+* [RAISING AND RESCUING CUSTOM ERRORS IN RAILS](https://wearestac.com/blog/raising-and-rescuing-custom-errors-in-rails)
 
 #自訂錯誤頁面
 
@@ -186,7 +203,16 @@ layouts/
   error.html.erb
 ```
 
-#other
+###Dynamic Error Pages
+
+* [Dynamic Rails Error Pages](https://mattbrictson.com/dynamic-rails-error-pages)  
+* [How to redirect to a 404 in Rails?](http://stackoverflow.com/questions/2385799/how-to-redirect-to-a-404-in-rails)  
+* [Custom 404 error page with Rails 4](http://thepugautomatic.com/2014/08/404-with-rails-4/)  
+* [DYNAMIC ERROR PAGES IN RAILS](https://wearestac.com/blog/dynamic-error-pages-in-rails)  
+* [Jutsu #12: Custom Error Pages in Rails 4+](https://samurails.com/jutsu/rails-jutsu/jutsu-12-custom-error-pages-in-rails-4/)  
+* [Creating Custom Error Pages With Rails](https://solidfoundationwebdev.com/blog/posts/creating-custom-error-pages-with-rails)
+
+#Don't use rescue Exception => e
 
 ```ruby
 begin
@@ -212,7 +238,54 @@ rescue Exception => e
   # Don't do this. This will swallow every single exception. Nothing gets past it. 
 end
 ```
-[Ruby's Exception vs StandardError: What's the difference?](http://blog.honeybadger.io/ruby-exception-vs-standarderror-whats-the-difference/)
+
+###why
+
+因為
+
+```ruby
+#會將所有的 exception 給 rescue 包括，ruby 自行產生的
+rescue Exception => e
+
+#只抓自己專案裡面的 error 都是繼承自 StandardError
+rescue => e
+等同於
+rescue StandardError => e
+```
+
+###The Exception Tree
+```ruby
+Exception
+ NoMemoryError
+ ScriptError
+   LoadError
+   NotImplementedError
+   SyntaxError
+ SignalException
+   Interrupt
+ StandardError
+   ArgumentError
+   IOError
+     EOFError
+   IndexError
+   LocalJumpError
+   NameError
+     NoMethodError
+   RangeError
+     FloatDomainError
+   RegexpError
+   RuntimeError
+   SecurityError
+   SystemCallError
+   SystemStackError
+   ThreadError
+   TypeError
+   ZeroDivisionError
+ SystemExit
+ fatal
+```
+
+* [Ruby's Exception vs StandardError: What's the difference?](http://blog.honeybadger.io/ruby-exception-vs-standarderror-whats-the-difference/)
 
 #Raise four step
 
@@ -352,5 +425,7 @@ puts "Continuing..."
 [Exception](http://ruby-doc.org/core-2.2.0/Exception.html)
 
 參考文件：  
-[Ruby - Chapter 09 例外處理(exception)](http://blog.xuite.net/yschu/wretch/104912690-Ruby+-+Chapter+09+%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86(exception))  
-[Ruby學習筆記(8) – 錯誤與例外處理](http://blog.tonycube.com/2011/07/ruby8.html)  
+
+* [Ruby - Chapter 09 例外處理(exception)](http://blog.xuite.net/yschu/wretch/104912690-Ruby+-+Chapter+09+%E4%BE%8B%E5%A4%96%E8%99%95%E7%90%86(exception))  
+* [Ruby學習筆記(8) – 錯誤與例外處理](http://blog.tonycube.com/2011/07/ruby8.html)  
+* [Error Handling in Rails — The Modular Way](https://medium.com/rails-ember-beyond/error-handling-in-rails-the-modular-way-9afcddd2fe1b#.nbq2qjk4a)

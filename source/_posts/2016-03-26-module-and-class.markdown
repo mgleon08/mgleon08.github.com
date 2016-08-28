@@ -57,23 +57,30 @@ p.yo #=> 'yo leon'
 
 ```ruby
 module Man
+  module_function
+  #也可以在每個 method 前面加上 self
+  #也能改成 extend self，但比較偏好 module_function
+
   def hi(name)
-    "hi, #{@name}"
+    "hi, #{name}"
   end
- 
+
   def yo
-    "yo, #{@name}"
+    "yo, #{name}"
   end
 end
 
 Man.hi('leon') #=> 'hi leon'
-Man.yo('leon') #=> 'yo leon'
+Man.yo #=> 'yo Man'
 ```
 
 另外是當 Class include 很多 module 時，都會變成 Class 的 `class method` or `instance method`，這時就很難去分辨是從哪個 module 來的 method。
 
 因此使用上，看習慣，可維護性等等，去判斷要用 module or class  
 再細分要放在 `cocern` or `service object` or `lib`
+
+官方文件：  
+[module_function](http://apidock.com/ruby/Module/module_function)
 
 參考文件：  
 [module include extend](http://mgleon08.github.io/blog/2016/02/24/include-extend-require/)
