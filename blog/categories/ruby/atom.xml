@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-08-28T14:56:31+08:00</updated>
+  <updated>2016-09-17T22:59:13+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,526 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[I/O 輸入輸出]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/08/30/io/"/>
+    <updated>2016-08-30T10:32:37+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/08/30/io</id>
+    <content type="html"><![CDATA[<p>先來說說什麼是 IO</p>
+
+<!-- more -->
+
+
+<blockquote><ul>
+<li>所謂「I/O」，是input/output(輸出入) 的縮寫，泛指所有的輸出入動作。</li>
+<li>我們從鍵盤上輸入資料、移動滑鼠、由掃描器輸入影像、從磁碟機讀入檔案，都是屬於輸入的動作；從印表機印出報表、顯示圖形到螢幕、將執行結果存入磁碟中，都是屬於輸出的一種。</li>
+<li>I/O也指磁碟機的存取、或是通訊埠的接收資料和傳送資料等動作，一般都是針對可兼做輸出和輸入的設備。</li>
+</ul>
+</blockquote>
+
+<p>由以上可知，當我們鍵盤上打字，就是一種輸入的動作，再 terminal 顯示我們輸入的字，就是一種輸出的動作</p>
+
+<h1>ruby IO</h1>
+
+<ul>
+<li>標準輸入：$stdin</li>
+<li>標準輸出：$stdout</li>
+<li>標準錯誤輸出：$stderr</li>
+<li>命令列引數的陣列: ARGV</li>
+</ul>
+
+
+<h3>標準輸出 vs 標準錯誤輸出</h3>
+
+<pre><code class="ruby">#io.rb
+$stdout.print  "標準輸出"
+$stderr.print  "標準錯誤輸出"
+
+#執行 ruby io.rb &gt; log.txt，會發現 console 只會顯示 '標準錯誤輸出'，而標準輸出則會輸出到 log.txt
+</code></pre>
+
+<pre><code class="ruby">##&lt;IO:&lt;STDIN&gt;&gt;
+STDIN
+$stdin
+
+##&lt;IO:&lt;STDOUT&gt;&gt;
+$&gt;
+STDOUT
+$stdout
+
+#雖然有很多種表示法，但是比較偏好 $stdin，因為再 ruby 全大寫通常是常數，會讓人誤會，另一個則是不懂的人難以理解
+</code></pre>
+
+<h3>輸入 input</h3>
+
+<p><code>$stdin.gets</code></p>
+
+<pre><code class="ruby">$stdin.gets
+&gt; hello
+#=&gt; "hello\n"
+</code></pre>
+
+<p><code>#chomp!</code> 去除掉 \n</p>
+
+<pre><code class="ruby">$stdin.gets.chomp!
+&gt; hello
+#=&gt; "hello"
+</code></pre>
+
+<p><code>#eof?</code> 判斷是否讀到最後</p>
+
+<pre><code class="ruby">io = File.open( 'ruby.rb' , "r" )
+io.eof?
+#=&gt; false
+io.gets
+#=&gt; "1\n"
+io.eof?
+#=&gt; false
+io.gets
+#=&gt; "2\n"
+io.gets
+#=&gt; nil
+io.eof?
+#=&gt; true
+</code></pre>
+
+<p><code>#getc</code> 每次讀取一個字元</p>
+
+<pre><code class="ruby">io = open( 'ruby.rb' , "r" )
+io.getc
+#=&gt; "1"
+io.getc
+#=&gt; "\n"
+
+#會被主動轉換成 ASCII 編碼，因此第二個會讀出 \n
+</code></pre>
+
+<p><code>io.read</code> 指定讀取長度，預設為全部</p>
+
+<pre><code class="ruby">io = open( 'ruby.rb' , "r" )
+io.read
+#=&gt; "1\n2\n3"
+io.rewind
+=&gt; 0
+io.read(3)
+#=&gt; "1\n2"
+</code></pre>
+
+<h3>輸出 output</h3>
+
+<pre><code class="ruby">#adds a new line character
+#is an equivalent to the $stdout.puts
+puts 'a'
+#=&gt;a\n
+
+#is an equivalent to the $stdout.print
+printf 'a'
+#a
+
+#prints one character to the console
+putc 97
+#a=&gt; 97
+
+#p calls the inspect method upon the object being printed, The method is useful for debugging.
+p "a"
+#=&gt; 'a'
+
+a = StringIO.new
+#=&gt; #&lt;StringIO:0x007fc9a08813e8&gt;
+a.puts(123)
+#=&gt; nil
+a.rewind
+#=&gt; 0
+a.gets
+#=&gt; "123\n"
+</code></pre>
+
+<h3>指標</h3>
+
+<p>資料流的存取方法，有區分成「固定長度」與「非固定長度」</p>
+
+<ul>
+<li><p>固定長度的讀取方式</p>
+
+<ul>
+<li>優點：讀取速度快，資料都以固定的長度儲存，可以很快的找到指定的位置</li>
+<li>缺點：浪費空間，即使用不到大的空間也是會空下位置</li>
+</ul>
+</li>
+<li><p>非固定長度的讀取方式</p>
+
+<ul>
+<li>優點：省空間，有用到才會有空間</li>
+<li>缺點：讀取速度慢，每次讀取資料時，都必須從頭開始讀取</li>
+</ul>
+</li>
+</ul>
+
+
+<pre><code class="ruby">io.rewind  #將指標移到最前面
+
+io.pos     #目前指標位置
+
+io.seek(位置, 方式) #指定位置
+#方式有三種：
+#SEEK_SET ： 直接移動到指定位置
+#SEEK_CUR ： 移動到目前位置的相對位置
+#SEEK_END ： 移動到檔尾算起的相對位置
+
+io.truncate(0)
+io.truncate(io.pos)
+#引數為 0 的話，表示全部清空
+#引數為 io.pos 的話，表示將目前指標後的檔案全清空
+</code></pre>
+
+<pre><code class="ruby">io = File.open("ruby.rb", 'a+')
+io.write("123")
+#=&gt; 3
+io.read
+#=&gt; ""
+
+#因為 a 若有檔案在會寫在檔案後面，此時指標會指向最後面，因此可以用 rewind 將指標移致最前面
+io.rewind
+io.read
+#=&gt; 123
+</code></pre>
+
+<h1>Readline</h1>
+
+<blockquote><p>The Readline module provides interface for GNU Readline. This module defines a number of methods to facilitate completion and accesses input history from the Ruby interpreter. This module supported Edit Line(libedit) too. libedit is compatible with GNU Readline.</p></blockquote>
+
+<p>GNU的readline是一個開源的跨平台程序庫，提供了交互式的文本編輯功能</p>
+
+<p><a href="http://ruby-doc.org/stdlib-2.1.1/libdoc/readline/rdoc/Readline.html">Readline</a></p>
+
+<h1>stringIO 物件</h1>
+
+<ul>
+<li><a href="http://ruby-doc.org/stdlib-2.3.0/libdoc/stringio/rdoc/StringIO.html">StringIO</a></li>
+</ul>
+
+
+<p>設一個能夠儲存字串的物件</p>
+
+<blockquote><p>Pseudo I/O on String object.<br/>
+Commonly used to simulate <code>$stdio</code> or <code>$stderr</code></p></blockquote>
+
+<p>此時對 io 操作 puts 並不會真正的輸出，而是將字串存入 io 物件之中</p>
+
+<pre><code class="ruby">io = StringIO.new
+io.puts("A")
+io.puts("B")
+io.puts("C")
+io.rewind
+p io.read
+
+#"A\nB\nC\n"
+</code></pre>
+
+<h1>檔案輸出入</h1>
+
+<p>File 繼承自 IO</p>
+
+<blockquote><p>File.new 與 File.open 和 IO.new 與 IO.open 幾乎一樣，只差在覆寫了 initialize 方法，使其接受的參數不再是 FD 而是檔案的路徑字串。</p></blockquote>
+
+<ul>
+<li><a href="http://ruby-doc.org/core-2.1.5/File.html">File</a></li>
+<li><a href="http://mgleon08.github.io/blog/2016/01/31/ruby-file-dir/">用 Ruby 進行 File ＆ Dir 檔案操作</a></li>
+</ul>
+
+
+<pre><code class="ruby"># r  讀取，檔案必須存在
+# w  會主動建立空檔案，檔案已存在則會被覆蓋
+# a  寫入。主動建檔，檔案已存在則追加在後。
+# r+ 讀取 / 寫入，不會主動建檔，將內容加在檔案最前面，會覆蓋原有內容，檔案必須存在)
+# w+ 讀取 / 寫入。同 w 功能
+# a+ 讀取 / 寫入。同 a 功能
+
+#在每個模式後面加上"b"
+#例如 "rb" 或 "rb+"，就可以開啟「二進位」模式 
+
+io = File.new("ruby.rb", "w")
+io = File.open("/home/work/ruby.rb")
+io.close
+io.closed? #檢查是否關閉
+#若後面沒有 block (結束會自動關閉) 必須要再加上，io.close，關閉檔案，否則會出錯
+</code></pre>
+
+<pre><code class="ruby"># 打開檔案，並寫入文字（若沒檔案會直接新增）
+File.open('langs', 'w') do |f|
+  f.puts "Ruby"
+  f.write "Java\n"
+  f &lt;&lt; "Python\n"
+end
+</code></pre>
+
+<pre><code class="ruby">#查看檔案是否存在，建立時間，檔案大小
+puts File.exists? 'tempfile'
+
+f = File.new 'tempfile', 'w'
+puts File.mtime 'tempfile'
+puts f.size
+
+File.rename 'tempfile', 'tempfile2'
+
+f.close
+</code></pre>
+
+<pre><code class="ruby">#逐一行印出
+f = File.open("stones")
+while line = f.gets do
+    puts line
+end
+f.close
+
+#逐一行顯示
+File.open( "ruby.rb" , "r" ) do |f|
+    while line = f.gets
+      puts line
+    end
+end
+</code></pre>
+
+<pre><code class="ruby">#刪除檔案
+File.delete("/home/work/ruby.rb")
+
+#讀取檔案
+File.read("ruby.rb")
+</code></pre>
+
+<blockquote><h3>IO 的世界相當大啊，還有很多沒有提及，以後若有機會接觸到比較深的再來研究~.~</h3></blockquote>
+
+<ul>
+<li><a href="http://mgleon08.github.io/blog/2016/01/31/ruby-file-dir/">用 Ruby 進行 File ＆ Dir 檔案操作</a></li>
+<li><a href="http://mgleon08.github.io/blog/2016/02/07/callsystem/">用 Ruby 來 Calling Shell Commands</a></li>
+</ul>
+
+
+<p>官方文件：</p>
+
+<ul>
+<li><a href="http://ruby-doc.org/core-2.2.2/IO.html">IO</a></li>
+<li><a href="http://ruby-doc.org/stdlib-1.9.3/libdoc/stringio/rdoc/StringIO.html">StringIO</a></li>
+<li><a href="http://ruby-doc.org/core-2.1.5/File.html">File</a></li>
+<li><a href="https://ruby-doc.org/core-2.2.0/Dir.html">Dir</a></li>
+<li><a href="http://ruby-doc.org/core-2.3.1/Kernel.html">Kernel</a></li>
+<li><a href="http://ruby-doc.org/stdlib-2.1.1/libdoc/readline/rdoc/Readline.html">Readline</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="http://zetcode.com/lang/rubytutorial/io/">Input &amp; output in Ruby</a></li>
+<li><a href="https://blog.alphacamp.co/2016/06/30/ruby-open/">Ruby#open 知多少？</a></li>
+<li><a href="http://rpg0822.pixnet.net/blog/post/2844850-ruby-%E7%AD%86%E8%A8%98---7----%E8%A9%B2%E6%AD%BB%E7%9A%84-io-">Ruby 筆記 - 7 - 該死的 IO</a></li>
+<li><a href="http://stackoverflow.com/questions/4279604/what-is-the-difference-between-stdin-and-stdin-in-ruby">What is the difference between STDIN and $stdin in Ruby?</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[ERB Template]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/08/30/erb-template/"/>
+    <updated>2016-08-30T10:31:47+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/08/30/erb-template</id>
+    <content type="html"><![CDATA[<p>相信學過 rails 一定知道 erb，可以很方便地將 ruby code 寫在 view 中</p>
+
+<!-- more -->
+
+
+<p>但不一定是要有 rails 才可以用 erb</p>
+
+<pre><code class="ruby">#template.rb
+require 'erb'
+
+class Template
+  def initialize(foo, bar)
+    @foo = foo
+    @bar = bar
+  end
+
+  def open_template
+    puts ERB.new(File.read(templates_path), nil).result(binding)
+  end
+
+  def templates_path
+    File.expand_path("../template.erb", __FILE__)
+  end
+end
+
+Template.new('hi', 'hello').open_template
+</code></pre>
+
+<pre><code class="ruby">#template.erb
+1. &lt;%= @foo %&gt;
+2. &lt;%= @bar %&gt;
+</code></pre>
+
+<pre><code class="ruby">#執行
+ruby template.rb
+#1. hi
+#2. hello
+</code></pre>
+
+<h3>也可以利用 erb 來寫設定檔</h3>
+
+<ul>
+<li><a href="http://mgleon08.github.io/blog/2016/02/07/yaml/">用 Yaml 來寫文件, 設定檔</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="http://ruby-doc.org/stdlib-2.3.1/libdoc/erb/rdoc/ERB.html">ERB doc</a></li>
+<li><a href="http://stackoverflow.com/questions/1338960/ruby-templates-how-to-pass-variables-into-inlined-erb">Ruby templates: How to pass variables into inlined ERB?</a></li>
+<li><a href="http://stackoverflow.com/questions/8954706/render-an-erb-template-with-values-from-a-hash">Render an ERB template with values from a hash</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[OptionParser]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/08/30/optionparser/"/>
+    <updated>2016-08-30T10:30:52+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/08/30/optionparser</id>
+    <content type="html"><![CDATA[<h1>OptionParser</h1>
+
+<p>ruby 裡內建的強大工具，可以解析命令行參數</p>
+
+<!-- more -->
+
+
+<p>先來看一下什麼是 Unix命令行</p>
+
+<p>通常的Unix命令行參數包含下面這些形式：</p>
+
+<ul>
+<li>Option - 主要功能是用於調整命令行工具的行為
+
+<ul>
+<li>Option的表現通常有兩種形式
+
+<ul>
+<li>short opt​​ion</li>
+<li>long option</li>
+</ul>
+</li>
+<li>Option的類型有兩種
+
+<ul>
+<li><code>switch</code> 不帶 argument</li>
+<li><code>flag</code> 帶有 argument</li>
+</ul>
+</li>
+</ul>
+</li>
+<li>Argument - 表示命令行工具要操作的對象，通常是路徑，URL或者名稱等等。</li>
+<li>Action - 表示命令行工具的行為，比如 git 命令的 push 或者 pull 等等。</li>
+</ul>
+
+
+<pre><code class="ruby">git log --max-count=10
+
+#git 是 command，log 是 action，表示查看 git 的提交歷史。
+#--max-count 則是 option，表示最多顯示N條commit記錄
+</code></pre>
+
+<p>用 <code>ARGV</code> 來接命令列引數的陣列。</p>
+
+<pre><code class="ruby">require 'optparse'
+
+class Hello
+  def initialize(arguments)
+      @arguments = arguments
+      parse_options
+    end
+
+  def parse_options
+    options = OptionParser.new
+    options.banner = 'Usage: xxxx [options]'
+    #on('short opt​​ion', 'long option', 'comment')
+    #帶參數
+    options.on('-a arg', '--aa arg', 'this is test') { |arg| puts arg }
+    #不帶參數
+    options.on('-b', '--bb', 'this is test') { puts 'b' }
+    #多個參數
+    options.on('-c arg', '--cc arg', 'this is test') { |arg| puts arg }
+    options.on('-h', '--help', 'Show this message') { puts(options); exit }
+    options.parse!(@arguments)
+  end
+end
+
+Hello.new(ARGV)
+</code></pre>
+
+<pre><code class="ruby">ruby optparse.rb -a a
+#=&gt;a
+ruby optparse.rb --aa aa
+#=&gt;aa
+ruby optparse.rb -b
+#=&gt;b
+ruby optparse.rb --bb
+#=&gt;b
+ruby optparse.rb -c c,cc
+#=&gt;c,cc
+
+ruby optparse.rb -h
+#Usage: xxxx [options]
+#   -t, --test arg                   this is test
+#   -h, --help                       Show this message
+</code></pre>
+
+<h3>ARGV</h3>
+
+<p><a href="http://lrthw.github.io/ex13/">Learn Ruby The Hard Way ex13</a></p>
+
+<pre><code class="ruby">first, second, third = ARGV
+puts "Your first variable is: #{first}"
+puts "Your second variable is: #{second}"
+puts "Your third variable is: #{third}"
+
+
+# ARGV 就是「參數變數(argument variable)」，是一個非常標準的程式術語。
+# 在其他的程式語言你也可以看到它全大寫的原因是因為它是一個「常數(constant)」，
+# 意思是當它被賦值之後你就不應該去改變它了。這個變數會接收當你運行 Ruby 腳本時所傳
+# 入的參數。通過後面的習題你將對它有更多的了解。你將對它有更多的了解。
+
+# 第 1 行將 ARGV 「解包(unpack)」，與其將所有參數放到同一個變數下面，我們將每個參數
+# 予一個變數名稱 first 、 second 以及 third。腳本本身的名稱被存在一個特殊變數 $0
+# 裡，這是我們不需要解包的部份。也許看來有些異，但「解包」可能是最好的描述方式了。它
+# 的涵義很簡單：「將 ARGV 中的東西解包，然後將所有
+# 的參數依次賦予左邊的變數名稱」。
+</code></pre>
+
+<p>官方文件：</p>
+
+<ul>
+<li><a href="http://ruby-doc.org/stdlib-2.3.1/libdoc/optparse/rdoc/OptionParser.html">OptionParser</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://ruby-china.org/wiki/building-a-command-line-tool-with-optionparser">用 OptionParser 构建 Command Line 工具</a></li>
+<li><a href="http://rubylearning.com/blog/2011/01/03/how-do-i-make-a-command-line-tool-in-ruby/">How do I make a command-line tool in Ruby?</a></li>
+</ul>
+
+
+<p>相關 gem：</p>
+
+<ul>
+<li><a href="https://github.com/defunkt/choice">choice</a></li>
+<li><a href="https://github.com/ManageIQ/trollop">trollop</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby on Rails 裝機趴 (Only Mac)]]></title>
@@ -374,6 +894,9 @@ gem install -v x.x.x gemname
 
 #反安裝
 gem uninstall gem_name 
+
+#移除所有 gem
+gem uninstall -aIx
 </code></pre>
 
 <h1><span id="rails">Rails</span></h1>
@@ -564,6 +1087,7 @@ export PATH="$HOME/bin:$PATH"
 <ul>
 <li><a href="https://packagecontrol.io/installation">package control</a></li>
 <li><a href="https://www.sublimetext.com/">Sublime Text</a></li>
+<li><a href="https://scotch.io/bar-talk/best-sublime-text-3-themes-of-2015-and-2016">Best Sublime Text 3 Themes of 2015 and 2016</a></li>
 </ul>
 
 
@@ -703,277 +1227,6 @@ puts after - before
 <a href="https://ruby-china.org/topics/17575">升级 Ruby 2.1 以及 GC 调整</a><br/>
 <a href="https://ruby-china.org/topics/13740">Ruby 的 GC 不释放内存给回系统的？</a><br/>
 <a href="https://ruby-china.org/topics/28127">画说 Ruby 与 Python 垃圾回收</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Class Macro (Ruby’s Declarative Style)]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/06/09/class-macro/"/>
-    <updated>2016-06-09T20:14:09+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/06/09/class-macro</id>
-    <content type="html"><![CDATA[<p>Class Macro 就是在 rails 的 ActiveRecord 中，經常會看到，<code>validates</code> <code>belongs_to</code> <code>hsa_manay</code> 等等的宣告</p>
-
-<!-- more -->
-
-
-<pre><code class="ruby">class User &lt; ActiveRecord::Base
-  validates  :name, presence: true
-  belongs_to :group
-  has_many   :posts
-end
-</code></pre>
-
-<p>範例:</p>
-
-<pre><code class="ruby">module ActiveRecord
-  class Base
-    def self.has_many(name)
-      puts "#{self} has many #{name}"
-
-      #定義 Dynamic method
-      define_method(name) do
-        puts "Select * From #{name} Where.."
-        puts "Return #{name}"
-        []
-      end
-    end
-  end
-end
-
-class Movie &lt; ActiveRecord::Base
-  #self.has_many(:reviews)
-  has_many :reviews
-  has_many :genres
-end
-
-class Project &lt; ActiveRecord::Base
-  has_many :tasks
-end
-
-movie = Movie.new
-movie.reviews
-project = Project.new
-project.tasks
-
-#=&gt;Movie has many reviews
-#=&gt;Movie has many genres
-#=&gt;Project has many tasks
-#=&gt;Select * From reviews Where..
-#=&gt;Return reviews
-#=&gt;Select * From tasks Where..
-#=&gt;Return tasks
-</code></pre>
-
-<p>之前有寫過
-<a href="http://mgleon08.github.io/blog/2016/04/19/dynamic-classes-and-methods/">Dynamic Classes &amp; Methods</a></p>
-
-<p>另一個範例，可以動態的將取出來的值做改變</p>
-
-<pre><code class="ruby">module Precentage
-  def transform(*columns, precentage: nil)
-    columns.each do |column|
-      #這裡做了 alias_method 主要是希望，如果想知道原本的價錢，還可以呼叫 xx_origin
-      alias_method "#{column}_origin", column
-      if precentage
-        #動態產生新的 method 去取代原本
-        define_method(column) do
-          send(precentage) * send("#{column}_origin")
-        end
-      end
-    end
-  end
-end
-
-class Book
-  extend Precentage
-  attr_reader :price, :precentage
-
-  def initialize(options)
-    @price      = options[:price]
-    @precentage = options[:precentage]
-  end
-
-  transform :price, precentage: :precentage
-end
-
-book = Book.new(price: 100, precentage:0.8)
-puts book.precentage
-puts book.price
-puts book.price_origin
-
-#=&gt; 0.8
-#=&gt; 80.0
-#=&gt; 100
-</code></pre>
-
-<p>參考文件：<br/>
-<a href="https://pragmaticstudio.com/blog/2015/4/14/ruby-macros">How To Write &ldquo;Macros&rdquo; in Ruby</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby Range]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/06/09/ruby-range/"/>
-    <updated>2016-06-09T20:13:54+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/06/09/ruby-range</id>
-    <content type="html"><![CDATA[<p>經常會使用 range 去判斷某個值，是否在某個區間<br/>
-ruby 也提供很多好用的方法去判斷，cover?, include? 等等</p>
-
-<!-- more -->
-
-
-<h1>Range</h1>
-
-<pre><code class="ruby">#... 不包含結尾
-(-1..-5).to_a      #=&gt; []
-(-5..-1).to_a      #=&gt; [-5, -4, -3, -2, -1]
-('a'..'e').to_a    #=&gt; ["a", "b", "c", "d", "e"]
-('a'...'e').to_a   #=&gt; ["a", "b", "c", "d"]
-
-(0..2) == Range.new(0,2)    #=&gt; true
-(0..2) == (0...2)           #=&gt; false
-</code></pre>
-
-<h1>begin/end first/last</h1>
-
-<pre><code class="ruby">r1 = 3..6
-r2 = 3...6
-r1a, r1b = r1.first, r1.last    #=&gt; 3, 6
-r1c, r1d = r1.begin, r1.end     #=&gt; 3, 6
-r2a, r2b = r2.begin, r2.end     #=&gt; 3, 6 (注意：不是3和5)
-r1.first(2)                     #=&gt; [3, 4]
-</code></pre>
-
-<h1>step</h1>
-
-<p>從 0..20 中取出 0，5，10，20</p>
-
-<pre><code class="ruby">a = 0..20
-a.step(5).to_a
-#=&gt; [0, 5, 10, 15, 20]
-</code></pre>
-
-<h1>include?/cover?</h1>
-
-<p>判斷值，是否在 range 當中</p>
-
-<pre><code class="ruby">r = 1 .. 5
-r.include?(1)     #=&gt; true
-r.include?(0)     #=&gt; false
-r.cover?(1)       #=&gt; true
-r.cover?(0)       #=&gt; false
-
-("a".."z").include?("ab")     # =&gt; false 
-("a".."z").cover?("ab")       # =&gt; true 
-</code></pre>
-
-<p>主要差異是</p>
-
-<ul>
-<li>include? 會將所有值一一拿出來做比對，因此效率較差</li>
-<li>cover?   只會取出開頭和結尾，去比對，值 > 開頭 &amp;&amp; 值 &lt;= 結尾，效能比較好</li>
-</ul>
-
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-1.9.3/Range.html">ruby-doc Range</a></p>
-
-<p>參考文件：<br/>
-<a href="http://stackoverflow.com/questions/21608935/what-is-the-difference-between-rangeinclude-and-rangecover">What is the difference between Range#include? and Range#cover? ?</a>  <br/>
-<a href="https://blog.8thlight.com/makis-otman/2014/09/03/setting-date-ranges-in-ruby.html">Apprentice Blog of the Week: Setting Date Ranges in Ruby</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Default Args]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/05/29/default-args/"/>
-    <updated>2016-05-29T20:22:19+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/05/29/default-args</id>
-    <content type="html"><![CDATA[<p>很常時候，需要給變數一個預設值，因此有以下方法，都可以設定預設值</p>
-
-<!-- more -->
-
-
-<h1>||</h1>
-
-<p>只要是空值，或是 false, nil 就會回傳後面的預設值</p>
-
-<pre><code class="ruby">h = { "a" =&gt; 100, "b" =&gt; false , 'c' =&gt; nil}
-#=&gt; {"a"=&gt;100, "b"=&gt;false, "c"=&gt;nil}
-h['a'] || 8
-#=&gt; 100
-h['b'] || 8
-#=&gt; 8
-h['c'] || 8
-#=&gt; 8
-h['d'] || 8
-#=&gt; 8
-</code></pre>
-
-<h1>fetch</h1>
-
-<p>即使是 nil, false 也會回傳，只有在空值的時候回傳預設值</p>
-
-<pre><code class="ruby">h = { "a" =&gt; 100, "b" =&gt; false , 'c' =&gt; nil}
-#=&gt; {"a"=&gt;100, "b"=&gt;false, "c"=&gt;nil}
-h.fetch('a', 8)
-#=&gt; 100
-h.fetch('b', 8)
-#=&gt; false
-h.fetch('c', 8)
-#=&gt; nil
-h.fetch('d', 8)
-#=&gt; 8
-</code></pre>
-
-<p>在處理應該存在的哈希鍵時，使用 fetch。</p>
-
-<pre><code class="ruby">heroes = { batman: 'Bruce Wayne', superman: 'Clark Kent' }
-# bad - if we make a mistake we might not spot it right away
-heroes[:batman] # =&gt; "Bruce Wayne"
-heroes[:supermann] # =&gt; nil
-
-# good - fetch raises a KeyError making the problem obvious
-heroes.fetch(:supermann)
-</code></pre>
-
-<p>在使用 fetch 時，使用第二個參數設置默認值而不是使用自定義的邏輯。</p>
-
-<pre><code class="ruby">batman = { name: 'Bruce Wayne', is_evil: false }
-
-# bad - if we just use || operator with falsy value we won't get the expected result
-batman[:is_evil] || true # =&gt; true
-
-# good - fetch work correctly with falsy values
-batman.fetch(:is_evil, true) # =&gt; false
-</code></pre>
-
-<p>盡量用 fetch 加區塊而不是直接設定默認值。</p>
-
-<pre><code class="ruby">batman = { name: 'Bruce Wayne' }
-
-# bad - if we use the default value, we eager evaluate it
-# so it can slow the program down if done multiple times
-batman.fetch(:powers, get_batman_powers) # get_batman_powers is an expensive call
-
-# good - blocks are lazy evaluated, so only triggered in case of KeyError exception
-batman.fetch(:powers) { get_batman_powers }
-</code></pre>
-
-<h1>merge</h1>
-
-<p>只有在 merge 的參數裡有同樣的值，才會覆蓋掉 default 的值</p>
-
-<pre><code class="ruby">default = { "a" =&gt; 100, "b" =&gt; false , 'c' =&gt; nil }
-args    = { "a" =&gt; 8 }
-
-default.merge(args)
-#=&gt; {"a"=&gt;8, "b"=&gt;false, "c"=&gt;nil}
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://apidock.com/ruby/Hash/fetch">fetch</a><br/>
-<a href="http://apidock.com/ruby/Hash/merge">merge</a></p>
 ]]></content>
   </entry>
   

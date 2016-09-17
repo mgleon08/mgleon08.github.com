@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Gem | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/gem/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-08-28T14:56:31+08:00</updated>
+  <updated>2016-09-17T22:59:13+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -14,18 +14,131 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Make You Own Gem]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/08/30/make-you-own-gem/"/>
+    <updated>2016-08-30T10:24:36+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/08/30/make-you-own-gem</id>
+    <content type="html"><![CDATA[<p>bundle 本身就有提供可以產生 gem 相關檔案的功能</p>
+
+<!-- more -->
+
+
+<pre><code class="ruby">bundle gem xxx --mit -t=rspec
+#後面可以設定參數，ex: 自動產生 LICENSE.txt, 測試用 rspec or mintest 等等
+
+#xxx/Gemfile                  &lt;= dependency 哪些套件，但基本上裡面是指定到 xxx.gemspec，將相依的套件定義在 xxx.gemspec 即可
+#xxx/Rakefile                 &lt;= 發佈和打包的 rake tasks
+#xxx/LICENSE.txt              &lt;= 註明 License
+#xxx/README.md                &lt;= 說明如何使用它(github上會顯示)
+#xxx/.gitignore               &lt;= 不要進 Git 的檔案在這定義
+#xxx/xxx.gemspec             &lt;= gem 的 spec
+#xxx/lib/xxx.rb              &lt;= gem 裡的 library，主要 code 都是在這裡
+#xxx/lib/xxx/version.rb      &lt;= 版本紀錄
+</code></pre>
+
+<p><code>xxx.gemspec</code> gem 裡面的基本設定都會在這邊，需要寫的都會註明 <code>TODO:</code></p>
+
+<pre><code class="ruby"># coding: utf-8
+lib = File.expand_path('../lib', __FILE__)
+$LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
+require 'xxx/version'
+
+Gem::Specification.new do |spec|
+  spec.name          = "xxx"
+  spec.version       = Xxx::VERSION
+  spec.authors       = ["TODO: Write your name"]
+  spec.email         = ["TODO: Write your email address"]
+
+  spec.summary       = %q{TODO: Write a short summary, because Rubygems requires one.}
+  spec.description   = %q{TODO: Write a longer description or delete this line.}
+  spec.homepage      = "TODO: Put your gem's website or public repo URL here."
+  spec.license       = "MIT"
+
+  # Prevent pushing this gem to RubyGems.org by setting 'allowed_push_host', or
+  # delete this section to allow pushing this gem to any host.
+  if spec.respond_to?(:metadata)
+    spec.metadata['allowed_push_host'] = "TODO: Set to 'http://mygemserver.com'"
+  else
+    raise "RubyGems 2.0 or newer is required to protect against public gem pushes."
+  end
+
+  spec.files         = `git ls-files -z`.split("\x0").reject { |f| f.match(%r{^(test|spec|features)/}) }
+  spec.bindir        = "exe"
+  spec.executables   = spec.files.grep(%r{^exe/}) { |f| File.basename(f) }
+  spec.require_paths = ["lib"]
+
+  spec.add_development_dependency "bundler", "~&gt; 1.11"
+  spec.add_development_dependency "rake", "~&gt; 10.0"
+  spec.add_development_dependency "rspec", "~&gt; 3.0"
+end
+</code></pre>
+
+<h1>Build</h1>
+
+<pre><code class="ruby">gem build xxx.gemspec
+#目錄底下會多出此檔 xxx-0.0.1.gem
+
+Successfully built RubyGem
+Name: xxx
+Version: 0.1.0
+File: xxx-0.1.0.gem
+</code></pre>
+
+<h1>Install</h1>
+
+<pre><code class="ruby">gem install xxx
+
+$ irb
+require 'xxx'
+#=&gt; true
+
+Xxx.hi
+#=&gt;Hello, world!
+</code></pre>
+
+<h1>發佈到 RubyGems.org</h1>
+
+<ul>
+<li>gem update &ndash;system</li>
+<li>申請帳號 <a href="https://rubygems.org/sign_up">rubygems</a></li>
+<li>發佈</li>
+</ul>
+
+
+<pre><code class="ruby">gem push xxx-0.0.1.gem
+#push 後會要輸入你剛剛的申請的帳號密碼，就ok囉
+</code></pre>
+
+<h3>command-reference</h3>
+
+<p><a href="http://guides.rubygems.org/command-reference/">command-reference</a></p>
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="RubyGems.org">https://rubygems.org/</a></li>
+<li><a href="http://bundler.io/v1.12/man/bundle-gem.1.html">bundle gem</a></li>
+<li><a href="http://guides.rubygems.org/make-your-own-gem/">MAKE YOUR OWN GEM</a></li>
+<li><a href="http://blog.jex.tw/blog/2013/11/29/ruby-build-own-gem/">Ruby 建立自己的 Gem 套件</a></li>
+<li><a href="https://quickleft.com/blog/engineering-lunch-series-step-by-step-guide-to-building-your-first-ruby-gem/">Step-by-Step Guide to Building Your First Ruby Gem</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[用 Foreman 管理進程]]></title>
     <link href="http://mgleon08.github.com/blog/2016/04/19/foreman/"/>
     <updated>2016-04-19T22:20:41+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/04/19/foreman</id>
-    <content type="html"><![CDATA[<p>若專案依賴各種外部的進程使用 foreman 來管理它們。</p>
+    <content type="html"><![CDATA[<p>若專案需要啟動多個 process，可以用 foreman 來管理它們。</p>
 
 <!-- more -->
 
 
 <h1>設定</h1>
 
-<p>在根目錄底下新增 Procfile 檔案</p>
+<p>在根目錄底下新增 <code>Procfile</code> 檔案</p>
 
 <p>設定所有要跑的指令</p>
 
@@ -41,11 +154,21 @@ web:    bundle exec rails s -p $PORTworker: bundle exec rake workerurgentworker:
 <pre><code class="ruby">foreman start13:44:20 web.1          | started with pid 8289113:44:20 worker.1       | started with pid 8289213:44:20 urgentworker.1 | started with pid 82893￼13:44:20 scheduler.1    | started with pid 82894
 </code></pre>
 
-<p>gem：<br/>
-<a href="https://github.com/ddollar/foreman">foreman</a></p>
+<p>gem：</p>
 
-<p>參考文件：<br/>
-<a href="http://arthurpai.logdown.com/posts/2014/07/09/heroku-worker-processes-setting">Heroku Worker Processes setting</a></p>
+<ul>
+<li><a href="https://github.com/ddollar/foreman">foreman</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="http://ddollar.github.io/foreman/">foreman doc</a></li>
+<li><a href="http://blog.daviddollar.org/2011/05/06/introducing-foreman.html">Introducing Foreman</a></li>
+<li><a href="http://arthurpai.logdown.com/posts/2014/07/09/heroku-worker-processes-setting">Heroku Worker Processes setting</a></li>
+</ul>
+
 ]]></content>
   </entry>
   
@@ -332,235 +455,6 @@ end
 
 <p>gem：<br/>
 <a href="https://github.com/stevenosloan/slack-notifier">slack-notifier</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[用 Sidekiq 處理 Background Job]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/02/23/sidekiq/"/>
-    <updated>2016-02-23T21:06:26+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/02/23/sidekiq</id>
-    <content type="html"><![CDATA[<p>當遇到一些需要等待比較長時間處理的動作時，就可以將這工作，丟到背景去處理<br/>
-給用戶們更好的時候體驗。</p>
-
-<!-- more -->
-
-
-<h1>Sidekiq:</h1>
-
-<h3>Pros</h3>
-
-<ul>
-<li>runs thread per worker (uses much less memory);</li>
-<li>less forking (works faster);</li>
-<li>more options out of the box.</li>
-</ul>
-
-
-<h3>Cons</h3>
-
-<ul>
-<li>[huge] requires thread-safety of your code and all dependencies. If you run thread-unsafe code with threads, you&rsquo;re asking for trouble;</li>
-<li>works on some rubies better than others (jruby and rubinius are recommended, efficiency on MRI is decreased due to GVL (global VM lock)).</li>
-</ul>
-
-
-<blockquote><p>每個 worker 是一個 thread，要注意 thread-safety 的問題<br/>
-Your worker code does need to be thread-safe.</p></blockquote>
-
-<p>一台機器，只能有一個 redis server，但是 redis 可以有多個 database<br/>
-redis 的 database 可以共享給不同 server shared</p>
-
-<h1>Redis</h1>
-
-<p>Sidekiq是搭配Redis來儲存Job，而Redis是一套高性能的 <code>In-Memory Key-Value</code> 儲存系統。</p>
-
-<pre><code>brew install redis
-</code></pre>
-
-<h3>啟動</h3>
-
-<pre><code class="ruby">redis-server #is the Redis Server itself.
-redis-sentinel #is the Redis Sentinel executable (monitoring and failover).
-redis-cli #is the command line interface utility to talk with Redis.
-redis-benchmark #is used to check Redis performances.
-redis-check-aof #are useful in the rare event of corrupted data files.
-redis-check-dump #are useful in the rare event of corrupted data files.
-</code></pre>
-
-<ul>
-<li><a href="http://redis.io/">redis</a></li>
-<li><a href="https://medium.com/@petehouston/install-and-config-redis-on-mac-os-x-via-homebrew-eb8df9a4f298#.bkepdbs4f">Install and config Redis on Mac OS X via Homebrew</a></li>
-<li><a href="http://stackoverflow.com/questions/24221449/want-to-run-redis-server-in-background-nonstop">want to run redis-server in background nonstop</a></li>
-<li><a href="http://stackoverflow.com/questions/31610511/how-can-i-run-redis-in-the-background">How can I run Redis in the background?</a></li>
-<li><a href="http://naleid.com/blog/2011/03/05/running-redis-as-a-user-daemon-on-osx-with-launchd">Running Redis as a User Daemon on OSX With Launchd</a></li>
-</ul>
-
-
-<h1>安裝</h1>
-
-<pre><code class="ruby">gem 'sidekiq'
-gem 'sinatra', :require =&gt; nil #用來呈現 Web UI
-</code></pre>
-
-<h1>設定</h1>
-
-<h3>Active Job</h3>
-
-<p>可用 ruby 內建的 Active Job，來產生 job。</p>
-
-<pre><code class="ruby">rails g job test
-# =&gt; app/jobs/test_job.rb
-</code></pre>
-
-<p>設定在 <code>config/application.rb</code><br/>
-或是各個環境去做設定 <code>config/environments/development.rb</code></p>
-
-<pre><code class="ruby">config.active_job.queue_adapter = :sidekiq
-</code></pre>
-
-<p><code>app/jobs/test_job.rb</code></p>
-
-<pre><code class="ruby">class TestJob &lt; ActiveJob::Base
-  queue_as :default
-
-  def perform(*args)
-    # Do something later
-  end
-end
-</code></pre>
-
-<h3>Worker</h3>
-
-<p>或是直接用 sidekiq 的 worker。</p>
-
-<p><code>app/works/test_worker.rb</code></p>
-
-<pre><code class="ruby">class TestWorker &lt; ActiveJob::Base
-  include Sidekiq::Worker
-  sidekiq_options :queue =&gt; :default, :retry =&gt; 3
-
-  def perform(*args)
-    # Do something later
-  end
-end
-</code></pre>
-
-<h3>other</h3>
-
-<p>設定 <code>redis</code> client 和 server</p>
-
-<ul>
-<li>將 worker push 到哪個 redis</li>
-<li>從哪個 redis pull worker 下來</li>
-</ul>
-
-
-<p><code>config/sidekiq.rb</code></p>
-
-<pre><code class="ruby">redis_server = '127.0.0.1'
-redis_port = 6379
-redis_db_num = 0
-redis_namespace = "sidekiq_moai_#{Rails.env}"
-
-Sidekiq.configure_server do |config|
-  config.redis = { url: "redis://#{redis_server}:#{redis_port}/#{redis_db_num}", namespace: redis_namespace }
-end
-
-Sidekiq.configure_client do |config|
-  config.redis = { url: "redis://#{redis_server}:#{redis_port}/#{redis_db_num}", namespace: redis_namespace, size: 25 }
-end
-</code></pre>
-
-<p><code>config/initializers/sidekiq.yml</code></p>
-
-<pre><code class="ruby">:concurrency: 1
-:pidfile: ./tmp/pids/sidekiq.pid
-:logfile: ./log/sidekiq.log
-:queues:
-  - default
-  - [myqueue, 2]
-development:
-  :concurrency: 1
-staging:
-  :concurrency: 10
-production:
-  :concurrency: 20
-</code></pre>
-
-<p><code>config/routes.rb</code></p>
-
-<pre><code class="ruby">require 'sidekiq/web'
-mount Sidekiq::Web =&gt; '/sidekiq'
-</code></pre>
-
-<h1>啟動</h1>
-
-<pre><code class="ruby">bundle exec sidekiq
-#會自動去找 sidekiq.yml
-
-bundle exec sidekiq -C ./config/sidekiq.yml
-</code></pre>
-
-<pre><code class="ruby">bundle exec sidekiq -q default -c 1
-
-#-c, --concurrency INT            processor threads to use
-#-d, --daemon                     Daemonize process
-#-e, --environment ENV            Application environment
-#-g, --tag TAG                    Process tag for procline
-#-i, --index INT                  unique process index on this machine
-#-q, --queue QUEUE[,WEIGHT]       Queues to process with optional weights
-#-r, --require [PATH|DIR]         Location of Rails application with workers or file to require
-#-t, --timeout NUM                Shutdown timeout
-#-v, --verbose                    Print more verbose output
-#-C, --config PATH                path to YAML config file
-#-L, --logfile PATH               path to writable logfile
-#-P, --pidfile PATH               path to pidfile
-#-V, --version                    Print version and exit
-#-h, --help                       Show help
-</code></pre>
-
-<pre><code class="ruby">#job
-TestJob.perform_later()
-
-#worker
-TesrWork.perform_async()
-
-#建議參數不要直接塞 object
-</code></pre>
-
-<h1>備註</h1>
-
-<p>清除 Queue 中的 Job，避免Queue中存放了太多蠢蠢欲動的僵屍Job，一方面也要防止耗費大量時間的Job再起浪費資源。</p>
-
-<pre><code>redis-cli -n flushdb
-redis-cli flushall
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://edgeguides.rubyonrails.org/active_job_basics.html">Active Job Basics</a><br/>
-<a href="http://rails.ruby.tw/active_job_basics.html">Active Job Basics 中文</a></p>
-
-<p>參考文件：  <br/>
-<a href="http://michaelhsu.tw/2013/07/04/server/#Web_server_/_Application_server_%E5%82%BB%E5%82%BB%E5%88%86%E4%B8%8D%E6%B8%85%E6%A5%9A_%EF%BC%9F">Web server / Application server 傻傻分不清楚 ？</a>
-<a href="http://aftcast.pixnet.net/blog/post/23786004-thread-safe%E7%9A%84%E7%90%86%E8%A7%A3%E8%88%87%E5%88%86%E6%9E%90">Thread-Safe的理解與分析</a><br/>
-<a href="http://stackoverflow.com/questions/18892667/sharing-sidekiq-between-two-apps">Sharing Sidekiq between two apps</a><br/>
-<a href="https://codedecoder.wordpress.com/2014/02/27/multiple-project-single-sidekiq-daemon-instance-one-machine/">multiple project using sidekiq on same machine</a><br/>
-<a href="http://blog.nicolas-brousse.fr/articles/2015-07-15-test-1--sidekiq-on-separate-servers/">Use Sidekiq on a separate servers</a> <br/>
-<a href="https://ruby-china.org/topics/18853">Sidekiq 异常的监控</a>
-<a href="https://ruby-china.org/topics/23176">使用 Monit＋Mina 监控服务器</a><br/>
-<a href="http://code.oneapm.com/ruby/2015/05/26/test-rails-mailer/">【译】使用Rails 4.2+ 测试异步邮件系统</a><br/>
-<a href="http://www.cnblogs.com/richard1234/p/3829074.html">Sidekiq in Rails</a><br/>
-<a href="http://ruby-journal.com/how-to-integrate-sidekiq-with-activejob/">How to Integrate Sidekiq With ActiveJob</a><br/>
-<a href="http://www.cnblogs.com/stephen-liu74/archive/2012/04/16/2370212.html">Redis學習手冊(目錄)</a><br/>
-<a href="http://www.rails365.net/articles/xiao-xi-dui-lie-active-job-jie-he-sidekiq-yi">消息队列之active_job结合sidekiq(一)</a><br/>
-<a href="http://liuchenyang.com/2016/upstart-inspeqtor-sidekiq/">使用Upstart + Inspeqtor 管理你的Sidekiq(监控、崩溃自动重启、邮件通知)</a></p>
-
-<p>gem：<br/>
-<a href="https://github.com/mperham/sidekiq">sidekiq</a><br/>
-<a href="https://github.com/utgarda/sidekiq-status">sidekiq-status</a><br/>
-<a href="https://github.com/mhfs/sidekiq-failures">sidekiq-failures</a> <br/>
-<a href="https://github.com/smartinez87/exception_notification">exception_notification</a></p>
 ]]></content>
   </entry>
   

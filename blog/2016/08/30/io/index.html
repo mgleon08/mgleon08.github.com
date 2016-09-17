@@ -1,0 +1,742 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>I/O 輸入輸出 - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="先來說說什麼是 IO 所謂「I/O」，是input/output(輸出入) 的縮寫，泛指所有的輸出入動作。
+我們從鍵盤上輸入資料、移動滑鼠、由掃描器輸入影像、從磁碟機讀入檔案，都是屬於輸入的動作；從印表機印出報表、顯示圖形到螢幕、將執行結果存入磁碟中，都是屬於輸出的一種。
+I/O也指磁碟機的存取、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/08/30/io">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">I/O 輸入輸出</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-08-30T10:32:37+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:32 am</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>先來說說什麼是 IO</p>
+
+<!-- more -->
+
+
+<blockquote><ul>
+<li>所謂「I/O」，是input/output(輸出入) 的縮寫，泛指所有的輸出入動作。</li>
+<li>我們從鍵盤上輸入資料、移動滑鼠、由掃描器輸入影像、從磁碟機讀入檔案，都是屬於輸入的動作；從印表機印出報表、顯示圖形到螢幕、將執行結果存入磁碟中，都是屬於輸出的一種。</li>
+<li>I/O也指磁碟機的存取、或是通訊埠的接收資料和傳送資料等動作，一般都是針對可兼做輸出和輸入的設備。</li>
+</ul>
+</blockquote>
+
+<p>由以上可知，當我們鍵盤上打字，就是一種輸入的動作，再 terminal 顯示我們輸入的字，就是一種輸出的動作</p>
+
+<h1>ruby IO</h1>
+
+<ul>
+<li>標準輸入：$stdin</li>
+<li>標準輸出：$stdout</li>
+<li>標準錯誤輸出：$stderr</li>
+<li>命令列引數的陣列: ARGV</li>
+</ul>
+
+
+<h3>標準輸出 vs 標準錯誤輸出</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#io.rb</span>
+</span><span class='line'><span class="vg">$stdout</span><span class="o">.</span><span class="n">print</span>  <span class="s2">&quot;標準輸出&quot;</span>
+</span><span class='line'><span class="vg">$stderr</span><span class="o">.</span><span class="n">print</span>  <span class="s2">&quot;標準錯誤輸出&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#執行 ruby io.rb &gt; log.txt，會發現 console 只會顯示 &#39;標準錯誤輸出&#39;，而標準輸出則會輸出到 log.txt</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">##&lt;IO:&lt;STDIN&gt;&gt;</span>
+</span><span class='line'><span class="no">STDIN</span>
+</span><span class='line'><span class="vg">$stdin</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">##&lt;IO:&lt;STDOUT&gt;&gt;</span>
+</span><span class='line'><span class="vg">$&gt;</span>
+</span><span class='line'><span class="no">STDOUT</span>
+</span><span class='line'><span class="vg">$stdout</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#雖然有很多種表示法，但是比較偏好 $stdin，因為再 ruby 全大寫通常是常數，會讓人誤會，另一個則是不懂的人難以理解</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>輸入 input</h3>
+
+<p><code>$stdin.gets</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vg">$stdin</span><span class="o">.</span><span class="n">gets</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="n">hello</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;hello\n&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>#chomp!</code> 去除掉 \n</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="vg">$stdin</span><span class="o">.</span><span class="n">gets</span><span class="o">.</span><span class="n">chomp!</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="n">hello</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;hello&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>#eof?</code> 判斷是否讀到最後</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span> <span class="s1">&#39;ruby.rb&#39;</span> <span class="p">,</span> <span class="s2">&quot;r&quot;</span> <span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">eof?</span>
+</span><span class='line'><span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">gets</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;1\n&quot;</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">eof?</span>
+</span><span class='line'><span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">gets</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;2\n&quot;</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">gets</span>
+</span><span class='line'><span class="c1">#=&gt; nil</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">eof?</span>
+</span><span class='line'><span class="c1">#=&gt; true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>#getc</code> 每次讀取一個字元</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span> <span class="s1">&#39;ruby.rb&#39;</span> <span class="p">,</span> <span class="s2">&quot;r&quot;</span> <span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">getc</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;1&quot;</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">getc</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;\n&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#會被主動轉換成 ASCII 編碼，因此第二個會讀出 \n</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>io.read</code> 指定讀取長度，預設為全部</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="nb">open</span><span class="p">(</span> <span class="s1">&#39;ruby.rb&#39;</span> <span class="p">,</span> <span class="s2">&quot;r&quot;</span> <span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;1\n2\n3&quot;</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">rewind</span>
+</span><span class='line'><span class="o">=&gt;</span> <span class="mi">0</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;1\n2&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>輸出 output</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#adds a new line character</span>
+</span><span class='line'><span class="c1">#is an equivalent to the $stdout.puts</span>
+</span><span class='line'><span class="nb">puts</span> <span class="s1">&#39;a&#39;</span>
+</span><span class='line'><span class="c1">#=&gt;a\n</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#is an equivalent to the $stdout.print</span>
+</span><span class='line'><span class="nb">printf</span> <span class="s1">&#39;a&#39;</span>
+</span><span class='line'><span class="c1">#a</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#prints one character to the console</span>
+</span><span class='line'><span class="nb">putc</span> <span class="mi">97</span>
+</span><span class='line'><span class="c1">#a=&gt; 97</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#p calls the inspect method upon the object being printed, The method is useful for debugging.</span>
+</span><span class='line'><span class="nb">p</span> <span class="s2">&quot;a&quot;</span>
+</span><span class='line'><span class="c1">#=&gt; &#39;a&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="no">StringIO</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="c1">#=&gt; #&lt;StringIO:0x007fc9a08813e8&gt;</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">puts</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; nil</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">rewind</span>
+</span><span class='line'><span class="c1">#=&gt; 0</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">gets</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;123\n&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>指標</h3>
+
+<p>資料流的存取方法，有區分成「固定長度」與「非固定長度」</p>
+
+<ul>
+<li><p>固定長度的讀取方式</p>
+
+<ul>
+<li>優點：讀取速度快，資料都以固定的長度儲存，可以很快的找到指定的位置</li>
+<li>缺點：浪費空間，即使用不到大的空間也是會空下位置</li>
+</ul>
+</li>
+<li><p>非固定長度的讀取方式</p>
+
+<ul>
+<li>優點：省空間，有用到才會有空間</li>
+<li>缺點：讀取速度慢，每次讀取資料時，都必須從頭開始讀取</li>
+</ul>
+</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">rewind</span>  <span class="c1">#將指標移到最前面</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">pos</span>     <span class="c1">#目前指標位置</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">seek</span><span class="p">(</span><span class="err">位置</span><span class="p">,</span> <span class="err">方式</span><span class="p">)</span> <span class="c1">#指定位置</span>
+</span><span class='line'><span class="c1">#方式有三種：</span>
+</span><span class='line'><span class="c1">#SEEK_SET ： 直接移動到指定位置</span>
+</span><span class='line'><span class="c1">#SEEK_CUR ： 移動到目前位置的相對位置</span>
+</span><span class='line'><span class="c1">#SEEK_END ： 移動到檔尾算起的相對位置</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">truncate</span><span class="p">(</span><span class="n">io</span><span class="o">.</span><span class="n">pos</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#引數為 0 的話，表示全部清空</span>
+</span><span class='line'><span class="c1">#引數為 io.pos 的話，表示將目前指標後的檔案全清空</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;ruby.rb&quot;</span><span class="p">,</span> <span class="s1">&#39;a+&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="s2">&quot;123&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1">#=&gt; 3</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#因為 a 若有檔案在會寫在檔案後面，此時指標會指向最後面，因此可以用 rewind 將指標移致最前面</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">rewind</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'><span class="c1">#=&gt; 123</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Readline</h1>
+
+<blockquote><p>The Readline module provides interface for GNU Readline. This module defines a number of methods to facilitate completion and accesses input history from the Ruby interpreter. This module supported Edit Line(libedit) too. libedit is compatible with GNU Readline.</p></blockquote>
+
+<p>GNU的readline是一個開源的跨平台程序庫，提供了交互式的文本編輯功能</p>
+
+<p><a href="http://ruby-doc.org/stdlib-2.1.1/libdoc/readline/rdoc/Readline.html">Readline</a></p>
+
+<h1>stringIO 物件</h1>
+
+<ul>
+<li><a href="http://ruby-doc.org/stdlib-2.3.0/libdoc/stringio/rdoc/StringIO.html">StringIO</a></li>
+</ul>
+
+
+<p>設一個能夠儲存字串的物件</p>
+
+<blockquote><p>Pseudo I/O on String object.<br/>
+Commonly used to simulate <code>$stdio</code> or <code>$stderr</code></p></blockquote>
+
+<p>此時對 io 操作 puts 並不會真正的輸出，而是將字串存入 io 物件之中</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="no">StringIO</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">puts</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">puts</span><span class="p">(</span><span class="s2">&quot;B&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">puts</span><span class="p">(</span><span class="s2">&quot;C&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">rewind</span>
+</span><span class='line'><span class="nb">p</span> <span class="n">io</span><span class="o">.</span><span class="n">read</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#&quot;A\nB\nC\n&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>檔案輸出入</h1>
+
+<p>File 繼承自 IO</p>
+
+<blockquote><p>File.new 與 File.open 和 IO.new 與 IO.open 幾乎一樣，只差在覆寫了 initialize 方法，使其接受的參數不再是 FD 而是檔案的路徑字串。</p></blockquote>
+
+<ul>
+<li><a href="http://ruby-doc.org/core-2.1.5/File.html">File</a></li>
+<li><a href="http://mgleon08.github.io/blog/2016/01/31/ruby-file-dir/">用 Ruby 進行 File ＆ Dir 檔案操作</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># r  讀取，檔案必須存在</span>
+</span><span class='line'><span class="c1"># w  會主動建立空檔案，檔案已存在則會被覆蓋</span>
+</span><span class='line'><span class="c1"># a  寫入。主動建檔，檔案已存在則追加在後。</span>
+</span><span class='line'><span class="c1"># r+ 讀取 / 寫入，不會主動建檔，將內容加在檔案最前面，會覆蓋原有內容，檔案必須存在)</span>
+</span><span class='line'><span class="c1"># w+ 讀取 / 寫入。同 w 功能</span>
+</span><span class='line'><span class="c1"># a+ 讀取 / 寫入。同 a 功能</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#在每個模式後面加上&quot;b&quot;</span>
+</span><span class='line'><span class="c1">#例如 &quot;rb&quot; 或 &quot;rb+&quot;，就可以開啟「二進位」模式 </span>
+</span><span class='line'>
+</span><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="s2">&quot;ruby.rb&quot;</span><span class="p">,</span> <span class="s2">&quot;w&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;/home/work/ruby.rb&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">close</span>
+</span><span class='line'><span class="n">io</span><span class="o">.</span><span class="n">closed?</span> <span class="c1">#檢查是否關閉</span>
+</span><span class='line'><span class="c1">#若後面沒有 block (結束會自動關閉) 必須要再加上，io.close，關閉檔案，否則會出錯</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 打開檔案，並寫入文字（若沒檔案會直接新增）</span>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s1">&#39;langs&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">f</span><span class="o">.</span><span class="n">puts</span> <span class="s2">&quot;Ruby&quot;</span>
+</span><span class='line'>  <span class="n">f</span><span class="o">.</span><span class="n">write</span> <span class="s2">&quot;Java</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="n">f</span> <span class="o">&lt;&lt;</span> <span class="s2">&quot;Python</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#查看檔案是否存在，建立時間，檔案大小</span>
+</span><span class='line'><span class="nb">puts</span> <span class="no">File</span><span class="o">.</span><span class="n">exists?</span> <span class="s1">&#39;tempfile&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">f</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">new</span> <span class="s1">&#39;tempfile&#39;</span><span class="p">,</span> <span class="s1">&#39;w&#39;</span>
+</span><span class='line'><span class="nb">puts</span> <span class="no">File</span><span class="o">.</span><span class="n">mtime</span> <span class="s1">&#39;tempfile&#39;</span>
+</span><span class='line'><span class="nb">puts</span> <span class="n">f</span><span class="o">.</span><span class="n">size</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">rename</span> <span class="s1">&#39;tempfile&#39;</span><span class="p">,</span> <span class="s1">&#39;tempfile2&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">f</span><span class="o">.</span><span class="n">close</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#逐一行印出</span>
+</span><span class='line'><span class="n">f</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span><span class="s2">&quot;stones&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="k">while</span> <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gets</span> <span class="k">do</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="n">line</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="n">f</span><span class="o">.</span><span class="n">close</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#逐一行顯示</span>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">open</span><span class="p">(</span> <span class="s2">&quot;ruby.rb&quot;</span> <span class="p">,</span> <span class="s2">&quot;r&quot;</span> <span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span>
+</span><span class='line'>  <span class="k">while</span> <span class="n">line</span> <span class="o">=</span> <span class="n">f</span><span class="o">.</span><span class="n">gets</span>
+</span><span class='line'>    <span class="nb">puts</span> <span class="n">line</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#刪除檔案</span>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">delete</span><span class="p">(</span><span class="s2">&quot;/home/work/ruby.rb&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#讀取檔案</span>
+</span><span class='line'><span class="no">File</span><span class="o">.</span><span class="n">read</span><span class="p">(</span><span class="s2">&quot;ruby.rb&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><h3>IO 的世界相當大啊，還有很多沒有提及，以後若有機會接觸到比較深的再來研究~.~</h3></blockquote>
+
+<ul>
+<li><a href="http://mgleon08.github.io/blog/2016/01/31/ruby-file-dir/">用 Ruby 進行 File ＆ Dir 檔案操作</a></li>
+<li><a href="http://mgleon08.github.io/blog/2016/02/07/callsystem/">用 Ruby 來 Calling Shell Commands</a></li>
+</ul>
+
+
+<p>官方文件：</p>
+
+<ul>
+<li><a href="http://ruby-doc.org/core-2.2.2/IO.html">IO</a></li>
+<li><a href="http://ruby-doc.org/stdlib-1.9.3/libdoc/stringio/rdoc/StringIO.html">StringIO</a></li>
+<li><a href="http://ruby-doc.org/core-2.1.5/File.html">File</a></li>
+<li><a href="https://ruby-doc.org/core-2.2.0/Dir.html">Dir</a></li>
+<li><a href="http://ruby-doc.org/core-2.3.1/Kernel.html">Kernel</a></li>
+<li><a href="http://ruby-doc.org/stdlib-2.1.1/libdoc/readline/rdoc/Readline.html">Readline</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="http://zetcode.com/lang/rubytutorial/io/">Input &amp; output in Ruby</a></li>
+<li><a href="https://blog.alphacamp.co/2016/06/30/ruby-open/">Ruby#open 知多少？</a></li>
+<li><a href="http://rpg0822.pixnet.net/blog/post/2844850-ruby-%E7%AD%86%E8%A8%98---7----%E8%A9%B2%E6%AD%BB%E7%9A%84-io-">Ruby 筆記 - 7 - 該死的 IO</a></li>
+<li><a href="http://stackoverflow.com/questions/4279604/what-is-the-difference-between-stdin-and-stdin-in-ruby">What is the difference between STDIN and $stdin in Ruby?</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-08-30T10:32:37+08:00'><span class='date'><span class='date-month'>Aug</span> <span class='date-day'>30</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>10:32 am</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/08/30/io/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/08/30/io/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/08/30/erb-template/" title="Previous Post: ERB template">&laquo; ERB template</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2016 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/08/30/io/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/08/30/io/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
