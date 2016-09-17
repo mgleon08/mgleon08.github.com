@@ -6,8 +6,6 @@ comments: true
 categories: ruby
 ---
 
-#OptionParser
-
 ruby 裡內建的強大工具，可以解析命令行參數
 
 <!-- more -->
