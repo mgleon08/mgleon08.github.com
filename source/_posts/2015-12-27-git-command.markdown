@@ -224,6 +224,18 @@ exec   = 執行一條指令
 	* 可以添加註解
 	* 可以添加簽名
 
+###push 標籤
+
+* `git push origin v1.5` git push 並不會把標籤上傳到遠端，所以必須透過底下才行
+* `git push origin --tags` 用 –tags 一次上傳上去
+
+###刪除標籤
+
+* `git push origin :refs/tags/my_tag` 
+* `git tag -d <tagname></tagname>`
+
+[[Git] 版本控制: 如何使用標籤(Tag)](https://blog.wu-boy.com/2010/11/git-%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E6%A8%99%E7%B1%A4tag/)
+
 #commit 順序
 
 ```

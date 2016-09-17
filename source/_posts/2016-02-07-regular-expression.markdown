@@ -22,6 +22,13 @@ categories: regular
 
 URL
 /(^$)|(^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(([0-9]{1,5})?\/.*)?$)/ix
+
+#group
+bot_name(<@U2B3X5R3L>)
+/^(?<bot>[[:alnum:][:punct:]@<>]*)$/u 
+
+(How is the weather in xxx?)
+/^How is the weather in (?<location>\w*)\?$/i
 ```
 
 ```ruby
@@ -139,9 +146,14 @@ p   ：列印，將某個選擇的資料印出。通常 p 會與參數 sed -n �
 s   ：取代，s 的動作可以搭配正規表示法。例如 1,20s/old/new/g 。
 ```
 
+![](http://3.bp.blogspot.com/-zDqcT6NKc64/T1A15_0JioI/AAAAAAAAALg/n4rdlJksXFQ/s1600/regular-expressions-cheat-sheet-v2.png)
+
 參考文件：  
-[正規表示式 Regular Expression](https://atedev.wordpress.com/2007/11/23/%E6%AD%A3%E8%A6%8F%E8%A1%A8%E7%A4%BA%E5%BC%8F-regular-expression/)
+
+* [正規表示式 Regular Expression](https://atedev.wordpress.com/2007/11/23/%E6%AD%A3%E8%A6%8F%E8%A1%A8%E7%A4%BA%E5%BC%8F-regular-expression/)
+* [Reglaur Expression 正規表達式介紹](http://wildsnote.blogspot.tw/2012/03/reglaur-expression.html)
 
 練習：  
-[Rubular](http://rubular.com/)  
-[Regex Cross­word](https://regexcrossword.com/)
+
+* [Rubular](http://rubular.com/)  
+* [Regex Cross­word](https://regexcrossword.com/)

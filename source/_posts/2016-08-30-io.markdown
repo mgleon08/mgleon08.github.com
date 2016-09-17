@@ -1,0 +1,303 @@
+---
+layout: post
+title: "I/O 輸入輸出"
+date: 2016-08-30 10:32:37 +0800
+comments: true
+categories: ruby
+---
+先來說說什麼是 IO
+
+<!-- more -->
+
+> * 所謂「I/O」，是input/output(輸出入) 的縮寫，泛指所有的輸出入動作。
+> * 我們從鍵盤上輸入資料、移動滑鼠、由掃描器輸入影像、從磁碟機讀入檔案，都是屬於輸入的動作；從印表機印出報表、顯示圖形到螢幕、將執行結果存入磁碟中，都是屬於輸出的一種。
+> * I/O也指磁碟機的存取、或是通訊埠的接收資料和傳送資料等動作，一般都是針對可兼做輸出和輸入的設備。
+
+由以上可知，當我們鍵盤上打字，就是一種輸入的動作，再 terminal 顯示我們輸入的字，就是一種輸出的動作
+
+
+#ruby IO
+
+* 標準輸入：$stdin
+* 標準輸出：$stdout
+* 標準錯誤輸出：$stderr
+* 命令列引數的陣列: ARGV
+
+### 標準輸出 vs 標準錯誤輸出
+
+```ruby
+#io.rb
+$stdout.print  "標準輸出"
+$stderr.print  "標準錯誤輸出"
+
+#執行 ruby io.rb > log.txt，會發現 console 只會顯示 '標準錯誤輸出'，而標準輸出則會輸出到 log.txt
+```
+
+```ruby
+##<IO:<STDIN>>
+STDIN
+$stdin
+
+##<IO:<STDOUT>>
+$>
+STDOUT
+$stdout
+
+#雖然有很多種表示法，但是比較偏好 $stdin，因為再 ruby 全大寫通常是常數，會讓人誤會，另一個則是不懂的人難以理解
+```
+
+
+###輸入 input
+
+`$stdin.gets`
+
+```ruby
+$stdin.gets
+> hello
+#=> "hello\n"
+```
+
+`#chomp! ` 去除掉 \n
+
+```ruby
+$stdin.gets.chomp!
+> hello
+#=> "hello"
+```
+
+`#eof?` 判斷是否讀到最後
+
+```ruby
+io = File.open( 'ruby.rb' , "r" )
+io.eof?
+#=> false
+io.gets
+#=> "1\n"
+io.eof?
+#=> false
+io.gets
+#=> "2\n"
+io.gets
+#=> nil
+io.eof?
+#=> true
+```
+
+`#getc` 每次讀取一個字元
+
+```ruby
+io = open( 'ruby.rb' , "r" )
+io.getc
+#=> "1"
+io.getc
+#=> "\n"
+
+#會被主動轉換成 ASCII 編碼，因此第二個會讀出 \n
+```
+
+`io.read` 指定讀取長度，預設為全部
+
+```ruby
+io = open( 'ruby.rb' , "r" )
+io.read
+#=> "1\n2\n3"
+io.rewind
+=> 0
+io.read(3)
+#=> "1\n2"
+```
+
+###輸出 output
+
+```ruby
+#adds a new line character
+#is an equivalent to the $stdout.puts
+puts 'a'
+#=>a\n
+
+#is an equivalent to the $stdout.print
+printf 'a'
+#a
+
+#prints one character to the console
+putc 97
+#a=> 97
+
+#p calls the inspect method upon the object being printed, The method is useful for debugging.
+p "a"
+#=> 'a'
+
+a = StringIO.new
+#=> #<StringIO:0x007fc9a08813e8>
+a.puts(123)
+#=> nil
+a.rewind
+#=> 0
+a.gets
+#=> "123\n"
+```
+
+###指標
+
+資料流的存取方法，有區分成「固定長度」與「非固定長度」
+
+* 固定長度的讀取方式
+	* 優點：讀取速度快，資料都以固定的長度儲存，可以很快的找到指定的位置
+	* 缺點：浪費空間，即使用不到大的空間也是會空下位置
+
+* 非固定長度的讀取方式
+	* 優點：省空間，有用到才會有空間
+	* 缺點：讀取速度慢，每次讀取資料時，都必須從頭開始讀取
+
+```ruby
+io.rewind  #將指標移到最前面
+
+io.pos     #目前指標位置
+
+io.seek(位置, 方式) #指定位置
+#方式有三種：
+#SEEK_SET ： 直接移動到指定位置
+#SEEK_CUR ： 移動到目前位置的相對位置
+#SEEK_END ： 移動到檔尾算起的相對位置
+
+io.truncate(0)
+io.truncate(io.pos)
+#引數為 0 的話，表示全部清空
+#引數為 io.pos 的話，表示將目前指標後的檔案全清空
+```
+
+```ruby
+io = File.open("ruby.rb", 'a+')
+io.write("123")
+#=> 3
+io.read
+#=> ""
+
+#因為 a 若有檔案在會寫在檔案後面，此時指標會指向最後面，因此可以用 rewind 將指標移致最前面
+io.rewind
+io.read
+#=> 123
+```
+
+#Readline
+
+>The Readline module provides interface for GNU Readline. This module defines a number of methods to facilitate completion and accesses input history from the Ruby interpreter. This module supported Edit Line(libedit) too. libedit is compatible with GNU Readline.
+
+GNU的readline是一個開源的跨平台程序庫，提供了交互式的文本編輯功能
+
+[Readline](http://ruby-doc.org/stdlib-2.1.1/libdoc/readline/rdoc/Readline.html)
+
+#stringIO 物件
+
+* [StringIO](http://ruby-doc.org/stdlib-2.3.0/libdoc/stringio/rdoc/StringIO.html)
+
+設一個能夠儲存字串的物件
+
+>Pseudo I/O on String object.  
+>Commonly used to simulate `$stdio` or `$stderr`
+
+此時對 io 操作 puts 並不會真正的輸出，而是將字串存入 io 物件之中
+
+```ruby
+io = StringIO.new
+io.puts("A")
+io.puts("B")
+io.puts("C")
+io.rewind
+p io.read
+
+#"A\nB\nC\n"
+```
+#檔案輸出入
+
+File 繼承自 IO
+
+>File.new 與 File.open 和 IO.new 與 IO.open 幾乎一樣，只差在覆寫了 initialize 方法，使其接受的參數不再是 FD 而是檔案的路徑字串。
+
+* [File](http://ruby-doc.org/core-2.1.5/File.html)
+* [用 Ruby 進行 File ＆ Dir 檔案操作](http://mgleon08.github.io/blog/2016/01/31/ruby-file-dir/)
+
+```ruby
+# r  讀取，檔案必須存在
+# w  會主動建立空檔案，檔案已存在則會被覆蓋
+# a  寫入。主動建檔，檔案已存在則追加在後。
+# r+ 讀取 / 寫入，不會主動建檔，將內容加在檔案最前面，會覆蓋原有內容，檔案必須存在)
+# w+ 讀取 / 寫入。同 w 功能
+# a+ 讀取 / 寫入。同 a 功能
+
+#在每個模式後面加上"b"
+#例如 "rb" 或 "rb+"，就可以開啟「二進位」模式 
+
+io = File.new("ruby.rb", "w")
+io = File.open("/home/work/ruby.rb")
+io.close
+io.closed? #檢查是否關閉
+#若後面沒有 block (結束會自動關閉) 必須要再加上，io.close，關閉檔案，否則會出錯
+```
+
+```ruby
+# 打開檔案，並寫入文字（若沒檔案會直接新增）
+File.open('langs', 'w') do |f|
+  f.puts "Ruby"
+  f.write "Java\n"
+  f << "Python\n"
+end
+```
+
+```ruby
+#查看檔案是否存在，建立時間，檔案大小
+puts File.exists? 'tempfile'
+
+f = File.new 'tempfile', 'w'
+puts File.mtime 'tempfile'
+puts f.size
+
+File.rename 'tempfile', 'tempfile2'
+
+f.close
+```
+
+```ruby
+#逐一行印出
+f = File.open("stones")
+while line = f.gets do
+    puts line
+end
+f.close
+
+#逐一行顯示
+File.open( "ruby.rb" , "r" ) do |f|
+	while line = f.gets
+	  puts line
+	end
+end
+```
+
+```ruby
+#刪除檔案
+File.delete("/home/work/ruby.rb")
+
+#讀取檔案
+File.read("ruby.rb")
+```
+
+> ###IO 的世界相當大啊，還有很多沒有提及，以後若有機會接觸到比較深的再來研究~.~
+
+* [用 Ruby 進行 File ＆ Dir 檔案操作](http://mgleon08.github.io/blog/2016/01/31/ruby-file-dir/)
+* [用 Ruby 來 Calling Shell Commands](http://mgleon08.github.io/blog/2016/02/07/callsystem/)
+
+官方文件：   
+
+* [IO](http://ruby-doc.org/core-2.2.2/IO.html)  
+* [StringIO](http://ruby-doc.org/stdlib-1.9.3/libdoc/stringio/rdoc/StringIO.html)
+* [File](http://ruby-doc.org/core-2.1.5/File.html)
+* [Dir](https://ruby-doc.org/core-2.2.0/Dir.html)
+* [Kernel](http://ruby-doc.org/core-2.3.1/Kernel.html)
+* [Readline](http://ruby-doc.org/stdlib-2.1.1/libdoc/readline/rdoc/Readline.html)
+
+參考文件：  
+
+* [Input & output in Ruby](http://zetcode.com/lang/rubytutorial/io/)
+* [Ruby#open 知多少？](https://blog.alphacamp.co/2016/06/30/ruby-open/)  
+* [Ruby 筆記 - 7 - 該死的 IO](http://rpg0822.pixnet.net/blog/post/2844850-ruby-%E7%AD%86%E8%A8%98---7----%E8%A9%B2%E6%AD%BB%E7%9A%84-io-)
+* [What is the difference between STDIN and $stdin in Ruby?](http://stackoverflow.com/questions/4279604/what-is-the-difference-between-stdin-and-stdin-in-ruby)

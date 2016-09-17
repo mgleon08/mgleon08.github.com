@@ -815,38 +815,46 @@ controller偶爾會寫
 feature 比較像是QA在寫的
 ```
 官方文件：  
-[Better Specs](http://betterspecs.org/)  
-[Relish](https://relishapp.com/rspec/)   
-[shoulda](http://matchers.shoulda.io/)  
+
+* [Better Specs](http://betterspecs.org/)  
+* [Relish](https://relishapp.com/rspec/)   
+* [shoulda](http://matchers.shoulda.io/)  
 
 Gem：  
-[rspec-rails](https://github.com/rspec/rspec-rails)  
-[factory_girl_rails](https://github.com/thoughtbot/factory_girl_rails)  
-[guard-rspec](https://github.com/guard/guard-rspec)  
-[capybara](https://github.com/jnicklas/capybara)  
-[shoulda-matchers](https://github.com/thoughtbot/shoulda-matchers)  
-[SimpleCov](https://github.com/colszowka/simplecov)  
-[database_cleaner](https://github.com/DatabaseCleaner/database_cleaner)  
-[approvals](https://github.com/kytrinyx/approvals)
 
-參考文件：  
-[自動化測試](https://ihower.tw/rails4/testing.html)  
-[RSpec-Rails (基礎篇)](http://motion-express.com/trainings/rspec-rails-1)  
-[RSpec-Rails當中自訂methods及helpers](http://motion-express.com/blog/20150320-custom-helpers-in-rspec)  
-[RSpec-Rails 針對module進行unit test](http://motion-express.com/blog/20150327-rspec-rails-testing-module)  
-[RSpec 讓你愛上寫測試](http://www.slideshare.net/ihower/rspec-7394497)  
-[程式設計師升級必練內功：TDD Kata](https://blog.alphacamp.co/2015/03/02/tdd-kata/)  
-[codility 練習](https://codility.com/programmers/lessons/)  
-[保齡球練習](http://www.sportcalculators.com/bowling-score-calculator)  
-[对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)  
-[RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)  
-[[RSpec] subject , expect , context, is_expected, be_xxx](http://blog.xdite.net/posts/2016/06/10/rspec-subject-expect-context-is-expected-be)  
-[[RSpec] 進階測試系列概念](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-0)
+* [rspec-rails](https://github.com/rspec/rspec-rails)  
+* [factory_girl_rails](https://github.com/thoughtbot/factory_girl_rails)  
+* [guard-rspec](https://github.com/guard/guard-rspec)  
+* [capybara](https://github.com/jnicklas/capybara)  
+* [shoulda-matchers](https://github.com/thoughtbot/shoulda-matchers)  
+* [SimpleCov](https://github.com/colszowka/simplecov)  
+* [database_cleaner](https://github.com/DatabaseCleaner/database_cleaner)  
+* [approvals](https://github.com/kytrinyx/approvals)
 
-RailsPacific：  
-[#RailsPacific - Taming Chaotic Specs - RSpec Design Patterns by Adam Cuppy](https://speakerdeck.com/acuppy/number-railspacific-taming-chaotic-specs-rspec-design-patterns)  
-[Courageous Software](http://randycoulman.com/blog/categories/getting-testy/)  
+參考文件： 
+ 
+* [自動化測試](https://ihower.tw/rails4/testing.html)  
+* [RSpec-Rails (基礎篇)](http://motion-express.com/trainings/rspec-rails-1)  
+* [RSpec-Rails當中自訂methods及helpers](http://motion-express.com/blog/20150320-custom-helpers-in-rspec)  
+* [RSpec-Rails 針對module進行unit test](http://motion-express.com/blog/20150327-rspec-rails-testing-module)  
+* [RSpec 讓你愛上寫測試](http://www.slideshare.net/ihower/rspec-7394497)  
+* [程式設計師升級必練內功：TDD Kata](https://blog.alphacamp.co/2015/03/02/tdd-kata/)  
+* [codility 練習](https://codility.com/programmers/lessons/)  
+* [保齡球練習](http://www.sportcalculators.com/bowling-score-calculator)  
+* [对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)  
+* [RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)  
+* [[RSpec] subject , expect , context, is_expected, be_xxx](http://blog.xdite.net/posts/2016/06/10/rspec-subject-expect-context-is-expected-be)  
+* [[RSpec] 進階測試系列概念](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-0)  
+* [Rails Race Condition Test With RSpec
+](http://blog.mz026.rocks/20160821/rails-race-condition-test-rspec)
+* [RSpec全套測試環境搭建從零入門](https://www.rails365.net/articles/rspec)
+
+RailsPacific： 
+ 
+* [#RailsPacific - Taming Chaotic Specs - RSpec Design Patterns by Adam Cuppy](https://speakerdeck.com/acuppy/number-railspacific-taming-chaotic-specs-rspec-design-patterns)  
+* [Courageous Software](http://randycoulman.com/blog/categories/getting-testy/)  
 
 Rspec-Style-Guide:  
-[rspec-style-guide(reachlocal)](https://github.com/reachlocal/rspec-style-guide)  
-[rspec-style-guide(howaboutwe)](https://github.com/howaboutwe/rspec-style-guide)
+
+* [rspec-style-guide(reachlocal)](https://github.com/reachlocal/rspec-style-guide)  
+* [rspec-style-guide(howaboutwe)](https://github.com/howaboutwe/rspec-style-guide)

@@ -74,6 +74,12 @@ rvm gemset create rails4.2.4
 rvm gemset use rails4.2.4
 ```
 
+使用 default
+
+```
+rvm --default use
+```
+
 ###清空
 清空裡面的 gem ，但保留 gemset
 ```

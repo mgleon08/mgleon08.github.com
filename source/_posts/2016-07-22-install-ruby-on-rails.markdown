@@ -334,6 +334,9 @@ gem install -v x.x.x gemname
 
 #反安裝
 gem uninstall gem_name 
+
+#移除所有 gem
+gem uninstall -aIx
 ```
 
 #<span id="rails">Rails</span>
@@ -520,6 +523,7 @@ export PATH="$HOME/bin:$PATH"
 
 * [package control](https://packagecontrol.io/installation)
 * [Sublime Text](https://www.sublimetext.com/)
+* [Best Sublime Text 3 Themes of 2015 and 2016](https://scotch.io/bar-talk/best-sublime-text-3-themes-of-2015-and-2016)
 
 #<span id="vim">Vim</span>
 
