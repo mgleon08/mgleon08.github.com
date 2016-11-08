@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-09-17T23:00:53+08:00</updated>
+  <updated>2016-11-08T13:49:41+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,238 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Logger]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/10/17/ruby-logger/"/>
+    <updated>2016-10-17T17:47:38+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/10/17/ruby-logger</id>
+    <content type="html"><![CDATA[<p>logger 可以方便我們去找尋問題在哪邊，因此設定好 logger 訊息是非常重要的</p>
+
+<!-- more -->
+
+
+<p>在 ruby 中，可以自定義 logger 的 level 還有 format，和輸出方式等等</p>
+
+<pre><code class="ruby">#設定 logger 的輸出
+logger = Logger.new(STDOUT)
+
+#設定 logger level
+logger.level = Logger::INFO
+
+#設定 logger formatter
+logger.formatter = proc do |severity, datetime, progname, msg|
+  "#{msg}\n"
+end
+</code></pre>
+
+<pre><code class="ruby"># Message in a block.
+logger.fatal { "Argument 'foo' not given." }
+# Message as a string.
+logger.error "Argument #{@foo} mismatch."
+# With progname.
+logger.info('initialize') { "Initializing..." }
+# With severity.
+logger.add(Logger::FATAL) { 'Fatal error!' }
+</code></pre>
+
+<p>同時輸出到 terminal &amp; file</p>
+
+<pre><code class="ruby">class Logger &lt; ::Logger
+  class &lt;&lt; self
+    def default(log)
+      io = [STDOUT, log_file]
+      logger = Logger.new(MultiIO.new(*io))
+      logger.level = Logger::INFO
+      logger.formatter = proc do |_severity, _datetime, _progname, msg|
+        "#{msg}\n"
+      end
+      logger
+    end
+
+    def log_file
+      time = Time.now.strftime('%Y-%m-%dT%H:%M:%S')
+      FileUtils.mkdir_p('./sample')
+      log_file = File.open("./sample/#{time}.log", 'a')
+      log_file
+    end
+  end
+end
+</code></pre>
+
+<pre><code class="ruby">class MultiIO
+  def initialize(*targets)
+    @targets = targets
+  end
+
+  def write(args)
+    @targets.each { |target| target.write(args) }
+  end
+
+  def close
+    @targets.each(&amp;:close)
+  end
+end
+</code></pre>
+
+<p>官方文件:</p>
+
+<ul>
+<li><a href="https://ruby-doc.org/stdlib-2.1.0/libdoc/logger/rdoc/Logger.html">logger</a></li>
+<li><a href="http://rails.ruby.tw/debugging_rails_applications.html#logger">rails guide</a></li>
+</ul>
+
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="http://stackoverflow.com/questions/6407141/how-can-i-have-ruby-logger-log-output-to-stdout-as-well-as-file">How can I have ruby logger log output to stdout as well as file?</a></li>
+<li><a href="http://stackoverflow.com/questions/14382252/how-to-format-ruby-logger">How to format ruby logger?</a></li>
+<li><a href="https://www.sitepoint.com/rubyists-love-logging/">All Rubyists Love Logging</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Custom Config Setting]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/10/17/custom-config-setting/"/>
+    <updated>2016-10-17T17:36:54+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/10/17/custom-config-setting</id>
+    <content type="html"><![CDATA[<p>經常看到 rails 中有很多 config 的設定，像是 rspec 等等，會用一個 black 包起來就可以做設定了，那內部實作是如何?</p>
+
+<!-- more -->
+
+
+<pre><code class="ruby">module Mail
+  class Configuration
+    DEFAULT_VERSION  = 'v1'
+    DEFAULT_API_KEY  = 'token'
+
+    class &lt;&lt; self
+      attr_writer :version, :api_key
+
+      def configure(&amp;block)
+        yield self
+        self
+      end
+
+      def version
+        @version ||= DEFAULT_VERSION
+      end
+
+      def api_key
+        @api_key ||= DEFAULT_API_KEY
+      end
+    end
+  end
+end
+
+Mail::Configuration.configure do |config|
+  config.version = 1
+  config.api_key = 2
+end
+</code></pre>
+
+<p>或是另外一種寫法</p>
+
+<pre><code class="ruby">module Mail
+  module Config
+    extend self
+
+    attr_accessor :token
+    attr_accessor :logger
+
+    def reset
+      self.token = nil
+      self.logger = nil
+    end
+
+    reset
+  end
+
+  class &lt;&lt; self
+    def configure
+      block_given? ? yield(Config) : Config
+    end
+
+    def config
+      Config
+    end
+  end
+end
+
+Mail.configure do |config|
+  config.token = ENV['MAIL_API_TOKEN']
+  config.logger = Logger.new(STDOUT)
+  config.logger.level = Logger::INFO
+  fail 'Missing ENV[MAIL_API_TOKEN]!' unless config.token
+end
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[環境變數 Environment Variable]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/10/17/environment-variable/"/>
+    <updated>2016-10-17T17:33:41+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/10/17/environment-variable</id>
+    <content type="html"><![CDATA[<p>為什麼需要環境變數?</p>
+
+<!-- more -->
+
+
+<p>因為在 github 上面不會將一些敏感資料放在上面，ex: password, token..etc <br/>
+所以這些資料就會在 sever 上面做設定，以免資料外漏</p>
+
+<p>那要設定這些資料有兩種方式</p>
+
+<h2>Config file</h2>
+
+<p>第一種是之前有提過的，做一個 example 設定檔，在到每個server上面個別去做設定。</p>
+
+<ul>
+<li><a href="http://mgleon08.github.io/blog/2016/02/07/yaml/">用 Yaml 來寫文件, 設定檔</a></li>
+</ul>
+
+
+<h2>Environment variable</h2>
+
+<p>在 <code>Unix shell</code> 直接設定環境變數</p>
+
+<pre><code class="ruby">#通常會用全大寫，已表示固定的變數
+export TOKEN=123
+</code></pre>
+
+<p>就能在 rails 中取得</p>
+
+<pre><code class="ruby">ENV['TOKEN']
+#=&gt; 123
+</code></pre>
+
+<p>但如果是在 <code>Unix shell</code> 下直接設定的話，只會存活在該 tab 底下，開新的 tab 就會消失，因此如果希望能一直存在的話，可以設定在 <code>~/.zshrc</code> or <code>~/.bashrc</code></p>
+
+<blockquote><p>echo $SHELL 可以看是使用哪個 SHELL</p></blockquote>
+
+<h2>Gem</h2>
+
+<p>ruby 也有一些 gem 可以很方便的設定</p>
+
+<ul>
+<li><a href="https://github.com/laserlemon/figaro">figaro</a></li>
+<li><a href="https://github.com/bkeepers/dotenv">dotenv</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="http://railsapps.github.io/rails-environment-variables.html">Rails Environment Variables</a></li>
+<li><a href="http://braavos.me/blog/2014/08/05/rails-env/">Rails的環境變數</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[I/O 輸入輸出]]></title>
@@ -391,840 +623,6 @@ ruby template.rb
 <li><a href="http://stackoverflow.com/questions/8954706/render-an-erb-template-with-values-from-a-hash">Render an ERB template with values from a hash</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[OptionParser]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/08/30/optionparser/"/>
-    <updated>2016-08-30T10:30:52+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/08/30/optionparser</id>
-    <content type="html"><![CDATA[<p>ruby 裡內建的強大工具，可以解析命令行參數</p>
-
-<!-- more -->
-
-
-<p>先來看一下什麼是 Unix命令行</p>
-
-<p>通常的Unix命令行參數包含下面這些形式：</p>
-
-<ul>
-<li>Option - 主要功能是用於調整命令行工具的行為
-
-<ul>
-<li>Option的表現通常有兩種形式
-
-<ul>
-<li>short opt​​ion</li>
-<li>long option</li>
-</ul>
-</li>
-<li>Option的類型有兩種
-
-<ul>
-<li><code>switch</code> 不帶 argument</li>
-<li><code>flag</code> 帶有 argument</li>
-</ul>
-</li>
-</ul>
-</li>
-<li>Argument - 表示命令行工具要操作的對象，通常是路徑，URL或者名稱等等。</li>
-<li>Action - 表示命令行工具的行為，比如 git 命令的 push 或者 pull 等等。</li>
-</ul>
-
-
-<pre><code class="ruby">git log --max-count=10
-
-#git 是 command，log 是 action，表示查看 git 的提交歷史。
-#--max-count 則是 option，表示最多顯示N條commit記錄
-</code></pre>
-
-<p>用 <code>ARGV</code> 來接命令列引數的陣列。</p>
-
-<pre><code class="ruby">require 'optparse'
-
-class Hello
-  def initialize(arguments)
-      @arguments = arguments
-      parse_options
-    end
-
-  def parse_options
-    options = OptionParser.new
-    options.banner = 'Usage: xxxx [options]'
-    #on('short opt​​ion', 'long option', 'comment')
-    #帶參數
-    options.on('-a arg', '--aa arg', 'this is test') { |arg| puts arg }
-    #不帶參數
-    options.on('-b', '--bb', 'this is test') { puts 'b' }
-    #多個參數
-    options.on('-c arg', '--cc arg', 'this is test') { |arg| puts arg }
-    options.on('-h', '--help', 'Show this message') { puts(options); exit }
-    options.parse!(@arguments)
-  end
-end
-
-Hello.new(ARGV)
-</code></pre>
-
-<pre><code class="ruby">ruby optparse.rb -a a
-#=&gt;a
-ruby optparse.rb --aa aa
-#=&gt;aa
-ruby optparse.rb -b
-#=&gt;b
-ruby optparse.rb --bb
-#=&gt;b
-ruby optparse.rb -c c,cc
-#=&gt;c,cc
-
-ruby optparse.rb -h
-#Usage: xxxx [options]
-#   -t, --test arg                   this is test
-#   -h, --help                       Show this message
-</code></pre>
-
-<h3>ARGV</h3>
-
-<p><a href="http://lrthw.github.io/ex13/">Learn Ruby The Hard Way ex13</a></p>
-
-<pre><code class="ruby">first, second, third = ARGV
-puts "Your first variable is: #{first}"
-puts "Your second variable is: #{second}"
-puts "Your third variable is: #{third}"
-
-
-# ARGV 就是「參數變數(argument variable)」，是一個非常標準的程式術語。
-# 在其他的程式語言你也可以看到它全大寫的原因是因為它是一個「常數(constant)」，
-# 意思是當它被賦值之後你就不應該去改變它了。這個變數會接收當你運行 Ruby 腳本時所傳
-# 入的參數。通過後面的習題你將對它有更多的了解。你將對它有更多的了解。
-
-# 第 1 行將 ARGV 「解包(unpack)」，與其將所有參數放到同一個變數下面，我們將每個參數
-# 予一個變數名稱 first 、 second 以及 third。腳本本身的名稱被存在一個特殊變數 $0
-# 裡，這是我們不需要解包的部份。也許看來有些異，但「解包」可能是最好的描述方式了。它
-# 的涵義很簡單：「將 ARGV 中的東西解包，然後將所有
-# 的參數依次賦予左邊的變數名稱」。
-</code></pre>
-
-<p>官方文件：</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/stdlib-2.3.1/libdoc/optparse/rdoc/OptionParser.html">OptionParser</a></li>
-</ul>
-
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="https://ruby-china.org/wiki/building-a-command-line-tool-with-optionparser">用 OptionParser 构建 Command Line 工具</a></li>
-<li><a href="http://rubylearning.com/blog/2011/01/03/how-do-i-make-a-command-line-tool-in-ruby/">How do I make a command-line tool in Ruby?</a></li>
-</ul>
-
-
-<p>相關 gem：</p>
-
-<ul>
-<li><a href="https://github.com/defunkt/choice">choice</a></li>
-<li><a href="https://github.com/ManageIQ/trollop">trollop</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby on Rails 裝機趴 (Only Mac)]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/07/22/install-ruby-on-rails/"/>
-    <updated>2016-07-22T19:58:37+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/07/22/install-ruby-on-rails</id>
-    <content type="html"><![CDATA[<p>最近剛好新來了一台電腦，所有東西都要重新安裝，就順手把需要的東西都紀錄了一下，以便之後可以快速的安裝起來!</p>
-
-<!-- more -->
-
-
-<h3>目錄</h3>
-
-<ul>
-<li><a href="#iterm2">iTerm2</a></li>
-<li><a href="#homebrew">Homebrew</a></li>
-<li><a href="#git">Git</a></li>
-<li><a href="#github">GitHub</a></li>
-<li><a href="#zsh">zsh &amp; oh-my-zsh</a></li>
-<li><a href="#rvmorrbenv">rvm or rbenv</a></li>
-<li><a href="#rubygems">RubyGems</a></li>
-<li><a href="#rails">Rails</a></li>
-<li><a href="#bundle">Bundle</a></li>
-<li><a href="#nvm">NVM</a></li>
-<li><a href="#npm">NPM</a></li>
-<li><a href="#sublime">Sublime Text</a></li>
-<li><a href="#vim">Vim</a></li>
-<li><a href="#linux">Linux</a></li>
-<li><a href="#other">Other</a></li>
-</ul>
-
-
-<h1><span id="iterm2">iTerm2</span></h1>
-
-<blockquote><p>Terminal 終端機</p></blockquote>
-
-<ul>
-<li><a href="https://www.iterm2.com/">iTerm2</a></li>
-</ul>
-
-
-<h3>tmux</h3>
-
-<ul>
-<li><a href="http://blog.chh.tw/posts/tmux-terminal-multiplexer/">終端機必備的多工良伴：tmux</a></li>
-</ul>
-
-
-<h1><span id="homebrew">Homebrew</span></h1>
-
-<blockquote><p>Mac OS X 上的套件管理程式</p></blockquote>
-
-<pre><code class="ruby">#安裝
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
-
-#homebrew檢查 
-brew doctor
-
-#已經裝了哪些套件
-brew list
-
-#homebrew更新
-brew update
-
-#搜尋套件
-brew search
-
-#查詢套件資訊
-brew info
-
-#module會裝到/usr/local/opt/xxx
-#安裝xxx模組 
-brew install xxx
-
-#更新xxx模組 
-brew upgrade xxx
-</code></pre>
-
-<ul>
-<li><a href="http://brew.sh/">Homebrew</a></li>
-</ul>
-
-
-<p>推薦套件</p>
-
-<p><a href="http://searchbrew.com/">searchbrew</a></p>
-
-<pre><code class="ruby">#postgresql
-brew install postgresql
-gem install pg
-
-#mysql
-brew install mysql
-gem install mysql2
-mysql.server start
-
-#redis
-brew install redis
-
-#背景啟動
-redis-server --daemonize yes
-redis-server&amp;&amp;
-
-#imagemagick
-brew install imagemagick
-gem install rmagick
-
-#ffmpeg
-brew install ffmpeg
-
-#MediaInfo
-brew install mediainfo
-
-#wget
-brew install wget
-</code></pre>
-
-<h1><span id="git">Git</span></h1>
-
-<blockquote><p>版本控制</p></blockquote>
-
-<pre><code class="ruby">#安裝 git
-brew install git
-
-#設定輸出顏色
-git config --global color.ui true
-
-#設定 git 的 user 和 email
-git config --global user.name "YOUR NAME"
-git config --global user.email "YOUR@EMAIL.com"
-
-#空白對有些語言是有影響的(像是Ruby)，因此我們會希望 Git 去忽略空白的變化
-git config --global apply.whitespace nowarn
-
-#讓 git 記住你，不需每次上傳 code 都要打帳號密碼
-git config --global credential.helper store 
-</code></pre>
-
-<h3>Git GUI</h3>
-
-<ul>
-<li><a href="https://www.sourcetreeapp.com/">SourceTree</a></li>
-</ul>
-
-
-<pre><code class="ruby">#建立 command line 快捷
-ln -s /Applications/SourceTree.app/Contents/Resources/stree /usr/local/bin/
-</code></pre>
-
-<ul>
-<li><a href="http://gitx.frim.nl/">GitX</a></li>
-<li><a href="http://jonas.nitro.dk/tig/manual.html#view-scrolling">tig</a></li>
-</ul>
-
-
-<h3>Git 指令</h3>
-
-<ul>
-<li><a href="http://mgleon08.github.io/blog/2015/12/27/git-command/">Git 指令操作手冊</a></li>
-</ul>
-
-
-<h1><span id="github">GitHub</span></h1>
-
-<p>設定SSH連接</p>
-
-<blockquote><p>若要沿用舊電腦的 key ， 將舊電腦的 id_rsa &amp; public key 複製過來即可，但因為新電腦第一次登入，會要求輸入就電腦的 key 的密碼</p></blockquote>
-
-<pre><code class="ruby">#本機產生 ssh key (id_rsa（private key）id_rsa.pub（public key）) ~/.ssh/
-ssh-keygen -t rsa -C [email]
-
-#設定權限(預設應該就有設好，若是自己新開檔案就要設定)
-chmod 600 id_rsa
-chmod 644 id_rsa.pub
-
-#在 github 上新增新的 ssh
-將 id_rsa.pub 內容複製過去
-
-#測試是否能連上 github
-ssh -T git@github.com
-
-#查看 ssh 功能
-man ssh
-
-#將 key 加入 ssh-agent memory
-ssh-add ~/.ssh/id_dsa
-
-#檢查目前的 key
-ssh-add -l
-
-#刪除 ssh-agent key
-ssh-add -d ~/.ssh/id_dsa.pub
-
-#刪除所有 ssh-agent key
-ssh-add -D ~/.ssh/id_dsa.pub
-
-#將 key 永久紀錄
-ssh-add -K [path/to/your/ssh-key]
-</code></pre>
-
-<ul>
-<li><a href="https://developer.github.com/guides/using-ssh-agent-forwarding/">Using SSH agent forwarding</a></li>
-<li><a href="https://ihower.tw/blog/archives/7837">SSH agent forwarding 的應用</a></li>
-<li><a href="http://man.linuxde.net/ssh">ssh命令</a></li>
-<li><a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chmod">鳥哥的私房菜 - 權限指令</a></li>
-</ul>
-
-
-<h1><span id="zsh">zsh &amp; oh-my-zsh</span></h1>
-
-<blockquote><p>shell &amp; zsh 的 framework 套件</p></blockquote>
-
-<pre><code class="ruby">#安裝 zsh
-brew install zsh
-
-#將 shell 預設改成 zsh，改完記得重開 iterm or source ~/.zshrc
-chsh -s /bin/zsh
-
-#查看目前使用是哪個 shell
-echo $SHELL
-
-#下載 oh-my-zsh
-git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
-
-#將 oh-my-zsh 預設的設定複製到 ./.zshrc (.zshrc 需要自行產生)
-cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
-
-#安裝 zsh-completions
-brew install zsh-completions
-
-#加入以下兩行來啟動 zsh-completions
-#zsh-completions
-fpath=(/usr/local/share/zsh-completions $fpath)
-
-#同時還需要 rebuild zsh 的 .zcompdump
-rm -f ~/.zcompdump; compinit
-
-#更改 theme ( 到 .zshrc 更改 ZSH_THEME 參數 )
-ZSH_THEME="edvardm"
-
-#啟動 oh-my-zsh 內建的套件，要看有哪些套件可以去 ~/.oh-my-zsh 裡面的 plugins 看裡面的設定( 到 .zshrc 更改 plugins 參數 )
-plugins=(git ruby rbenv github gitignore rails rake python z)
-</code></pre>
-
-<ul>
-<li><a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a></li>
-<li><a href="http://icarus4.logdown.com/posts/177661-from-bash-to-zsh-setup-tips">bash 轉移 zsh (oh-my-zsh) 設定心得</a></li>
-</ul>
-
-
-<h1><span id="rvmorrbenv">rvm or rbenv</span></h1>
-
-<blockquote><p>管理 ruby &amp; gem 工具</p></blockquote>
-
-<h3>rvm</h3>
-
-<ul>
-<li><a href="http://mgleon08.github.io/blog/2016/02/15/rvm-and-gemsets/">RVM and Gemsets Ruby版本控制</a></li>
-<li><a href="https://ruby-china.org/wiki/rvm-guide">rvm 使用指南</a></li>
-</ul>
-
-
-<h3>rbenv</h3>
-
-<pre><code class="ruby">#安裝
-brew install rbenv ruby-build
-
-#將指令放到 ~/.zshrc or ~/.bashrc
-export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init -)"
-
-#列出所有 ruby 版本
-rbenv install --list
-
-#列出安装的版本
-rbenv versions               
-
-#列出正在使用的版本
-rbenv version    
-
-#安裝 ruby (請依照當下最新的版本)
-rbenv install 2.3.1
-
-#設定預設版本
-rbenv global 2.3.1
-
-#確定目前使用的 ruby 是透過 rbenv 而不是內建的(記得重開視窗)
-which ruby
-#=&gt; 確保有 .rbenv/shims/ruby
-
-#project 加上 .ruby-version 檔案裡面寫 ruby 版本 才能加入控管
-2.3.1
-
-#rbenv 指令
-Some useful rbenv commands are:
-   commands    List all available rbenv commands
-   local       Set or show the local application-specific Ruby version
-   global      Set or show the global Ruby version
-   shell       Set or show the shell-specific Ruby version
-   install     Install a Ruby version using ruby-build
-   uninstall   Uninstall a specific Ruby version
-   rehash      Rehash rbenv shims (run this after installing executables)
-   version     Show the current Ruby version and its origin
-   versions    List all Ruby versions available to rbenv
-   which       Display the full path to an executable
-   whence      List all Ruby versions that contain the given executable
-</code></pre>
-
-<p>rbenv-gemset</p>
-
-<pre><code class="ruby">#安裝 rbenv-gemset
-brew install rbenv-gemset
-
-#rbenv gemset 指令
-possible commands are:
-  active
-  create [version] [gemset]
-  delete [version] [gemset]
-  file
-  init [gemset]
-  list
-  version
-
-#使用方法
-將想要使用的 gemset 名稱，放到 .rbenv-gemsets 檔案即可，在該專案執行 bundle 就會對設定好的 gemset 進行操作
-若是沒有設定該檔案就會是 global 的 bundle
-</code></pre>
-
-<ul>
-<li><a href="https://ruby-china.org/wiki/rbenv-guide">rbenv 使用指南</a></li>
-</ul>
-
-
-<h1><span id="rubygems">RubyGems</span></h1>
-
-<blockquote><p>RubyGems 是 Ruby 的套件管理系統，讓你輕易安裝及管理 Ruby 函式庫。</p></blockquote>
-
-<p><a href="https://rubygems.org/">RubyGems.org</a></p>
-
-<pre><code class="ruby">#RubyGems 的版本
-gem -v
-
-#升級RubyGems的版本
-gem update --system 
-
-#安裝某個套件(加上 --no-ri --no-rdoc 可以不要產生預設的 RDoc和ri文件)
-gem install gem_name --no-ri --no-rdoc
-
-#列出安裝的套件
-gem list 
-
-#更新最新版本
-gem update gem_name 
-
-#更新所有你安裝的Gems
-gem update 
-
-#安裝特定版本
-gem install -v x.x.x gemname
-
-#反安裝
-gem uninstall gem_name 
-
-#移除所有 gem
-gem uninstall -aIx
-</code></pre>
-
-<h1><span id="rails">Rails</span></h1>
-
-<pre><code class="ruby">#後面的參數是不下載文件，可以省很多安裝時間
-gem install rails --no-ri --no-rdoc
-</code></pre>
-
-<h1><span id="bundle">Bundle</span></h1>
-
-<blockquote><p>管理應用程式 Gem 依存性(dependencies)管理工具，它會根據 Gemfile 的設定自動下載及安裝 Gem 套件</p></blockquote>
-
-<pre><code class="ruby">gem install bundler
-</code></pre>
-
-<ul>
-<li><a href="http://bundler.io/">bundle</a></li>
-</ul>
-
-
-<h1><span id="nvm">NVM</span></h1>
-
-<blockquote><p>管理 npm 工具，類似 rvm</p></blockquote>
-
-<pre><code class="ruby">#根據當下最新版本
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.4/install.sh | bash
-
-#將以下放到自己的 ~/.zshrc or ~/.bashrc or .bash_profile 下面（預設會自動放好，但還是去確定一下）
-export NVM_DIR="/Users/leon/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] &amp;&amp; . "$NVM_DIR/nvm.sh"  # This loads nvm%
-
-#重新載入 Shell
-. ~/.nvm/nvm.sh or source ~/.zshrc
-
-# 安裝穩定版本的 NodeJS
-nvm install stable 
-
-#顯示目前可以安裝的版本
-nvm ls-remote
-
-#安裝 NodeJS
-nvm install &lt;version&gt;
-
-#安裝穩定版本的 NodeJS
-nvm install stable 
-
-#使用版本，只有在當下，重新開新tab就會消失
-nvm use stable 
-
-#設定預設版本，永久
-nvm alias default stable
-
-#看目前安裝所有版本
-ls -a ~/.nvm/versions/node
-</code></pre>
-
-<ul>
-<li><a href="https://segmentfault.com/a/1190000004404505">node版本管理工具nvm-Mac下安装及使用</a></li>
-<li><a href="https://tenten.co/blog/install-gulp-grunt-bower-sass-susy-on-mac-with-nvm-rvm/">在 Mac 上裝 NVM, RVM 等跑 Gulp, Grunt, Bower 環境</a></li>
-<li><a href="http://icarus4.logdown.com/posts/175092-nodejs-installation-guide">Node.js 安裝與版本切換教學 (for MAC)</a></li>
-</ul>
-
-
-<h1><span id="npm">NPM</span></h1>
-
-<blockquote><p>套件管理</p></blockquote>
-
-<p><a href="https://www.npmjs.com/">npm</a></p>
-
-<p>資料夾一定會有 package.json</p>
-
-<pre><code class="ruby">#搜尋 npm 套件，但建議去網站上比較快
-npm search
-
-#本地安裝，會安裝在當前專案的 node_modules 目錄下
-npm install &lt;package name&gt;
-
-#全域安裝，會將套件安裝在統一的 npm 目錄底下
-npm install -g &lt;package name&gt;
-
-#列出專案使用套件
-npm ls (-g 全域套件)
-
-#更新專案套件
-npm update (-g 全域套件)
-
-#移除專案套件
-npm uninstall &lt;package name&gt; (-g 全域套件)
-
-#清快取
-npm cache clean
-
-#查詢 npm 儲存路徑
-npm config get prefix
-
-#自動安裝 package.json 套件定義檔中定義的所有套件
-npm install
-
-#安裝套件並儲存在 package.json 中
-npm install &lt;package name&gt; --save #套件發行時宣告的相依套件
-npm install &lt;package name&gt; --save-dev #開發環境開發時需要的套件
-</code></pre>
-
-<h3>package.json</h3>
-
-<pre><code class="ruby">#自動產生 package.json
-npm init
-
-{
-  "name": "leon",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" &amp;&amp; exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies":{#套件相依
-  },
-  "devDependencies": {#開發套件相依
-    "lodash": "^4.15.0" #示範加上去的
-  }
-}
-</code></pre>
-
-<ul>
-<li><a href="http://www.slideshare.net/wantingj/npm-46801372">Npm 套件管理 &amp; 常用開發工具介紹</a></li>
-</ul>
-
-
-<h1><span id="sublime">Sublime Text</span></h1>
-
-<blockquote><p>編輯器</p></blockquote>
-
-<p>安裝好用的套件管理 <a href="https://packagecontrol.io/installation">package control</a></p>
-
-<pre><code class="ruby">All Autocomplete
-AutoFileName
-Alignment
-Color Highlighter
-CovertToUTF8
-Emmet
-GitGutter
-SideBarEnhancement
-BracketHighlighter
-SublimeCodeIntel
-PrettyRuby
-PrettyJson
-PrettyYaml
-
-#theme
-Spacegray
-</code></pre>
-
-<p><a href="https://github.com/kkga/spacegray">Spacegray</a></p>
-
-<p>Prefrences > Setting-User</p>
-
-<pre><code class="ruby">{
-    "font_size": 22,
-    "hightlight_line": true,
-    "tab_size": 2,
-    "translate_tabs_to_spaces": true,
-    "trim_trailing_white_space_on_save": true,
-    "ignored_packages":
-    [
-        "Vintage"
-    ]
-}
-</code></pre>
-
-<p>建立快速鍵</p>
-
-<pre><code class="ruby">{ "keys": ["super+shift+h"], "command": "pretty_ruby_format" }
-</code></pre>
-
-<p>設定快速command <code>subl .</code></p>
-
-<pre><code class="ruby">#建立 bin 資料夾，建立軟連結到指定的檔案
-mkdir ~/bin 
-ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ~/bin/subl
-
-#若是 echo $PATH 沒有相對應的路徑，可以在 .zshrc 加上
-export PATH="$HOME/bin:$PATH"
-</code></pre>
-
-<ul>
-<li><a href="https://packagecontrol.io/installation">package control</a></li>
-<li><a href="https://www.sublimetext.com/">Sublime Text</a></li>
-<li><a href="https://scotch.io/bar-talk/best-sublime-text-3-themes-of-2015-and-2016">Best Sublime Text 3 Themes of 2015 and 2016</a></li>
-</ul>
-
-
-<h1><span id="vim">Vim</span></h1>
-
-<p>介面優化，新增 <code>.vimrc</code> 檔案</p>
-
-<pre><code class="ruby">#顯示行號：對於 debug 相當有幫助! (加上 run 數字會跟著跑)
-:set nu rnu
-#自動對齊縮排：如果上一行有兩個 tab 的寬度，按 enter 繼續編輯下一行時會自動保留兩個 tab 鍵的寬度。
-:set ai
-#光標底線：光標所在的那一行會有底線，幫助尋找光標位置
-:set cursorline
-#上色模式-針對亮背景上色，預設為亮背景(白色等)上色，但是終端機的初始背景色為深紫色，會出現文字失蹤 ( 例如註解為深藍色 ) 的情況。將這一行換成 :set bg=dark 即可。
-:set bg=light
-#縮排間隔數 ( 預設為 8 個空白對齊 )，也就是說按一次 tab 鍵，游標會自動跳 4 格空白字元的寬度。雖有多個空格但實際上只有一個 tab 字元。注意：也就是說，在其他環境下，看到 tab 字元，依舊是 8 個空白寬
-:set tabstop=4
-#自動縮排對齊間隔數：向右或向左一個縮排的寬度
-:set shiftwidth=4
-</code></pre>
-
-<ul>
-<li><a href="http://wiki.csie.ncku.edu.tw/vim/vimrc">vimrc設定教學</a></li>
-<li><a href="http://www2.nsysu.edu.tw/csmlab/unix/vi_command.htm">vi指令說明(完整版)</a></li>
-</ul>
-
-
-<h1><span id="linux">Linux 常用指令</span></h1>
-
-<ul>
-<li><a href="http://jdev.tw/blog/3599/linux-terminal-commands-and-shortcuts">Linux常用Terminal命令與快捷鍵參考</a></li>
-</ul>
-
-
-<h1><span id="other">other</span></h1>
-
-<ul>
-<li><a href="http://macdown.uranusjr.com/">MacDown</a></li>
-<li><a href="http://www.sequelpro.com/">Sequel Pro</a></li>
-<li><a href="https://eggerapps.at/postico/">Postico</a></li>
-<li><a href="https://www.getpostman.com/app/postman-osx">PostMan</a></li>
-</ul>
-
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="https://github.com/yuyueugene84/ntu_ror_training_course/blob/master/installation_mac.md">Ruby on Rails Mac 安裝教學</a></li>
-<li><a href="https://ihower.tw/rails4/installation.html">安裝 Rails 開發環境</a></li>
-<li><a href="https://tenten.co/blog/install-gulp-grunt-bower-sass-susy-on-mac-with-nvm-rvm/">在 Mac 上裝 NVM, RVM 等跑 Gulp, Grunt, Bower 環境</a></li>
-<li><a href="https://segmentfault.com/a/1190000004404505">node版本管理工具nvm-Mac下安装及使用</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Garbage Collection (GC)]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/06/10/garbage-collection/"/>
-    <updated>2016-06-10T12:18:42+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/06/10/garbage-collection</id>
-    <content type="html"><![CDATA[<p>在 ruby 當中，經常會看到 : 的符號，代表 symbol</p>
-
-<!-- more -->
-
-
-<p>跟一般 string 的差異在於</p>
-
-<ul>
-<li>同樣的 string，會產生不同的 記憶體</li>
-<li>同樣的 symbol，一樣的記憶體</li>
-</ul>
-
-
-<pre><code class="ruby">3.times do
-  puts "foo".object_id
-end
-#=&gt;70302331020060
-#=&gt;70302331019980
-#=&gt;70302331019920
-
-3.times do
-  puts :foo.object_id
-end
-#=&gt;1091868
-#=&gt;1091868
-#=&gt;1091868
-
-#將字串 freeze 起來，object_id 也會是一樣
-3.times do
-  puts "foo".freeze.object_id
-end
-#=&gt;70172682147320
-#=&gt;70172682147320
-#=&gt;70172682147320
-</code></pre>
-
-<h1>Garbage Collection</h1>
-
-<ul>
-<li><p>在 ruby 2.2 之前，symbol 所佔用的記憶體沒辦法被自動回收，要釋放就必須重啟動程式，因此會造成 memory leak 的問題</p></li>
-<li><p>但在 2.2 之後，Symbol GC(Garbage Collection) ，那些動態用 to_sym 或 intern 長出來的 Symbol 就可以跟一般物件一樣被回收了。</p></li>
-</ul>
-
-
-<h3>ruby2.1</h3>
-
-<pre><code class="ruby"># Ruby 2.1
-before = Symbol.all_symbols.size
-100_000.times do |i|
-  "sym#{i}".to_sym
-end
-GC.start
-after = Symbol.all_symbols.size
-puts after - before
-# =&gt; 100001
-</code></pre>
-
-<h3>ruby 2.2</h3>
-
-<pre><code class="ruby"># Ruby 2.2
-before = Symbol.all_symbols.size
-100_000.times do |i|
-  "sym#{i}".to_sym
-end
-GC.start
-after = Symbol.all_symbols.size
-puts after - before
-# =&gt; 1
-</code></pre>
-
-<p>參考文件：<br/>
-<a href="http://kaochenlong.com/2016/04/25/string-and-symbol/">Ruby 語法放大鏡之「有的變數變前面有一個冒號(例如 :name)，是什麼意思?」</a><br/>
-<a href="https://www.sitepoint.com/symbol-gc-ruby-2-2/">Symbol GC in Ruby 2.2</a><br/>
-<a href="http://grantcss.com/blog/2015/01/26/symbol-gc-in-ruby-2-dot-2/">[译] 在 Ruby 2.2 中的 Symbol GC</a><br/>
-<a href="https://ruby-china.org/topics/21498">Ruby 2.2 的 可回收 symbol</a><br/>
-<a href="https://ruby-china.org/topics/17575">升级 Ruby 2.1 以及 GC 调整</a><br/>
-<a href="https://ruby-china.org/topics/13740">Ruby 的 GC 不释放内存给回系统的？</a><br/>
-<a href="https://ruby-china.org/topics/28127">画说 Ruby 与 Python 垃圾回收</a></p>
 ]]></content>
   </entry>
   

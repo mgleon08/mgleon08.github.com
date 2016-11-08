@@ -204,7 +204,7 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 </span><span class='line'>
 </span><span class='line'><span class="n">scope</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;events&quot;</span><span class="p">,</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">&quot;/foo&quot;</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="s2">&quot;bar&quot;</span> <span class="k">do</span>
 </span><span class='line'>  <span class="n">get</span> <span class="s1">&#39;meetings/:id&#39;</span> <span class="o">=&gt;</span> <span class="ss">:show</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="s2">&quot;meeting&quot;</span>
-</span><span class='line'>  <span class="n">post</span> <span class="s1">&#39;meetings&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;:create   , :as =&gt; &quot;meetings&quot;</span>
+</span><span class='line'>  <span class="n">post</span> <span class="s1">&#39;meetings&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;:create , :as =&gt; &quot;meetings&quot;</span>
 </span><span class='line'><span class="s1">end</span>
 </span><span class='line'>
 </span><span class='line'><span class="s1">scope :path =&gt; &#39;</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">v1</span><span class="o">/</span><span class="s1">&#39;, :module =&gt; &quot;api_v1&quot;, :as =&gt; &#39;</span><span class="n">v1</span><span class="err">&#39;</span> <span class="k">do</span>
@@ -213,10 +213,31 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p><code>:as</code> 增加 vi_path(相對路徑) 和 v1_url(絕對路徑)<br/>
-<code>: path</code>網址 <code>/api/v1/projects</code> <br/>
-<code>:controller</code> 指定 controller 是哪個<br/>
-<code>:module</code> 指定 controller 對應到 ApiV1::ProjectsController</p>
+<ul>
+<li><code>:as</code> 增加 vi_path(相對路徑) 和 v1_url(絕對路徑)</li>
+<li><code>: path</code>網址後面的 path 改成 <code>/api/v1/projects</code></li>
+<li><code>:controller</code> 指定 controller 是哪個</li>
+<li><code>:module</code> 指定 controller 對應到 ApiV1::ProjectsController</li>
+<li><code>params</code> 將 <code>:id</code> 改成指定的變數 ex <code>params: :api_id</code></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resources</span> <span class="ss">:api</span><span class="p">,</span> <span class="ss">path</span><span class="p">:</span><span class="s1">&#39;/test&#39;</span><span class="p">,</span> <span class="ss">controller</span><span class="p">:</span> <span class="s1">&#39;hello/api&#39;</span><span class="p">,</span> <span class="ss">param</span><span class="p">:</span> <span class="ss">:api_id</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="o">%</span><span class="n">i</span><span class="p">(</span><span class="n">index</span> <span class="n">show</span> <span class="n">create</span> <span class="n">update</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">api_index</span> <span class="no">GET</span>   <span class="sr">/test(.:format)         hello/</span><span class="n">api</span><span class="c1">#index</span>
+</span><span class='line'>          <span class="no">POST</span>  <span class="sr">/test(.:format)         hello/</span><span class="n">api</span><span class="c1">#create</span>
+</span><span class='line'>      <span class="n">api</span> <span class="no">GET</span>   <span class="sr">/test/</span><span class="ss">:api_id</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span> <span class="n">hello</span><span class="o">/</span><span class="n">api</span><span class="c1">#show</span>
+</span><span class='line'>          <span class="no">PATCH</span> <span class="sr">/test/</span><span class="ss">:api_id</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span> <span class="n">hello</span><span class="o">/</span><span class="n">api</span><span class="c1">#update</span>
+</span><span class='line'>          <span class="no">PUT</span>   <span class="sr">/test/</span><span class="ss">:api_id</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span> <span class="n">hello</span><span class="o">/</span><span class="n">api</span><span class="c1">#update</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h1>導向</h1>
 
@@ -301,14 +322,25 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 
 <h3>子網域</h3>
 
-<figure class='code'><figcaption><span>resources :posts, constraints: { subdomain: 'api' }</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sb">```</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resources</span> <span class="ss">:posts</span><span class="p">,</span> <span class="ss">constraints</span><span class="p">:</span> <span class="p">{</span> <span class="ss">subdomain</span><span class="p">:</span> <span class="s1">&#39;api&#39;</span> <span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>ruby￼constraints subdomain: &lsquo;api&rsquo; do  resources :posts  #<a href="http://api.mgleon08.com/posts%EF%BF%BCend">http://api.mgleon08.com/posts%EF%BF%BCend</a></p>
 
-<figure class='code'><figcaption><span>resources :posts, constraints: { subdomain: 'api' }</span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="err">￼</span><span class="n">constraints</span> <span class="ss">subdomain</span><span class="p">:</span> <span class="s1">&#39;api&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:posts</span>  <span class="c1">#http://api.mgleon08.com/posts</span>
+</span><span class='line'><span class="err">￼</span><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
@@ -328,28 +360,26 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="sb">```ruby</span>
-</span><span class='line'><span class="sb">namespace :api do</span>
-</span><span class='line'><span class="sb">  constraints subdomain: &#39;api&#39; do</span>
-</span><span class='line'><span class="sb">    resources :posts</span>
-</span><span class='line'><span class="sb">  end</span>
-</span><span class='line'><span class="sb">end</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">namespace</span> <span class="ss">:api</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">constraints</span> <span class="ss">subdomain</span><span class="p">:</span> <span class="s1">&#39;api&#39;</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">resources</span> <span class="ss">:posts</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="sb">#產生兩個 api</span>
-</span><span class='line'><span class="sb">#http://api.mgleon08.com/api/posts</span>
+</span><span class='line'><span class="c1">#產生兩個 api</span>
+</span><span class='line'><span class="c1">#http://api.mgleon08.com/api/posts</span>
 </span><span class='line'>
-</span><span class='line'><span class="sb">constraints subdomain: &#39;api&#39; do </span>
-</span><span class='line'><span class="sb"> namespace :api, path: &#39;/&#39; do #加上 path 就可以消去後面的</span>
-</span><span class='line'><span class="sb">     resources :zombies</span>
-</span><span class='line'><span class="sb">   end</span>
-</span><span class='line'><span class="sb">end</span>
-</span><span class='line'><span class="sb">#上下一樣</span>
-</span><span class='line'><span class="sb">namespace :api, path: &#39;/&#39;, constraints: { subdomain: &#39;api&#39; } do</span>
-</span><span class='line'><span class="sb">  resources :zombies</span>
-</span><span class='line'><span class="sb">end</span>
+</span><span class='line'><span class="n">constraints</span> <span class="ss">subdomain</span><span class="p">:</span> <span class="s1">&#39;api&#39;</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">namespace</span> <span class="ss">:api</span><span class="p">,</span> <span class="ss">path</span><span class="p">:</span> <span class="s1">&#39;/&#39;</span> <span class="k">do</span> <span class="c1">#加上 path 就可以消去後面的</span>
+</span><span class='line'>     <span class="n">resources</span> <span class="ss">:zombies</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'><span class="c1">#上下一樣</span>
+</span><span class='line'><span class="n">namespace</span> <span class="ss">:api</span><span class="p">,</span> <span class="ss">path</span><span class="p">:</span> <span class="s1">&#39;/&#39;</span><span class="p">,</span> <span class="ss">constraints</span><span class="p">:</span> <span class="p">{</span> <span class="ss">subdomain</span><span class="p">:</span> <span class="s1">&#39;api&#39;</span> <span class="p">}</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resources</span> <span class="ss">:zombies</span>
+</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="sb">#http://api.mgleon08.com/posts</span>
+</span><span class='line'><span class="c1">#http://api.mgleon08.com/posts</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -367,13 +397,11 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
-<span class='line-number'>11</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">concern</span> <span class="ss">:sociable</span> <span class="k">do</span> <span class="o">|</span><span class="n">options</span><span class="o">|</span>
 </span><span class='line'>  <span class="n">resources</span> <span class="ss">:comments</span><span class="p">,</span> <span class="n">options</span>
 </span><span class='line'>  <span class="n">resources</span> <span class="ss">:categories</span><span class="p">,</span> <span class="n">options</span>
 </span><span class='line'>  <span class="n">resources</span> <span class="ss">:tags</span><span class="p">,</span> <span class="n">options</span>
 </span><span class='line'><span class="k">end</span>
-</span><span class='line'>
 </span><span class='line'><span class="n">resources</span> <span class="ss">:messages</span><span class="p">,</span> <span class="ss">concerns</span><span class="p">:</span> <span class="ss">:sociable</span>
 </span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span><span class="p">,</span>    <span class="ss">concerns</span><span class="p">:</span> <span class="ss">:sociable</span>
 </span><span class='line'><span class="err">￼</span><span class="n">resources</span> <span class="ss">:items</span> <span class="k">do</span>
@@ -390,9 +418,7 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
-<span class='line-number'>7</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">concern</span> <span class="ss">:sociable</span><span class="p">,</span> <span class="no">Sociable</span>
-</span><span class='line'>
 </span><span class='line'><span class="n">resources</span> <span class="ss">:messages</span><span class="p">,</span> <span class="ss">concerns</span><span class="p">:</span> <span class="ss">:sociable</span>
 </span><span class='line'><span class="n">resources</span> <span class="ss">:posts</span><span class="p">,</span> <span class="ss">concerns</span><span class="p">:</span> <span class="ss">:sociable</span>
 </span><span class='line'><span class="n">resources</span> <span class="ss">:items</span> <span class="k">do</span>

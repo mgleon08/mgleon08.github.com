@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-09-17T23:00:53+08:00</updated>
+  <updated>2016-11-08T13:49:41+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,131 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[在專案中連接另一個 Database]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/10/24/connect-multiple-database/"/>
+    <updated>2016-10-24T10:17:44+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/10/24/connect-multiple-database</id>
+    <content type="html"><![CDATA[<p>有時候會需要連接另外一個 database 的資料，rails 可以很方便地來做連接!</p>
+
+<!-- more -->
+
+
+<p>在 model 底下建立子資料夾，連接到另外一個 database，不過關聯就需要另外再去定義，因為是單純去 database 去拉資料過來</p>
+
+<ul>
+<li>好處：就不用透過 api 去拉資料</li>
+<li>壞處：當拉的 database，結構有變就必須跟著動到 code</li>
+</ul>
+
+
+<pre><code class="ruby">#models/test/base.rb
+class Test::Base &lt; ActiveRecord::Base
+  self.abstract_class = true
+  ActiveRecord::Base.establish_connection(
+    :adapter  =&gt; "mysql2",
+    :host     =&gt; "localhost",
+    :username =&gt; "root",
+    :password =&gt; "",
+    :database =&gt; "database_name"
+  )
+  end
+</code></pre>
+
+<pre><code class="ruby">#models/test/course.rb
+class Test::Course &lt; Test::Base
+  self.table_name = :Course
+  has_many :teachers, class_name: "Test::Teacher"
+end
+</code></pre>
+
+<pre><code class="ruby">#models/test/teacher.rb
+class Test::Teacher &lt; Test::Base
+  self.table_name = :teacher
+  belongs_to :course, class_name: "Test::Course"
+end
+</code></pre>
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Custom Config Setting]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/10/17/custom-config-setting/"/>
+    <updated>2016-10-17T17:36:54+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/10/17/custom-config-setting</id>
+    <content type="html"><![CDATA[<p>經常看到 rails 中有很多 config 的設定，像是 rspec 等等，會用一個 black 包起來就可以做設定了，那內部實作是如何?</p>
+
+<!-- more -->
+
+
+<pre><code class="ruby">module Mail
+  class Configuration
+    DEFAULT_VERSION  = 'v1'
+    DEFAULT_API_KEY  = 'token'
+
+    class &lt;&lt; self
+      attr_writer :version, :api_key
+
+      def configure(&amp;block)
+        yield self
+        self
+      end
+
+      def version
+        @version ||= DEFAULT_VERSION
+      end
+
+      def api_key
+        @api_key ||= DEFAULT_API_KEY
+      end
+    end
+  end
+end
+
+Mail::Configuration.configure do |config|
+  config.version = 1
+  config.api_key = 2
+end
+</code></pre>
+
+<p>或是另外一種寫法</p>
+
+<pre><code class="ruby">module Mail
+  module Config
+    extend self
+
+    attr_accessor :token
+    attr_accessor :logger
+
+    def reset
+      self.token = nil
+      self.logger = nil
+    end
+
+    reset
+  end
+
+  class &lt;&lt; self
+    def configure
+      block_given? ? yield(Config) : Config
+    end
+
+    def config
+      Config
+    end
+  end
+end
+
+Mail.configure do |config|
+  config.token = ENV['MAIL_API_TOKEN']
+  config.logger = Logger.new(STDOUT)
+  config.logger.level = Logger::INFO
+  fail 'Missing ENV[MAIL_API_TOKEN]!' unless config.token
+end
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Cucumber]]></title>
@@ -573,6 +698,15 @@ gem uninstall gem_name
 
 #移除所有 gem
 gem uninstall -aIx
+
+#移除舊版本的 gem
+gem cleanup
+
+#顯示要移除的有哪些
+gem cleanup -d
+
+#移除特定 gem 舊版本
+gem cleanup rails
 </code></pre>
 
 <h1><span id="rails">Rails</span></h1>
@@ -586,6 +720,11 @@ gem install rails --no-ri --no-rdoc
 <blockquote><p>管理應用程式 Gem 依存性(dependencies)管理工具，它會根據 Gemfile 的設定自動下載及安裝 Gem 套件</p></blockquote>
 
 <pre><code class="ruby">gem install bundler
+
+#Cleans up unused gems in your bundler directory
+bundle clean [--force]
+#Options:
+#--force: forces clean even if --path is set
 </code></pre>
 
 <ul>
@@ -817,277 +956,6 @@ export PATH="$HOME/bin:$PATH"
 <li><a href="https://segmentfault.com/a/1190000004404505">node版本管理工具nvm-Mac下安装及使用</a></li>
 </ul>
 
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Custom Seed File]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/07/04/custom-seed-file/"/>
-    <updated>2016-07-04T22:27:18+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/07/04/custom-seed-file</id>
-    <content type="html"><![CDATA[<p>在 <code>db</code> 下有個 seed.rb，可以寫一些假資料 or 要匯入的資料，在執行 <code>rake db:seed</code> 就會執行了<br/>
-但是當有多個檔案，就可以自己寫個 <code>task</code> 來覆蓋原本的 <code>rake db:seed</code></p>
-
-<!-- more -->
-
-
-<p></p>
-
-<pre><code class="ruby">#檔案可以放在 db/seeds 資料夾底下
-#db/seeds/hello.rb
-puts 'hello'
-
-#lib/tasks/custom_seed.rake
-namespace :db do
-  namespace :seed do
-    Dir[File.join(Rails.root, 'db', 'seeds', '*.rb')].each do |filename|
-      task_name = File.basename(filename, '.rb').intern    
-      task task_name =&gt; :environment do
-        load(filename) if File.exist?(filename)
-      end
-    end
-  end
-end
-</code></pre>
-
-<p>接著執行</p>
-
-<pre><code class="ruby">rake db:seed:hello
-#=&gt;hello
-</code></pre>
-
-<p>參考文件： <br/>
-<a href="http://stackoverflow.com/questions/19872271/adding-a-custom-seed-file">Adding a custom seed file</a></p>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[好用的 Hash Method]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/07/04/rails-hash/"/>
-    <updated>2016-07-04T21:58:11+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/07/04/rails-hash</id>
-    <content type="html"><![CDATA[<p>在 rails 當中經常會使用 hash，rails 也提供很多方便的 methods</p>
-
-<!--more-->
-
-
-<h1>Hash</h1>
-
-<pre><code class="ruby">Hash["a", 100, "b", 200]             #=&gt; {"a"=&gt;100, "b"=&gt;200}
-Hash[ [ ["a", 100], ["b", 200] ] ]   #=&gt; {"a"=&gt;100, "b"=&gt;200}
-Hash["a" =&gt; 100, "b" =&gt; 200]         #=&gt; {"a"=&gt;100, "b"=&gt;200}
-</code></pre>
-
-<h1>merge &amp; merge!</h1>
-
-<p>回傳新的 hash，後面一樣的 key 則會覆蓋前面的</p>
-
-<blockquote><p>以後面的為優先</p></blockquote>
-
-<pre><code class="ruby">h1 = { "a" =&gt; 100, "b" =&gt; 200 }
-h2 = { "b" =&gt; 254, "c" =&gt; 300 }
-h1.merge(h2)   #=&gt; {"a"=&gt;100, "b"=&gt;254, "c"=&gt;300}
-
-#將重複的做其他處理
-h1.merge(h2){|key, oldval, newval| newval - oldval}
-#=&gt; {"a"=&gt;100, "b"=&gt;54,  "c"=&gt;300}
-h1             #=&gt; {"a"=&gt;100, "b"=&gt;200}
-</code></pre>
-
-<p><code>merge!</code> 直接改變原先的 hash</p>
-
-<pre><code class="ruby">h1.merge!(h2)
-#=&gt; {"a"=&gt;100, "b"=&gt;254, "c"=&gt;300}
-h1
-#=&gt; {"a"=&gt;100, "b"=&gt;254, "c"=&gt;300}
-</code></pre>
-
-<h1>reverse_merge &amp; reverse_merge!</h1>
-
-<p>回傳新的 hash，前面一樣的 key 則會覆蓋後面的</p>
-
-<p>通常用在指定hash的預設值</p>
-
-<blockquote><p>以前面的為優先</p></blockquote>
-
-<pre><code class="ruby">h1 = { "a" =&gt; 100, "b" =&gt; 200 }
-h2 = { "b" =&gt; 254, "c" =&gt; 300 }
-
-h1.merge(h2)
-#=&gt; {"a"=&gt;100, "b"=&gt;254, "c"=&gt;300}
-h1.reverse_merge(h2)
-#=&gt; {"b"=&gt;200, "c"=&gt;300, "a"=&gt;100}
-</code></pre>
-
-<h1>deep_merge &amp; deep_merge!</h1>
-
-<p>在兩個hash的鍵值相同，而值也是個hash的情況下</p>
-
-<pre><code class="ruby">h1 = {:a =&gt; {:b =&gt; 1}}
-h2 = {:a =&gt; {:c =&gt; 2}}
-
-h1.merge(h2)
-#=&gt; {:a=&gt;{:c=&gt;2}} error
-h1.deep_merge(h2)
-#=&gt; {:a=&gt;{:b=&gt;1, :c=&gt;2}}
-</code></pre>
-
-<h1>fetch</h1>
-
-<p>即使是 nil, false 也會回傳，只有在空值的時候回傳預設值</p>
-
-<pre><code class="ruby">h = { "a" =&gt; 100, "b" =&gt; false , 'c' =&gt; nil}
-#=&gt; {"a"=&gt;100, "b"=&gt;false, "c"=&gt;nil}
-h.fetch('a', 8)
-#=&gt; 100
-h.fetch('b', 8)
-#=&gt; false
-h.fetch('c', 8)
-#=&gt; nil
-h.fetch('d', 8)
-#=&gt; 8
-</code></pre>
-
-<p>在處理應該存在的哈希鍵時，使用 fetch。</p>
-
-<pre><code class="ruby">heroes = { batman: 'Bruce Wayne', superman: 'Clark Kent' }
-# bad - if we make a mistake we might not spot it right away
-heroes[:batman] # =&gt; "Bruce Wayne"
-heroes[:supermann] # =&gt; nil
-
-# good - fetch raises a KeyError making the problem obvious
-heroes.fetch(:supermann)
-</code></pre>
-
-<p>在使用 fetch 時，使用第二個參數設置默認值而不是使用自定義的邏輯。</p>
-
-<pre><code class="ruby">batman = { name: 'Bruce Wayne', is_evil: false }
-
-# bad - if we just use || operator with falsy value we won't get the expected result
-batman[:is_evil] || true # =&gt; true
-
-# good - fetch work correctly with falsy values
-batman.fetch(:is_evil, true) # =&gt; false
-</code></pre>
-
-<p>盡量用 fetch 加區塊而不是直接設定默認值。</p>
-
-<pre><code class="ruby">batman = { name: 'Bruce Wayne' }
-
-# bad - if we use the default value, we eager evaluate it
-# so it can slow the program down if done multiple times
-batman.fetch(:powers, get_batman_powers) # get_batman_powers is an expensive call
-
-# good - blocks are lazy evaluated, so only triggered in case of KeyError exception
-batman.fetch(:powers) { get_batman_powers }
-</code></pre>
-
-<h1>except &amp; except!</h1>
-
-<p>通常用在確保某些欄位不要被傳進來的參數修改到</p>
-
-<pre><code class="ruby">h1 = { a:100, b:200 }
-h1.except(:a)
-</code></pre>
-
-<h1>symbolize_keys &amp; symbolize_keys!</h1>
-
-<p>回傳新的 hash，key 值轉成 symbol</p>
-
-<blockquote><p>通常用在確保 key 的一致性</p></blockquote>
-
-<pre><code class="ruby">hash = { 'name' =&gt; 'Rob', 'age' =&gt; '28' }
-
-hash.symbolize_keys
-# =&gt; {:name=&gt;"Rob", :age=&gt;"28"}
-</code></pre>
-
-<h1>stringify_keys &amp; stringify_keys!</h1>
-
-<p>回傳新的 hash，key 值轉成 string</p>
-
-<p>alias <code>to_options</code> &amp; <code>to_options!</code></p>
-
-<blockquote><p>通常用在確保 key 的一致性</p></blockquote>
-
-<pre><code class="ruby">hash = { name: 'Rob', age: '28' }
-
-hash.stringify_keys
-#=&gt; { "name" =&gt; "Rob", "age" =&gt; "28" }
-
-#若有衝突已後面為優先
-{"a" =&gt; 1, :a =&gt; 2}.stringify_keys
-#=&gt; {"a"=&gt;2}
-</code></pre>
-
-<h1>slice &amp; slice!</h1>
-
-<p>有 <code>!</code> 行為會不太一樣，要注意</p>
-
-<pre><code class="ruby">h1 = { "a" =&gt; 100, "b" =&gt; 200 }
-
-h1.slice("a")
-#=&gt; {"a"=&gt;100}
-h1
-#=&gt; {"a"=&gt;100, "b"=&gt;200}
-
-h1.slice!("a")
-#=&gt; {"b"=&gt;200}
-h1
-#=&gt; {"a"=&gt;100}
-</code></pre>
-
-<h1>extract!</h1>
-
-<p>將需要的值提取出來，成為新的 hash</p>
-
-<pre><code class="ruby">h1 = { "a" =&gt; 100, "b" =&gt; 200 }
-h1.extract!("a")
-#=&gt; {"a"=&gt;100}
-h1
-#=&gt; {"b"=&gt;200}
-</code></pre>
-
-<h1>to_query</h1>
-
-<p>Alias for Hash#to_query</p>
-
-<pre><code class="ruby">{name: 'David', nationality: 'Danish'}.to_query
-#=&gt; "name=David&amp;nationality=Danish"
-
-{name: 'David', nationality: 'Danish'}.to_query('user')
-# =&gt; "user%5Bname%5D=David&amp;user%5Bnationality%5D=Danish"
-</code></pre>
-
-<h1>values_at</h1>
-
-<pre><code class="ruby"># bad
-email = data['email']
-nickname = data['nickname']
-
-# good
-email, username = data.values_at('email', 'nickname')
-</code></pre>
-
-<h1>other</h1>
-
-<h3>attributes</h3>
-
-<p>將物件轉成 hash</p>
-
-<pre><code class="ruby">foo = Book.first
-#=&gt; #&lt;Book id: 22, name: "book", desc: "desc", created_at: "xxx", updated_at: "xxx"&gt;
-
-foo.attributes
-#=&gt; {"id"=&gt;22, "name"=&gt;"book", "desc"=&gt;"desc", "star"=&gt;1, "created_at"=&gt;xxx, "updated_at"=&gt;xxx}
-</code></pre>
-
-<p>官方文件：<br/>
-<a href="http://ruby-doc.org/core-2.1.5/Hash.html">Ruby Doc Hash</a><br/>
-<a href="http://apidock.com/rails/v4.2.1/Hash">Hash apidock</a></p>
-
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/activesupport.html">ActiveSupport - 工具函式庫</a></p>
 ]]></content>
   </entry>
   
