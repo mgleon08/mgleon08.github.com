@@ -55,6 +55,14 @@ class Post
 end
 ```
 
+###可改成 alias
+
+```ruby
+alias_method :bar, :foo
+#上下相等
+alias bar foo
+```
+
 #alias_attribute
 
 ```ruby

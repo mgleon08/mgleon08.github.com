@@ -362,6 +362,7 @@ end
 ```
 
 ```ruby
+# 讓 User 這個 model 執行 follow 時都一律回傳 false, 以便測試到失敗的例子
 allow_any_instance_of(User).to receive(:follow).and_return(false)
 ```
 [mock](http://betterspecs.org/#mock)

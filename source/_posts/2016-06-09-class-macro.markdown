@@ -70,6 +70,7 @@ module Precentage
     columns.each do |column|
       #這裡做了 alias_method 主要是希望，如果想知道原本的價錢，還可以呼叫 xx_origin
       alias_method "#{column}_origin", column
+      #可簡化為 alias "#{column}_origin", column
       if precentage
         #動態產生新的 method 去取代原本
         define_method(column) do

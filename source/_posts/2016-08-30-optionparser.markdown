@@ -45,6 +45,8 @@ class Hello
   def parse_options
     options = OptionParser.new
     options.banner = 'Usage: xxxx [options]'
+    options.separator ''
+    options.separator 'options:'
     #on('short opt​​ion', 'long option', 'comment')
     #帶參數
     options.on('-a arg', '--aa arg', 'this is test') { |arg| puts arg }
@@ -105,13 +107,18 @@ puts "Your third variable is: #{third}"
 官方文件：  
 
 * [OptionParser](http://ruby-doc.org/stdlib-2.3.1/libdoc/optparse/rdoc/OptionParser.html)
+* [OptionParser doc](https://docs.ruby-lang.org/en/2.1.0/OptionParser.html)
 
 參考文件：  
 
 * [用 OptionParser 构建 Command Line 工具](https://ruby-china.org/wiki/building-a-command-line-tool-with-optionparser)  
 * [How do I make a command-line tool in Ruby?](http://rubylearning.com/blog/2011/01/03/how-do-i-make-a-command-line-tool-in-ruby/)
+* [How do you specify a required switch (not argument) with Ruby OptionParser?](http://stackoverflow.com/questions/1541294/how-do-you-specify-a-required-switch-not-argument-with-ruby-optionparser/1542658#1542658)
 
 相關 gem： 
 
+* [docopt](https://github.com/docopt/docopt.rb)
+* [slop](https://github.com/leejarvis/slop)
 * [choice](https://github.com/defunkt/choice)  
 * [trollop](https://github.com/ManageIQ/trollop) 
+* [gli](https://github.com/davetron5000/gli)

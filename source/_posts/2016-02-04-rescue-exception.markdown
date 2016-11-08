@@ -421,6 +421,10 @@ end
 puts "Continuing..."
 ```
 
+#throw & catch
+* [再談Ruby的異常處理(學習筆記)](http://snails.github.io/2012/06/22/Let's-Talk-About-Exception-Again/)
+* [Exceptions, Catch, and Throw](http://phrogz.net/programmingruby/tut_exceptions.html)
+
 官方文件：  
 [Exception](http://ruby-doc.org/core-2.2.0/Exception.html)
 

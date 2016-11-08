@@ -337,6 +337,15 @@ gem uninstall gem_name
 
 #移除所有 gem
 gem uninstall -aIx
+
+#移除舊版本的 gem
+gem cleanup
+
+#顯示要移除的有哪些
+gem cleanup -d
+
+#移除特定 gem 舊版本
+gem cleanup rails
 ```
 
 #<span id="rails">Rails</span>
@@ -351,6 +360,11 @@ gem install rails --no-ri --no-rdoc
 
 ```ruby
 gem install bundler
+
+#Cleans up unused gems in your bundler directory
+bundle clean [--force]
+#Options:
+#--force: forces clean even if --path is set
 ```
 
 * [bundle](http://bundler.io/)

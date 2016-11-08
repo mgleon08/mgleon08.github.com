@@ -323,6 +323,7 @@ git fetch origin <remote_branch_name>:<local_branch_name>
 #Show what will be deleted with the -n option
 git clean -f -n
 git clean -f
+git clean -df #刪除 untracked directory
 ```
 
 [How do I remove local (untracked) files from my current Git branch?](http://stackoverflow.com/questions/61212/how-do-i-remove-local-untracked-files-from-my-current-git-branch)
@@ -431,7 +432,8 @@ alias glog='git log --oneline --decorate --color --graph'
 [連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)  
 [好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)  
 [Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)  
-[Git 風格指南](https://github.com/JuanitoFatas/git-style-guide)
+[Git 風格指南](https://github.com/JuanitoFatas/git-style-guide)  
+[How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/)
 
 練習：  
 [codeschool](https://try.github.io/levels/1/challenges/1)  

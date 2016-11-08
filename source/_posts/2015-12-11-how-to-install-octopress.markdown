@@ -97,6 +97,5 @@ Octopress會幫你產生新的檔案 `2015-12-11-title.markdown` 到source/_post
 
 這樣就可以開始寫文章囉~
 
-[octopress官方網站](http://octopress.org/docs/blogging/)
-
-
+* [octopress官方網站](http://octopress.org/docs/blogging/)
+* [Octopress 課程目錄](http://shengmingzhiqing.com/blog/octopress-tutorials-toc.html/)

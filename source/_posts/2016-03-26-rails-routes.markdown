@@ -39,18 +39,30 @@ post 'foo/meetings', :to => 'events#create'
 
 scope :controller => "events", :path => "/foo", :as => "bar" do
   get 'meetings/:id' => :show, :as => "meeting"
-  post 'meetings' => ':create	, :as => "meetings"
+  post 'meetings' => ':create , :as => "meetings"
 end
 
 scope :path => '/api/v1/', :module => "api_v1", :as => 'v1' do
   resources :projects
 end
 ```
-`:as` 增加 vi_path(相對路徑) 和 v1_url(絕對路徑)  
-`: path `網址 `/api/v1/projects`   
-`:controller` 指定 controller 是哪個  
-`:module` 指定 controller 對應到 ApiV1::ProjectsController
 
+* `:as` 增加 vi_path(相對路徑) 和 v1_url(絕對路徑)  
+* `: path `網址後面的 path 改成 `/api/v1/projects`   
+* `:controller` 指定 controller 是哪個  
+* `:module` 指定 controller 對應到 ApiV1::ProjectsController
+* `params` 將 `:id` 改成指定的變數 ex `params: :api_id`
+
+
+```ruby
+resources :api, path:'/test', controller: 'hello/api', param: :api_id, only: %i(index show create update)
+
+api_index GET   /test(.:format)         hello/api#index
+          POST  /test(.:format)         hello/api#create
+      api GET   /test/:api_id(.:format) hello/api#show
+          PATCH /test/:api_id(.:format) hello/api#update
+          PUT   /test/:api_id(.:format) hello/api#update
+```
 
 #導向
 
@@ -102,10 +114,14 @@ end
 
 ###子網域
 
-```rubyresources :posts, constraints: { subdomain: 'api' }
+```ruby
+resources :posts, constraints: { subdomain: 'api' }
 ```
 
-```ruby￼constraints subdomain: 'api' do  resources :posts  #http://api.mgleon08.com/posts￼end
+```ruby
+￼constraints subdomain: 'api' do
+  resources :posts  #http://api.mgleon08.com/posts
+￼end
 ```
 
 ```ruby
@@ -119,10 +135,14 @@ end
 #http://api.mgleon08.com/api/posts
 
 constraints subdomain: 'api' do 
-	namespace :api, path: '/' do #加上 path 就可以消去後面的     resources :zombies   endend
+  namespace :api, path: '/' do #加上 path 就可以消去後面的
+     resources :zombies
+   end
+end
 #上下一樣
 namespace :api, path: '/', constraints: { subdomain: 'api' } do
-  resources :zombiesend
+  resources :zombies
+end
 
 #http://api.mgleon08.com/posts
 ```
@@ -134,23 +154,34 @@ namespace :api, path: '/', constraints: { subdomain: 'api' } do
 concern :sociable do |options| 
   resources :comments, options
   resources :categories, options 
-  resources :tags, optionsend
-resources :messages, concerns: :sociableresources :posts,    concerns: :sociable￼resources :items do  concerns :sociable, only: :createend
+  resources :tags, options
+end
+resources :messages, concerns: :sociable
+resources :posts,    concerns: :sociable
+￼resources :items do
+  concerns :sociable, only: :create
+end
 ```
 
 ###or
 
 ```ruby
 concern :sociable, Sociable
-resources :messages, concerns: :sociable 
+resources :messages, concerns: :sociable 
 resources :posts, concerns: :sociable 
-resources :items do  concerns :sociable, only: :createend
+resources :items do
+  concerns :sociable, only: :create
+end
 ```
 
 ```ruby
-#app/concerns/sociable.rbclass Sociable  def self.call(mapper, options)    mapper.resources :comments, options 
+#app/concerns/sociable.rb
+class Sociable
+  def self.call(mapper, options)
+    mapper.resources :comments, options 
     mapper.resources :categories, options 
-    mapper.resources :tags, options  end 
+    mapper.resources :tags, options
+  end 
 end
 ```
 
@@ -163,20 +194,28 @@ resources :humans, only: :inde
 ```
 
 ```ruby
-￼with_options only: :index do |list_only|   list_only.resources :zombies   list_only.resources :humans   list_only.resources :medical_kits￼￼￼￼end
+￼with_options only: :index do |list_only|
+   list_only.resources :zombies
+   list_only.resources :humans
+   list_only.resources :medical_kits
+￼￼￼￼end
 ```
 
 #將 module 名稱改為大寫
 
 ```ruby
 #app/controllers/api/posts_controller.rb
-￼module Api #通常是camelcase   class PostController < ApplicationController   end
+￼module Api #通常是camelcase
+   class PostController < ApplicationController
+   end
 end
 ```
 
 ```ruby
 #config/initializers/inflections.rb
-￼ActiveSupport::Inflector.inflections(:en) do |inflect|￼  inflect.acronym 'API'￼end
+￼ActiveSupport::Inflector.inflections(:en) do |inflect|
+￼  inflect.acronym 'API'
+￼end
 ```
 #CURL
 

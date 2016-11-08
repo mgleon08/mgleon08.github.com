@@ -62,6 +62,21 @@ Gem::Specification.new do |spec|
 end
 ```
 
+#Code
+
+`xxx/lib/xxx.rb`
+
+```ruby
+require "xxx/version"
+
+module Xxx
+  # Your code goes here...
+  def self.hi
+    puts "Hello, world!"
+  end
+end
+```
+
 #Build
 
 ```ruby
