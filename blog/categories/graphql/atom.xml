@@ -1,0 +1,189 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Graphql | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/graphql/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2017-01-08T13:32:15+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Rails With GraphQL API]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/12/16/graphql/"/>
+    <updated>2016-12-16T17:31:16+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/12/16/graphql</id>
+    <content type="html"><![CDATA[<p>GraphQL 是 facebook 所開放的查詢語言</p>
+
+<!-- more -->
+
+
+<blockquote><p>GraphQl is a query language for your API</p></blockquote>
+
+<ul>
+<li>GraphQL 是 facebook 所開放的查詢語言，可以透過定義的schema系統將複雜的邏輯拆分成細粒度的資料結構，讓前端能夠透過GraphQL提供的類型查詢系統，自由定製請求數據的能力。</li>
+<li>GraphQL 本身適合對數據力度小，需求變更頻繁的場景，與 RESTful 相反</li>
+</ul>
+
+
+<h3>GraphQL Look Like</h3>
+
+<pre><code class="ruby">{
+  user(id: 1) {
+    id,
+    name,
+    friends {
+      name
+    }
+  }
+}
+</code></pre>
+
+<h3>Response</h3>
+
+<pre><code class="ruby">{
+  "user" : {
+    "id": 1,
+    "name": "Marc-Andre Giroux",
+    "friends": [
+      {
+        "name": "Joe Bro"
+      },
+      {
+        "name": "Johny Yolo"
+      }
+    ]
+  }
+}
+</code></pre>
+
+<h1>Rails with GraphQL API</h1>
+
+<p><a href="https://github.com/rmosolgo/graphql-ruby">graphql-ruby</a></p>
+
+<p>主要有五個步驟</p>
+
+<ul>
+<li>新增 ruby gem <a href="https://github.com/rmosolgo/graphql-ruby">graphql-ruby</a></li>
+<li>Declare Query Type</li>
+<li>Build a Schema</li>
+<li>Add GraphQL end_point</li>
+</ul>
+
+
+<h3>Ruby gem</h3>
+
+<pre><code class="ruby">gem 'graphql'
+</code></pre>
+
+<pre><code class="ruby">$ bundle install
+</code></pre>
+
+<h3>Declare Query Type</h3>
+
+<p>All Types (<code>!</code> marks a field as &ldquo;non-null&rdquo;)</p>
+
+<ul>
+<li>string</li>
+<li>int</li>
+<li>float</li>
+<li>boolean</li>
+<li>ID</li>
+</ul>
+
+
+<pre><code class="ruby"># app/graph/types/post_type.rb
+PostType = GraphQL::ObjectType.define do
+  name "Post"
+  description "A blog post"
+  # `!` marks a field as "non-null"
+  field :id, !types.ID
+  field :title, !types.String
+  field :body, !types.String
+  field :comments, types[!CommentType]
+end
+</code></pre>
+
+<pre><code class="ruby"># app/graph/types/comment_type.rb
+CommentType = GraphQL::ObjectType.define do
+  name "Comment"
+  field :id, !types.ID
+  field :body, !types.String
+  field :created_at, !types.String
+end
+</code></pre>
+
+<p>Make sure you add this line to your application.rb for rails to autoload the types</p>
+
+<pre><code class="ruby">#config/application.rb
+config.autoload_paths &lt;&lt; Rails.root.join('app', 'graph')
+config.autoload_paths &lt;&lt; Rails.root.join('app', 'graph', 'types')
+</code></pre>
+
+<h3>Build a Schema</h3>
+
+<pre><code class="ruby">#app/graph/types/query_type.rb
+#query root
+
+QueryType = GraphQL::ObjectType.define do
+  name "Query"
+  description "The query root of this schema"
+
+  field :post do
+    type PostType
+    argument :id, !types.ID #argument 可以根據哪些欄位去查詢
+    description "Find a Post by ID"
+    resolve -&gt;(obj, args, ctx) { Post.find(args["id"]) }
+  end
+end
+</code></pre>
+
+<pre><code class="ruby"># app/graph/schema.rb
+Schema = GraphQL::Schema.define do
+  query QueryType
+end
+</code></pre>
+
+<h3>Router</h3>
+
+<pre><code class="ruby">#config/routes.rb
+resources :queries, via: [:post, :options]
+</code></pre>
+
+<pre><code class="ruby"># app/controller/queries_controller.rb
+class QueriesController &lt; ApplicationController
+  def create
+    query_string = params[:query]
+    query_variables = params[:variables] || {}
+    result = BlogSchema.execute(query_string, variables: query_variables)
+    render json: result
+  end
+end
+</code></pre>
+
+<h3>Execute queries</h3>
+
+<pre><code class="ruby">curl -XPOST -d 'query={ blog(id: 1) { title content }}' http://localhost:3000/queries
+</code></pre>
+
+<ul>
+<li><a href="http://graphql.org/">graphql.org</a></li>
+<li><a href="http://graphql-swapi.parseapp.com/">GraphiQL</a></li>
+<li><a href="https://github.com/rmosolgo/graphql-ruby">graphql-ruby gem</a></li>
+<li><a href="https://www.youtube.com/watch?v=tmy4oZ_sVmk">15 - 夏俊晨 - GraphQL on Rails (video)</a></li>
+<li><a href="https://speakerdeck.com/onlimii/graphql-on-rails">GraphQL on Rails</a></li>
+<li><a href="http://mgiroux.me/2015/getting-started-with-rails-graphql-relay/">Getting started with Rails and GraphQL</a></li>
+<li><a href="http://www.jianshu.com/p/4355bd92c216">GraphQL on Rails(一) GraphQL介紹</a></li>
+<li><a href="http://www.jianshu.com/p/f7e435a17960">GraphQL on Rails(二) GraphQL介紹</a></li>
+<li><a href="http://www.jianshu.com/p/f9f20602af5a">GraphQL on Rails(三) GraphQL介紹</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

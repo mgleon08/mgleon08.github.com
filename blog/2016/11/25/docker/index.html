@@ -1,0 +1,648 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Docker 簡單介紹 - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="docker 讓應用程式佈署在軟體容器下的工作可以自動化進行，藉此在Linux作業系統上，提供一個額外的軟體抽象層，以及作業系統層虛擬化的自動管理機制。 Docker 的優點 秒級實作
+對系統資源的使用率很高，一台主機可以同時執行數千個 Docker 容器
+更快速的交付和部署 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/11/25/docker">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Docker 簡單介紹</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-11-25T16:28:35+08:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>4:28 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>docker 讓應用程式佈署在軟體容器下的工作可以自動化進行，藉此在Linux作業系統上，提供一個額外的軟體抽象層，以及作業系統層虛擬化的自動管理機制。</p>
+
+<!-- more -->
+
+
+<p>Docker 的優點</p>
+
+<ul>
+<li>秒級實作</li>
+<li>對系統資源的使用率很高，一台主機可以同時執行數千個 Docker 容器</li>
+<li>更快速的交付和部署
+
+<ul>
+<li>使用一個標準的映像檔來建立一套開發容器，開發完成之後，維運人員可以直接使用這個容器來部署程式碼。</li>
+</ul>
+</li>
+<li>更有效率的虛擬化
+
+<ul>
+<li>不需額外的虛擬化支援，它是核心層級的虛擬化</li>
+</ul>
+</li>
+<li>更輕鬆的遷移和擴展
+
+<ul>
+<li>Docker 容器幾乎可以在任意的平台上執行</li>
+</ul>
+</li>
+<li>更簡單的管理</li>
+</ul>
+
+
+<p>Docker vs VM</p>
+
+<ul>
+<li>Docker 僅載入所需要的函式庫與執行檔，而不像VM需要安裝大容量的作業系統</li>
+<li>VM是用硬體端的hypervisor技術來同時執行多個虛擬主機，一般可預見需要大量的運行資源。Docker則是用軟體端的作業系統來實現虛擬分割的技術，由於僅載入核心的函式庫</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#查看版本</span>
+</span><span class='line'><span class="n">docker</span> <span class="o">--</span><span class="n">version</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="o">--</span><span class="n">version</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">machine</span> <span class="o">--</span><span class="n">version</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#從 hub 取得所需要的 images :後面為版本號，若沒加則會拉最新的</span>
+</span><span class='line'><span class="n">docker</span> <span class="n">pull</span> <span class="ss">ubuntu</span><span class="p">:</span><span class="mi">12</span><span class="o">.</span><span class="mo">04</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#執行 docker ，若本地沒有 image，就會自動去 Docker Hub pull 下來</span>
+</span><span class='line'><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">t</span> <span class="o">-</span><span class="n">i</span> <span class="ss">ubuntu</span><span class="p">:</span><span class="mi">12</span><span class="o">.</span><span class="mo">04</span> <span class="n">bash</span>
+</span><span class='line'><span class="c1">#-t 在容器中分配一個虛擬終端（pseudo-tty）並綁定到容器的標準輸入上</span>
+</span><span class='line'><span class="c1">#-i 建立與容器標準輸入（STDIN）的互動連結，讓容器的標準輸入保持打開</span>
+</span><span class='line'><span class="c1">#執行後啟動 bash</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">d</span> <span class="o">-</span><span class="nb">p</span> <span class="mi">80</span><span class="p">:</span><span class="mi">80</span> <span class="o">--</span><span class="nb">name</span> <span class="n">webserver</span> <span class="n">nginx</span>
+</span><span class='line'><span class="c1"># -p 80:80 (主機 port, container port)</span>
+</span><span class='line'><span class="c1">#--name webserver</span>
+</span><span class='line'><span class="c1"># -d daemon 模式，docker 只要一執行完它的程式就會終止了</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">docker</span> <span class="n">run</span> <span class="o">-</span><span class="n">it</span> <span class="o">-</span><span class="n">v</span> <span class="o">~</span><span class="sr">/Downloads: ubuntu:12.04 bash</span>
+</span><span class='line'><span class="sr">#建立容器並啟動，且掛載本地目錄(local 在前，container 在後)</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#啟動 container</span>
+</span><span class='line'><span class="sr">docker start &lt;imageID&gt;|&lt;imageName&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#重新啟動</span>
+</span><span class='line'><span class="sr">docker restart &lt;imageID&gt;|&lt;imageName&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#停止 container </span>
+</span><span class='line'><span class="sr">docker stop &lt;imageID&gt;|&lt;imageName&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#搜尋官方的 Image</span>
+</span><span class='line'><span class="sr">docker search </span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#目前有哪些 docker 正在跑</span>
+</span><span class='line'><span class="sr">docker ps</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#查看所有的 container 包含停止的</span>
+</span><span class='line'><span class="sr">docker ps -a </span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#查看目前有哪些 images</span>
+</span><span class='line'><span class="sr">docker images</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#移除 image</span>
+</span><span class='line'><span class="sr">docker rmi &lt;imageID&gt;|&lt;imageName&gt;</span>
+</span><span class='line'><span class="sr">docker rmi nginx</span>
+</span><span class='line'><span class="sr">docker rmi nginx -f</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#移除 container (要先 stop 才可以移除)</span>
+</span><span class='line'><span class="sr">docker rm &lt;containerID&gt;</span>
+</span><span class='line'><span class="sr">#一次移除全部</span>
+</span><span class='line'><span class="sr">docker rm $(docker ps -a -q)</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#看 container log</span>
+</span><span class='line'><span class="sr">docker logs -f &lt;imageID&gt;|&lt;imageName&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#連到 container 最後執行</span>
+</span><span class='line'><span class="sr">#當多個窗口同時 attach 到同一個容器的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了</span>
+</span><span class='line'><span class="sr">docker attach &lt;imageID&gt;|&lt;imageName&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#進去 container 執行 bash</span>
+</span><span class='line'><span class="sr">docker exec -it &lt;imageID&gt;|&lt;imageName&gt; bash</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#commit</span>
+</span><span class='line'><span class="sr">docker commit -m &#39;message&#39; -a &#39;author&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#建立 tag</span>
+</span><span class='line'><span class="sr">docker tag &lt;imageID&gt; &lt;tag&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#上傳 images</span>
+</span><span class='line'><span class="sr">docker push</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="https://blog.fntsr.tw/wp-content/uploads/2014/12/Docker-Command-Diagram.png" alt="" /></p>
+
+<h2>Dockerfile</h2>
+
+<p><a href="https://philipzheng.gitbooks.io/docker_practice/content/dockerfile/instructions.html">Dockerfile 指令</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#一般會建議放置 Dockerfile 的目錄為空目錄。也可以透過 .dockerignore 檔案（每一行新增一條排除模式：exclusion patterns）來讓 Docker 忽略路徑下的目錄和檔案。</span>
+</span><span class='line'><span class="n">docker</span> <span class="n">build</span> <span class="o">-</span><span class="n">t</span> <span class="o">&lt;</span><span class="n">tagName</span><span class="o">&gt;</span> <span class="o">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#這樣也可以，只是不指定名稱</span>
+</span><span class='line'><span class="n">docker</span> <span class="n">build</span> <span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>FROM</h3>
+
+<p>一定要有，只能有一個 FROM，基於某個已存在的 image 進行二次開發。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">FROM</span> <span class="ss">ubuntu</span><span class="p">:</span><span class="mi">14</span><span class="o">.</span><span class="mo">04</span><span class="o">.</span><span class="mi">2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>MAINTAINER</h3>
+
+<p>指定維護者訊息。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">MAINTAINER</span> <span class="o">&lt;</span><span class="nb">name</span> <span class="o">|</span> <span class="n">email</span><span class="o">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>RUN</h3>
+
+<p>對映像檔執行相對應的命令。每運行一條 RUN 指令，映像檔就會新增一層，主要用來安裝 packages、設定系統環境等</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">RUN</span> <span class="o">&lt;</span><span class="n">command</span><span class="o">&gt;</span> <span class="err">或</span> <span class="no">RUN</span> <span class="o">[</span><span class="s2">&quot;executable&quot;</span><span class="p">,</span> <span class="s2">&quot;param1&quot;</span><span class="p">,</span> <span class="s2">&quot;param2&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>前者將在 shell 終端中運行命令，即 /bin/sh -c；後者則使用 exec 執行。指定使用其它終端可以透過第二種方式實作，例如 RUN [&ldquo;/bin/bash&rdquo;, &ldquo;-c&rdquo;, &ldquo;echo hello&rdquo;]。</p>
+
+<p>每條 RUN 指令將在當前映像檔基底上執行指定命令，並產生新的映像檔。當命令較長時可以使用 \ 來換行。</p>
+
+<h3>EXPOSE</h3>
+
+<p>設定 Docker 伺服器容器對外的埠號，供外界使用。在啟動容器時需要透過 -P，Docker 會自動分配一個埠號轉發到指定的埠號（當然也可以自己給，例如 -p 1055:80)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">EXPOSE</span> <span class="mi">80</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>ADD</h3>
+
+<p>該命令將複製指定的 <src> 到容器中的 <dest>。 其中 <src> 可以是 Dockerfile 所在目錄的相對路徑；也可以是一個 URL；還可以是一個 tar 檔案（其複製後會自動解壓縮）。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">ADD</span> <span class="o">&lt;</span><span class="n">src</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">dest</span><span class="o">&gt;</span>
+</span><span class='line'><span class="no">ADD</span> <span class="n">text</span><span class="o">.</span><span class="n">conf</span> <span class="sr">/etc/</span><span class="n">apache2</span><span class="o">/</span><span class="nb">test</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>USER</h3>
+
+<p>切換使用者身份，Docker 預設使用者是 root，但若不需要，建議切換使用者身份，畢竟 root 權限太大了，使用上有安全的風險。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">USER</span> <span class="no">Leon</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>VOLUME</h3>
+
+<p>建立一個可以從本地端或其他容器掛載的掛載點，一般用來存放資料庫和需要保存的資料等。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">VOLUME</span> <span class="o">[</span><span class="s2">&quot;/data&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>WORKDIR</h3>
+
+<p>用來切換工作目錄，Docker 預設工作目錄是在根目錄，只有 RUN 能執行 cd 指令切換目錄，只作用在當下的 RUN，也就是說每一個 RUN 都是獨立進行的。如果想讓其他指令在指定的目錄下執行，就得靠 WORKDIR。WORKDIR 的變更影響是持續的，不用每個指令前都使用一次 WORKDIR</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">WORKDIR</span> <span class="sr">/a</span>
+</span><span class='line'><span class="sr">WORKDIR b</span>
+</span><span class='line'><span class="sr">WORKDIR c</span>
+</span><span class='line'><span class="sr">RUN pwd</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">#則最終路徑為 /</span><span class="n">a</span><span class="o">/</span><span class="n">b</span><span class="o">/</span><span class="n">c</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>ENV</h3>
+
+<p>指定一個環境變數，會被後續 RUN 指令使用，並在容器運行時保持。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">ENV</span> <span class="o">&lt;</span><span class="n">key</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">value</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ENV</span> <span class="no">PG_MAJOR</span> <span class="mi">9</span><span class="o">.</span><span class="mi">3</span>
+</span><span class='line'><span class="no">ENV</span> <span class="no">PG_VERSION</span> <span class="mi">9</span><span class="o">.</span><span class="mi">3</span><span class="o">.</span><span class="mi">4</span>
+</span><span class='line'><span class="no">RUN</span> <span class="n">curl</span> <span class="o">-</span><span class="no">SL</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//ex</span><span class="n">ample</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">postgres</span><span class="o">-</span><span class="vg">$PG_VERSION</span><span class="o">.</span><span class="n">tar</span><span class="o">.</span><span class="n">xz</span> <span class="o">|</span> <span class="n">tar</span> <span class="o">-</span><span class="n">xJC</span> <span class="sr">/usr/s</span><span class="n">rc</span><span class="o">/</span><span class="n">postgress</span> <span class="o">&amp;&amp;</span> <span class="err">…</span>
+</span><span class='line'><span class="no">ENV</span> <span class="no">PATH</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">postgres</span><span class="o">-</span><span class="vg">$PG_MAJOR</span><span class="o">/</span><span class="ss">bin</span><span class="p">:</span><span class="vg">$PATH</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>COPY</h3>
+
+<p>能將本機端的檔案或目錄，複製到 image 內。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#複製本地端的 &lt;src&gt;（為 Dockerfile 所在目錄的相對路徑）到容器中的 &lt;dest&gt;。</span>
+</span><span class='line'><span class="no">COPY</span> <span class="o">&lt;</span><span class="n">src</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">dest</span><span class="o">&gt;</span>
+</span><span class='line'><span class="no">COPY</span> <span class="nb">test</span><span class="o">.</span><span class="n">rb</span> <span class="o">.</span><span class="n">/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>ENTRYPOINT</h3>
+
+<p>指定 Docker image 運行成 instance (也就是 Docker container) 時，要執行的指令或檔案。在這個範本中，test.rb 就是要執行的檔案。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">ENTRYPOINT</span> <span class="o">[</span><span class="s2">&quot;./test.rb&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>CMD</h3>
+
+<p>指定啟動容器時執行的命令，每個 Dockerfile 只能有一條 CMD 命令。如果指定了多條命令，只有最後一條會被執行。
+如果使用者啟動容器時候指定了運行的命令，則會覆蓋掉 CMD 指定的命令。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#使用 exec 執行，推薦使用</span>
+</span><span class='line'><span class="no">CMD</span> <span class="o">[</span><span class="s2">&quot;executable&quot;</span><span class="p">,</span><span class="s2">&quot;param1&quot;</span><span class="p">,</span><span class="s2">&quot;param2&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="c1">#在 /bin/sh 中執行，使用在給需要互動的指令</span>
+</span><span class='line'><span class="c1">#提供給 ENTRYPOINT 的預設參數</span>
+</span><span class='line'><span class="no">CMD</span> <span class="n">command</span> <span class="n">param1</span> <span class="n">param2</span> <span class="no">CMD</span> <span class="o">[</span><span class="s2">&quot;param1&quot;</span><span class="p">,</span><span class="s2">&quot;param2&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>範例</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">FROM</span> <span class="ss">ubuntu</span><span class="p">:</span><span class="n">latest</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">-</span><span class="n">qq</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">aptitude</span> <span class="n">git</span> <span class="n">imagemagick</span> <span class="n">curl</span> <span class="n">vim</span> <span class="n">bash</span><span class="o">-</span><span class="n">completion</span> <span class="n">htop</span> <span class="n">nodejs</span> <span class="n">mysql</span><span class="o">-</span><span class="n">client</span> <span class="n">libmysqlclient</span><span class="o">-</span><span class="n">dev</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RUN</span> <span class="n">gpg</span> <span class="o">--</span><span class="n">keyserver</span> <span class="ss">hkp</span><span class="p">:</span><span class="sr">//</span><span class="n">keys</span><span class="o">.</span><span class="n">gnupg</span><span class="o">.</span><span class="n">net</span> <span class="o">--</span><span class="n">recv</span><span class="o">-</span><span class="n">keys</span> <span class="mi">409</span><span class="no">B6B1796C275462A1703113804BB82D39DC0E3</span>
+</span><span class='line'><span class="no">RUN</span> <span class="p">\</span><span class="n">curl</span> <span class="o">-</span><span class="n">sSL</span> <span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">get</span><span class="o">.</span><span class="n">rvm</span><span class="o">.</span><span class="n">io</span> <span class="o">|</span> <span class="n">bash</span> <span class="o">-</span><span class="n">s</span> <span class="n">stable</span>
+</span><span class='line'><span class="no">RUN</span> <span class="sr">/bin/</span><span class="n">bash</span> <span class="o">-</span><span class="n">l</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;rvm install 2.1.5&quot;</span>
+</span><span class='line'><span class="no">RUN</span> <span class="sr">/bin/</span><span class="n">bash</span> <span class="o">-</span><span class="n">l</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;gem install bundler -v 1.10.5 --no-ri --no-rdoc&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ENV</span> <span class="no">APP_ROOT</span> <span class="sr">/yourator</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">RUN mkdir $APP_ROOT</span>
+</span><span class='line'><span class="sr">WORKDIR $APP_ROOT</span>
+</span><span class='line'><span class="sr">ADD . $APP_ROOT</span>
+</span><span class='line'><span class="sr">RUN /</span><span class="n">bin</span><span class="o">/</span><span class="n">bash</span> <span class="o">-</span><span class="n">l</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;bundle install&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a></li>
+<li><a href="https://philipzheng.gitbooks.io/docker_practice/content/index.html">Docker —— 從入門到實踐</a></li>
+<li><a href="http://www.cc.ntu.edu.tw/chinese/epaper/0036/20160321_3611.html">淺談輕量化的虛擬技術 - Docker容器</a></li>
+<li><a href="http://cepave.com/how-to-write-dockerfile/">撰寫一份符合需求的 Dockerfile</a></li>
+<li><a href="http://bonze.tw/%E4%BC%BA%E6%9C%8D%E5%99%A8%E7%A0%94%E7%A9%B6%E5%AE%A4/dockerfile%E7%B0%A1%E5%96%AE%E4%BB%8B%E7%B4%B9">Dockerfile簡單介紹</a></li>
+<li><a href="https://segmentfault.com/q/1010000000417103">Dockerfile裡指定執行命令用ENTRYPOING和用CMD有何不同？</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-11-25T16:28:35+08:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>25</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>4:28 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/server/'>server</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/11/25/docker/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/11/25/docker/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/10/24/connect-multiple-database/" title="Previous Post: 在專案中連接另一個 database">&laquo; 在專案中連接另一個 database</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/11/28/rake-db-tasks/" title="Next Post: rake db tasks 指令">rake db tasks 指令 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2017 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/11/25/docker/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/11/25/docker/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

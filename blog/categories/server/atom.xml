@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Server | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/server/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2016-11-08T13:49:41+08:00</updated>
+  <updated>2017-01-08T13:32:15+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,276 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Docker 簡單介紹]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/11/25/docker/"/>
+    <updated>2016-11-25T16:28:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/11/25/docker</id>
+    <content type="html"><![CDATA[<p>docker 讓應用程式佈署在軟體容器下的工作可以自動化進行，藉此在Linux作業系統上，提供一個額外的軟體抽象層，以及作業系統層虛擬化的自動管理機制。</p>
+
+<!-- more -->
+
+
+<p>Docker 的優點</p>
+
+<ul>
+<li>秒級實作</li>
+<li>對系統資源的使用率很高，一台主機可以同時執行數千個 Docker 容器</li>
+<li>更快速的交付和部署
+
+<ul>
+<li>使用一個標準的映像檔來建立一套開發容器，開發完成之後，維運人員可以直接使用這個容器來部署程式碼。</li>
+</ul>
+</li>
+<li>更有效率的虛擬化
+
+<ul>
+<li>不需額外的虛擬化支援，它是核心層級的虛擬化</li>
+</ul>
+</li>
+<li>更輕鬆的遷移和擴展
+
+<ul>
+<li>Docker 容器幾乎可以在任意的平台上執行</li>
+</ul>
+</li>
+<li>更簡單的管理</li>
+</ul>
+
+
+<p>Docker vs VM</p>
+
+<ul>
+<li>Docker 僅載入所需要的函式庫與執行檔，而不像VM需要安裝大容量的作業系統</li>
+<li>VM是用硬體端的hypervisor技術來同時執行多個虛擬主機，一般可預見需要大量的運行資源。Docker則是用軟體端的作業系統來實現虛擬分割的技術，由於僅載入核心的函式庫</li>
+</ul>
+
+
+<pre><code class="ruby">#查看版本
+docker --version
+docker-compose --version
+docker-machine --version
+
+#從 hub 取得所需要的 images :後面為版本號，若沒加則會拉最新的
+docker pull ubuntu:12.04 
+
+#執行 docker ，若本地沒有 image，就會自動去 Docker Hub pull 下來
+docker run -t -i ubuntu:12.04 bash
+#-t 在容器中分配一個虛擬終端（pseudo-tty）並綁定到容器的標準輸入上
+#-i 建立與容器標準輸入（STDIN）的互動連結，讓容器的標準輸入保持打開
+#執行後啟動 bash
+
+docker run -d -p 80:80 --name webserver nginx
+# -p 80:80 (主機 port, container port)
+#--name webserver
+# -d daemon 模式，docker 只要一執行完它的程式就會終止了
+
+docker run -it -v ~/Downloads: ubuntu:12.04 bash
+#建立容器並啟動，且掛載本地目錄(local 在前，container 在後)
+
+#啟動 container
+docker start &lt;imageID&gt;|&lt;imageName&gt;
+
+#重新啟動
+docker restart &lt;imageID&gt;|&lt;imageName&gt;
+
+#停止 container 
+docker stop &lt;imageID&gt;|&lt;imageName&gt;
+
+#搜尋官方的 Image
+docker search 
+
+#目前有哪些 docker 正在跑
+docker ps
+
+#查看所有的 container 包含停止的
+docker ps -a 
+
+#查看目前有哪些 images
+docker images
+
+#移除 image
+docker rmi &lt;imageID&gt;|&lt;imageName&gt;
+docker rmi nginx
+docker rmi nginx -f
+
+#移除 container (要先 stop 才可以移除)
+docker rm &lt;containerID&gt;
+#一次移除全部
+docker rm $(docker ps -a -q)
+
+#看 container log
+docker logs -f &lt;imageID&gt;|&lt;imageName&gt;
+
+#連到 container 最後執行
+#當多個窗口同時 attach 到同一個容器的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了
+docker attach &lt;imageID&gt;|&lt;imageName&gt;
+
+#進去 container 執行 bash
+docker exec -it &lt;imageID&gt;|&lt;imageName&gt; bash
+
+#commit
+docker commit -m 'message' -a 'author'
+
+#建立 tag
+docker tag &lt;imageID&gt; &lt;tag&gt;
+
+#上傳 images
+docker push
+</code></pre>
+
+<p><img src="https://blog.fntsr.tw/wp-content/uploads/2014/12/Docker-Command-Diagram.png" alt="" /></p>
+
+<h2>Dockerfile</h2>
+
+<p><a href="https://philipzheng.gitbooks.io/docker_practice/content/dockerfile/instructions.html">Dockerfile 指令</a></p>
+
+<pre><code class="ruby">#一般會建議放置 Dockerfile 的目錄為空目錄。也可以透過 .dockerignore 檔案（每一行新增一條排除模式：exclusion patterns）來讓 Docker 忽略路徑下的目錄和檔案。
+docker build -t &lt;tagName&gt; .
+
+#這樣也可以，只是不指定名稱
+docker build .
+</code></pre>
+
+<h3>FROM</h3>
+
+<p>一定要有，只能有一個 FROM，基於某個已存在的 image 進行二次開發。</p>
+
+<pre><code class="ruby">FROM ubuntu:14.04.2
+</code></pre>
+
+<h3>MAINTAINER</h3>
+
+<p>指定維護者訊息。</p>
+
+<pre><code class="ruby">MAINTAINER &lt;name | email&gt;
+</code></pre>
+
+<h3>RUN</h3>
+
+<p>對映像檔執行相對應的命令。每運行一條 RUN 指令，映像檔就會新增一層，主要用來安裝 packages、設定系統環境等</p>
+
+<pre><code class="ruby">RUN &lt;command&gt; 或 RUN ["executable", "param1", "param2"]
+</code></pre>
+
+<p>前者將在 shell 終端中運行命令，即 /bin/sh -c；後者則使用 exec 執行。指定使用其它終端可以透過第二種方式實作，例如 RUN [&ldquo;/bin/bash&rdquo;, &ldquo;-c&rdquo;, &ldquo;echo hello&rdquo;]。</p>
+
+<p>每條 RUN 指令將在當前映像檔基底上執行指定命令，並產生新的映像檔。當命令較長時可以使用 \ 來換行。</p>
+
+<h3>EXPOSE</h3>
+
+<p>設定 Docker 伺服器容器對外的埠號，供外界使用。在啟動容器時需要透過 -P，Docker 會自動分配一個埠號轉發到指定的埠號（當然也可以自己給，例如 -p 1055:80)</p>
+
+<pre><code class="ruby">EXPOSE 80
+</code></pre>
+
+<h3>ADD</h3>
+
+<p>該命令將複製指定的 <src> 到容器中的 <dest>。 其中 <src> 可以是 Dockerfile 所在目錄的相對路徑；也可以是一個 URL；還可以是一個 tar 檔案（其複製後會自動解壓縮）。</p>
+
+<pre><code class="ruby">ADD &lt;src&gt; &lt;dest&gt;
+ADD text.conf /etc/apache2/test.conf
+</code></pre>
+
+<h3>USER</h3>
+
+<p>切換使用者身份，Docker 預設使用者是 root，但若不需要，建議切換使用者身份，畢竟 root 權限太大了，使用上有安全的風險。</p>
+
+<pre><code class="ruby">USER Leon
+</code></pre>
+
+<h3>VOLUME</h3>
+
+<p>建立一個可以從本地端或其他容器掛載的掛載點，一般用來存放資料庫和需要保存的資料等。</p>
+
+<pre><code class="ruby">VOLUME ["/data"]
+</code></pre>
+
+<h3>WORKDIR</h3>
+
+<p>用來切換工作目錄，Docker 預設工作目錄是在根目錄，只有 RUN 能執行 cd 指令切換目錄，只作用在當下的 RUN，也就是說每一個 RUN 都是獨立進行的。如果想讓其他指令在指定的目錄下執行，就得靠 WORKDIR。WORKDIR 的變更影響是持續的，不用每個指令前都使用一次 WORKDIR</p>
+
+<pre><code class="ruby">WORKDIR /a
+WORKDIR b
+WORKDIR c
+RUN pwd
+
+#則最終路徑為 /a/b/c
+</code></pre>
+
+<h3>ENV</h3>
+
+<p>指定一個環境變數，會被後續 RUN 指令使用，並在容器運行時保持。</p>
+
+<pre><code class="ruby">ENV &lt;key&gt; &lt;value&gt;
+
+ENV PG_MAJOR 9.3
+ENV PG_VERSION 9.3.4
+RUN curl -SL http://example.com/postgres-$PG_VERSION.tar.xz | tar -xJC /usr/src/postgress &amp;&amp; …
+ENV PATH /usr/local/postgres-$PG_MAJOR/bin:$PATH
+</code></pre>
+
+<h3>COPY</h3>
+
+<p>能將本機端的檔案或目錄，複製到 image 內。</p>
+
+<pre><code class="ruby">#複製本地端的 &lt;src&gt;（為 Dockerfile 所在目錄的相對路徑）到容器中的 &lt;dest&gt;。
+COPY &lt;src&gt; &lt;dest&gt;
+COPY test.rb ./
+</code></pre>
+
+<h3>ENTRYPOINT</h3>
+
+<p>指定 Docker image 運行成 instance (也就是 Docker container) 時，要執行的指令或檔案。在這個範本中，test.rb 就是要執行的檔案。</p>
+
+<pre><code class="ruby">ENTRYPOINT ["./test.rb"] 
+</code></pre>
+
+<h3>CMD</h3>
+
+<p>指定啟動容器時執行的命令，每個 Dockerfile 只能有一條 CMD 命令。如果指定了多條命令，只有最後一條會被執行。
+如果使用者啟動容器時候指定了運行的命令，則會覆蓋掉 CMD 指定的命令。</p>
+
+<pre><code class="ruby">#使用 exec 執行，推薦使用
+CMD ["executable","param1","param2"] 
+#在 /bin/sh 中執行，使用在給需要互動的指令
+#提供給 ENTRYPOINT 的預設參數
+CMD command param1 param2 CMD ["param1","param2"]
+</code></pre>
+
+<h3>範例</h3>
+
+<pre><code class="ruby">FROM ubuntu:latest
+
+RUN apt-get update -qq &amp;&amp; apt-get install -y aptitude git imagemagick curl vim bash-completion htop nodejs mysql-client libmysqlclient-dev
+
+RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+RUN \curl -sSL https://get.rvm.io | bash -s stable
+RUN /bin/bash -l -c "rvm install 2.1.5"
+RUN /bin/bash -l -c "gem install bundler -v 1.10.5 --no-ri --no-rdoc"
+
+ENV APP_ROOT /yourator
+
+RUN mkdir $APP_ROOT
+WORKDIR $APP_ROOT
+ADD . $APP_ROOT
+RUN /bin/bash -l -c "bundle install"
+</code></pre>
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a></li>
+<li><a href="https://philipzheng.gitbooks.io/docker_practice/content/index.html">Docker —— 從入門到實踐</a></li>
+<li><a href="http://www.cc.ntu.edu.tw/chinese/epaper/0036/20160321_3611.html">淺談輕量化的虛擬技術 - Docker容器</a></li>
+<li><a href="http://cepave.com/how-to-write-dockerfile/">撰寫一份符合需求的 Dockerfile</a></li>
+<li><a href="http://bonze.tw/%E4%BC%BA%E6%9C%8D%E5%99%A8%E7%A0%94%E7%A9%B6%E5%AE%A4/dockerfile%E7%B0%A1%E5%96%AE%E4%BB%8B%E7%B4%B9">Dockerfile簡單介紹</a></li>
+<li><a href="https://segmentfault.com/q/1010000000417103">Dockerfile裡指定執行命令用ENTRYPOING和用CMD有何不同？</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Web Server / Application Server / Rack / Process / Thread]]></title>
@@ -99,6 +369,7 @@
 <li><a href="https://www.rails365.net/articles/rack-jie-shao-yu-yuan-li">rack介紹與原理</a></li>
 <li><a href="https://www.rails365.net/articles/rack-yu-zhong-jian-jian">rack與中間件</a></li>
 <li><a href="http://rails.ruby.tw/rails_on_rack.html">Rails on Rack</a></li>
+<li><a href="http://gabebw.com/blog/2015/08/10/advanced-rack">Advanced Rack</a></li>
 </ul>
 
 
@@ -168,6 +439,13 @@
 
 <blockquote><p>thread safe: 一個 process 有多個 thread 在跑，因為變數是共享的，所以可能造成對一個變數，做重複的操作，導致錯誤的結果</p></blockquote>
 
+<ul>
+<li><a href="http://mp.weixin.qq.com/s?__biz=MzI0NjIzNDkwOA==&amp;mid=2247483676&amp;idx=1&amp;sn=1df45612132f3f96037b04d62f72d0cf&amp;scene=0">Ruby 中的多进程与多线程</a></li>
+<li><a href="https://read01.com/GoNKk4.html">Ruby 中的多進程與多線程</a></li>
+<li><a href="http://aftcast.pixnet.net/blog/post/23786004-thread-safe%E7%9A%84%E7%90%86%E8%A7%A3%E8%88%87%E5%88%86%E6%9E%90">Thread-Safe的理解與分析</a></li>
+</ul>
+
+
 <h1>GIL/GVL</h1>
 
 <blockquote><p>MRI裡有個東西叫全局解釋器鎖(global interpreter lock)。這個鎖環繞著Ruby程式碼的執行。即是說在一個多執行緒的上下文中，在任何時候只有一個執行緒可以執行Ruby程式碼。 因此，假如一台8核機器上跑著8個執行緒，在特定的時間點上也只有一個執行緒和一個核心在忙碌。GIL一直保護著Ruby內核，以免競爭條件造成數據混亂。把警告和優化放一邊</p></blockquote>
@@ -189,6 +467,7 @@
 <li><a href="http://www.justinweiss.com/articles/a-web-server-vs-an-app-server/">A Web Server vs. An App Server</a></li>
 <li><a href="http://stackoverflow.com/questions/4113299/ruby-on-rails-server-options">Ruby on Rails Server options [closed]</a> <a href="https://ruby-china.org/topics/25276">Ruby 伺服器對比</a></li>
 <li><a href="https://ruby-china.org/topics/10832">Ruby 的多執行緒應用伺服器介紹</a></li>
+<li><a href="http://blog.mz026.rocks/20160917/rails-connection-leak">大戰 Rails Connection Leak</a></li>
 </ul>
 
 ]]></content>
@@ -267,7 +546,7 @@ group  = r-- = 4+0+0 = 4
 others = r-- = 4+0+0 = 4
 </code></pre>
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#97;&#105;&#108;&#116;&#x6f;&#58;&#x64;&#x65;&#112;&#x6c;&#x6f;&#121;&#x40;&#x31;&#x32;&#51;&#x2e;&#49;&#x32;&#x33;&#x2e;&#49;&#x32;&#x2e;&#x31;">&#100;&#101;&#112;&#108;&#x6f;&#121;&#64;&#x31;&#50;&#51;&#46;&#49;&#50;&#x33;&#46;&#x31;&#x32;&#x2e;&#49;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#x3a;&#100;&#101;&#x70;&#108;&#x6f;&#x79;&#x40;&#49;&#50;&#51;&#46;&#x31;&#x32;&#x33;&#46;&#49;&#50;&#x2e;&#x31;">&#x64;&#x65;&#x70;&#x6c;&#x6f;&#121;&#x40;&#x31;&#50;&#x33;&#46;&#x31;&#x32;&#51;&#46;&#x31;&#50;&#x2e;&#49;</a> 就連進去囉!!</p>
 
 <h1>設定快捷鍵</h1>
 
