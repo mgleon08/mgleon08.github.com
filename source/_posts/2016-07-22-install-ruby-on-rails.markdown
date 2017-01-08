@@ -446,8 +446,8 @@ npm config get prefix
 npm install
 
 #安裝套件並儲存在 package.json 中
-npm install <package name> --save #套件發行時宣告的相依套件
-npm install <package name> --save-dev #開發環境開發時需要的套件
+npm install <package name> --save #用於上線時必要的套件(react, bootstrap…)，會更新到package.json裡的Dependencies(上線依賴)
+npm install <package name> --save-dev #用來安裝開發時用的工具(ex babel, webpack, webpack-dev-server…)，會更新到package.json裡的devDependencies(開發依賴)
 ```
 
 ###package.json
@@ -475,6 +475,7 @@ npm init
 ```
 
 * [Npm 套件管理 & 常用開發工具介紹](http://www.slideshare.net/wantingj/npm-46801372)
+* [Npm All cli](https://docs.npmjs.com/cli/access)
 
 #<span id="sublime">Sublime Text</span>
 

@@ -1,0 +1,173 @@
+---
+layout: post
+title: "Rails with GraphQL API"
+date: 2016-12-16 17:31:16 +0800
+comments: true
+categories: rails graphql
+---
+
+GraphQL 是 facebook 所開放的查詢語言
+
+<!-- more -->
+
+>GraphQl is a query language for your API
+
+* GraphQL 是 facebook 所開放的查詢語言，可以透過定義的schema系統將複雜的邏輯拆分成細粒度的資料結構，讓前端能夠透過GraphQL提供的類型查詢系統，自由定製請求數據的能力。
+* GraphQL 本身適合對數據力度小，需求變更頻繁的場景，與 RESTful 相反
+
+###GraphQL Look Like
+
+```ruby
+{
+  user(id: 1) {
+    id,
+    name,
+    friends {
+      name
+    }
+  }
+}
+```
+
+###Response
+
+```ruby
+{
+  "user" : {
+    "id": 1,
+    "name": "Marc-Andre Giroux",
+    "friends": [
+      {
+        "name": "Joe Bro"
+      },
+      {
+        "name": "Johny Yolo"
+      }
+    ]
+  }
+}
+```
+
+#Rails with GraphQL API
+
+[graphql-ruby](https://github.com/rmosolgo/graphql-ruby)
+
+主要有五個步驟
+
+* 新增 ruby gem [graphql-ruby](https://github.com/rmosolgo/graphql-ruby)
+* Declare Query Type
+* Build a Schema
+* Add GraphQL end_point
+
+
+###Ruby gem
+
+```ruby
+gem 'graphql'
+```
+
+```ruby
+$ bundle install
+```
+
+###Declare Query Type
+
+All Types (`!` marks a field as "non-null")
+
+* string
+* int
+* float
+* boolean
+* ID
+
+```ruby
+# app/graph/types/post_type.rb
+PostType = GraphQL::ObjectType.define do
+  name "Post"
+  description "A blog post"
+  # `!` marks a field as "non-null"
+  field :id, !types.ID
+  field :title, !types.String
+  field :body, !types.String
+  field :comments, types[!CommentType]
+end
+```
+
+```ruby
+# app/graph/types/comment_type.rb
+CommentType = GraphQL::ObjectType.define do
+  name "Comment"
+  field :id, !types.ID
+  field :body, !types.String
+  field :created_at, !types.String
+end
+```
+
+Make sure you add this line to your application.rb for rails to autoload the types
+
+```ruby
+#config/application.rb
+config.autoload_paths << Rails.root.join('app', 'graph')
+config.autoload_paths << Rails.root.join('app', 'graph', 'types')
+```
+
+###Build a Schema
+
+```ruby
+#app/graph/types/query_type.rb
+#query root
+
+QueryType = GraphQL::ObjectType.define do
+  name "Query"
+  description "The query root of this schema"
+
+  field :post do
+    type PostType
+    argument :id, !types.ID #argument 可以根據哪些欄位去查詢
+    description "Find a Post by ID"
+    resolve ->(obj, args, ctx) { Post.find(args["id"]) }
+  end
+end
+```
+
+```ruby
+# app/graph/schema.rb
+Schema = GraphQL::Schema.define do
+  query QueryType
+end
+```
+
+###Router
+
+```ruby
+#config/routes.rb
+resources :queries, via: [:post, :options]
+```
+
+```ruby
+# app/controller/queries_controller.rb
+class QueriesController < ApplicationController
+  def create
+    query_string = params[:query]
+    query_variables = params[:variables] || {}
+    result = BlogSchema.execute(query_string, variables: query_variables)
+    render json: result
+  end
+end
+```
+
+###Execute queries
+
+```ruby
+curl -XPOST -d 'query={ blog(id: 1) { title content }}' http://localhost:3000/queries
+```
+
+* [graphql.org](http://graphql.org/)
+* [GraphiQL](http://graphql-swapi.parseapp.com/)
+* [graphql-ruby gem](https://github.com/rmosolgo/graphql-ruby)
+* [15 - 夏俊晨 - GraphQL on Rails (video)](https://www.youtube.com/watch?v=tmy4oZ_sVmk)
+* [GraphQL on Rails](https://speakerdeck.com/onlimii/graphql-on-rails)
+* [Getting started with Rails and GraphQL](http://mgiroux.me/2015/getting-started-with-rails-graphql-relay/)
+* [GraphQL on Rails(一) GraphQL介紹](http://www.jianshu.com/p/4355bd92c216)
+* [GraphQL on Rails(二) GraphQL介紹](http://www.jianshu.com/p/f7e435a17960)
+* [GraphQL on Rails(三) GraphQL介紹](http://www.jianshu.com/p/f9f20602af5a)

@@ -154,6 +154,8 @@ s   ：取代，s 的動作可以搭配正規表示法。例如 1,20s/old/new/g 
 * [[Regex] 進階群組建構](https://dotblogs.com.tw/johnny/2010/03/02/13855)
 * [Reglaur Expression 正規表達式介紹](http://wildsnote.blogspot.tw/2012/03/reglaur-expression.html)
 * [regexper](https://regexper.com/)
+* [regex101](https://regex101.com/)
+* [regexhub](https://projects.lukehaas.me/regexhub/)
 
 練習：  
 

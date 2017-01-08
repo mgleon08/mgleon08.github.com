@@ -233,13 +233,16 @@ Blog.includes(:posts).where(name: 'Blog 1').references(:posts)
 ![](http://www.codeproject.com/KB/database/Visual_SQL_Joins/Visual_SQL_JOINS_orig.jpg)
 
 官方資料：  
-[Active Record Query Interface](http://guides.rubyonrails.org/active_record_querying.html)  
-[Active Record 查詢](http://rails.ruby.tw/active_record_querying.html)
+
+* [Active Record Query Interface](http://guides.rubyonrails.org/active_record_querying.html)  
+* [Active Record 查詢](http://rails.ruby.tw/active_record_querying.html)
 
 參考資料：  
-[網站效能](https://ihower.tw/rails4/performance.html)  
-[ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)  
-[Rails使用 include 和 join 避免 N+1 query](http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query)  
-[preload, eager_load, includes, references, and joins in Rails](http://blog.ifyouseewendy.com/blog/2015/11/11/preload-eager_load-includes-references-joins/)  
-[Preload, Eagerload, Includes and Joins](http://blog.bigbinary.com/2013/07/01/preload-vs-eager-load-vs-joins-vs-includes.html)  
-[3 ways to do eager loading (preloading) in Rails 3 & 4](http://blog.arkency.com/2013/12/rails4-preloading/)
+
+* [網站效能](https://ihower.tw/rails4/performance.html)  
+* [ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)  
+* [Rails使用 include 和 join 避免 N+1 query](http://motion-express.com/blog/20141028-rails-include-join-avoid-n-1-query)  
+* [preload, eager_load, includes, references, and joins in Rails](http://blog.ifyouseewendy.com/blog/2015/11/11/preload-eager_load-includes-references-joins/)  
+* [Preload, Eagerload, Includes and Joins](http://blog.bigbinary.com/2013/07/01/preload-vs-eager-load-vs-joins-vs-includes.html)  
+* [3 ways to do eager loading (preloading) in Rails 3 & 4](http://blog.arkency.com/2013/12/rails4-preloading/)  
+* [Eager Loading](http://jocoomadao.logdown.com/posts/189846-laravel-eloquent-orm-part-two)

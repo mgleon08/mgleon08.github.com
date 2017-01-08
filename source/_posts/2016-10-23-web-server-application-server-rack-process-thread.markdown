@@ -62,6 +62,7 @@ categories: server backend
 * [rack介紹與原理](https://www.rails365.net/articles/rack-jie-shao-yu-yuan-li)
 * [rack與中間件](https://www.rails365.net/articles/rack-yu-zhong-jian-jian)
 * [Rails on Rack](http://rails.ruby.tw/rails_on_rack.html)
+* [Advanced Rack](http://gabebw.com/blog/2015/08/10/advanced-rack)
 
 Video：
 
@@ -107,6 +108,10 @@ Video：
 
 > thread safe: 一個 process 有多個 thread 在跑，因為變數是共享的，所以可能造成對一個變數，做重複的操作，導致錯誤的結果
 
+* [Ruby 中的多进程与多线程](http://mp.weixin.qq.com/s?__biz=MzI0NjIzNDkwOA==&mid=2247483676&idx=1&sn=1df45612132f3f96037b04d62f72d0cf&scene=0)
+* [Ruby 中的多進程與多線程](https://read01.com/GoNKk4.html)
+* [Thread-Safe的理解與分析](http://aftcast.pixnet.net/blog/post/23786004-thread-safe%E7%9A%84%E7%90%86%E8%A7%A3%E8%88%87%E5%88%86%E6%9E%90)
+
 #GIL/GVL
 
 > MRI裡有個東西叫全局解釋器鎖(global interpreter lock)。這個鎖環繞著Ruby程式碼的執行。即是說在一個多執行緒的上下文中，在任何時候只有一個執行緒可以執行Ruby程式碼。 因此，假如一台8核機器上跑著8個執行緒，在特定的時間點上也只有一個執行緒和一個核心在忙碌。GIL一直保護著Ruby內核，以免競爭條件造成數據混亂。把警告和優化放一邊
@@ -125,3 +130,4 @@ Video：
 * [A Web Server vs. An App Server](http://www.justinweiss.com/articles/a-web-server-vs-an-app-server/)
 * [Ruby on Rails Server options [closed]](http://stackoverflow.com/questions/4113299/ruby-on-rails-server-options) [Ruby 伺服器對比](https://ruby-china.org/topics/25276) 
 * [Ruby 的多執行緒應用伺服器介紹](https://ruby-china.org/topics/10832)
+* [大戰 Rails Connection Leak](http://blog.mz026.rocks/20160917/rails-connection-leak)

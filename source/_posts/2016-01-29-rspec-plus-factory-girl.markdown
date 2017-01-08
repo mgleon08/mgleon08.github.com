@@ -846,8 +846,7 @@ Gem：
 * [RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)  
 * [[RSpec] subject , expect , context, is_expected, be_xxx](http://blog.xdite.net/posts/2016/06/10/rspec-subject-expect-context-is-expected-be)  
 * [[RSpec] 進階測試系列概念](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-0)  
-* [Rails Race Condition Test With RSpec
-](http://blog.mz026.rocks/20160821/rails-race-condition-test-rspec)
+* [Rails Race Condition Test With RSpec](http://blog.mz026.rocks/20160821/rails-race-condition-test-rspec)
 * [RSpec全套測試環境搭建從零入門](https://www.rails365.net/articles/rspec)
 
 RailsPacific： 
