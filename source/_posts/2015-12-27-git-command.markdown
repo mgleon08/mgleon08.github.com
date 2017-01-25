@@ -272,6 +272,25 @@ git bisect bad  079944e6  #設定壞的 commit SHA1
 git bisect reset #結束
 ```
 
+
+#git format-patch
+
+git 製作成 patch 檔 然後 merge
+
+```ruby
+#最新的n個 commit
+git format-patch -n
+
+#清除之前的訊息
+git am --abort
+
+#上patch
+git am xxx.patch
+git am *.patch	
+```
+
+[【Git】使用 format-patch 將 commit 打包成檔案 Use format-patch to carry commit](http://chris800731.blogspot.tw/2013/08/git-format-patch-commit-use-format.html)
+
 #其他
 ###gitkeep
 * `.gitkeep` 空目錄不會被 commit，必要時在目錄裡放 `.gitkeep`。
@@ -338,7 +357,10 @@ git fliter-branch --tree--filter "rm -f config/password.txt"
 #alias
 自己設定的一些 alias
 
+可以建立新的檔案 `.aliases`, 並在 `.zshrc` 加上 `source ~/.aliases`
+
 ```
+#base
 alias g='git'
 
 alias grs='git reset'

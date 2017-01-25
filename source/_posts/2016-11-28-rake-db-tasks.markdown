@@ -17,6 +17,9 @@ rake db:create
 # 刪除整個 database
 rake db:drop
 
+# 查看所有 migration 的狀態 (up 已執行過，down 尚未執行。)
+rake db:migrate:status
+
 # 還原已跑最新的 migration
 rake db:rollback
 
@@ -52,6 +55,12 @@ rake db:setup
 
 # does db:drop, db:create, db:schema:load
 rake db:reset
+
+# clean assets
+RAILS_ENV=production bundle exec rake assets:clean
+
+# assets precompile
+RAILS_ENV=production bundle exec rake assets:precompile
 ```
 
 相關 gem

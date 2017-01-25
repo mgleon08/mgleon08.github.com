@@ -464,7 +464,7 @@ rspec --tag focus
 
 ###matchers
 
-* [rspec](https://relishapp.com/rspec/)
+* [rspec built-in-matchers](https://www.relishapp.com/rspec/rspec-expectations/docs/built-in-matchers)
 
 ###include
 

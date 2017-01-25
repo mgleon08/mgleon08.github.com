@@ -487,6 +487,7 @@ npm init
 All Autocomplete
 AutoFileName
 Alignment
+Babel
 Color Highlighter
 CovertToUTF8
 Emmet
@@ -494,38 +495,63 @@ GitGutter
 SideBarEnhancement
 BracketHighlighter
 SublimeCodeIntel
+BeautifyRuby
 PrettyRuby
 PrettyJson
 PrettyYaml
+AdvancedNewFile
+View In Browser
+Browser Refresh
+JSHint
 
 #theme
 Spacegray
+Material
 ```
-[Spacegray](https://github.com/kkga/spacegray)
+* [Spacegray](https://github.com/kkga/spacegray)
+* [Material](https://github.com/equinusocio/material-theme)
 
 Prefrences > Setting-User
 
 ```ruby
 {
-	"font_size": 22,
-	"hightlight_line": true,
-	"tab_size": 2,
-	"translate_tabs_to_spaces": true,
-	"trim_trailing_white_space_on_save": true,
+	"bold_folder_labels": true,
+	"caret_style": "phase",
+	"color_scheme": "Packages/Theme - Spacegray/base16-eighties.dark.tmTheme",
+	"fade_fold_buttons": false,
+	"font_size": 20,
+	"highlight_line": true,
 	"ignored_packages":
 	[
 		"Vintage"
-	]
+	],
+	"line_padding_bottom": 1,
+	"line_padding_top": 1,
+	"spacegray_fileicons": true,
+	"tab_size": 2,
+	"theme": "Spacegray Eighties.sublime-theme",
+	"translate_tabs_to_spaces": true,
+	"trim_trailing_white_space_on_save": true
 }
+
+
+#theme setting
+"theme": "Spacegray Eighties.sublime-theme",
+"spacegray_fileicons": true
 ```
 
 建立快速鍵
 
 ```ruby
-{ "keys": ["super+shift+h"], "command": "pretty_ruby_format" }
+[
+  { "keys": ["super+shift+k", ], "command": "pretty_ruby_format" },
+  { "keys": ["super+shift+h"], "command": "htmlprettify" },
+  { "keys": ["ctrl+super+k"],  "command": "beautify_ruby" }
+]
 ```
 
 設定快速command `subl .`
+[OS X Command Line](https://www.sublimetext.com/docs/2/osx_command_line.html)
 
 ```ruby
 #建立 bin 資料夾，建立軟連結到指定的檔案
@@ -578,4 +604,4 @@ export PATH="$HOME/bin:$PATH"
 * [Ruby on Rails Mac 安裝教學](https://github.com/yuyueugene84/ntu_ror_training_course/blob/master/installation_mac.md)  
 * [安裝 Rails 開發環境](https://ihower.tw/rails4/installation.html)
 * [在 Mac 上裝 NVM, RVM 等跑 Gulp, Grunt, Bower 環境](https://tenten.co/blog/install-gulp-grunt-bower-sass-susy-on-mac-with-nvm-rvm/)
-* [node版本管理工具nvm-Mac下安装及使用](https://segmentfault.com/a/1190000004404505)
+* [node版本管理工具nvm-Mac下安装及使用](https://segmentfault.com/a/1190000004404505)subl .

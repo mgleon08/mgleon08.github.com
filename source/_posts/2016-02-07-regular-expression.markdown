@@ -152,10 +152,11 @@ s   ：取代，s 的動作可以搭配正規表示法。例如 1,20s/old/new/g 
 
 * [正規表示式 Regular Expression](https://atedev.wordpress.com/2007/11/23/%E6%AD%A3%E8%A6%8F%E8%A1%A8%E7%A4%BA%E5%BC%8F-regular-expression/)
 * [[Regex] 進階群組建構](https://dotblogs.com.tw/johnny/2010/03/02/13855)
-* [Reglaur Expression 正規表達式介紹](http://wildsnote.blogspot.tw/2012/03/reglaur-expression.html)
+* [Reglaur Expression 正規表達式介紹](https://www.latech.tw/2012/03/reglaur-expression.html)
 * [regexper](https://regexper.com/)
 * [regex101](https://regex101.com/)
 * [regexhub](https://projects.lukehaas.me/regexhub/)
+* [regexr](http://regexr.com/)
 
 練習：  
 
