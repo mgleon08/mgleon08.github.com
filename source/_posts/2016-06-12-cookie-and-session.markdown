@@ -83,18 +83,23 @@ require 'rack'cookie = "BAh7CUkiD3Nlc3Npb25faWQGOgZFRkkiJ(...)"Rack::Session::
 ```
 
 官方文件：  
-[session](http://rails.ruby.tw/action_controller_overview.html#session)  
-[cookie](http://rails.ruby.tw/action_controller_overview.html#cookies)  
+
+* [session](http://rails.ruby.tw/action_controller_overview.html#session)  
+* [cookie](http://rails.ruby.tw/action_controller_overview.html#cookies)  
 [RailsGuide](http://guides.rubyonrails.org/security.html#sessions)  
 
 參考文件：  
-[Cookie 和 Session 的神秘關係](http://blog.andikan.me/2012/10/03/cookie-and-session/)  
-[Action Controller - 控制 HTTP 流程](https://ihower.tw/rails4/actioncontroller.html)  
-[Web 技術中的 Session 是什麼？](http://fred-zone.blogspot.tw/2014/01/web-session.html)  
-[session / cookie 解釋](http://railsfun.tw/t/session-cookie/380)  
-[Rails - Sessions, Cookies and Flash](http://lucaswu.logdown.com/posts/735841-rails-sessions-cookies-and-flash)
-[[译] Rails Sessions 是如何工作的？](http://grantcss.com/blog/2015/03/23/how-rails-sessions-work/)  
-[cookie原理与实现(rails篇)](http://www.rails365.net/articles/cookie-yuan-li-yu-shi-xian-rails-pian)  
-[session原理与实现(rails篇)](http://www.rails365.net/articles/session-yuan-li-yu-shi-xian-rails-pian)  
-[COOKIE與SESSION比較](https://read01.com/NyARK.html)  
-[第 8 章 登录和退出](http://railstutorial-china.org/rails42/chapter8.html#logging-in)
+
+* [Cookie 和 Session 的神秘關係](http://blog.andikan.me/2012/10/03/cookie-and-session/)  
+* [Action Controller - 控制 HTTP 流程](https://ihower.tw/rails4/actioncontroller.html)  
+* [Web 技術中的 Session 是什麼？](http://fred-zone.blogspot.tw/2014/01/web-session.html)  
+* [session / cookie 解釋](http://railsfun.tw/t/session-cookie/380)  
+* [Rails - Sessions, Cookies and Flash](http://lucaswu.logdown.com/posts/735841-rails-sessions-cookies-and-flash)
+* [[译] Rails Sessions 是如何工作的？](http://grantcss.com/blog/2015/03/23/how-rails-sessions-work/)  
+* [cookie原理与实现(rails篇)](http://www.rails365.net/articles/cookie-yuan-li-yu-shi-xian-rails-pian)  
+* [session原理与实现(rails篇)](http://www.rails365.net/articles/session-yuan-li-yu-shi-xian-rails-pian)  
+* [COOKIE與SESSION比較](https://read01.com/NyARK.html)  
+* [第 8 章 登录和退出](http://railstutorial-china.org/rails42/chapter8.html#logging-in)
+* [详说 Cookie, LocalStorage 与 SessionStorage | 咀嚼之味](http://jerryzou.com/posts/cookie-and-web-storage/)
+* [Cache / Session / Cache 簡單說](https://medium.com/@renhades/%E7%B0%A1%E5%96%AE%E8%AA%AA-cache-session-cache-4de6f3c77aa1#.qdbr3vq94)
+* [九种浏览器端缓存机制知多少 | ouvenzhang的博客](http://jixianqianduan.com/frontend-javascript/2015/12/28/nine-browser-cache-methods.html)

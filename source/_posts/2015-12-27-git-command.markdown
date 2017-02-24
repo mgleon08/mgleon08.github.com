@@ -103,6 +103,9 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 * `git branch [branch]` 建立一個新的 branch。
 * `git branch -m [oldbranch] [newbranch]` 修改分支的名稱， `-M` 強制。
 * `git branch -d [branchname]` 刪除 branch，未合併的無法刪除，必須改用 `-D` 強制刪除。
+* `git branch --merged maste` lists branches merged into master
+* `git branch --merged` lists branches merged into HEAD (i.e. tip of current branch)
+* `git branch --no-merged` lists branches that have not been merged
 
 ###checkout
 * `git checkout [branch]` 切換到該 branch。
@@ -181,7 +184,6 @@ exec   = 執行一條指令
 * `git pull -u origin master` 將遠端資料庫拉下來，並且合併，相當於 `git fetch` + `git merge`。
 
 >加上 `-u` 後續就只要 `git push` 和 `git pull` 即可。
-
 
 * `git push --force` 可將 github 上的 `commit` 全部覆蓋掉。
 * `git pull --rebase origin [brance]` pull 遠端用 rebase 的方式。
@@ -446,25 +448,31 @@ alias glog='git log --oneline --decorate --color --graph'
 ```
 
 官方文件：  
-[Git Pro](http://git-scm.com/book/zh-tw/v1)  
+
+* [Git Pro](http://git-scm.com/book/zh-tw/v1)  
 
 參考資料：  
-[Git 版本控制系統](https://ihower.tw/git/)  
-[30 天精通 Git 版本控管](https://github.com/doggy8088/Learn-Git-in-30-days)  
-[連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)  
-[好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)  
-[Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)  
-[Git 風格指南](https://github.com/JuanitoFatas/git-style-guide)  
-[How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/)
+
+* [Git 版本控制系統](https://ihower.tw/git/)  
+* [30 天精通 Git 版本控管](https://github.com/doggy8088/Learn-Git-in-30-days)  
+* [連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)  
+* [好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)  
+* [Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)  
+* [Git 風格指南](https://github.com/JuanitoFatas/git-style-guide)  
+* [How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/)
 
 練習：  
-[codeschool](https://try.github.io/levels/1/challenges/1)  
-[Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)  
-[learnGitBranching](http://pcottle.github.io/learnGitBranching/)  
 
-其他技巧：  
-[使用 git rebase 避免無謂的 merge](https://ihower.tw/blog/archives/3843)  
-[Git flow 開發流程](https://ihower.tw/blog/archives/5140)  
-[A successful Git branching model](http://nvie.com/posts/a-successful-git-branching-model/)  
-[git-flow 備忘清單](http://danielkummer.github.io/git-flow-cheatsheet/index.zh_TW.html)  
-[The magical (and not harmful) rebase](http://jeffkreeftmeijer.com/2010/the-magical-and-not-harmful-rebase/)
+* [codeschool](https://try.github.io/levels/1/challenges/1)  
+* [Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)  
+* [learnGitBranching](http://pcottle.github.io/learnGitBranching/)  
+
+其他技巧： 
+ 
+* [使用 git rebase 避免無謂的 merge](https://ihower.tw/blog/archives/3843)  
+* [Git flow 開發流程](https://ihower.tw/blog/archives/5140)  
+* [A successful Git branching model](http://nvie.com/posts/a-successful-git-branching-model/)  
+* [git-flow 備忘清單](http://danielkummer.github.io/git-flow-cheatsheet/index.zh_TW.html)  
+* [The magical (and not harmful) rebase](http://jeffkreeftmeijer.com/2010/the-magical-and-not-harmful-rebase/)
+* [How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/#seven-rules)
+* [A guide to using Github Pages](https://www.thinkful.com/learn/a-guide-to-using-github-pages/)

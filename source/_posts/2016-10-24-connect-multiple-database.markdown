@@ -44,3 +44,7 @@ class Test::Teacher < Test::Base
   belongs_to :course, class_name: "Test::Course"
 end
 ```
+
+其他文件:
+
+* [ActiveRecord in pure Ruby（+ API server）](http://railsfun.tw/t/activerecord-in-pure-ruby-api-server/161)

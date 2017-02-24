@@ -340,3 +340,4 @@ Babel是一個廣泛使用的轉碼器，可以將ES6程式碼轉為ES5程式碼
 其他參考資料
 
 * [終於弄懂了各種前端build工具](http://www.yidianzixun.com/article/0EmFXyTl)
+* [一看就懂的前端開發環境建置入門教學](http://blog.kdchang.cc/2016/11/05/how-to-establish-modern-front-end-development-environment-tutorial/)

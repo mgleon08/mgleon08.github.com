@@ -86,6 +86,13 @@ or
 Foo.bar('hello')
 ```
 
+###另一個跟 include 類似的 prepend
+
+* include 會將 module 加入到 class 的後面
+* prepend 會將 module 加入到 class 的前面
+
+[Ruby 理解 Ruby 中的 include 和 prepend](https://ruby-china.org/topics/28712)
+
 #require
 
 在 ruby 中，一開始用有很多 `method` 可以使用，是因為 ruby 將一些常用的都先載入進來。

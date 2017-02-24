@@ -47,8 +47,8 @@ scope :path => '/api/v1/', :module => "api_v1", :as => 'v1' do
 end
 ```
 
-* `:as` 增加 vi_path(相對路徑) 和 v1_url(絕對路徑)  
-* `: path `網址後面的 path 改成 `/api/v1/projects`   
+* `:as` 增加 v1_path(相對路徑) 和 v1_url(絕對路徑)  
+* `:path `網址後面的 path 改成 `/api/v1/projects`   
 * `:controller` 指定 controller 是哪個  
 * `:module` 指定 controller 對應到 ApiV1::ProjectsController
 * `params` 將 `:id` 改成指定的變數 ex `params: :api_id`

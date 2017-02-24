@@ -75,7 +75,25 @@ b.num
 #=> 2
 ```
 
-###instance_eval
+另外由於 class 也是 Class 的 instance 因此也可以直接去做定義，class method
+
+```ruby
+class A
+end
+
+A.instance_eval do
+	def hi
+		'hi'
+	end
+end
+
+A.hi
+#=> hi
+```
+
+
+## Example
+
 ```ruby
 class Tweet
   def initialize(user)
@@ -120,5 +138,7 @@ end
 ```
 
 參考文件：  
-[Understanding class_eval and instance_eval](http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php)  
-[eval](http://openhome.cc/Gossip/Ruby/Eval.html)
+
+* [Understanding class_eval and instance_eval](http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php)  
+* [eval](http://openhome.cc/Gossip/Ruby/Eval.html)
+* [instance_eval 與 class_eval 的區別](https://ruby-china.org/topics/2442)

@@ -303,6 +303,8 @@ possible commands are:
 ```
 
 * [rbenv 使用指南](https://ruby-china.org/wiki/rbenv-guide)  
+* [rbenv-gemset](https://github.com/jf/rbenv-gemset)
+* [Setting up and installing rbenv, ruby-build, rubies, rbenv-gemset, and bundler](https://gist.github.com/MicahElliott/2407918)
 
 #<span id="rubygems">RubyGems</span>
 
