@@ -6,6 +6,10 @@ comments: true
 categories: rails
 ---
 
+有時候會需要匯入 csv 的檔案, 就可以用 seed 的方式來處理
+
+<!-- more -->
+
 ```ruby
 #db/seeds/import_csv.rb
 require 'csv'
