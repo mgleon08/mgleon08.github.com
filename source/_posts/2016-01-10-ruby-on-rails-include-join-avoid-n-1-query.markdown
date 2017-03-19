@@ -90,7 +90,7 @@ User Load (0.4ms)  SELECT `users`.* FROM `users` INNER JOIN `skills` ON `skills`
 #joins和include的區別
 
 * include 主要是將其他關聯的 table 一起拉進來，後續查詢時，就不會再去查
-* joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做塞選
+* joins 則是將兩張表合成一張（必須id有對到），再透過欄位去做篩選
 * joins 為 inner join ， include 為 left outer join
 
 ```ruby

@@ -134,6 +134,15 @@ end
 #自訂錯誤類型
 
 ```ruby
+# config/initializers/extend_errors.rb
+
+Dir["#{Rails.root}/lib/errors/*.rb"].each do |file|
+  require file
+end
+```
+
+```ruby
+# lib/errors/what_error.rb
 module Errors
   class WhatError < StandardError
   end
