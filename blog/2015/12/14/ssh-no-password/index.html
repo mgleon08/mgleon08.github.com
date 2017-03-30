@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>遠端 SSH 免密碼登入(key) - Leon's Blogging</title>
+  <title>遠端 SSH 免密碼登入(key) 設定 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
@@ -102,7 +102,7 @@
   <header>
     
       
-        <h1 class="entry-title">遠端 SSH 免密碼登入(key)</h1>
+        <h1 class="entry-title">遠端 SSH 免密碼登入(key) 設定</h1>
       
     
     
@@ -137,12 +137,13 @@
 
 <h3>Step 1.</h3>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh root@123.123.12.1
-</span><span class='line'>sudo adduser --disabled-password deploy
-</span><span class='line'>sudo su deploy</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ssh</span> <span class="n">root</span><span class="err">@</span><span class="mi">123</span><span class="o">.</span><span class="mi">123</span><span class="o">.</span><span class="mi">12</span><span class="o">.</span><span class="mi">1</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">adduser</span> <span class="o">--</span><span class="n">disabled</span><span class="o">-</span><span class="n">password</span> <span class="n">deploy</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">su</span> <span class="n">deploy</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>首先會先連到遠端 server 開新的帳號
@@ -156,18 +157,19 @@
 </ul>
 
 
-<h3>Step 2.</h3>
+<h3>Step 2. (也可以參考下面的 快速複製 SSH public key 到遠端主機)</h3>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>ssh-keygen -t rsa
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ssh</span><span class="o">-</span><span class="n">keygen</span> <span class="o">-</span><span class="n">t</span> <span class="n">rsa</span>
 </span><span class='line'>
-</span><span class='line'>#Enter file in which to save the key (/root/.ssh/id_rsa): (不輸入，直接按Enter)
-</span><span class='line'>#Enter passphrase (empty for no passphrase): (不輸入，直接按Enter)
-</span><span class='line'>#Enter same passphrase again: (不輸入，直接按Enter)</span></code></pre></td></tr></table></div></figure>
+</span><span class='line'><span class="c1">#Enter file in which to save the key (/root/.ssh/id_rsa): (不輸入，直接按Enter)</span>
+</span><span class='line'><span class="c1">#Enter passphrase (empty for no passphrase): (不輸入，直接按Enter)</span>
+</span><span class='line'><span class="c1">#Enter same passphrase again: (不輸入，直接按Enter)</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>再（本機）輸入 <code>ssh-keygen -t rsa</code> 產生出 <code>id_rsa（private key）</code> 和 <code>id_rsa.pub （public key）</code></p>
@@ -184,52 +186,163 @@
 
 <h3>Step 3.</h3>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'> chmod 644 /home/deploy/.ssh/authorized_keys
-</span><span class='line'> chown deploy:deploy /home/deploy/.ssh/authorized_keys</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'> <span class="n">chmod</span> <span class="mi">644</span> <span class="o">/</span><span class="n">home</span><span class="o">/</span><span class="n">deploy</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span><span class="n">authorized_keys</span>
+</span><span class='line'> <span class="n">chown</span> <span class="ss">deploy</span><span class="p">:</span><span class="n">deploy</span> <span class="sr">/home/</span><span class="n">deploy</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span><span class="n">authorized_keys</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>更改權限，讓 group 和 other 可以讀
 <code>chmod</code> 改變權限
 <code>chown</code> 改變檔案擁有者</p>
 
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>644 權限
-</span><span class='line'>owner  = rw- = 4+2+0 = 6
-</span><span class='line'>group  = r-- = 4+0+0 = 4
-</span><span class='line'>others = r-- = 4+0+0 = 4</span></code></pre></td></tr></table></div></figure>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">644</span> <span class="err">權限</span>
+</span><span class='line'><span class="n">owner</span>  <span class="o">=</span> <span class="n">rw</span><span class="o">-</span> <span class="o">=</span> <span class="mi">4</span><span class="o">+</span><span class="mi">2</span><span class="o">+</span><span class="mi">0</span> <span class="o">=</span> <span class="mi">6</span>
+</span><span class='line'><span class="n">group</span>  <span class="o">=</span> <span class="n">r</span><span class="o">--</span> <span class="o">=</span> <span class="mi">4</span><span class="o">+</span><span class="mi">0</span><span class="o">+</span><span class="mi">0</span> <span class="o">=</span> <span class="mi">4</span>
+</span><span class='line'><span class="n">others</span> <span class="o">=</span> <span class="n">r</span><span class="o">--</span> <span class="o">=</span> <span class="mi">4</span><span class="o">+</span><span class="mi">0</span><span class="o">+</span><span class="mi">0</span> <span class="o">=</span> <span class="mi">4</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#x61;&#105;&#x6c;&#x74;&#111;&#58;&#100;&#x65;&#112;&#108;&#x6f;&#121;&#64;&#49;&#50;&#51;&#x2e;&#x31;&#50;&#x33;&#x2e;&#49;&#x32;&#x2e;&#49;">&#100;&#x65;&#112;&#108;&#x6f;&#121;&#x40;&#x31;&#50;&#x33;&#46;&#49;&#x32;&#x33;&#46;&#x31;&#x32;&#46;&#x31;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#x6d;&#97;&#105;&#108;&#x74;&#x6f;&#58;&#x64;&#x65;&#x70;&#x6c;&#111;&#x79;&#64;&#x31;&#x32;&#51;&#46;&#49;&#50;&#51;&#x2e;&#x31;&#50;&#x2e;&#x31;">&#100;&#101;&#x70;&#108;&#x6f;&#x79;&#64;&#x31;&#x32;&#x33;&#x2e;&#x31;&#50;&#51;&#46;&#x31;&#50;&#46;&#49;</a> 就連進去囉!!</p>
 
-<h1>設定快捷鍵</h1>
-
-<p>可以直接 <code>sudo .ssh/config</code> 設定</p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>Host [自訂名稱]
-</span><span class='line'>    HostName [hostname 網址或ip]
-</span><span class='line'>    Port 22
-</span><span class='line'>    User deploy</span></code></pre></td></tr></table></div></figure>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">-</span><span class="n">rw</span><span class="o">-------</span> <span class="p">(</span><span class="mi">600</span><span class="p">)</span> <span class="o">--</span> <span class="err">只有屬主有讀寫權限。</span>
+</span><span class='line'><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">r</span><span class="o">--</span><span class="n">r</span><span class="o">--</span> <span class="p">(</span><span class="mi">644</span><span class="p">)</span> <span class="o">--</span> <span class="err">只有屬主有讀寫權限；而屬組用戶和其他用戶只有讀權限。</span>
+</span><span class='line'><span class="o">-</span><span class="n">rwx</span><span class="o">------</span> <span class="p">(</span><span class="mi">700</span><span class="p">)</span> <span class="o">--</span> <span class="err">只有屬主有讀、寫、執行權限。</span>
+</span><span class='line'><span class="o">-</span><span class="n">rwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="p">(</span><span class="mi">755</span><span class="p">)</span> <span class="o">--</span> <span class="err">屬主有讀、寫、執行權限；而屬組用戶和其他用戶只有讀、執行權限。</span>
+</span><span class='line'><span class="o">-</span><span class="n">rwx</span><span class="o">--</span><span class="n">x</span><span class="o">--</span><span class="n">x</span> <span class="p">(</span><span class="mi">711</span><span class="p">)</span> <span class="o">--</span> <span class="err">屬主有讀、寫、執行權限；而屬組用戶和其他用戶只有執行權限。</span>
+</span><span class='line'><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">rw</span><span class="o">-</span><span class="n">rw</span><span class="o">-</span> <span class="p">(</span><span class="mi">666</span><span class="p">)</span> <span class="o">--</span> <span class="err">所有用戶都有文件讀、寫權限。這種做法不可取。</span>
+</span><span class='line'><span class="o">-</span><span class="n">rwxrwxrwx</span> <span class="p">(</span><span class="mi">777</span><span class="p">)</span> <span class="o">--</span> <span class="err">所有用戶都有讀、寫、執行權限。更不可取的做法。</span>
+</span><span class='line'>
+</span><span class='line'><span class="err">以下是對目錄的兩個普通設定：</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">drwx</span><span class="o">------</span> <span class="p">(</span><span class="mi">700</span><span class="p">)</span> <span class="o">-</span> <span class="err">只有屬主可在目錄中讀、寫。</span>
+</span><span class='line'><span class="n">drwxr</span><span class="o">-</span><span class="n">xr</span><span class="o">-</span><span class="n">x</span> <span class="p">(</span><span class="mi">755</span><span class="p">)</span> <span class="o">-</span> <span class="err">所有用戶可讀該目錄，但只有屬主才能改變目錄中的內容</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>SSH config 設定檔</h1>
+
+<p>新增檔案 <code>config</code> 到 <code>~/.ssh/</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#~/.ssh/config</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#設定連線的資料方式等等，只要設定需要用到的即可</span>
+</span><span class='line'><span class="no">Host</span> <span class="o">[</span><span class="err">自訂名稱</span><span class="o">]</span>
+</span><span class='line'>  <span class="no">HostName</span> <span class="mi">192</span><span class="o">.</span><span class="mi">168</span><span class="o">.</span><span class="mi">11</span><span class="o">.</span><span class="mi">24</span> <span class="c1"># IP or Domain name</span>
+</span><span class='line'>  <span class="no">PreferredAuthentications</span> <span class="n">publickey</span> <span class="c1"># 優先用金鑰認證</span>
+</span><span class='line'>  <span class="no">PasswordAuthentication</span> <span class="n">no</span> <span class="c1"># 停用密碼認證</span>
+</span><span class='line'>  <span class="no">PubkeyAuthentication</span> <span class="n">yes</span> <span class="c1"># 只允許金鑰認證</span>
+</span><span class='line'>  <span class="no">IdentityFile</span> <span class="o">~</span><span class="sr">/.ssh/i</span><span class="n">d_rsa</span> <span class="c1"># 透過 local 的私鑰去做身份認證</span>
+</span><span class='line'>  <span class="no">ForwardAgent</span> <span class="n">yes</span> <span class="c1"># agent forwarding</span>
+</span><span class='line'><span class="no">Port</span> <span class="mi">22</span> <span class="c1"># 連線的 port</span>
+</span><span class='line'><span class="no">User</span> <span class="n">deploy</span> <span class="c1"># 使用者名稱</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <p>接著就可以直接 <code>ssh [自訂名稱]</code> 就會登入 deploy 的帳號了。</p>
 
+<ul>
+<li><a href="http://blog.alantsai.net/2016/03/ssh-config-ssh-agent-passphrase-management.html#WizKMOutline_1457361341463918">如何用config管理多個網站的ssh key和如何不用每一組輸入ssh的Pass Phrase</a></li>
+</ul>
+
+
+<h1>快速複製 SSH public key 到遠端主機</h1>
+
+<h3>方法1</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">scp</span> <span class="o">-</span><span class="n">i</span> <span class="o">~</span><span class="sr">/.ssh/i</span><span class="n">d_rsa</span><span class="o">.</span><span class="n">pub</span> <span class="n">deploy</span><span class="vi">@test</span><span class="o">.</span><span class="n">com</span><span class="ss">:/</span><span class="n">home</span><span class="o">/</span><span class="n">deploy</span><span class="o">/.</span><span class="n">ssh</span><span class="o">/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>方法2</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ssh</span><span class="o">-</span><span class="n">copy</span><span class="o">-</span><span class="nb">id</span> <span class="o">-</span><span class="n">i</span> <span class="o">~</span><span class="sr">/.ssh/i</span><span class="n">d_rsa</span><span class="o">.</span><span class="n">pub</span> <span class="n">deploy</span><span class="vi">@test</span><span class="o">.</span><span class="n">com</span><span class="p">:</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://jashliao.pixnet.net/blog/post/164556993-%E6%AF%8F%E5%A4%A9%E4%B8%80%E5%80%8Blinux%E6%8C%87%E4%BB%A4--scp%E6%8C%87%E4%BB%A4%28%E9%81%A0%E7%AB%AF%E6%AA%94%E6%A1%88%E5%8A%A0%E5%AF%86%E6%8B%B7%E8%B2%9D-">每天一個Linux指令- scp指令(遠端檔案加密拷貝 工具)</a></li>
+<li><a href="https://blog.longwin.com.tw/2011/03/ssh-public-key-copy-2011/">SSH Public Key 快速複製到遠端主機</a></li>
+</ul>
+
+
+<h1>測試 SSH 是否有連線成功</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ssh</span> <span class="o">-</span><span class="n">T</span> <span class="n">git</span><span class="vi">@github</span><span class="o">.</span><span class="n">com</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>ssh-add</h1>
+
+<p>ssh-add命令是把專用密鑰添加到ssh-agent的高速緩存中。該命令位置在 <code>/usr/bin/ssh-add</code></p>
+
+<ul>
+<li><a href="http://man.linuxde.net/ssh-add">ssh-add 指令</a></li>
+<li><a href="http://man.linuxde.net/ssh-agent">ssh-agent命令</a></li>
+</ul>
+
+
 <h1>SSH agent forwarding</h1>
 
-<p><a href="https://developer.github.com/guides/using-ssh-agent-forwarding/">Using SSH agent forwarding</a><br/>
-<a href="https://ihower.tw/blog/archives/7837">SSH agent forwarding 的應用</a><br/>
-<a href="http://man.linuxde.net/ssh">ssh命令</a></p>
+<ul>
+<li><a href="https://developer.github.com/guides/using-ssh-agent-forwarding/">Using SSH agent forwarding</a></li>
+<li><a href="https://ihower.tw/blog/archives/7837">SSH agent forwarding 的應用</a></li>
+<li><a href="http://wiki.jikexueyuan.com/project/github-developer-guides/using-ssh-agent.html">SSH agent 轉發</a></li>
+</ul>
 
-<p>權限指令參考：<br/>
-<a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chmod">鳥哥的私房菜</a></p>
+
+<h1>本地測試</h1>
+
+<p>若是要本地自行測試的話，可以到 <code>/etc/hosts</code> 去設定網址對應 ip 位置，這樣之後連該網址就會連線到指定的 ip</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">111</span><span class="o">.</span><span class="mi">111</span><span class="o">.</span><span class="mi">111</span><span class="o">.</span><span class="mi">111</span> <span class="nb">test</span><span class="o">.</span><span class="n">com</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>只網頁連線到 <code>test.com</code> 就會連到 ip <code>111.111.111.111</code> 的主機上</p>
+
+<p>參考網站：</p>
+
+<ul>
+<li><a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chmod">鳥哥的私房菜 - 檔案權限</a></li>
+<li><a href="https://ihower.tw/rails/deployment.html">Ruby on Rails 實戰聖經 網站佈署</a></li>
+<li><a href="http://man.linuxde.net/ssh">ssh命令</a></li>
+<li><a href="https://help.github.com/articles/connecting-to-github-with-ssh/">Connecting to GitHub with SSH</a></li>
+</ul>
+
 </div>
 
 
