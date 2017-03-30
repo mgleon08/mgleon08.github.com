@@ -10,7 +10,7 @@ categories: rails
 
 <!-- more -->
 
-檔案放在 `/config/tasks/xxx.rake`
+檔案放在 `/lib/tasks/xxx.rake`
 記得後面副檔名是 `rake`
 
 #[Ubike](http://data.taipei/opendata/datalist/apiAccess?scope=resourceAquire&rid=ddb80380-f1b3-4f8e-8016-7ed9cba571d5)

@@ -58,6 +58,7 @@ nginx log 在 /opt/nginx/logs 下，要用 root 身分才能看
 
 
 #重開 nginx sudo
+若不是 `root` 記得加上 `sudo`
 `service nginx restart`
 
 #重開遠端 rails 而不重開 nginx

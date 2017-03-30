@@ -103,3 +103,4 @@ require 'rack'cookie = "BAh7CUkiD3Nlc3Npb25faWQGOgZFRkkiJ(...)"Rack::Session::
 * [详说 Cookie, LocalStorage 与 SessionStorage | 咀嚼之味](http://jerryzou.com/posts/cookie-and-web-storage/)
 * [Cache / Session / Cache 簡單說](https://medium.com/@renhades/%E7%B0%A1%E5%96%AE%E8%AA%AA-cache-session-cache-4de6f3c77aa1#.qdbr3vq94)
 * [九种浏览器端缓存机制知多少 | ouvenzhang的博客](http://jixianqianduan.com/frontend-javascript/2015/12/28/nine-browser-cache-methods.html)
+* [讓我們來談談 CSRF](http://blog.techbridge.cc/2017/02/25/csrf-introduction/)

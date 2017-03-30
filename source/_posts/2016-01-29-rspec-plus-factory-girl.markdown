@@ -848,6 +848,8 @@ Gem：
 * [[RSpec] 進階測試系列概念](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-0)  
 * [Rails Race Condition Test With RSpec](http://blog.mz026.rocks/20160821/rails-race-condition-test-rspec)
 * [RSpec全套測試環境搭建從零入門](https://www.rails365.net/articles/rspec)
+* [Configuring database_cleaner with Rails, RSpec, Capybara, and Selenium](http://www.virtuouscode.com/2012/08/31/configuring-database_cleaner-with-rails-rspec-capybara-and-selenium/)
+* [rspec 101](https://xdite.gitbooks.io/rspec-101/content/)
 
 RailsPacific： 
  
