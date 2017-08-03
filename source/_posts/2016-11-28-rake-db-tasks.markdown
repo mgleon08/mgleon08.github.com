@@ -26,6 +26,9 @@ rake db:rollback
 # 還原已跑最新三個的 migration
 rake db:rollback STEP=3
 
+# 還原指定已跑的 migration
+rake db:migrate:down VERSION=20100905201547
+
 # 重跑目前最新的 migration
 rake db:migrate:redo
 

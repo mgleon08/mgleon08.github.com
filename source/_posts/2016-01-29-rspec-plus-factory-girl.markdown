@@ -850,6 +850,7 @@ Gem：
 * [RSpec全套測試環境搭建從零入門](https://www.rails365.net/articles/rspec)
 * [Configuring database_cleaner with Rails, RSpec, Capybara, and Selenium](http://www.virtuouscode.com/2012/08/31/configuring-database_cleaner-with-rails-rspec-capybara-and-selenium/)
 * [rspec 101](https://xdite.gitbooks.io/rspec-101/content/)
+* [rspec-expectations](https://github.com/rspec/rspec-expectations)
 
 RailsPacific： 
  

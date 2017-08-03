@@ -84,10 +84,14 @@ set :keep_releases, 3
 # 也可以在這裡設定一些 hook
 # 範例
 namespace :deploy do
-  desc "Restart application"
-  after :publishing, :restart do
-    on release_roles :all do
-      execute :touch, release_path.join('tmp/restart.txt')
+ desc "Run custom task"
+  after :published, :task do # 在什麼 flow 之後
+    on release_roles :all do # 可以執行的主機權限
+      within "#{current_path}" do # 在 current 目錄底下
+        with rails_env: :staging do # 在 staging 環境
+          execute :rake, "task_run"
+        end
+      end
     end
   end
 end

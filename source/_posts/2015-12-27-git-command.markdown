@@ -64,19 +64,19 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 [Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)
 
 ```
-`y` stage this hunk for the next commit  
-`n` do not stage this hunk for the next commit  
-`q` quit; do not stage this hunk or any of the remaining ones  
-`a` stage this hunk and all later hunks in the file  
-`d` do not stage this hunk or any of the later hunks in the file  
-`g` select a hunk to go to  
-`/` search for a hunk matching the given regex  
-`j` leave this hunk undecided, see next undecided hunk  
-`J` leave this hunk undecided, see next hunk  
-`k` leave this hunk undecided, see previous undecided hunk  
-`K` leave this hunk undecided, see previous hunk  
-`s` split the current hunk into smaller hunks  
-`e` manually edit the current hunk  
+`y` stage this hunk for the next commit
+`n` do not stage this hunk for the next commit
+`q` quit; do not stage this hunk or any of the remaining ones
+`a` stage this hunk and all later hunks in the file
+`d` do not stage this hunk or any of the later hunks in the file
+`g` select a hunk to go to
+`/` search for a hunk matching the given regex
+`j` leave this hunk undecided, see next undecided hunk
+`J` leave this hunk undecided, see next hunk
+`k` leave this hunk undecided, see previous undecided hunk
+`K` leave this hunk undecided, see previous hunk
+`s` split the current hunk into smaller hunks
+`e` manually edit the current hunk
 `?` print help
 ```
 ###rm
@@ -233,7 +233,7 @@ exec   = 執行一條指令
 
 ###刪除標籤
 
-* `git push origin :refs/tags/my_tag` 
+* `git push origin :refs/tags/my_tag`
 * `git tag -d <tagname></tagname>`
 
 [[Git] 版本控制: 如何使用標籤(Tag)](https://blog.wu-boy.com/2010/11/git-%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E6%A8%99%E7%B1%A4tag/)
@@ -288,7 +288,7 @@ git am --abort
 
 #上patch
 git am xxx.patch
-git am *.patch	
+git am *.patch
 ```
 
 [【Git】使用 format-patch 將 commit 打包成檔案 Use format-patch to carry commit](http://chris800731.blogspot.tw/2013/08/git-format-patch-commit-use-format.html)
@@ -300,7 +300,7 @@ git am *.patch
 ###.gitignore
 * `vi .gitignore` 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。
 
-[.gitignore ⼤集合](https://github.com/github/gitignore)  
+[.gitignore ⼤集合](https://github.com/github/gitignore)
 [.gitignore not working](http://stackoverflow.com/questions/11451535/gitignore-not-working)
 
 ```ruby
@@ -355,6 +355,13 @@ git clean -df #刪除 untracked directory
 git fliter-branch --tree--filter "rm -f config/password.txt"
 ```
 
+### 移除local 遠端 branch
+
+clear any remote-tracking branch which is no longer exist on the remote.
+
+```ruby
+git fetch --prune
+```
 
 #alias
 自己設定的一些 alias
@@ -426,6 +433,7 @@ alias grbs='git rebase --skip'
 
 #git stash
 alias gsta='git stash save'
+alias gstak='git stash save --keep-index'
 alias gstaa='git stash apply'
 alias gstd='git stash drop'
 alias gstl='git stash list'
@@ -447,32 +455,32 @@ alias glola="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Crese
 alias glog='git log --oneline --decorate --color --graph'
 ```
 
-官方文件：  
+官方文件：
 
-* [Git Pro](http://git-scm.com/book/zh-tw/v1)  
+* [Git Pro](http://git-scm.com/book/zh-tw/v1)
 
-參考資料：  
+參考資料：
 
-* [Git 版本控制系統](https://ihower.tw/git/)  
-* [30 天精通 Git 版本控管](https://github.com/doggy8088/Learn-Git-in-30-days)  
-* [連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)  
-* [好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)  
-* [Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)  
-* [Git 風格指南](https://github.com/JuanitoFatas/git-style-guide)  
+* [Git 版本控制系統](https://ihower.tw/git/)
+* [30 天精通 Git 版本控管](https://github.com/doggy8088/Learn-Git-in-30-days)
+* [連猴子都能懂的git入門](https://backlogtool.com/git-guide/tw/reference/)
+* [好麻煩部落格](http://blog.gogojimmy.net/2012/01/17/how-to-use-git-1-git-basic/)
+* [Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)
+* [Git 風格指南](https://github.com/JuanitoFatas/git-style-guide)
 * [How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/)
 
-練習：  
+練習：
 
-* [codeschool](https://try.github.io/levels/1/challenges/1)  
-* [Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)  
-* [learnGitBranching](http://pcottle.github.io/learnGitBranching/)  
+* [codeschool](https://try.github.io/levels/1/challenges/1)
+* [Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)
+* [learnGitBranching](http://pcottle.github.io/learnGitBranching/)
 
-其他技巧： 
- 
-* [使用 git rebase 避免無謂的 merge](https://ihower.tw/blog/archives/3843)  
-* [Git flow 開發流程](https://ihower.tw/blog/archives/5140)  
-* [A successful Git branching model](http://nvie.com/posts/a-successful-git-branching-model/)  
-* [git-flow 備忘清單](http://danielkummer.github.io/git-flow-cheatsheet/index.zh_TW.html)  
+其他技巧：
+
+* [使用 git rebase 避免無謂的 merge](https://ihower.tw/blog/archives/3843)
+* [Git flow 開發流程](https://ihower.tw/blog/archives/5140)
+* [A successful Git branching model](http://nvie.com/posts/a-successful-git-branching-model/)
+* [git-flow 備忘清單](http://danielkummer.github.io/git-flow-cheatsheet/index.zh_TW.html)
 * [The magical (and not harmful) rebase](http://jeffkreeftmeijer.com/2010/the-magical-and-not-harmful-rebase/)
 * [How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/#seven-rules)
 * [A guide to using Github Pages](https://www.thinkful.com/learn/a-guide-to-using-github-pages/)

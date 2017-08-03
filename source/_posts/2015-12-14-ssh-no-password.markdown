@@ -131,8 +131,13 @@ ssh -T git@github.com
 
 ssh-add命令是把專用密鑰添加到ssh-agent的高速緩存中。該命令位置在 `/usr/bin/ssh-add`
 
+1. 把專用密鑰新增到 ssh-agent 的高速緩存中：`ssh-add ~/.ssh/id_rsa`
+2. 從ssh-agent中刪除密鑰： `ssh-add -d ~/.ssh/id_xxx.pub`
+3. 查看ssh-agent中的密鑰： `ssh-add -l`
+
 * [ssh-add 指令](http://man.linuxde.net/ssh-add)
 * [ssh-agent命令](http://man.linuxde.net/ssh-agent)
+* [Mac 上 ssh-add 永久將私鑰新增到 Keychain](http://icodeyou.com/2016/01/17/ssh-add-mac/)
 
 # SSH agent forwarding  
 

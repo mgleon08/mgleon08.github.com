@@ -64,7 +64,7 @@ rvm get stable
 
 #設定
 
-安裝好之後，基本上就是一個全新的，gem 都要全部重新安裝  
+安裝好之後，基本上就是一個全新的，gem 都要全部重新安裝
 記得先去安裝 `bundler`
 
 ```ruby
@@ -188,12 +188,14 @@ openssl 解決方式參考:
 * [RVM/Rbenv RVM 安裝 Ruby 2.0.0 的 OpenSSL 問題 ](https://ruby-china.org/topics/8589)
 * [troubles with RVM and OpenSSL](http://stackoverflow.com/questions/15511943/troubles-with-rvm-and-openssl)
 * [Fixing SSL errors in rvm for OSX](https://schneid.io/blog/fixing-ssl-errors-in-rvm-for-osx.html)
+* [SSL_connect返回= 1 errno = 0 state = SSLv3讀伺服器證書B：證書驗證失敗](https://gxnotes.com/article/21594.html)
+* [SSL upgrades on rubygems.org and RubyInstaller versions](https://gist.github.com/luislavena/f064211759ee0f806c88)
 
-官方文件：  
+官方文件：
 [rvm](https://rvm.io/)
 
-參考文件：  
-[Ruby gem 想要一機裝多個版本？RVM來幫你！](http://motion-express.com/blog/20141005-ruby-rvm-gemset)  
-[RVM and Gemsets](http://blog.eddie.com.tw/2011/04/08/rvm-and-gemsets/)  
-[rvm 使用指南](https://ruby-china.org/wiki/rvm-guide)  
+參考文件：
+[Ruby gem 想要一機裝多個版本？RVM來幫你！](http://motion-express.com/blog/20141005-ruby-rvm-gemset)
+[RVM and Gemsets](http://blog.eddie.com.tw/2011/04/08/rvm-and-gemsets/)
+[rvm 使用指南](https://ruby-china.org/wiki/rvm-guide)
 

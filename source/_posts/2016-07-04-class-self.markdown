@@ -88,6 +88,8 @@ puts f1.bar # bar
 puts f2.bar # undefined method `bar'
 ```
 
-參考文件：  
-[Ruby: class << self](http://wemee.blogspot.tw/2014/07/ruby-class.html)  
-[class << self vs self.method with Ruby: what's better?](http://stackoverflow.com/questions/10964081/class-self-vs-self-method-with-ruby-whats-better)
+參考文件：
+
+* [Ruby: class << self](http://wemee.blogspot.tw/2014/07/ruby-class.html)
+* [class << self vs self.method with Ruby: what's better?](http://stackoverflow.com/questions/10964081/class-self-vs-self-method-with-ruby-whats-better)
+* [關於 Ruby Class 他們沒告訴你的真相：MetaClass](http://blog.chh.tw/posts/ruby-metaclass-eigenclass/)
