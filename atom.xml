@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2017-03-30T18:21:24+08:00</updated>
+  <updated>2017-08-03T10:00:59+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -119,6 +119,10 @@
 <span class='line-number'>45</span>
 <span class='line-number'>46</span>
 <span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># config/deploy.rb</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1"># lock Capistrano Version</span>
@@ -159,10 +163,14 @@
 </span><span class='line'><span class="c1"># 也可以在這裡設定一些 hook</span>
 </span><span class='line'><span class="c1"># 範例</span>
 </span><span class='line'><span class="n">namespace</span> <span class="ss">:deploy</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">desc</span> <span class="s2">&quot;Restart application&quot;</span>
-</span><span class='line'>  <span class="n">after</span> <span class="ss">:publishing</span><span class="p">,</span> <span class="ss">:restart</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">on</span> <span class="n">release_roles</span> <span class="ss">:all</span> <span class="k">do</span>
-</span><span class='line'>      <span class="n">execute</span> <span class="ss">:touch</span><span class="p">,</span> <span class="n">release_path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;tmp/restart.txt&#39;</span><span class="p">)</span>
+</span><span class='line'> <span class="n">desc</span> <span class="s2">&quot;Run custom task&quot;</span>
+</span><span class='line'>  <span class="n">after</span> <span class="ss">:published</span><span class="p">,</span> <span class="ss">:task</span> <span class="k">do</span> <span class="c1"># 在什麼 flow 之後</span>
+</span><span class='line'>    <span class="n">on</span> <span class="n">release_roles</span> <span class="ss">:all</span> <span class="k">do</span> <span class="c1"># 可以執行的主機權限</span>
+</span><span class='line'>      <span class="n">within</span> <span class="s2">&quot;</span><span class="si">#{</span><span class="n">current_path</span><span class="si">}</span><span class="s2">&quot;</span> <span class="k">do</span> <span class="c1"># 在 current 目錄底下</span>
+</span><span class='line'>        <span class="n">with</span> <span class="ss">rails_env</span><span class="p">:</span> <span class="ss">:staging</span> <span class="k">do</span> <span class="c1"># 在 staging 環境</span>
+</span><span class='line'>          <span class="n">execute</span> <span class="ss">:rake</span><span class="p">,</span> <span class="s2">&quot;task_run&quot;</span>
+</span><span class='line'>        <span class="k">end</span>
+</span><span class='line'>      <span class="k">end</span>
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
@@ -1218,6 +1226,9 @@
 <span class='line-number'>48</span>
 <span class='line-number'>49</span>
 <span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 建立 database</span>
 </span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">create</span>
 </span><span class='line'>
@@ -1232,6 +1243,9 @@
 </span><span class='line'>
 </span><span class='line'><span class="c1"># 還原已跑最新三個的 migration</span>
 </span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">rollback</span> <span class="no">STEP</span><span class="o">=</span><span class="mi">3</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 還原指定已跑的 migration</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="ss">migrate</span><span class="p">:</span><span class="n">down</span> <span class="no">VERSION</span><span class="o">=</span><span class="mi">20100905201547</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1"># 重跑目前最新的 migration</span>
 </span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="ss">migrate</span><span class="p">:</span><span class="k">redo</span>
