@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2017-08-03T10:00:59+08:00</updated>
+  <updated>2017-09-01T14:59:38+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,101 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[使用 Explain 優化 SQL 語句]]></title>
+    <link href="http://mgleon08.github.com/blog/2017/09/01/mysql-sql-optimization-with-explain/"/>
+    <updated>2017-09-01T14:33:17+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2017/09/01/mysql-sql-optimization-with-explain</id>
+    <content type="html"><![CDATA[<p>有時候發現 query 速度很慢，但又不知道要怎麼提升的時候，就可以用 explain 的方式，來看看 sql 語法，哪裡可以做優化!</p>
+
+<!-- more -->
+
+
+<p>當 query 速度很慢時，很多時候可能是少加了 index，但有時又不是能夠這麼快的馬上看出來，這時候就可以將 sql 語法前面加上 <code>explain</code> 來解析</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">explain</span> <span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="k">user</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<table>
+<thead>
+<tr>
+<th> id </th>
+<th> select_type </th>
+<th> table </th>
+<th> partitions </th>
+<th> type  </th>
+<th> possible_keys </th>
+<th> key     </th>
+<th> key_len </th>
+<th> ref  </th>
+<th> rows </th>
+<th> filtered </th>
+<th> Extra       </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> 1  </td>
+<td> SIMPLE      </td>
+<td> users </td>
+<td> NULL       </td>
+<td> range </td>
+<td> PRIMARY       </td>
+<td> PRIMARY </td>
+<td> 4       </td>
+<td> NULL </td>
+<td> 2148 </td>
+<td> 100      </td>
+<td> Using where </td>
+</tr>
+</tbody>
+</table>
+
+
+<ol>
+<li>id: 沒有意義</li>
+<li>select_type: 查詢類型，是單表查詢、聯合查詢還是子查詢等</li>
+<li>table: 查詢的表名</li>
+<li>type: 連接使用的類型(重要項) 顯示連接使用的類型,按最 優到最差的類型排序
+
+<ul>
+<li>System</li>
+<li>const</li>
+<li>eq_ref</li>
+<li>ref</li>
+<li>fulltext</li>
+<li>ref_or_null</li>
+<li>index_merge</li>
+<li>unique_subquery</li>
+<li>index_subquery</li>
+<li>range</li>
+<li>index</li>
+<li>ALL</li>
+</ul>
+</li>
+<li>prossible_keys: 能在該表中使用哪些索引有助於查詢</li>
+<li>key:實際使用的索引</li>
+<li>key_len：索引的長度，在不損失精確性的情況 下,長度越短越好</li>
+<li>ref：索引的哪一列被使用了</li>
+<li>rows:返回的結果的行數</li>
+<li>Extra:其他說明</li>
+</ol>
+
+
+<p>每個欄位詳細的一些 type 可以到參考文件裡的文章去找尋!</p>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="http://www.shixinke.com/mysql/mysql-sql-optimization-with-using-explain-and-show-profile">使用explain和show profile來分析SQL語句實現優化SQL語句</a></li>
+<li><a href="http://blog.kejyun.com/2012/12/Using-EXPLAIN-SQL-To-Analysis-Efficient-On-MySQL.html">在MySQL使用Explain做SQL SELECT語法效能測試</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Capistrano 自動化部署設定]]></title>
@@ -3759,121 +3854,6 @@ Commonly used to simulate <code>$stdio</code> or <code>$stderr</code></p></block
 <li><a href="http://kaochenlong.com/2016/04/30/rake/">Ruby 語法放大鏡之「常在終端機裡下 rake db:migrate 指令，這個 rake 是什麼，後面那個 db:migrate 又是怎麼回事?」</a></li>
 <li><a href="http://code.oneapm.com/ruby/2015/05/28/ruby-rake-testtask/">Rake::TestTask 介绍</a></li>
 <li><a href="http://stackoverflow.com/questions/19200734/how-to-convert-array-of-activerecord-models-to-csv">How to convert array of ActiveRecord models to CSV?</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[更改 Rails 命名規則 Inflector]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/08/11/inflector/"/>
-    <updated>2016-08-11T20:49:39+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/08/11/inflector</id>
-    <content type="html"><![CDATA[<p>在 rails 當中，有許多命名的慣例</p>
-
-<!-- more -->
-
-
-<ul>
-<li>像是 <code>hello_controller</code> 檔案，裡面慣例對應到的 Class 就是 <code>Hello_Controller</code></li>
-<li>但若是像 <code>api_controller</code>，就會是 <code>Api_Controller</code></li>
-</ul>
-
-
-<p>雖然不是不行，但 API 本來就是縮寫，硬要改成 Api 可能會讓人覺得怪怪的</p>
-
-<p>因此 rails 有提供解決辦法，就能夠將 <code>api_Controller</code> 改成 <code>API_Controller</code></p>
-
-<p>rails 內建有 <code>Inflector</code> 就是用來處理命名規則用的</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">/</span><span class="n">initializers</span><span class="o">/</span><span class="n">inflections</span><span class="o">.</span><span class="n">rb</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Inflector</span><span class="o">.</span><span class="n">inflections</span><span class="p">(</span><span class="ss">:en</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">inflect</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">inflect</span><span class="o">.</span><span class="n">acronym</span> <span class="s1">&#39;API&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>或是 Rails 轉單複數單字，有錯誤時，可以定義</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#錯誤</span>
-</span><span class='line'><span class="s2">&quot;Business&quot;</span><span class="o">.</span><span class="n">singularize</span>  <span class="o">=&gt;</span> <span class="s2">&quot;Busines&quot;</span>
-</span><span class='line'><span class="s2">&quot;moose&quot;</span><span class="o">.</span><span class="n">pluralize</span> <span class="o">=&gt;</span> <span class="s2">&quot;mooses&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">config</span><span class="o">/</span><span class="n">initializers</span><span class="o">/</span><span class="n">inflections</span><span class="o">.</span><span class="n">rb</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">ActiveSupport</span><span class="o">::</span><span class="no">Inflector</span><span class="o">.</span><span class="n">inflections</span><span class="p">(</span><span class="ss">:en</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">inflect</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">inflect</span><span class="o">.</span><span class="n">irregular</span> <span class="s1">&#39;tooth&#39;</span><span class="p">,</span> <span class="s1">&#39;teeth&#39;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>other</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Be sure to restart your server when you modify this file.</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># Add new inflection rules using the following format. Inflections</span>
-</span><span class='line'><span class="c1"># are locale specific, and you may define rules for as many different</span>
-</span><span class='line'><span class="c1"># locales as you wish. All of these examples are active by default:</span>
-</span><span class='line'><span class="c1"># ActiveSupport::Inflector.inflections(:en) do |inflect|</span>
-</span><span class='line'><span class="c1">#   inflect.plural /^(ox)$/i, &#39;\1en&#39;</span>
-</span><span class='line'><span class="c1">#   inflect.singular /^(ox)en/i, &#39;\1&#39;</span>
-</span><span class='line'><span class="c1">#   inflect.irregular &#39;person&#39;, &#39;people&#39;</span>
-</span><span class='line'><span class="c1">#   inflect.uncountable %w( fish sheep )</span>
-</span><span class='line'><span class="c1"># end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># These inflection rules are supported but not enabled by default:</span>
-</span><span class='line'><span class="c1"># ActiveSupport::Inflector.inflections(:en) do |inflect|</span>
-</span><span class='line'><span class="c1">#   inflect.acronym &#39;RESTful&#39;</span>
-</span><span class='line'><span class="c1"># end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>官方文件：</p>
-
-<ul>
-<li><a href="http://api.rubyonrails.org/classes/ActiveSupport/Inflector.html">Inflector</a></li>
-</ul>
-
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="https://ruby-china.org/topics/19242">&lsquo;APIController&rsquo; is not a supported controller name</a></li>
-<li><a href="https://ihower.tw/rails4/environments-and-bundler.html">環境設定與Bundler</a></li>
 </ul>
 
 ]]></content>

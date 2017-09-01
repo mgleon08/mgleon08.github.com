@@ -5,13 +5,11 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>About - Leon's Blogging</title>
+  <title>使用 Explain 優化 SQL 語句 - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="About Dec 12th, 2015 1:12 pm | Leon Ji Ruby on Rails Developer Github : https://github.com/mgleon08
-Yourator : www.yourator.co
-Rainbow-Balloons : &hellip;">
+  <meta name="description" content="有時候發現 query 速度很慢，但又不知道要怎麼提升的時候，就可以用 explain 的方式，來看看 sql 語法，哪裡可以做優化! 當 query 速度很慢時，很多時候可能是少加了 index，但有時又不是能夠這麼快的馬上看出來，這時候就可以將 sql 語法前面加上 explain 來解析 1 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -20,7 +18,7 @@ Rainbow-Balloons : &hellip;">
   <meta name="viewport" content="width=device-width, initial-scale=1">
 
   
-  <link rel="canonical" href="http://mgleon08.github.com/about">
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2017/09/01/mysql-sql-optimization-with-explain">
   <link href="/favicon.png" rel="icon">
   <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
   <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
@@ -98,55 +96,156 @@ Rainbow-Balloons : &hellip;">
   <div id="main">
     <div id="content">
       <div>
-<article role="article">
+<article class="hentry" role="article">
   
   <header>
-    <h1 class="entry-title">About</h1>
     
-        <p class="meta">
-            
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time> |
-           <!--  <a href="/about/index.markdown">Edit</a> -->
-        </p>
+      
+        <h1 class="entry-title">使用 Explain 優化 SQL 語句</h1>
+      
     
-  </header>
-  
-  <h1>Leon Ji</h1>
-
-<h3>Ruby on Rails Developer</h3>
-
-<p><img src="https://avatars1.githubusercontent.com/u/13741096?v=3&amp;s=300" alt="Leon Ji" /></p>
-
-<ul>
-<li>Github : <a href="https://github.com/mgleon08">https://github.com/mgleon08</a></li>
-<li>Yourator : <a href="http://www.yourator.co/">www.yourator.co</a></li>
-<li>Rainbow-Balloons : <a href="http://www.rainbow-balloons.com/">http://www.rainbow-balloons.com/</a></li>
-<li>Email : <a href="&#x6d;&#97;&#105;&#x6c;&#x74;&#111;&#x3a;&#x6d;&#103;&#108;&#x65;&#x6f;&#x6e;&#x30;&#56;&#x40;&#103;&#109;&#x61;&#x69;&#108;&#46;&#99;&#111;&#x6d;">&#x6d;&#103;&#x6c;&#x65;&#x6f;&#x6e;&#x30;&#x38;&#x40;&#103;&#109;&#x61;&#105;&#x6c;&#46;&#99;&#x6f;&#x6d;</a></li>
-<li>Skill : HTML, CSS, JavaScript, jQuery, Angular, Ruby, Rails</li>
-</ul>
-
-
-  
-    <footer>
+    
       <p class="meta">
         
+
+
+
+
+<time class='entry-date' datetime='2017-09-01T14:33:17+08:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2017</span></span> <span class='time'>2:33 pm</span></time>
         
-
-
-
-
-<time class='entry-date' datetime='2015-12-12T13:12:00+08:00'><span class='date'><span class='date-month'>Dec</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2015</span></span> <span class='time'>1:12 pm</span></time>
+         | <a href="#disqus_thread">Comments</a>
         
         
       </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>有時候發現 query 速度很慢，但又不知道要怎麼提升的時候，就可以用 explain 的方式，來看看 sql 語法，哪裡可以做優化!</p>
+
+<!-- more -->
+
+
+<p>當 query 速度很慢時，很多時候可能是少加了 index，但有時又不是能夠這麼快的馬上看出來，這時候就可以將 sql 語法前面加上 <code>explain</code> 來解析</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='sql'><span class='line'><span class="k">explain</span> <span class="k">SELECT</span> <span class="o">*</span> <span class="k">FROM</span> <span class="k">user</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<table>
+<thead>
+<tr>
+<th> id </th>
+<th> select_type </th>
+<th> table </th>
+<th> partitions </th>
+<th> type  </th>
+<th> possible_keys </th>
+<th> key     </th>
+<th> key_len </th>
+<th> ref  </th>
+<th> rows </th>
+<th> filtered </th>
+<th> Extra       </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> 1  </td>
+<td> SIMPLE      </td>
+<td> users </td>
+<td> NULL       </td>
+<td> range </td>
+<td> PRIMARY       </td>
+<td> PRIMARY </td>
+<td> 4       </td>
+<td> NULL </td>
+<td> 2148 </td>
+<td> 100      </td>
+<td> Using where </td>
+</tr>
+</tbody>
+</table>
+
+
+<ol>
+<li>id: 沒有意義</li>
+<li>select_type: 查詢類型，是單表查詢、聯合查詢還是子查詢等</li>
+<li>table: 查詢的表名</li>
+<li>type: 連接使用的類型(重要項) 顯示連接使用的類型,按最 優到最差的類型排序
+
+<ul>
+<li>System</li>
+<li>const</li>
+<li>eq_ref</li>
+<li>ref</li>
+<li>fulltext</li>
+<li>ref_or_null</li>
+<li>index_merge</li>
+<li>unique_subquery</li>
+<li>index_subquery</li>
+<li>range</li>
+<li>index</li>
+<li>ALL</li>
+</ul>
+</li>
+<li>prossible_keys: 能在該表中使用哪些索引有助於查詢</li>
+<li>key:實際使用的索引</li>
+<li>key_len：索引的長度，在不損失精確性的情況 下,長度越短越好</li>
+<li>ref：索引的哪一列被使用了</li>
+<li>rows:返回的結果的行數</li>
+<li>Extra:其他說明</li>
+</ol>
+
+
+<p>每個欄位詳細的一些 type 可以到參考文件裡的文章去找尋!</p>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="http://www.shixinke.com/mysql/mysql-sql-optimization-with-using-explain-and-show-profile">使用explain和show profile來分析SQL語句實現優化SQL語句</a></li>
+<li><a href="http://blog.kejyun.com/2012/12/Using-EXPLAIN-SQL-To-Analysis-Efficient-On-MySQL.html">在MySQL使用Explain做SQL SELECT語法效能測試</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
       
-        <div class="sharing">
   
-  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/about/index.html" data-via="" data-counturl="http://mgleon08.github.com/about/index.html" >Tweet</a>
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2017-09-01T14:33:17+08:00'><span class='date'><span class='date-month'>Sep</span> <span class='date-day'>1</span><span class='date-suffix'>st</span>, <span class='date-year'>2017</span></span> <span class='time'>2:33 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/sql/'>sql</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2017/09/01/mysql-sql-optimization-with-explain/" data-via="" data-counturl="http://mgleon08.github.com/blog/2017/09/01/mysql-sql-optimization-with-explain/" >Tweet</a>
   
   
   
@@ -154,9 +253,14 @@ Rainbow-Balloons : &hellip;">
   
 </div>
 
+    
+    <p class="meta">
       
-    </footer>
-  
+        <a class="basic-alignment left" href="/blog/2017/03/30/capistrano/" title="Previous Post: Capistrano 自動化部署設定">&laquo; Capistrano 自動化部署設定</a>
+      
+      
+    </p>
+  </footer>
 </article>
 
   <section>
@@ -167,13 +271,6 @@ Rainbow-Balloons : &hellip;">
 
 
 </div>
-
-<aside class="sidebar">
-  
-    
-  
-</aside>
-
 
     </div>
   </div>
@@ -190,8 +287,8 @@ Rainbow-Balloons : &hellip;">
       
         
         // var disqus_developer = 1;
-        var disqus_identifier = 'http://mgleon08.github.com/about/index.html';
-        var disqus_url = 'http://mgleon08.github.com/about/index.html';
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2017/09/01/mysql-sql-optimization-with-explain/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2017/09/01/mysql-sql-optimization-with-explain/';
         var disqus_script = 'embed.js';
       
     (function () {
