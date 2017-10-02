@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Server | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/server/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2017-09-01T14:59:38+08:00</updated>
+  <updated>2017-10-02T16:58:24+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -58,15 +58,60 @@
 </ul>
 
 
-<pre><code class="ruby">#查看版本
+<h3>Basic</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/docker/">base command</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/ps/#description">ps</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/container/">container</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/image/">image</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/images/">images</a></li>
+</ul>
+
+
+<pre><code class="ruby"># 查看版本
 docker --version
 docker-compose --version
 docker-machine --version
 
-#從 hub 取得所需要的 images :後面為版本號，若沒加則會拉最新的
+# 從 hub 取得所需要的 images :後面為版本號，若沒加則會拉最新的
 docker pull ubuntu:12.04 
 
-#執行 docker ，若本地沒有 image，就會自動去 Docker Hub pull 下來
+# 搜尋官方的 Image
+docker search 
+
+# container (有些 container 可改 ps)
+docker container ls                              # List all running containers
+docker container ls -a                           # List all containers, even those not running
+docker container stop &lt;containerID&gt;              # Gracefully stop the specified container
+docker container kill &lt;containerID&gt;              # Force shutdown of the specified container
+docker container rm &lt;containerID&gt;                # Remove specified container from this machine
+docker container rm $(docker container ls -a -q) # Remove all containers
+docker start &lt;containerID&gt;
+docker stop &lt;containerID&gt;
+
+# images
+docker image ls -a                       # List all images on this machine
+docker image rm &lt;image id&gt;               # Remove specified image from this machine
+docker image rm $(docker image ls -a -q) # Remove all images from this machine
+docker rmi &lt;imageID&gt;|&lt;imageName&gt;
+docker rmi nginx
+docker rmi nginx -f
+
+# 看 container log
+docker logs -f &lt;imageID&gt;|&lt;imageName&gt;
+</code></pre>
+
+<h3>Run</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/run/">run</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/attach/">attach</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/exec/">exec</a></li>
+</ul>
+
+
+<pre><code class="ruby"># 執行 docker ，若本地沒有 image，就會自動去 Docker Hub pull 下來，如果沒有指定 TAG，預設使用 latest
 docker run -t -i ubuntu:12.04 bash
 #-t 在容器中分配一個虛擬終端（pseudo-tty）並綁定到容器的標準輸入上
 #-i 建立與容器標準輸入（STDIN）的互動連結，讓容器的標準輸入保持打開
@@ -74,68 +119,136 @@ docker run -t -i ubuntu:12.04 bash
 
 docker run -d -p 80:80 --name webserver nginx
 # -p 80:80 (主機 port, container port)
-#--name webserver
-# -d daemon 模式，docker 只要一執行完它的程式就會終止了
+# --name webserver
+# -d daemon 模式，放到背景去跑
 
 docker run -it -v ~/Downloads: ubuntu:12.04 bash
-#建立容器並啟動，且掛載本地目錄(local 在前，container 在後)
+# 建立容器並啟動，且掛載本地目錄(local 在前，container 在後)
 
-#啟動 container
-docker start &lt;imageID&gt;|&lt;imageName&gt;
-
-#重新啟動
-docker restart &lt;imageID&gt;|&lt;imageName&gt;
-
-#停止 container 
-docker stop &lt;imageID&gt;|&lt;imageName&gt;
-
-#搜尋官方的 Image
-docker search 
-
-#目前有哪些 docker 正在跑
-docker ps
-
-#查看所有的 container 包含停止的
-docker ps -a 
-
-#查看目前有哪些 images
-docker images
-
-#移除 image
-docker rmi &lt;imageID&gt;|&lt;imageName&gt;
-docker rmi nginx
-docker rmi nginx -f
-
-#移除 container (要先 stop 才可以移除)
-docker rm &lt;containerID&gt;
-#一次移除全部
-docker rm $(docker ps -a -q)
-
-#看 container log
-docker logs -f &lt;imageID&gt;|&lt;imageName&gt;
-
-#連到 container 最後執行
-#當多個窗口同時 attach 到同一個容器的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了
+# 連到 container 最後執行
+# 當多個窗口同時 attach 到同一個容器的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了
 docker attach &lt;imageID&gt;|&lt;imageName&gt;
 
-#進去 container 執行 bash
+# 進去 container 執行 bash
 docker exec -it &lt;imageID&gt;|&lt;imageName&gt; bash
 
-#commit
-docker commit -m 'message' -a 'author'
-
-#建立 tag
-docker tag &lt;imageID&gt; &lt;tag&gt;
-
-#上傳 images
-docker push
+# Volume mapping to map the local directory /opt/datadir to /var/lib/mysql
+docker run -v /opt/datadir:/var/lib/mysql mysql
 </code></pre>
+
+<h3>建立映像檔</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/commit/">commit</a></li>
+<li><a href="https://philipzheng.gitbooks.io/docker_practice/content/image/create.html">images create</a></li>
+</ul>
+
+
+<h3>## 1.修改已有映像檔</h3>
+
+<p>進去現有的 container，加入新的套件，再用此 container build 新的 images</p>
+
+<pre><code class="ruby"># commit 建立新的 images
+docker commit -m 'message' -a 'author'
+docker commit -m "Added json gem" -a "Docker Newbee" 0b2616b0e5a8 ouruser/sinatra:v2
+# -m 指定提交的說明信息，跟我們使用的版本控制工具一樣；
+# -a 可以指定更新的使用者信息
+# 之後是用來建立映像檔的容器的 CONTAINER ID
+# 最後指定新映像檔的名稱和 tag 。建立成功後會印出新映像檔的 ID。
+</code></pre>
+
+<h3>## <a href="#dockerfile">2.利用 Dockerfile 建立映像檔</a></h3>
+
+<h3>Tag and Publish the image</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/tag/">tag</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/push/">push</a></li>
+</ul>
+
+
+<pre><code class="ruby"># Tag the image
+docker tag username/repository:tag
+docker tag helloworld leon/get-started:part1
+
+# Upload your tagged image to the repository:
+docker push eon/get-started:part1
+</code></pre>
+
+<h3>Pull and run the image from the remote repository</h3>
+
+<pre><code class="ruby">docker run -p 4000:80 username/repository:tag
+</code></pre>
+
+<h3>儲存映像檔</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/save/">save</a></li>
+</ul>
+
+
+<p>如果要建立映像檔到本地檔案，可以使用 docker save 命令</p>
+
+<pre><code class="ruby">$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu              14.04               c4ff7513909d        5 weeks ago         225.4 MB
+
+docker save -o ubuntu_14.04.tar ubuntu:14.04
+</code></pre>
+
+<h3>載入映像檔</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/load/">load</a></li>
+</ul>
+
+
+<p>可以使用 docker load 從建立的本地檔案中再匯入到本地映像檔庫</p>
+
+<pre><code class="ruby">docker load --input ubuntu_14.04.tar
+docker load &lt; ubuntu_14.04.tar
+</code></pre>
+
+<h3><a href="https://philipzheng.gitbooks.io/docker_practice/content/container/enter.html">進入容器</a></h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/exec/">exec</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/attach/">attach</a></li>
+</ul>
+
+
+<p>attach 命令有時候並不方便。當多個窗口同時 attach 到同一個容器的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了</p>
 
 <p><img src="https://blog.fntsr.tw/wp-content/uploads/2014/12/Docker-Command-Diagram.png" alt="" /></p>
 
-<h2>Dockerfile</h2>
+<h2><span id="dockerfile">Dockerfile</span></h2>
+
+<pre><code class="ruby"># 1. OS-Ubuntu
+FROM Ubuntu
+
+# 2. Update apt repo
+RUN apt-get update
+# 3. Install denpendencies using apt
+RUN apt-get install python
+
+# 4. Install python denpendencies using pip
+RUN pip install flask
+RUN pip install flask-mysql
+
+# 5. Copy source code to /opt folder
+COPY . /opt/source-code
+
+# 6. Run the web server using 'flask' command
+ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run 
+</code></pre>
+
+<pre><code class="ruby">docker build Dockerfile -t user_name/custom_app
+docker push user_name/custom_app
+</code></pre>
 
 <p><a href="https://philipzheng.gitbooks.io/docker_practice/content/dockerfile/instructions.html">Dockerfile 指令</a></p>
+
+<blockquote><p>注意一個映像檔不能超過 127 層</p></blockquote>
 
 <pre><code class="ruby">#一般會建議放置 Dockerfile 的目錄為空目錄。也可以透過 .dockerignore 檔案（每一行新增一條排除模式：exclusion patterns）來讓 Docker 忽略路徑下的目錄和檔案。
 docker build -t &lt;tagName&gt; .
@@ -238,16 +351,29 @@ COPY test.rb ./
 <pre><code class="ruby">ENTRYPOINT ["./test.rb"] 
 </code></pre>
 
+<blockquote><p>會將 docker run xxx 後面的參數，當作 ENTRYPOINT 指令的參數</p></blockquote>
+
+<pre><code class="ruby">ENTRYPOINT ["echo"]
+docker run CONTAINER echo foo
+# =&gt; echo foo
+</code></pre>
+
 <h3>CMD</h3>
 
-<p>指定啟動容器時執行的命令，每個 Dockerfile 只能有一條 CMD 命令。如果指定了多條命令，只有最後一條會被執行。
-如果使用者啟動容器時候指定了運行的命令，則會覆蓋掉 CMD 指定的命令。</p>
+<p>指定啟動容器時執行的命令，每個 Dockerfile 只能有一條 CMD 命令。如果指定了多條命令，只有最後一條會被執行。</p>
 
 <pre><code class="ruby">#使用 exec 執行，推薦使用
 CMD ["executable","param1","param2"] 
 #在 /bin/sh 中執行，使用在給需要互動的指令
 #提供給 ENTRYPOINT 的預設參數
 CMD command param1 param2 CMD ["param1","param2"]
+</code></pre>
+
+<blockquote><p>會將 docker run xxx 後面的參數，覆蓋掉 CMD 指定的命令。</p></blockquote>
+
+<pre><code class="ruby">CMD ["echo"]
+docker run CONTAINER echo foo
+# =&gt; foo
 </code></pre>
 
 <h3>範例</h3>
@@ -269,15 +395,59 @@ ADD . $APP_ROOT
 RUN /bin/bash -l -c "bundle install"
 </code></pre>
 
-<p>參考文件：</p>
+<h2>Docker Compose</h2>
+
+<p>Compose 是一個工具，用來定義與執行多個 container 組成的 Docker Applications。你可以使用 Compose 檔案來組態設定你的應用服務。然後使用單一命令，透過你的組態設定來建立與啟動你的服務。</p>
+
+<p>Compose 適合用來開發、測試、與建立 staging 環境，如同 CI workflows。</p>
+
+<p>使用 Compose 有基本的三個處理步驟：</p>
+
+<ol>
+<li>使用 Dockerfile 定義你的 app 環境，讓它可以在任何地方都能複製(reproduced)。</li>
+<li>使用 docker-compose.yml 定義你的服務，讓他們可以在獨立環境內一起執行。</li>
+<li>最後，執行 docker-compose up，Compose 將會開始與執行你所有的 app。</li>
+</ol>
+
+
+<pre><code class="ruby"># docker-compose.yml
+services:
+    web:
+        images:"mmumshad/simple-webapp"
+        ports:
+            - "80:5000"
+    detabase:
+        images:"mysql"
+        volumes::
+            - /opt/data:/var/lib/mysql
+</code></pre>
+
+<p><img src="https://i.imgur.com/2Z22ghU.png" alt="" /></p>
+
+<pre><code class="ruby">docker-compose up
+docker-compose stop
+docker-compose down
+</code></pre>
+
+<p>官方文件：</p>
 
 <ul>
 <li><a href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a></li>
+<li><a href="https://docs.docker.com/engine/reference/builder/">Docker Docs</a></li>
+<li><a href="https://docs.docker.com/get-started/part2/#recap-and-cheat-sheet-optional">Docker Sample</a></li>
+<li><a href="https://docs.docker.com/compose/">Docker Compose</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
 <li><a href="https://philipzheng.gitbooks.io/docker_practice/content/index.html">Docker —— 從入門到實踐</a></li>
 <li><a href="http://www.cc.ntu.edu.tw/chinese/epaper/0036/20160321_3611.html">淺談輕量化的虛擬技術 - Docker容器</a></li>
-<li><a href="http://cepave.com/how-to-write-dockerfile/">撰寫一份符合需求的 Dockerfile</a></li>
 <li><a href="http://bonze.tw/%E4%BC%BA%E6%9C%8D%E5%99%A8%E7%A0%94%E7%A9%B6%E5%AE%A4/dockerfile%E7%B0%A1%E5%96%AE%E4%BB%8B%E7%B4%B9">Dockerfile簡單介紹</a></li>
 <li><a href="https://segmentfault.com/q/1010000000417103">Dockerfile裡指定執行命令用ENTRYPOING和用CMD有何不同？</a></li>
+<li><a href="http://blog.maxkit.com.tw/2017/03/docker-compose.html">Docker Compose 初步閱讀與學習記錄</a></li>
+<li><a href="https://medium.com/@DcardLab/dcard-%E5%AF%A6%E7%BF%92%E7%94%9F%E6%B4%BB%E6%97%A5%E8%A8%98-%E5%B0%8F%E9%AF%A8%E9%AD%9A-docker-%E4%BB%8B%E7%B4%B9-a574b28feae4">Dcard 實習生活日記：小鯨魚（Docker）介紹s</a></li>
 </ul>
 
 ]]></content>
@@ -546,7 +716,7 @@ group  = r-- = 4+0+0 = 4
 others = r-- = 4+0+0 = 4
 </code></pre>
 
-<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#97;&#x69;&#108;&#x74;&#x6f;&#x3a;&#100;&#101;&#112;&#x6c;&#x6f;&#121;&#x40;&#49;&#x32;&#x33;&#46;&#x31;&#50;&#x33;&#46;&#49;&#x32;&#46;&#x31;">&#x64;&#101;&#x70;&#108;&#x6f;&#x79;&#x40;&#49;&#x32;&#51;&#x2e;&#49;&#50;&#51;&#x2e;&#49;&#x32;&#x2e;&#x31;</a> 就連進去囉!!</p>
+<p>接著就可以在 (本機) 直接  ssh <a href="&#109;&#x61;&#x69;&#108;&#x74;&#x6f;&#x3a;&#100;&#x65;&#112;&#108;&#111;&#x79;&#64;&#49;&#x32;&#51;&#x2e;&#49;&#x32;&#x33;&#46;&#x31;&#50;&#46;&#x31;">&#100;&#101;&#x70;&#x6c;&#x6f;&#x79;&#64;&#49;&#x32;&#x33;&#x2e;&#49;&#50;&#x33;&#46;&#49;&#x32;&#x2e;&#49;</a> 就連進去囉!!</p>
 
 <pre><code class="ruby">-rw------- (600) -- 只有屬主有讀寫權限。
 -rw-r--r-- (644) -- 只有屬主有讀寫權限；而屬組用戶和其他用戶只有讀權限。
