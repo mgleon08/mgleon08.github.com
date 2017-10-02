@@ -1,0 +1,190 @@
+---
+layout: post
+title: "Rails 5 初探"
+date: 2017-09-17 10:09:39 +0800
+comments: true
+categories: rails
+---
+
+Rails5.x.x 已經出來一段時間了，聽說增加了不少東西，來研究順便記錄一下~
+
+<!-- more -->
+
+# 後端
+
+* rake 有些相關指令可改用 rails (`rake db:migrate` to `rails db:migrate`原來的 rake 指令還是可以用)
+
+
+
+# 前端
+* Yarn 成為預設套件 ([yarn 和 npm 效能比較表](https://github.com/pnpm/node-package-manager-benchmark))
+* `jquery-rails` 移出 Gemfile (需要的話，可用 yarn 來安裝)
+* Support webpack
+
+```ruby
+# Webpack
+1.將許多javascript的檔案包在一起，減少request的次數
+2.利用 Loader將ES6編譯成ES5的語法，讓瀏覽器能順利讀取
+3.整合ES Modules、CommonJS和AMD，等等的模組
+``` 	
+
+# 建立專案 with Webpack & Vue
+
+### 新的專案
+
+```ruby
+# 可改成 react or angular
+rails new myapp --webpack=vue
+```
+
+### 原本的專案
+
+> 記得先 brew install yarn (預設會用 yarn 來安裝)
+
+```ruby
+# Gemfile
+gem 'webpack'
+
+# command
+rails webpack:install
+rails webpack:install:vue
+```
+
+### 新增檔案
+
+在 `app/javascript/pack` 的所有檔案會自動被 webpack compiled
+
+```ruby
+app/javascript:
+  ├── packs:
+  │   # only webpack entry files here
+  │   ├── app.vue
+  │   ├── application.js
+  │   └── hello_vue.js
+  └── src:
+  │   └── application.css
+  └── images:
+      └── logo.svg
+```
+
+Rails 會自動產生 vue component 的 sample
+
+```ruby
+# app.vue
+<template>
+  <div id="app">
+    <p>{{ message }}</p>
+  </div>
+</template>
+
+<script>
+export default {
+  data: function () {
+    return {
+      message: "Hello Vue!"
+    }
+  }
+}
+</script>
+
+<style scoped>
+p {
+  font-size: 2em;
+  text-align: center;
+}
+</style>
+
+# hello_vue.js
+import Vue from 'vue'
+import App from './app.vue'
+
+document.addEventListener('DOMContentLoaded', () => {
+  document.body.appendChild(document.createElement('hello'))
+  const app = new Vue(App).$mount('hello')
+
+  console.log(app)
+})
+```
+
+### 建立 controller
+
+```ruby
+bundle exec rails g controller pages index
+```
+
+更改 page index 內容 & router
+
+```ruby
+# app/views/pages/index.html.erb
+<%= javascript_pack_tag 'hello_vue' %>s
+<%= stylesheet_pack_tag 'application' %>
+
+# router
+root 'pages/index'
+```
+
+### 啟動
+
+* 啟動後，Webpacker 會自動 Compiling
+* 若是有修改 vue 裡面的內容，頁面重新整理會在自動 Compiling
+
+```ruby
+rails s
+
+Started GET "/" for 127.0.0.1 at 2017-09-17 11:58:29 +0800
+Processing by PagesController#index as HTML
+  Rendering pages/index.html.erb within layouts/application
+[Webpacker] Compiling…
+[Webpacker] Compiled all packs in /Users/leon/Code/practice/rails5/myapp/public/packs
+  Rendered pages/index.html.erb within layouts/application (4828.5ms)
+Completed 200 OK in 6547ms (Views: 6249.7ms)
+```
+
+* 也可以手動啟動 Webpack Dev Servers
+* 這樣修改 vue 的內容，只要檔案 save 就會自動 Compiling，不需要面重新整理 (vue-hot-reload)
+
+> 開兩個 terminal
+
+```ruby
+# 啟動
+rails s
+bin/webpack-dev-server
+```
+
+> forman gem
+
+```ruby
+# Gemfile
+gem 'foreman'
+
+# Procfile
+backend: bin/rails s -p 3000
+frontend: bin/webpack-dev-server
+
+# 啟動
+foreman start
+```
+
+
+
+教學文件:
+
+* [為你自己學 Ruby on Rails](http://railsbook.tw/table-of-content)
+* [Ruby on Rails 課程](https://railstutorial-china.org/book/)
+
+參考文件: 
+
+* [前端工具整理](http://mgleon08.github.io/blog/2016/11/29/front-end-tools)
+* [Rails 5.1 loves Javascript](https://medium.com/@hpux/rails-5-1-loves-javascript-a1d84d5318b)
+* [Rails 5 & Vue.js: how to stop worrying and love the frontend](https://mkdev.me/en/posts/rails-5-vue-js-how-to-stop-worrying-and-love-the-frontend)
+* [Rails 5.1 使用 yarn 和 webpack 實戰 (vue, 建構等)](https://ruby-china.org/topics/32904)
+
+webpack
+
+* [webpack gem](https://github.com/rails/webpacker)
+* [webpack-dev-server](https://webpack.github.io/docs/webpack-dev-server.html)
+* [Using Webpack gem in rails (video)](https://gorails.com/episodes/using-webpack-in-rails-with-webpacker-gem)
+
+Vue
+
+* [How to use Vue.js and Turbolinks together](https://gorails.com/episodes/how-to-use-vuejs-and-turbolinks-together)
