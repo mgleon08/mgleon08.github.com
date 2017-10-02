@@ -29,7 +29,7 @@ namespace do
 end
 ```
 
-#scope
+# scope
 
 ```ruby
 get 'foo/meetings/:id', :to => 'events#show'
@@ -64,7 +64,7 @@ api_index GET   /test(.:format)         hello/api#index
           PUT   /test/:api_id(.:format) hello/api#update
 ```
 
-#導向
+# 導向
 
 ```ruby
 #靜態
@@ -75,14 +75,14 @@ get '/stories/:name', to: redirect('/articles/%{name}')
 ```
 `redirect` 將網址導向到另一個網址
 
-#設定沒有指定的 path 都導向同一個頁面
+# 設定沒有指定的 path 都導向同一個頁面
 
 ```ruby
 get "*path", to: "welcome#welcome", :defaults => { :format => :json }
 ```
 `defaults` 設定此 routes 輸出都是 json 格式
 
-#特殊條件限定
+# 特殊條件限定
 
 ```ruby
 #過濾id
@@ -147,7 +147,7 @@ end
 #http://api.mgleon08.com/posts
 ```
 
-#DRY
+# DRY
 
 ### concern
 ```ruby
@@ -201,7 +201,7 @@ resources :humans, only: :inde
 ￼￼￼￼end
 ```
 
-#將 module 名稱改為大寫
+# 將 module 名稱改為大寫
 
 ```ruby
 #app/controllers/api/posts_controller.rb
@@ -217,7 +217,7 @@ end
 ￼  inflect.acronym 'API'
 ￼end
 ```
-#CURL
+# CURL
 
 可以用 command line 來測試 get
 
@@ -246,13 +246,13 @@ curl -IH "Authorization: Token token=16d7d6089b8fe0c5e19bfe10bb156832" http://lo
 #Set token on Authorization header
 ```
 
-#路由參數
+# 路由參數
 ```ruby
 get '/clients/:status' => 'clients#index', foo: 'bar'
 ```
 當使用者打開 /clients/active 這一頁，params[:status] 便會被設成 "active"，params[:foo] 也會被設成 "bar"，就像是我們原本透過 Query String 傳進去那樣。同樣的，params[:action] 也會被設成 index。
 
-#default_url_options
+# default_url_options
 
 每次都會在指定的參數進來
 
@@ -264,12 +264,45 @@ class ApplicationController < ActionController::Base
 end
 ```
 
-[路由參數](http://rails.ruby.tw/action_controller_overview.html#%E8%B7%AF%E7%94%B1%E5%8F%83%E6%95%B8)  
-[default_url_options](http://apidock.com/rails/ActionController/Base/default_url_options)
+# shallow
+
+編輯、更新 以及 刪除 功能沒有必要一定要跟在 User 後面，因為主要就是要檢視文章
+
+```ruby
+resources :users do
+  resources :posts, only: [:index, :new, :create]
+end
+resources :posts, only: [:show, :edit, :update, :destroy]
+```
+
+上下相等
+
+```ruby
+resources :users do
+  resources :posts, shallow: true
+end
+```
+
+# 後台網址不要太好猜
+
+`/test/products` 對應資料夾 `admin/products#index`
+
+```ruby
+namespace :admin, path: "test" do
+  resources :products
+end
+```
+
+參考文件:
+
+* [路由參數](http://rails.ruby.tw/action_controller_overview.html#%E8%B7%AF%E7%94%B1%E5%8F%83%E6%95%B8)  
+* [default_url_options](http://apidock.com/rails/ActionController/Base/default_url_options)
+* [為你自己學的 ruby on rails (router)](http://railsbook.tw/chapters/11-routes.html)
 
 官方文件：  
-[Rails Routing from the Outside In](http://guides.rubyonrails.org/routing.html)  
-[Rails 路由：深入淺出](http://rails.ruby.tw/routing.html)
+
+* [Rails Routing from the Outside In](http://guides.rubyonrails.org/routing.html)  
+* [Rails 路由：深入淺出](http://rails.ruby.tw/routing.html)
 
 參考文件：  
-[路由(Routing)](https://ihower.tw/rails4/routing.html)  
+* [路由(Routing)](https://ihower.tw/rails4/routing.html)  

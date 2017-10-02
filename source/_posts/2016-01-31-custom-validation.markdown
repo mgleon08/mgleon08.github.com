@@ -143,8 +143,11 @@ update_counters
 其他內建驗證直接參考官網
 
 官方文件：  
-[Active Record 驗證](http://guides.rubyonrails.org/active_record_validations.html)  
-[Active Record 驗證 中文](http://rails.ruby.tw/active_record_validations.html)
+
+* [Active Record 驗證](http://guides.rubyonrails.org/active_record_validations.html)  
+* [Active Record 驗證 中文](http://rails.ruby.tw/active_record_validations.html)
 
 參考文件：  
-[ActiveRecord - 資料驗證及回呼](https://ihower.tw/rails4/activerecord-lifecycle.html)
+
+* [ActiveRecord - 資料驗證及回呼](https://ihower.tw/rails4/activerecord-lifecycle.html)
+* [為你學的 ruby on rails - model 驗證及回呼](http://railsbook.tw/chapters/19-model-validation-and-callback.html)

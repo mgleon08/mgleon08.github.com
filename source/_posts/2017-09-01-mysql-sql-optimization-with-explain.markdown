@@ -46,6 +46,28 @@ explain SELECT * FROM user
 
 每個欄位詳細的一些 type 可以到參考文件裡的文章去找尋!
 
+# composite index
+另外有時候我們會做 composite index，但其實這種 index 是有順序的!
+
+例如:
+
+```ruby
+add_index :lookup, [:name, :email, :phone], name: "lookup_index", unique: true
+```
+
+當在 `where` 的時候，就必須有順序 `name` `email` `phone` 這個 `index` 才會有效
+
+ex:
+ 
+* `name`
+* `name` `email`
+* `name` `email` `phone`
+* `name` `phone`
+
+`where` 的時候不管順序，只要有對應到就可以
+
+像是 `email` or `phone` or `email` + `phone` 就不會用到這個 index
+
 參考文件:
 
 * [使用explain和show profile來分析SQL語句實現優化SQL語句](http://www.shixinke.com/mysql/mysql-sql-optimization-with-using-explain-and-show-profile)

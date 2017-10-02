@@ -328,6 +328,8 @@ webpack --config myconfig.js
 * [Webpack學習實踐系列(一)](http://blog.hugzh.com/2016/05/02/webpack%E5%AD%A6%E4%B9%A0%E5%AE%9E%E8%B7%B5%E7%B3%BB%E5%88%97-%E4%B8%80/)
 * [如何使用 Webpack 模組整合工具](https://rhadow.github.io/2015/03/23/webpackIntro/)
 * [深入瞭解 Webpack Plugins](https://rhadow.github.io/2015/05/30/webpack-loaders-and-plugins/)
+* [webpack tutorial](https://roy-huang.com/category/webpack/)
+* [Webpack 2 入門課程](https://llp0574.github.io/2016/11/29/getting-started-with-webpack2/)
 
 #<span id="babel">Babel</span>
 

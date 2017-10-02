@@ -291,7 +291,8 @@ git am xxx.patch
 git am *.patch
 ```
 
-[【Git】使用 format-patch 將 commit 打包成檔案 Use format-patch to carry commit](http://chris800731.blogspot.tw/2013/08/git-format-patch-commit-use-format.html)
+* [【Git】使用 format-patch 將 commit 打包成檔案 Use format-patch to carry commit](http://chris800731.blogspot.tw/2013/08/git-format-patch-commit-use-format.html)
+* [5.3 分散式 Git - 專案的管理](https://git-scm.com/book/zh-tw/v1/%E5%88%86%E6%95%A3%E5%BC%8F-Git-%E5%B0%88%E6%A1%88%E7%9A%84%E7%AE%A1%E7%90%86)
 
 #其他
 ###gitkeep
@@ -361,6 +362,32 @@ clear any remote-tracking branch which is no longer exist on the remote.
 
 ```ruby
 git fetch --prune
+```
+
+### git 垃圾回收
+
+```ruby
+git gc
+```
+
+### 拯救已被刪除的 branch
+
+```ruby
+# 看目前 branch 的 sha1
+git rev-parse <branch name>
+
+# 建立新的 branch 並給予 sha1
+git branch new_name <sha1>
+```
+
+### 拯救已被 hard reset 的節點
+
+```ruby
+# 查看 log 節點的 sha1
+git reflog
+
+# 強制回復到該節點
+# git reset <sha1> --hard
 ```
 
 #alias
@@ -468,6 +495,7 @@ alias glog='git log --oneline --decorate --color --graph'
 * [Commit only part of a file in Git](http://stackoverflow.com/questions/1085162/commit-only-part-of-a-file-in-git)
 * [Git 風格指南](https://github.com/JuanitoFatas/git-style-guide)
 * [How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/)
+* [你知道 Git 是怎麼一回事嗎](http://kaochenlong.com/2017/08/11/git-on-modern-web/)
 
 練習：
 

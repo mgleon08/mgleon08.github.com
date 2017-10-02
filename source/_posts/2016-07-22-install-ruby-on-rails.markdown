@@ -606,4 +606,5 @@ export PATH="$HOME/bin:$PATH"
 * [Ruby on Rails Mac 安裝教學](https://github.com/yuyueugene84/ntu_ror_training_course/blob/master/installation_mac.md)  
 * [安裝 Rails 開發環境](https://ihower.tw/rails4/installation.html)
 * [在 Mac 上裝 NVM, RVM 等跑 Gulp, Grunt, Bower 環境](https://tenten.co/blog/install-gulp-grunt-bower-sass-susy-on-mac-with-nvm-rvm/)
-* [node版本管理工具nvm-Mac下安装及使用](https://segmentfault.com/a/1190000004404505)subl .
+* [node版本管理工具nvm-Mac下安装及使用](https://segmentfault.com/a/1190000004404505)
+* [為你自己學 Ruby on Rails 環境設定](http://railsbook.tw/chapters/02-environment-setup.html)
