@@ -19,7 +19,7 @@ categories: rails
 #Cache Store
 
 * 預設的 memory_store 只適合單機開發，重啟 Rails cache 資料就不見了。
-* 正式上線的網站會推薦使用 `Memcached`  
+* 正式上線的網站會推薦使用 `Memcached`
 * 它是一套Name-Value Pair(NVP)分散式記憶體快取系統，當你有多個Rails伺服器的時候，也可以很方便的共用快取資料。
 
 
@@ -27,7 +27,7 @@ categories: rails
 
 ETag 是用來辨識當前的頁面是否有所改變（Rails 預設就有使用了）
 
-第一次  
+第一次
 
 1. Client 發 Request
 2. Rails 流程
@@ -35,7 +35,7 @@ ETag 是用來辨識當前的頁面是否有所改變（Rails 預設就有使用
 	* 2. Create ETag
 	* 3. Body & ETag included in response(`headers['ETag'] = Digest::MD5.hexdigest(body)`)
 3. Rails 發 Response
-	* 200 Success Head 裡包含 ￼headers['ETag'] 
+	* 200 Success Head 裡包含 ￼headers['ETag']
 4. Client 接收並 caches response
 
 第二次
@@ -57,13 +57,18 @@ ETag 是用來辨識當前的頁面是否有所改變（Rails 預設就有使用
 ```ruby
 class ItemsController < ApplicationController
   etag {current_user.id}
-    def show    @item = Item.find(params[:id])￼    fresh_when(@item)
+
+  def show
+    @item = Item.find(params[:id])
+￼    fresh_when(@item)
 	#headers['ETag'] = Digest::MD5.hexdigest(@item.cache_key)
-	#加上面的 etag {current_user.id} 等於 fresh_when([@item, current_user.id])，可以有更多參數去判斷是否有改變  endend
+	#加上面的 etag {current_user.id} 等於 fresh_when([@item, current_user.id])，可以有更多參數去判斷是否有改變
+  end
+end
 ```
 
 這樣一來就只要 id 和 update_at 兩個就可以知道到底整個頁面有沒有東西變動過
-	
+
 
 #memcache store uses dalli
 
@@ -84,6 +89,7 @@ brew install memcached
 * 加上memcached的函式庫
 
 ```ruby
+gem "actionpack-action_caching"
 gem "dalli"
 ```
 
@@ -110,9 +116,9 @@ Rails.cache.fetch('last_post') { Post.last }
 Rails.cache.fetch('time', expires_in: 4.seconds) { Time.now }
 ```
 
-###使用時機
+### 使用時機
 
-資料庫裡不常變動的資料，ex:所有國家
+1.資料庫裡不常變動的資料，ex:所有國家
 
 使用
 
@@ -129,25 +135,58 @@ end
 * 如果不轉 array (to_a)直接將 active-record 的 relations 儲存到 cache 的話，每次訪問 cache 這個 relations 還是會查詢資料庫的
 
 
-gem：  
-[dalli](https://github.com/petergoldstein/dalli)
+2.某個每天需要更新的 cache 資料
 
-官方文件：  
-[Rails 缓存简介](http://guides.ruby-china.org/caching_with_rails.html)  
-[Caching with Rails: An overview](http://guides.rubyonrails.org/caching_with_rails.html)  
-[memcached](https://memcached.org/)
+```ruby
+# Use a different cache store in production.
+config.cache_store = :dalli_store, { value_max_bytes: 3100000 }
+```
 
-參考文件：  
-[快取](https://ihower.tw/rails4/caching.html)  
-[Google Developers: HTTP 快取](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching)  
-[數據緩存提升性能gem - Dalli介紹](http://grantcss.com/blog/2014/12/04/introduce-dalli/)  
-[如何使用 memcached 做快取](https://ihower.tw/blog/archives/1768)  
-[Rails中使用memcached內存緩存技術](https://danielzhangqinglong.github.io/2015/03/19/rails-caching/)  
-[译 ~ 介绍Rails中的条件HTTP缓存](https://danielzhangqinglong.github.io/2015/04/03/intro-http-caching-with-rails/)  
-[Rails 3 和 Rails 4 中 ETags 工作原理](https://ruby-china.org/topics/24996)  
-[淺談memory cache](http://enginechang.logdown.com/posts/249025-discussion-on-memory-cache)  
-[总结 Web 应用中常用的各种 Cache](https://ruby-china.org/topics/19389)  
-[Rails Cache](http://rails-everyday.group.iteye.com/group/wiki/1160)  
-[Speed Up Your Rails App by 66% - The Complete Guide to Rails Caching](https://www.nateberkopec.com/2015/07/15/the-complete-guide-to-rails-caching.html)  
-[Accelerating Rails, Part 1: Built-in Caching](https://www.fastly.com/blog/accelerating-rails-part-1-built-caching)  
-[Accelerating Rails, Part 2: Dynamic HTTP Caching](https://www.fastly.com/blog/accelerating-rails-part-2-dynamic-http-caching)
+```ruby
+class TestController < ApplicationController
+  skip_before_action :authenticate_user!
+  caches_action :index, cache_path: -> { request.domain }, expires_in: 1.day
+
+  def index
+    render template: "test/index.json.jbuilder"
+  end
+
+  def clear_cache
+    Rails.cache.delete_matched("_cache_page.json")
+
+    render json: "Cache page has been deleted."
+  end
+end
+
+```
+
+### 參考文件
+
+Gem
+
+* [dalli](https://github.com/petergoldstein/dalli)
+* [actionpack-action_caching](https://github.com/rails/actionpack-action_caching)
+
+
+官方文件
+
+* [Rails 缓存简介](http://guides.ruby-china.org/caching_with_rails.html)
+* [Caching with Rails: An overview](http://guides.rubyonrails.org/caching_with_rails.html)
+* [memcached](https://memcached.org/)
+* [caching_with_rails](https://doc.bccnsoft.com/docs/rails-guides-4.1-cn/caching_with_rails.html)
+
+參考文件：
+
+* [快取](https://ihower.tw/rails4/caching.html)
+* [Google Developers: HTTP 快取](https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching)
+* [數據緩存提升性能gem - Dalli介紹](http://grantcss.com/blog/2014/12/04/introduce-dalli/)
+* [如何使用 memcached 做快取](https://ihower.tw/blog/archives/1768)
+* [Rails中使用memcached內存緩存技術](https://danielzhangqinglong.github.io/2015/03/19/rails-caching/)
+* [译 ~ 介绍Rails中的条件HTTP缓存](https://danielzhangqinglong.github.io/2015/04/03/intro-http-caching-with-rails/)
+* [Rails 3 和 Rails 4 中 ETags 工作原理](https://ruby-china.org/topics/24996)
+* [淺談memory cache](http://enginechang.logdown.com/posts/249025-discussion-on-memory-cache)
+* [总结 Web 应用中常用的各种 Cache](https://ruby-china.org/topics/19389)
+* [Rails Cache](http://rails-everyday.group.iteye.com/group/wiki/1160)
+* [Speed Up Your Rails App by 66% - The Complete Guide to Rails Caching](https://www.nateberkopec.com/2015/07/15/the-complete-guide-to-rails-caching.html)
+* [Accelerating Rails, Part 1: Built-in Caching](https://www.fastly.com/blog/accelerating-rails-part-1-built-caching)
+* [Accelerating Rails, Part 2: Dynamic HTTP Caching](https://www.fastly.com/blog/accelerating-rails-part-2-dynamic-http-caching)

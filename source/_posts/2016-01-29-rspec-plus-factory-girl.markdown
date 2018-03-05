@@ -851,6 +851,9 @@ Gem：
 * [Configuring database_cleaner with Rails, RSpec, Capybara, and Selenium](http://www.virtuouscode.com/2012/08/31/configuring-database_cleaner-with-rails-rspec-capybara-and-selenium/)
 * [rspec 101](https://xdite.gitbooks.io/rspec-101/content/)
 * [rspec-expectations](https://github.com/rspec/rspec-expectations)
+* [rspec_cheatsheet_attributed.pdf](https://www.anchor.com.au/wp-content/uploads/rspec_cheatsheet_attributed.pdf)
+* [rspec-expectations-cheat-sheet](https://www.rubypigeon.com/posts/rspec-expectations-cheat-sheet/)
+* [rspec_rails_cheetsheet.rb](https://gist.github.com/them0nk/2166525)
 
 RailsPacific： 
  
