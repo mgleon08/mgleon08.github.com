@@ -269,7 +269,9 @@ cache 如果沒寫好，可能會產生資料不一致的Bug、時間顯示相�
 
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;dalli&quot;</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="s2">&quot;actionpack-action_caching&quot;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s2">&quot;dalli&quot;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -315,7 +317,7 @@ cache 如果沒寫好，可能會產生資料不一致的Bug、時間顯示相�
 
 <h3>使用時機</h3>
 
-<p>資料庫裡不常變動的資料，ex:所有國家</p>
+<p>1.資料庫裡不常變動的資料，ex:所有國家</p>
 
 <p>使用</p>
 
@@ -339,28 +341,86 @@ cache 如果沒寫好，可能會產生資料不一致的Bug、時間顯示相�
 </ul>
 
 
-<p>gem：<br/>
-<a href="https://github.com/petergoldstein/dalli">dalli</a></p>
+<p>2.某個每天需要更新的 cache 資料</p>
 
-<p>官方文件：<br/>
-<a href="http://guides.ruby-china.org/caching_with_rails.html">Rails 缓存简介</a><br/>
-<a href="http://guides.rubyonrails.org/caching_with_rails.html">Caching with Rails: An overview</a><br/>
-<a href="https://memcached.org/">memcached</a></p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Use a different cache store in production.</span>
+</span><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">cache_store</span> <span class="o">=</span> <span class="ss">:dalli_store</span><span class="p">,</span> <span class="p">{</span> <span class="ss">value_max_bytes</span><span class="p">:</span> <span class="mi">3100000</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
 
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/caching.html">快取</a><br/>
-<a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching">Google Developers: HTTP 快取</a><br/>
-<a href="http://grantcss.com/blog/2014/12/04/introduce-dalli/">數據緩存提升性能gem - Dalli介紹</a><br/>
-<a href="https://ihower.tw/blog/archives/1768">如何使用 memcached 做快取</a><br/>
-<a href="https://danielzhangqinglong.github.io/2015/03/19/rails-caching/">Rails中使用memcached內存緩存技術</a><br/>
-<a href="https://danielzhangqinglong.github.io/2015/04/03/intro-http-caching-with-rails/">译 ~ 介绍Rails中的条件HTTP缓存</a><br/>
-<a href="https://ruby-china.org/topics/24996">Rails 3 和 Rails 4 中 ETags 工作原理</a><br/>
-<a href="http://enginechang.logdown.com/posts/249025-discussion-on-memory-cache">淺談memory cache</a><br/>
-<a href="https://ruby-china.org/topics/19389">总结 Web 应用中常用的各种 Cache</a><br/>
-<a href="http://rails-everyday.group.iteye.com/group/wiki/1160">Rails Cache</a><br/>
-<a href="https://www.nateberkopec.com/2015/07/15/the-complete-guide-to-rails-caching.html">Speed Up Your Rails App by 66% - The Complete Guide to Rails Caching</a><br/>
-<a href="https://www.fastly.com/blog/accelerating-rails-part-1-built-caching">Accelerating Rails, Part 1: Built-in Caching</a><br/>
-<a href="https://www.fastly.com/blog/accelerating-rails-part-2-dynamic-http-caching">Accelerating Rails, Part 2: Dynamic HTTP Caching</a></p>
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">TestController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">skip_before_action</span> <span class="ss">:authenticate_user!</span>
+</span><span class='line'>  <span class="n">caches_action</span> <span class="ss">:index</span><span class="p">,</span> <span class="ss">cache_path</span><span class="p">:</span> <span class="o">-&gt;</span> <span class="p">{</span> <span class="n">request</span><span class="o">.</span><span class="n">domain</span> <span class="p">},</span> <span class="ss">expires_in</span><span class="p">:</span> <span class="mi">1</span><span class="o">.</span><span class="n">day</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">template</span><span class="p">:</span> <span class="s2">&quot;test/index.json.jbuilder&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">clear_cache</span>
+</span><span class='line'>    <span class="no">Rails</span><span class="o">.</span><span class="n">cache</span><span class="o">.</span><span class="n">delete_matched</span><span class="p">(</span><span class="s2">&quot;_cache_page.json&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="s2">&quot;Cache page has been deleted.&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>參考文件</h3>
+
+<p>Gem</p>
+
+<ul>
+<li><a href="https://github.com/petergoldstein/dalli">dalli</a></li>
+<li><a href="https://github.com/rails/actionpack-action_caching">actionpack-action_caching</a></li>
+</ul>
+
+
+<p>官方文件</p>
+
+<ul>
+<li><a href="http://guides.ruby-china.org/caching_with_rails.html">Rails 缓存简介</a></li>
+<li><a href="http://guides.rubyonrails.org/caching_with_rails.html">Caching with Rails: An overview</a></li>
+<li><a href="https://memcached.org/">memcached</a></li>
+<li><a href="https://doc.bccnsoft.com/docs/rails-guides-4.1-cn/caching_with_rails.html">caching_with_rails</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://ihower.tw/rails4/caching.html">快取</a></li>
+<li><a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching">Google Developers: HTTP 快取</a></li>
+<li><a href="http://grantcss.com/blog/2014/12/04/introduce-dalli/">數據緩存提升性能gem - Dalli介紹</a></li>
+<li><a href="https://ihower.tw/blog/archives/1768">如何使用 memcached 做快取</a></li>
+<li><a href="https://danielzhangqinglong.github.io/2015/03/19/rails-caching/">Rails中使用memcached內存緩存技術</a></li>
+<li><a href="https://danielzhangqinglong.github.io/2015/04/03/intro-http-caching-with-rails/">译 ~ 介绍Rails中的条件HTTP缓存</a></li>
+<li><a href="https://ruby-china.org/topics/24996">Rails 3 和 Rails 4 中 ETags 工作原理</a></li>
+<li><a href="http://enginechang.logdown.com/posts/249025-discussion-on-memory-cache">淺談memory cache</a></li>
+<li><a href="https://ruby-china.org/topics/19389">总结 Web 应用中常用的各种 Cache</a></li>
+<li><a href="http://rails-everyday.group.iteye.com/group/wiki/1160">Rails Cache</a></li>
+<li><a href="https://www.nateberkopec.com/2015/07/15/the-complete-guide-to-rails-caching.html">Speed Up Your Rails App by 66% - The Complete Guide to Rails Caching</a></li>
+<li><a href="https://www.fastly.com/blog/accelerating-rails-part-1-built-caching">Accelerating Rails, Part 1: Built-in Caching</a></li>
+<li><a href="https://www.fastly.com/blog/accelerating-rails-part-2-dynamic-http-caching">Accelerating Rails, Part 2: Dynamic HTTP Caching</a></li>
+</ul>
+
 </div>
 
 
@@ -430,7 +490,7 @@ cache 如果沒寫好，可能會產生資料不一致的Bug、時間顯示相�
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2017 - LeonJi -
+  Copyright &copy; 2018 - LeonJi -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
 </p>
 

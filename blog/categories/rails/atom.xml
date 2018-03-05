@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2017-10-02T16:58:24+08:00</updated>
+  <updated>2018-03-05T10:20:05+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,88 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[樂觀鎖 與 悲觀鎖 Optimistic Locking & Pessimistic Locking]]></title>
+    <link href="http://mgleon08.github.com/blog/2017/11/01/optimistic-locking-and-pessimistic-locking/"/>
+    <updated>2017-11-01T12:16:10+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2017/11/01/optimistic-locking-and-pessimistic-locking</id>
+    <content type="html"><![CDATA[<p>有時候在 db 中會發現重複的值，在交易頻繁的網站更是如此，那就需要 lock，rails 也提供方便的方法來鎖!</p>
+
+<!-- more -->
+
+
+<h2>樂觀鎖</h2>
+
+<ul>
+<li>每次去拿數據的時候，都認為別人不會修改數據，所以不會對數據上鎖，這樣在你拿數據的時候別人也能拿和你屬於同一條的數據。</li>
+<li>在更新數據時，會判斷在這期間是否有人更新過數據，如果有，則本次更新失敗；否則成功。</li>
+<li>由於多個用戶可以同時對同一條數據進行訪問，增加了數據庫的吞吐量。</li>
+<li>適合在資源爭用不激烈的時候使用。</li>
+</ul>
+
+
+<blockquote><p>使用樂觀鎖之前需要給數據庫增加一列 :lock_version，Rails 會自動識別這一列，像數據庫提交數據的時候自動帶上。</p></blockquote>
+
+<pre><code class="ruby">retry_times = 3
+
+begin
+    @order.with_lock do
+        @order.set_paid!
+    end
+rescue ActiveRecord::StaleObjectError =&gt; e
+    retry_times -= 1
+    if retry_times &gt; 0
+        retry
+    else
+        raise e
+    end
+rescue =&gt; e
+    raise e
+end
+</code></pre>
+
+<h2>悲觀鎖</h2>
+
+<ul>
+<li>每次去拿數據的時候，都認為別人會修改數據，因此會對數據上鎖，這樣在自己讀寫數據的過程中，別人不能讀寫這條數據，只能等待本次處理結束，才能訪問。</li>
+<li>嚴謹、有效的保證了數據的有效行</li>
+<li>不能同時對數據庫中同一條數據進行訪問，大大減少了數據庫的吞吐量。</li>
+<li>需要持續的與數據庫保持連接，因此不適合web應用</li>
+<li>實現起來，比較麻煩。</li>
+<li>在資源爭用比較嚴重的時候比較合適</li>
+</ul>
+
+
+<pre><code class="ruby"># rails
+account = Account.find(1)
+Account.transaction do
+    account.lock!
+    account.balance -= 100
+    account.save! 
+end
+
+# 和下面是等價的
+
+account.with_lock do
+    account.balance -= 100
+    account.save!
+end
+</code></pre>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://rails.ruby.tw/active_record_querying.html#%E6%9B%B4%E6%96%B0%E6%99%82%E9%8E%96%E5%AE%9A%E8%A8%98%E9%8C%84">更新時鎖定記錄</a></li>
+<li><a href="https://ruby-china.org/topics/28963">Rails 中樂觀鎖與悲觀鎖的使用</a></li>
+<li><a href="https://openhome.cc/Gossip/HibernateGossip/IsolationLevel.html">簡介隔離層級</a></li>
+<li><a href="https://ruby-china.org/topics/28963">Rails 中樂觀鎖與悲觀鎖的使用</a></li>
+<li><a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Pessimistic.html">ActiveRecord::Locking::Pessimistic</a></li>
+<li><a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html">ActiveRecord::Locking::Optimistic</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails 5 初探]]></title>
@@ -495,91 +577,6 @@ RAILS_ENV=production bundle exec rake assets:precompile
 <ul>
 <li><a href="https://github.com/rroblak/seed_dump">seed_dump</a></li>
 <li><a href="https://github.com/yamldb/yaml_db">yaml_db</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[在專案中連接另一個 Database]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/10/24/connect-multiple-database/"/>
-    <updated>2016-10-24T10:17:44+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/10/24/connect-multiple-database</id>
-    <content type="html"><![CDATA[<p>有時候會需要連接另外一個 database 的資料，rails 可以很方便地來做連接!</p>
-
-<!-- more -->
-
-
-<p>在 model 底下建立子資料夾，連接到另外一個 database，不過關聯就需要另外再去定義，因為是單純去 database 去拉資料過來</p>
-
-<ul>
-<li>好處：就不用透過 api 去拉資料</li>
-<li>壞處：當拉的 database，結構有變就必須跟著動到 code</li>
-</ul>
-
-
-<pre><code class="ruby">#models/test/base.rb
-class Test::Base &lt; ActiveRecord::Base
-  self.abstract_class = true
-  ActiveRecord::Base.establish_connection(
-    :adapter  =&gt; "mysql2",
-    :host     =&gt; "localhost",
-    :username =&gt; "root",
-    :password =&gt; "",
-    :database =&gt; "database_name"
-  )
-  end
-</code></pre>
-
-<pre><code class="ruby">#models/test/course.rb
-class Test::Course &lt; Test::Base
-  self.table_name = :Course
-  has_many :teachers, class_name: "Test::Teacher"
-end
-</code></pre>
-
-<pre><code class="ruby">#models/test/teacher.rb
-class Test::Teacher &lt; Test::Base
-  self.table_name = :teacher
-  belongs_to :course, class_name: "Test::Course"
-end
-</code></pre>
-
-<h2>other</h2>
-
-<p>也可以寫在 database.yml 裡面</p>
-
-<pre><code class="ruby">development_db2:
-  database: your_database_name_development
-  &lt;&lt;: *default
-
-test_db2:
-  database: your_database_name_test
-  &lt;&lt;: *default
-
-production_db2:
-  database: your_database_name
-  &lt;&lt;: *default
-</code></pre>
-
-<pre><code class="ruby">class OtherDatabase &lt; ActiveRecord::Base
-  #記得要用 symbol
-  establish_connection "#{RAILS_ENV}_db2".to_sym
-end
-
-class User &lt; OtherDatabase
-    self.table_name = :user
-end
-</code></pre>
-
-<p>其他文件:</p>
-
-<ul>
-<li><a href="http://railsfun.tw/t/activerecord-in-pure-ruby-api-server/161">ActiveRecord in pure Ruby（+ API server）</a></li>
-<li><a href="http://geekhmer.github.io/blog/2015/02/07/ruby-on-rails-connect-to-multiple-databases-and-migrations/">Ruby on Rails Connect to Multiple Databases and Migrations</a></li>
-<li><a href="https://solidfoundationwebdev.com/blog/posts/connecting-models-to-different-databases-in-rails">Connecting Models To Different Databases In Rails</a></li>
-<li><a href="http://stackoverflow.com/questions/1226182/how-do-i-work-with-two-different-databases-in-rails-with-active-records">How do i work with two different databases in rails with active records?</a></li>
-<li><a href="http://stackoverflow.com/questions/6122508/connecting-rails-3-1-with-multiple-databases">Connecting Rails 3.1 with Multiple Databases</a></li>
 </ul>
 
 ]]></content>

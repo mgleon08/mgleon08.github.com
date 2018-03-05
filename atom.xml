@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2017-10-02T16:58:24+08:00</updated>
+  <updated>2018-03-05T10:20:05+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,349 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[樂觀鎖 與 悲觀鎖 Optimistic Locking & Pessimistic Locking]]></title>
+    <link href="http://mgleon08.github.com/blog/2017/11/01/optimistic-locking-and-pessimistic-locking/"/>
+    <updated>2017-11-01T12:16:10+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2017/11/01/optimistic-locking-and-pessimistic-locking</id>
+    <content type="html"><![CDATA[<p>有時候在 db 中會發現重複的值，在交易頻繁的網站更是如此，那就需要 lock，rails 也提供方便的方法來鎖!</p>
+
+<!-- more -->
+
+
+<h2>樂觀鎖</h2>
+
+<ul>
+<li>每次去拿數據的時候，都認為別人不會修改數據，所以不會對數據上鎖，這樣在你拿數據的時候別人也能拿和你屬於同一條的數據。</li>
+<li>在更新數據時，會判斷在這期間是否有人更新過數據，如果有，則本次更新失敗；否則成功。</li>
+<li>由於多個用戶可以同時對同一條數據進行訪問，增加了數據庫的吞吐量。</li>
+<li>適合在資源爭用不激烈的時候使用。</li>
+</ul>
+
+
+<blockquote><p>使用樂觀鎖之前需要給數據庫增加一列 :lock_version，Rails 會自動識別這一列，像數據庫提交數據的時候自動帶上。</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">retry_times</span> <span class="o">=</span> <span class="mi">3</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">begin</span>
+</span><span class='line'>    <span class="vi">@order</span><span class="o">.</span><span class="n">with_lock</span> <span class="k">do</span>
+</span><span class='line'>        <span class="vi">@order</span><span class="o">.</span><span class="n">set_paid!</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">rescue</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">StaleObjectError</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>    <span class="n">retry_times</span> <span class="o">-=</span> <span class="mi">1</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">retry_times</span> <span class="o">&gt;</span> <span class="mi">0</span>
+</span><span class='line'>        <span class="k">retry</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>        <span class="k">raise</span> <span class="n">e</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
+</span><span class='line'>    <span class="k">raise</span> <span class="n">e</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>悲觀鎖</h2>
+
+<ul>
+<li>每次去拿數據的時候，都認為別人會修改數據，因此會對數據上鎖，這樣在自己讀寫數據的過程中，別人不能讀寫這條數據，只能等待本次處理結束，才能訪問。</li>
+<li>嚴謹、有效的保證了數據的有效行</li>
+<li>不能同時對數據庫中同一條數據進行訪問，大大減少了數據庫的吞吐量。</li>
+<li>需要持續的與數據庫保持連接，因此不適合web應用</li>
+<li>實現起來，比較麻煩。</li>
+<li>在資源爭用比較嚴重的時候比較合適</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># rails</span>
+</span><span class='line'><span class="n">account</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'><span class="no">Account</span><span class="o">.</span><span class="n">transaction</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">lock!</span>
+</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">balance</span> <span class="o">-=</span> <span class="mi">100</span>
+</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">save!</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 和下面是等價的</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">account</span><span class="o">.</span><span class="n">with_lock</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">balance</span> <span class="o">-=</span> <span class="mi">100</span>
+</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">save!</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://rails.ruby.tw/active_record_querying.html#%E6%9B%B4%E6%96%B0%E6%99%82%E9%8E%96%E5%AE%9A%E8%A8%98%E9%8C%84">更新時鎖定記錄</a></li>
+<li><a href="https://ruby-china.org/topics/28963">Rails 中樂觀鎖與悲觀鎖的使用</a></li>
+<li><a href="https://openhome.cc/Gossip/HibernateGossip/IsolationLevel.html">簡介隔離層級</a></li>
+<li><a href="https://ruby-china.org/topics/28963">Rails 中樂觀鎖與悲觀鎖的使用</a></li>
+<li><a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Pessimistic.html">ActiveRecord::Locking::Pessimistic</a></li>
+<li><a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html">ActiveRecord::Locking::Optimistic</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Http Websocket Bot]]></title>
+    <link href="http://mgleon08.github.com/blog/2017/10/06/http-websocket-bot/"/>
+    <updated>2017-10-06T12:09:51+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2017/10/06/http-websocket-bot</id>
+    <content type="html"><![CDATA[<p>簡單的 <code>Http</code> <code>Websocket</code> <code>Bot</code> 介紹</p>
+
+<!-- more -->
+
+
+<ul>
+<li>HTTP is hypertext transfer protocol</li>
+<li>HTTP is an application protocol</li>
+<li>HTTP is the foundation of data communication for the World Wide Web.</li>
+</ul>
+
+
+<blockquote><p>HTTP 是一個無狀態（Stateless）的協議，對於事務處理沒有記憶能力，伺服器不知道客戶端是什麼狀態。發送 HTTP 請求之後，伺服器根據請求，會給我們發送數據過來，但是，發送完，不會記錄任何訊息。</p></blockquote>
+
+<ul>
+<li>Http 1.0
+
+<ul>
+<li>HTTP 的生命週期透過 Request 來界定，也就是一個Request 一個Response，那麼在HTTP1.0中，這次HTTP請求就結束了</li>
+</ul>
+</li>
+<li>Http 1.1
+
+<ul>
+<li>多出一個keep-alive，在一個HTTP連接中，可以發送多個Request，接收多個Response。</li>
+<li>但是 Request = Response ， 在HTTP中永遠是這樣，也就是說一個request只能有一個response。而且這個response也是被動的，不能主動發起。</li>
+</ul>
+</li>
+</ul>
+
+
+<p><img src="https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/HTTP_persistent_connection.svg/600px-HTTP_persistent_connection.svg.png" alt="" /></p>
+
+<p><a href="https://read01.com/ePjEn2.html">如何理解HTTP協議的「無連接，無狀態」特點?</a></p>
+
+<h3>傳統即時性網頁技術</h3>
+
+<ul>
+<li>Polling 輪詢
+
+<ul>
+<li>瀏覽器每隔一段時間就自動送出一個 HTTP 請求給 server ，獲取最新的網頁資料</li>
+<li>在 server 沒有新資料時，瀏覽器也是會自動送出請求，造成網路資源浪費</li>
+</ul>
+</li>
+<li>Long-Polling 長時間輪詢
+
+<ul>
+<li>server 在接收到瀏覽器所送出的 HTTP 請求後， server 會等待一段時間，若在這段時間裡 server 有新的資料，它就會把最新的資料傳回給瀏覽器</li>
+<li>如果等待的時間到了之後也沒有新資料的話，就會送一個回應給瀏覽器，告知瀏覽器資料沒有更新</li>
+<li>如果在資料更新很頻繁的狀況下，長時間輪詢並不會比傳統的輪詢有效率，而且有時候資料量很大時，會造成連續的 polls 不斷產生，反而會更糟糕。</li>
+</ul>
+</li>
+<li>Streaming
+
+<ul>
+<li>讓 server 在接收到瀏覽器所送出 HTTP 請求後，立即產生一個回應瀏覽器的連線，並且讓這個連線持續一段時間不要中斷，而 server 在這段時間內如果有新的資料，就可以透過這個連線將資料馬上傳送給瀏覽器。</li>
+<li>由於是建立在 HTTP 協定上的一種傳輸機制，所以有可能會因為代理 server（proxy）或防火牆（firewall）將其中的資料存放在緩衝區中，造成資料回應上的延遲，因此許多使用串流的 Comet 實作會在偵測到有代理 server 的狀況時，改用 Long-Polling 的方式處理。</li>
+</ul>
+</li>
+</ul>
+
+
+<h1>WebSocket</h1>
+
+<blockquote><p>WebSocket protocol 定義在 HTML5 標準中的一個新的網頁傳輸協議。</p></blockquote>
+
+<ul>
+<li>是一種建立在單一 TCP 連線上的全雙工（full-duplex）通訊管道，可以讓網頁應用程式與伺服器之間做即時性、雙向的資料傳遞。</li>
+<li>瀏覽器與伺服器之間若要建立一條 WebSocket 連線，在一開始的交握（handshake）階段中，要先從 HTTP 協定升級為 WebSocket 協定</li>
+</ul>
+
+
+<h1>EventMachine</h1>
+
+<blockquote><p><a href="https://travisliu.gitbooks.io/learn-eventmachine/content/index.html">EventMachine</a> 是一套事件驅動(event-driven IO) 的框架，基於Reactor Pattern 達到輕量化的併發處理</p></blockquote>
+
+<ul>
+<li>Reactor模式
+
+<ul>
+<li>一個處理服務請求的並發程式設計模型。多個服務請求同時發往一個服務句柄(Service Handler)。服務句柄(Service Handler)多路分用到來的請求並把它們同步轉發給相關的請求處理器。</li>
+</ul>
+</li>
+</ul>
+
+
+<p>Github：</p>
+
+<ul>
+<li><a href="https://github.com/eventmachine/eventmachine">eventmachine</a> doc <a href="http://www.rubydoc.info/github/eventmachine/eventmachine/index">rubydoc</a></li>
+<li><a href="https://github.com/faye/faye-websocket-ruby">faye-websocket-ruby</a></li>
+<li><a href="https://github.com/igrigorik/em-websocket">em-websocket</a></li>
+<li><a href="https://api.slack.com/community">Widely-used open source libraries</a></li>
+</ul>
+
+
+<p>官網：</p>
+
+<ul>
+<li><a href="http://websocket.org/">websocket.org</a></li>
+<li><a href="https://hubot.github.com/">hubot</a></li>
+<li><a href="https://faye.jcoglan.com/">faye</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li>WebSocket 介紹
+
+<ul>
+<li><a href="https://blog.gtwang.org/web-development/websocket-protocol/">WebSocket 通訊協定簡介：比較 Polling、Long-Polling 與 Streaming 的運作原理</a></li>
+<li><a href="http://www.syscom.com.tw/ePaper_New_Content.aspx?id=368&amp;EPID=194&amp;TableName=sgEPArticle">WebSocket – 新一代網路傳輸技術</a></li>
+<li><a href="https://www.zhihu.com/question/20215561">WebSocket 是什麼原理？為什麼可以實現持久連接？</a></li>
+</ul>
+</li>
+<li><a href="https://travisliu.gitbooks.io/learn-eventmachine/content/index.html">learn-eventmachine</a></li>
+<li><a href="https://www.sitepoint.com/building-a-slackbot-with-ruby-and-sinatra/">Building a Slackbot with Ruby and Sinatra</a></li>
+<li><a href="https://zh.scribd.com/document/28253878/EventMachine-scalable-non-blocking-i-o-in-ruby">EventMachine: scalable non-blocking i/o in ruby</a></li>
+<li><a href="http://blog.csdn.net/zdq0394123/article/details/7901932">EventMachine簡介</a></li>
+<li><a href="http://railsfun.tw/t/rails-websocket/498">rails + websocket</a></li>
+<li><a href="https://devcenter.heroku.com/articles/ruby-websockets">Using WebSockets on Heroku with Ruby</a></li>
+<li><a href="https://blog.engineyard.com/2013/getting-started-with-ruby-and-websockets">Getting Started with Ruby and WebSockets</a></li>
+<li><a href="http://tonytonyjan.net/2015/11/05/concurrent-ruby/">Ruby SSE Server 動手做</a></li>
+<li><a href="https://www.rails365.net/articles/websocket-xu-lie-wen-zhang-mu-lu">websocket序列文章目錄</a></li>
+<li><a href="https://ihower.tw/rails4/deployment.html">EventMachine和多執行序模型</a></li>
+<li><a href="http://blog.hugzh.com/2016/01/05/socket.io%E6%90%AD%E5%BB%BA%E5%A4%9A%E8%81%8A%E5%A4%A9%E5%AE%A4/">socket.io搭建多聊天室</a></li>
+<li><a href="https://devcenter.heroku.com/articles/ruby-websockets#functionality">Using WebSockets on Heroku with Ruby</a></li>
+<li><a href="https://wearestac.com/blog/building-a-slack-slash-command-with-sinatra-finch-and-heroku">BUILDING A SLACK SLASH COMMAND WITH SINATRA, FINCH AND HEROKU</a></li>
+<li><a href="http://tech.deepdevelop.com/shi-xian-ge-slack-slash-command/">實現一個 Slack Slash Command</a></li>
+<li><a href="http://blog.amowu.com/2015/12/serverless-aws-slack-slash-commands.html">Serverless! 使用 AWS 開發 Slack Slash Commands</a></li>
+</ul>
+
+
+<h3>Video</h3>
+
+<ul>
+<li><a href="http://code.dblock.org/2016/03/11/your-first-slack-bot-service-video.html">Your First Slack Bot Service (Ruby)</a></li>
+<li><a href="http://www.slideshare.net/ryudoawaru/rt28-29828529">Eventmachine Websocket 實戰</a>  <a href="https://www.youtube.com/watch?v=5X5WEFRTehE">(Video)</a></li>
+<li><a href="https://www.youtube.com/watch?v=BWaTYiTbv7Q">Say Hello To Your First Slackbot (Js)</a></li>
+</ul>
+
+
+<h3>Hubot</h3>
+
+<ul>
+<li><a href="https://github.com/hubot-scripts">Hubot Scripts</a></li>
+<li><a href="https://github.com/github/hubot-scripts">hubot-scripts</a></li>
+<li><a href="http://huli.logdown.com/posts/417258-hubot-a-bot-framework">[心得] Hubot, 一套 bot framework</a></li>
+<li><a href="http://blog.frost.tw/posts/2012/03/18/create-a-hubot-plurk-adapter/">製作一個 Hubot 的噗浪 Adapter</a></li>
+<li><a href="http://code.kpman.cc/2016/04/18/%E5%9C%A8-slack-%E5%BB%BA%E7%AB%8B-hubot/#">在 slack 建立 hubot</a></li>
+<li><a href="https://asoul.github.io/2016/04/24/create-hubot-script-and-publish-to-npm/">如何製作 Hubot Script 推上 npm</a></li>
+<li><a href="https://npes87184.github.io/%E7%A0%94%E7%A9%B6%E9%9B%9C%E8%A8%98/2016/07/08/hubotExample.html">Hubot 聊天機器人簡單架設教學</a></li>
+<li><a href="https://github.com/twtrubiks/mybot">使用Hubot建立屬於自己的機器人 (Build Your Own Robot With Hubot)</a></li>
+<li><a href="http://www.jianshu.com/p/3ff7a48be02d">基於Hubot打造自己的聊天機器人服務</a></li>
+</ul>
+
+
+<h3>other</h3>
+
+<ul>
+<li><a href="http://www.inside.com.tw/2016/08/26/how-to-build-an-inside-bot">INSIDE 有隻硬塞 Bot，聊天、訂閱、搜尋樣樣行！（請勿拍打餵食）</a></li>
+<li><a href="https://chatfuel.com/">chatfuel</a></li>
+</ul>
+
+
+<h3>deploy</h3>
+
+<ul>
+<li><a href="https://www.heroku.com/">heroku</a></li>
+<li><a href="http://uptimerobot.com/">uptimerobot</a> 一直戳 heroku 防止 server 進入休眠</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># create new heroku project</span>
+</span><span class='line'><span class="n">heroku</span> <span class="n">create</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># push heroku</span>
+</span><span class='line'><span class="n">git</span> <span class="n">push</span> <span class="n">heroku</span> <span class="n">master</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># env config setting</span>
+</span><span class='line'><span class="n">heroku</span> <span class="ss">config</span><span class="p">:</span><span class="n">add</span> <span class="no">SLACK_API_TOKEN</span><span class="o">=</span><span class="n">xxxxxx</span><span class="o">-</span><span class="n">xxxxxxxxx</span><span class="o">-</span><span class="n">xxxxxxxxxxx</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">heroku</span> <span class="ss">config</span><span class="p">:</span><span class="n">add</span> <span class="no">SLACK_API_TOKEN</span><span class="o">=</span><span class="n">xxoxb</span><span class="o">-</span><span class="mi">74720840001</span><span class="o">-</span><span class="n">leOhdqKE1mX4hYknfHAeV049</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">heroku</span> <span class="ss">config</span><span class="p">:</span><span class="n">remove</span> <span class="no">SLACK_API_TOKEN</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># log</span>
+</span><span class='line'><span class="n">heroku</span> <span class="n">logs</span> <span class="o">--</span><span class="n">tail</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># scale</span>
+</span><span class='line'><span class="n">heroku</span> <span class="ss">ps</span><span class="p">:</span><span class="n">scale</span> <span class="n">web</span><span class="o">=</span><span class="mi">2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>實做簡易 slack bot</h3>
+
+<ul>
+<li><a href="https://github.com/mgleon08/simple_slack_bot">simple_slack_bot</a></li>
+<li><a href="https://github.com/mgleon08/simple_line_bot">simple_line_bot</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails 5 初探]]></title>
@@ -2273,6 +2616,37 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h3>範例二</h3>
+
+<p><a href="https://github.com/mgleon08/slack_neuralyzer">slack_neuralyzer</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">FROM</span> <span class="ss">ubuntu</span><span class="p">:</span><span class="n">latest</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">MAINTAINER</span> <span class="n">leonji</span> <span class="n">mgleon08</span><span class="vi">@gmail</span><span class="o">.</span><span class="n">com</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RUN</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">upgrade</span> <span class="o">-</span><span class="n">y</span> <span class="o">&amp;&amp;</span> <span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="o">-</span><span class="n">y</span> <span class="n">curl</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">RUN</span> <span class="n">gpg</span> <span class="o">--</span><span class="n">keyserver</span> <span class="ss">hkp</span><span class="p">:</span><span class="sr">//</span><span class="n">keys</span><span class="o">.</span><span class="n">gnupg</span><span class="o">.</span><span class="n">net</span> <span class="o">--</span><span class="n">recv</span><span class="o">-</span><span class="n">keys</span> <span class="mi">409</span><span class="no">B6B1796C275462A1703113804BB82D39DC0E3</span>
+</span><span class='line'><span class="no">RUN</span> <span class="p">\</span><span class="n">curl</span> <span class="o">-</span><span class="n">sSL</span> <span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">get</span><span class="o">.</span><span class="n">rvm</span><span class="o">.</span><span class="n">io</span> <span class="o">|</span> <span class="n">bash</span> <span class="o">-</span><span class="n">s</span> <span class="n">stable</span>
+</span><span class='line'><span class="no">RUN</span> <span class="sr">/bin/</span><span class="n">bash</span> <span class="o">-</span><span class="n">l</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;rvm install 2.4.2&quot;</span>
+</span><span class='line'><span class="no">RUN</span> <span class="sr">/bin/</span><span class="n">bash</span> <span class="o">-</span><span class="n">l</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;gem install slack_neuralyzer&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">CMD</span> <span class="sr">/bin/</span><span class="n">bash</span> <span class="o">-</span><span class="n">l</span> <span class="o">-</span><span class="n">c</span> <span class="s2">&quot;slack_neuralyzer -t &lt;SLACK_TOKEN&gt; -u &lt;USER_NAME&gt; -D &lt;USER_NAME&gt; -m -e -r 1&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h2>Docker Compose</h2>
 
 <p>Compose 是一個工具，用來定義與執行多個 container 組成的 Docker Applications。你可以使用 Compose 檔案來組態設定你的應用服務。然後使用單一命令，透過你的組態設定來建立與啟動你的服務。</p>
@@ -3958,381 +4332,6 @@ Commonly used to simulate <code>$stdio</code> or <code>$stderr</code></p></block
 <li><a href="https://github.com/defunkt/choice">choice</a></li>
 <li><a href="https://github.com/ManageIQ/trollop">trollop</a></li>
 <li><a href="https://github.com/davetron5000/gli">gli</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Make You Own Gem]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/08/30/make-you-own-gem/"/>
-    <updated>2016-08-30T10:24:36+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/08/30/make-you-own-gem</id>
-    <content type="html"><![CDATA[<p>bundle 本身就有提供可以產生 gem 相關檔案的功能</p>
-
-<!-- more -->
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bundle</span> <span class="n">gem</span> <span class="n">xxx</span> <span class="o">--</span><span class="n">mit</span> <span class="o">-</span><span class="n">t</span><span class="o">=</span><span class="n">rspec</span>
-</span><span class='line'><span class="c1">#後面可以設定參數，ex: 自動產生 LICENSE.txt, 測試用 rspec or mintest 等等</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">#xxx/Gemfile                  &lt;= dependency 哪些套件，但基本上裡面是指定到 xxx.gemspec，將相依的套件定義在 xxx.gemspec 即可</span>
-</span><span class='line'><span class="c1">#xxx/Rakefile                 &lt;= 發佈和打包的 rake tasks</span>
-</span><span class='line'><span class="c1">#xxx/LICENSE.txt              &lt;= 註明 License</span>
-</span><span class='line'><span class="c1">#xxx/README.md                &lt;= 說明如何使用它(github上會顯示)</span>
-</span><span class='line'><span class="c1">#xxx/.gitignore               &lt;= 不要進 Git 的檔案在這定義</span>
-</span><span class='line'><span class="c1">#xxx/xxx.gemspec             &lt;= gem 的 spec</span>
-</span><span class='line'><span class="c1">#xxx/lib/xxx.rb              &lt;= gem 裡的 library，主要 code 都是在這裡</span>
-</span><span class='line'><span class="c1">#xxx/lib/xxx/version.rb      &lt;= 版本紀錄</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p><code>xxx.gemspec</code> gem 裡面的基本設定都會在這邊，需要寫的都會註明 <code>TODO:</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># coding: utf-8</span>
-</span><span class='line'><span class="n">lib</span> <span class="o">=</span> <span class="no">File</span><span class="o">.</span><span class="n">expand_path</span><span class="p">(</span><span class="s1">&#39;../lib&#39;</span><span class="p">,</span> <span class="bp">__FILE__</span><span class="p">)</span>
-</span><span class='line'><span class="vg">$LOAD_PATH</span><span class="o">.</span><span class="n">unshift</span><span class="p">(</span><span class="n">lib</span><span class="p">)</span> <span class="k">unless</span> <span class="vg">$LOAD_PATH</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="n">lib</span><span class="p">)</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;xxx/version&#39;</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Gem</span><span class="o">::</span><span class="no">Specification</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span> <span class="o">|</span><span class="n">spec</span><span class="o">|</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">name</span>          <span class="o">=</span> <span class="s2">&quot;xxx&quot;</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">version</span>       <span class="o">=</span> <span class="no">Xxx</span><span class="o">::</span><span class="no">VERSION</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">authors</span>       <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;TODO: Write your name&quot;</span><span class="o">]</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">email</span>         <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;TODO: Write your email address&quot;</span><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">summary</span>       <span class="o">=</span> <span class="sx">%q{TODO: Write a short summary, because Rubygems requires one.}</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">description</span>   <span class="o">=</span> <span class="sx">%q{TODO: Write a longer description or delete this line.}</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">homepage</span>      <span class="o">=</span> <span class="s2">&quot;TODO: Put your gem&#39;s website or public repo URL here.&quot;</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">license</span>       <span class="o">=</span> <span class="s2">&quot;MIT&quot;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1"># Prevent pushing this gem to RubyGems.org by setting &#39;allowed_push_host&#39;, or</span>
-</span><span class='line'>  <span class="c1"># delete this section to allow pushing this gem to any host.</span>
-</span><span class='line'>  <span class="k">if</span> <span class="n">spec</span><span class="o">.</span><span class="n">respond_to?</span><span class="p">(</span><span class="ss">:metadata</span><span class="p">)</span>
-</span><span class='line'>    <span class="n">spec</span><span class="o">.</span><span class="n">metadata</span><span class="o">[</span><span class="s1">&#39;allowed_push_host&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="s2">&quot;TODO: Set to &#39;http://mygemserver.com&#39;&quot;</span>
-</span><span class='line'>  <span class="k">else</span>
-</span><span class='line'>    <span class="k">raise</span> <span class="s2">&quot;RubyGems 2.0 or newer is required to protect against public gem pushes.&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">files</span>         <span class="o">=</span> <span class="sb">`git ls-files -z`</span><span class="o">.</span><span class="n">split</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\x0</span><span class="s2">&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">reject</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="n">f</span><span class="o">.</span><span class="n">match</span><span class="p">(</span><span class="sr">%r{^(test|spec|features)/}</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">bindir</span>        <span class="o">=</span> <span class="s2">&quot;exe&quot;</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">executables</span>   <span class="o">=</span> <span class="n">spec</span><span class="o">.</span><span class="n">files</span><span class="o">.</span><span class="n">grep</span><span class="p">(</span><span class="sr">%r{^exe/}</span><span class="p">)</span> <span class="p">{</span> <span class="o">|</span><span class="n">f</span><span class="o">|</span> <span class="no">File</span><span class="o">.</span><span class="n">basename</span><span class="p">(</span><span class="n">f</span><span class="p">)</span> <span class="p">}</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">require_paths</span> <span class="o">=</span> <span class="o">[</span><span class="s2">&quot;lib&quot;</span><span class="o">]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">add_development_dependency</span> <span class="s2">&quot;bundler&quot;</span><span class="p">,</span> <span class="s2">&quot;~&gt; 1.11&quot;</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">add_development_dependency</span> <span class="s2">&quot;rake&quot;</span><span class="p">,</span> <span class="s2">&quot;~&gt; 10.0&quot;</span>
-</span><span class='line'>  <span class="n">spec</span><span class="o">.</span><span class="n">add_development_dependency</span> <span class="s2">&quot;rspec&quot;</span><span class="p">,</span> <span class="s2">&quot;~&gt; 3.0&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Code</h1>
-
-<p><code>xxx/lib/xxx.rb</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s2">&quot;xxx/version&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">module</span> <span class="nn">Xxx</span>
-</span><span class='line'>  <span class="c1"># Your code goes here...</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">hi</span>
-</span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;Hello, world!&quot;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Build</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">build</span> <span class="n">xxx</span><span class="o">.</span><span class="n">gemspec</span>
-</span><span class='line'><span class="c1">#目錄底下會多出此檔 xxx-0.0.1.gem</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Successfully</span> <span class="n">built</span> <span class="no">RubyGem</span>
-</span><span class='line'><span class="ss">Name</span><span class="p">:</span> <span class="n">xxx</span>
-</span><span class='line'><span class="ss">Version</span><span class="p">:</span> <span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="ss">File</span><span class="p">:</span> <span class="n">xxx</span><span class="o">-</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="n">gem</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Install</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">install</span> <span class="n">xxx</span>
-</span><span class='line'>
-</span><span class='line'><span class="err">$</span> <span class="n">irb</span>
-</span><span class='line'><span class="nb">require</span> <span class="s1">&#39;xxx&#39;</span>
-</span><span class='line'><span class="c1">#=&gt; true</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Xxx</span><span class="o">.</span><span class="n">hi</span>
-</span><span class='line'><span class="c1">#=&gt;Hello, world!</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>發佈到 RubyGems.org</h1>
-
-<ul>
-<li>gem update &ndash;system</li>
-<li>申請帳號 <a href="https://rubygems.org/sign_up">rubygems</a></li>
-<li>發佈</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">gem</span> <span class="n">push</span> <span class="n">xxx</span><span class="o">-</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">1</span><span class="o">.</span><span class="n">gem</span>
-</span><span class='line'><span class="c1">#push 後會要輸入你剛剛的申請的帳號密碼，就ok囉</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>command-reference</h3>
-
-<p><a href="http://guides.rubygems.org/command-reference/">command-reference</a></p>
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="RubyGems.org">https://rubygems.org/</a></li>
-<li><a href="http://bundler.io/v1.12/man/bundle-gem.1.html">bundle gem</a></li>
-<li><a href="http://guides.rubygems.org/make-your-own-gem/">MAKE YOUR OWN GEM</a></li>
-<li><a href="http://blog.jex.tw/blog/2013/11/29/ruby-build-own-gem/">Ruby 建立自己的 Gem 套件</a></li>
-<li><a href="https://quickleft.com/blog/engineering-lunch-series-step-by-step-guide-to-building-your-first-ruby-gem/">Step-by-Step Guide to Building Your First Ruby Gem</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Cucumber]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/08/30/cucumber/"/>
-    <updated>2016-08-30T10:23:07+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/08/30/cucumber</id>
-    <content type="html"><![CDATA[<p>BDD 行為驅動開發工具</p>
-
-<!-- more -->
-
-
-<ul>
-<li>Behavior Driven Development BDD 行為驅動開發工具</li>
-<li>Cucumber 通過 Gherkin 語言来描述語句</li>
-</ul>
-
-
-<h3>好處</h3>
-
-<ul>
-<li>會說話的程式碼</li>
-<li>用口語方式寫測試</li>
-<li>讓溝通更順暢</li>
-<li>使用人類的語言來描述程式行為</li>
-<li>明確溝通需求</li>
-<li>測試即文件</li>
-<li>消除落差</li>
-<li>留作紀錄</li>
-</ul>
-
-
-<h3>Usage</h3>
-
-<p>描述行為</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Feature</span> <span class="p">(</span><span class="err">功能</span><span class="p">)</span>             <span class="c1">#功能說明, 使用情境</span>
-</span><span class='line'>  <span class="no">Scenario</span><span class="p">(</span><span class="err">場景，劇本</span><span class="p">)</span>    <span class="c1">#操作方式 特定流程</span>
-</span><span class='line'>      <span class="no">Step</span>    <span class="p">(</span><span class="err">步驟</span><span class="p">)</span>      <span class="c1">#操作步驟</span>
-</span><span class='line'>      <span class="no">Given</span>   <span class="p">(</span><span class="err">假設</span><span class="p">)</span>      <span class="c1">#前情提要, 初始化</span>
-</span><span class='line'>      <span class="no">And</span>     <span class="p">(</span><span class="err">並且</span><span class="p">)</span>      <span class="c1">#更多前情提要</span>
-</span><span class='line'>      <span class="no">When</span>    <span class="p">(</span><span class="err">當</span><span class="p">)</span>        <span class="c1">#執行動作</span>
-</span><span class='line'>      <span class="no">And</span>     <span class="p">(</span><span class="err">並且</span><span class="p">)</span>      <span class="c1">#更多動作 </span>
-</span><span class='line'>      <span class="no">Then</span>    <span class="p">(</span><span class="err">那麼</span><span class="p">)</span>      <span class="c1">#預期結果</span>
-</span><span class='line'>      <span class="no">And</span>     <span class="p">(</span><span class="err">並且</span><span class="p">)</span>      <span class="c1">#更多結果</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>撰寫測試</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#features/cucumber.feature</span>
-</span><span class='line'><span class="ss">Feature</span><span class="p">:</span>
-</span><span class='line'>  <span class="no">Add</span> <span class="n">two</span> <span class="n">number</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="ss">Scenario</span><span class="p">:</span> <span class="no">Add</span> <span class="mi">1</span> <span class="ow">and</span> <span class="mi">2</span> <span class="n">should</span> <span class="n">be</span> <span class="mi">3</span>
-</span><span class='line'>  <span class="no">Given</span> <span class="n">the</span> <span class="n">first</span> <span class="n">number</span> <span class="n">is</span> <span class="mi">1</span>
-</span><span class='line'>  <span class="no">And</span> <span class="n">the</span> <span class="n">second</span> <span class="n">numner</span> <span class="n">is</span> <span class="mi">2</span>
-</span><span class='line'>  <span class="no">When</span> <span class="n">calculate</span> <span class="n">two</span> <span class="n">number</span>
-</span><span class='line'>  <span class="no">Then</span> <span class="n">result</span> <span class="n">should</span> <span class="n">be</span> <span class="mi">3</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#features/step_definitions/interaction_steps.rb</span>
-</span><span class='line'><span class="no">Given</span><span class="p">(</span><span class="sr">/^the first number is (\d+)$/</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">num1</span><span class="o">|</span>
-</span><span class='line'>  <span class="vi">@num1</span> <span class="o">=</span> <span class="n">num1</span><span class="o">.</span><span class="n">to_i</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Given</span><span class="p">(</span><span class="sr">/^the second numner is (\d+)$/</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">num2</span><span class="o">|</span>
-</span><span class='line'>  <span class="vi">@num2</span> <span class="o">=</span> <span class="n">num2</span><span class="o">.</span><span class="n">to_i</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">When</span><span class="p">(</span><span class="sr">/^calculate two number$/</span><span class="p">)</span> <span class="k">do</span>
-</span><span class='line'>  <span class="vi">@sum</span> <span class="o">=</span> <span class="vi">@num1</span> <span class="o">+</span> <span class="vi">@num2</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Then</span><span class="p">(</span><span class="sr">/^result should be (\d+)$/</span><span class="p">)</span> <span class="k">do</span> <span class="o">|</span><span class="n">result</span><span class="o">|</span>
-</span><span class='line'>  <span class="vi">@sum</span><span class="o">.</span><span class="n">should</span> <span class="o">===</span> <span class="n">result</span><span class="o">.</span><span class="n">to_i</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">console</span>
-</span><span class='line'><span class="ss">Feature</span><span class="p">:</span>
-</span><span class='line'>  <span class="no">Add</span> <span class="n">two</span> <span class="n">number</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="ss">Scenario</span><span class="p">:</span> <span class="no">Add</span> <span class="mi">1</span> <span class="ow">and</span> <span class="mi">2</span> <span class="n">should</span> <span class="n">be</span> <span class="mi">3</span> <span class="c1"># features/command_options.feature:4</span>
-</span><span class='line'>    <span class="no">Given</span> <span class="n">the</span> <span class="n">first</span> <span class="n">number</span> <span class="n">is</span> <span class="mi">1</span>     <span class="c1"># features/step_definitions/interaction_steps.rb:1</span>
-</span><span class='line'>    <span class="no">And</span> <span class="n">the</span> <span class="n">second</span> <span class="n">numner</span> <span class="n">is</span> <span class="mi">2</span>      <span class="c1"># features/step_definitions/interaction_steps.rb:5</span>
-</span><span class='line'>    <span class="no">When</span> <span class="n">calculate</span> <span class="n">two</span> <span class="n">number</span>       <span class="c1"># features/step_definitions/interaction_steps.rb:9</span>
-</span><span class='line'>    <span class="no">Then</span> <span class="n">result</span> <span class="n">should</span> <span class="n">be</span> <span class="mi">3</span>         <span class="c1"># features/step_definitions/interaction_steps.rb:13</span>
-</span><span class='line'>
-</span><span class='line'><span class="mi">1</span> <span class="n">scenario</span> <span class="p">(</span><span class="mi">1</span> <span class="n">passed</span><span class="p">)</span>
-</span><span class='line'><span class="mi">4</span> <span class="n">steps</span> <span class="p">(</span><span class="mi">4</span> <span class="n">passed</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>產表工具</h3>
-
-<p>cucumber-html-report</p>
-
-<h3>測試涵蓋率</h3>
-
-<p>Istanbul</p>
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="https://github.com/cucumber/cucumber">cucumber github</a></li>
-<li><a href="https://cucumber.io/">cucumber.io</a></li>
-<li><a href="http://teddy-chen-tw.blogspot.tw/2013/07/bdd2cucumber.html">搞笑談軟工: BDD（2）：大家來吃小黃瓜之Cucumber運作原理</a></li>
-<li><a href="http://icodeit.org/2012/05/cucumber%E7%AE%80%E4%BB%8B/">Cucumber简介</a></li>
-<li><a href="http://insights.thoughtworkers.org/bdd/">醒醒吧少年，只用CUCUMBER不能帮助你BDD</a></li>
-<li><a href="https://ruby-china.org/topics/7119">Cucumber 经验总结</a></li>
-<li><a href="http://www.cnblogs.com/davenkin/archive/2012/02/03/cucumber-watir-in-10-minutes.html">10分钟学会 Cucumber+Watir 自动化测试框架</a></li>
-<li><a href="https://danielzhangqinglong.github.io/2015/03/02/rails-test-samples/">在实际开发中使用RSpec和Cucumber进行TDD/BDD测试</a></li>
-<li><a href="http://tauntaunslayer13.me/blog/2014/01/26/ru-he-shi-yong-capybarahe-cucumbershi-xian-ye-mian-ji-bie-zi-dong-hua/">如何使用Capybara和Cucumber实现页面级别自动化</a></li>
-<li><a href="http://tauntaunslayer13.me/blog/2014/03/12/cucumberxiao-huang-gua-ye-mian-ji-zi-dong-hua-ce-shi-ru-men-jiao-cheng/">Cucumber小黄瓜页面级自动化测试入门教程</a></li>
-<li><a href="https://hackmd.io/p/Bk7gPjMA#/">BDD 實戰經驗分享 MarsZ</a></li>
 </ul>
 
 ]]></content>
