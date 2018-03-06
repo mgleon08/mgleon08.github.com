@@ -383,6 +383,20 @@ end
 ￼￼￼￼￼#/spec/models/zombie_spec.rbit "returns properly formatted lat, long" do  loc = stub(latitude: 2, longitude: 3)  Zoogle.stub(:graveyard_locator).returns(loc)  zombie.geolocate_with_object.should == "2, 3"end
 ```
 
+#### Message Chains
+
+可以一次 mock 多個 method
+
+`receive_message_chain`
+
+```ruby
+Http.get('http://google.com').parse
+
+allow(HTTP).to receive_message_chain(:get, :parse).and_return({ 'data'=>[] })
+```
+
+* [message-chains](https://relishapp.com/rspec/rspec-mocks/docs/working-with-legacy-code/message-chains)
+
 ###Spies
 * 類似 mocks ，一樣製造假物件，一樣是對假物件斷言，但是透過測試工具的功能，而改善了測試程式碼的可讀性，流程更自然（準備、執行、斷言）
 
