@@ -196,6 +196,7 @@ exec   = 執行一條指令
 * `git diff --cached`比對「Staging Area」與「HEAD」之間的差異。(可改成 --staged)
 * `git diff commit1(SHA1) commit2(SHA1)` 比較兩個 commit 差異。
 * `git diff HEAD^ HEAD` 比較 HEAD 和 HEAD^ 差異。
+* `git diff BRANCH` 比較當下 branch 和指定 branch 的差異。
 
 #記錄
 
