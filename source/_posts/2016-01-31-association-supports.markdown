@@ -18,6 +18,11 @@ class User < ActiveRecord::Base
 	has_many :following, through: :active_relationships,  source: :followed
 	has_many :followers, through: :passive_relationships, source: :follower
 end
+
+class Relationship < ActiveRecord::Base
+    belongs_to :followed, :class_name => "User"
+    belongs_to :follower, :class_name => "User"
+end
 ```
 
 * `through` 透過關聯來建立另一個關聯集合，用於建立多對多的關係
@@ -51,6 +56,7 @@ end
 * `source`
 
 搭配through設定使用，當關聯的名稱不一致的時候，需要加上source指名是哪一種物件。
+`source` 主要是設定 `join` model 所設定的，belongs_to，指定是要關聯到哪一個 
 
 * `counter_cache ` 參考之前文章 [counter-cache](http://mgleon08.github.io/blog/2015/12/20/counter-cache/)
 

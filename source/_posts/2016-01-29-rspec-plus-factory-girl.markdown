@@ -709,6 +709,29 @@ before do
 end
 ```
 
+### sequences
+
+可以以 auto incremental 的方式產生資料。
+
+```ruby
+FactoryBot.define do
+  factory :user do
+    first_name "John"
+    last_name "doe"
+    
+    # 第一個參數是欄位名稱，第二個參數則是起始的數值。
+    sequence(:id_number, '01') { |n| "E12223334#{n}" }
+    # 可利用 cycle 讓數字做循環
+    sequence(:id_number, ('01'..'99').cycle) { |n| "E12223334#{n}" }
+    
+    # 會重複出現一樣的公司名稱
+    company_name Faker::Company.name
+    # 無論產生幾筆資料都是隨機的
+    company_name { Faker::Company.name }
+  end
+end
+```
+
 ###注意
 factory_girl 產生出來的資料，不會透過 controller ，而是直接再 model 產生，因此會跑出 validation 的驗證。
 
@@ -738,8 +761,10 @@ config.generators do |g|
   g.fixture_replacement :factory_girl, :dir => "spec/factories"
 end
 ```
-參考文件：  
-[Factory Girl](http://www.slideshare.net/gabevanslv/factory-girl-15924188)
+參考文件：
+  
+* [Factory Girl](http://www.slideshare.net/gabevanslv/factory-girl-15924188)
+* [規劃 FactoryBot 小技巧，你的測試可以做得更好](https://5xruby.tw/posts/factoryBot)
 
 #<span id="capybara">Capybara</span>
 RSpec除了可以拿來寫單元程式，我們也可以把測試的層級拉高做整合性測試，以Web應用程式來說，就是去自動化瀏覽器的操作，實際去向網站伺服器請求，然後驗證出來的HTML是正確的輸出。

@@ -33,7 +33,7 @@ sudo su deploy
 ### Step 2. (也可以參考下面的 快速複製 SSH public key 到遠端主機)
 
 ```ruby
-ssh-keygen -t rsa
+ssh-keygen -t rsa -C "your_email@example.com"
 
 #Enter file in which to save the key (/root/.ssh/id_rsa): (不輸入，直接按Enter)
 #Enter passphrase (empty for no passphrase): (不輸入，直接按Enter)
@@ -160,3 +160,4 @@ ssh-add命令是把專用密鑰添加到ssh-agent的高速緩存中。該命令�
 * [Ruby on Rails 實戰聖經 網站佈署](https://ihower.tw/rails/deployment.html)
 * [ssh命令](http://man.linuxde.net/ssh)
 * [Connecting to GitHub with SSH](https://help.github.com/articles/connecting-to-github-with-ssh/)
+

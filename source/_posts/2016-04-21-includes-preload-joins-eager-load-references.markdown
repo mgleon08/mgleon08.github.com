@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "includes preload joins eager_load references"
+title: "includes preload ActiveRecord::Associations::Preloader joins eager_load references"
 date: 2016-04-21 00:41:09 +0800
 comments: true
 categories: rails
@@ -10,7 +10,7 @@ rails 當中有很多方便可以做資料查詢的功能，可以好好研究�
 
 <!-- more -->
 
-#modle
+# modle
 
 ```ruby
 class Blog < ActiveRecord::Base
@@ -27,7 +27,7 @@ class Post < ActiveRecord::Base
 end
 ```
 
-#includes
+# includes
 
 * `includes` 主要用於可以直接將相關連的資料，在同一筆查詢，一起撈出來
 * two separate queries
@@ -54,7 +54,7 @@ Blog.includes(:user, comments: [:user, { replies: [:user] }])
 #更複雜的關聯
 ```
 
-#preload
+# preload
 
 * 跟 includes 類似，主要差別在於無法用 where 條件去查關聯到的 table 欄位
 * two separate queries
@@ -85,6 +85,15 @@ Blog.includes(:posts).where(posts: { title:"Post 1-1" } )
  Blog.includes(:posts).where("posts.title = 'Post 1-1'").references(:post)
   SQL (0.3ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id" WHERE (posts.title = 'Post 1-1')
  => #<ActiveRecord::Relation [#<Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01">]>
+```
+
+### ActiveRecord::Associations::Preloader
+
+we can preload our data whenever we want.
+
+```ruby 
+# like include
+ActiveRecord::Associations::Preloader.new.preload(@users, :address)
 ```
 
 #joins (inner join)

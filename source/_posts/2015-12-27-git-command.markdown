@@ -184,10 +184,13 @@ exec   = 執行一條指令
 * `git pull -u origin master` 將遠端資料庫拉下來，並且合併，相當於 `git fetch` + `git merge`。
 
 >加上 `-u` 後續就只要 `git push` 和 `git pull` 即可。
+> `-u` 相當於 `--set-upstream` 用來追蹤遠端的分支，因此要取消追蹤為 `--unset-upstream`
 
 * `git push --force` 可將 github 上的 `commit` 全部覆蓋掉。
 * `git pull --rebase origin [brance]` pull 遠端用 rebase 的方式。
 
+* [upstream](https://zlargon.gitbooks.io/git-tutorial/content/remote/upstream.html)
+* [Git 更安全的強制推送，--force-with-lease](https://walterlv.github.io/post/safe-push-using-force-with-lease.html)
 
 #差異
 * `git diff` 比對「Working tree」與「Staging Area」之間的差異。
