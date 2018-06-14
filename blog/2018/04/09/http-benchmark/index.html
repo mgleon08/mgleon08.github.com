@@ -1,0 +1,598 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>HTTP Benchmark 工具 Wrk - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="wrk 可以預先模擬多人來網站時，效能會如何! 這類的工具有很多，大概如下 複雜 jmeter
+LoadRunner 簡單 wrk
+ab 那這次主要介紹是 wrk 安裝 1
+brew install wrk Command 1
+2
+3
+4
+5
+6
+7
+8
+9
+10
+11
+12
+13
+14
+15 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2018/04/09/http-benchmark">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">HTTP Benchmark 工具 Wrk</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-04-09T17:09:37+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>5:09 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>wrk 可以預先模擬多人來網站時，效能會如何!</p>
+
+<!-- more -->
+
+
+<p>這類的工具有很多，大概如下</p>
+
+<ul>
+<li>複雜
+
+<ul>
+<li>jmeter</li>
+<li>LoadRunner</li>
+</ul>
+</li>
+<li>簡單
+
+<ul>
+<li>wrk</li>
+<li>ab</li>
+</ul>
+</li>
+</ul>
+
+
+<p>那這次主要介紹是 wrk</p>
+
+<h1>安裝</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">wrk</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Command</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 跟服務器建立並保持的TCP連接數量 </span>
+</span><span class='line'><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">--</span><span class="ss">connections</span><span class="p">:</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="no">HTTP</span> <span class="n">connections</span> <span class="n">to</span> <span class="n">keep</span> <span class="nb">open</span> <span class="n">with</span>
+</span><span class='line'>                   <span class="n">each</span> <span class="n">thread</span> <span class="n">handling</span> <span class="n">N</span> <span class="o">=</span> <span class="n">connections</span><span class="o">/</span><span class="n">threads</span>
+</span><span class='line'><span class="c1"># 壓測時間</span>
+</span><span class='line'><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="o">--</span><span class="ss">duration</span><span class="p">:</span>    <span class="n">duration</span> <span class="n">of</span> <span class="n">the</span> <span class="nb">test</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="mi">2</span><span class="n">s</span><span class="p">,</span> <span class="mi">2</span><span class="n">m</span><span class="p">,</span> <span class="mi">2</span><span class="n">h</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 使用多少個線程進行壓測   </span>
+</span><span class='line'><span class="o">-</span><span class="n">t</span><span class="p">,</span> <span class="o">--</span><span class="ss">threads</span><span class="p">:</span>     <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">threads</span> <span class="n">to</span> <span class="n">use</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 指定Lua腳本路徑</span>
+</span><span class='line'><span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="o">--</span><span class="ss">script</span><span class="p">:</span>      <span class="no">LuaJIT</span> <span class="n">script</span><span class="p">,</span> <span class="n">see</span> <span class="no">SCRIPTING</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 為每一個HTTP請求添加HTTP頭</span>
+</span><span class='line'><span class="o">-</span><span class="n">H</span><span class="p">,</span> <span class="o">--</span><span class="ss">header</span><span class="p">:</span>      <span class="no">HTTP</span> <span class="n">header</span> <span class="n">to</span> <span class="n">add</span> <span class="n">to</span> <span class="n">request</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="s2">&quot;User-Agent: wrk&quot;</span>
+</span><span class='line'><span class="c1"># 在壓測結束後，打印延遲統計信息</span>
+</span><span class='line'>    <span class="o">--</span><span class="ss">latency</span><span class="p">:</span>     <span class="nb">print</span> <span class="n">detailed</span> <span class="n">latency</span> <span class="n">statistics</span>
+</span><span class='line'><span class="c1"># 超時時間</span>
+</span><span class='line'>    <span class="o">--</span><span class="ss">timeout</span><span class="p">:</span>     <span class="n">record</span> <span class="n">a</span> <span class="n">timeout</span> <span class="k">if</span> <span class="n">a</span> <span class="n">response</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">received</span> <span class="n">within</span>
+</span><span class='line'>                   <span class="n">this</span> <span class="n">amount</span> <span class="n">of</span> <span class="n">time</span><span class="o">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Exmple</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">wrk</span> <span class="o">-</span><span class="n">t12</span> <span class="o">-</span><span class="n">c400</span> <span class="o">-</span><span class="n">d30s</span> <span class="o">-</span><span class="no">T30s</span> <span class="o">--</span><span class="n">latency</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span>
+</span><span class='line'><span class="c1"># -t12 用 12 個線程</span>
+</span><span class='line'><span class="c1"># -c400 模擬 400 個併發連接</span>
+</span><span class='line'><span class="c1"># -d30s 持續 30 秒</span>
+</span><span class='line'><span class="c1"># -T30s 設定超過 30 秒就算連接超時 </span>
+</span><span class='line'><span class="c1"># --latency 響應時間的分佈情況</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Running</span> <span class="mi">30</span><span class="n">s</span> <span class="nb">test</span> <span class="err">@</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span>
+</span><span class='line'>  <span class="mi">4</span> <span class="n">threads</span> <span class="ow">and</span> <span class="mi">1000</span> <span class="n">connections</span>
+</span><span class='line'>  <span class="no">Thread</span> <span class="no">Stats</span>   <span class="no">Avg</span>      <span class="no">Stdev</span>     <span class="no">Max</span>   <span class="o">+/-</span> <span class="no">Stdev</span>
+</span><span class='line'>    <span class="no">Latency</span>     <span class="mi">1</span><span class="o">.</span><span class="mi">38</span><span class="n">ms</span>    <span class="mi">1</span><span class="o">.</span><span class="mi">09</span><span class="n">ms</span>  <span class="mi">84</span><span class="o">.</span><span class="mi">91</span><span class="n">ms</span>   <span class="mi">91</span><span class="o">.</span><span class="mi">92</span><span class="o">%</span>
+</span><span class='line'>    <span class="no">Req</span><span class="o">/</span><span class="no">Sec</span>     <span class="mi">3</span><span class="o">.</span><span class="mi">62</span><span class="n">k</span>   <span class="mi">555</span><span class="o">.</span><span class="mi">58</span>     <span class="mi">4</span><span class="o">.</span><span class="mi">48</span><span class="n">k</span>    <span class="mi">81</span><span class="o">.</span><span class="mo">00</span><span class="o">%</span>
+</span><span class='line'>  <span class="no">Latency</span> <span class="no">Distribution</span>
+</span><span class='line'>     <span class="mi">50</span><span class="o">%</span>    <span class="mi">1</span><span class="o">.</span><span class="mi">22</span><span class="n">ms</span>
+</span><span class='line'>     <span class="mi">75</span><span class="o">%</span>    <span class="mi">1</span><span class="o">.</span><span class="mi">69</span><span class="n">ms</span>
+</span><span class='line'>     <span class="mi">90</span><span class="o">%</span>    <span class="mi">2</span><span class="o">.</span><span class="mi">27</span><span class="n">ms</span>
+</span><span class='line'>     <span class="mi">99</span><span class="o">%</span>    <span class="mi">3</span><span class="o">.</span><span class="mi">93</span><span class="n">ms</span>
+</span><span class='line'>  <span class="mi">108206</span> <span class="n">requests</span> <span class="k">in</span> <span class="mi">30</span><span class="o">.</span><span class="mi">08</span><span class="n">s</span><span class="p">,</span> <span class="mi">118</span><span class="o">.</span><span class="mi">88</span><span class="no">MB</span> <span class="n">read</span>
+</span><span class='line'>  <span class="no">Socket</span> <span class="ss">errors</span><span class="p">:</span> <span class="n">connect</span> <span class="mi">0</span><span class="p">,</span> <span class="n">read</span> <span class="mi">883</span><span class="p">,</span> <span class="n">write</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timeout</span> <span class="mi">0</span>
+</span><span class='line'><span class="no">Requests</span><span class="o">/</span><span class="ss">sec</span><span class="p">:</span>   <span class="mi">3597</span><span class="o">.</span><span class="mi">39</span>
+</span><span class='line'><span class="no">Transfer</span><span class="o">/</span><span class="ss">sec</span><span class="p">:</span>      <span class="mi">3</span><span class="o">.</span><span class="mi">95</span><span class="no">MB</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>Latency</code>: 響應時間</li>
+<li><code>Req/Sec</code>: 每個線程每秒鐘的完成的請求數</li>
+<li><code>Avg</code>: 平均值</li>
+<li><code>Stdev (Standard Deviation)</code>: 即標準偏差，是統計學的一個名詞，這裡表示請求響應時間的離散程度，值越大代表請求響應時間的差距越大，系統的響應約不穩定。</li>
+<li><code>Max</code>: 最大值</li>
+<li><code>+/- Stdev</code>: 正負一個標準差佔比</li>
+<li><code>Latency Distribution</code>: 50% 在 1.22ms 以內完成 / 99% 在 3.93ms 以內完成</li>
+<li><code>Socket errors</code>: 分為 <code>連接錯誤</code>, <code>讀取錯誤</code>, <code>寫入錯誤</code>, <code>超時錯誤</code></li>
+<li><code>Requests/sec</code>: 每秒請求數量，也就是並發能力</li>
+</ul>
+
+
+<h1>腳本 scroipt 測試複雜場景</h1>
+
+<p>wrk 支援 <code>lua</code> 的腳本</p>
+
+<p>先建立一個 <code>test.lua</code> 的 file</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='lua'><span class='line'><span class="c1">-- example HTTP POST script which demonstrates setting the</span>
+</span><span class='line'><span class="c1">-- HTTP method, body, and adding a header</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">wrk</span><span class="p">.</span><span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">POST&quot;</span>
+</span><span class='line'><span class="n">wrk</span><span class="p">.</span><span class="n">body</span>   <span class="o">=</span> <span class="s2">&quot;</span><span class="s">foo=bar&amp;baz=quux&quot;</span>
+</span><span class='line'><span class="n">wrk</span><span class="p">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;</span><span class="s">Content-Type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">application/x-www-form-urlencoded&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>執行</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">wrk</span> <span class="o">-</span><span class="n">t12</span> <span class="o">-</span><span class="n">c100</span> <span class="o">-</span><span class="n">d30s</span> <span class="o">-</span><span class="no">T30s</span> <span class="o">--</span><span class="n">script</span><span class="o">=</span><span class="n">post</span><span class="o">.</span><span class="n">lua</span> <span class="o">--</span><span class="n">latency</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>wrk 接受的屬性</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">local</span> <span class="n">wrk</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>   <span class="n">scheme</span>  <span class="o">=</span> <span class="s2">&quot;http&quot;</span><span class="p">,</span>
+</span><span class='line'>   <span class="n">host</span>    <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
+</span><span class='line'>   <span class="n">port</span>    <span class="o">=</span> <span class="kp">nil</span><span class="p">,</span>
+</span><span class='line'>   <span class="nb">method</span>  <span class="o">=</span> <span class="s2">&quot;GET&quot;</span><span class="p">,</span>
+</span><span class='line'>   <span class="n">path</span>    <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+</span><span class='line'>   <span class="n">headers</span> <span class="o">=</span> <span class="p">{},</span>
+</span><span class='line'>   <span class="n">body</span>    <span class="o">=</span> <span class="kp">nil</span><span class="p">,</span>
+</span><span class='line'>   <span class="n">thread</span>  <span class="o">=</span> <span class="kp">nil</span><span class="p">,</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>wrk 提供的 hook 函數</h3>
+
+<ul>
+<li>setup 函數</li>
+</ul>
+
+
+<p>這個函數在目標 IP 地址已經解析完, 並且所有 thread 已經生成, 但是還沒有開始時被調用. 每個線程執行一次這個函數.
+可以通過thread:get(name),  thread:set(name, value)設置線程級別的變量.</p>
+
+<ul>
+<li>init 函數</li>
+</ul>
+
+
+<p>每次請求發送之前被調用.
+可以接受 wrk 命令行的額外參數. 通過 &ndash; 指定.</p>
+
+<ul>
+<li>delay函數</li>
+</ul>
+
+
+<p>這個函數返回一個數值, 在這次請求執行完以後延遲多長時間執行下一個請求. 可以對應 thinking time 的場景.</p>
+
+<ul>
+<li>request函數</li>
+</ul>
+
+
+<p>通過這個函數可以每次請求之前修改本次請求的屬性. 返回一個字符串. 這個函數要慎用, 會影響測試端性能.</p>
+
+<ul>
+<li>response</li>
+</ul>
+
+
+<p>每次請求返回以後被調用，可以根據響應內容做特殊處理，比如遇到特殊響應停止執行測試，或輸出到控制台等等。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='lua'><span class='line'><span class="c1">-- 實現每個請求前會有隨機的延遲</span>
+</span><span class='line'><span class="c1">-- example script that demonstrates adding a random</span>
+</span><span class='line'><span class="c1">-- 10-50ms delay before each request</span>
+</span><span class='line'><span class="k">function</span> <span class="nf">delay</span><span class="p">()</span>
+</span><span class='line'>   <span class="k">return</span> <span class="nb">math.random</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='lua'><span class='line'><span class="c1">-- 每個線程要先進行認證，認證之後獲取token以進行壓測</span>
+</span><span class='line'><span class="n">token</span> <span class="o">=</span> <span class="kc">nil</span>
+</span><span class='line'><span class="n">path</span>  <span class="o">=</span> <span class="s2">&quot;</span><span class="s">/authenticate&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">request</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">wrk</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;</span><span class="s">GET&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">response</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
+</span><span class='line'>   <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span> <span class="ow">and</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">200</span> <span class="k">then</span>
+</span><span class='line'>      <span class="n">token</span> <span class="o">=</span> <span class="n">headers</span><span class="p">[</span><span class="s2">&quot;</span><span class="s">X-Token&quot;</span><span class="p">]</span>
+</span><span class='line'>      <span class="n">path</span>  <span class="o">=</span> <span class="s2">&quot;</span><span class="s">/resource&quot;</span>
+</span><span class='line'>      <span class="n">wrk</span><span class="p">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;</span><span class="s">X-Token&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">token</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='lua'><span class='line'><span class="c1">-- 壓測支持HTTP pipeline的服務</span>
+</span><span class='line'><span class="c1">-- 通過在init方法中將三個HTTP request請求拼接在一起，實現每次發送三個請求，以使用HTTP pipeline。</span>
+</span><span class='line'><span class="n">init</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>   <span class="kd">local</span> <span class="n">r</span> <span class="o">=</span> <span class="p">{}</span>
+</span><span class='line'>   <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrk</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s">/?foo&quot;</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrk</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s">/?bar&quot;</span><span class="p">)</span>
+</span><span class='line'>   <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrk</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s">/?baz&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="n">req</span> <span class="o">=</span> <span class="nb">table.concat</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">request</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
+</span><span class='line'>   <span class="k">return</span> <span class="n">req</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://github.com/wg/wrk/tree/master/scripts">更多 scripts 範本</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://github.com/wg/wrk">wrk git</a></li>
+<li><a href="https://www.restran.net/2016/09/27/wrk-http-benchmark/">使用 wrk 來測試 HTTP 性能</a></li>
+<li><a href="http://zjumty.iteye.com/blog/2221040">wrk &ndash; 小巧輕盈的 http 性能測試工具</a></li>
+<li><a href="https://yq.aliyun.com/articles/35251">使用ab和wrk對OSS進行benchmark測試</a></li>
+<li><a href="https://coolshell.cn/articles/17381.html">性能測試應該怎麼做？</a></li>
+<li><a href="http://zhaox.github.io/benchmark/2016/12/28/wrk-guidelines">Http壓測工具wrk使用指南</a></li>
+<li><a href="https://github.com/wg/wrk/tree/master/scripts">更多 scripts 範本</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-04-09T17:09:37+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>9</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>5:09 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/http/'>http</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2018/04/09/http-benchmark/" data-via="" data-counturl="http://mgleon08.github.com/blog/2018/04/09/http-benchmark/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/04/09/linux-command/" title="Previous Post: Linux 指令">&laquo; Linux 指令</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2018/04/26/golang-install-variables-constants-conversions-output/" title="Next Post: Golang 初探 - install, variables, constants, conversions And output">Golang 初探 - install, variables, constants, conversions And output &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2018/04/09/http-benchmark/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2018/04/09/http-benchmark/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

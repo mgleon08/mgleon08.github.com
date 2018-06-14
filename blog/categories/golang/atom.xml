@@ -1,0 +1,3756 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Golang | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/golang/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2018-06-14T18:46:05+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - Defer, Error Handling, Custom Errors, Panic, Recover]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/05/29/golang-defer-error-handling-custom-errors-panic-recover/"/>
+    <updated>2018-05-29T15:39:48+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/05/29/golang-defer-error-handling-custom-errors-panic-recover</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<ul>
+<li><a href="#defer">Defer</a></li>
+<li><a href="#error_handling">Error Handling</a></li>
+<li><a href="#custom_errors">Custom Errors</a></li>
+<li><a href="#panic_recover">Panic and Recover</a></li>
+</ul>
+
+
+<h1><span id="defer"> Defer </span></h1>
+
+<p>defer後面的表達式會被放入一個列表中，在當前方法返回的時候，列表中的表達式就會被執行。</p>
+
+<blockquote><ul>
+<li>在Golang中，defer表達式通常用於資源清理和釋放、文件關閉、解鎖以及記錄時間等操作。</li>
+<li>即使函式發生嚴重錯誤也會執行</li>
+<li>透過與匿名函式配合可在return之後修改函式計算結果</li>
+<li>Go沒有異常機制，但有 panic/recover 模式來處理錯誤</li>
+<li>Panic 可以在任何地方引發，但 recover 只有在 defer 呼叫的函式中有效</li>
+</ul>
+</blockquote>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    defer fmt.Println("world")
+
+    fmt.Println("hello")
+}
+
+
+// hello 
+// world
+</code></pre>
+
+<h3>Last-In-First-Out (LIFO)</h3>
+
+<blockquote><p>defer 是讓 fmt.Println(0) , fmt.Println(1) , fmt.Println(2) , fmt.Println(3) , fmt.Println(4) 依序放到清單中, 等到 func f 結束前, 再依據 Last-In-First-Out (LIFO) 的順序 call 清單中的 function.</p></blockquote>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main(){
+    for i := 0 ; i &lt; 5 ; i++{
+        defer fmt.Println(i)
+    }
+    fmt.Println("f finish")
+}
+
+
+// f finish
+// 4
+// 3
+// 2
+// 1
+// 0
+</code></pre>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+func main() {  
+    name := "Naveen"
+    fmt.Printf("Orignal String: %s\n", string(name))
+    fmt.Printf("Reversed String: ")
+    for _, v := range []rune(name) {
+        defer fmt.Printf("%c", v)
+    }
+}
+
+// Orignal String: Naveen  
+// Reversed String: neevaN  
+</code></pre>
+
+<h3>Arguments evaluation</h3>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+func printA(a int) {  
+    fmt.Println("value of a in deferred function", a)
+}
+
+func main() {  
+    a := 5
+    defer printA(a) // 收到的 arg 會是這時候當下的 arg
+    a = 10
+    fmt.Println("value of a before deferred function call", a)
+}
+
+// value of a before deferred function call 10
+// value of a in deferred function 5
+</code></pre>
+
+<h3>defer with return</h3>
+
+<p>Ex1.</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func f() (result int) {
+    // 相當於 result = 0，最後再執行 result++，因此最後回傳會是 1
+    defer func() {
+        result++
+    }()
+    return 0
+}
+
+func main() {
+    fmt.Println(f())
+}
+
+// 1
+</code></pre>
+
+<p>Ex2.</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func f() (r int) {
+    t := 5
+    // 相當於 r = t，因為最後回傳的參數為 r，但 defer 裡面是針對 t + 5，因此不受影響
+    defer func() {
+        t = t + 5
+    }()
+    return t
+}
+
+func main() {
+    fmt.Println(f())
+}
+
+// 5
+</code></pre>
+
+<p>Ex3.</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func f() (r int) {
+    // 相當於 r = 1
+    defer func(r int) { //這裡改的r是傳值傳進去的r，不會改變要返回的那個r值
+        r = r + 5
+    }(r)
+    return 1
+}
+
+func main() {
+    fmt.Println(f())
+}
+// 1
+</code></pre>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://golangbot.com/learn-golang-series/">[golangbot.com]</a></li>
+<li><a href="https://golangbot.com/defer/">[golangbot.com]defer</a></li>
+<li><a href="https://golang.org/ref/spec#Defer_statements">Defer_statements</a></li>
+<li><a href="https://xiaozhou.net/something-about-defer-2014-05-25.html">Golang中defer的那些事</a></li>
+<li><a href="https://hsinyu.gitbooks.io/golang_note/content/defer_panic_recover.html">defer panic recover</a></li>
+<li><a href="https://tiancaiamao.gitbooks.io/go-internals/content/zh/03.4.html">3.4 defer關鍵字</a></li>
+</ul>
+
+
+<h1><span id="error_handling"> Error Handling </span></h1>
+
+<h3>1. Asserting the underlying struct type and getting more information from the struct fields</h3>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "os"
+)
+
+func main() {  
+    f, err := os.Open("/test.txt")
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Println(f.Name(), "opened successfully")
+}
+
+// open /test.txt: No such file or directory  
+</code></pre>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "os"
+)
+
+func main() {  
+    f, err := os.Open("/test.txt")
+    // type assertion 斷言 err 是 *os.PathError type，斷言的結果就是 err 的動態值，動態值的 type 就是 *os.PathError  
+    // //get the underlying *os.PathError value from err  
+    if err, ok := err.(*os.PathError); ok {
+        fmt.Println("File at path", err.Path, "failed to open")
+        return
+    }
+    fmt.Println(f.Name(), "opened successfully")
+}
+
+// File at path /test.txt failed to open  
+</code></pre>
+
+<h5>Golang 的 <code>err.(*os.PathError)</code> 究竟是什麼？</h5>
+
+<p>os.Open return 一個 err 的值，但這個 error 本身是一個 interface</p>
+
+<pre><code class="go">type error interface { Error() string } 
+</code></pre>
+
+<ul>
+<li>任何碰巧具有 Error 方法的數據類型都將實現該介面並且可以被分配。在大多數情況下，僅打印錯誤就足夠了</li>
+<li>聲明 <code>e, ok := err.(*os.PathError)</code> 是一個 type asserting 。</li>
+<li>它將檢查介面值 err 包含 <code>*os.PathError</code> 作為具體類型並將返回該值。</li>
+</ul>
+
+
+<h3>2. Asserting the underlying struct type and getting more information using methods</h3>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "net"
+)
+
+func main() {  
+    addr, err := net.LookupHost("golangbot123.com")
+    if err, ok := err.(*net.DNSError); ok {
+        if err.Timeout() {
+            fmt.Println("operation timed out")
+        } else if err.Temporary() {
+            fmt.Println("temporary error")
+        } else {
+            fmt.Println("generic error: ", err)
+        }
+        return
+    }
+    fmt.Println(addr)
+}
+</code></pre>
+
+<h3>3. Direct comparison</h3>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "path/filepath"
+)
+
+func main() {  
+    files, error := filepath.Glob("[")
+    if error != nil &amp;&amp; error == filepath.ErrBadPattern {
+        fmt.Println(error)
+        return
+    }
+    fmt.Println("matched files", files)
+}
+</code></pre>
+
+<h1><span id="custom_errors"> Custom Errors </span></h1>
+
+<h3>1. Creating custom errors using the New function</h3>
+
+<pre><code class="go">package main
+
+import (  
+    "errors"
+    "fmt"
+    "math"
+)
+
+func circleArea(radius float64) (float64, error) {  
+    if radius &lt; 0 {
+        return 0, errors.New("Area calculation failed, radius is less than zero")
+    }
+    return math.Pi * radius * radius, nil
+}
+
+func main() {  
+    radius := -20.0
+    area, err := circleArea(radius)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Printf("Area of circle %0.2f", area)
+}
+// Area calculation failed, radius is less than zero
+</code></pre>
+
+<h3>2. Adding more information to the error using Errorf</h3>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "math"
+)
+
+func circleArea(radius float64) (float64, error) {  
+    if radius &lt; 0 {
+        return 0, fmt.Errorf("Area calculation failed, radius %0.2f is less than zero", radius)
+    }
+    return math.Pi * radius * radius, nil
+}
+
+func main() {  
+    radius := -20.0
+    area, err := circleArea(radius)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Printf("Area of circle %0.2f", area)
+}
+// Area calculation failed, radius -20.00 is less than zero
+</code></pre>
+
+<h3>3. Providing more information about the error using struct type and fields</h3>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "math"
+)
+
+type areaError struct {  
+    err    string
+    radius float64
+}
+
+func (e *areaError) Error() string {  
+    return fmt.Sprintf("radius %0.2f: %s", e.radius, e.err)
+}
+
+func circleArea(radius float64) (float64, error) {  
+    if radius &lt; 0 {
+        return 0, &amp;areaError{"radius is negative", radius}
+    }
+    return math.Pi * radius * radius, nil
+}
+
+func main() {  
+    radius := -20.0
+    area, err := circleArea(radius)
+    if err != nil {
+        if err, ok := err.(*areaError); ok {
+            fmt.Printf("Radius %0.2f is less than zero", err.radius)
+            return
+        }
+        fmt.Println(err)
+        return
+    }
+    fmt.Printf("Area of rectangle1 %0.2f", area)
+}
+// Radius -20.00 is less than zero
+</code></pre>
+
+<h3>4. Providing more information about the error using methods on struct types</h3>
+
+<pre><code class="go">ackage main
+
+import "fmt"
+
+type areaError struct {  
+    err    string  //error description
+    length float64 //length which caused the error
+    width  float64 //width which caused the error
+}
+
+func (e *areaError) Error() string {  
+    return e.err
+}
+
+func (e *areaError) lengthNegative() bool {  
+    return e.length &lt; 0
+}
+
+func (e *areaError) widthNegative() bool {  
+    return e.width &lt; 0
+}
+
+func rectArea(length, width float64) (float64, error) {  
+    err := ""
+    if length &lt; 0 {
+        err += "length is less than zero"
+    }
+    if width &lt; 0 {
+        if err == "" {
+            err = "width is less than zero"
+        } else {
+            err += ", width is less than zero"
+        }
+    }
+    if err != "" {
+        return 0, &amp;areaError{err, length, width}
+    }
+    return length * width, nil
+}
+
+func main() {  
+    length, width := -5.0, -9.0
+    area, err := rectArea(length, width)
+    // 這裡回傳回來的 err，是 interface type，還不知道是什麼 dynamic value &amp; type
+    //因此 err.length, err.width, lengthNegative(), widthNegative()，都沒辦法使用，只能使用 Error()
+    if err != nil {
+        // 利用 type type assertion to get the underlying value of the error interface
+        if err, ok := err.(*areaError); ok {
+        // 因此這裡的 err，可以使用 err.length, err.width, lengthNegative(), widthNegative()
+            if err.lengthNegative() {
+                fmt.Printf("error: length %0.2f is less than zero\n", err.length)
+            }
+            if err.widthNegative() {
+                fmt.Printf("error: width %0.2f is less than zero\n", err.width)
+            }
+            return
+        }
+        fmt.Println(err)
+        return
+    }
+    fmt.Println("area of rect", area)
+}
+
+/*
+error: length -5.00 is less than zero  
+error: width -9.00 is less than zero  
+*/
+</code></pre>
+
+<h1><span id="panic_recover"> Panic and Recover </span></h1>
+
+<h3>When should panic be used?</h3>
+
+<p>One important factor is that you should avoid panic and recover and use errors where ever possible. Only in cases where the program just cannot continue execution should a panic and recover mechanism be used.</p>
+
+<ul>
+<li>An unrecoverable error where the program cannot simply continue its execution.</li>
+<li>A programmer error. (一個接收 pointer 參數的 function，卻傳了 nil 給他)</li>
+</ul>
+
+
+<pre><code class="go">func panic(interface{})  
+</code></pre>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+func fullName(firstName *string, lastName *string) {  
+    if firstName == nil {
+        panic("runtime error: first name cannot be nil")
+    }
+    if lastName == nil {
+        panic("runtime error: last name cannot be nil")
+    }
+    fmt.Printf("%s %s\n", *firstName, *lastName)
+    fmt.Println("returned normally from fullName")
+}
+
+func main() { 
+    firstName := "Elon"
+    fullName(&amp;firstName, nil)
+    fmt.Println("returned normally from main")
+}
+/*
+panic: runtime error: last name cannot be nil
+
+goroutine 1 [running]:
+main.fullName(0x1042ff98, 0x0)
+    /tmp/sandbox191402046/main.go:12 +0x140
+main.main()
+    /tmp/sandbox191402046/main.go:20 +0x40
+*/
+</code></pre>
+
+<h3>defer</h3>
+
+<p>如果有 <code>defer</code>，會等所有的 defer 跑完，最後才會執行 panic</p>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+func fullName(firstName *string, lastName *string) {  
+    defer fmt.Println("deferred call in fullName")
+    if firstName == nil {
+        panic("runtime error: first name cannot be nil")
+    }
+    if lastName == nil {
+        panic("runtime error: last name cannot be nil")
+    }
+    fmt.Printf("%s %s\n", *firstName, *lastName)
+    fmt.Println("returned normally from fullName")
+}
+
+func main() {  
+    defer fmt.Println("deferred call in main")
+    firstName := "Elon"
+    fullName(&amp;firstName, nil)
+    fmt.Println("returned normally from main")
+}
+
+/*
+deferred call in fullName  
+deferred call in main  
+panic: runtime error: last name cannot be nil
+
+goroutine 1 [running]:  
+main.fullName(0x1042bf90, 0x0)  
+    /tmp/sandbox060731990/main.go:13 +0x280
+main.main()  
+    /tmp/sandbox060731990/main.go:22 +0xc0
+*/
+</code></pre>
+
+<h3>Recover</h3>
+
+<p>recover is a builtin function which is used to regain control of a panicking goroutine.</p>
+
+<blockquote><p>Recover is useful only when called inside deferred functions and  called from the same goroutine.</p></blockquote>
+
+<pre><code class="go">func recover() interface{}  
+</code></pre>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+func recoverName() {  
+    if r := recover(); r!= nil {
+        fmt.Println("recovered from ", r)
+    }
+}
+
+func fullName(firstName *string, lastName *string) {  
+    defer recoverName()
+    if firstName == nil {
+        panic("runtime error: first name cannot be nil")
+    }
+    if lastName == nil {
+        panic("runtime error: last name cannot be nil")
+    }
+    fmt.Printf("%s %s\n", *firstName, *lastName)
+    fmt.Println("returned normally from fullName")
+}
+
+func main() {  
+    defer fmt.Println("deferred call in main")
+    firstName := "Elon"
+    fullName(&amp;firstName, nil)
+    fmt.Println("returned normally from main")
+}
+
+/*
+recovered from  runtime error: last name cannot be nil  
+returned normally from main  
+deferred call in main  
+*/
+</code></pre>
+
+<h3>Getting stack trace after recover</h3>
+
+<p>There is a way to print the stack trace using the <code>PrintStack</code> function of the <code>Debug</code> package</p>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "runtime/debug"
+)
+
+func r() {  
+    if r := recover(); r != nil {
+        fmt.Println("Recovered", r)
+        debug.PrintStack()
+    }
+}
+
+func a() {  
+    defer r()
+    n := []int{5, 7, 4}
+    fmt.Println(n[3])
+    fmt.Println("normally returned from a")
+}
+
+func main() {  
+    a()
+    fmt.Println("normally returned from main")
+}
+</code></pre>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://golangbot.com/learn-golang-series/">golangbot.com</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - Goroutine, Channel, Worker Pool, Select, Mutex]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/05/17/golang-goroutine-channel-worker-pool-select-mutex/"/>
+    <updated>2018-05-17T23:10:28+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/05/17/golang-goroutine-channel-worker-pool-select-mutex</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<ul>
+<li><a href="#concurrency">Concurrency</a></li>
+<li><a href="#parallelism">Parallelism</a></li>
+<li><a href="#goroutine">Goroutine</a></li>
+<li><a href="#channel">Channel</a></li>
+<li><a href="#buffered_channels">Buffered Channels</a></li>
+<li><a href="#worker_pool">Worker Pool</a></li>
+<li><a href="#select">Select</a></li>
+<li><a href="mutex">sync.Mutex</a></li>
+</ul>
+
+
+<h1>Concurrency &amp;  Parallelism</h1>
+
+<blockquote><p>Goroutines are part of making concurrency easy to use.</p></blockquote>
+
+<p>要了解 Goroutine 可能要先了解一下，Concurrency 跟 parallelism 的差別</p>
+
+<h3><span id="concurrency"> Concurrency </span></h3>
+
+<blockquote><p>Concurrency is the capability to deal with lots of things at once.</p></blockquote>
+
+<p>簡單的解釋，一個在跑步的人，因為鞋帶鬆了，所以他停下來綁鞋帶，綁完後繼續跑。</p>
+
+<p><img src="http://i.imgur.com/WOthNHb.png" alt="" /></p>
+
+<h3><span id="parallelism"> Parallelism </span></h3>
+
+<blockquote><p>Parallelism is doing lots of things at the same time. It might sound similar to concurrency but its actually different.</p></blockquote>
+
+<p>同樣用慢跑來解釋的話，在慢跑的人，同時在用耳機聽音樂，在同一時間做了很多事。</p>
+
+<p><img src="http://i.imgur.com/cTonbBE.png" alt="" /></p>
+
+<ul>
+<li><a href="https://golangbot.com/concurrency/">concurrency &amp; parallelism</a></li>
+</ul>
+
+
+<h1><span id="goroutine"> Goroutine </span></h1>
+
+<blockquote><p>Goroutines are functions or methods that run concurrently with other functions or methods.</p></blockquote>
+
+<ul>
+<li>go 本身就有數千個 goroutine 在跑</li>
+<li>goroutine can be thought of as light weight threads.</li>
+<li>與 threads 相比，goroutine 成本非常小</li>
+<li>goroutine 最多運行 GOMAXPROCS 數量(可以設定)</li>
+<li>main() 也是一個 goroutine 稱為 <code>main Goroutine</code></li>
+</ul>
+
+
+<h3>Example 1</h3>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "time"
+)
+
+func hello() {  
+    fmt.Println("Hello world goroutine")
+}
+
+func main() {  
+    go hello()
+    // time.Sleep(1 * time.Second)
+    fmt.Println("main function")
+}
+
+// main function
+// 因為 hello() 進入背景處理，但是 main() 已經結束，因此所有的 goroutine 都會直接打斷，程序退出。
+// 加入 sleep 1 秒，讓 hello() 有足夠的時間 retuen 回來
+</code></pre>
+
+<h3>Example 2</h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func numbers() {
+    for i := 1; i &lt;= 5; i++ {
+        time.Sleep(250 * time.Millisecond)
+        fmt.Printf("%d ", i)
+    }
+}
+func alphabets() {
+    for i := 'a'; i &lt;= 'e'; i++ {
+        time.Sleep(400 * time.Millisecond)
+        fmt.Printf("%c ", i)
+    }
+}
+func main() {
+    go numbers()
+    go alphabets()
+    time.Sleep(3000 * time.Millisecond)
+    fmt.Println("main terminated")
+}
+
+// 1 a 2 3 b 4 c 5 d e main terminated
+</code></pre>
+
+<p><img src="https://golangbot.com/content/images/2017/07/Goroutines-explained.png" alt="" /></p>
+
+<ul>
+<li><a href="https://tonybai.com/2014/11/15/how-goroutines-work/">Goroutine是如何工作的</a></li>
+<li><a href="https://golangbot.com/goroutines/">[golangbot.com] goroutines</a></li>
+</ul>
+
+
+<h1><span id="channel"> Channel </span></h1>
+
+<blockquote><p>Channels can be thought as pipes using which Goroutines communicate. Similar to how water flows from one end to another in a pipe, data can be sent from one end and received from the another end using channels.</p></blockquote>
+
+<ul>
+<li>Channel 是 goroutine 之間相互通信的機制（goroutine之間是相互獨立的，因此需要 Channel 來做溝通）</li>
+<li>Channel 中使用的 type 稱之為 element type，比如 int 類型的 channel 寫作為 <code>chan int</code></li>
+<li>Go 使用 make 內建函式建立 channel</li>
+<li>The zero value of a channel is <code>nil</code></li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    var a chan int
+    if a == nil {
+        fmt.Println("channel a is nil, going to define it")
+        a = make(chan int)
+        fmt.Printf("Type of a is %T", a)
+    }
+}
+
+// channel a is nil, going to define it
+// Type of a is chan int
+</code></pre>
+
+<pre><code class="go">a := make(chan int)  
+</code></pre>
+
+<h3>send、receive、close</h3>
+
+<pre><code class="go">data := &lt;- ch // read from channel ch 
+&lt;- ch // read from channel ch
+ch &lt;- data // write to channel ch
+</code></pre>
+
+<h3>Sends and receives are blocking by default</h3>
+
+<blockquote><ul>
+<li>When a data is sent to a channel, the control is blocked in the send statement until some other Goroutine reads from that channel.</li>
+<li>Similarly when data is read from a channel, the read is blocked until some Goroutine writes data to that channel.</li>
+<li>如果另一方一直對沒有動作，會造成 <code>Deadlock</code></li>
+</ul>
+</blockquote>
+
+<h5>Example</h5>
+
+<p><code>&lt;-done</code> 這行會導致 <code>main goroutine</code> blocked 在這邊，直到其他 goroutine 將 data 寫入 done，不然是不會繼續往下走，也意味著就不需要用 sleep 來停止</p>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "time"
+)
+
+func hello(done chan bool) {  
+    fmt.Println("hello go routine is going to sleep")
+    time.Sleep(4 * time.Second)
+    fmt.Println("hello go routine awake and going to write to done")
+    done &lt;- true
+}
+func main() {  
+    done := make(chan bool)
+    fmt.Println("Main going to call hello go goroutine")
+    go hello(done)
+    // 這邊 done channel，沒有任何東西，因此被 blockeds 住，等有東西到 channel 才會繼續下一行
+    &lt;- done 
+    fmt.Println("Main received data")
+}
+
+// Main going to call hello go goroutine
+// hello go routine is going to sleep
+// hello go routine awake and going to write to done
+// Main received data
+</code></pre>
+
+<h5>Exampale</h5>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+func calcSquares(number int, squareop chan int) {  
+    sum := 0
+    for number != 0 {
+        digit := number % 10
+        sum += digit * digit
+        number /= 10
+    }
+    squareop &lt;- sum
+}
+
+func calcCubes(number int, cubeop chan int) {  
+    sum := 0 
+    for number != 0 {
+        digit := number % 10
+        sum += digit * digit * digit
+        number /= 10
+    }
+    cubeop &lt;- sum
+} 
+
+func main() {  
+    number := 589
+    sqrch := make(chan int)
+    cubech := make(chan int)
+    go calcSquares(number, sqrch)
+    go calcCubes(number, cubech)
+    squares, cubes := &lt;-sqrch, &lt;-cubech
+    fmt.Println("Final output", squares + cubes)
+}
+
+// Final output 1536
+</code></pre>
+
+<p>refactor with close &amp; range</p>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+func digits(number int, dchnl chan int) {  
+    for number != 0 {
+        digit := number % 10
+        dchnl &lt;- digit
+        number /= 10
+    }
+    close(dchnl)
+}
+func calcSquares(number int, squareop chan int) {  
+    sum := 0
+    dch := make(chan int)
+    go digits(number, dch)
+    for digit := range dch {
+        sum += digit * digit
+    }
+    squareop &lt;- sum
+}
+
+func calcCubes(number int, cubeop chan int) {  
+    sum := 0
+    dch := make(chan int)
+    go digits(number, dch)
+    for digit := range dch {
+        sum += digit * digit * digit
+    }
+    cubeop &lt;- sum
+}
+
+func main() {  
+    number := 589
+    sqrch := make(chan int)
+    cubech := make(chan int)
+    go calcSquares(number, sqrch)
+    go calcCubes(number, cubech)
+    squares, cubes := &lt;-sqrch, &lt;-cubech
+    fmt.Println("Final output", squares+cubes)
+}
+
+// Final output 1536
+</code></pre>
+
+<h3>Deadlock</h3>
+
+<p>當 Goroutine send data 到 channel，但沒有其他的 Goroutine 去接收這個 data，就會造成 Deadlock，並且出現錯誤 <code>panic</code></p>
+
+<pre><code class="go">package main
+
+func main() {  
+    ch := make(chan int)
+    ch &lt;- 5
+}
+</code></pre>
+
+<h3>Unidirectional channels (單向 channels)</h3>
+
+<p>到目前為止，說的都是 bidirectional channels(雙向 channels)</p>
+
+<p>channel 也可以是單向的，<code>only send or receive data</code></p>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func sendData(sendch chan&lt;- int) {  
+    sendch &lt;- 10
+}
+
+func main() {  
+    sendch := make(chan&lt;- int) // 單向 channel
+    go sendData(sendch)
+    fmt.Println(&lt;-sendch)
+}
+
+// main.go:11: invalid operation: &lt;-sendch (receive from send-only type chan&lt;- int)
+</code></pre>
+
+<p>以上只有 send 功能，並沒有 receive，因此會報錯，但事實上只有 send 的 channel 也是沒有什麼意義</p>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func sendData(sendch chan&lt;- int) { // 單向 channel
+    sendch &lt;- 10
+}
+
+func main() {
+    chnl := make(chan int) // 雙向 channel
+    go sendData(chnl)
+    fmt.Println(&lt;-chnl)
+}
+
+// 10
+</code></pre>
+
+<p>將單向改成雙向，並且透過 <code>func</code> 來控制單向</p>
+
+<h3>Closing channels and for range loops on channels</h3>
+
+<ul>
+<li>Only the sender should close a channel, never the receiver. Sending on a closed channel will cause a <code>panic</code></li>
+<li>Channels aren&rsquo;t like files; you don&rsquo;t usually need to close them. Closing is only necessary when the receiver must be told there are no more values coming, such as to terminate a <code>range</code> loop.</li>
+</ul>
+
+
+<pre><code class="go">v, ok := &lt;- ch
+// ok 
+// true: 可以接收的狀態
+// false: 沒有任何 value &amp; channel 已經關閉
+</code></pre>
+
+<h5>Examples</h5>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func producer(chnl chan int) {
+    for i := 0; i &lt; 3; i++ {
+        chnl &lt;- i
+    }
+    close(chnl) // close
+}
+func main() {
+    ch := make(chan int)
+    go producer(ch)
+    // 用 range，當 channel close 會自動離開
+    for v := range ch {
+        fmt.Println("Received ", v)
+    }
+    /*
+    for {
+        v, ok := &lt;-ch
+        if ok == false {
+            break
+        }
+        fmt.Println("Received ", v, ok)
+    }
+    */
+}
+
+// Received  0 true
+// Received  1 true
+// Received  2 true
+// 沒有 close 會造成 fatal error: all goroutines are asleep - deadlock!
+</code></pre>
+
+<h5>Example</h5>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func fibonacci(n int, c chan int) {
+    x, y := 0, 1
+    for i := 0; i &lt; n; i++ {
+        c &lt;- x
+        x, y = y, x+y
+    }
+    close(c)
+}
+
+func main() {
+    c := make(chan int, 10)
+    go fibonacci(cap(c), c)
+    for i := range c {
+        fmt.Println(i)
+    }
+}
+
+// 0
+// 1
+// 1
+// 2
+// 3
+// 5
+// 8
+// 13
+// 21
+// 34
+</code></pre>
+
+<h1><span id="buffered_channels"> Buffered Channels </span></h1>
+
+<blockquote><p>Provide the buffer length as the second argument to make to initialize a buffered channel:</p></blockquote>
+
+<pre><code class="go">ch := make(chan int, 100)
+// ch := make(chan type, capacity)
+// The capacity for an unbuffered channel is 0 
+</code></pre>
+
+<ul>
+<li>當 buffer 滿了，sends 就會 block 住</li>
+<li>當 buffer 空了，receives 就會 block 住</li>
+</ul>
+
+
+<h3>Example</h3>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    ch := make(chan int, 3)
+    ch &lt;- 1
+    ch &lt;- 2 
+    // ch &lt;- 3 再多傳一個就會 deadlock
+    fmt.Println("capacity is", cap(ch))
+    fmt.Println("length is", len(ch))
+    fmt.Println(&lt;-ch)
+    fmt.Println(&lt;-ch)
+    // fmt.Println(&lt;-ch) 多接收一個也會 deadlock
+    fmt.Println("capacity is", cap(ch))
+    fmt.Println("length is", len(ch))
+}
+
+/*
+capacity is 3
+length is 2
+1
+2
+capacity is 3
+length is 0
+*/
+</code></pre>
+
+<h1><span id="worker_pool"> Worker Pool </span></h1>
+
+<h3>WaitGroup</h3>
+
+<p>透過 WaitGroup，可以讓所有的 Goroutine 都跑完，最後再結束</p>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+    "sync"
+    "time"
+)
+
+func process(i int, wg *sync.WaitGroup) {  
+    fmt.Println("started Goroutine ", i)
+    time.Sleep(2 * time.Second)
+    fmt.Printf("Goroutine %d ended\n", i)
+    wg.Done() // 執行完一次就 -1
+}
+
+func main() {  
+    no := 3
+    var wg sync.WaitGroup
+    for i := 0; i &lt; no; i++ {
+        wg.Add(1) // 每次執行都 + 1
+        go process(i, &amp;wg) // wg 一定要用 pointer，否則每個 goroutine 都會有各自的 WaitGroup
+    }
+    wg.Wait() // 會 wait 到 0 才會繼續下一步
+    fmt.Println("All go routines finished executing")
+}
+</code></pre>
+
+<p>what is <a href="https://en.wikipedia.org/wiki/Thread_pool">worker pool</a>?</p>
+
+<blockquote><p>a worker pool is a collection of threads which are waiting for tasks to be assigned to them. Once they finish the task assigned, they make themselves available again for the next task.</p></blockquote>
+
+<ul>
+<li><a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a></li>
+</ul>
+
+
+<h3>Example</h3>
+
+<ul>
+<li><a href="https://golangbot.com/buffered-channels-worker-pools/">Worker Pool Implementation</a></li>
+</ul>
+
+
+<h1><span id="select"> Select </span></h1>
+
+<ul>
+<li>The select statement lets a goroutine wait on multiple communication operations.</li>
+<li>A select blocks until one of its cases can run, then it executes that case. It chooses one at random if multiple are ready.</li>
+</ul>
+
+
+<blockquote><p>The syntax is similar to switch except that each of the case statement will be a channel operation</p></blockquote>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func server1(ch chan string) {
+    time.Sleep(6 * time.Second)
+    ch &lt;- "from server1"
+}
+func server2(ch chan string) {
+    time.Sleep(3 * time.Second)
+    ch &lt;- "from server2"
+
+}
+func main() {
+    output1 := make(chan string)
+    output2 := make(chan string)
+    go server1(output1)
+    go server2(output2)
+
+    // 等待到其中一個 channel 回來，就執行，如果都有就會隨機
+    select {
+    case s1 := &lt;-output1:
+        fmt.Println(s1)
+    case s2 := &lt;-output2:
+        fmt.Println(s2)
+    }
+}
+
+// from server2
+</code></pre>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func fibonacci(c, quit chan int) {
+    x, y := 0, 1
+    for {
+        select {
+        case c &lt;- x:
+            x, y = y, x+y
+        case &lt;-quit:
+            fmt.Println("quit")
+            return
+        }
+    }
+}
+
+func main() {
+    c := make(chan int)
+    quit := make(chan int)
+    go func() {
+        for i := 0; i &lt; 10; i++ {
+            fmt.Println(&lt;-c)
+        }
+        quit &lt;- 0
+    }()
+    fibonacci(c, quit)
+}
+
+// 0
+// 1
+// 1
+// 2
+// 3
+// 5
+// 8
+// 13
+// 21
+// 34
+// quit
+</code></pre>
+
+<h3>Default Selection</h3>
+
+<p>The default case in a select is run if no other case is ready.</p>
+
+<pre><code class="go">// Use a default case to try a send or receive without blocking:
+
+select {
+case i := &lt;-c:
+    // use i
+default:
+    // receiving from c would block
+}
+</code></pre>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func process(ch chan string) {
+    time.Sleep(10500 * time.Millisecond)
+    ch &lt;- "process successful"
+}
+
+func main() {
+    ch := make(chan string)
+    go process(ch)
+    for {
+        time.Sleep(1000 * time.Millisecond)
+        select {
+        case v := &lt;-ch:
+            fmt.Println("received value: ", v)
+            return
+        default:
+            fmt.Println("no value received")
+        }
+    }
+
+}
+</code></pre>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func main() {
+    tick := time.Tick(100 * time.Millisecond)
+    boom := time.After(500 * time.Millisecond)
+    for {
+        select {
+        case &lt;-tick:
+            fmt.Println("tick.")
+        case &lt;-boom:
+            fmt.Println("BOOM!")
+            return
+        default:
+            fmt.Println("    .")
+            time.Sleep(50 * time.Millisecond)
+        }
+    }
+}
+</code></pre>
+
+<h1><span id="mutex"> sync.Mutex </span></h1>
+
+<h3><a href="https://zh.wikipedia.org/wiki/%E8%87%A8%E7%95%8C%E5%8D%80%E6%AE%B5">Critical section</a></h3>
+
+<p>一個存取共用資源（例如：共用裝置或是共用記憶體）的程式片段，而這些共用資源有無法同時被多個執行緒存取的特性。</p>
+
+<p>當兩個以上的 goroutine 對同一個 value 做計算時，可能會因為前後順序的差異，導致最後的結果不同。(e.g. x = x + 1)</p>
+
+<h3><a href="https://tip.golang.org/pkg/sync/#Mutex">Mutex</a></h3>
+
+<p>A Mutex is used to provide a locking mechanism to ensure that only one Goroutine is running the critical section of code at any point of time to prevent race condition from happening.</p>
+
+<pre><code class="go">// Mutex is available in the sync package
+mutex.Lock()  
+x = x + 1  
+mutex.Unlock() 
+
+// 同時間只會有一個 goroutine
+</code></pre>
+
+<h3>Example</h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+var x = 0
+
+func increment(wg *sync.WaitGroup, m *sync.Mutex) {
+    m.Lock()
+    x = x + 1
+    m.Unlock()
+    wg.Done()
+}
+func main() {
+    var w sync.WaitGroup
+    var m sync.Mutex
+    for i := 0; i &lt; 1000; i++ {
+        w.Add(1)
+        go increment(&amp;w, &amp;m) // 這裡一定要用 address
+    }
+    w.Wait()
+    fmt.Println("final value of x", x)
+}
+
+// 1000
+// 如果沒加上 lock，同時就會有很多個 goroutine 在跑，導致最後結果不一樣
+</code></pre>
+
+<p>用 buffered channel 的方式</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+var x = 0
+
+func increment(wg *sync.WaitGroup, ch chan bool) {
+    ch &lt;- true // 當前面的 channel 還有東西，就會 block 住，導致後面無法繼續
+    x = x + 1
+    &lt;-ch
+    wg.Done()
+}
+func main() {
+    var w sync.WaitGroup
+    ch := make(chan bool, 1)
+    for i := 0; i &lt; 1000; i++ {
+        w.Add(1)
+        go increment(&amp;w, ch)
+    }
+    w.Wait()
+    fmt.Println("final value of x", x)
+}
+</code></pre>
+
+<h3>Example 2</h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "sync"
+    "time"
+)
+
+// SafeCounter is safe to use concurrently.
+type SafeCounter struct {
+    v   map[string]int
+    mux sync.Mutex
+}
+
+// Inc increments the counter for the given key.
+func (c *SafeCounter) Inc(key string) {
+    c.mux.Lock()
+    // Lock so only one goroutine at a time can access the map c.v.
+    c.v[key]++
+    c.mux.Unlock()
+}
+
+// Value returns the current value of the counter for the given key.
+func (c *SafeCounter) Value(key string) int {
+    c.mux.Lock()
+    // Lock so only one goroutine at a time can access the map c.v.
+    defer c.mux.Unlock()
+    return c.v[key]
+}
+
+func main() {
+    c := SafeCounter{v: make(map[string]int)}
+    for i := 0; i &lt; 1000; i++ {
+        go c.Inc("somekey")
+    }
+
+    time.Sleep(time.Second)
+    fmt.Println(c.Value("somekey"))
+}
+</code></pre>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://golangbot.com/learn-golang-series/">[golangbot.com]</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - Interfaces]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/05/12/golang-interfaces/"/>
+    <updated>2018-05-12T23:39:34+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/05/12/golang-interfaces</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<ul>
+<li><a href="#interfaces">介面 Interfaces</a>
+
+<ul>
+<li><a href="#stringer">Stringer Interface</a></li>
+<li><a href="#errors">Errors Interface</a></li>
+<li><a href="#reader">Reader Interface</a></li>
+<li><a href="#image">Image Interface</a></li>
+<li><a href="#http">HTTP interface</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h1><span id="interfaces">介面 Interfaces</span></h1>
+
+<p>Golang 本身並沒有泛型程式設計(generic types)，但可以利用 interface 來達成</p>
+
+<blockquote><p>泛型程式設計: <br/>
+簡單來說就是，編寫的程式碼不是針對特定的類型（比如適用於int, 不適用於string）才有效，而是大部分類型的參數都是可以工作的。</p></blockquote>
+
+<p>在 Golang 中，interface 是一組 method 的集合，是 <a href="https://en.wikipedia.org/wiki/Duck_typing">duck typing programming</a> 的一種體現。不關心屬性（數據），只關心行為（方法）</p>
+
+<h3>實作條件</h3>
+
+<p>欲實作的建構體必須要有 Interface 所定義的所有函式、接收參數、回傳值</p>
+
+<pre><code class="go">type Database interface {  
+    Read(string) string
+    Write(string)
+}
+// Read 一定要接收一個字串，然後回傳一個字串
+// Write 則必須接收一個字串。
+
+type Database interface {  
+    Read(name string) string
+    Write(data string)
+}
+// 允許定義 Interface 的時候擺上參數名稱用以辨別，但實作的時候並不需要遵循這個參數名稱。
+</code></pre>
+
+<h3>Why Interface?</h3>
+
+<blockquote><p>Interface specifies what methods a type should have and the type decides how to implement these methods.</p></blockquote>
+
+<ul>
+<li>writing generic algorithm （泛型程式設計）</li>
+<li>hiding implementation detail （隱藏具體實現）</li>
+<li>providing interception points</li>
+</ul>
+
+
+<p>Golang 裡有兩種 Interface (型態 &amp; 定義)</p>
+
+<h3>1. 型態</h3>
+
+<h3>Empty Interface</h3>
+
+<p><code>interface{}</code> 意味著任何型態的值，因為裡面沒有任何 method，也代表所有 type 都 implement</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func describe(i interface{}) {
+    fmt.Printf("Type = %T, value = %v\n", i, i)
+}
+
+func main() {
+    var inter interface{}
+    describe(inter)
+    s := "Hello World"
+    describe(s)
+    i := 55
+    describe(i)
+    strt := struct {
+        name string
+    }{
+        name: "Hi",
+    }
+    describe(strt)
+}
+
+/*
+Type = &lt;nil&gt;, value = &lt;nil&gt;
+Type = string, value = Hello World
+Type = int, value = 55
+Type = struct { name string }, value = {Hi}
+*/
+</code></pre>
+
+<h3>interface{}類型的 slice 是不是就可以接受任何類型的 slice ?</h3>
+
+<p>go 不會對 類型是interface{} 的 slice 進行轉換
+<a href="https://github.com/golang/go/wiki/InterfaceSlice">InterfaceSlice</a></p>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func printAll(vals []interface{}) { //1
+    for _, val := range vals {
+        fmt.Println(val)
+    }
+}
+func main() {
+    names := []string{"stanley", "david", "oscar"}
+    printAll(names)
+}
+
+// prog.go:14:10: cannot use names (type []string) as type []interface {} in argument to printAll
+</code></pre>
+
+<h3>Interface value 的賦值</h3>
+
+<p>從概念上來講，interface value 有兩部分組成：type 部分是一個 concrete type，vlaue 部分是這個 concrete type 對應的 instance，它們分別稱之為 interface value 的 dynamic type 和 dynamic value。</p>
+
+<ul>
+<li><a href="http://sanyuesha.com/2017/10/18/go-interface-3/">Go interface 詳解 (三) ：interface 的值</a></li>
+</ul>
+
+
+<h3>型態斷言 Type Assertion</h3>
+
+<ul>
+<li><a href="http://sanyuesha.com/2017/12/01/go-interface-4/">Go interface 詳解 (四) ：type assertion</a></li>
+</ul>
+
+
+<p>Type assertion is used extract the underlying value of the interface.</p>
+
+<p><code>i.(T)</code> is the syntax which is used to get the underlying value of interface <code>i</code> whose concrete type is <code>T</code>.</p>
+
+<p><code>t, ok := i.(T)</code> i 是 interface 類型的變數，T代表要斷言的類型，t 是 interface 變數存儲的值，ok 是 bool 類型表示是否為該斷言的類型 T</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func assert(i interface{}) {
+    // Type Switch
+    switch v := i.(type) {
+    case int:
+        fmt.Printf("Twice %v is %v\n", v, v*2)
+    case string:
+        fmt.Printf("%q is %v bytes long\n", v, len(v))
+    default:
+        fmt.Printf("I don't know about type %T!\n", v)
+    }
+}
+
+func main() {
+    assert(21)
+    assert("hello")
+    assert(true)
+}
+
+/*
+Twice 21 is 42
+"hello" is 5 bytes long
+I don't know about type bool!
+*/
+</code></pre>
+
+<h5>compare a type to an interface</h5>
+
+<p>當一個 type implements 了一個 interface，就可以做比較</p>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+type Describer interface {
+    Describe()
+}
+type Person struct {
+    name string
+    age  int
+}
+
+func (p Person) Describe() {
+    fmt.Printf("%s is %d years old", p.name, p.age)
+}
+
+func findType(i interface{}) {
+    switch v := i.(type) {
+    case Describer:
+        v.Describe()
+    default:
+        fmt.Printf("unknown type\n")
+    }
+}
+
+func main() {
+    findType("Naveen")
+    p := Person{
+        name: "Naveen R",
+        age:  25,
+    }
+    findType(p)
+}
+
+/*
+unknown type
+Naveen R is 25 years old
+*/
+</code></pre>
+
+<h5>具體類型 vs 介面類型</h5>
+
+<p>在 <code>x.(T)</code> 當中，<code>x</code> 是 interface 介面的表達式，<code>T</code>是類型，稱為被斷言類型</p>
+
+<blockquote><p>介面有介面值的概念，其包括 <code>動態類型 dynamic type</code> 和 <code>動態值 dynamic value</code> 兩部分。</p></blockquote>
+
+<p>T 有分兩種 <code>具體類型</code> <code>介面類型</code></p>
+
+<h5>具體類型 concrete type</h5>
+
+<p>類型斷言首先檢查 <code>x</code> 的動態類型是否是 <code>T</code></p>
+
+<ul>
+<li>如果是，類型斷言的結果就是 <code>x</code> 的動態值，動態值的 type 就是 T.</li>
+<li>如果否，操作就會 <code>panic</code></li>
+<li>對 concrete type 的斷言實際上是獲取 x 的 dynamic value。</li>
+</ul>
+
+
+<pre><code class="go">// os.Stdout 的類型就是 *os.File
+var w io.Writer
+w = os.Stdout
+f := w.(*os.File) // success: f == os.Stdout
+c := w.(*bytes.Buffer) // panic: interface holds *os.File, not *bytes.Buffer
+</code></pre>
+
+<h5>介面類型 interface type</h5>
+
+<p>類型斷言首先檢查x的動態類型是否滿足T</p>
+
+<ul>
+<li>斷言的目的是為了檢測 x 的 dynamic type 是否滿足 T</li>
+<li>如果是，x 的動態值不會被提取，結果仍然是以前的動態類型和動態值。但結果的類型是介面類型T.</li>
+<li>換句話説，對介面類型的斷言，結果的類型是T，不是x的類型，改變了類型的表述方式，從而改變了可訪問的方法集合(通常更大)，但會保留x介面值中的動態類型和動態值。</li>
+</ul>
+
+
+<pre><code class="go">/*
+第一個類別型斷言後，
+w、rw兩個介面的動態值都是os.Stout，動態類型都是*os.File。
+
+w的類型是io.Writer，只暴露Write方法，
+rw的類型是io.ReadWriter,暴露Read和Write方法。
+*/
+var w io.Writer
+w = os.Stdout // w = os.Stdout 賦值 *os.File 類型的 value 給 w
+rw := w.(io.ReadWriter) // success: *os.File has both Read and Write
+</code></pre>
+
+<h5>Testing</h5>
+
+<ul>
+<li><a href="https://play.golang.org/p/7_uCMhUNGVb">pointer struct</a></li>
+<li><a href="https://play.golang.org/p/1eZxJWA9ok3">struct</a></li>
+<li><a href="https://play.golang.org/p/Uqq6oE7py2Q">interface</a></li>
+</ul>
+
+
+<h3>型態宣告 Type Casting</h3>
+
+<p>若很確定這個 interface{} 是什麼型態，可以直接透過 value.(型態) 來進行型態宣告</p>
+
+<p>倘若該型態不正確，則會出現 <code>panic</code> 警告。</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func Test(i interface{}) {
+    v, k := i.(int)
+    fmt.Println(v, k)
+}
+
+func Panic(i interface{}) {
+    fmt.Println(i.(string))
+}
+
+func main() {
+    Test("Hi")
+    Test(123)
+    Panic(111)
+}
+
+// 0 false
+// 123 true
+// panic: interface conversion: interface {} is int, not string
+</code></pre>
+
+<h3>2. 定義</h3>
+
+<h3>Example 1</h3>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+type SalaryCalculator interface {  
+    CalculateSalary() int //第一個是 method 名稱，第二個是 return type
+}
+
+// 長期雇工
+type Permanent struct {  
+    empId    int
+    basicpay int
+    pf       int
+}
+
+// 合約雇工
+type Contract struct {  
+    empId  int
+    basicpay int
+}
+
+// 長期雇工 實作 CalculateSalary()
+func (p Permanent) CalculateSalary() int {  
+    return p.basicpay + p.pf
+}
+
+// 合約雇工實作 CalculateSalary()
+func (c Contract) CalculateSalary() int {  
+    return c.basicpay
+}
+
+/*
+total expense is calculated by iterating though the SalaryCalculator slice and summing  
+the salaries of the individual employees  
+*/
+
+// 必須傳 slice 並且 type 是 SalaryCalculator
+func totalExpense(s []SalaryCalculator) {  
+    expense := 0
+    for _, v := range s {
+        // v 必須都有實作 CalculateSalary()
+        expense = expense + v.CalculateSalary()
+    }
+    fmt.Printf("Total Expense Per Month $%d", expense)
+}
+
+func main() {  
+    pemp1 := Permanent{1, 5000, 20}
+    pemp2 := Permanent{2, 6000, 30}
+    cemp1 := Contract{3, 3000}
+    employees := []SalaryCalculator{pemp1, pemp2, cemp1}
+    totalExpense(employees)
+}
+
+// Total Expense Per Month $14050
+</code></pre>
+
+<h3>Implementing interfaces using pointer receivers vs value receivers</h3>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+type Describer interface {  
+    Describe()
+}
+
+type Person struct {  
+    name string
+    age  int
+}
+
+func (p Person) Describe() { //implemented using value receiver  
+    fmt.Printf("%s is %d years old\n", p.name, p.age)
+}
+
+type Address struct {  
+    state   string
+    country string
+}
+
+func (a *Address) Describe() { //implemented using pointer receiver  
+    fmt.Printf("State %s Country %s", a.state, a.country)
+}
+
+func main() {  
+    var d1 Describer // 聲明 d1 是 Describer(interface) 類型
+    p1 := Person{"Sam", 25}
+    d1 = p1  // 賦值 p1 到 d1
+    d1.Describe()
+    p2 := Person{"James", 32}
+    d1 = &amp;p2 // 賦值 &amp;p2 到 d1
+    d1.Describe()
+
+    var d2 Describer // 聲明 d2 是 Describer(interface) 類型
+    a := Address{"Washington", "USA"}
+
+    //d2 = a 
+    // 當 assign value 時，必須要 implements interface 的內容，否則會 error
+    /* 
+       cannot use a (type Address) as type Describer
+       in assignment: Address does not implement
+       Describer (Describe method has pointer
+       receiver)
+    */
+
+    d2 = &amp;a // 賦值 &amp;a 到 d2
+    d2.Describe()
+}
+
+/*
+Sam is 25 years old
+James is 32 years old
+State Washington Country USA
+*/
+</code></pre>
+
+<h3>Embedding interfaces</h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type SalaryCalculator interface {
+    DisplaySalary()
+}
+
+type LeaveCalculator interface {
+    CalculateLeavesLeft() int
+}
+
+type EmployeeOperations interface {
+    SalaryCalculator
+    LeaveCalculator
+}
+
+type Employee struct {
+    firstName   string
+    lastName    string
+    basicPay    int
+    pf          int
+    totalLeaves int
+    leavesTaken int
+}
+
+func (e Employee) DisplaySalary() {
+    fmt.Printf("%s %s has salary $%d", e.firstName, e.lastName, (e.basicPay + e.pf))
+}
+
+func (e Employee) CalculateLeavesLeft() int {
+    return e.totalLeaves - e.leavesTaken
+}
+
+func main() {
+    e := Employee{
+        firstName:   "Naveen",
+        lastName:    "Ramanathan",
+        basicPay:    5000,
+        pf:          200,
+        totalLeaves: 30,
+        leavesTaken: 5,
+    }
+    var empOp EmployeeOperations = e
+    empOp.DisplaySalary()
+    fmt.Println("\nLeaves left =", empOp.CalculateLeavesLeft())
+}
+
+/*
+Naveen Ramanathan has salary $5200
+Leaves left = 25
+*/
+</code></pre>
+
+<h5>Example 2</h5>
+
+<p>Go語言中也提供了sort函式，原始碼，src/sort/sort.go</p>
+
+<p>裡面定義了一個Interface，包含三個方法：Len(), Less(), Swap()。Interface 作為參數傳遞給Sort。</p>
+
+<p>我們要使用Sort，只需要實現Interface的三個方法就可以使用。</p>
+
+<pre><code class="go">// src/sort/sort.go
+package sort
+
+// A type, typically a collection, that satisfies sort.Interface can be
+// sorted by the routines in this package.  The methods require that the
+// elements of the collection be enumerated by an integer index.
+// interface 是一個介面定義，用來讓第三方開發者定義自己的資料庫使用方式，就像一種規範。
+type Interface interface {
+    // Len is the number of elements in the collection.
+    Len() int
+    // Less reports whether the element with
+    // index i should sort before the element with index j.
+    Less(i, j int) bool
+    // Swap swaps the elements with indexes i and j.
+    Swap(i, j int)
+}
+
+...
+
+// Sort sorts data.
+// It makes one call to data.Len to determine n, and O(n*log(n)) calls to
+// data.Less and data.Swap. The sort is not guaranteed to be stable.
+func Sort(data Interface) {
+    // Switch to heapsort if depth of 2*ceil(lg(n+1)) is reached.
+    n := data.Len()
+    maxDepth := 0
+    for i := n; i &gt; 0; i &gt;&gt;= 1 {
+        maxDepth++
+    }
+    maxDepth *= 2
+    quickSort(data, 0, n, maxDepth)
+}
+</code></pre>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "sort"
+)
+
+type Person struct {
+    Name string
+    Age  int
+}
+
+func (p Person) String() string {
+    return fmt.Sprintf("%s: %d", p.Name, p.Age)
+}
+
+// ByAge implements sort.Interface for []Person based on
+// the Age field.
+type ByAge []Person
+
+func (a ByAge) Len() int           { return len(a) }
+func (a ByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
+func (a ByAge) Less(i, j int) bool { return a[i].Age &lt; a[j].Age }
+
+func main() {
+    people := []Person{
+        {"Bob", 31},
+        {"John", 42},
+        {"Michael", 17},
+        {"Jenny", 26},
+    }
+
+    fmt.Println(people)
+    sort.Sort(ByAge(people))
+    fmt.Println(people)
+}
+
+// [Bob: 31 John: 42 Michael: 17 Jenny: 26]
+// [Michael: 17 Jenny: 26 Bob: 31 John: 42]
+</code></pre>
+
+<h3><span id="stringer">Stringer Interface</span></h3>
+
+<p>Make the IPAddr type implement fmt.Stringer to print the address as a dotted quad.</p>
+
+<blockquote><p>most ubiquitous interfaces is <code>Stringer</code> defined by the <code>fmt</code> package.</p></blockquote>
+
+<pre><code class="go">type Stringer interface {
+    String() string
+}
+</code></pre>
+
+<h5><a href="tour.golang.org/methods/17">範例 1</a></h5>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+type Person struct {
+  Name string
+  Age  int
+}
+
+func (p Person) String() string {
+  return fmt.Sprintf("%v (%v years)", p.Name, p.Age)
+}
+
+func main() {
+  a := Person{"Arthur Dent", 42}
+  z := Person{"Zaphod Beeblebrox", 9001}
+  fmt.Println(a, z)
+}
+// Arthur Dent (42 years) Zaphod Beeblebrox (9001 years)s
+</code></pre>
+
+<h5><a href="https://tour.golang.org/methods/18">範例 2</a></h5>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+type IPAddr [4]byte
+
+func (ip IPAddr) String() string {
+  return fmt.Sprintf("%v.%v.%v.%v", ip[0], ip[1], ip[2], ip[3])
+}
+
+func main() {
+   // key 為 string type
+   // value 為 IPAddr type 
+   // 因此只有 IPAddr 會轉換成上方定義的 func 形式
+  hosts := map[string]IPAddr{
+    "loopback":  {127, 0, 0, 1},
+    "googleDNS": {8, 8, 8, 8},
+  }
+  for name, ip := range hosts {
+    fmt.Printf("%v: %v\n", name, ip)
+  }
+}
+</code></pre>
+
+<h3><span id="errors">Errors Interface</span></h3>
+
+<p>The error type is a built-in interface similar to fmt.Stringer</p>
+
+<pre><code class="go">type error interface {
+    Error() string
+}
+</code></pre>
+
+<h5><a href="https://tour.golang.org/methods/19">範例 1</a></h5>
+
+<pre><code class="go">package main
+
+import (
+  "fmt"
+  "time"
+)
+
+type MyError struct {
+  When time.Time
+  What string
+}
+
+func (e *MyError) Error() string {
+  return fmt.Sprintf("at %v, %s",
+    e.When, e.What)
+}
+
+func run() error {
+  return &amp;MyError{
+    time.Now(),
+    "it didn't work",
+  }
+}
+
+func main() {
+  if err := run(); err != nil {
+    fmt.Println(err)
+  }
+}
+
+// at 2009-11-10 23:00:00 +0000 UTC m=+0.000000001, it didn't work
+</code></pre>
+
+<h5><a href="https://tour.golang.org/methods/20">範例 2</a></h5>
+
+<pre><code class="go">package main
+
+import (
+  "fmt"
+  "math"
+)
+
+type ErrNegativeSqrt float64
+
+func (e ErrNegativeSqrt) Error() string {
+  return fmt.Sprintf("Sqrt: negative number %g", e)
+}
+
+const delta = 1e-10
+
+func Sqrt(f float64) (float64, error) {
+  if f &lt; 0 {
+    return 0, ErrNegativeSqrt(f)
+  }
+  z := f
+  for {
+    n := z - (z*z-f)/(2*z)
+    if math.Abs(n-z) &lt; delta {
+      break
+    }
+    z = n
+  }
+  return z, nil
+}
+
+func main() {
+  fmt.Println(Sqrt(2))
+  fmt.Println(Sqrt(-2))
+}
+
+// 1.4142135623730951 &lt;nil&gt;
+// 0 cannot Sqrt negativ number: -2
+</code></pre>
+
+<h3><span id="reader">Reader Interface</span></h3>
+
+<p>The io package specifies the io.Reader interface, which represents the read end of a stream of data.</p>
+
+<p><a href="https://golang.org/pkg/io/#Reader">Reader interface</a></p>
+
+<pre><code class="go">type Reader interface {
+        Read(p []byte) (n int, err error)
+}
+</code></pre>
+
+<h5><a href="https://tour.golang.org/methods/21">範例 1</a></h5>
+
+<pre><code class="go">package main
+
+import (
+  "fmt"
+  "io"
+  "strings"
+)
+
+func main() {
+  r := strings.NewReader("Hello, Reader!")
+
+  b := make([]byte, 8)
+  for {
+    n, err := r.Read(b)
+    fmt.Printf("n = %v err = %v b = %v\n", n, err, b)
+    fmt.Printf("b[:n] = %q\n", b[:n])
+    // end-of-file (EOF)
+    if err == io.EOF {
+      break
+    }
+  }
+}
+
+// n = 8 err = &lt;nil&gt; b = [72 101 108 108 111 44 32 82]
+// b[:n] = "Hello, R"
+// n = 6 err = &lt;nil&gt; b = [101 97 100 101 114 33 32 82]
+// b[:n] = "eader!"
+// n = 0 err = EOF b = [101 97 100 101 114 33 32 82]
+// b[:n] = ""
+</code></pre>
+
+<h5><a href="https://tour.golang.org/methods/22">範例 2</a></h5>
+
+<p><a href="https://github.com/golang/tour/blob/master/reader/validate.go">reader</a></p>
+
+<pre><code class="go">package main
+
+import "golang.org/x/tour/reader"
+
+type MyReader struct{}
+
+func (r MyReader) Read(b []byte) (int, error) {
+  for i := range b {
+    b[i] = 'A'
+  }
+  return len(b), nil
+}
+
+func main() {
+  reader.Validate(MyReader{})
+}
+
+// OK!
+</code></pre>
+
+<h5><a href="https://tour.golang.org/methods/23">範例 3</a></h5>
+
+<p>rot13Reader
+s</p>
+
+<blockquote><p>Wiki <a href="https://en.wikipedia.org/wiki/ROT13"><code>ROT13</code></a></p></blockquote>
+
+<pre><code class="go">package main
+
+import (
+  "io"
+  "os"
+  "strings"
+)
+
+// 轉換 ROT13
+func rot13(b byte) byte {
+  var a, z byte
+  switch {
+  // 判斷是小寫還是大寫的範圍
+  case 'a' &lt;= b &amp;&amp; b &lt;= 'z': 
+    a, z = 'a', 'z'
+  case 'A' &lt;= b &amp;&amp; b &lt;= 'Z':
+    a, z = 'A', 'Z'
+   // 特殊符號就直接回傳
+  default:
+    return b 
+  }
+  // a &amp; b 會自動轉成 ASCII 碼數字
+  return (b-a+13)%(z-a+1) + a
+}
+
+// 建立一個 rot13Reader 並且有 Read method
+type rot13Reader struct {
+  rr io.Reader
+}
+
+func (r rot13Reader) Read(p []byte) (n int, err error) {
+// n 為 s 字串的長度
+  n, err = r.rr.Read(p)
+  for i := 0; i &lt; n; i++ {
+    p[i] = rot13(p[i])
+  }
+  return
+}
+
+func main() {
+  s := strings.NewReader(
+    "Lbh penpxrq gur pbqr!")
+  r := rot13Reader{s}
+  io.Copy(os.Stdout, &amp;r)
+}
+
+// You cracked the code!
+</code></pre>
+
+<h3><span id="image">Image Interface</span></h3>
+
+<p><a href="https://golang.org/pkg/image/#Image">Image Interface</a></p>
+
+<pre><code class="go">package image
+
+type Image interface {
+    ColorModel() color.Model
+    Bounds() Rectangle
+    At(x, y int) color.Color
+}
+</code></pre>
+
+<h5><a href="https://tour.golang.org/methods/25">範例 1</a></h5>
+
+<pre><code class="go">package main
+
+import (
+    "code.google.com/p/go-tour/pic"
+    "image"
+    "image/color"
+)
+
+type Image struct {
+    width  int
+    height int
+}
+
+func (img Image) ColorModel() color.Model {
+    return color.RGBAModel
+}
+
+func (img Image) Bounds() image.Rectangle {
+    return image.Rect(0, 0, img.width, img.height)
+}
+
+func (img Image) At(x, y int) color.Color {
+    img_func := func(x, y int) uint8 {
+        //return uint8(x*y)
+        //return uint8((x+y) / 2)
+        return uint8(x ^ y)
+    }
+    v := img_func(x, y)
+    return color.RGBA{v, v, 255, 255}
+}
+
+func main() {
+    m := Image{256, 64}
+    pic.ShowImage(m)
+}
+</code></pre>
+
+<h3><span id="http"> HTTP Interface</span></h3>
+
+<p><a href="https://golang.org/pkg/net/http/">HTTP Interface</a></p>
+
+<pre><code class="go">package http
+
+type Handler interface {
+    ServeHTTP(w ResponseWriter, r *Request)
+}
+</code></pre>
+
+<h5>範例 1</h5>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+type Hello struct{}
+
+func (h Hello) ServeHTTP(
+    w http.ResponseWriter,
+    r *http.Request) {
+    fmt.Fprint(w, "Hello!")
+}
+
+func main() {
+    var h Hello
+    http.ListenAndServe("localhost:4000", h)
+}
+</code></pre>
+
+<h5>範例 2</h5>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "net/http"
+)
+
+type String string
+
+func (s String) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, s)
+}
+
+
+type Struct struct {
+    Greeting string
+    Punct string
+    Who string
+}
+
+func (s *Struct) ServeHTTP(w http.ResponseWriter, r *http.Request) {
+    fmt.Fprint(w, s.Greeting, s.Punct, s.Who)
+}
+
+
+func main() {
+    http.Handle("/string", String("I'm a frayed knot."))
+    http.Handle("/struct", &amp;Struct{"Hello", ":", "Gophers!"})
+    http.ListenAndServe("localhost:4000", nil)
+}
+</code></pre>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://golangbot.com/learn-golang-series/">golangbot.com</a></li>
+<li><a href="https://golangbot.com/polymorphism/">[golangbot.com] polymorphism</a></li>
+<li><a href="https://yami.io/golang-interface/">解釋 Golang 中的 Interface 到底是什麼</a></li>
+<li><a href="http://legendtkl.com/2017/06/12/understanding-golang-interface/">深入理解 Go Interface</a></li>
+<li><a href="http://legendtkl.com/2015/11/25/go-generic-programming/">go"泛型程式設計"</a></li>
+<li><a href="http://legendtkl.com/2015/11/28/go-interface-reflect/">談一談Go的interface和reflect</a></li>
+<li><a href="http://sanyuesha.com/2017/07/22/how-to-understand-go-interface/">理解 go interface 的 5 個關鍵點</a></li>
+<li><a href="http://sanyuesha.com/2017/10/10/go-interface-1/">Go interface 詳解(一) ：介紹</a></li>
+<li><a href="http://sanyuesha.com/2017/10/12/go-interface-2/">Go interface 詳解(二) ：定義和使用</a></li>
+<li><a href="http://sanyuesha.com/2017/10/18/go-interface-3/">Go interface 詳解 (三) ：interface 的值</a></li>
+<li><a href="http://sanyuesha.com/2017/12/01/go-interface-4/">Go interface 詳解 (四) ：type assertion</a></li>
+<li><a href="https://www.youtube.com/watch?v=F4wUrj6pmSI&amp;t=2319s">[video] Google Understanding Go Interfaces</a></li>
+<li><a href="https://github.com/gopherchina/conference/blob/master/2017/1.4%20interface.presented.pdf">[slider] Google Understanding Go Interfaces</a></li>
+<li><a href="http://gobook.io/read/github.com/lunny/gopl-zh/ch7/ch7-10.html">7.10. 類型斷言</a></li>
+<li><a href="https://hk.saowen.com/a/07c058b7f0424b619737a3cf71710500b3d493edb3f72b80e2478b2f43b631b1">Go 的類型斷言type assertion</a></li>
+<li><a href="https://research.swtch.com/interfaces">Go Data Structures: Interfaces</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - Pointer, Structs, Methods]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/05/08/golang-pointer-structs-methods/"/>
+    <updated>2018-05-08T23:55:02+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/05/08/golang-pointer-structs-methods</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<ul>
+<li><a href="#pointer">指標 Pointer</a></li>
+<li><a href="#structs">結構體 Structs</a>
+
+<ul>
+<li><a href="#anonymous_structs">Anonymous structs</a></li>
+<li><a href="#pointers_to_structs">Pointers to structs</a></li>
+<li><a href="#nested_structs">Nested structs</a></li>
+<li><a href="#promoted_fields">Promoted fields</a></li>
+<li><a href="#new_struct">New struct</a></li>
+<li><a href="#combination">組合 combination</a></li>
+<li><a href="#constructors">建構子 Constructors</a></li>
+</ul>
+</li>
+<li><a href="#methods">方法 methods</a>
+
+<ul>
+<li><a href="#pointer_receivers">Pointer receivers</a></li>
+<li><a href="#pointer_or_value">function use pointer or value ??</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h1><span id="pointer">指標 Pointer</span></h1>
+
+<blockquote><p>A pointer holds the memory address of a value<br/>
+將變數直接指向記憶體位置就叫做Pointer，要修改內容就直接到該記憶體位置修改</p></blockquote>
+
+<ul>
+<li>The type <code>*T</code> is a pointer to a T value. Its zero value is nil.</li>
+<li>The <code>&amp;</code> operator generates a pointer to its operand.</li>
+<li>Do not pass a pointer to an array as a argument to a function. Use slice instead.</li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    var i = 8  // i 佔用了一個記憶體空間
+    var p *int // 宣告 p 是一個 int 的指標，但此時要指向哪還不知道
+    fmt.Printf("Type of p is %T\n", p)
+    fmt.Printf("Type of &amp;i is %T\n", &amp;i)
+    fmt.Println("p =", p) // The zero value of a pointer is nil
+
+    p = &amp;i          // 將 p 指到 i 的記憶體位置
+    fmt.Println("p =", p)  // p 所指到的記憶體位置，就是i
+    fmt.Println("&amp;p =", &amp;p) // p 的記憶體位置
+    fmt.Println("*p =", *p) // '*' 代表透過 pointer 顯示該記憶體位置的值
+
+    *p = 20         // 透過 pointer 寫入 i 的值
+    fmt.Println("*p =", *p)
+}
+
+/**
+Type of p is *int
+Type of &amp;i is *int
+p = &lt;nil&gt;
+p = 0x10414020
+&amp;p = 0x1040c128
+*p = 8
+*p = 20
+**/
+// 當用 * 宣告為指標時，必須再去指向記憶體位置 &amp;
+</code></pre>
+
+<h3>Passing pointer to a function</h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func change(val *int) {
+    *val = 55
+}
+func main() {
+    a := 58
+    fmt.Println("value of a before function call is", a)
+    b := &amp;a
+    change(b)
+    fmt.Println("value of a after function call is", a)
+}
+
+/**
+value of a before function call is 58
+value of a after function call is 55
+**/
+</code></pre>
+
+<ul>
+<li><a href="https://ithelp.ithome.com.tw/articles/10187607">30天就Go(10)：Pointer</a></li>
+<li><a href="https://golangbot.com/pointers/">[golangbot.com] pointers</a></li>
+</ul>
+
+
+<h1><span id="structs">結構體 Structs</span></h1>
+
+<p>Golang 沒有類別 class，但有建構體 struct</p>
+
+<blockquote><ul>
+<li>在 Structs 中我們可以為不同項，定義不同的數據類型</li>
+<li>Structs 是由一系列具有相同類型或不同類型的數據構成的數據集合</li>
+<li>且沒有 public、private、protected 的種類</li>
+<li>structs 是可以比較的，但如果裡面的值是不可比較的 (map)，那就不可以比較</li>
+</ul>
+</blockquote>
+
+<h3>Declaring a structure</h3>
+
+<p>For instance a employee has a firstName, lastName and age. It makes sense to group these three properties into a single structure employee.</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type Employee struct {
+    firstName, lastName string
+    age, salary         int
+}
+
+func main() {
+
+    //creating structure using field names
+    emp1 := Employee{
+        firstName: "Sam",
+        age:       25,
+        salary:    500,
+        lastName:  "Anderson",
+    }
+
+    //creating structure without using field names
+    emp2 := Employee{"Thomas", "Paul", 29, 800}
+
+    fmt.Println("Employee 1", emp1)
+    fmt.Println(emp1.firstName, emp1.age, emp1.salary, emp1.lastName)
+    fmt.Println("Employee 2", emp2)
+    fmt.Println(emp2.firstName, emp2.age, emp2.salary, emp2.lastName)
+
+}
+
+/**
+Employee 1 {Sam Anderson 25 500}
+Sam 25 500 Anderson
+Employee 2 {Thomas Paul 29 800}
+Thomas 29 800 Paul
+**/
+</code></pre>
+
+<h3><span id="anonymous_structs"> Anonymous structs </span></h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    emp3 := struct {
+        firstName, lastName string
+        age, salary         int
+    }{
+        firstName: "Andreah",
+        lastName:  "Nikola",
+        age:       31,
+        salary:    5000,
+    }
+
+    fmt.Println("Employee 3", emp3)
+}
+
+// Employee 3 {Andreah Nikola 31 5000}
+</code></pre>
+
+<h3><span id="pointers_to_structs"> Pointers to structs </span></h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type Vertex struct {
+    X int
+    Y int
+}
+
+func main() {
+    v := Vertex{1, 2}
+    p := &amp;v
+    p.X = 1e9 // 等同於 (*p).X，但這樣太複雜，因此允許可以只用 p.X
+    fmt.Println(v)
+
+    var (
+        v1 = Vertex{1, 2}  // has type Vertex
+        v2 = Vertex{X: 1}  // Y:0 is implicit
+        v3 = Vertex{}      // X:0 and Y:0
+        p2 = &amp;Vertex{1, 2} // has type *Vertex
+    )
+
+    fmt.Println(v1, v2, v3, p2, *p2)
+
+}
+
+/**
+{1000000000 2}
+{1 2} {1 0} {0 0} &amp;{1 2} {1 2}
+**/
+</code></pre>
+
+<h3><span id="nested_structs"> Nested structs </span></h3>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+type Address struct {  
+    city, state string
+}
+
+type Person struct {  
+    name string
+    age int
+    address Address
+}
+
+func main() {  
+    var p Person
+    p.name = "Naveen"
+    p.age = 50
+    p.address = Address {
+        city: "Chicago",
+        state: "Illinois",
+    }
+    fmt.Println("Name:", p.name)
+    fmt.Println("Age:",p.age)
+    fmt.Println("City:",p.address.city)
+    fmt.Println("State:",p.address.state)
+}
+
+/**
+Name: Naveen
+Age: 50
+City: Chicago
+State: Illinois
+**/
+</code></pre>
+
+<h3><span id="promoted_fields"> Promoted fields </span></h3>
+
+<p>當 struct 裡面有 <code>anonymous struct</code>，那該 <code>anonymous struct</code> 的 field 就叫做 <code>promoted fields</code></p>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+type Address struct {  
+    city, state string
+}
+
+type Person struct {  
+    name string
+    age  int
+    Address // anonymous struct
+}
+
+func main() {  
+    var p Person
+    p.name = "Naveen"
+    p.age = 50
+    p.Address = Address{
+        city:  "Chicago",
+        state: "Illinois",
+    }
+    fmt.Println("Name:", p.name)
+    fmt.Println("Age:", p.age)
+    fmt.Println("City:", p.city) //city is promoted field
+    fmt.Println("State:", p.state) //state is promoted field
+}
+</code></pre>
+
+<h3><span id="new_struct"> New struct </span></h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type Vertex struct {
+    X, Y int
+}
+
+func main() {
+    v := new(Vertex)
+    // 相當於 var v *Vertex = new(Vertex)
+    // 宣告 v 是一個 *Vertex 的指標，並指向 Vertex struct
+    fmt.Println(v)
+    v.X, v.Y = 11, 9
+    fmt.Println(v)
+}
+
+// &amp;{0 0}
+// &amp;{11 9}
+</code></pre>
+
+<h3><span id="combination">組合 combination</span></h3>
+
+<p>golang 沒有繼承，但有組合</p>
+
+<ul>
+<li><a href="https://golangbot.com/inheritance/">Composition Instead of Inheritance - OOP in Go</a></li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type author struct {
+    firstName string
+    lastName  string
+    bio       string
+}
+
+func (a author) fullName() string {
+    return fmt.Sprintf("%s %s", a.firstName, a.lastName)
+}
+
+type post struct {
+    title   string
+    content string
+    // Anonymous fields
+    // Go會將嵌入字段預設作為屬性名
+    author
+}
+
+func (p post) details() {
+    fmt.Println("Title: ", p.title)
+    fmt.Println("Content: ", p.content)
+    fmt.Println("Author: ", p.fullName())
+    fmt.Println("Bio: ", p.bio)
+}
+
+type website struct {
+    posts []post
+}
+
+func (w website) contents() {
+    fmt.Println("Contents of Website\n")
+    for _, v := range w.posts {
+        v.details()
+        fmt.Println()
+    }
+}
+
+func main() {
+    author1 := author{
+        "Naveen",
+        "Ramanathan",
+        "Golang Enthusiast",
+    }
+    post1 := post{
+        "Inheritance in Go",
+        "Go supports composition instead of inheritance",
+        author1,
+    }
+    post2 := post{
+        "Struct instead of Classes in Go",
+        "Go does not support classes but methods can be added to structs",
+        author1,
+    }
+    post3 := post{
+        "Concurrency",
+        "Go is a concurrent language and not a parallel one",
+        author1,
+    }
+    w := website{
+        posts: []post{post1, post2, post3},
+    }
+    w.contents()
+}
+</code></pre>
+
+<h3><span id="constructors">建構子 Constructors</span></h3>
+
+<p>Golang 裡因為沒有類別，也就沒有建構子，但可以自己在外部建立一個建構用函式。</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type Test struct {
+    a string
+}
+
+func (t *Test) show() {
+    fmt.Println(t.a)
+}
+
+// 用來建構 Test 的假建構子
+func newTest() (test *Test) {
+    test = &amp;Test{a: "foobar"}
+    // 這裡會回傳一個型態是 *Test 建構體的 test 變數
+    return
+}
+
+func main() {
+    b := newTest()
+    b.show() // 輸出：foobar
+}
+
+// foobar 
+</code></pre>
+
+<h5>Example 2</h5>
+
+<pre><code class="go">// employee/employee.go
+package employee
+
+import (  
+    "fmt"
+)
+
+type employee struct {  // 改成小寫，不需要外面呼叫，必須都要透過 New 來產生
+    firstName   string
+    lastName    string
+    totalLeaves int
+    leavesTaken int
+}
+
+func New(firstName string, lastName string, totalLeave int, leavesTaken int) employee {  
+    e := employee {firstName, lastName, totalLeave, leavesTaken}
+    return e
+}
+
+func (e employee) LeavesRemaining() {  
+    fmt.Printf("%s %s has %d leaves remaining", e.firstName, e.lastName, (e.totalLeaves - e.leavesTaken))
+}
+</code></pre>
+
+<pre><code class="go">// main.go
+package main  
+
+import "oop/employee"
+
+func main() {  
+    e := employee.New("Sam", "Adolf", 30, 20)
+    e.LeavesRemaining()
+}
+</code></pre>
+
+<h1><span id="methods"> methods </span></h1>
+
+<p>Golang 中 structs 的成員還有方法都是在 structs 外面所定義的</p>
+
+<blockquote><p>在普通函式前面加個接受者（receiver，寫在函式名前面的括號裡面），這樣編譯器就知道這個函式（方法）屬於哪個struct了。</p>
+
+<p>Remember: a method is just a function with a receiver argument</p></blockquote>
+
+<ul>
+<li>golang 並不完全屬於<a href="https://golang.org/doc/faq#Is_Go_an_object-oriented_language">物件導向語言</a>，但是透過 methods 和 types 使行為像 class 一樣</li>
+<li>function 可以達成跟 methods 一樣的方法，但是 function 不允許有同樣的名稱，methods 可以，只要是不同的 struct</li>
+<li>function 通常只接收一種接受者 receiver，但 methods 可以接受 <code>value receiver</code> &amp; <code>pointer receiver</code>s</li>
+</ul>
+
+
+<pre><code class="go">// 定義
+func (r ReceiverType) funcName(parameters) {
+}
+// 形象一點說，就是 ReceiverType 類型的所有字段，方法 funcName 都是可以使用的，可以認為 funcName 屬於 ReceiverType
+</code></pre>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "math"
+)
+
+type Vertex struct {
+    X, Y float64
+}
+
+func (v Vertex) Abs() float64 {
+    return math.Sqrt(v.X*v.X + v.Y*v.Y)
+}
+
+func main() {
+    ver := Vertex{3, 4}
+    fmt.Println(ver.Abs())
+}
+
+
+// 5
+</code></pre>
+
+<h3>Declare a method on non-struct types, too.</h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "math"
+)
+
+type MyFloat float64 // create a type alias for the built-in type float64s
+
+func (f MyFloat) Abs() float64 {
+    if f &lt; 0 {
+        return float64(-f)
+    }
+    return float64(f)
+}
+
+func main() {
+    f := MyFloat(-math.Sqrt2)
+    fmt.Println(f.Abs())
+}
+
+// 1.4142135623730951
+</code></pre>
+
+<h3><span id="pointer_receivers"> Pointer receivers </span></h3>
+
+<p>兩個原因為什麼要用 pointer receiver?</p>
+
+<ul>
+<li>更改指標指向的值</li>
+<li>避免重複每個 method 使用的值</li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+// // 先定義一個 Foobar 建構體，然後有個叫做 a 的字串成員
+type Foobar struct {
+    a string
+}
+
+// 定義一個屬於 Foobar 的 test 方法
+func (f *Foobar) test() {
+    // 接收來自 Foobar 的 a
+    fmt.Println(f.a)
+}
+func main() {
+    a := &amp;Foobar{a: "a: hello, world!"}
+    var b = Foobar{a: "b: hello, world!"}
+    var c = &amp;Foobar{a: "c: hello, world!"}
+    var d *Foobar = &amp;Foobar{a: "d: hello, world!"} // 將 d 宣告為 Foobar 指標
+    a.test()
+    (&amp;b).test()
+    b.test() // 相當於 (&amp;b).test()
+    c.test()
+    d.test()
+}
+
+/**
+a: hello, world!
+b: hello, world!
+b: hello, world!
+c: hello, world!
+d: hello, world!
+**/
+</code></pre>
+
+<h5>Pointer receive to change value</h5>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type Vertex struct {
+    X, Y float64
+}
+
+func (v Vertex) Abs() float64 {
+    return v.X + v.Y
+}
+
+func (v *Vertex) Scale(f float64) {
+    v.X = v.X * f
+    v.Y = v.Y * f
+}
+
+func main() {
+    v := Vertex{3, 4}
+    v.Scale(10)
+    fmt.Println(v.Abs())
+}
+
+// 70
+// 改成沒有 *,  output 會變為 7
+// 有 * 用指標，才會更改原本的 X, Y
+</code></pre>
+
+<h5>rewritten as functions</h5>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type Vertex struct {
+    X, Y float64
+}
+
+func Abs(v Vertex) float64 {
+    return v.X + v.Y
+}
+
+func Scale(v *Vertex, f float64) {
+    v.X = v.X * f
+    v.Y = v.Y * f
+}
+
+func main() {
+    v := Vertex{3, 4}
+    Scale(&amp;v, 10)
+    fmt.Println(Abs(v))
+}
+
+// 70
+</code></pre>
+
+<h3>Methods and pointer indirection</h3>
+
+<pre><code class="go">type Vertex struct {
+  X, Y float64
+}
+
+func (v *Vertex) Scale(f float64) {
+  v.X = v.X * f
+  v.Y = v.Y * f
+}
+
+func ScaleFunc(v *Vertex, f float64) {
+  v.X = v.X * f
+  v.Y = v.Y * f
+}
+
+func (v Vertex) Abs() float64 {
+    return v.X + v.Y
+}
+
+func AbsFunc(v Vertex) float64 {
+    return v.X + v.Y
+}
+
+func main() {
+  v := Vertex{3, 4}
+  v.Scale(2) // (&amp;v).Scale(2)
+  ScaleFunc(&amp;v, 10)
+
+  p := &amp;Vertex{4, 3}
+  p.Scale(3)
+  ScaleFunc(p, 8)
+
+  fmt.Println(v, p)
+
+  a := Vertex{3, 4}
+  fmt.Println(a.Abs())
+  fmt.Println(AbsFunc(a))
+
+  b := &amp;Vertex{4, 3}
+  fmt.Println(b.Abs()) // (*b).Abs()
+  fmt.Println(AbsFunc(*b))
+}
+
+// {60 80} &amp;{96 72}
+// 7
+// 7
+// 7
+// 7
+</code></pre>
+
+<h3><span id="pointer_or_value">function use pointer or value ??</span></h3>
+
+<blockquote><p>先說結論: 如果只是要讀值，可以使用 Value 或 Pointer 方式，但是要寫入，則只能用 Pointer 方式。</p></blockquote>
+
+<h3>寫入或讀取</h3>
+
+<p>果需要對 Struct 內的成員進行修改，那請務必使用 Pointer 傳值，相反的，Go 會使用 Copy struct 方式來傳入，但是用此方式你就拿不到修改後的資料。</p>
+
+<h3>效能</h3>
+
+<p>假設 Struct 內部成員非常的多，請務必使用 Pointer 方式傳入，這樣省下的系統資源肯定比 Copy Value 的方式還來的多。</p>
+
+<h3>一致性</h3>
+
+<p>在開發團隊內，如果有人使用 Pointer 有人使用 Value 方式，這樣寫法不統一，造成維護效率非常低，所以官方建議，全部使用 Pointer 方式是最好的寫法。</p>
+
+<ul>
+<li><a href="https://blog.wu-boy.com/2017/05/go-struct-method-pointer-or-value/">Go 語言內 struct methods 該使用 pointer 或 value 傳值?</a></li>
+<li><a href="https://golang.org/doc/faq#methods_on_values_or_pointers">Should I define methods on values or pointers?</a></li>
+</ul>
+
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://golangbot.com/learn-golang-series/">golangbot.com</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - Array, Range, Slices, Maps]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/05/05/golang-array-range-slices-maps/"/>
+    <updated>2018-05-05T22:17:57+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/05/05/golang-array-range-slices-maps</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<ul>
+<li><a href="#array">陣列 Array </a></li>
+<li><a href="#range">Range (each)</a></li>
+<li><a href="#slices">Slices</a></li>
+<li><a href="#maps">Maps</a></li>
+</ul>
+
+
+<h1><span id="array"> 陣列 Array </span></h1>
+
+<blockquote><ul>
+<li>Array 的長度是其類型的一部分，因此陣列不能改變大小。</li>
+<li>當定義為 int Array，之後就只能放 int，不能放其他 type</li>
+<li>int default 值是 0, string 是 nil</li>
+<li>當設定一定長度時，內容不一定要填滿，但不能超過當初定義的長度。</li>
+<li>size 不一樣的 Array 是不同的 Type</li>
+</ul>
+</blockquote>
+
+<pre><code class="go">var a [10]int // 宣告一個變數 a 為一個 int type 的 Array 並且長度只有10.
+
+// 宣告一個變數 ｂ 為 string type, 並且裡面的值是 A, B 並且長度只有 2 
+b := [2]string{"A", "B"}
+b := [...]string{"A", "B"} // ... makes the compiler determine the length
+
+a := [3][2]string // Multidimensional arrays
+
+a := [3][2]string{
+        {"lion", "tiger"},
+        {"cat", "dog"},
+        {"pigeon", "peacock"}, //this comma is necessary. The compiler will complain if you omit this comma
+    }
+
+s := []struct {
+    i int
+    b bool
+  }{
+    {2, true},
+    {3, false},
+    {5, true},
+    {7, true},
+    {11, false},
+    {13, true},
+  }
+</code></pre>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    var s [2]string
+    s[0] = "Hello"
+    s[1] = "World"
+    fmt.Println(s)
+
+    primes := [6]int{2, 3, 5, 7, 11, 13}
+    fmt.Println(primes)
+
+    a := [...]float64{67.7, 89.8, 21, 78}
+    for i := 0; i &lt; len(a); i++ {
+        fmt.Printf("%d th element of a is %.2f\n", i, a[i])
+    }
+}
+
+/**
+[Hello World]
+[2 3 5 7 11 13]
+0 th element of a is 67.70
+1 th element of a is 89.80
+2 th element of a is 21.00
+3 th element of a is 78.00
+**/
+</code></pre>
+
+<h3>Passing a array to a function</h3>
+
+<p>傳遞給 function 部會改變原來的值</p>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func changeLocal(num [5]int) {  
+    num[0] = 55
+    fmt.Println("inside function ", num)
+
+}
+func main() {  
+    num := [...]int{5, 6, 7, 8, 8}
+    fmt.Println("before passing to function ", num)
+    changeLocal(num) //num is passed by value
+    fmt.Println("after passing to function ", num)
+}
+
+/**
+before passing to function  [5 6 7 8 8]  
+inside function  [55 6 7 8 8]  
+after passing to function  [5 6 7 8 8]  
+**/
+</code></pre>
+
+<h1><span id="range"> Range (each) </span></h1>
+
+<p>可以達成 foreach 的方式</p>
+
+<pre><code class="go">func main() {
+  data := []string{"a", "b", "c"}
+
+  for index, value := range data {
+    fmt.Printf("%d%s|", index, value) // 輸出：0a|1b|2c|
+  }
+
+  for index := range data {
+    fmt.Printf("%d|", index) // 輸出：0|1|2|
+  }
+
+  for _, value := range data {
+    fmt.Printf("%s|", value) // 輸出：a|b|c|
+  }
+}
+</code></pre>
+
+<h1><span id="slices"> Slices </span></h1>
+
+<p>不用定義其最大長度，而且可以直接賦予值</p>
+
+<blockquote><ul>
+<li>An array has a fixed size. A slice, on the other hand, is a dynamically-sizeds</li>
+<li>slice 的零值是 nil，一個 nil 的 slice 的長度和容量是 0</li>
+<li>Slice 是用 reference</li>
+</ul>
+</blockquote>
+
+<pre><code class="go">// 範圍 low ~ hight -1
+a[low : high]
+</code></pre>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    // 不需定義長度，因此可以一直擴充，但相對的會比較浪費資源
+    primes := []int{2, 3, 5, 7, 11, 13}
+
+    fmt.Println(primes[1:4]) // 通過指定索引 1:4 去做 slice，包含第一個，但不包含最後一個
+    fmt.Println(primes[1:])  // 索引 1 到最後
+    fmt.Println(primes[:2])  // 第一個到索引 2
+    fmt.Println(primes[1])   // 索引 1
+    fmt.Println(primes[1:1])
+    fmt.Println(primes[:])   // 全部
+}
+
+/**
+[3 5 7]
+[3 5 7 11 13]
+[2 3]
+3
+[]
+[2 3 5 7 11 13]
+**/
+</code></pre>
+
+<h3>Slices are like references to arrays</h3>
+
+<pre><code class="go">// slices 都是用 references 的方式，因此改值
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    numbers := [4]int{1, 2, 3, 4}
+    fmt.Println(numbers)
+
+    a := numbers[0:2]
+    b := numbers[1:3]
+    fmt.Println("a =", a, "b =", b)
+    b[0] = 0
+    fmt.Println("a =", a, "b =", b)
+    fmt.Println(numbers)
+}
+
+/**
+[1 2 3 4]
+a = [1 2] b = [2 3]
+a = [1 0] b = [0 3]
+[1 0 3 4]
+**/
+</code></pre>
+
+<h3>length and capacity</h3>
+
+<ul>
+<li>len is the number of elements in the slice.</li>
+<li>cap is the number of elements in the underlying array starting from the index from which the slice is created.</li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    s := []int{2, 3, 5, 7, 11, 13}
+    printSlice(s)
+    s = s[:0] // Slice the slice to give it zero length.
+    printSlice(s)
+    s = s[:4] // Extend its length.
+    printSlice(s)
+    s = s[:cap(s)] // re-sliced
+    printSlice(s)
+    s = s[2:] // Drop its first two values.
+    printSlice(s)
+
+}
+
+func printSlice(s []int) {
+    fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
+}
+
+
+/**
+len=6 cap=6 [2 3 5 7 11 13]
+len=0 cap=6 []
+len=4 cap=6 [2 3 5 7]
+len=6 cap=6 [2 3 5 7 11 13]
+len=4 cap=4 [5 7 11 13]
+**/
+</code></pre>
+
+<h3>Slices of slices 二維陣列</h3>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "strings"
+)
+
+func main() {
+    // Create a tic-tac-toe board.
+    board := [][]string{
+        []string{"_", "_", "_"},
+        []string{"_", "_", "_"},
+        []string{"_", "_", "_"},
+    }
+
+    // The players take turns.
+    board[0][0] = "X"
+    board[2][2] = "O"
+    board[1][2] = "X"
+    board[1][0] = "O"
+    board[0][2] = "X"
+
+    for i := 0; i &lt; len(board); i++ {
+        fmt.Printf("%s\n", strings.Join(board[i], " "))
+    }
+}
+
+// X _ X
+// O _ X
+// _ _ O
+</code></pre>
+
+<ul>
+<li><a href="https://golang.org/pkg/strings/#Join">strings.Join</a></li>
+</ul>
+
+
+<h3>Append</h3>
+
+<p>當空間不夠時，會自動擴充 capacity(*2)，實際上是建立一個新的 array，將原有的值 copy 過去，新的 slice 在 reference 到 新的 array 上面</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    var s []int
+    printSlice(s)
+
+    // append works on nil slices.
+    s = append(s, 0)
+    printSlice(s)
+
+    // The slice grows as needed.
+    s = append(s, 1)
+    printSlice(s)
+
+    // We can add more than one element at a time.
+    s = append(s, 2)
+    printSlice(s)
+}
+
+func printSlice(s []int) {
+    fmt.Printf("len=%d cap=%d %v\n", len(s), cap(s), s)
+}
+
+// len=0 cap=0 []
+// len=1 cap=2 [0] 
+// len=2 cap=2 [0 1]  
+// len=3 cap=4 [0 1 2]
+</code></pre>
+
+<h3>use make function to create dynamically-sized arrays.</h3>
+
+<pre><code class="go">func make([]T, len, cap)
+
+// make(類型, 長度, 容量)
+</code></pre>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    a := make([]int, 5) // a := [5]int{}
+    printSlice("a", a)
+    b := make([]int, 0, 5)
+    printSlice("b", b)
+    c := b[:2]
+    printSlice("c", c)
+    d := c[2:5]
+    printSlice("d", d)
+}
+
+func printSlice(s string, x []int) {
+    fmt.Printf("%s len=%d cap=%d %v\n",
+        s, len(x), cap(x), x)
+}
+
+/**
+a len=5 cap=5 [0 0 0 0 0]
+b len=0 cap=5 []
+c len=2 cap=5 [0 0]
+d len=3 cap=3 [0 0 0]
+**/
+</code></pre>
+
+<ul>
+<li><a href="https://golang.org/pkg/builtin/#make">make</a></li>
+<li><a href="https://blog.golang.org/go-slices-usage-and-internals">Go Slices: usage and internals</a></li>
+</ul>
+
+
+<h3>Passing a slice to a function</h3>
+
+<p>因為 slice 是用 reference，因此丟到 function 還是一樣會改值</p>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+func subtactOne(numbers []int) {  
+    for i := range numbers {
+        numbers[i] -= 2
+    }
+
+}
+func main() {
+    nos := []int{8, 7, 6}
+    fmt.Println("slice before function call", nos)
+    subtactOne(nos)                               //function modifies the slice
+    fmt.Println("slice after function call", nos) //modifications are visible outside
+
+}
+
+/**
+slice before function call [8 7 6]
+slice after function call [6 5 4]
+**/
+</code></pre>
+
+<h3>Memory Optimisation</h3>
+
+<p>用 slices 時，會 reference 到 array，此時會造成 array 無法被 garbage collected，因此會造成 memory 的浪費</p>
+
+<p>因此要解決的話可以利用 <a href="https://golang.org/pkg/builtin/#copy">copy</a>，copy 會產生新的 slices 跟 array ，而原本的 array 就可以被 garbage collected</p>
+
+<pre><code class="go">package main
+
+import (  
+    "fmt"
+)
+
+func countries() []string {  
+    countries := []string{"USA", "Singapore", "Germany", "India", "Australia"}
+    neededCountries := countries[:len(countries)-2]
+    countriesCpy := make([]string, len(neededCountries))
+    copy(countriesCpy, neededCountries) //copies neededCountries to countriesCpy
+    return countriesCpy
+}
+func main() {  
+    countriesNeeded := countries()
+    fmt.Println(countriesNeeded)
+}
+
+// [USA Singapore Germany]
+</code></pre>
+
+<ul>
+<li><a href="https://golang.org/pkg/builtin/#copy">copy</a></li>
+</ul>
+
+
+<h1><span id="maps"> Maps </span></h1>
+
+<p>A map maps keys to values.</p>
+
+<blockquote><ul>
+<li>Similar to slices, maps are reference types</li>
+<li>Only be compared to nil</li>
+</ul>
+</blockquote>
+
+<pre><code class="go">make(map[key]value)  
+</code></pre>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    // 聲明 map 的 key 和 value 的 type
+    var m1 map[string]int
+    fmt.Println("m1 == nil:", m1 == nil) // true
+    // 使用make函式建立一個非nil的map，nil map不能賦值
+    m1 = make(map[string]int)
+    fmt.Println("m1 == nil:", m1 == nil) // false
+    // 最後給已聲明的map賦值
+    m1["a"] = 1
+    fmt.Println("m1 =", m1)
+    fmt.Println("m1[a] =", m1["a"])
+
+    // 直接建立
+    // map[keyType]valueTypes
+    m2 := make(map[string]string)
+    // 然後賦值
+    m2["a"] = "aa"
+    fmt.Println("m2 =", m2)
+
+    // 初始化 + 賦值一體化
+    m3 := map[string]string{
+        "a": "aa",
+        "b": "bb",
+        "c": "cc",
+    }
+    fmt.Println("m3 =", m3)
+
+    // 查找鍵值是否存在
+    if v, ok := m1["c"]; ok {
+        fmt.Println(v)
+    } else {
+        fmt.Println("Key Not Found")
+    }
+
+    // for loop map
+    for k, v := range m3 {
+        fmt.Println(k, v)
+    }
+
+    // delete
+    delete(m3, "a")
+    fmt.Println(m3)
+
+    //Length of the map
+    fmt.Println(len(m3))
+}
+
+/**
+m1 == nil: true
+m1 == nil: false
+m1 = map[a:1]
+m1[a] = 1
+m2 = map[a:aa]
+m3 = map[a:aa b:bb c:cc]
+Key Not Found
+a aa
+b bb
+c cc
+map[b:bb c:cc]
+2
+**/
+</code></pre>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+type Vertex struct {
+  x, y float64
+}
+
+// 先聲明map
+var m map[string]Vertex
+
+func main() {
+  // 再使用make函式建立一個非nil的map，nil map不能賦值
+  m = make(map[string]Vertex)
+  m["A"] = Vertex{
+    40.68433, -74.39967,
+  }
+  fmt.Println(m["A"])
+  fmt.Println(m["B"])
+  fmt.Println(m)
+}
+
+// {40.68433 -74.39967}
+// {0, 0}
+// map[A:{40.68433 -74.39967}]
+</code></pre>
+
+<ul>
+<li><a href="https://hsinyu.gitbooks.io/golang_note/content/map_1.html">map (1)</a></li>
+<li><a href="http://blog.cyeam.com/json/2017/11/02/go-map-delete#map-%E7%9A%84%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C">Golang map 如何進行刪除操作？</a></li>
+</ul>
+
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://golangbot.com/learn-golang-series/">golangbot.com</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

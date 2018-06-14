@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Http | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/http/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-03-06T17:55:33+08:00</updated>
+  <updated>2018-06-14T18:46:05+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,238 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[HTTP Benchmark 工具 Wrk]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/04/09/http-benchmark/"/>
+    <updated>2018-04-09T17:09:37+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/04/09/http-benchmark</id>
+    <content type="html"><![CDATA[<p>wrk 可以預先模擬多人來網站時，效能會如何!</p>
+
+<!-- more -->
+
+
+<p>這類的工具有很多，大概如下</p>
+
+<ul>
+<li>複雜
+
+<ul>
+<li>jmeter</li>
+<li>LoadRunner</li>
+</ul>
+</li>
+<li>簡單
+
+<ul>
+<li>wrk</li>
+<li>ab</li>
+</ul>
+</li>
+</ul>
+
+
+<p>那這次主要介紹是 wrk</p>
+
+<h1>安裝</h1>
+
+<pre><code class="ruby">brew install wrk
+</code></pre>
+
+<h1>Command</h1>
+
+<pre><code class="ruby"># 跟服務器建立並保持的TCP連接數量 
+-c, --connections: total number of HTTP connections to keep open with
+                   each thread handling N = connections/threads
+# 壓測時間
+-d, --duration:    duration of the test, e.g. 2s, 2m, 2h
+
+# 使用多少個線程進行壓測   
+-t, --threads:     total number of threads to use
+
+# 指定Lua腳本路徑
+-s, --script:      LuaJIT script, see SCRIPTING
+
+# 為每一個HTTP請求添加HTTP頭
+-H, --header:      HTTP header to add to request, e.g. "User-Agent: wrk"
+# 在壓測結束後，打印延遲統計信息
+    --latency:     print detailed latency statistics
+# 超時時間
+    --timeout:     record a timeout if a response is not received within
+                   this amount of time.
+</code></pre>
+
+<h1>Exmple</h1>
+
+<pre><code class="ruby">wrk -t12 -c400 -d30s -T30s --latency http://localhost:3000
+# -t12 用 12 個線程
+# -c400 模擬 400 個併發連接
+# -d30s 持續 30 秒
+# -T30s 設定超過 30 秒就算連接超時 
+# --latency 響應時間的分佈情況
+</code></pre>
+
+<pre><code class="ruby">Running 30s test @ http://localhost:3000
+  4 threads and 1000 connections
+  Thread Stats   Avg      Stdev     Max   +/- Stdev
+    Latency     1.38ms    1.09ms  84.91ms   91.92%
+    Req/Sec     3.62k   555.58     4.48k    81.00%
+  Latency Distribution
+     50%    1.22ms
+     75%    1.69ms
+     90%    2.27ms
+     99%    3.93ms
+  108206 requests in 30.08s, 118.88MB read
+  Socket errors: connect 0, read 883, write 1, timeout 0
+Requests/sec:   3597.39
+Transfer/sec:      3.95MB
+</code></pre>
+
+<ul>
+<li><code>Latency</code>: 響應時間</li>
+<li><code>Req/Sec</code>: 每個線程每秒鐘的完成的請求數</li>
+<li><code>Avg</code>: 平均值</li>
+<li><code>Stdev (Standard Deviation)</code>: 即標準偏差，是統計學的一個名詞，這裡表示請求響應時間的離散程度，值越大代表請求響應時間的差距越大，系統的響應約不穩定。</li>
+<li><code>Max</code>: 最大值</li>
+<li><code>+/- Stdev</code>: 正負一個標準差佔比</li>
+<li><code>Latency Distribution</code>: 50% 在 1.22ms 以內完成 / 99% 在 3.93ms 以內完成</li>
+<li><code>Socket errors</code>: 分為 <code>連接錯誤</code>, <code>讀取錯誤</code>, <code>寫入錯誤</code>, <code>超時錯誤</code></li>
+<li><code>Requests/sec</code>: 每秒請求數量，也就是並發能力</li>
+</ul>
+
+
+<h1>腳本 scroipt 測試複雜場景</h1>
+
+<p>wrk 支援 <code>lua</code> 的腳本</p>
+
+<p>先建立一個 <code>test.lua</code> 的 file</p>
+
+<pre><code class="lua">-- example HTTP POST script which demonstrates setting the
+-- HTTP method, body, and adding a header
+
+wrk.method = "POST"
+wrk.body   = "foo=bar&amp;baz=quux"
+wrk.headers["Content-Type"] = "application/x-www-form-urlencoded"
+</code></pre>
+
+<p>執行</p>
+
+<pre><code class="ruby">wrk -t12 -c100 -d30s -T30s --script=post.lua --latency http://localhost:3000 
+</code></pre>
+
+<h3>wrk 接受的屬性</h3>
+
+<pre><code class="ruby">local wrk = {  
+   scheme  = "http",  
+   host    = "localhost",  
+   port    = nil,  
+   method  = "GET",  
+   path    = "/",  
+   headers = {},  
+   body    = nil,  
+   thread  = nil,  
+}  
+</code></pre>
+
+<h3>wrk 提供的 hook 函數</h3>
+
+<ul>
+<li>setup 函數</li>
+</ul>
+
+
+<p>這個函數在目標 IP 地址已經解析完, 並且所有 thread 已經生成, 但是還沒有開始時被調用. 每個線程執行一次這個函數.
+可以通過thread:get(name),  thread:set(name, value)設置線程級別的變量.</p>
+
+<ul>
+<li>init 函數</li>
+</ul>
+
+
+<p>每次請求發送之前被調用.
+可以接受 wrk 命令行的額外參數. 通過 &ndash; 指定.</p>
+
+<ul>
+<li>delay函數</li>
+</ul>
+
+
+<p>這個函數返回一個數值, 在這次請求執行完以後延遲多長時間執行下一個請求. 可以對應 thinking time 的場景.</p>
+
+<ul>
+<li>request函數</li>
+</ul>
+
+
+<p>通過這個函數可以每次請求之前修改本次請求的屬性. 返回一個字符串. 這個函數要慎用, 會影響測試端性能.</p>
+
+<ul>
+<li>response</li>
+</ul>
+
+
+<p>每次請求返回以後被調用，可以根據響應內容做特殊處理，比如遇到特殊響應停止執行測試，或輸出到控制台等等。</p>
+
+<pre><code class="lua">-- 實現每個請求前會有隨機的延遲
+-- example script that demonstrates adding a random
+-- 10-50ms delay before each request
+function delay()
+   return math.random(10, 50)
+end
+</code></pre>
+
+<pre><code class="lua">-- 每個線程要先進行認證，認證之後獲取token以進行壓測
+token = nil
+path  = "/authenticate"
+
+request = function()
+   return wrk.format("GET", path)
+end
+
+response = function(status, headers, body)
+   if not token and status == 200 then
+      token = headers["X-Token"]
+      path  = "/resource"
+      wrk.headers["X-Token"] = token
+   end
+end
+</code></pre>
+
+<pre><code class="lua">-- 壓測支持HTTP pipeline的服務
+-- 通過在init方法中將三個HTTP request請求拼接在一起，實現每次發送三個請求，以使用HTTP pipeline。
+init = function(args)
+   local r = {}
+   r[1] = wrk.format(nil, "/?foo")
+   r[2] = wrk.format(nil, "/?bar")
+   r[3] = wrk.format(nil, "/?baz")
+
+   req = table.concat(r)
+end
+
+request = function()
+   return req
+end
+</code></pre>
+
+<ul>
+<li><a href="https://github.com/wg/wrk/tree/master/scripts">更多 scripts 範本</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://github.com/wg/wrk">wrk git</a></li>
+<li><a href="https://www.restran.net/2016/09/27/wrk-http-benchmark/">使用 wrk 來測試 HTTP 性能</a></li>
+<li><a href="http://zjumty.iteye.com/blog/2221040">wrk &ndash; 小巧輕盈的 http 性能測試工具</a></li>
+<li><a href="https://yq.aliyun.com/articles/35251">使用ab和wrk對OSS進行benchmark測試</a></li>
+<li><a href="https://coolshell.cn/articles/17381.html">性能測試應該怎麼做？</a></li>
+<li><a href="http://zhaox.github.io/benchmark/2016/12/28/wrk-guidelines">Http壓測工具wrk使用指南</a></li>
+<li><a href="https://github.com/wg/wrk/tree/master/scripts">更多 scripts 範本</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Http Websocket Bot]]></title>

@@ -16,7 +16,12 @@
 5
 6
 7
-class User &lt; ActiveRecord::Base has_many :microposts, dependent: : &hellip;">
+8
+9
+10
+11
+12
+class User &lt; ActiveRecord::Base has_many :microposts, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -142,12 +147,22 @@ class User &lt; ActiveRecord::Base has_many :microposts, dependent: : &hellip;">
 <span class='line-number'>5</span>
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
 </span><span class='line'>  <span class="n">has_many</span> <span class="ss">:microposts</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
 </span><span class='line'>  <span class="n">has_many</span> <span class="ss">:active_relationships</span><span class="p">,</span>  <span class="ss">class_name</span><span class="p">:</span>  <span class="s2">&quot;Relationship&quot;</span><span class="p">,</span> <span class="ss">foreign_key</span><span class="p">:</span> <span class="s2">&quot;follower_id&quot;</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
 </span><span class='line'>  <span class="n">has_many</span> <span class="ss">:passive_relationships</span><span class="p">,</span> <span class="ss">class_name</span><span class="p">:</span>  <span class="s2">&quot;Relationship&quot;</span><span class="p">,</span> <span class="ss">foreign_key</span><span class="p">:</span> <span class="s2">&quot;followed_id&quot;</span><span class="p">,</span> <span class="ss">dependent</span><span class="p">:</span> <span class="ss">:destroy</span>
 </span><span class='line'>  <span class="n">has_many</span> <span class="ss">:following</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:active_relationships</span><span class="p">,</span>  <span class="ss">source</span><span class="p">:</span> <span class="ss">:followed</span>
 </span><span class='line'>  <span class="n">has_many</span> <span class="ss">:followers</span><span class="p">,</span> <span class="ss">through</span><span class="p">:</span> <span class="ss">:passive_relationships</span><span class="p">,</span> <span class="ss">source</span><span class="p">:</span> <span class="ss">:follower</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">Relationship</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>    <span class="n">belongs_to</span> <span class="ss">:followed</span><span class="p">,</span> <span class="ss">:class_name</span> <span class="o">=&gt;</span> <span class="s2">&quot;User&quot;</span>
+</span><span class='line'>    <span class="n">belongs_to</span> <span class="ss">:follower</span><span class="p">,</span> <span class="ss">:class_name</span> <span class="o">=&gt;</span> <span class="s2">&quot;User&quot;</span>
 </span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -202,7 +217,8 @@ class User &lt; ActiveRecord::Base has_many :microposts, dependent: : &hellip;">
 </ul>
 
 
-<p>搭配through設定使用，當關聯的名稱不一致的時候，需要加上source指名是哪一種物件。</p>
+<p>搭配through設定使用，當關聯的名稱不一致的時候，需要加上source指名是哪一種物件。
+<code>source</code> 主要是設定 <code>join</code> model 所設定的，belongs_to，指定是要關聯到哪一個</p>
 
 <ul>
 <li><code>counter_cache</code> 參考之前文章 <a href="http://mgleon08.github.io/blog/2015/12/20/counter-cache/">counter-cache</a></li>

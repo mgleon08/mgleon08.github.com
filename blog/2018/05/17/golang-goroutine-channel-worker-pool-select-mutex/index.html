@@ -1,0 +1,1664 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Golang - Goroutine, Channel, Worker Pool, Select, Mutex - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="Concurrency
+Parallelism
+Goroutine
+Channel
+Buffered Channels
+Worker Pool
+Select
+sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2018/05/17/golang-goroutine-channel-worker-pool-select-mutex">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Golang - Goroutine, Channel, Worker Pool, Select, Mutex</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-05-17T23:10:28+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:10 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!-- more -->
+
+
+<ul>
+<li><a href="#concurrency">Concurrency</a></li>
+<li><a href="#parallelism">Parallelism</a></li>
+<li><a href="#goroutine">Goroutine</a></li>
+<li><a href="#channel">Channel</a></li>
+<li><a href="#buffered_channels">Buffered Channels</a></li>
+<li><a href="#worker_pool">Worker Pool</a></li>
+<li><a href="#select">Select</a></li>
+<li><a href="mutex">sync.Mutex</a></li>
+</ul>
+
+
+<h1>Concurrency &amp;  Parallelism</h1>
+
+<blockquote><p>Goroutines are part of making concurrency easy to use.</p></blockquote>
+
+<p>要了解 Goroutine 可能要先了解一下，Concurrency 跟 parallelism 的差別</p>
+
+<h3><span id="concurrency"> Concurrency </span></h3>
+
+<blockquote><p>Concurrency is the capability to deal with lots of things at once.</p></blockquote>
+
+<p>簡單的解釋，一個在跑步的人，因為鞋帶鬆了，所以他停下來綁鞋帶，綁完後繼續跑。</p>
+
+<p><img src="http://i.imgur.com/WOthNHb.png" alt="" /></p>
+
+<h3><span id="parallelism"> Parallelism </span></h3>
+
+<blockquote><p>Parallelism is doing lots of things at the same time. It might sound similar to concurrency but its actually different.</p></blockquote>
+
+<p>同樣用慢跑來解釋的話，在慢跑的人，同時在用耳機聽音樂，在同一時間做了很多事。</p>
+
+<p><img src="http://i.imgur.com/cTonbBE.png" alt="" /></p>
+
+<ul>
+<li><a href="https://golangbot.com/concurrency/">concurrency &amp; parallelism</a></li>
+</ul>
+
+
+<h1><span id="goroutine"> Goroutine </span></h1>
+
+<blockquote><p>Goroutines are functions or methods that run concurrently with other functions or methods.</p></blockquote>
+
+<ul>
+<li>go 本身就有數千個 goroutine 在跑</li>
+<li>goroutine can be thought of as light weight threads.</li>
+<li>與 threads 相比，goroutine 成本非常小</li>
+<li>goroutine 最多運行 GOMAXPROCS 數量(可以設定)</li>
+<li>main() 也是一個 goroutine 稱為 <code>main Goroutine</code></li>
+</ul>
+
+
+<h3>Example 1</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">hello</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Hello world goroutine&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">hello</span><span class="p">()</span>
+</span><span class='line'>    <span class="c1">// time.Sleep(1 * time.Second)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;main function&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// main function</span>
+</span><span class='line'><span class="c1">// 因為 hello() 進入背景處理，但是 main() 已經結束，因此所有的 goroutine 都會直接打斷，程序退出。</span>
+</span><span class='line'><span class="c1">// 加入 sleep 1 秒，讓 hello() 有足夠的時間 retuen 回來</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Example 2</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">numbers</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">250</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%d &quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">alphabets</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="sc">&#39;a&#39;</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="sc">&#39;e&#39;</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">400</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%c &quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">numbers</span><span class="p">()</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">alphabets</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">3000</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;main terminated&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 1 a 2 3 b 4 c 5 d e main terminated</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="https://golangbot.com/content/images/2017/07/Goroutines-explained.png" alt="" /></p>
+
+<ul>
+<li><a href="https://tonybai.com/2014/11/15/how-goroutines-work/">Goroutine是如何工作的</a></li>
+<li><a href="https://golangbot.com/goroutines/">[golangbot.com] goroutines</a></li>
+</ul>
+
+
+<h1><span id="channel"> Channel </span></h1>
+
+<blockquote><p>Channels can be thought as pipes using which Goroutines communicate. Similar to how water flows from one end to another in a pipe, data can be sent from one end and received from the another end using channels.</p></blockquote>
+
+<ul>
+<li>Channel 是 goroutine 之間相互通信的機制（goroutine之間是相互獨立的，因此需要 Channel 來做溝通）</li>
+<li>Channel 中使用的 type 稱之為 element type，比如 int 類型的 channel 寫作為 <code>chan int</code></li>
+<li>Go 使用 make 內建函式建立 channel</li>
+<li>The zero value of a channel is <code>nil</code></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">a</span> <span class="kd">chan</span> <span class="kt">int</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">a</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;channel a is nil, going to define it&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="nx">a</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Type of a is %T&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// channel a is nil, going to define it</span>
+</span><span class='line'><span class="c1">// Type of a is chan int</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">a</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>send、receive、close</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">data</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span> <span class="c1">// read from channel ch </span>
+</span><span class='line'><span class="o">&lt;-</span> <span class="nx">ch</span> <span class="c1">// read from channel ch</span>
+</span><span class='line'><span class="nx">ch</span> <span class="o">&lt;-</span> <span class="nx">data</span> <span class="c1">// write to channel ch</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Sends and receives are blocking by default</h3>
+
+<blockquote><ul>
+<li>When a data is sent to a channel, the control is blocked in the send statement until some other Goroutine reads from that channel.</li>
+<li>Similarly when data is read from a channel, the read is blocked until some Goroutine writes data to that channel.</li>
+<li>如果另一方一直對沒有動作，會造成 <code>Deadlock</code></li>
+</ul>
+</blockquote>
+
+<h5>Example</h5>
+
+<p><code>&lt;-done</code> 這行會導致 <code>main goroutine</code> blocked 在這邊，直到其他 goroutine 將 data 寫入 done，不然是不會繼續往下走，也意味著就不需要用 sleep 來停止</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">hello</span><span class="p">(</span><span class="nx">done</span> <span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;hello go routine is going to sleep&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;hello go routine awake and going to write to done&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">done</span> <span class="o">&lt;-</span> <span class="kc">true</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">done</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Main going to call hello go goroutine&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">hello</span><span class="p">(</span><span class="nx">done</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1">// 這邊 done channel，沒有任何東西，因此被 blockeds 住，等有東西到 channel 才會繼續下一行</span>
+</span><span class='line'>    <span class="o">&lt;-</span> <span class="nx">done</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Main received data&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Main going to call hello go goroutine</span>
+</span><span class='line'><span class="c1">// hello go routine is going to sleep</span>
+</span><span class='line'><span class="c1">// hello go routine awake and going to write to done</span>
+</span><span class='line'><span class="c1">// Main received data</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>Exampale</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">calcSquares</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">squareop</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">number</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">digit</span> <span class="o">:=</span> <span class="nx">number</span> <span class="o">%</span> <span class="mi">10</span>
+</span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
+</span><span class='line'>        <span class="nx">number</span> <span class="o">/=</span> <span class="mi">10</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">squareop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">calcCubes</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">cubeop</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">number</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">digit</span> <span class="o">:=</span> <span class="nx">number</span> <span class="o">%</span> <span class="mi">10</span>
+</span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
+</span><span class='line'>        <span class="nx">number</span> <span class="o">/=</span> <span class="mi">10</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">cubeop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">number</span> <span class="o">:=</span> <span class="mi">589</span>
+</span><span class='line'>    <span class="nx">sqrch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">cubech</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">calcSquares</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">sqrch</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">calcCubes</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">cubech</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">squares</span><span class="p">,</span> <span class="nx">cubes</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">sqrch</span><span class="p">,</span> <span class="o">&lt;-</span><span class="nx">cubech</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Final output&quot;</span><span class="p">,</span> <span class="nx">squares</span> <span class="o">+</span> <span class="nx">cubes</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Final output 1536</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>refactor with close &amp; range</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">digits</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">dchnl</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">number</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">digit</span> <span class="o">:=</span> <span class="nx">number</span> <span class="o">%</span> <span class="mi">10</span>
+</span><span class='line'>        <span class="nx">dchnl</span> <span class="o">&lt;-</span> <span class="nx">digit</span>
+</span><span class='line'>        <span class="nx">number</span> <span class="o">/=</span> <span class="mi">10</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nb">close</span><span class="p">(</span><span class="nx">dchnl</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">calcSquares</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">squareop</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="nx">dch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">digits</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">dch</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">digit</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dch</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">squareop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">calcCubes</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">cubeop</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="nx">dch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">digits</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">dch</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">digit</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dch</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">cubeop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">number</span> <span class="o">:=</span> <span class="mi">589</span>
+</span><span class='line'>    <span class="nx">sqrch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">cubech</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">calcSquares</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">sqrch</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">calcCubes</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">cubech</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">squares</span><span class="p">,</span> <span class="nx">cubes</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">sqrch</span><span class="p">,</span> <span class="o">&lt;-</span><span class="nx">cubech</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Final output&quot;</span><span class="p">,</span> <span class="nx">squares</span><span class="o">+</span><span class="nx">cubes</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Final output 1536</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Deadlock</h3>
+
+<p>當 Goroutine send data 到 channel，但沒有其他的 Goroutine 去接收這個 data，就會造成 Deadlock，並且出現錯誤 <code>panic</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="mi">5</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Unidirectional channels (單向 channels)</h3>
+
+<p>到目前為止，說的都是 bidirectional channels(雙向 channels)</p>
+
+<p>channel 也可以是單向的，<code>only send or receive data</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">sendData</span><span class="p">(</span><span class="nx">sendch</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">sendch</span> <span class="o">&lt;-</span> <span class="mi">10</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">sendch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">int</span><span class="p">)</span> <span class="c1">// 單向 channel</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">sendData</span><span class="p">(</span><span class="nx">sendch</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="nx">sendch</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// main.go:11: invalid operation: &lt;-sendch (receive from send-only type chan&lt;- int)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>以上只有 send 功能，並沒有 receive，因此會報錯，但事實上只有 send 的 channel 也是沒有什麼意義</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">sendData</span><span class="p">(</span><span class="nx">sendch</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 單向 channel</span>
+</span><span class='line'>  <span class="nx">sendch</span> <span class="o">&lt;-</span> <span class="mi">10</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">chnl</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="c1">// 雙向 channel</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">sendData</span><span class="p">(</span><span class="nx">chnl</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="nx">chnl</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 10</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>將單向改成雙向，並且透過 <code>func</code> 來控制單向</p>
+
+<h3>Closing channels and for range loops on channels</h3>
+
+<ul>
+<li>Only the sender should close a channel, never the receiver. Sending on a closed channel will cause a <code>panic</code></li>
+<li>Channels aren&rsquo;t like files; you don&rsquo;t usually need to close them. Closing is only necessary when the receiver must be told there are no more values coming, such as to terminate a <code>range</code> loop.</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span>
+</span><span class='line'><span class="c1">// ok </span>
+</span><span class='line'><span class="c1">// true: 可以接收的狀態</span>
+</span><span class='line'><span class="c1">// false: 沒有任何 value &amp; channel 已經關閉</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>Examples</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">producer</span><span class="p">(</span><span class="nx">chnl</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">3</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">chnl</span> <span class="o">&lt;-</span> <span class="nx">i</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nb">close</span><span class="p">(</span><span class="nx">chnl</span><span class="p">)</span> <span class="c1">// close</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">producer</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1">// 用 range，當 channel close 會自動離開</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">ch</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Received &quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="cm">/*</span>
+</span><span class='line'><span class="cm"> for {</span>
+</span><span class='line'><span class="cm">     v, ok := &lt;-ch</span>
+</span><span class='line'><span class="cm">     if ok == false {</span>
+</span><span class='line'><span class="cm">         break</span>
+</span><span class='line'><span class="cm">     }</span>
+</span><span class='line'><span class="cm">     fmt.Println(&quot;Received &quot;, v, ok)</span>
+</span><span class='line'><span class="cm"> }</span>
+</span><span class='line'><span class="cm"> */</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Received  0 true</span>
+</span><span class='line'><span class="c1">// Received  1 true</span>
+</span><span class='line'><span class="c1">// Received  2 true</span>
+</span><span class='line'><span class="c1">// 沒有 close 會造成 fatal error: all goroutines are asleep - deadlock!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>Example</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">fibonacci</span><span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">c</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">c</span> <span class="o">&lt;-</span> <span class="nx">x</span>
+</span><span class='line'>      <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="p">=</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">x</span><span class="o">+</span><span class="nx">y</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nb">close</span><span class="p">(</span><span class="nx">c</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">c</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">fibonacci</span><span class="p">(</span><span class="nb">cap</span><span class="p">(</span><span class="nx">c</span><span class="p">),</span> <span class="nx">c</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">c</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 0</span>
+</span><span class='line'><span class="c1">// 1</span>
+</span><span class='line'><span class="c1">// 1</span>
+</span><span class='line'><span class="c1">// 2</span>
+</span><span class='line'><span class="c1">// 3</span>
+</span><span class='line'><span class="c1">// 5</span>
+</span><span class='line'><span class="c1">// 8</span>
+</span><span class='line'><span class="c1">// 13</span>
+</span><span class='line'><span class="c1">// 21</span>
+</span><span class='line'><span class="c1">// 34</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1><span id="buffered_channels"> Buffered Channels </span></h1>
+
+<blockquote><p>Provide the buffer length as the second argument to make to initialize a buffered channel:</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
+</span><span class='line'><span class="c1">// ch := make(chan type, capacity)</span>
+</span><span class='line'><span class="c1">// The capacity for an unbuffered channel is 0 </span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>當 buffer 滿了，sends 就會 block 住</li>
+<li>當 buffer 空了，receives 就會 block 住</li>
+</ul>
+
+
+<h3>Example</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="c1">// ch &lt;- 3 再多傳一個就會 deadlock</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;capacity is&quot;</span><span class="p">,</span> <span class="nb">cap</span><span class="p">(</span><span class="nx">ch</span><span class="p">))</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;length is&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">ch</span><span class="p">))</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1">// fmt.Println(&lt;-ch) 多接收一個也會 deadlock</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;capacity is&quot;</span><span class="p">,</span> <span class="nb">cap</span><span class="p">(</span><span class="nx">ch</span><span class="p">))</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;length is&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">ch</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">capacity is 3</span>
+</span><span class='line'><span class="cm">length is 2</span>
+</span><span class='line'><span class="cm">1</span>
+</span><span class='line'><span class="cm">2</span>
+</span><span class='line'><span class="cm">capacity is 3</span>
+</span><span class='line'><span class="cm">length is 0</span>
+</span><span class='line'><span class="cm">*/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1><span id="worker_pool"> Worker Pool </span></h1>
+
+<h3>WaitGroup</h3>
+
+<p>透過 WaitGroup，可以讓所有的 Goroutine 都跑完，最後再結束</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;sync&quot;</span>
+</span><span class='line'>    <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">process</span><span class="p">(</span><span class="nx">i</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">wg</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;started Goroutine &quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Goroutine %d ended\n&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span> <span class="c1">// 執行完一次就 -1</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">no</span> <span class="o">:=</span> <span class="mi">3</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">no</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span> <span class="c1">// 每次執行都 + 1</span>
+</span><span class='line'>        <span class="k">go</span> <span class="nx">process</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">wg</span><span class="p">)</span> <span class="c1">// wg 一定要用 pointer，否則每個 goroutine 都會有各自的 WaitGroup</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span> <span class="c1">// 會 wait 到 0 才會繼續下一步</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;All go routines finished executing&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>what is <a href="https://en.wikipedia.org/wiki/Thread_pool">worker pool</a>?</p>
+
+<blockquote><p>a worker pool is a collection of threads which are waiting for tasks to be assigned to them. Once they finish the task assigned, they make themselves available again for the next task.</p></blockquote>
+
+<ul>
+<li><a href="https://golang.org/pkg/sync/#WaitGroup">WaitGroup</a></li>
+</ul>
+
+
+<h3>Example</h3>
+
+<ul>
+<li><a href="https://golangbot.com/buffered-channels-worker-pools/">Worker Pool Implementation</a></li>
+</ul>
+
+
+<h1><span id="select"> Select </span></h1>
+
+<ul>
+<li>The select statement lets a goroutine wait on multiple communication operations.</li>
+<li>A select blocks until one of its cases can run, then it executes that case. It chooses one at random if multiple are ready.</li>
+</ul>
+
+
+<blockquote><p>The syntax is similar to switch except that each of the case statement will be a channel operation</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">server1</span><span class="p">(</span><span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">6</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="s">&quot;from server1&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">server2</span><span class="p">(</span><span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">3</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="s">&quot;from server2&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">output1</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">output2</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">server1</span><span class="p">(</span><span class="nx">output1</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">server2</span><span class="p">(</span><span class="nx">output2</span><span class="p">)</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">// 等待到其中一個 channel 回來，就執行，如果都有就會隨機</span>
+</span><span class='line'>  <span class="k">select</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">case</span> <span class="nx">s1</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">output1</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s1</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">case</span> <span class="nx">s2</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">output2</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s2</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// from server2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">fibonacci</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="nx">quit</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">select</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">case</span> <span class="nx">c</span> <span class="o">&lt;-</span> <span class="nx">x</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="p">=</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">x</span><span class="o">+</span><span class="nx">y</span>
+</span><span class='line'>      <span class="k">case</span> <span class="o">&lt;-</span><span class="nx">quit</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;quit&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">return</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">c</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">quit</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">go</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="nx">c</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="nx">quit</span> <span class="o">&lt;-</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="p">}()</span>
+</span><span class='line'>  <span class="nx">fibonacci</span><span class="p">(</span><span class="nx">c</span><span class="p">,</span> <span class="nx">quit</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 0</span>
+</span><span class='line'><span class="c1">// 1</span>
+</span><span class='line'><span class="c1">// 1</span>
+</span><span class='line'><span class="c1">// 2</span>
+</span><span class='line'><span class="c1">// 3</span>
+</span><span class='line'><span class="c1">// 5</span>
+</span><span class='line'><span class="c1">// 8</span>
+</span><span class='line'><span class="c1">// 13</span>
+</span><span class='line'><span class="c1">// 21</span>
+</span><span class='line'><span class="c1">// 34</span>
+</span><span class='line'><span class="c1">// quit</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Default Selection</h3>
+
+<p>The default case in a select is run if no other case is ready.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// Use a default case to try a send or receive without blocking:</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">select</span> <span class="p">{</span>
+</span><span class='line'><span class="k">case</span> <span class="nx">i</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">c</span><span class="p">:</span>
+</span><span class='line'>    <span class="c1">// use i</span>
+</span><span class='line'><span class="k">default</span><span class="p">:</span>
+</span><span class='line'>    <span class="c1">// receiving from c would block</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">process</span><span class="p">(</span><span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">10500</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="s">&quot;process successful&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">go</span> <span class="nx">process</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">1000</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">select</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">case</span> <span class="nx">v</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">ch</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;received value: &quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">return</span>
+</span><span class='line'>      <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;no value received&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">tick</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Tick</span><span class="p">(</span><span class="mi">100</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">boom</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">After</span><span class="p">(</span><span class="mi">500</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">select</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">case</span> <span class="o">&lt;-</span><span class="nx">tick</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;tick.&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">case</span> <span class="o">&lt;-</span><span class="nx">boom</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;BOOM!&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">return</span>
+</span><span class='line'>      <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;    .&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">50</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Millisecond</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1><span id="mutex"> sync.Mutex </span></h1>
+
+<h3><a href="https://zh.wikipedia.org/wiki/%E8%87%A8%E7%95%8C%E5%8D%80%E6%AE%B5">Critical section</a></h3>
+
+<p>一個存取共用資源（例如：共用裝置或是共用記憶體）的程式片段，而這些共用資源有無法同時被多個執行緒存取的特性。</p>
+
+<p>當兩個以上的 goroutine 對同一個 value 做計算時，可能會因為前後順序的差異，導致最後的結果不同。(e.g. x = x + 1)</p>
+
+<h3><a href="https://tip.golang.org/pkg/sync/#Mutex">Mutex</a></h3>
+
+<p>A Mutex is used to provide a locking mechanism to ensure that only one Goroutine is running the critical section of code at any point of time to prevent race condition from happening.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// Mutex is available in the sync package</span>
+</span><span class='line'><span class="nx">mutex</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+</span><span class='line'><span class="nx">x</span> <span class="p">=</span> <span class="nx">x</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class='line'><span class="nx">mutex</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 同時間只會有一個 goroutine</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Example</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;sync&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">x</span> <span class="p">=</span> <span class="mi">0</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">increment</span><span class="p">(</span><span class="nx">wg</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span><span class="p">,</span> <span class="nx">m</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">m</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">x</span> <span class="p">=</span> <span class="nx">x</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="nx">m</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">w</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">m</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">1000</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">w</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">go</span> <span class="nx">increment</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">w</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">m</span><span class="p">)</span> <span class="c1">// 這裡一定要用 address</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">w</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;final value of x&quot;</span><span class="p">,</span> <span class="nx">x</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 1000</span>
+</span><span class='line'><span class="c1">// 如果沒加上 lock，同時就會有很多個 goroutine 在跑，導致最後結果不一樣</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>用 buffered channel 的方式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;sync&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span> <span class="nx">x</span> <span class="p">=</span> <span class="mi">0</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">increment</span><span class="p">(</span><span class="nx">wg</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span><span class="p">,</span> <span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="kc">true</span> <span class="c1">// 當前面的 channel 還有東西，就會 block 住，導致後面無法繼續</span>
+</span><span class='line'>  <span class="nx">x</span> <span class="p">=</span> <span class="nx">x</span> <span class="o">+</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="o">&lt;-</span><span class="nx">ch</span>
+</span><span class='line'>  <span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">w</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">bool</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">1000</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">w</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">go</span> <span class="nx">increment</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">w</span><span class="p">,</span> <span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">w</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;final value of x&quot;</span><span class="p">,</span> <span class="nx">x</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Example 2</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;sync&quot;</span>
+</span><span class='line'>  <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// SafeCounter is safe to use concurrently.</span>
+</span><span class='line'><span class="kd">type</span> <span class="nx">SafeCounter</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">v</span>   <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span>
+</span><span class='line'>  <span class="nx">mux</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Inc increments the counter for the given key.</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">SafeCounter</span><span class="p">)</span> <span class="nx">Inc</span><span class="p">(</span><span class="nx">key</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">c</span><span class="p">.</span><span class="nx">mux</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+</span><span class='line'>  <span class="c1">// Lock so only one goroutine at a time can access the map c.v.</span>
+</span><span class='line'>  <span class="nx">c</span><span class="p">.</span><span class="nx">v</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span><span class="o">++</span>
+</span><span class='line'>  <span class="nx">c</span><span class="p">.</span><span class="nx">mux</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Value returns the current value of the counter for the given key.</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="o">*</span><span class="nx">SafeCounter</span><span class="p">)</span> <span class="nx">Value</span><span class="p">(</span><span class="nx">key</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">c</span><span class="p">.</span><span class="nx">mux</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+</span><span class='line'>  <span class="c1">// Lock so only one goroutine at a time can access the map c.v.</span>
+</span><span class='line'>  <span class="k">defer</span> <span class="nx">c</span><span class="p">.</span><span class="nx">mux</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">c</span><span class="p">.</span><span class="nx">v</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">c</span> <span class="o">:=</span> <span class="nx">SafeCounter</span><span class="p">{</span><span class="nx">v</span><span class="p">:</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span><span class="p">)}</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">1000</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">go</span> <span class="nx">c</span><span class="p">.</span><span class="nx">Inc</span><span class="p">(</span><span class="s">&quot;somekey&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">c</span><span class="p">.</span><span class="nx">Value</span><span class="p">(</span><span class="s">&quot;somekey&quot;</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://golangbot.com/learn-golang-series/">[golangbot.com]</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-05-17T23:10:28+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:10 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/golang/'>golang</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2018/05/17/golang-goroutine-channel-worker-pool-select-mutex/" data-via="" data-counturl="http://mgleon08.github.com/blog/2018/05/17/golang-goroutine-channel-worker-pool-select-mutex/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/05/12/golang-interfaces/" title="Previous Post: Golang - Interfaces">&laquo; Golang - Interfaces</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2018/05/29/golang-defer-error-handling-custom-errors-panic-recover/" title="Next Post: Golang - defer, error handling, custom errors, panic, recover">Golang - defer, error handling, custom errors, panic, recover &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2018/05/17/golang-goroutine-channel-worker-pool-select-mutex/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2018/05/17/golang-goroutine-channel-worker-pool-select-mutex/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -1,0 +1,1970 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Golang - Interfaces - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="介面 Interfaces Stringer Interface
+Errors Interface
+Reader Interface
+Image Interface
+HTTP interface 介面 Interfaces Golang 本身並沒有泛型程式設計(generic types)， &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2018/05/12/golang-interfaces">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Golang - Interfaces</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-05-12T23:39:34+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:39 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!-- more -->
+
+
+<ul>
+<li><a href="#interfaces">介面 Interfaces</a>
+
+<ul>
+<li><a href="#stringer">Stringer Interface</a></li>
+<li><a href="#errors">Errors Interface</a></li>
+<li><a href="#reader">Reader Interface</a></li>
+<li><a href="#image">Image Interface</a></li>
+<li><a href="#http">HTTP interface</a></li>
+</ul>
+</li>
+</ul>
+
+
+<h1><span id="interfaces">介面 Interfaces</span></h1>
+
+<p>Golang 本身並沒有泛型程式設計(generic types)，但可以利用 interface 來達成</p>
+
+<blockquote><p>泛型程式設計: <br/>
+簡單來說就是，編寫的程式碼不是針對特定的類型（比如適用於int, 不適用於string）才有效，而是大部分類型的參數都是可以工作的。</p></blockquote>
+
+<p>在 Golang 中，interface 是一組 method 的集合，是 <a href="https://en.wikipedia.org/wiki/Duck_typing">duck typing programming</a> 的一種體現。不關心屬性（數據），只關心行為（方法）</p>
+
+<h3>實作條件</h3>
+
+<p>欲實作的建構體必須要有 Interface 所定義的所有函式、接收參數、回傳值</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">type</span> <span class="nx">Database</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Read</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">Write</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="c1">// Read 一定要接收一個字串，然後回傳一個字串</span>
+</span><span class='line'><span class="c1">// Write 則必須接收一個字串。</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Database</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Read</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">Write</span><span class="p">(</span><span class="nx">data</span> <span class="kt">string</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="c1">// 允許定義 Interface 的時候擺上參數名稱用以辨別，但實作的時候並不需要遵循這個參數名稱。</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Why Interface?</h3>
+
+<blockquote><p>Interface specifies what methods a type should have and the type decides how to implement these methods.</p></blockquote>
+
+<ul>
+<li>writing generic algorithm （泛型程式設計）</li>
+<li>hiding implementation detail （隱藏具體實現）</li>
+<li>providing interception points</li>
+</ul>
+
+
+<p>Golang 裡有兩種 Interface (型態 &amp; 定義)</p>
+
+<h3>1. 型態</h3>
+
+<h3>Empty Interface</h3>
+
+<p><code>interface{}</code> 意味著任何型態的值，因為裡面沒有任何 method，也代表所有 type 都 implement</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">describe</span><span class="p">(</span><span class="nx">i</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Type = %T, value = %v\n&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">inter</span> <span class="kd">interface</span><span class="p">{}</span>
+</span><span class='line'>  <span class="nx">describe</span><span class="p">(</span><span class="nx">inter</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">s</span> <span class="o">:=</span> <span class="s">&quot;Hello World&quot;</span>
+</span><span class='line'>  <span class="nx">describe</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">i</span> <span class="o">:=</span> <span class="mi">55</span>
+</span><span class='line'>  <span class="nx">describe</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">strt</span> <span class="o">:=</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">name</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="p">}{</span>
+</span><span class='line'>      <span class="nx">name</span><span class="p">:</span> <span class="s">&quot;Hi&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">describe</span><span class="p">(</span><span class="nx">strt</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">Type = &lt;nil&gt;, value = &lt;nil&gt;</span>
+</span><span class='line'><span class="cm">Type = string, value = Hello World</span>
+</span><span class='line'><span class="cm">Type = int, value = 55</span>
+</span><span class='line'><span class="cm">Type = struct { name string }, value = {Hi}</span>
+</span><span class='line'><span class="cm">*/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>interface{}類型的 slice 是不是就可以接受任何類型的 slice ?</h3>
+
+<p>go 不會對 類型是interface{} 的 slice 進行轉換
+<a href="https://github.com/golang/go/wiki/InterfaceSlice">InterfaceSlice</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">printAll</span><span class="p">(</span><span class="nx">vals</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span> <span class="c1">//1</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">val</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">vals</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">val</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">names</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;stanley&quot;</span><span class="p">,</span> <span class="s">&quot;david&quot;</span><span class="p">,</span> <span class="s">&quot;oscar&quot;</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">printAll</span><span class="p">(</span><span class="nx">names</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// prog.go:14:10: cannot use names (type []string) as type []interface {} in argument to printAll</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Interface value 的賦值</h3>
+
+<p>從概念上來講，interface value 有兩部分組成：type 部分是一個 concrete type，vlaue 部分是這個 concrete type 對應的 instance，它們分別稱之為 interface value 的 dynamic type 和 dynamic value。</p>
+
+<ul>
+<li><a href="http://sanyuesha.com/2017/10/18/go-interface-3/">Go interface 詳解 (三) ：interface 的值</a></li>
+</ul>
+
+
+<h3>型態斷言 Type Assertion</h3>
+
+<ul>
+<li><a href="http://sanyuesha.com/2017/12/01/go-interface-4/">Go interface 詳解 (四) ：type assertion</a></li>
+</ul>
+
+
+<p>Type assertion is used extract the underlying value of the interface.</p>
+
+<p><code>i.(T)</code> is the syntax which is used to get the underlying value of interface <code>i</code> whose concrete type is <code>T</code>.</p>
+
+<p><code>t, ok := i.(T)</code> i 是 interface 類型的變數，T代表要斷言的類型，t 是 interface 變數存儲的值，ok 是 bool 類型表示是否為該斷言的類型 T</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">assert</span><span class="p">(</span><span class="nx">i</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// Type Switch</span>
+</span><span class='line'>  <span class="k">switch</span> <span class="nx">v</span> <span class="o">:=</span> <span class="nx">i</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">case</span> <span class="kt">int</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Twice %v is %v\n&quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">,</span> <span class="nx">v</span><span class="o">*</span><span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">case</span> <span class="kt">string</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%q is %v bytes long\n&quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">v</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;I don&#39;t know about type %T!\n&quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">assert</span><span class="p">(</span><span class="mi">21</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">assert</span><span class="p">(</span><span class="s">&quot;hello&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">assert</span><span class="p">(</span><span class="kc">true</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">Twice 21 is 42</span>
+</span><span class='line'><span class="cm">&quot;hello&quot; is 5 bytes long</span>
+</span><span class='line'><span class="cm">I don&#39;t know about type bool!</span>
+</span><span class='line'><span class="cm">*/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>compare a type to an interface</h5>
+
+<p>當一個 type implements 了一個 interface，就可以做比較</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Describer</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Describe</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Person</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">name</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">age</span>  <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">Person</span><span class="p">)</span> <span class="nx">Describe</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%s is %d years old&quot;</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">age</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">findType</span><span class="p">(</span><span class="nx">i</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">switch</span> <span class="nx">v</span> <span class="o">:=</span> <span class="nx">i</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">case</span> <span class="nx">Describer</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">v</span><span class="p">.</span><span class="nx">Describe</span><span class="p">()</span>
+</span><span class='line'>  <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;unknown type\n&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">findType</span><span class="p">(</span><span class="s">&quot;Naveen&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">p</span> <span class="o">:=</span> <span class="nx">Person</span><span class="p">{</span>
+</span><span class='line'>      <span class="nx">name</span><span class="p">:</span> <span class="s">&quot;Naveen R&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">age</span><span class="p">:</span>  <span class="mi">25</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">findType</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">unknown type</span>
+</span><span class='line'><span class="cm">Naveen R is 25 years old</span>
+</span><span class='line'><span class="cm">*/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>具體類型 vs 介面類型</h5>
+
+<p>在 <code>x.(T)</code> 當中，<code>x</code> 是 interface 介面的表達式，<code>T</code>是類型，稱為被斷言類型</p>
+
+<blockquote><p>介面有介面值的概念，其包括 <code>動態類型 dynamic type</code> 和 <code>動態值 dynamic value</code> 兩部分。</p></blockquote>
+
+<p>T 有分兩種 <code>具體類型</code> <code>介面類型</code></p>
+
+<h5>具體類型 concrete type</h5>
+
+<p>類型斷言首先檢查 <code>x</code> 的動態類型是否是 <code>T</code></p>
+
+<ul>
+<li>如果是，類型斷言的結果就是 <code>x</code> 的動態值，動態值的 type 就是 T.</li>
+<li>如果否，操作就會 <code>panic</code></li>
+<li>對 concrete type 的斷言實際上是獲取 x 的 dynamic value。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// os.Stdout 的類型就是 *os.File</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">w</span> <span class="nx">io</span><span class="p">.</span><span class="nx">Writer</span>
+</span><span class='line'><span class="nx">w</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nx">Stdout</span>
+</span><span class='line'><span class="nx">f</span> <span class="o">:=</span> <span class="nx">w</span><span class="p">.(</span><span class="o">*</span><span class="nx">os</span><span class="p">.</span><span class="nx">File</span><span class="p">)</span> <span class="c1">// success: f == os.Stdout</span>
+</span><span class='line'><span class="nx">c</span> <span class="o">:=</span> <span class="nx">w</span><span class="p">.(</span><span class="o">*</span><span class="nx">bytes</span><span class="p">.</span><span class="nx">Buffer</span><span class="p">)</span> <span class="c1">// panic: interface holds *os.File, not *bytes.Buffer</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>介面類型 interface type</h5>
+
+<p>類型斷言首先檢查x的動態類型是否滿足T</p>
+
+<ul>
+<li>斷言的目的是為了檢測 x 的 dynamic type 是否滿足 T</li>
+<li>如果是，x 的動態值不會被提取，結果仍然是以前的動態類型和動態值。但結果的類型是介面類型T.</li>
+<li>換句話説，對介面類型的斷言，結果的類型是T，不是x的類型，改變了類型的表述方式，從而改變了可訪問的方法集合(通常更大)，但會保留x介面值中的動態類型和動態值。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">第一個類別型斷言後，</span>
+</span><span class='line'><span class="cm">w、rw兩個介面的動態值都是os.Stout，動態類型都是*os.File。</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">w的類型是io.Writer，只暴露Write方法，</span>
+</span><span class='line'><span class="cm">rw的類型是io.ReadWriter,暴露Read和Write方法。</span>
+</span><span class='line'><span class="cm">*/</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">w</span> <span class="nx">io</span><span class="p">.</span><span class="nx">Writer</span>
+</span><span class='line'><span class="nx">w</span> <span class="p">=</span> <span class="nx">os</span><span class="p">.</span><span class="nx">Stdout</span> <span class="c1">// w = os.Stdout 賦值 *os.File 類型的 value 給 w</span>
+</span><span class='line'><span class="nx">rw</span> <span class="o">:=</span> <span class="nx">w</span><span class="p">.(</span><span class="nx">io</span><span class="p">.</span><span class="nx">ReadWriter</span><span class="p">)</span> <span class="c1">// success: *os.File has both Read and Write</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>Testing</h5>
+
+<ul>
+<li><a href="https://play.golang.org/p/7_uCMhUNGVb">pointer struct</a></li>
+<li><a href="https://play.golang.org/p/1eZxJWA9ok3">struct</a></li>
+<li><a href="https://play.golang.org/p/Uqq6oE7py2Q">interface</a></li>
+</ul>
+
+
+<h3>型態宣告 Type Casting</h3>
+
+<p>若很確定這個 interface{} 是什麼型態，可以直接透過 value.(型態) 來進行型態宣告</p>
+
+<p>倘若該型態不正確，則會出現 <code>panic</code> 警告。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">Test</span><span class="p">(</span><span class="nx">i</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">v</span><span class="p">,</span> <span class="nx">k</span> <span class="o">:=</span> <span class="nx">i</span><span class="p">.(</span><span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">,</span> <span class="nx">k</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">Panic</span><span class="p">(</span><span class="nx">i</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">.(</span><span class="kt">string</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Test</span><span class="p">(</span><span class="s">&quot;Hi&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">Test</span><span class="p">(</span><span class="mi">123</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">Panic</span><span class="p">(</span><span class="mi">111</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 0 false</span>
+</span><span class='line'><span class="c1">// 123 true</span>
+</span><span class='line'><span class="c1">// panic: interface conversion: interface {} is int, not string</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2. 定義</h3>
+
+<h3>Example 1</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">SalaryCalculator</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">CalculateSalary</span><span class="p">()</span> <span class="kt">int</span> <span class="c1">//第一個是 method 名稱，第二個是 return type</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 長期雇工</span>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Permanent</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">empId</span>    <span class="kt">int</span>
+</span><span class='line'>    <span class="nx">basicpay</span> <span class="kt">int</span>
+</span><span class='line'>    <span class="nx">pf</span>       <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 合約雇工</span>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Contract</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">empId</span>  <span class="kt">int</span>
+</span><span class='line'>    <span class="nx">basicpay</span> <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 長期雇工 實作 CalculateSalary()</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">Permanent</span><span class="p">)</span> <span class="nx">CalculateSalary</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">p</span><span class="p">.</span><span class="nx">basicpay</span> <span class="o">+</span> <span class="nx">p</span><span class="p">.</span><span class="nx">pf</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 合約雇工實作 CalculateSalary()</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">c</span> <span class="nx">Contract</span><span class="p">)</span> <span class="nx">CalculateSalary</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">c</span><span class="p">.</span><span class="nx">basicpay</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">total expense is calculated by iterating though the SalaryCalculator slice and summing  </span>
+</span><span class='line'><span class="cm">the salaries of the individual employees  </span>
+</span><span class='line'><span class="cm">*/</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 必須傳 slice 並且 type 是 SalaryCalculator</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">totalExpense</span><span class="p">(</span><span class="nx">s</span> <span class="p">[]</span><span class="nx">SalaryCalculator</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">expense</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">s</span> <span class="p">{</span>
+</span><span class='line'>      <span class="c1">// v 必須都有實作 CalculateSalary()</span>
+</span><span class='line'>        <span class="nx">expense</span> <span class="p">=</span> <span class="nx">expense</span> <span class="o">+</span> <span class="nx">v</span><span class="p">.</span><span class="nx">CalculateSalary</span><span class="p">()</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Total Expense Per Month $%d&quot;</span><span class="p">,</span> <span class="nx">expense</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">pemp1</span> <span class="o">:=</span> <span class="nx">Permanent</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5000</span><span class="p">,</span> <span class="mi">20</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">pemp2</span> <span class="o">:=</span> <span class="nx">Permanent</span><span class="p">{</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6000</span><span class="p">,</span> <span class="mi">30</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">cemp1</span> <span class="o">:=</span> <span class="nx">Contract</span><span class="p">{</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3000</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">employees</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">SalaryCalculator</span><span class="p">{</span><span class="nx">pemp1</span><span class="p">,</span> <span class="nx">pemp2</span><span class="p">,</span> <span class="nx">cemp1</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">totalExpense</span><span class="p">(</span><span class="nx">employees</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Total Expense Per Month $14050</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Implementing interfaces using pointer receivers vs value receivers</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Describer</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Describe</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Person</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">name</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">age</span>  <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">Person</span><span class="p">)</span> <span class="nx">Describe</span><span class="p">()</span> <span class="p">{</span> <span class="c1">//implemented using value receiver  </span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%s is %d years old\n&quot;</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">name</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">age</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Address</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">state</span>   <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">country</span> <span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="o">*</span><span class="nx">Address</span><span class="p">)</span> <span class="nx">Describe</span><span class="p">()</span> <span class="p">{</span> <span class="c1">//implemented using pointer receiver  </span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;State %s Country %s&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">state</span><span class="p">,</span> <span class="nx">a</span><span class="p">.</span><span class="nx">country</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">d1</span> <span class="nx">Describer</span> <span class="c1">// 聲明 d1 是 Describer(interface) 類型</span>
+</span><span class='line'>    <span class="nx">p1</span> <span class="o">:=</span> <span class="nx">Person</span><span class="p">{</span><span class="s">&quot;Sam&quot;</span><span class="p">,</span> <span class="mi">25</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">d1</span> <span class="p">=</span> <span class="nx">p1</span>  <span class="c1">// 賦值 p1 到 d1</span>
+</span><span class='line'>    <span class="nx">d1</span><span class="p">.</span><span class="nx">Describe</span><span class="p">()</span>
+</span><span class='line'>    <span class="nx">p2</span> <span class="o">:=</span> <span class="nx">Person</span><span class="p">{</span><span class="s">&quot;James&quot;</span><span class="p">,</span> <span class="mi">32</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">d1</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">p2</span> <span class="c1">// 賦值 &amp;p2 到 d1</span>
+</span><span class='line'>    <span class="nx">d1</span><span class="p">.</span><span class="nx">Describe</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">d2</span> <span class="nx">Describer</span> <span class="c1">// 聲明 d2 是 Describer(interface) 類型</span>
+</span><span class='line'>    <span class="nx">a</span> <span class="o">:=</span> <span class="nx">Address</span><span class="p">{</span><span class="s">&quot;Washington&quot;</span><span class="p">,</span> <span class="s">&quot;USA&quot;</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//d2 = a </span>
+</span><span class='line'>    <span class="c1">// 當 assign value 時，必須要 implements interface 的內容，否則會 error</span>
+</span><span class='line'>    <span class="cm">/* </span>
+</span><span class='line'><span class="cm">       cannot use a (type Address) as type Describer</span>
+</span><span class='line'><span class="cm">       in assignment: Address does not implement</span>
+</span><span class='line'><span class="cm">       Describer (Describe method has pointer</span>
+</span><span class='line'><span class="cm">       receiver)</span>
+</span><span class='line'><span class="cm">    */</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">d2</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">a</span> <span class="c1">// 賦值 &amp;a 到 d2</span>
+</span><span class='line'>    <span class="nx">d2</span><span class="p">.</span><span class="nx">Describe</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">Sam is 25 years old</span>
+</span><span class='line'><span class="cm">James is 32 years old</span>
+</span><span class='line'><span class="cm">State Washington Country USA</span>
+</span><span class='line'><span class="cm">*/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Embedding interfaces</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">SalaryCalculator</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">DisplaySalary</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">LeaveCalculator</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">CalculateLeavesLeft</span><span class="p">()</span> <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">EmployeeOperations</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">SalaryCalculator</span>
+</span><span class='line'>  <span class="nx">LeaveCalculator</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Employee</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">firstName</span>   <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">lastName</span>    <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">basicPay</span>    <span class="kt">int</span>
+</span><span class='line'>  <span class="nx">pf</span>          <span class="kt">int</span>
+</span><span class='line'>  <span class="nx">totalLeaves</span> <span class="kt">int</span>
+</span><span class='line'>  <span class="nx">leavesTaken</span> <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">e</span> <span class="nx">Employee</span><span class="p">)</span> <span class="nx">DisplaySalary</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%s %s has salary $%d&quot;</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">firstName</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">lastName</span><span class="p">,</span> <span class="p">(</span><span class="nx">e</span><span class="p">.</span><span class="nx">basicPay</span> <span class="o">+</span> <span class="nx">e</span><span class="p">.</span><span class="nx">pf</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">e</span> <span class="nx">Employee</span><span class="p">)</span> <span class="nx">CalculateLeavesLeft</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">e</span><span class="p">.</span><span class="nx">totalLeaves</span> <span class="o">-</span> <span class="nx">e</span><span class="p">.</span><span class="nx">leavesTaken</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">e</span> <span class="o">:=</span> <span class="nx">Employee</span><span class="p">{</span>
+</span><span class='line'>      <span class="nx">firstName</span><span class="p">:</span>   <span class="s">&quot;Naveen&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">lastName</span><span class="p">:</span>    <span class="s">&quot;Ramanathan&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">basicPay</span><span class="p">:</span>    <span class="mi">5000</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">pf</span><span class="p">:</span>          <span class="mi">200</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">totalLeaves</span><span class="p">:</span> <span class="mi">30</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">leavesTaken</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">empOp</span> <span class="nx">EmployeeOperations</span> <span class="p">=</span> <span class="nx">e</span>
+</span><span class='line'>  <span class="nx">empOp</span><span class="p">.</span><span class="nx">DisplaySalary</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;\nLeaves left =&quot;</span><span class="p">,</span> <span class="nx">empOp</span><span class="p">.</span><span class="nx">CalculateLeavesLeft</span><span class="p">())</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">Naveen Ramanathan has salary $5200</span>
+</span><span class='line'><span class="cm">Leaves left = 25</span>
+</span><span class='line'><span class="cm">*/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>Example 2</h5>
+
+<p>Go語言中也提供了sort函式，原始碼，src/sort/sort.go</p>
+
+<p>裡面定義了一個Interface，包含三個方法：Len(), Less(), Swap()。Interface 作為參數傳遞給Sort。</p>
+
+<p>我們要使用Sort，只需要實現Interface的三個方法就可以使用。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// src/sort/sort.go</span>
+</span><span class='line'><span class="kn">package</span> <span class="nx">sort</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// A type, typically a collection, that satisfies sort.Interface can be</span>
+</span><span class='line'><span class="c1">// sorted by the routines in this package.  The methods require that the</span>
+</span><span class='line'><span class="c1">// elements of the collection be enumerated by an integer index.</span>
+</span><span class='line'><span class="c1">// interface 是一個介面定義，用來讓第三方開發者定義自己的資料庫使用方式，就像一種規範。</span>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Interface</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Len is the number of elements in the collection.</span>
+</span><span class='line'>    <span class="nx">Len</span><span class="p">()</span> <span class="kt">int</span>
+</span><span class='line'>    <span class="c1">// Less reports whether the element with</span>
+</span><span class='line'>    <span class="c1">// index i should sort before the element with index j.</span>
+</span><span class='line'>    <span class="nx">Less</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span>
+</span><span class='line'>    <span class="c1">// Swap swaps the elements with indexes i and j.</span>
+</span><span class='line'>    <span class="nx">Swap</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">...</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Sort sorts data.</span>
+</span><span class='line'><span class="c1">// It makes one call to data.Len to determine n, and O(n*log(n)) calls to</span>
+</span><span class='line'><span class="c1">// data.Less and data.Swap. The sort is not guaranteed to be stable.</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">Sort</span><span class="p">(</span><span class="nx">data</span> <span class="nx">Interface</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="c1">// Switch to heapsort if depth of 2*ceil(lg(n+1)) is reached.</span>
+</span><span class='line'>    <span class="nx">n</span> <span class="o">:=</span> <span class="nx">data</span><span class="p">.</span><span class="nx">Len</span><span class="p">()</span>
+</span><span class='line'>    <span class="nx">maxDepth</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&gt;</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&gt;&gt;=</span> <span class="mi">1</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">maxDepth</span><span class="o">++</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">maxDepth</span> <span class="o">*=</span> <span class="mi">2</span>
+</span><span class='line'>    <span class="nx">quickSort</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">maxDepth</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;sort&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Person</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Name</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">Age</span>  <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">Person</span><span class="p">)</span> <span class="nx">String</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;%s: %d&quot;</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// ByAge implements sort.Interface for []Person based on</span>
+</span><span class='line'><span class="c1">// the Age field.</span>
+</span><span class='line'><span class="kd">type</span> <span class="nx">ByAge</span> <span class="p">[]</span><span class="nx">Person</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="nx">ByAge</span><span class="p">)</span> <span class="nx">Len</span><span class="p">()</span> <span class="kt">int</span>           <span class="p">{</span> <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="nx">ByAge</span><span class="p">)</span> <span class="nx">Swap</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span>      <span class="p">{</span> <span class="nx">a</span><span class="p">[</span><span class="nx">i</span><span class="p">],</span> <span class="nx">a</span><span class="p">[</span><span class="nx">j</span><span class="p">]</span> <span class="p">=</span> <span class="nx">a</span><span class="p">[</span><span class="nx">j</span><span class="p">],</span> <span class="nx">a</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="nx">ByAge</span><span class="p">)</span> <span class="nx">Less</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">j</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">bool</span> <span class="p">{</span> <span class="k">return</span> <span class="nx">a</span><span class="p">[</span><span class="nx">i</span><span class="p">].</span><span class="nx">Age</span> <span class="p">&lt;</span> <span class="nx">a</span><span class="p">[</span><span class="nx">j</span><span class="p">].</span><span class="nx">Age</span> <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">people</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">Person</span><span class="p">{</span>
+</span><span class='line'>        <span class="p">{</span><span class="s">&quot;Bob&quot;</span><span class="p">,</span> <span class="mi">31</span><span class="p">},</span>
+</span><span class='line'>        <span class="p">{</span><span class="s">&quot;John&quot;</span><span class="p">,</span> <span class="mi">42</span><span class="p">},</span>
+</span><span class='line'>        <span class="p">{</span><span class="s">&quot;Michael&quot;</span><span class="p">,</span> <span class="mi">17</span><span class="p">},</span>
+</span><span class='line'>        <span class="p">{</span><span class="s">&quot;Jenny&quot;</span><span class="p">,</span> <span class="mi">26</span><span class="p">},</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">people</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">sort</span><span class="p">.</span><span class="nx">Sort</span><span class="p">(</span><span class="nx">ByAge</span><span class="p">(</span><span class="nx">people</span><span class="p">))</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">people</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// [Bob: 31 John: 42 Michael: 17 Jenny: 26]</span>
+</span><span class='line'><span class="c1">// [Michael: 17 Jenny: 26 Bob: 31 John: 42]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><span id="stringer">Stringer Interface</span></h3>
+
+<p>Make the IPAddr type implement fmt.Stringer to print the address as a dotted quad.</p>
+
+<blockquote><p>most ubiquitous interfaces is <code>Stringer</code> defined by the <code>fmt</code> package.</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">type</span> <span class="nx">Stringer</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">String</span><span class="p">()</span> <span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="tour.golang.org/methods/17">範例 1</a></h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Person</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">Age</span>  <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="nx">Person</span><span class="p">)</span> <span class="nx">String</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;%v (%v years)&quot;</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">p</span><span class="p">.</span><span class="nx">Age</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="nx">Person</span><span class="p">{</span><span class="s">&quot;Arthur Dent&quot;</span><span class="p">,</span> <span class="mi">42</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">z</span> <span class="o">:=</span> <span class="nx">Person</span><span class="p">{</span><span class="s">&quot;Zaphod Beeblebrox&quot;</span><span class="p">,</span> <span class="mi">9001</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">z</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="c1">// Arthur Dent (42 years) Zaphod Beeblebrox (9001 years)s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://tour.golang.org/methods/18">範例 2</a></h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">IPAddr</span> <span class="p">[</span><span class="mi">4</span><span class="p">]</span><span class="kt">byte</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">ip</span> <span class="nx">IPAddr</span><span class="p">)</span> <span class="nx">String</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;%v.%v.%v.%v&quot;</span><span class="p">,</span> <span class="nx">ip</span><span class="p">[</span><span class="mi">0</span><span class="p">],</span> <span class="nx">ip</span><span class="p">[</span><span class="mi">1</span><span class="p">],</span> <span class="nx">ip</span><span class="p">[</span><span class="mi">2</span><span class="p">],</span> <span class="nx">ip</span><span class="p">[</span><span class="mi">3</span><span class="p">])</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>   <span class="c1">// key 為 string type</span>
+</span><span class='line'>   <span class="c1">// value 為 IPAddr type </span>
+</span><span class='line'>   <span class="c1">// 因此只有 IPAddr 會轉換成上方定義的 func 形式</span>
+</span><span class='line'>  <span class="nx">hosts</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="nx">IPAddr</span><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;loopback&quot;</span><span class="p">:</span>  <span class="p">{</span><span class="mi">127</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span><span class="p">},</span>
+</span><span class='line'>    <span class="s">&quot;googleDNS&quot;</span><span class="p">:</span> <span class="p">{</span><span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">8</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">ip</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">hosts</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%v: %v\n&quot;</span><span class="p">,</span> <span class="nx">name</span><span class="p">,</span> <span class="nx">ip</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><span id="errors">Errors Interface</span></h3>
+
+<p>The error type is a built-in interface similar to fmt.Stringer</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">type</span> <span class="kt">error</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Error</span><span class="p">()</span> <span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://tour.golang.org/methods/19">範例 1</a></h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">MyError</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">When</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Time</span>
+</span><span class='line'>  <span class="nx">What</span> <span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">e</span> <span class="o">*</span><span class="nx">MyError</span><span class="p">)</span> <span class="nx">Error</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;at %v, %s&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">e</span><span class="p">.</span><span class="nx">When</span><span class="p">,</span> <span class="nx">e</span><span class="p">.</span><span class="nx">What</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">run</span><span class="p">()</span> <span class="kt">error</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="o">&amp;</span><span class="nx">MyError</span><span class="p">{</span>
+</span><span class='line'>    <span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">(),</span>
+</span><span class='line'>    <span class="s">&quot;it didn&#39;t work&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">run</span><span class="p">();</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// at 2009-11-10 23:00:00 +0000 UTC m=+0.000000001, it didn&#39;t work</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://tour.golang.org/methods/20">範例 2</a></h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;math&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">ErrNegativeSqrt</span> <span class="kt">float64</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">e</span> <span class="nx">ErrNegativeSqrt</span><span class="p">)</span> <span class="nx">Error</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;Sqrt: negative number %g&quot;</span><span class="p">,</span> <span class="nx">e</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">const</span> <span class="nx">delta</span> <span class="p">=</span> <span class="mf">1e-10</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">Sqrt</span><span class="p">(</span><span class="nx">f</span> <span class="kt">float64</span><span class="p">)</span> <span class="p">(</span><span class="kt">float64</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">f</span> <span class="p">&lt;</span> <span class="mi">0</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">ErrNegativeSqrt</span><span class="p">(</span><span class="nx">f</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">z</span> <span class="o">:=</span> <span class="nx">f</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">n</span> <span class="o">:=</span> <span class="nx">z</span> <span class="o">-</span> <span class="p">(</span><span class="nx">z</span><span class="o">*</span><span class="nx">z</span><span class="o">-</span><span class="nx">f</span><span class="p">)</span><span class="o">/</span><span class="p">(</span><span class="mi">2</span><span class="o">*</span><span class="nx">z</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nx">math</span><span class="p">.</span><span class="nx">Abs</span><span class="p">(</span><span class="nx">n</span><span class="o">-</span><span class="nx">z</span><span class="p">)</span> <span class="p">&lt;</span> <span class="nx">delta</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">break</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">z</span> <span class="p">=</span> <span class="nx">n</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">z</span><span class="p">,</span> <span class="kc">nil</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">Sqrt</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">Sqrt</span><span class="p">(</span><span class="o">-</span><span class="mi">2</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 1.4142135623730951 &lt;nil&gt;</span>
+</span><span class='line'><span class="c1">// 0 cannot Sqrt negativ number: -2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><span id="reader">Reader Interface</span></h3>
+
+<p>The io package specifies the io.Reader interface, which represents the read end of a stream of data.</p>
+
+<p><a href="https://golang.org/pkg/io/#Reader">Reader interface</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">type</span> <span class="nx">Reader</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">Read</span><span class="p">(</span><span class="nx">p</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://tour.golang.org/methods/21">範例 1</a></h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;io&quot;</span>
+</span><span class='line'>  <span class="s">&quot;strings&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">r</span> <span class="o">:=</span> <span class="nx">strings</span><span class="p">.</span><span class="nx">NewReader</span><span class="p">(</span><span class="s">&quot;Hello, Reader!&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">b</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="mi">8</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">n</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">Read</span><span class="p">(</span><span class="nx">b</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;n = %v err = %v b = %v\n&quot;</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">err</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;b[:n] = %q\n&quot;</span><span class="p">,</span> <span class="nx">b</span><span class="p">[:</span><span class="nx">n</span><span class="p">])</span>
+</span><span class='line'>    <span class="c1">// end-of-file (EOF)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nx">err</span> <span class="o">==</span> <span class="nx">io</span><span class="p">.</span><span class="nx">EOF</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">break</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// n = 8 err = &lt;nil&gt; b = [72 101 108 108 111 44 32 82]</span>
+</span><span class='line'><span class="c1">// b[:n] = &quot;Hello, R&quot;</span>
+</span><span class='line'><span class="c1">// n = 6 err = &lt;nil&gt; b = [101 97 100 101 114 33 32 82]</span>
+</span><span class='line'><span class="c1">// b[:n] = &quot;eader!&quot;</span>
+</span><span class='line'><span class="c1">// n = 0 err = EOF b = [101 97 100 101 114 33 32 82]</span>
+</span><span class='line'><span class="c1">// b[:n] = &quot;&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://tour.golang.org/methods/22">範例 2</a></h5>
+
+<p><a href="https://github.com/golang/tour/blob/master/reader/validate.go">reader</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;golang.org/x/tour/reader&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">MyReader</span> <span class="kd">struct</span><span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="nx">MyReader</span><span class="p">)</span> <span class="nx">Read</span><span class="p">(</span><span class="nx">b</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">b</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">b</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="sc">&#39;A&#39;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nb">len</span><span class="p">(</span><span class="nx">b</span><span class="p">),</span> <span class="kc">nil</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">reader</span><span class="p">.</span><span class="nx">Validate</span><span class="p">(</span><span class="nx">MyReader</span><span class="p">{})</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// OK!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://tour.golang.org/methods/23">範例 3</a></h5>
+
+<p>rot13Reader
+s</p>
+
+<blockquote><p>Wiki <a href="https://en.wikipedia.org/wiki/ROT13"><code>ROT13</code></a></p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;io&quot;</span>
+</span><span class='line'>  <span class="s">&quot;os&quot;</span>
+</span><span class='line'>  <span class="s">&quot;strings&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 轉換 ROT13</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">rot13</span><span class="p">(</span><span class="nx">b</span> <span class="kt">byte</span><span class="p">)</span> <span class="kt">byte</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">z</span> <span class="kt">byte</span>
+</span><span class='line'>  <span class="k">switch</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// 判斷是小寫還是大寫的範圍</span>
+</span><span class='line'>  <span class="k">case</span> <span class="sc">&#39;a&#39;</span> <span class="o">&lt;=</span> <span class="nx">b</span> <span class="o">&amp;&amp;</span> <span class="nx">b</span> <span class="o">&lt;=</span> <span class="sc">&#39;z&#39;</span><span class="p">:</span>
+</span><span class='line'>    <span class="nx">a</span><span class="p">,</span> <span class="nx">z</span> <span class="p">=</span> <span class="sc">&#39;a&#39;</span><span class="p">,</span> <span class="sc">&#39;z&#39;</span>
+</span><span class='line'>  <span class="k">case</span> <span class="sc">&#39;A&#39;</span> <span class="o">&lt;=</span> <span class="nx">b</span> <span class="o">&amp;&amp;</span> <span class="nx">b</span> <span class="o">&lt;=</span> <span class="sc">&#39;Z&#39;</span><span class="p">:</span>
+</span><span class='line'>    <span class="nx">a</span><span class="p">,</span> <span class="nx">z</span> <span class="p">=</span> <span class="sc">&#39;A&#39;</span><span class="p">,</span> <span class="sc">&#39;Z&#39;</span>
+</span><span class='line'>   <span class="c1">// 特殊符號就直接回傳</span>
+</span><span class='line'>  <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">b</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="c1">// a &amp; b 會自動轉成 ASCII 碼數字</span>
+</span><span class='line'>  <span class="k">return</span> <span class="p">(</span><span class="nx">b</span><span class="o">-</span><span class="nx">a</span><span class="o">+</span><span class="mi">13</span><span class="p">)</span><span class="o">%</span><span class="p">(</span><span class="nx">z</span><span class="o">-</span><span class="nx">a</span><span class="o">+</span><span class="mi">1</span><span class="p">)</span> <span class="o">+</span> <span class="nx">a</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 建立一個 rot13Reader 並且有 Read method</span>
+</span><span class='line'><span class="kd">type</span> <span class="nx">rot13Reader</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">rr</span> <span class="nx">io</span><span class="p">.</span><span class="nx">Reader</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="nx">rot13Reader</span><span class="p">)</span> <span class="nx">Read</span><span class="p">(</span><span class="nx">p</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">)</span> <span class="p">(</span><span class="nx">n</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">err</span> <span class="kt">error</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="c1">// n 為 s 字串的長度</span>
+</span><span class='line'>  <span class="nx">n</span><span class="p">,</span> <span class="nx">err</span> <span class="p">=</span> <span class="nx">r</span><span class="p">.</span><span class="nx">rr</span><span class="p">.</span><span class="nx">Read</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">n</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nx">rot13</span><span class="p">(</span><span class="nx">p</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">s</span> <span class="o">:=</span> <span class="nx">strings</span><span class="p">.</span><span class="nx">NewReader</span><span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;Lbh penpxrq gur pbqr!&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">r</span> <span class="o">:=</span> <span class="nx">rot13Reader</span><span class="p">{</span><span class="nx">s</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">io</span><span class="p">.</span><span class="nx">Copy</span><span class="p">(</span><span class="nx">os</span><span class="p">.</span><span class="nx">Stdout</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">r</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// You cracked the code!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><span id="image">Image Interface</span></h3>
+
+<p><a href="https://golang.org/pkg/image/#Image">Image Interface</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">image</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Image</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">ColorModel</span><span class="p">()</span> <span class="nx">color</span><span class="p">.</span><span class="nx">Model</span>
+</span><span class='line'>    <span class="nx">Bounds</span><span class="p">()</span> <span class="nx">Rectangle</span>
+</span><span class='line'>    <span class="nx">At</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">color</span><span class="p">.</span><span class="nx">Color</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5><a href="https://tour.golang.org/methods/25">範例 1</a></h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;code.google.com/p/go-tour/pic&quot;</span>
+</span><span class='line'>  <span class="s">&quot;image&quot;</span>
+</span><span class='line'>  <span class="s">&quot;image/color&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Image</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">width</span>  <span class="kt">int</span>
+</span><span class='line'>  <span class="nx">height</span> <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">img</span> <span class="nx">Image</span><span class="p">)</span> <span class="nx">ColorModel</span><span class="p">()</span> <span class="nx">color</span><span class="p">.</span><span class="nx">Model</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">color</span><span class="p">.</span><span class="nx">RGBAModel</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">img</span> <span class="nx">Image</span><span class="p">)</span> <span class="nx">Bounds</span><span class="p">()</span> <span class="nx">image</span><span class="p">.</span><span class="nx">Rectangle</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">image</span><span class="p">.</span><span class="nx">Rect</span><span class="p">(</span><span class="mi">0</span><span class="p">,</span> <span class="mi">0</span><span class="p">,</span> <span class="nx">img</span><span class="p">.</span><span class="nx">width</span><span class="p">,</span> <span class="nx">img</span><span class="p">.</span><span class="nx">height</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">img</span> <span class="nx">Image</span><span class="p">)</span> <span class="nx">At</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="kt">int</span><span class="p">)</span> <span class="nx">color</span><span class="p">.</span><span class="nx">Color</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">img_func</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">uint8</span> <span class="p">{</span>
+</span><span class='line'>      <span class="c1">//return uint8(x*y)</span>
+</span><span class='line'>      <span class="c1">//return uint8((x+y) / 2)</span>
+</span><span class='line'>      <span class="k">return</span> <span class="nb">uint8</span><span class="p">(</span><span class="nx">x</span> <span class="p">^</span> <span class="nx">y</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">v</span> <span class="o">:=</span> <span class="nx">img_func</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">color</span><span class="p">.</span><span class="nx">RGBA</span><span class="p">{</span><span class="nx">v</span><span class="p">,</span> <span class="nx">v</span><span class="p">,</span> <span class="mi">255</span><span class="p">,</span> <span class="mi">255</span><span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">m</span> <span class="o">:=</span> <span class="nx">Image</span><span class="p">{</span><span class="mi">256</span><span class="p">,</span> <span class="mi">64</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">pic</span><span class="p">.</span><span class="nx">ShowImage</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><span id="http"> HTTP Interface</span></h3>
+
+<p><a href="https://golang.org/pkg/net/http/">HTTP Interface</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">http</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Handler</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">ServeHTTP</span><span class="p">(</span><span class="nx">w</span> <span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">Request</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>範例 1</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;net/http&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Hello</span> <span class="kd">struct</span><span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">h</span> <span class="nx">Hello</span><span class="p">)</span> <span class="nx">ServeHTTP</span><span class="p">(</span>
+</span><span class='line'>  <span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span>
+</span><span class='line'>  <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprint</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="s">&quot;Hello!&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">h</span> <span class="nx">Hello</span>
+</span><span class='line'>  <span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">&quot;localhost:4000&quot;</span><span class="p">,</span> <span class="nx">h</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>範例 2</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;net/http&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">String</span> <span class="kt">string</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="nx">String</span><span class="p">)</span> <span class="nx">ServeHTTP</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprint</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="nx">s</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Struct</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Greeting</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">Punct</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">Who</span> <span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">s</span> <span class="o">*</span><span class="nx">Struct</span><span class="p">)</span> <span class="nx">ServeHTTP</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Fprint</span><span class="p">(</span><span class="nx">w</span><span class="p">,</span> <span class="nx">s</span><span class="p">.</span><span class="nx">Greeting</span><span class="p">,</span> <span class="nx">s</span><span class="p">.</span><span class="nx">Punct</span><span class="p">,</span> <span class="nx">s</span><span class="p">.</span><span class="nx">Who</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">http</span><span class="p">.</span><span class="nx">Handle</span><span class="p">(</span><span class="s">&quot;/string&quot;</span><span class="p">,</span> <span class="nx">String</span><span class="p">(</span><span class="s">&quot;I&#39;m a frayed knot.&quot;</span><span class="p">))</span>
+</span><span class='line'>    <span class="nx">http</span><span class="p">.</span><span class="nx">Handle</span><span class="p">(</span><span class="s">&quot;/struct&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">Struct</span><span class="p">{</span><span class="s">&quot;Hello&quot;</span><span class="p">,</span> <span class="s">&quot;:&quot;</span><span class="p">,</span> <span class="s">&quot;Gophers!&quot;</span><span class="p">})</span>
+</span><span class='line'>    <span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">&quot;localhost:4000&quot;</span><span class="p">,</span> <span class="kc">nil</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://golangbot.com/learn-golang-series/">golangbot.com</a></li>
+<li><a href="https://golangbot.com/polymorphism/">[golangbot.com] polymorphism</a></li>
+<li><a href="https://yami.io/golang-interface/">解釋 Golang 中的 Interface 到底是什麼</a></li>
+<li><a href="http://legendtkl.com/2017/06/12/understanding-golang-interface/">深入理解 Go Interface</a></li>
+<li><a href="http://legendtkl.com/2015/11/25/go-generic-programming/">go"泛型程式設計"</a></li>
+<li><a href="http://legendtkl.com/2015/11/28/go-interface-reflect/">談一談Go的interface和reflect</a></li>
+<li><a href="http://sanyuesha.com/2017/07/22/how-to-understand-go-interface/">理解 go interface 的 5 個關鍵點</a></li>
+<li><a href="http://sanyuesha.com/2017/10/10/go-interface-1/">Go interface 詳解(一) ：介紹</a></li>
+<li><a href="http://sanyuesha.com/2017/10/12/go-interface-2/">Go interface 詳解(二) ：定義和使用</a></li>
+<li><a href="http://sanyuesha.com/2017/10/18/go-interface-3/">Go interface 詳解 (三) ：interface 的值</a></li>
+<li><a href="http://sanyuesha.com/2017/12/01/go-interface-4/">Go interface 詳解 (四) ：type assertion</a></li>
+<li><a href="https://www.youtube.com/watch?v=F4wUrj6pmSI&amp;t=2319s">[video] Google Understanding Go Interfaces</a></li>
+<li><a href="https://github.com/gopherchina/conference/blob/master/2017/1.4%20interface.presented.pdf">[slider] Google Understanding Go Interfaces</a></li>
+<li><a href="http://gobook.io/read/github.com/lunny/gopl-zh/ch7/ch7-10.html">7.10. 類型斷言</a></li>
+<li><a href="https://hk.saowen.com/a/07c058b7f0424b619737a3cf71710500b3d493edb3f72b80e2478b2f43b631b1">Go 的類型斷言type assertion</a></li>
+<li><a href="https://research.swtch.com/interfaces">Go Data Structures: Interfaces</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-05-12T23:39:34+08:00'><span class='date'><span class='date-month'>May</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:39 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/golang/'>golang</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2018/05/12/golang-interfaces/" data-via="" data-counturl="http://mgleon08.github.com/blog/2018/05/12/golang-interfaces/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/05/08/golang-pointer-structs-methods/" title="Previous Post: Golang - pointer, structs, methods">&laquo; Golang - pointer, structs, methods</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2018/05/17/golang-goroutine-channel-worker-pool-select-mutex/" title="Next Post: Golang - goroutine, channel, worker pool, select, mutex">Golang - goroutine, channel, worker pool, select, mutex &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2018/05/12/golang-interfaces/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2018/05/12/golang-interfaces/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
