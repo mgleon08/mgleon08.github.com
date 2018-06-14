@@ -3,7 +3,7 @@ layout: post
 title: "Golang - if else, loops, switch"
 date: 2018-05-03 18:42:50 +0800
 comments: true
-categories: 
+categories: golang
 ---
 
 <!-- more -->
