@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "前端工具整理"
+title: "前端工具整理 NVM,NPM,YARN,Webpack,Babel 等等"
 date: 2016-11-29 11:32:26 +0800
 comments: true
 categories: front_end
@@ -135,6 +135,7 @@ Facebook 開源的 Yarn，這是針對存儲在 npm 或 Bower 註冊表中的 Ja
 
 * [yarn](https://yarnpkg.com/)
 * [yarn github](https://github.com/yarnpkg/yarn)
+* [yarn migrating from npm](https://yarnpkg.com/en/docs/migrating-from-npm)
 * [[譯] Yarn 官方介紹: 一款新的 JavaScript 包管理器](https://github.com/cssmagic/blog/issues/67)
 * [Facebook 新發佈的 Yarn JS 包管理器的 5 大功能](https://sheerdevelopment.com/posts/facebook-js-5)
 

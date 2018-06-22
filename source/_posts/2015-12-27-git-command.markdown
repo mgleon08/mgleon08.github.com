@@ -394,6 +394,17 @@ git reflog
 # git reset <sha1> --hard
 ```
 
+### 拯救已刪除的檔案
+
+```ruby
+# 會列出一堆檔案的 bash
+git fsck --cache --unreachable
+# 逐一檢視檔案內容即可救回失去的檔案 
+git show <hash> 
+```
+
+ * [Git 救回已刪除的檔案](http://blog.hsatac.net/2012/07/git-restore-removed-files/)
+
 #alias
 自己設定的一些 alias
 
