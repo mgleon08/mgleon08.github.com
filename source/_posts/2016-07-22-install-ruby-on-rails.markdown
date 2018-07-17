@@ -5,11 +5,15 @@ date: 2016-07-22 19:58:37 +0800
 comments: true
 categories: ruby rails install
 ---
+
+2018-06-30 update!
+
 最近剛好新來了一台電腦，所有東西都要重新安裝，就順手把需要的東西都紀錄了一下，以便之後可以快速的安裝起來!
 
 <!-- more -->
 
-###目錄
+### 目錄
+
 * [iTerm2](#iterm2)
 * [Homebrew](#homebrew)
 * [Git](#git)
@@ -21,21 +25,22 @@ categories: ruby rails install
 * [Bundle](#bundle)
 * [NVM](#nvm)
 * [NPM](#npm)
+* [Yarn](#yarn)
 * [Sublime Text](#sublime)
+* [Visual Studio Code](#vscode)
 * [Vim](#vim)
 * [Linux](#linux)
-* [Other](#other)
 
-#<span id="iterm2">iTerm2</span>
+# <span id="iterm2">iTerm2</span>
 
 >Terminal 終端機
 
 * [iTerm2](https://www.iterm2.com/)
 
-###tmux
+### tmux
 * [終端機必備的多工良伴：tmux](http://blog.chh.tw/posts/tmux-terminal-multiplexer/)
 
-#<span id="homebrew">Homebrew</span>
+# <span id="homebrew">Homebrew</span>
 
 >Mac OS X 上的套件管理程式
 
@@ -76,6 +81,11 @@ brew upgrade xxx
 #postgresql
 brew install postgresql
 gem install pg
+brew services start postgresql
+brew services stop postgresql
+brew services restart postgresql
+createdb db_name
+psql db_name
 
 #mysql
 brew install mysql
@@ -87,7 +97,7 @@ brew install redis
 
 #背景啟動
 redis-server --daemonize yes
-redis-server&&
+redis-server &
 
 #imagemagick
 brew install imagemagick
@@ -103,7 +113,10 @@ brew install mediainfo
 brew install wget
 ```
 
-#<span id="git">Git</span>
+* [How to start PostgreSQL server on Mac OS X?
+](https://stackoverflow.com/questions/7975556/how-to-start-postgresql-server-on-mac-os-x)
+
+# <span id="git">Git</span>
 
 >版本控制
 
@@ -125,7 +138,7 @@ git config --global apply.whitespace nowarn
 git config --global credential.helper store 
 ```
 
-###Git GUI 
+### Git GUI 
 
 * [SourceTree](https://www.sourcetreeapp.com/)
 
@@ -137,10 +150,10 @@ ln -s /Applications/SourceTree.app/Contents/Resources/stree /usr/local/bin/
 * [GitX](http://gitx.frim.nl/)
 * [tig](http://jonas.nitro.dk/tig/manual.html#view-scrolling)
 
-###Git 指令
+### Git 指令
 * [Git 指令操作手冊](http://mgleon08.github.io/blog/2015/12/27/git-command/)
 
-#<span id="github">GitHub</span>
+# <span id="github">GitHub</span>
 
 設定SSH連接
 
@@ -185,7 +198,7 @@ ssh-add -K [path/to/your/ssh-key]
 * [鳥哥的私房菜 - 權限指令](http://linux.vbird.org/linux_basic/0210filepermission.php#chmod)
 
 
-#<span id="zsh">zsh & oh-my-zsh</span>
+# <span id="zsh">zsh & oh-my-zsh</span>
 
 >shell & zsh 的 framework 套件
 
@@ -226,15 +239,15 @@ plugins=(git ruby rbenv github gitignore rails rake python z)
 * [bash 轉移 zsh (oh-my-zsh) 設定心得](http://icarus4.logdown.com/posts/177661-from-bash-to-zsh-setup-tips)
 
 
-#<span id="rvmorrbenv">rvm or rbenv</span>
+# <span id="rvmorrbenv">rvm or rbenv</span>
 
 >管理 ruby & gem 工具
 
-###rvm
+### rvm
 * [RVM and Gemsets Ruby版本控制](http://mgleon08.github.io/blog/2016/02/15/rvm-and-gemsets/)  
 * [rvm 使用指南](https://ruby-china.org/wiki/rvm-guide)  
 
-###rbenv
+### rbenv
 
 ```ruby
 #安裝
@@ -306,7 +319,7 @@ possible commands are:
 * [rbenv-gemset](https://github.com/jf/rbenv-gemset)
 * [Setting up and installing rbenv, ruby-build, rubies, rbenv-gemset, and bundler](https://gist.github.com/MicahElliott/2407918)
 
-#<span id="rubygems">RubyGems</span>
+# <span id="rubygems">RubyGems</span>
 
 >RubyGems 是 Ruby 的套件管理系統，讓你輕易安裝及管理 Ruby 函式庫。
 
@@ -350,14 +363,14 @@ gem cleanup -d
 gem cleanup rails
 ```
 
-#<span id="rails">Rails</span>
+# <span id="rails">Rails</span>
 
 ```ruby
 #後面的參數是不下載文件，可以省很多安裝時間
 gem install rails --no-ri --no-rdoc
 ```
 
-#<span id="bundle">Bundle</span>
+# <span id="bundle">Bundle</span>
 > 管理應用程式 Gem 依存性(dependencies)管理工具，它會根據 Gemfile 的設定自動下載及安裝 Gem 套件
 
 ```ruby
@@ -371,7 +384,7 @@ bundle clean [--force]
 
 * [bundle](http://bundler.io/)
 
-#<span id="nvm">NVM</span>
+# <span id="nvm">NVM</span>
 
 >管理 npm 工具，類似 rvm
 
@@ -380,8 +393,8 @@ bundle clean [--force]
 curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.4/install.sh | bash
 
 #將以下放到自己的 ~/.zshrc or ~/.bashrc or .bash_profile 下面（預設會自動放好，但還是去確定一下）
-export NVM_DIR="/Users/leon/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh"  # This loads nvm%
+export NVM_DIR="$HOME/.nvm"
+[ -s "$NVM_DIR/nvm.sh" ] && . "$NVM_DIR/nvm.sh" # This loads nvm
 
 #重新載入 Shell
 . ~/.nvm/nvm.sh or source ~/.zshrc
@@ -407,11 +420,23 @@ nvm alias default stable
 #看目前安裝所有版本
 ls -a ~/.nvm/versions/node
 ```
+
+```ruby
+# package.json 設定
+{ 
+  "engines" : { 
+    "node" : ">=0.10.3 <0.12" 
+  } 
+}
+```
+
 * [node版本管理工具nvm-Mac下安装及使用](https://segmentfault.com/a/1190000004404505)
 * [在 Mac 上裝 NVM, RVM 等跑 Gulp, Grunt, Bower 環境](https://tenten.co/blog/install-gulp-grunt-bower-sass-susy-on-mac-with-nvm-rvm/)
 * [Node.js 安裝與版本切換教學 (for MAC)](http://icarus4.logdown.com/posts/175092-nodejs-installation-guide)
+* [package.json文件](http://javascript.ruanyifeng.com/nodejs/packagejson.html#toc6)
+* [Node.js 環境設定-for mac](https://medium.com/@toumasaya/node-js-%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A-for-mac-a2628836feaf)
 
-#<span id="npm">NPM</span>
+# <span id="npm">NPM</span>
 
 >套件管理
 
@@ -452,7 +477,7 @@ npm install <package name> --save #用於上線時必要的套件(react, bootstr
 npm install <package name> --save-dev #用來安裝開發時用的工具(ex babel, webpack, webpack-dev-server…)，會更新到package.json裡的devDependencies(開發依賴)
 ```
 
-###package.json
+### package.json
 
 ```ruby
 #自動產生 package.json
@@ -479,7 +504,33 @@ npm init
 * [Npm 套件管理 & 常用開發工具介紹](http://www.slideshare.net/wantingj/npm-46801372)
 * [Npm All cli](https://docs.npmjs.com/cli/access)
 
-#<span id="sublime">Sublime Text</span>
+# <span id="yarn"> Yarn </span>
+
+Facebook 開源的 Yarn，這是針對存儲在 npm 或 Bower 註冊表中的 JavaScript 模組的一個代理包管理器。
+
+```ruby
+brew install yarn
+
+# -g 為 global 的意思，沒有加的話，會裝在當下的
+yarn global add vue-cli
+
+# 安裝指定套件 (會自動 save 到 package.json)
+yarn add sass sass-loader node-sass
+
+# 安裝 package.json 內其它套件
+yarn install
+
+# run project
+yarn run start
+```
+
+* [yarn](https://yarnpkg.com/en/)
+* [yarn github](https://github.com/yarnpkg/yarn)
+* [yarn migrating from npm](https://yarnpkg.com/en/docs/migrating-from-npm)
+* [[譯] Yarn 官方介紹: 一款新的 JavaScript 包管理器](https://github.com/cssmagic/blog/issues/67)
+* [Facebook 新發佈的 Yarn JS 包管理器的 5 大功能](https://sheerdevelopment.com/posts/facebook-js-5)
+
+# <span id="sublime">Sublime Text</span>
 
 >編輯器
 
@@ -568,7 +619,80 @@ export PATH="$HOME/bin:$PATH"
 * [Sublime Text](https://www.sublimetext.com/)
 * [Best Sublime Text 3 Themes of 2015 and 2016](https://scotch.io/bar-talk/best-sublime-text-3-themes-of-2015-and-2016)
 
-#<span id="vim">Vim</span>
+#<span id="vscode"> Visual Studio Code </span>
+
+### 套件安裝
+
+找尋套件 `Command` + `Shift` + `P`
+
+```js
+// 在 terminal 直接開啟 vscode，一開始畫面就會問要不要設定了
+code
+```
+
+### 推薦套件
+
+```js
+// Other
+ESLint // 如果你有用程式碼規範的話
+Prettier - code formatter // alt + shift + f
+vscodeicon
+// 其他可以看上面推薦的安裝
+```
+
+### Setting
+
+```js
+{
+  "editor.tabSize": 2,
+  "editor.renderControlCharacters": true,
+  "editor.renderWhitespace": "all",
+  "prettier.semi": false,
+  "prettier.singleQuote": true,
+  "prettier.trailingComma": "none",
+  "prettier.printWidth": 120,
+  "files.trimTrailingWhitespace": true
+}
+```
+
+### command line
+
+```js
+// 隱藏側邊欄
+command + B
+// 隱藏下邊欄
+command + J
+// Undo
+command + Z
+// Redo
+command + shift + z
+// New File
+command + N
+// New Window
+command + shift + N
+// Replace In Files
+command + shift + H
+// Replace
+command + option + F
+// Copy Line
+option + shift + ↑↓
+// Move Line
+option + ↑↓
+// Add cursor
+command + option + ↑↓
+// Comment One Line
+command + K + C
+// Remove Comment One Line
+command + K + U
+// Select All Occurrences of Find Match
+command + shift + Ls
+```
+
+官方文件: 
+
+* [visualstudio](https://code.visualstudio.com/)
+
+# <span id="vim">Vim</span>
 
 介面優化，新增 `.vimrc` 檔案
 
@@ -590,16 +714,9 @@ export PATH="$HOME/bin:$PATH"
 * [vimrc設定教學](http://wiki.csie.ncku.edu.tw/vim/vimrc)
 * [vi指令說明(完整版)](http://www2.nsysu.edu.tw/csmlab/unix/vi_command.htm)
 
-#<span id="linux">Linux 常用指令</span>
+# <span id="linux">Linux 常用指令</span>
+
 * [Linux常用Terminal命令與快捷鍵參考](http://jdev.tw/blog/3599/linux-terminal-commands-and-shortcuts)
-
-#<span id="other">other</span>
-
-* [MacDown](http://macdown.uranusjr.com/) 
-* [Sequel Pro](http://www.sequelpro.com/)
-* [Postico](https://eggerapps.at/postico/)
-* [PostMan](https://www.getpostman.com/app/postman-osx)
-
 
 參考文件： 
  

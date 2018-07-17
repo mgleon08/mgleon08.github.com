@@ -34,15 +34,16 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 4. MERGE_HEAD
 	* 當你執行合併工作時 (關於合併的議題會在日後的文章中會提到)，「合併來源｣的 commit 物件絕對名稱會被記錄在 MERGE_HEAD 這個符號參照中。
 
-#基本設定
-* `git config --global user.name "<使用者名字>"`
-* `git config --global user.email "<電子信箱>"`
+# 基本設定
+* `git config --global user.name "<使用者名字>"` (個別專案可用 --local)
+* `git config --global user.email "<電子信箱>"` (個別專案可用 --local)
 * `git config --list`　看 Git 設定內容
 * `git config --global alias.st status`　縮短字串（將 git status 縮寫為 git st）
 * `git config --global color.ui true`　設定輸出顏色
 * `git config --global apply.whitespace nowarn` 空白對有些語言是有影響的(像是Ruby)，因此我們會希望 Git 去忽略空白的變化
+* `git config --global alias.co checkout` 設定 alias
 
-以上皆可直接 `vi .gitconfig` 去做修正
+以上皆可直接 `vim ~/.gitconfig` 去做修正
 
 #基本功能
 
@@ -88,6 +89,7 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 * `git commit -m [commit 訊息]` 直接寫入 commit 訊息。
 * `git commit -am [commit 訊息]` 等於 `git add .` + `git commit -m`。
 * `git commit --amend` 合併到上一個 commit 訊息。
+* `git commit --amend --no-edit` 合併到上一個 commit 訊息，並且不需要更改訊息
 
 ###status
 * `git status` 檢視檔案的狀態。
@@ -207,11 +209,18 @@ exec   = 執行一條指令
 * `git log` 查詢歷史紀錄。
 * `git log -10` 限定輸出最近幾筆紀錄。
 * `git log --oneline --graph --all --decorate` 圖像化 log。
+* `git log --oneline --author="leon"` 找出 leon 所有的 commit(`多個名稱 --author="leon1\|leon2"`)
+* `git log --oneline --grep="rails"` 找出 commit 訊息有 rails 的字眼
+* `git log -S "Ruby"` 找出 commit 的內容有包括 `Ruby` 的字
+* `git log --oneline --since="9am" --until="12am"` 今天早上 9 點到 12 點之間所有的 Commit
+* `git log --oneline --since="9am" --until="12am" --after="2017-01"`  2017 年 1 月之後，每天早上 9 點到 12 點的 Commit
 
 ###reflog
 * `git reflog` 可列印出所有「歷史紀錄」的版本變化。
 * `git log -g` 顯示 reflog 的詳細版本記錄。
 * `git reflog delete HEAD@{1}` 刪除特定幾個版本的歷史紀錄。
+
+[【狀況題】不小心使用 hard 模式 Reset 了某個 Commit，救得回來嗎？](https://gitbook.tw/chapters/using-git/restore-hard-reset-commit.html)
 
 #標籤
 
@@ -317,8 +326,12 @@ git commit -m "fixed untracked files"
 ###移除已經上 github 的敏感檔案
 * [移除 git 上敏感檔案](https://help.github.com/articles/remove-sensitive-data/)
 
-```
+```ruby
 git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch 檔案名稱' --prune-empty --tag-name-filter cat -- --all
+
+git filter-branch --tree-filter "rm -f config/database.yml"
+# filter-branch 這個指令可以讓你根據不同的 filter，一個一個 Commit 的來處理它。
+# --tree-filter 這個 filter，它可以讓你在 Checkout 到每個 Commit 的時候執行你指定的指令，執行完後再自動幫你重新再 Commit
 ```
 
 ###開乾淨的 branch
@@ -350,6 +363,7 @@ git fetch origin <remote_branch_name>:<local_branch_name>
 git clean -f -n
 git clean -f
 git clean -df #刪除 untracked directory
+git clean -fX # 清除被忽略的檔案
 ```
 
 [How do I remove local (untracked) files from my current Git branch?](http://stackoverflow.com/questions/61212/how-do-i-remove-local-untracked-files-from-my-current-git-branch)
@@ -380,6 +394,9 @@ git gc
 # 看目前 branch 的 sha1
 git rev-parse <branch name>
 
+# 或使用 git reflog 找找看有沒有之前的記錄
+git reflog
+
 # 建立新的 branch 並給予 sha1
 git branch new_name <sha1>
 ```
@@ -391,7 +408,7 @@ git branch new_name <sha1>
 git reflog
 
 # 強制回復到該節點
-# git reset <sha1> --hard
+git reset <sha1> --hard
 ```
 
 ### 拯救已刪除的檔案
@@ -408,9 +425,20 @@ git show <hash>
 #alias
 自己設定的一些 alias
 
-可以建立新的檔案 `.aliases`, 並在 `.zshrc` 加上 `source ~/.aliases`
+可以建立在 `~/.gitconfig` 裡面，但是前面 `git` 就無法縮寫成 `g` 
 
+```ruby
+[alias]
+  co = checkout
+  br = branch
+  st = status
+  l  = log --oneline --graph
+  ls = log --graph --pretty=format:"%h <%an> %ar %s"
 ```
+
+也可以建立新的檔案 `.aliases`, 並在 `.zshrc` 加上 `source ~/.aliases`
+
+```ruby
 #base
 alias g='git'
 
@@ -511,10 +539,12 @@ alias glog='git log --oneline --decorate --color --graph'
 * [Git 風格指南](https://github.com/JuanitoFatas/git-style-guide)
 * [How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/)
 * [你知道 Git 是怎麼一回事嗎](http://kaochenlong.com/2017/08/11/git-on-modern-web/)
+* [為你自己學 Git](https://gitbook.tw/)
+* [Git 小說連載系列](https://kaochenlong.com/git-tips/)
 
 練習：
 
-* [codeschool](https://try.github.io/levels/1/challenges/1)
+* [codeschool](https://try.github.io/levels/1/challengesㄋ/1)
 * [Easy-Git-Tutorial](http://dylandy.github.io/Easy-Git-Tutorial/)
 * [learnGitBranching](http://pcottle.github.io/learnGitBranching/)
 

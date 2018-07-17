@@ -511,3 +511,38 @@ fmt.Printf("%T %T %T %T\n", i, f, b, s) // int float64 bool string
 * [學習Golang語言(4):類型--字串](https://zybuluo.com/codemanship/note/21183)
 * [string rune byte 的關係](https://golangtc.com/t/528cc004320b52227200000f)
 * [字串編碼筆記：ASCII，Unicode 和 UTF-8](http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html)
+
+官方文件：
+
+* [How to Write Go Code](https://golang.org/doc/code.html#GOPATH)
+* [golang](https://golang.org/)
+* [A Tour of Go](https://tour.golang.org/welcome/1)
+* [gobyexample](https://gobyexample.com/)
+* [golang-book](http://www.golang-book.com/books/intro)
+* [godoc](https://godoc.org/)
+* [The Go Programming Language Specification](https://golang.org/ref/spec)
+* [Go's Declaration Syntax](https://blog.golang.org/gos-declaration-syntax)
+* [線上 play golong](https://play.golang.org/)
+* [PackageManagementTools](https://github.com/golang/go/wiki/PackageManagementTools)
+* [Where to Go from here...](https://tour.golang.org/concurrency/11)
+
+
+陸陸續續有看到的網站紀錄一下：
+
+* [Go語言聖經（中文版)](https://wizardforcel.gitbooks.io/gopl-zh/content/)
+* [Effective Go 中英雙語版](https://bingohuang.gitbooks.io/effective-go-zh-en/content/)
+* [Go Web 程式設計](https://astaxie.gitbooks.io/build-web-application-with-golang/content/)
+* [Golang concepts from an OOP point of view](https://github.com/luciotato/golang-notes/blob/master/OOP.md)
+* [Mac下安裝Go和配置相應環境](https://blog.helloarron.com/2015/08/29/go/mac-install-go/)
+* [在 Mac OS X 下使用 brew 安裝 Go](http://steventtud.com/install-go-in-mac-osx-with-homebrew/)
+* [使用gvm管理多版本golang](http://chen-tao.github.io/2017/09/14/Use-gvm-manage-golang-version/)
+* [go-lang-cheat-sheet](https://github.com/a8m/go-lang-cheat-sheet#basic-syntax)
+* [從 PHP 到 Golang 的筆記](https://yami.io/php-to-golang/s)
+* [深入解析Go](https://tiancaiamao.gitbooks.io/go-internals/content/zh/)
+* [Go基礎學習四之函式function、結構struct、方法method](https://segmentfault.com/a/1190000011446643#articleHeader5)
+* [go101](https://go101.org/article/101.html)
+* [ Go語言學習 - cyent筆記](https://cyent.github.io/golang/)
+* [golang tour solutions](https://github.com/golang/tour/tree/master/solutions)
+* [飛雪無情的博客 - golang](http://www.flysnow.org/categories/Golang/page/5/)
+* [[golangbot.com] Golang tutorial series](https://golangbot.com/learn-golang-series/)
+* [astaxie.gitbooks.io](https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/preface.html)

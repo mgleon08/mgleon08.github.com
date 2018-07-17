@@ -651,9 +651,11 @@ curl -IH "Authorization: Token token=16d7d6089b8fe0c5e19bfe10bb156832" http://lo
 #Set token on Authorization header
 ```
 
-#<span id="factory_girl">Factory Girl</span>
+#<span id="factory_girl">Factory Bot (前身Factory Girl)</span>
 
 到 `spec/rails_helper.rb` 設定
+
+> 以下 FactoryGirl 要改成 FactoryBot :: 2018-06-29
 
 ```ruby
 RSpec.configure do |config|
@@ -711,7 +713,7 @@ end
 
 ### sequences
 
-可以以 auto incremental 的方式產生資料。
+可以已 `auto incremental` 的方式產生資料。
 
 ```ruby
 FactoryBot.define do
@@ -732,7 +734,7 @@ FactoryBot.define do
 end
 ```
 
-###注意
+### 注意
 factory_girl 產生出來的資料，不會透過 controller ，而是直接再 model 產生，因此會跑出 validation 的驗證。
 
 若是希望能跑 controller action 裡的 method 則是要另外跑
@@ -745,14 +747,18 @@ trait :user_buy do
 end
 ```
 
-###為什麼要假物件?
+### 為什麼要假物件?
 * 無法控制回傳值的外部系統 (例如第三⽅ web service)
 * 建構正確的回傳值很⿇煩 (例如得準備很多假資料)
 * 可能很慢，拖慢測試速度 (例如耗時的運算)
 * 有難以預測的回傳值 (例如亂數⽅法)
 * 還沒開始實作 (特別是採⽤ TDD 流程)
 
-##其他設定
+### Faker
+
+可搭配 	[Faker](https://github.com/stympy/faker) 用來產生假資料
+
+## 其他設定
 `rails g model` 時，一併產生 factory_girl 的檔案在 `spc/factories `
 
 ```ruby
@@ -761,6 +767,7 @@ config.generators do |g|
   g.fixture_replacement :factory_girl, :dir => "spec/factories"
 end
 ```
+
 參考文件：
   
 * [Factory Girl](http://www.slideshare.net/gabevanslv/factory-girl-15924188)

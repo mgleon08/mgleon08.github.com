@@ -133,7 +133,23 @@ npm init
 
 Facebook 開源的 Yarn，這是針對存儲在 npm 或 Bower 註冊表中的 JavaScript 模組的一個代理包管理器。
 
-* [yarn](https://yarnpkg.com/)
+```ruby
+brew install yarn
+
+# -g 為 global 的意思，沒有加的話，會裝在當下的
+yarn global add vue-cli
+
+# 安裝指定套件 (會自動 save 到 package.json)
+yarn add sass sass-loader node-sass
+
+# 安裝 package.json 內其它套件
+yarn install
+
+# run project
+yarn run start
+```
+
+* [yarn](https://yarnpkg.com/en/)
 * [yarn github](https://github.com/yarnpkg/yarn)
 * [yarn migrating from npm](https://yarnpkg.com/en/docs/migrating-from-npm)
 * [[譯] Yarn 官方介紹: 一款新的 JavaScript 包管理器](https://github.com/cssmagic/blog/issues/67)

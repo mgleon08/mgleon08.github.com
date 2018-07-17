@@ -38,13 +38,29 @@ post 'foo/meetings', :to => 'events#create'
 可以改寫成
 
 scope :controller => "events", :path => "/foo", :as => "bar" do
-  get 'meetings/:id' => :show, :as => "meeting"
-  post 'meetings' => ':create , :as => "meetings"
+  get 'meetings/:id', to: :show, as: "meeting"
+  post 'meetings', to: :create , as: "meetings"
 end
+
+# bar_meeting GET   /foo/meetings/:id(.:format) events#show
+# bar_meetings POST /foo/meetings(.:format)     events#create
 
 scope :path => '/api/v1/', :module => "api_v1", :as => 'v1' do
   resources :projects
 end
+
+# GET  /api/v1/projects(.:format) api_v1/projects#index
+# POST /api/v1/projects(.:format) api_v1/projects#create
+             
+resources :users do
+  member do
+    scope 'graphs' do
+     get :dashboard, to: "users/graphs#dashboard"
+    end
+  end
+end
+
+# /users/:id/graphs/dashboard
 ```
 
 * `:as` 增加 v1_path(相對路徑) 和 v1_url(絕對路徑)  
@@ -67,11 +83,14 @@ api_index GET   /test(.:format)         hello/api#index
 # 導向
 
 ```ruby
-#靜態
+# 靜態
 get "/welcome" to: redirect("/hello")
 
-#動態
+# 動態
 get '/stories/:name', to: redirect('/articles/%{name}')
+
+# 導外
+ get '/welcome', to: redirect('https://google.com')
 ```
 `redirect` 將網址導向到另一個網址
 
@@ -147,7 +166,24 @@ end
 #http://api.mgleon08.com/posts
 ```
 
+### 限制
+
+```ruby
+# 所有沒有設定的 GET routes 都會導到 application#index
+match "*path", to: "application#index", format: false, via: :get
+```
+
+* [route-globbing-and-wildcard-segments](http://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments)
+* [http-verb-constraints](http://guides.rubyonrails.org/routing.html#http-verb-constraints)
+
 # DRY
+
+### none
+	
+```ruby
+# 不需要任何 resources 產生的 restful，可能是要做 member or collection
+resources :users, only: :none
+```
 
 ### concern
 ```ruby
@@ -217,6 +253,7 @@ end
 ￼  inflect.acronym 'API'
 ￼end
 ```
+
 # CURL
 
 可以用 command line 來測試 get
@@ -247,9 +284,11 @@ curl -IH "Authorization: Token token=16d7d6089b8fe0c5e19bfe10bb156832" http://lo
 ```
 
 # 路由參數
+
 ```ruby
 get '/clients/:status' => 'clients#index', foo: 'bar'
 ```
+
 當使用者打開 /clients/active 這一頁，params[:status] 便會被設成 "active"，params[:foo] 也會被設成 "bar"，就像是我們原本透過 Query String 傳進去那樣。同樣的，params[:action] 也會被設成 index。
 
 # default_url_options
@@ -293,6 +332,49 @@ namespace :admin, path: "test" do
 end
 ```
 
+# 單數 resource
+
+當使用者能檢視、更新、刪除自己的 profile，就能夠用單數的 resource
+
+需要檢視每個人的話就用複數，像是管理員
+
+```ruby
+Rails.application.routes.draw do
+  resource :profile
+end
+```
+
+```ruby
+      Prefix Verb   URI Pattern             Controller#Action
+     profile POST   /profile(.:format)      profiles#create
+ new_profile GET    /profile/new(.:format)  profiles#new
+edit_profile GET    /profile/edit(.:format) profiles#edit
+             GET    /profile(.:format)      profiles#show
+             PATCH  /profile(.:format)      profiles#update
+             PUT    /profile(.:format)      profiles#update
+             DELETE /profile(.:format)      profiles#destroys
+```
+
+# On
+
+```ruby
+resources :orders do
+  member do
+    post :confirm
+    delete :cancel
+  end
+end
+```
+
+可改寫為
+
+```ruby
+resources :orders do
+  post :confirm, on: :member
+  delete :cancel, on: :member
+end
+```
+
 參考文件:
 
 * [路由參數](http://rails.ruby.tw/action_controller_overview.html#%E8%B7%AF%E7%94%B1%E5%8F%83%E6%95%B8)  
@@ -305,4 +387,5 @@ end
 * [Rails 路由：深入淺出](http://rails.ruby.tw/routing.html)
 
 參考文件：  
+
 * [路由(Routing)](https://ihower.tw/rails4/routing.html)  

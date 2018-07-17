@@ -1,0 +1,146 @@
+---
+layout: post
+title: "JSON Web Token(JWT) 簡單介紹"
+date: 2018-07-16 17:48:22 +0800
+comments: true
+categories: token
+---
+
+之前常常聽到 jwt，但沒有很了解，就來研究一下吧
+
+<!-- more -->
+
+# 什麼是 JWT
+
+* JWT 是基於 JSON 的開放標準 (RFC 7519)
+* 一般被用來在 身份提供者 和 服務提供者 間傳遞被 認證 的用戶身份訊息，以便於從資源伺服器獲取資源
+* 同時也可以增加一些額外的聲明訊息，該 token 也可直接被用於認證，也可被加密
+* 特別適用於分佈式站點的單點登錄（SSO）場景
+
+
+先來瞭解一般 session 和 jwt 的差別
+
+## Session
+
+Http 協議本身是無狀態的，所以無法知道每個 request 來的是誰? 因此用戶每次 request 就必須提供帳號密碼，以便證明身份，但每次都要另外輸入帳號密碼，豈不是很麻煩?
+
+所以當用戶第一次發 request 過來後，就會產生一組 token 紀錄在 db 和 session，並且將這組 token 給用戶，告訴其保存在 cookie，當下次發 request 的時候，就直接帶這組 token 以便證明身份。
+
+## JWT
+
+JWT 的組成內容有三個部分，由 `.` 做區隔，最後透過這三個部分，串成一個 Jwt 字串
+
+### 1. Header 頭部
+
+```ruby
+{
+  'typ': 'JWT', # 聲明類型
+  'alg': 'HS256' # 加密的方法: HMAC、SHA256、RSA 進行 Base64 編碼
+}
+```
+
+進行 base64 加密（該加密是可以對稱解密的)
+
+```ruby
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
+```
+
+### 2. Payload 載荷
+
+這裡放聲明內容，可以說就是存放溝通訊息的地方，在定義上有 3 種聲明 (Claims)
+
+* Reserved (註冊聲明)
+* Public (公開聲明)
+* Private (私有聲明)
+
+註冊聲明參數 (建議但不強制使用)
+
+* iss (Issuer) - jwt簽發者
+* sub (Subject) -  jwt所面向的用戶
+* aud (Audience) - 接收jwt的一方
+* exp (Expiration Time) - jwt的過期時間，這個過期時間必須要大於簽發時間
+* nbf (Not Before) - 定義在什麼時間之前，該jwt都是不可用的
+* iat (Issued At) - jwt的簽發時間
+* jti (JWT ID) - jwt的唯一身份標識，主要用來作為一次性token,從而迴避重放攻擊
+
+```ruby
+{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "iat": 1516239022
+}
+```
+
+進行 base64 加密（該加密是可以對稱解密的)
+
+```ruby
+eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9
+```
+
+### 3. Signature
+
+由三個部分組成
+
+* header (base64後的)
+* payload (base64後的)
+* secret
+
+```ruby
+HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), 'secret')
+```
+> secret 要保存在 server 端，jwt 的 簽發驗證都必須使用這個 secret，當其他人得知這個 secret，那就意味著客戶端是可以自我簽發 jwt ，因此在任何場景都不應該外流
+
+進行 base64 加密
+
+```ruby
+SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+```
+
+最後由三個部分由 `.` 組成
+
+```ruby
+eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+```
+
+# 使用方法
+
+在發 request 的時候在 header 加入 `Authorization: Bearer <token>`
+
+```ruby
+post('api/user/1', {
+  headers: {
+    'Authorization': 'Bearer ' + token
+  }
+})
+```
+
+![](https://cdn.auth0.com/content/jwt/jwt-diagram.png)
+
+# 優點
+
+* 跨語言，因為 json 格式大部分語言都可使用
+* 可儲存一些簡單但非敏感的商業邏輯 - role ..
+* 構成內容簡單，佔用 Size 小方便傳輸
+* 不需在 server 保存 session，所以它易於應用的擴展
+
+# 安全相關 Security
+
+* Base64 是可逆的加密方式，不適合存放敏感訊息，因為該部分是客戶端可解密的部分
+* 用來加密的 Secret 要保護好，存在 server 端
+* 使用 Https 協議 - 避免敏感訊息被嗅探
+* 使用 HttpOnly 來防止 Cookie 被 JavaScript 讀取，從而避免跨站腳本攻擊（XSS攻擊）
+
+# JWT的適用場景
+
+* 一次性驗證  ex: 信件中的連結
+* restful api 的無狀態認證
+* 單點登錄+會話管理(不推薦，絕大多數情況下，傳統的 cookie-session 機制工作得更好)
+
+參考文件:
+
+* [JWT](https://jwt.io/)
+* [什麼是 JWT -- JSON WEB TOKEN](https://www.jianshu.com/p/576dbf44b2ae)
+* [不要用JWT替代session管理（上）：全面瞭解Token,JWT,OAuth,SAML,SSO](https://hk.saowen.com/a/e86e2d932aa9b5dc3d11d639e9940eb55812f030029fac54245f6d1f9eef6f23)
+* [JSON Web Token - 在Web應用間安全地傳遞訊息](https://blog.leapoahead.com/2015/09/06/understanding-jwt/)
+* [八幅漫畫理解使用JSON Web Token設計單點登錄系統](http://blog.leapoahead.com/2015/09/07/user-authentication-with-jwt/)
+* [理解JWT的使用場景和優劣](https://hk.saowen.com/a/afdc2b0fb445a973bed63330596f8588ad8f86da0faf6b5af5211ff3e29c2da8)

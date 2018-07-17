@@ -84,6 +84,27 @@ nil.present?   #false
 >主要還是要看當時的情境拉XD
 
 
+### presence
+
+另外一個 presence 可以將
+
+```ruby
+params[:state] if params[:state].present?
+```
+縮短為
+
+```ruby
+params[:state].presence
+```
+
+和以下相等
+
+```ruby
+object.present? ? object : nil
+```
+
+* [presence](https://apidock.com/rails/Object/presence)
+
 #.persisted? & .new_record?
 
 最後來介紹一下，如何判斷 Object 是否已經存在資料庫的 method。

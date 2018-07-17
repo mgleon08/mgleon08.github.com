@@ -59,6 +59,13 @@ Ctrl + A + D
 > 
 > ps命令列出的是當前那些進程的快照，就是執行ps命令的那個時刻的那些進程，如果想要動態的顯示進程信息，就可以使用top命令。
 
+```ruby
+# 顯示較詳細的資訊
+ps au
+# 顯示所有包含其他使用者的行程 
+ps auxs
+```
+
 * [每天一個linux命令（41）：ps命令](http://www.cnblogs.com/peida/archive/2012/12/19/2824418.html)
 
 # df
@@ -72,7 +79,23 @@ df -h
 
 * [每天一個linux命令（33）：df 命令](http://www.cnblogs.com/peida/archive/2012/12/07/2806483.html)
 
+# jobs
+
+> 可以看到背景目前有的指令狀況
+
+```ruby
+& # 指令後面加上 `&`，可將指令丟到後台中去執行
+ctrl + z #前台任務丟到後台中暫停
+jobs # 顯示目前所有的 jobs 狀態
+[1]  + 93594 running    sleep 10
+fg %jobnumber 將後台的任務拿到前台來處理
+bg %jobnumber 將任務放到後台中去處理
+```
+
 參考文件:
 
 * [使用 Screen 指令操控 UNIX/Linux 終端機的教學與範例](https://blog.gtwang.org/linux/screen-command-examples-to-manage-linux-terminals/)
 * [每天一個linux命令目錄](http://www.cnblogs.com/peida/archive/2012/12/05/2803591.html)
+* [man7 hier](http://man7.org/linux/man-pages/man7/hier.7.html)
+* [ubuntu hier](http://manpages.ubuntu.com/manpages/xenial/man7/hier.7.html)
+* [鳥哥的私房菜](http://linux.vbird.org/)

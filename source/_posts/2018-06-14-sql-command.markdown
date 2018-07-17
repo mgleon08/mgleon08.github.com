@@ -85,3 +85,58 @@ IFNULL(x, y)
 // 將時間轉成 date
 CONVERT(created_at, date)
 ```
+
+# CASE
+
+像 `if else` 一樣，可以根據條件，給不同的值
+
+```sql
+SELECT CASE ("欄位名")
+  WHEN "條件1" THEN "結果1"
+  WHEN "條件2" THEN "結果2"
+  ...
+  [ELSE "結果N"]
+  END
+FROM "表格名";
+```
+
+# LOWER() &  UPPER() 
+
+將字串轉小寫或大寫
+
+```sql
+LOWER("HI");
+UPPER("hi");
+```
+
+# AUTO_INCREMENT
+
+```sql
+ALTER TABLE `pre_campaign_details_channels` CHANGE `id` `id` INT(11)  NOT NULL  AUTO_INCREMENT , ADD UNIQUE (`id`);
+```
+
+# unix_timestamp
+
+date 轉成 Unix Timestamp 
+
+`2018/01/01` -> `1514736000(s)` -> `1514736000000(ms)`
+
+```sql
+SELECT unix_timestamp(my_datetime_column) as stamp
+# milliseconds
+SELECT unix_timestamp(my_datetime_column) * 1000 as stamp
+```
+
+[Convert MySql DateTime stamp into JavaScript's Date format](https://stackoverflow.com/questions/3075577/convert-mysql-datetime-stamp-into-javascripts-date-format)
+
+# BETWEEN
+
+可以直接指定在某個區段的時間
+
+```sql
+SELECT * 
+FROM Store_Information 
+WHERE Txn_Date BETWEEN 'Jan-06-1999' AND 'Jan-10-1999';
+```
+
+[SQL Between](https://www.1keydata.com/tw/sql/sqlbetween.html)s

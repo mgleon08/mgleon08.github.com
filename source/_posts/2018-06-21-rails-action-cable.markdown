@@ -28,6 +28,8 @@ categories: rails
 <li>瀏覽器與伺服器之間若要建立一條 WebSocket 連線，在一開始的交握（handshake）階段中，要先從 HTTP 協定升級為 WebSocket 協定</li>
 </ul>
 
+<p><img src="https://heroku-blog-files.s3.amazonaws.com/1462551384-websocket-protocol.png" alt="" /></p>
+
 <h3 id="polling">Polling 輪詢</h3>
 
 <ul>
@@ -358,4 +360,17 @@ $(document).on 'keypress', '[data-behavior~=room_speaker]', (event) -&gt;
 <li><a href="https://www.youtube.com/watch?v=n0WUjGkDFS0">Rails 5: Action Cable demo</a></li>
 
 <li><a href="https://ihower.tw/rails/actioncable.html">Action Cable 即時通訊</a></li>
+
+<li><a href="https://www.learnenough.com/action-cable-tutorial">Action Cable Tutorial</a></li>
+
+<li><a href="https://github.com/rails/rails/tree/master/actioncable">Action Cable – Integrated WebSockets for Rails</a></li>
+
+<li><a href="https://blog.heroku.com/real_time_rails_implementing_websockets_in_rails_5_with_action_cable">Real-Time Rails: Implementing WebSockets in Rails 5 with Action Cable</a></li>
+
+<li><a href="https://www.sitepoint.com/create-a-chat-app-with-rails-5-actioncable-and-devise/">Create a Chat App with Rails 5, ActionCable, and Devise</a></li>
+
+<li><a href="https://evilmartians.com/chronicles/anycable-actioncable-on-steroids">AnyCable</a></li>
 </ul>
+
+
+

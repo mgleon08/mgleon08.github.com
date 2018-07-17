@@ -17,39 +17,53 @@ categories: ruby
 \curl -sSL https://get.rvm.io | bash -s stable
 ```
 
-###安裝 ruby 版本
+### 安裝 ruby 版本
+
 ```ruby
 rvm install 2.2.3
 ```
 
 
-###使用版本(該 terminal)
+### 使用版本(該 terminal)
+
 ```ruby
 rvm use 2.2.3
+# use 可省略 rvm 2.2.3
 ```
 
-###設定 default 使用版本
+### 設定 default 使用版本
+
 ```ruby
-rvm --default use 2.4.0
+rvm use 2.4.0 --default
+# rvm 2.4.0 --default
 ```
 
+### 切回到原來系統內建的版本
 
-###目前有的版本
+```ruby
+rvm system
+```
+
+### 目前有的版本
+
 ```ruby
 rvm list
 ```
 
 ### 查目前可以安裝的版本
+
 ```ruby
 rvm list known
 ```
 
-###移除
+### 移除
+
 ```ruby
 rvm remove 2.2.3
 ```
 
-###看本機是否使用 rvm 還是本機
+### 看本機是否使用 rvm 還是本機
+
 ```ruby
 which ruby
 ```
@@ -58,11 +72,12 @@ which ruby
 
 ```ruby
 rvm get stable
+#master     - install the master release
 #stable     - install the latest RVM stable release
 #latest     - install the latest RVM release
 ```
 
-#設定
+# 設定
 
 安裝好之後，基本上就是一個全新的，gem 都要全部重新安裝
 記得先去安裝 `bundler`

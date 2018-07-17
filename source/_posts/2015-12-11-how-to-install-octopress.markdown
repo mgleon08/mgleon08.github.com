@@ -75,7 +75,7 @@ rake generate
 ```
 rake new_page["title"]
 ```
-再去首頁新增連結即可。
+再去 `source/_includes/custom/navigation.html` 新增連結即可。
 
 #撰寫文章
 ```
