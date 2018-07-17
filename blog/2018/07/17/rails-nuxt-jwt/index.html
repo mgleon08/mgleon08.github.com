@@ -1,0 +1,1731 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Rails API + Nuxt.js + Devise-JWT - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="在網路上發現這篇文章，覺得寫得很不錯，所以這次就跟著這篇一起做一遍~ How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT 來學習，Rails API / Nuxt.js / JWT / Docker &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2018/07/17/rails-nuxt-jwt">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Rails API + Nuxt.js + Devise-JWT</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-07-17T17:39:32+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>5:39 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>在網路上發現這篇文章，覺得寫得很不錯，所以這次就跟著這篇一起做一遍~</p>
+
+<!-- more-->
+
+
+<p><a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></p>
+
+<p>來學習，<code>Rails API / Nuxt.js / JWT / Docker</code></p>
+
+<ul>
+<li><a href="#part1">Part 1: Creating a development environment</a></li>
+<li><a href="#part2">Part 2: Getting them talking to each other</a></li>
+<li><a href="#part3">Part 3: Authentication with Devise-JWT</a></li>
+</ul>
+
+
+<h1><span id="part1">Part 1: Creating a development environment</span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># backend</span>
+</span><span class='line'><span class="n">mkdir</span> <span class="n">autheg</span>
+</span><span class='line'><span class="n">cd</span> <span class="n">autheg</span>
+</span><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">autheg</span><span class="o">-</span><span class="n">backend</span> <span class="o">-</span><span class="n">T</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">spring</span> <span class="o">-</span><span class="n">C</span> <span class="o">-</span><span class="n">B</span> <span class="o">-</span><span class="n">d</span> <span class="n">postgresql</span> <span class="o">--</span><span class="n">api</span>
+</span><span class='line'><span class="c1"># -T = skip test</span>
+</span><span class='line'><span class="c1"># -C = skip action cable</span>
+</span><span class='line'><span class="c1"># -B = skip bundle 主要是作者要跑在 docker 裡面</span>
+</span><span class='line'><span class="c1"># --api = 沒有任何 view 純 API server</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#frontend</span>
+</span><span class='line'><span class="n">vue</span> <span class="n">init</span> <span class="n">nuxt</span><span class="o">-</span><span class="n">community</span><span class="o">/</span><span class="n">starter</span><span class="o">-</span><span class="n">template</span> <span class="n">autheg</span><span class="o">-</span><span class="n">frontend</span>
+</span><span class='line'><span class="n">cd</span> <span class="n">autheg</span><span class="o">-</span><span class="n">frontend</span>
+</span><span class='line'><span class="n">yarn</span> <span class="n">generate</span><span class="o">-</span><span class="n">lock</span><span class="o">-</span><span class="n">entry</span> <span class="o">&gt;</span> <span class="n">yarn</span><span class="o">.</span><span class="n">lock</span>
+</span><span class='line'><span class="c1"># 跟 -B 類似，為了不 install</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>backend</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg/autheg-backend/Dockerfile</span>
+</span><span class='line'><span class="no">FROM</span> <span class="ss">ruby</span><span class="p">:</span><span class="mi">2</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ARG</span> <span class="no">UID</span>
+</span><span class='line'><span class="no">RUN</span> <span class="n">adduser</span> <span class="n">rails</span> <span class="o">--</span><span class="n">uid</span> <span class="vg">$UID</span> <span class="o">--</span><span class="n">disabled</span><span class="o">-</span><span class="n">password</span> <span class="o">--</span><span class="n">gecos</span> <span class="s2">&quot;&quot;</span>
+</span><span class='line'><span class="c1"># 可以透過 $UID 給予不同的 user ID，並且進到任何的 container 都可以用相同的 user ID</span>
+</span><span class='line'><span class="c1"># --disabled-password - 讓 rails 無法用密碼登入</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ENV</span> <span class="no">APP</span> <span class="sr">/usr/s</span><span class="n">rc</span><span class="o">/</span><span class="n">app</span>
+</span><span class='line'><span class="no">RUN</span> <span class="n">mkdir</span> <span class="vg">$APP</span>
+</span><span class='line'><span class="no">WORKDIR</span> <span class="vg">$APP</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">COPY</span> <span class="no">Gemfile</span><span class="o">*</span> <span class="vg">$APP</span><span class="o">/</span>
+</span><span class='line'><span class="no">RUN</span> <span class="n">bundle</span> <span class="n">install</span> <span class="o">-</span><span class="n">j3</span> <span class="o">--</span><span class="n">path</span> <span class="n">vendor</span><span class="o">/</span><span class="n">bundle</span>
+</span><span class='line'><span class="c1"># Gems and yarn packages are installed into the mounted volumes. </span>
+</span><span class='line'><span class="c1"># This will stop you from needing to rebuild the whole Docker image every time you change the Gemfile or package.json.</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">COPY</span> <span class="o">.</span> <span class="vg">$APP</span><span class="o">/</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">CMD</span> <span class="o">[</span><span class="s2">&quot;bin/rails&quot;</span><span class="p">,</span> <span class="s2">&quot;server&quot;</span><span class="p">,</span> <span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="s2">&quot;8080&quot;</span><span class="p">,</span> <span class="s2">&quot;-b&quot;</span><span class="p">,</span> <span class="s2">&quot;0.0.0.0&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="c1"># 這裡原本是 rails，但實際在 run 的時候會有 error，因此改為 bin/rails</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>.dockerignore</code> 避免 Docker 在 build 的時候，一併複製過去</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg/autheg-backend/.dockerignore</span>
+</span><span class='line'><span class="sr">/vendor/</span><span class="n">bundle</span>
+</span><span class='line'><span class="sr">/log</span>
+</span><span class='line'><span class="sr">/</span><span class="n">tmp</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg/autheg-backend/.gitignore</span>
+</span><span class='line'><span class="sr">/vendor/</span><span class="n">bundle</span><span class="o">/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>frontend</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg/autheg-frontend/Dockerfile</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">FROM</span> <span class="ss">node</span><span class="p">:</span><span class="mi">9</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ARG</span> <span class="no">UID</span>
+</span><span class='line'><span class="no">RUN</span> <span class="n">adduser</span> <span class="n">frontend</span> <span class="o">--</span><span class="n">uid</span> <span class="vg">$UID</span> <span class="o">--</span><span class="n">disabled</span><span class="o">-</span><span class="n">password</span> <span class="o">--</span><span class="n">gecos</span> <span class="s2">&quot;&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">ENV</span> <span class="no">APP</span> <span class="sr">/usr/s</span><span class="n">rc</span><span class="o">/</span><span class="n">app</span>
+</span><span class='line'><span class="no">RUN</span> <span class="n">mkdir</span> <span class="vg">$APP</span>
+</span><span class='line'><span class="no">WORKDIR</span> <span class="vg">$APP</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">COPY</span> <span class="n">package</span><span class="o">.</span><span class="n">json</span> <span class="n">yarn</span><span class="o">.</span><span class="n">lock</span> <span class="vg">$APP</span><span class="o">/</span>
+</span><span class='line'><span class="no">RUN</span> <span class="n">yarn</span>
+</span><span class='line'><span class="c1"># Gems and yarn packages are installed into the mounted volumes. </span>
+</span><span class='line'><span class="c1"># This will stop you from needing to rebuild the whole Docker image every time you change the Gemfile or package.json.</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">COPY</span> <span class="o">.</span> <span class="vg">$APP</span><span class="o">/</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">CMD</span> <span class="o">[</span><span class="s2">&quot;yarn&quot;</span><span class="p">,</span> <span class="s2">&quot;run&quot;</span><span class="p">,</span> <span class="s2">&quot;dev&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>.dockerignore</code> 避免 Docker 在 build 的時候，一併複製過去</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg/autheg-frontend/.dockerignore</span>
+</span><span class='line'><span class="sr">/node_modules/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>all</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg/docker-compose.yml</span>
+</span><span class='line'>
+</span><span class='line'><span class="ss">version</span><span class="p">:</span> <span class="s1">&#39;3&#39;</span> <span class="c1"># dockerfile 版本 </span>
+</span><span class='line'><span class="ss">services</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">db</span><span class="p">:</span> <span class="c1"># 對應 rails database.yml 的 host</span>
+</span><span class='line'>    <span class="ss">image</span><span class="p">:</span> <span class="n">postgres</span>
+</span><span class='line'>    <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="s2">&quot;5432&quot;</span>
+</span><span class='line'>  <span class="ss">backend</span><span class="p">:</span> <span class="c1"># 會變成 REPOSITORY name autheg_backend</span>
+</span><span class='line'>    <span class="ss">build</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">context</span><span class="p">:</span> <span class="n">autheg</span><span class="o">-</span><span class="n">backend</span> <span class="c1"># 要 build 的資料夾位置</span>
+</span><span class='line'>      <span class="ss">args</span><span class="p">:</span>
+</span><span class='line'>        <span class="ss">UID</span><span class="p">:</span> <span class="err">$</span><span class="p">{</span><span class="ss">UID</span><span class="p">:</span><span class="o">-</span><span class="mi">1001</span><span class="p">}</span>
+</span><span class='line'>    <span class="ss">volumes</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="o">.</span><span class="n">/autheg</span><span class="o">-</span><span class="ss">backend</span><span class="p">:</span><span class="sr">/usr/s</span><span class="n">rc</span><span class="o">/</span><span class="n">app</span>
+</span><span class='line'>      <span class="c1"># 放哪裡沒有一定 /var/www/html,  /usr/src/app,  /home 都有人放</span>
+</span><span class='line'>    <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="s2">&quot;8080:8080&quot;</span>
+</span><span class='line'>    <span class="ss">depends_on</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="n">db</span>
+</span><span class='line'>    <span class="ss">user</span><span class="p">:</span> <span class="n">rails</span> <span class="c1"># 對應到 adduser 的名稱</span>
+</span><span class='line'>  <span class="ss">frontend</span><span class="p">:</span> <span class="c1"># 會變成 REPOSITORY name autheg_frontend</span>
+</span><span class='line'>    <span class="ss">build</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">context</span><span class="p">:</span> <span class="n">autheg</span><span class="o">-</span><span class="n">frontend</span>
+</span><span class='line'>      <span class="ss">args</span><span class="p">:</span>
+</span><span class='line'>        <span class="ss">UID</span><span class="p">:</span> <span class="err">$</span><span class="p">{</span><span class="ss">UID</span><span class="p">:</span><span class="o">-</span><span class="mi">1001</span><span class="p">}</span>
+</span><span class='line'>    <span class="ss">volumes</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="o">.</span><span class="n">/autheg</span><span class="o">-</span><span class="ss">frontend</span><span class="p">:</span><span class="sr">/usr/s</span><span class="n">rc</span><span class="o">/</span><span class="n">app</span>
+</span><span class='line'>    <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="s2">&quot;3000:3000&quot;</span>
+</span><span class='line'>    <span class="ss">user</span><span class="p">:</span> <span class="n">frontend</span> <span class="c1"># 對應到 adduser 的名稱</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下來執行</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">build</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># docker images</span>
+</span><span class='line'><span class="no">REPOSITORY</span>          <span class="no">TAG</span>                 <span class="no">IMAGE</span> <span class="no">ID</span>            <span class="no">CREATED</span>              <span class="no">SIZE</span>
+</span><span class='line'><span class="n">autheg_frontend</span>     <span class="n">latest</span>              <span class="mi">18</span><span class="n">b1178326a7</span>        <span class="no">About</span> <span class="n">a</span> <span class="n">minute</span> <span class="n">ago</span>   <span class="mi">890</span><span class="no">MB</span>
+</span><span class='line'><span class="n">autheg_backend</span>      <span class="n">latest</span>              <span class="mi">528</span><span class="n">bfe5bf6d6</span>        <span class="mi">2</span> <span class="n">minutes</span> <span class="n">ago</span>        <span class="mi">1</span><span class="o">.</span><span class="mo">03</span><span class="no">GB</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="n">backend</span> <span class="n">bundle</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># docker ps -a</span>
+</span><span class='line'><span class="no">CONTAINER</span> <span class="no">ID</span>        <span class="no">IMAGE</span>               <span class="no">COMMAND</span>                  <span class="no">CREATED</span>              <span class="no">STATUS</span>                          <span class="no">PORTS</span>                     <span class="no">NAMES</span>
+</span><span class='line'><span class="n">a11609898c96</span>        <span class="n">autheg_backend</span>      <span class="s2">&quot;bundle&quot;</span>                 <span class="no">About</span> <span class="n">a</span> <span class="n">minute</span> <span class="n">ago</span>   <span class="no">Exited</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="no">About</span> <span class="n">a</span> <span class="n">minute</span> <span class="n">ago</span>                             <span class="n">autheg_backend_run_1</span>
+</span><span class='line'><span class="n">f088297e9b9b</span>        <span class="n">postgres</span>            <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="no">About</span> <span class="n">a</span> <span class="n">minute</span> <span class="n">ago</span>   <span class="no">Up</span> <span class="no">About</span> <span class="n">a</span> <span class="n">minute</span>               <span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="p">:</span><span class="mi">32783</span><span class="o">-&gt;</span><span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">autheg_db_1</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">docker</span> <span class="n">volume</span> <span class="n">ls</span>
+</span><span class='line'><span class="c1"># DRIVER              VOLUME NAME</span>
+</span><span class='line'><span class="c1"># local               64117d4ab46a1d0575cc7136e745cc70bf568cfb3e200c80c69ae035cde89085</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="n">frontend</span> <span class="n">yarn</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># docker ps -a</span>
+</span><span class='line'><span class="no">CONTAINER</span> <span class="no">ID</span>        <span class="no">IMAGE</span>               <span class="no">COMMAND</span>                  <span class="no">CREATED</span>                  <span class="no">STATUS</span>                     <span class="no">PORTS</span>                     <span class="no">NAMES</span>
+</span><span class='line'><span class="n">d51e53bd1370</span>        <span class="n">autheg_frontend</span>     <span class="s2">&quot;yarn&quot;</span>                   <span class="no">Less</span> <span class="n">than</span> <span class="n">a</span> <span class="n">second</span> <span class="n">ago</span>   <span class="no">Exited</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="mi">3</span> <span class="n">seconds</span> <span class="n">ago</span>                             <span class="n">autheg_frontend_run_1</span>
+</span><span class='line'><span class="n">a11609898c96</span>        <span class="n">autheg_backend</span>      <span class="s2">&quot;bundle&quot;</span>                 <span class="mi">3</span> <span class="n">minutes</span> <span class="n">ago</span>            <span class="no">Exited</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="mi">3</span> <span class="n">minutes</span> <span class="n">ago</span>                             <span class="n">autheg_backend_run_1</span>
+</span><span class='line'><span class="n">f088297e9b9b</span>        <span class="n">postgres</span>            <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">3</span> <span class="n">minutes</span> <span class="n">ago</span>            <span class="no">Up</span> <span class="mi">3</span> <span class="n">minutes</span>               <span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="p">:</span><span class="mi">32783</span><span class="o">-&gt;</span><span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">autheg_db_1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>要再跑 bundle &amp; yarn 是因為有做 volumes，因此利用 docker 所建立的環境，跑 host 的 bundle &amp; yarn，讓兩邊一致</p>
+
+<blockquote><p>The reason you need to run bundle and yarn after building is because your docker-compose file mounts your host volumes into the containers so you need to install the packages into the host volumes as well as the images that are used to create the containers</p></blockquote>
+
+<h3>編輯 database.yml &amp; package.json</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'> default: &amp;default
+</span><span class='line'>   adapter: postgresql
+</span><span class='line'>   encoding: unicode
+</span><span class='line'><span class="gi">+  host: db</span>
+</span><span class='line'><span class="gi">+  username: postgres</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'>   &quot;private&quot;: true,
+</span><span class='line'>   &quot;scripts&quot;: {
+</span><span class='line'><span class="gd">-    &quot;dev&quot;: &quot;nuxt&quot;,</span>
+</span><span class='line'><span class="gi">+    &quot;dev&quot;: &quot;HOST=0.0.0.0 nuxt&quot;,</span>
+</span><span class='line'>     &quot;build&quot;: &quot;nuxt build&quot;,
+</span><span class='line'>     &quot;start&quot;: &quot;nuxt start&quot;,
+</span><span class='line'>     &quot;generate&quot;: &quot;nuxt generate&quot;,
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>HOST=0.0.0.0 nuxt</code> so it’s visible on your host machine</p>
+
+<p>再啟動一個 container 用來建立新資料庫</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='diff'><span class='line'>docker-compose run backend bin/rails db:create
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>此時 db 會 create 在，一開始設定的 db container <code>autheg_db_1</code> 裡面，可以</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span> <span class="nb">exec</span> <span class="o">-</span><span class="n">it</span> <span class="n">autheg_db_1</span> <span class="n">bash</span>
+</span><span class='line'><span class="n">su</span> <span class="o">-</span> <span class="n">postgres</span>
+</span><span class='line'><span class="n">psql</span> <span class="o">-</span><span class="n">ls</span>
+</span><span class='line'><span class="c1"># 就會看到 create 好的 database</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>看一下目前產生的 container</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># docker ps -a</span>
+</span><span class='line'><span class="no">CONTAINER</span> <span class="no">ID</span>        <span class="no">IMAGE</span>               <span class="no">COMMAND</span>                  <span class="no">CREATED</span>             <span class="no">STATUS</span>                     <span class="no">PORTS</span>                     <span class="no">NAMES</span>
+</span><span class='line'><span class="mi">85</span><span class="n">d3ec81e943</span>        <span class="n">autheg_backend</span>      <span class="s2">&quot;bin/rails db:create&quot;</span>    <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>       <span class="no">Exited</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="mi">6</span> <span class="n">minutes</span> <span class="n">ago</span>                             <span class="n">autheg_backend_run_2</span>
+</span><span class='line'><span class="mi">6</span><span class="n">e1f7b406a70</span>        <span class="n">autheg_frontend</span>     <span class="s2">&quot;yarn&quot;</span>                   <span class="mi">7</span> <span class="n">minutes</span> <span class="n">ago</span>       <span class="no">Exited</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="mi">7</span> <span class="n">minutes</span> <span class="n">ago</span>                             <span class="n">autheg_frontend_run_1</span>
+</span><span class='line'><span class="mi">55</span><span class="n">ff63bb46e9</span>        <span class="n">autheg_backend</span>      <span class="s2">&quot;bundle&quot;</span>                 <span class="mi">25</span> <span class="n">minutes</span> <span class="n">ago</span>      <span class="no">Exited</span> <span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="mi">8</span> <span class="n">minutes</span> <span class="n">ago</span>                             <span class="n">autheg_backend_run_1</span>
+</span><span class='line'><span class="n">e889c2e713d0</span>        <span class="n">postgres</span>            <span class="s2">&quot;docker-entrypoint.s…&quot;</span>   <span class="mi">25</span> <span class="n">minutes</span> <span class="n">ago</span>      <span class="no">Up</span> <span class="mi">25</span> <span class="n">minutes</span>              <span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span><span class="p">:</span><span class="mi">32770</span><span class="o">-&gt;</span><span class="mi">5432</span><span class="o">/</span><span class="n">tcp</span>   <span class="n">autheg_db_1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>將所有 container 啟動</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span>
+</span><span class='line'><span class="c1"># docker-compose stop</span>
+</span><span class='line'><span class="c1"># docker-compose down</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>就能看到</p>
+
+<ul>
+<li>rails : <code>http://localhost:8080/</code></li>
+<li>nuxt : <code>http://localhost:3000/</code></li>
+</ul>
+
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*hoai7Zion_e9-0uZQGr1Sw.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<h1><span id="part2">Part 2: Getting them talking to each other</span></h1>
+
+<p>新增 table, model, controller</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="n">backend</span> <span class="n">bash</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">g</span> <span class="n">resource</span> <span class="n">example</span> <span class="nb">name</span><span class="ss">:string</span> <span class="ss">colour</span><span class="p">:</span><span class="n">string</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">c</span>
+</span><span class='line'><span class="o">&gt;</span> <span class="o">&gt;</span> <span class="p">{</span><span class="s2">&quot;foo&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;green&quot;</span><span class="p">,</span> <span class="s2">&quot;bar&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;red&quot;</span><span class="p">,</span> <span class="s2">&quot;baz&quot;</span> <span class="o">=&gt;</span> <span class="s2">&quot;purple&quot;</span><span class="p">}</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span><span class="o">|</span><span class="n">n</span><span class="p">,</span><span class="n">c</span><span class="o">|</span> <span class="no">Example</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="nb">name</span><span class="p">:</span> <span class="n">n</span><span class="p">,</span> <span class="ss">colour</span><span class="p">:</span> <span class="n">c</span><span class="p">)}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>編輯 controller</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/app/controllers/examples_controller.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">ExamplesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="n">examples</span> <span class="o">=</span> <span class="no">Example</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:colour</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="n">examples</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/config/routes.rb</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:api</span><span class="p">,</span> <span class="ss">defaults</span><span class="p">:</span> <span class="p">{</span> <span class="nb">format</span><span class="p">:</span> <span class="ss">:json</span> <span class="p">}</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">resources</span> <span class="ss">:examples</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這個步驟目前先不做，要等後面安裝 <code>devise</code> 才需要</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/app/controllers/application_controller.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">API</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">MimeResponds</span>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:json</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>現在打 <code>http://localhost:8080/api/examples</code> 就會看到</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*76hf6XcYJM_xLdpbd0jZGw.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<p>接著安裝 <a href="https://github.com/axios/axios">axios</a> &amp; <a href="https://vuetifyjs.com/en/">vuetify</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="n">frontend</span> <span class="n">yarn</span> <span class="n">add</span> <span class="vi">@nuxtjs</span><span class="o">/</span><span class="n">axios</span> <span class="vi">@nuxtjs</span><span class="o">/</span><span class="n">vuetify</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這邊是 hardcode 在上面，正式機不應該這樣寫</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// autheg-frontend/nuxt.config.js</span>
+</span><span class='line'>  <span class="nx">modules</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="s1">&#39;@nuxtjs/vuetify&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s1">&#39;@nuxtjs/axios&#39;</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="nx">axios</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">host</span><span class="o">:</span> <span class="s1">&#39;localhost&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">port</span><span class="o">:</span> <span class="mi">8080</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">prefix</span><span class="o">:</span> <span class="s1">&#39;/api&#39;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更改畫面</p>
+
+<p>The <code>nuxt</code> option to the link tells it to use Nuxt’s router to handle the link, rather than doing it in the browser.</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// autheg-frontend/layouts/default.vue</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">div</span> <span class="nx">id</span><span class="o">=</span><span class="s2">&quot;app&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">app</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">toolbar</span> <span class="nx">app</span> <span class="nx">dark</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">toolbar</span><span class="o">-</span><span class="nx">title</span><span class="o">&gt;</span><span class="nx">Auth</span> <span class="nx">example</span><span class="o">&lt;</span><span class="err">/v-toolbar-title&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">spacer</span> <span class="o">/&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">btn</span> <span class="nx">icon</span> <span class="nx">nuxt</span> <span class="nx">href</span><span class="o">=</span><span class="s2">&quot;/&quot;</span><span class="o">&gt;&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">icon</span><span class="o">&gt;</span><span class="nx">home</span><span class="o">&lt;</span><span class="err">/v-icon&gt;&lt;/v-btn&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="err">/v-toolbar&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">content</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">container</span> <span class="nx">fluid</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">nuxt</span><span class="o">/&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="err">/v-container&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="err">/v-content&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="err">/v-app&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/div&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/template&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>mounted()</code> 會在 template 初始化的時候呼叫，並且會 call <code>updateExamples()</code> method，去 call <code>/examples</code> API 拿資料回來</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// autheg-frontend/pages/index.vue</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">layout</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">flex</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">list</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">list</span><span class="o">-</span><span class="nx">tile</span> <span class="nx">v</span><span class="o">-</span><span class="k">for</span><span class="o">=</span><span class="s2">&quot;example in examples&quot;</span> <span class="o">:</span><span class="nx">key</span><span class="o">=</span><span class="s2">&quot;example.id&quot;</span> <span class="o">:</span><span class="kr">class</span><span class="o">=</span><span class="s2">&quot;example.colour&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">list</span><span class="o">-</span><span class="nx">tile</span><span class="o">-</span><span class="nx">content</span><span class="o">&gt;</span><span class="p"></span><span class="o">&lt;</span><span class="err">/v-list-tile-content&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="err">/v-list-tile&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="err">/v-list&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="err">/v-flex&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/v-layout&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/template&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">data</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">examples</span><span class="o">:</span> <span class="p">[]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nx">methods</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">async</span> <span class="nx">updateExamples</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="nx">examples</span> <span class="o">=</span> <span class="nx">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">$axios</span><span class="p">.</span><span class="nx">$get</span><span class="p">(</span><span class="s1">&#39;/examples&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nx">mounted</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">updateExamples</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著會看到 browser console 會 error，主要是因為 <a href="https://en.wikipedia.org/wiki/Cross-origin_resource_sharing">CROS</a> 的原因</p>
+
+<blockquote><p>JavaScript isn’t allowed to query endpoints on other domains unless those domains set the CORS headers appropriately</p></blockquote>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*5PhACGlQd7cfjiA-DqksuA.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<p>接著要去 <code>backend</code> 新增 <code>cros</code> 的設定，讓 <code>frontend</code> 可以 call</p>
+
+<p>先將 Gemfile 的 comment 打開</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;rack-cors&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># autheg-backend/config/initializers/cors.rb</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">config</span><span class="o">.</span><span class="n">middleware</span><span class="o">.</span><span class="n">insert_before</span> <span class="mi">0</span><span class="p">,</span> <span class="no">Rack</span><span class="o">::</span><span class="no">Cors</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">allow</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">origins</span> <span class="s1">&#39;localhost:3000&#39;</span> <span class="c1"># 也可以 * 就是所有 domain 都可以打進來</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">resource</span> <span class="s1">&#39;*&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">headers</span><span class="p">:</span> <span class="ss">:any</span><span class="p">,</span>
+</span><span class='line'>      <span class="nb">methods</span><span class="p">:</span> <span class="o">[</span><span class="ss">:get</span><span class="p">,</span> <span class="ss">:post</span><span class="p">,</span> <span class="ss">:put</span><span class="p">,</span> <span class="ss">:patch</span><span class="p">,</span> <span class="ss">:delete</span><span class="p">,</span> <span class="ss">:options</span><span class="p">,</span> <span class="ss">:head</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著跑</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="n">backend</span> <span class="n">bundle</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>然後重新起動 container</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ctrl</span> <span class="o">+</span> <span class="n">c</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*LUreZEc1i0c5WfhoDCLxSQ.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<h1><span id="part3">Part 3: Authentication with Devise-JWT</span></h1>
+
+<p>這次要加上 devise 加上 JWT</p>
+
+<ul>
+<li><a href="https://jwt.io/">JWT</a></li>
+<li><a href="https://github.com/plataformatec/devise">devise</a></li>
+<li><a href="https://github.com/waiting-for-dev/devise-jwt">devise-jwt</a></li>
+</ul>
+
+
+<p>先在 Gemfile 新增</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;devise&#39;</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;devise-jwt&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>bundle</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="n">backend</span> <span class="n">bundle</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著先安裝 devise 參考 <a href="https://github.com/plataformatec/devise#getting-started">getting-started</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 開新的 container 安裝 devise</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="n">backend</span> <span class="n">bash</span>
+</span><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">g</span> <span class="ss">devise</span><span class="p">:</span><span class="n">install</span>
+</span><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">g</span> <span class="n">devise</span> <span class="n">user</span>
+</span><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>到這個步驟都還沒用到 <a href="https://jwt.io/">JWT</a>，接下來要要決定如何使令牌無效，原文選擇用 <code>黑名單</code> 的方式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">g</span> <span class="n">model</span> <span class="n">jwt_blacklist</span> <span class="ss">jti</span><span class="p">:</span><span class="ss">string</span><span class="p">:</span><span class="n">index</span> <span class="ss">exp</span><span class="p">:</span><span class="n">datetime</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>並將欄位加上 <code>null: false</code> 和移除 <code>t.timestamps</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>  <span class="n">create_table</span> <span class="ss">:jwt_blacklists</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="n">string</span> <span class="ss">:jti</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>    <span class="n">t</span><span class="o">.</span><span class="n">datetime</span> <span class="ss">:exp</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="n">add_index</span> <span class="ss">:jwt_blacklists</span><span class="p">,</span> <span class="ss">:jti</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 model 加上 <code>include Devise::JWT::RevocationStrategies::Blacklist</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/app/models/jwt_blacklist.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">JwtBlacklist</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">Devise</span><span class="o">::</span><span class="no">JWT</span><span class="o">::</span><span class="no">RevocationStrategies</span><span class="o">::</span><span class="no">Blacklist</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>secret setting</h3>
+
+<blockquote><p>在這裡遇到個問題 <a href="https://github.com/waiting-for-dev/devise-jwt/issues/56">No implicit conversion of nil into String</a>，主要是用的 rails 版本，與原文章的 ralis(5.1) 不同，導致遇到在 5.2 版本時已經沒有 <code>secrets.yml</code>&hellip; 轉而改用 <code>credentials.yml.enc</code>，所以在這裡記錄一下兩個版本的設定</p></blockquote>
+
+<h3>Before rails 5.2</h3>
+
+<p>接著產生一組 secret，做設定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">secret</span>
+</span><span class='line'><span class="c1"># 9dd044df628a496e83c668f..</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/config/secrets.yml</span>
+</span><span class='line'><span class="ss">development</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">secret_key_base</span><span class="p">:</span> <span class="n">xxx</span>
+</span><span class='line'>  <span class="ss">jwt_secret</span><span class="p">:</span> <span class="mi">9</span><span class="n">dd044df628a496e83c668f</span><span class="o">.</span><span class="n">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">test</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">secret_key_base</span><span class="p">:</span> <span class="n">xxx</span>
+</span><span class='line'>  <span class="ss">jwt_secret</span><span class="p">:</span> <span class="mi">9</span><span class="n">dd044df628a496e83c668f</span><span class="o">.</span><span class="n">.</span>
+</span><span class='line'>
+</span><span class='line'><span class="ss">production</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">secret_key_base</span><span class="p">:</span> <span class="o">&lt;</span><span class="sx">%= ENV[&quot;SECRET_KEY_BASE&quot;] %&gt;</span>
+</span><span class='line'><span class="sx">  jwt_secret: &lt;%=</span> <span class="no">ENV</span><span class="o">[</span><span class="s2">&quot;JWT_SECRET&quot;</span><span class="o">]</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/config/initializers/devise.rb</span>
+</span><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">jwt</span> <span class="k">do</span> <span class="o">|</span><span class="n">jwt</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">jwt</span><span class="o">.</span><span class="n">secret</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">secrets</span><span class="o">.</span><span class="n">jwt_secret</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>After rails 5.2</h3>
+
+<ul>
+<li><a href="https://medium.com/cedarcode/rails-5-2-credentials-9b3324851336">Rails 5.2 credentials</a></li>
+<li><a href="https://www.viget.com/articles/storing-secret-credentials-in-rails-5-2-and-up/">Storing Secret Credentials in Rails 5.2 and Up</a></li>
+<li><a href="https://keithpblog.org/post/encrypted-secrets/">Rails 5.2: encrypted secrets</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">secret</span>
+</span><span class='line'><span class="c1"># 9dd044df628a496e83c668f..</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這時必須在 console執行 <code>EDITOR="vim" rails credentials:edit</code>，但是在 container 並沒有 <code>vim</code> 和 <code>sudo</code> 這個指令，因此要先切換成 root 去安裝 <code>vim</code> 才有辦法執行</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="n">backend</span> <span class="n">bash</span>
+</span><span class='line'><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">update</span>
+</span><span class='line'><span class="n">apt</span><span class="o">-</span><span class="n">get</span> <span class="n">install</span> <span class="n">vim</span> <span class="o">-</span><span class="n">y</span> <span class="c1"># 安裝 vim </span>
+</span><span class='line'><span class="no">EDITOR</span><span class="o">=</span><span class="s2">&quot;vim&quot;</span> <span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="ss">credentials</span><span class="p">:</span><span class="n">edit</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 接著編輯</span>
+</span><span class='line'><span class="ss">secret_key_base</span><span class="p">:</span> <span class="n">xxx</span>
+</span><span class='line'><span class="ss">jwt_secret</span><span class="p">:</span> <span class="mi">9</span><span class="n">dd044df628a496e83c668f</span><span class="o">.</span><span class="n">.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/config/initializers/devise.rb</span>
+</span><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">jwt</span> <span class="k">do</span> <span class="o">|</span><span class="n">jwt</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">jwt</span><span class="o">.</span><span class="n">secret</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">credentials</span><span class="o">[</span><span class="ss">:jwt_secret</span><span class="o">]</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>上面 secret 設定好就可以繼續</p>
+
+<p>設定 <code>response format</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/app/controllers/application_controller.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">ApplicationController</span> <span class="o">&lt;</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">API</span>
+</span><span class='line'>  <span class="kp">include</span> <span class="no">ActionController</span><span class="o">::</span><span class="no">MimeResponds</span>
+</span><span class='line'>  <span class="n">respond_to</span> <span class="ss">:json</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/app/models/user.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>  <span class="c1"># Include default devise modules. Others available are:</span>
+</span><span class='line'>  <span class="c1"># :confirmable, :lockable, :timeoutable and :omniauthable</span>
+</span><span class='line'>  <span class="n">devise</span> <span class="ss">:database_authenticatable</span><span class="p">,</span> <span class="ss">:registerable</span><span class="p">,</span>
+</span><span class='line'>         <span class="ss">:recoverable</span><span class="p">,</span> <span class="ss">:rememberable</span><span class="p">,</span> <span class="ss">:trackable</span><span class="p">,</span> <span class="ss">:validatable</span><span class="p">,</span>
+</span><span class='line'>         <span class="ss">:jwt_authenticatable</span><span class="p">,</span> <span class="ss">jwt_revocation_strategy</span><span class="p">:</span> <span class="no">JwtBlacklist</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>設定好跑</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>將 router 的 <code>devise_scope :user</code> 移到 api scope 裡面</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:api</span><span class="p">,</span> <span class="ss">defaults</span><span class="p">:</span> <span class="p">{</span> <span class="nb">format</span><span class="p">:</span> <span class="ss">:json</span> <span class="p">}</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">resources</span> <span class="ss">:examples</span>
+</span><span class='line'>    <span class="n">devise_for</span> <span class="ss">:users</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>restart containers</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ctrl</span> <span class="o">+</span> <span class="n">c</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>console 新增一個 User</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">c</span>
+</span><span class='line'><span class="no">User</span><span class="o">.</span><span class="n">create!</span><span class="p">(</span><span class="ss">email</span><span class="p">:</span> <span class="s1">&#39;test@example.com&#39;</span><span class="p">,</span> <span class="ss">password</span><span class="p">:</span> <span class="s1">&#39;password&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下來就可以來測試 <code>user login</code> 原文推薦使用 <a href="http://yet-another-rest-client.com/">YARC</a> 不過個人偏好 <a href="https://www.getpostman.com/">Postman</a>，都可以</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">POST</span> <span class="sr">/api/use</span><span class="n">rs</span><span class="o">/</span><span class="n">sign_in</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>   <span class="s2">&quot;user&quot;</span><span class="p">:{</span>
+</span><span class='line'>      <span class="s2">&quot;email&quot;</span><span class="ss">:&quot;test@example.com&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;password&quot;</span><span class="ss">:&quot;password&quot;</span>
+</span><span class='line'>   <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*2cTvgN1s2-6VkCLknzuwXQ.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<p>這裡可以看到 Response Headers 多了一個欄位</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 原本</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;x-runtime&quot;</span><span class="p">:</span> <span class="s2">&quot;0.496080&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;etag&quot;</span><span class="p">:</span> <span class="s2">&quot;W/</span><span class="se">\&quot;</span><span class="s2">9a9c93785c7d5e5890c3189efa33ca10</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;vary&quot;</span><span class="p">:</span> <span class="s2">&quot;Origin&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json; charset=utf-8&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;cache-control&quot;</span><span class="p">:</span> <span class="s2">&quot;max-age=0, private, must-revalidate&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;transfer-encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;chunked&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;x-request-id&quot;</span><span class="p">:</span> <span class="s2">&quot;c6a59d67-2551-496f-8f99-f69c5b79bd75&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="mi">201</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 加上 jwt</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;x-runtime&quot;</span><span class="p">:</span> <span class="s2">&quot;0.998534&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;etag&quot;</span><span class="p">:</span> <span class="s2">&quot;W/</span><span class="se">\&quot;</span><span class="s2">d2403cf91d814bea7a094efecd1e0ae9</span><span class="se">\&quot;</span><span class="s2">&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;authorization&quot;</span><span class="p">:</span> <span class="s2">&quot;Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwic2NwIjoidXNlciIsImF1ZCI6bnVsbCwiaWF0IjoxNTMxNjY2NjA0LCJleHAiOjE1MzE2NzAyMDQsImp0aSI6ImYzMjkxMWViLTY0ZDEtNDU0NS1iNGJjLTQ5MjE2NjQwMDc1OCJ9.nP5vGhbiPfC5acnQOusY_bEZCAWF2TZ29vq28SMUX2U&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;vary&quot;</span><span class="p">:</span> <span class="s2">&quot;Origin&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;content-type&quot;</span><span class="p">:</span> <span class="s2">&quot;application/json; charset=utf-8&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;location&quot;</span><span class="p">:</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;cache-control&quot;</span><span class="p">:</span> <span class="s2">&quot;max-age=0, private, must-revalidate&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;transfer-encoding&quot;</span><span class="p">:</span> <span class="s2">&quot;chunked&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;x-request-id&quot;</span><span class="p">:</span> <span class="s2">&quot;4eec0e2f-5cb5-4c4d-9ed9-be9385c79a5d&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;status&quot;</span><span class="p">:</span> <span class="mi">201</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著要來覆蓋掉 devise 原本的 session controller，讓我們可以將 jwt 加進去</p>
+
+<p>先 generate devise 內建的 sessino controller</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">bin</span><span class="o">/</span><span class="n">rails</span> <span class="n">generate</span> <span class="ss">devise</span><span class="p">:</span><span class="n">controllers</span> <span class="n">users</span> <span class="o">-</span><span class="n">c</span><span class="o">=</span><span class="n">sessions</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>並且新增一個 router，已便可以拿到 user 的 detail 資訊</p>
+
+<blockquote><p>這裡跟原文章不太一樣，這邊是藉由 devise 內建的 generate 產生 session controller file，是放在 app/controller/users/sessions_controller.rb，原文章應該是自行建立的檔案放在 app/controller/sessions_controller.rb，因此底下的 router 設定也會有稍微不同</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/config/routes.rb</span>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">scope</span> <span class="ss">:api</span><span class="p">,</span> <span class="ss">defaults</span><span class="p">:</span> <span class="p">{</span> <span class="nb">format</span><span class="p">:</span> <span class="ss">:json</span> <span class="p">}</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">resources</span> <span class="ss">:examples</span>
+</span><span class='line'>    <span class="n">devise_for</span> <span class="ss">:users</span><span class="p">,</span> <span class="ss">controllers</span><span class="p">:</span> <span class="p">{</span> <span class="ss">sessions</span><span class="p">:</span> <span class="s1">&#39;users/sessions&#39;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="n">devise_scope</span> <span class="ss">:user</span> <span class="k">do</span>
+</span><span class='line'>      <span class="n">get</span> <span class="s1">&#39;users/current&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s1">&#39;users/sessions#show&#39;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>將 Gemfile 裡的 <code>jbuilder</code> gem 打開</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;jbuilder&#39;</span><span class="p">,</span> <span class="s1">&#39;~&gt; 2.5&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="n">backend</span> <span class="n">bundle</span>
+</span><span class='line'><span class="c1"># restart containers</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/app/controllers/users/sessions_controller.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">Users</span><span class="o">::</span><span class="no">SessionsController</span> <span class="o">&lt;</span> <span class="no">Devise</span><span class="o">::</span><span class="no">SessionsController</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">create</span>
+</span><span class='line'>    <span class="k">super</span> <span class="p">{</span> <span class="vi">@token</span> <span class="o">=</span> <span class="n">current_token</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">show</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">current_token</span>
+</span><span class='line'>    <span class="n">request</span><span class="o">.</span><span class="n">env</span><span class="o">[</span><span class="s1">&#39;warden-jwt_auth.token&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/app/views/users/create.json.jbuilder</span>
+</span><span class='line'><span class="n">json</span><span class="o">.</span><span class="n">token</span> <span class="vi">@token</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/app/views/users/show.json.jbuilder</span>
+</span><span class='line'><span class="k">if</span> <span class="n">user_signed_in?</span>
+</span><span class='line'>  <span class="n">json</span><span class="o">.</span><span class="n">user</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">json</span><span class="o">.</span><span class="p">(</span><span class="n">current_user</span><span class="p">,</span> <span class="ss">:id</span><span class="p">,</span> <span class="ss">:email</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下來可以測試 login 了</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 登入拿 token</span>
+</span><span class='line'><span class="no">POST</span> <span class="sr">/api/use</span><span class="n">rs</span><span class="o">/</span><span class="n">sign_in</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>   <span class="s2">&quot;user&quot;</span><span class="p">:{</span>
+</span><span class='line'>      <span class="s2">&quot;email&quot;</span><span class="ss">:&quot;test@example.com&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s2">&quot;password&quot;</span><span class="ss">:&quot;password&quot;</span>
+</span><span class='line'>   <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 在 Header 加上剛剛登入拿到的 token</span>
+</span><span class='line'><span class="c1"># &quot;authorization&quot;: &quot;Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdW ...&quot;</span>
+</span><span class='line'><span class="no">GET</span> <span class="sr">/api/use</span><span class="n">rs</span><span class="o">/</span><span class="n">current</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 登出，記得也要帶 token 才知道誰要登出</span>
+</span><span class='line'><span class="c1"># &quot;authorization&quot;: &quot;Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdW ...&quot;</span>
+</span><span class='line'><span class="no">DELETE</span> <span class="sr">/api/use</span><span class="n">rs</span><span class="o">/</span><span class="n">sign_out</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>測試 ok 後，接下來在 <code>ExamplesController</code> 加上 <code>authentication</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg-backend/app/controllers/examples_controller.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">ExamplesController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="n">before_action</span> <span class="ss">:authenticate_user!</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">index</span>
+</span><span class='line'>    <span class="n">examples</span> <span class="o">=</span> <span class="no">Example</span><span class="o">.</span><span class="n">all</span><span class="o">.</span><span class="n">select</span><span class="p">(</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:colour</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">render</span> <span class="ss">json</span><span class="p">:</span> <span class="n">examples</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>這時 <code>GET /api/examples</code> 就必須帶 <code>token</code> 否則會 <code>error</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">GET</span> <span class="sr">/api/ex</span><span class="n">amples</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;error&quot;</span><span class="p">:</span> <span class="s2">&quot;You need to sign in or sign up before continuing.&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下來回到 frontend，會發現 <code>401 Unauthorized error</code> 所以要在 frontend 加上 <code>authentication</code></p>
+
+<p>新增後端 <code>sign_in</code> <code>sign_out</code> <code>detail</code> API &amp; <code>@nuxtjs/auth</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="n">frontend</span> <span class="n">yarn</span> <span class="n">add</span> <span class="vi">@nuxtjs</span><span class="o">/</span><span class="n">auth</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// autheg-frontend/nuxt.config.js</span>
+</span><span class='line'><span class="nx">modules</span><span class="o">:</span> <span class="p">[</span>
+</span><span class='line'>  <span class="s1">&#39;@nuxtjs/vuetify&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;@nuxtjs/axios&#39;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;@nuxtjs/auth&#39;</span>
+</span><span class='line'><span class="p">],</span>
+</span><span class='line'><span class="nx">auth</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">endpoints</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">login</span><span class="o">:</span>  <span class="p">{</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;/users/sign_in&#39;</span> <span class="p">},</span>
+</span><span class='line'>    <span class="nx">logout</span><span class="o">:</span> <span class="p">{</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;/users/sign_out&#39;</span><span class="p">,</span> <span class="nx">method</span><span class="o">:</span> <span class="s1">&#39;delete&#39;</span> <span class="p">},</span>
+</span><span class='line'>    <span class="nx">user</span><span class="o">:</span>   <span class="p">{</span> <span class="nx">url</span><span class="o">:</span> <span class="s1">&#39;/users/current&#39;</span> <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// autheg-frontend/store/index.js</span>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">state</span><span class="o">:</span> <span class="p">()</span> <span class="o">=&gt;</span> <span class="p">({</span>
+</span><span class='line'>  <span class="p">})</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>restart container 讓 frontend 吃到剛剛的設定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// autheg-frontend/pages/login.vue</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">layout</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">flex</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">card</span> <span class="nx">v</span><span class="o">-</span><span class="k">if</span><span class="o">=</span><span class="s2">&quot;$auth.state.loggedIn&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">alert</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;error&quot;</span> <span class="o">:</span><span class="nx">value</span><span class="o">=</span><span class="s2">&quot;error&quot;</span><span class="o">&gt;</span><span class="p"></span><span class="o">&lt;</span><span class="err">/v-alert&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">card</span><span class="o">-</span><span class="nx">text</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="nx">Logged</span> <span class="k">in</span> <span class="nx">as</span> <span class="p"></span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="err">/v-card-text&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">card</span><span class="o">-</span><span class="nx">actions</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">btn</span> <span class="err">@</span><span class="nx">click</span><span class="o">=</span><span class="s2">&quot;logout&quot;</span><span class="o">&gt;</span><span class="nx">Log</span> <span class="nx">out</span><span class="o">&lt;</span><span class="err">/v-btn&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="err">/v-card-actions&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="err">/v-card&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">card</span> <span class="nx">v</span><span class="o">-</span><span class="k">else</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">alert</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;error&quot;</span> <span class="o">:</span><span class="nx">value</span><span class="o">=</span><span class="s2">&quot;error&quot;</span><span class="o">&gt;</span><span class="p"></span><span class="o">&lt;</span><span class="err">/v-alert&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">card</span><span class="o">-</span><span class="nx">text</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">form</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">text</span><span class="o">-</span><span class="nx">field</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="s2">&quot;email&quot;</span> <span class="nx">label</span><span class="o">=</span><span class="s2">&quot;Email&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">text</span><span class="o">-</span><span class="nx">field</span> <span class="nx">v</span><span class="o">-</span><span class="nx">model</span><span class="o">=</span><span class="s2">&quot;password&quot;</span> <span class="nx">label</span><span class="o">=</span><span class="s2">&quot;Password&quot;</span> <span class="nx">type</span><span class="o">=</span><span class="s2">&quot;password&quot;</span> <span class="o">/&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/v-form&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">card</span><span class="o">-</span><span class="nx">actions</span><span class="o">&gt;</span>
+</span><span class='line'>            <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">btn</span> <span class="err">@</span><span class="nx">click</span><span class="o">=</span><span class="s2">&quot;login&quot;</span><span class="o">&gt;</span><span class="nx">Log</span> <span class="k">in</span><span class="o">&lt;</span><span class="err">/v-btn&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="err">/v-card-actions&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="err">/v-card-text&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="err">/v-card&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="err">/v-flex&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/v-layout&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/template&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">data</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">email</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">password</span><span class="o">:</span> <span class="s1">&#39;&#39;</span><span class="p">,</span>
+</span><span class='line'>      <span class="nx">error</span><span class="o">:</span> <span class="kc">null</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nx">methods</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">login</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="nx">$auth</span><span class="p">.</span><span class="nx">login</span><span class="p">({</span>
+</span><span class='line'>        <span class="nx">data</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">user</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">email</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">email</span><span class="p">,</span>
+</span><span class='line'>            <span class="nx">password</span><span class="o">:</span> <span class="k">this</span><span class="p">.</span><span class="nx">password</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">}).</span><span class="k">catch</span><span class="p">(</span><span class="nx">e</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">error</span> <span class="o">=</span> <span class="nx">e</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="p">})</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="nx">logout</span><span class="o">:</span> <span class="kd">function</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="nx">$auth</span><span class="p">.</span><span class="nx">logout</span><span class="p">().</span><span class="k">catch</span><span class="p">(</span><span class="nx">e</span> <span class="o">=&gt;</span> <span class="p">{</span><span class="k">this</span><span class="p">.</span><span class="nx">error</span> <span class="o">=</span> <span class="nx">e</span> <span class="o">+</span> <span class="s1">&#39;&#39;</span><span class="p">})</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>現在可以到 <code>/login</code> 試試看登入了</p>
+
+<p>如果想要讓 user 沒有 login 的狀態下都 redirect 到 <code>login page</code> 就加上</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// autheg-frontend/pages/index.vue</span>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">template</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">layout</span><span class="o">&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">flex</span><span class="o">&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">list</span><span class="o">&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">list</span><span class="o">-</span><span class="nx">tile</span> <span class="nx">v</span><span class="o">-</span><span class="k">for</span><span class="o">=</span><span class="s2">&quot;example in examples&quot;</span> <span class="o">:</span><span class="nx">key</span><span class="o">=</span><span class="s2">&quot;example.id&quot;</span> <span class="o">:</span><span class="kr">class</span><span class="o">=</span><span class="s2">&quot;example.colour&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>          <span class="o">&lt;</span><span class="nx">v</span><span class="o">-</span><span class="nx">list</span><span class="o">-</span><span class="nx">tile</span><span class="o">-</span><span class="nx">content</span><span class="o">&gt;</span><span class="p"></span><span class="o">&lt;</span><span class="err">/v-list-tile-content&gt;</span>
+</span><span class='line'>        <span class="o">&lt;</span><span class="err">/v-list-tile&gt;</span>
+</span><span class='line'>      <span class="o">&lt;</span><span class="err">/v-list&gt;</span>
+</span><span class='line'>    <span class="o">&lt;</span><span class="err">/v-flex&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="err">/v-layout&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/template&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="nx">script</span><span class="o">&gt;</span>
+</span><span class='line'><span class="kr">export</span> <span class="k">default</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">middleware</span><span class="o">:</span> <span class="p">[</span><span class="s1">&#39;auth&#39;</span><span class="p">],</span>
+</span><span class='line'>  <span class="nx">data</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">examples</span><span class="o">:</span> <span class="p">[]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nx">methods</span><span class="o">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">async</span> <span class="nx">updateExamples</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">this</span><span class="p">.</span><span class="nx">examples</span> <span class="o">=</span> <span class="nx">await</span> <span class="k">this</span><span class="p">.</span><span class="nx">$axios</span><span class="p">.</span><span class="nx">$get</span><span class="p">(</span><span class="s1">&#39;/examples&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="nx">mounted</span> <span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">this</span><span class="p">.</span><span class="nx">updateExamples</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="o">&lt;</span><span class="err">/script&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>現在可以 try 一下</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*012-LUDxJttnF6Jtn0Cm7A.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*X7EYUzlYqfSEDGUlTaK7vQ.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></li>
+<li><a href="https://medium.com/@fishpercolator/deploying-your-nuxt-rails-api-app-to-production-with-heroku-54efd09eec22">Deploying your Nuxt+Rails API app to production with Heroku</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-07-17T17:39:32+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>17</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>5:39 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rails/'>rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2018/07/17/rails-nuxt-jwt/" data-via="" data-counturl="http://mgleon08.github.com/blog/2018/07/17/rails-nuxt-jwt/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/07/16/jwt/" title="Previous Post: JSON Web Token(JWT) 簡單介紹">&laquo; JSON Web Token(JWT) 簡單介紹</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2018/07/17/rails-nuxt-jwt/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2018/07/17/rails-nuxt-jwt/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

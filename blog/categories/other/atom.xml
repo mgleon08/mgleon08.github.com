@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Other | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/other/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-06-23T00:40:50+08:00</updated>
+  <updated>2018-07-17T18:11:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,155 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[GCP BigQuery With API]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/06/27/gcp-bigquery-with-api/"/>
+    <updated>2018-06-27T21:18:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/06/27/gcp-bigquery-with-api</id>
+    <content type="html"><![CDATA[<p>最近剛好碰到 BigQuery，可以直接透過 API 帶 sql 指令去拉資料!</p>
+
+<!-- more -->
+
+
+<h3>安裝</h3>
+
+<pre><code class="ruby"># Gemfile
+gem 'google-cloud-bigquery'
+</code></pre>
+
+<pre><code class="ruby">bundle
+</code></pre>
+
+<p>裝 <a href="https://cloud.google.com/sdk/docs/downloads-interactive">安 gcp SDK</a></p>
+
+<pre><code class="ruby"># 安裝
+curl https://sdk.cloud.google.com | bash
+# Restart your shell
+exec -l $SHELL
+# 記得在 google 那邊要先開權限，才可以指定到自己要的 project
+gcloud init
+# auth，但最好的話是要申請一個 憑證，並設定在環境變數(environmentvalue)
+gcloud auth application-default login
+# 取得憑證
+gcloud auth application-default print-access-token
+</code></pre>
+
+<h3>執行</h3>
+
+<pre><code class="ruby">require "google/cloud/bigquery"
+
+# This uses Application Default Credentials to authenticate.
+# @see https://cloud.google.com/bigquery/docs/authentication/getting-started
+bigquery = Google::Cloud::Bigquery.new(project: "project_id")
+
+sql     = "SELECT " +
+          "CONCAT('https://stackoverflow.com/questions/', " +
+          "       CAST(id as STRING)) as url, view_count " +
+          "FROM `bigquery-public-data.stackoverflow.posts_questions` " +
+          "WHERE tags like '%google-bigquery%' " +
+          "ORDER BY view_count DESC LIMIT 10"
+results = bigquery.query sql
+
+results.each do |row|
+  puts "#{row[:url]}: #{row[:view_count]} views"
+end
+</code></pre>
+
+<h3>問題</h3>
+
+<p>在執行上有遇到一些問題，ruby 用 query 第一次去打的時候，回來的值卻會是空 Array，第二次就會有值</p>
+
+<p>可以看到下面 <code>job_complete</code> 也是 <code>false</code>，第二次打就會是 true</p>
+
+<pre><code class="ruby">bigquery.query(sql)
+
+# Sending HTTP post https://www.googleapis.com/bigquery/v2/projects/project_id/queries?
+# 200
+# #&lt;Hurley::Response POST https://www.googleapis.com/bigquery/v2/projects/project_id/queries == 200 (184 bytes) 11197ms&gt;
+# Success - #&lt;Google::Apis::BigqueryV2::QueryResponse:0x007fa1021033f8
+#  @job_complete=false,
+#  @job_reference=
+#   #&lt;Google::Apis::BigqueryV2::JobReference:0x007fa102102318
+#    @job_id="job_0HlGAo3KB4WrAGz20MypIHluup9B",
+#    @project_id="project_id"&gt;,
+#  @kind="bigquery#queryResponse"&gt;
+#  =&gt; []
+</code></pre>
+
+<h3>原因</h3>
+
+<p>Google 回覆</p>
+
+<p><code>job_complete=false</code> 代表這個 bigquery job 還沒跑完.</p>
+
+<p>在 bigquery 下 query 的時候, 執行 query 的 API call 會有一個 timeout, 當 API call 執行的時間超過這個 timeout 但是 query 還沒跑完的時候, API call 會 return HTTP code 200, 但是 query result 是空的, 並且 <code>job_complete = false.</code></p>
+
+<p>詳細可以參考文件[1]一開頭 &ldquo;Runs a BigQuery SQL query and returns results if the query completes within a specified timeout.&rdquo; 以及同一份文件下方的 timeoutMs 以及 jobComplete 這些參數.</p>
+
+<p>如前所述, 如果收到 job_complete = false 的 HTTP code 200 response, 表示 job 還在執行. 這時候的標準做法是去 poll GetQueryResults 這個 API (參考文件[2]) 直到 job_complete = true 再拿取結果.</p>
+
+<ul>
+<li><a href="https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query">1. query</a></li>
+<li><a href="https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/getQueryResults">2. getQueryResults</a></li>
+</ul>
+
+
+<h3>解決方式</h3>
+
+<p>在 new 的時候，新增 timeout 時間(也可以設定 retries)</p>
+
+<pre><code class="ruby">Google::Cloud::Bigquery.new(project: project_id, timeout: 120, retries: 10)
+</code></pre>
+
+<blockquote><p>但實際測試加上 <code>timeout</code> 卻好像沒有用..</p></blockquote>
+
+<p>在試的時候，有用另外的方式去解決，自己去處理 job 就可以確保 job 跑完，再拿資料回來</p>
+
+<pre><code class="ruby"># 先設定 job
+bigquery.query_job(sql)
+# 再讓它去執行 wait_until_done!
+job.wait_until_done!
+# 最後再將結果回傳，這樣就可以確保第一次可以拉到值
+job.query_results
+</code></pre>
+
+<p>但去看原始碼，實際上也是做一樣的動作..</p>
+
+<blockquote><p>因該是內建的 <code>query</code> 有設定 10 秒就會 response，因此改直接去執行裡面的動作，就沒有這個限制</p></blockquote>
+
+<pre><code class="ruby">def query query, params: nil, external: nil, max: nil, cache: true,
+          standard_sql: nil, legacy_sql: nil, &amp;block
+  job = query_job query, params: params, external: external,
+                  cache: cache, standard_sql: standard_sql,
+                  legacy_sql: legacy_sql, &amp;block
+  job.wait_until_done!
+  ensure_job_succeeded! job
+  job.data max: max
+end
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://cloud.google.com/bigquery/create-simple-app-api">Create A Simple Application With the API</a></li>
+<li><a href="https://github.com/GoogleCloudPlatform/google-cloud-ruby/tree/master/google-cloud-bigquery">google-cloud-bigquery</a></li>
+<li><a href="https://cloud.google.com/sdk/docs/downloads-interactive">安裝 gcp SDK</a></li>
+<li><a href="https://cloud.google.com/bigquery/docs/bq-command-line-tool">Command Line</a></li>
+<li><a href="https://cloud.google.com/docs/authentication/production">Auth</a></li>
+<li><a href="https://cloud.google.com/ruby/">在 GOOGLE CLOUD PLATFORM 上執行 RUBY</a></li>
+</ul>
+
+
+<p>Auth</p>
+
+<ul>
+<li><a href="https://stackoverflow.com/questions/13212991/how-to-query-bigquery-programmatically-from-python-without-end-user-interaction">How to query BigQuery programmatically from Python without end-user interaction?</a></li>
+<li><a href="https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login">gcloud auth application-default login</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[分享內網 Localhost to Everybody - Ngrok, Serveo]]></title>

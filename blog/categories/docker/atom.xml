@@ -1,0 +1,771 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Docker | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/docker/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2018-07-17T18:11:14+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Docker - Dockerfile, Docker Compose, Docker Volumn]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/11/25/docker/"/>
+    <updated>2016-11-25T16:28:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/11/25/docker</id>
+    <content type="html"><![CDATA[<p>docker 讓應用程式佈署在軟體容器下的工作可以自動化進行，藉此在Linux作業系統上，提供一個額外的軟體抽象層，以及作業系統層虛擬化的自動管理機制。</p>
+
+<!-- more -->
+
+
+<ul>
+<li><a href="#dockerfile">Dockerfile</a></li>
+<li><a href="#docker_compose">Docker Compose</a></li>
+<li><a href="#docker_volumn">Docker Volumn</a></li>
+</ul>
+
+
+<p>Docker 的優點</p>
+
+<ul>
+<li>秒級實作</li>
+<li>對系統資源的使用率很高，一台主機可以同時執行數千個 Docker 容器</li>
+<li>更快速的交付和部署
+
+<ul>
+<li>使用一個標準的映像檔來建立一套開發容器，開發完成之後，維運人員可以直接使用這個容器來部署程式碼。</li>
+</ul>
+</li>
+<li>更有效率的虛擬化
+
+<ul>
+<li>不需額外的虛擬化支援，它是核心層級的虛擬化</li>
+</ul>
+</li>
+<li>更輕鬆的遷移和擴展
+
+<ul>
+<li>Docker 容器幾乎可以在任意的平台上執行</li>
+</ul>
+</li>
+<li>更簡單的管理</li>
+</ul>
+
+
+<p>Docker vs VM</p>
+
+<ul>
+<li>Docker 僅載入所需要的函式庫與執行檔，而不像VM需要安裝大容量的作業系統</li>
+<li>VM是用硬體端的hypervisor技術來同時執行多個虛擬主機，一般可預見需要大量的運行資源。Docker則是用軟體端的作業系統來實現虛擬分割的技術，由於僅載入核心的函式庫</li>
+</ul>
+
+
+<h3>Basic</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/docker/">base command</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/ps/#description">ps</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/container/">container</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/image/">image</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/images/">images</a></li>
+</ul>
+
+
+<pre><code class="ruby"># 查看版本
+docker --version
+docker-compose --version
+docker-machine --version
+
+# 從 hub 取得所需要的 images :後面為版本號，若沒加則會拉最新的
+docker pull ubuntu:12.04 
+
+# 搜尋官方的 Image
+docker search 
+
+# container (有些 container 可改 ps)
+docker container ls                              # List all running containers
+docker container ls -a                           # List all vcontainers, even those not running
+docker container stop &lt;containerID&gt;              # Gracefully stop the specified container
+docker container kill &lt;containerID&gt;              # Force shutdown of the specified container
+docker container rm &lt;containerID&gt;                # Remove specified container from this machine
+docker container rm $(docker container ls -a -q) # Remove all containers; -q show all ID
+docker start &lt;containerID&gt;
+docker stop &lt;containerID&gt;
+
+# images
+docker image ls -a                       # List all images on this machine
+docker image rm &lt;image id&gt;               # Remove specified image from this machine
+docker image rm $(docker image ls -a -q) # Remove all images from this machine
+docker rmi &lt;imageID&gt;|&lt;imageName&gt;
+docker rmi nginx
+docker rmi nginx -f
+
+# 顯示 container 的資訊
+docker inspect &lt;containerID&gt;
+
+# 跳回 terminal 而不關閉 container
+ctrl + p + ctrl + q
+# 回去 container
+docker attach &lt;containerID&gt;
+</code></pre>
+
+<h3>Run</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/run/">run</a></li>
+</ul>
+
+
+<pre><code class="ruby"># 執行 docker ，若本地沒有 image，就會自動去 Docker Hub pull 下來，如果沒有指定 TAG，預設使用 latest
+docker run -t -i ubuntu:12.04 bash
+# -t 在容器中分配一個虛擬終端（pseudo-tty）並綁定到容器的標準輸入上
+# -i 建立與容器標準輸入（STDIN）的互動連結，讓容器的標準輸入保持打開
+# 執行後啟動 bash
+
+docker run -d -p 80:80 --name webserver nginx
+# -p 80:80 (主機 port, container port)
+# --name webserver
+# -d daemon 模式，放到背景去跑
+
+docker run -it -v ~/Downloads: ubuntu:12.04 bash
+# 建立容器並啟動，且掛載本地目錄(local 在前，container 在後)
+
+# 加上 -rm 可以在 container 結束後自動刪除
+docker run -it --rm ubuntu:latest bash
+
+# 如果 container 停下來會自動 restart
+--restart=always
+</code></pre>
+
+<h3>Attach</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/attach/">attach</a></li>
+</ul>
+
+
+<pre><code class="ruby"># 連到 container 最後執行
+# 當多個窗口同時 attach 到同一個容器的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了
+docker attach &lt;imageID&gt;|&lt;imageName&gt;
+</code></pre>
+
+<h3>Exec</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/exec/">exec</a></li>
+</ul>
+
+
+<pre><code class="ruby"># 進去 container 執行 bash
+docker exec -it &lt;imageID&gt;|&lt;imageName&gt; bash
+</code></pre>
+
+<h3>Volume</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/volume_create/">volume</a></li>
+</ul>
+
+
+<pre><code class="ruby"># Volume mapping to map the local directory /opt/datadir to /var/lib/mysql
+docker run -v /opt/datadir:/var/lib/mysql mysql
+</code></pre>
+
+<h3>log</h3>
+
+<pre><code class="ruby"># 看 container log，-f=follow, -t=time
+docker logs -tf &lt;imageID&gt;|&lt;imageName&gt;
+</code></pre>
+
+<h3>建立映像檔</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/commit/">commit</a></li>
+<li><a href="https://philipzheng.gitbooks.io/docker_practice/content/image/create.html">images create</a></li>
+</ul>
+
+
+<h3>1.修改已有映像檔</h3>
+
+<p>進去現有的 container，加入新的套件，再用此 container build 新的 images</p>
+
+<pre><code class="ruby"># commit 建立新的 images
+# docker commit -m '&lt;message&gt;' -a '&lt;author&gt;' &lt;containerID&gt; &lt;tag&gt;
+docker commit -m "Added json gem" -a "Docker Newbee" 0b2616b0e5a8 ouruser/sinatra:v2
+# -m 指定提交的說明信息，跟我們使用的版本控制工具一樣；
+# -a 可以指定更新的使用者信息
+# 之後是用來建立映像檔的容器的 CONTAINER ID
+# 最後指定新映像檔的名稱和 tag 。建立成功後會印出新映像檔的 ID。
+</code></pre>
+
+<h3><a href="#dockerfile">2.利用 Dockerfile 建立映像檔</a></h3>
+
+<h3>Tag and Publish the image</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/tag/">tag</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/push/">push</a></li>
+</ul>
+
+
+<pre><code class="ruby"># Tag the image
+docker tag username/repository:tag
+docker tag helloworld leon/get-started:part1
+
+# Upload your tagged image to the repository:
+docker push leon/get-started:part1
+</code></pre>
+
+<h3>Pull and run the image from the remote repository</h3>
+
+<pre><code class="ruby">docker run -p 4000:80 username/repository:tag
+</code></pre>
+
+<h3>儲存映像檔</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/save/">save</a></li>
+</ul>
+
+
+<p>如果要建立映像檔到本地檔案，可以使用 docker save 命令</p>
+
+<pre><code class="ruby">$ sudo docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
+ubuntu              14.04               c4ff7513909d        5 weeks ago         225.4 MB
+
+docker save -o ubuntu_14.04.tar ubuntu:14.04
+</code></pre>
+
+<h3>載入映像檔</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/load/">load</a></li>
+</ul>
+
+
+<p>可以使用 docker load 從建立的本地檔案中再匯入到本地映像檔庫</p>
+
+<pre><code class="ruby">docker load --input ubuntu_14.04.tar
+docker load &lt; ubuntu_14.04.tar
+</code></pre>
+
+<h3><a href="https://philipzheng.gitbooks.io/docker_practice/content/container/enter.html">進入容器</a></h3>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/attach/">attach</a></li>
+</ul>
+
+
+<p>attach 開啟一個和正在運行的處理序交互的終端，如果該處理序結束，原docker container的處理序也會結束。attach只可以用在以 /bin/bash 命令啟動的容器， 比如 docker run ubuntu /bin/bash</p>
+
+<p>attach 命令有時候並不方便。當多個窗口同時 attach 到同一個容器的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了</p>
+
+<ul>
+<li><a href="https://docs.docker.com/engine/reference/commandline/exec/">exec</a></li>
+</ul>
+
+
+<p>exec 可以開啟多個終端實例， exec -i /bin/bash，由此可見exec其實是在運行中的容器中執行一個命令，比如/bin/bash 來達到交互的目的。</p>
+
+<p><img src="https://blog.fntsr.tw/wp-content/uploads/2014/12/Docker-Command-Diagram.png" alt="" /></p>
+
+<h2><span id="dockerfile">Dockerfile</span></h2>
+
+<pre><code class="ruby"># 1. OS-Ubuntu
+FROM Ubuntu
+
+# 2. Update apt repo
+RUN apt-get update
+# 3. Install denpendencies using apt
+RUN apt-get install python
+
+# 4. Install python denpendencies using pip
+RUN pip install flask
+RUN pip install flask-mysql
+
+# 5. Copy source code to /opt folder
+COPY . /opt/source-code
+
+# 6. Run the web server using 'flask' command
+ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run 
+</code></pre>
+
+<pre><code class="ruby"># 可加 --no-cache 
+docker build -t user_name/custom_app Dockerfile
+docker push user_name/custom_app
+</code></pre>
+
+<p><a href="https://philipzheng.gitbooks.io/docker_practice/content/dockerfile/instructions.html">Dockerfile 指令</a></p>
+
+<blockquote><p>注意一個映像檔不能超過 127 層</p></blockquote>
+
+<pre><code class="ruby">#一般會建議放置 Dockerfile 的目錄為空目錄。也可以透過 .dockerignore 檔案（每一行新增一條排除模式：exclusion patterns）來讓 Docker 忽略路徑下的目錄和檔案。
+docker build -t &lt;repositoryName&gt;:&lt;tagName&gt; .
+
+#這樣也可以，只是不指定名稱
+docker build .
+</code></pre>
+
+<h3>FROM</h3>
+
+<p>一定要有，只能有一個 FROM，基於某個已存在的 image 進行二次開發。</p>
+
+<pre><code class="ruby">FROM ubuntu:14.04.2
+</code></pre>
+
+<h3>MAINTAINER</h3>
+
+<p>指定維護者訊息。</p>
+
+<pre><code class="ruby">MAINTAINER &lt;name | email&gt;
+</code></pre>
+
+<h3>RUN</h3>
+
+<p>對映像檔執行相對應的命令。每運行一條 RUN 指令，映像檔就會新增一層，主要用來安裝 packages、設定系統環境等</p>
+
+<pre><code class="ruby"># shell形式
+RUN &lt;command&gt; &lt;param1&gt; &lt;param2&gt;
+# exec形式
+RUN ["executable", "param1", "param2"]
+</code></pre>
+
+<p>前者將在 shell 終端中運行命令，即 <code>/bin/sh -c</code>；後者則使用 exec 執行。指定使用其它終端可以透過第二種方式實作，例如 <code>RUN ["/bin/bash", "-c", "echo hello"]</code>。</p>
+
+<p>每條 RUN 指令將在當前映像檔基底上執行指定命令，並產生新的映像檔。當命令較長時可以使用 \ 來換行。</p>
+
+<h3>EXPOSE</h3>
+
+<p>設定 Docker 伺服器容器對外的埠號，供外界使用。在啟動容器時需要透過 -P，Docker 會自動分配一個埠號轉發到指定的埠號（當然也可以自己給，例如 -p 1055:80)</p>
+
+<pre><code class="ruby">EXPOSE 80
+</code></pre>
+
+<h3>ADD</h3>
+
+<p>該命令將複製指定的 <code>&lt;src&gt;</code> 到容器中的 <code>&lt;dest&gt;</code>。 其中 <code>&lt;src&gt;</code> 可以是 Dockerfile 所在目錄的相對路徑；也可以是一個 URL；還可以是一個 tar 檔案（其複製後會自動解壓縮）。</p>
+
+<pre><code class="ruby">ADD &lt;src&gt; &lt;dest&gt;
+ADD text.conf /etc/apache2/test.conf
+</code></pre>
+
+<h3>USER</h3>
+
+<p>切換使用者身份，Docker 預設使用者是 root，但若不需要，建議切換使用者身份，畢竟 root 權限太大了，使用上有安全的風險。</p>
+
+<pre><code class="ruby">USER Leon
+</code></pre>
+
+<h3>VOLUME</h3>
+
+<p>建立一個可以從本地端或其他容器掛載的掛載點，一般用來存放資料庫和需要保存的資料等。</p>
+
+<pre><code class="ruby">VOLUME ["/data"]
+VOLUME ["/storage1", "/storage2", "/storage2"]
+</code></pre>
+
+<h3>WORKDIR</h3>
+
+<p>用來切換工作目錄，Docker 預設工作目錄是在根目錄，只有 RUN 能執行 cd 指令切換目錄，只作用在當下的 RUN，也就是說每一個 RUN 都是獨立進行的。如果想讓其他指令在指定的目錄下執行，就得靠 WORKDIR。WORKDIR 的變更影響是持續的，不用每個指令前都使用一次 WORKDIR</p>
+
+<pre><code class="ruby">WORKDIR /a
+WORKDIR b
+WORKDIR c
+RUN pwd
+
+#則最終路徑為 /a/b/c
+</code></pre>
+
+<h3>ENV</h3>
+
+<p>指定一個環境變數，會被後續 RUN 指令使用，並在容器運行時保持。</p>
+
+<pre><code class="ruby">ENV &lt;key&gt; &lt;value&gt;
+
+ENV PG_MAJOR 9.3
+ENV PG_VERSION 9.3.4
+RUN curl -SL http://example.com/postgres-$PG_VERSION.tar.xz | tar -xJC /usr/src/postgress &amp;&amp; …
+ENV PATH /usr/local/postgres-$PG_MAJOR/bin:$PATH
+</code></pre>
+
+<h3>ARG</h3>
+
+<pre><code class="ruby">格式：ARG &lt;參數名&gt;[=&lt;預設值&gt;]
+</code></pre>
+
+<p>建構參數和 ENV 的效果一樣，都是設定環境變數。所不同的是，ARG 所設定的建構環境的環境變數，在將來容器運行時是不會存在這些環境變數的。但是不要因此就使用 ARG 保存密碼之類別的訊息，因為 docker history 還是可以看到所有值的。</p>
+
+<p>Dockerfile 中的 ARG 指令是定義參數名稱，以及定義其預設值。
+該預設值可以在建構命令</p>
+
+<pre><code class="ruby">docker build 中用 --build-arg &lt;參數名&gt;=&lt;值&gt;
+</code></pre>
+
+<p>來覆蓋。</p>
+
+<h3>COPY</h3>
+
+<p>能將本機端的檔案或目錄，複製到 image 內。（與 ADD 雷同，差別在於不會做解壓縮，一般都是使用COPY）</p>
+
+<pre><code class="ruby">#複製本地端的 &lt;src&gt;（為 Dockerfile 所在目錄的相對路徑）到容器中的 &lt;dest&gt;。
+COPY &lt;src&gt; &lt;dest&gt;
+COPY test.rb ./
+</code></pre>
+
+<h3>ENTRYPOINT</h3>
+
+<p>指定 Docker image 運行成 instance (也就是 Docker container) 時，要執行的指令或檔案。在這個範本中，test.rb 就是要執行的檔案。</p>
+
+<pre><code class="ruby">ENTRYPOINT ["./test.rb"]
+
+# shell形式
+ENTRYPOINT ["executable", "param1", "param2"]
+# exec形式
+ENTRYPOINT command param1 param2
+</code></pre>
+
+<blockquote><p>會將 docker run xxx 後面的參數，當作 ENTRYPOINT 指令的參數</p></blockquote>
+
+<pre><code class="ruby">ENTRYPOINT ["echo"]
+docker run CONTAINER echo foo
+# =&gt; echo foo
+</code></pre>
+
+<h3>CMD</h3>
+
+<p>指定啟動容器時執行的命令，每個 Dockerfile 只能有一條 CMD 命令。如果指定了多條命令，只有最後一條會被執行。</p>
+
+<pre><code class="ruby">#在 /bin/sh 中執行，使用在給需要互動的指令
+
+# shell形式
+CMD command param1 param2
+# exec形式
+CMD ["executable","param1","param2"] 
+#參數形式: 作為 ENTRYPOINT 的預設參數
+CMD ["param1","param2"]
+</code></pre>
+
+<blockquote><p>會將 docker run xxx 後面的參數，覆蓋掉 CMD 指定的命令。</p></blockquote>
+
+<pre><code class="ruby">CMD ["echo"]
+docker run CONTAINER echo foo
+# =&gt; foo
+</code></pre>
+
+<h3>RUN ENTRYPOINT &amp; CMD</h3>
+
+<h5>shell &amp; exec 形式差別</h5>
+
+<p>shell</p>
+
+<ul>
+<li>預設使用 <code>/bin/sh -c</code> 來運行命令，如果鏡像中不包含/bin/sh，容器會無法啟動。</li>
+</ul>
+
+
+<p>exec (推薦的格式)</p>
+
+<ul>
+<li>exec 直接運行指定的指令</li>
+<li>exec指定的命令不由shell啟動，因此也就無法使用shell中的環境變數，如<code>$HOME</code>。需要環境變數可以指定命令為 <code>sh</code>：<code>CMD [ "sh", "-c", "echo", "$HOME" ]</code></li>
+</ul>
+
+
+<h3>範例</h3>
+
+<pre><code class="ruby"># 記得要指定版本，不然很容易因為版本導致這個 Dockerfile 無法使用
+FROM ubuntu:14.04
+
+RUN apt-get update -qq &amp;&amp; apt-get install -y aptitude git imagemagick curl vim bash-completion htop nodejs mysql-client libmysqlclient-dev
+
+RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
+RUN \curl -sSL https://get.rvm.io | bash -s stable
+RUN /bin/bash -l -c "rvm install 2.1.5"
+RUN /bin/bash -l -c "gem install bundler -v 1.10.5 --no-ri --no-rdoc"
+
+ENV APP_ROOT /project_name
+
+RUN mkdir $APP_ROOT
+WORKDIR $APP_ROOT
+ADD . $APP_ROOT
+RUN /bin/bash -l -c "bundle install"
+</code></pre>
+
+<h3>範例二</h3>
+
+<p><a href="https://github.com/mgleon08/slack_neuralyzer">slack_neuralyzer</a></p>
+
+<pre><code class="ruby">FROM ubuntu:14.04
+
+MAINTAINER leonji mgleon08@gmail.com
+
+RUN apt-get update
+RUN apt-get -y upgrade
+RUN apt-get -y install curl
+
+RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
+RUN curl -sSL https://get.rvm.io | bash -s stable
+RUN /bin/bash -l -c "rvm install 2.4.2"
+RUN /bin/bash -l -c "gem install slack_neuralyzer"
+
+CMD /bin/bash -l -c "slack_neuralyzer -t &lt;SLACK_TOKEN&gt; -u &lt;USER_NAME&gt; -D &lt;USER_NAME&gt; -m -e -r 1"
+</code></pre>
+
+<pre><code class="ruby"># 可加上 --no-cache，避免在 Build Docker image 時被 cache 住，而造成沒有 build 到修改過的 Dockerfile。
+docker build -t leon:slack
+# 放到背景去跑，跑完就結束
+docker run -d &lt;imageID&gt;|&lt;imageName&gt;
+# 之後會產生 container
+docker ps -a
+docker start &lt;containerID&gt;
+# 就會跑了，而且會連同原本 run 加上的 -d 參數也會一起執行
+</code></pre>
+
+<blockquote><p>bin/bash -l，中的 -l <a href="https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html">6.1 Invoking Bash</a></p></blockquote>
+
+<h2><span id="docker_compose">Docker Compose</span></h2>
+
+<p>Compose 是一個工具，用來定義與執行多個 container 組成的 Docker Applications。你可以使用 Compose 檔案來組態設定你的應用服務。然後使用單一命令，透過你的組態設定來建立與啟動你的服務。</p>
+
+<p>Compose 適合用來開發、測試、與建立 staging 環境，如同 CI workflows。</p>
+
+<p>使用 Compose 有基本的三個處理步驟：</p>
+
+<ol>
+<li>使用 Dockerfile 定義你的 app 環境，讓它可以在任何地方都能複製(reproduced)。</li>
+<li>使用 docker-compose.yml 定義你的服務，讓他們可以在獨立環境內一起執行。</li>
+<li>最後，執行 docker-compose up，Compose 將會開始與執行你所有的 app。</li>
+</ol>
+
+
+<pre><code class="ruby"># docker-compose.yml
+version: '1' # dockerfile 版本  
+services:
+    web:
+       container_name: exmple-web # Container 名稱
+        images:"mmumshad/simple-webapp" # 使用的 Image
+        ports:
+            - "80:5000" # 將 container 的 port 映射到 80
+    detabase:
+        container_name: exmple-detabase # Container 名稱
+        images:"mysql"
+        volumes::
+            - /opt/data:/var/lib/mysql
+</code></pre>
+
+<p><img src="https://i.imgur.com/2Z22ghU.png" alt="" /></p>
+
+<pre><code class="ruby">docker-compose build # 透過 docker-compose 建立好所有的 image
+docker-compose up
+docker-compose stop
+docker-compose down
+</code></pre>
+
+<h3>Example</h3>
+
+<pre><code class="ruby">version: '3'
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432"
+  backend:
+    build:
+      context: test-backend
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./test-backend:/usr/src/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    user: rails
+  frontend:
+    build:
+      context: test-frontend
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./test-frontend:/usr/src/app
+    ports:
+      - "3000:3000"
+    user: frontend
+</code></pre>
+
+<p>官方文件：</p>
+
+<ul>
+<li><a href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a></li>
+<li><a href="https://docs.docker.com/engine/reference/builder/">Docker Docs</a></li>
+<li><a href="https://docs.docker.com/compose/">Docker Compose</a></li>
+<li><a href="https://docs.docker.com/compose/compose-file/">Compose file version 3 reference</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://philipzheng.gitbooks.io/docker_practice/content/index.html">Docker —— 從入門到實踐</a></li>
+<li><a href="http://www.cc.ntu.edu.tw/chinese/epaper/0036/20160321_3611.html">淺談輕量化的虛擬技術 - Docker容器</a></li>
+<li><a href="http://bonze.tw/%E4%BC%BA%E6%9C%8D%E5%99%A8%E7%A0%94%E7%A9%B6%E5%AE%A4/dockerfile%E7%B0%A1%E5%96%AE%E4%BB%8B%E7%B4%B9">Dockerfile簡單介紹</a></li>
+<li><a href="http://blog.maxkit.com.tw/2017/03/docker-compose.html">Docker Compose 初步閱讀與學習記錄</a></li>
+<li><a href="https://medium.com/@DcardLab/dcard-%E5%AF%A6%E7%BF%92%E7%94%9F%E6%B4%BB%E6%97%A5%E8%A8%98-%E5%B0%8F%E9%AF%A8%E9%AD%9A-docker-%E4%BB%8B%E7%B4%B9-a574b28feae4">Dcard 實習生活日記：小鯨魚（Docker）介紹</a></li>
+<li><a href="https://segmentfault.com/q/1010000000417103">Dockerfile裡指定執行命令用ENTRYPOING和用CMD有何不同？</a></li>
+<li><a href="https://beginor.github.io/2017/10/21/dockerfile-cmd-and-entripoint.html">Dockerfile 的 ENTRYPOINT 與 CMD</a></li>
+<li><a href="https://5xruby.tw/posts/rails-docker-image">2018 年的 Rails 應用 Docker Image 包裝範例</a></li>
+<li><a href="https://larrylu.blog/step-by-step-dockerize-your-app-ecd8940696f4">Docker 實戰系列（一）：一步一步帶你 dockerize 你的應用</a></li>
+<li><a href="https://blog.csdn.net/qq_36148847/article/details/79427878">docker-compose.yml 配置文件編寫詳解</a></li>
+<li><a href="https://ithelp.ithome.com.tw/users/20103456/ironman/1320">用30天來介紹和使用 Docker</a></li>
+</ul>
+
+
+<h2><span id="docker_volumn">Docker Volumn</span></h2>
+
+<p>Docker Volume 是個介於主機與容器間的共享資料夾，可用來匯入或匯出容器內的資料，或者共享容器間的資料</p>
+
+<ul>
+<li>Docker image 由多個 read-only 的 file system 疊加而成一個 stack，這些組合稱為 Union File System。</li>
+<li>啟動 container 的時候，會在 stack 上方新增一個 read-write layer，更動都在這邊，砍掉 container 這邊也就沒了</li>
+<li>Volume 是為了要解決 container 之間資料共享與資料保存而提出的</li>
+<li>Volume 就是目錄或是檔案，可以繞過 UFS 以正常的檔案或目錄的方式存在 host 本機上</li>
+<li>啟動 Container 的時候產生 volume，如果 Volume 掛載的目標路徑已經有檔案存在於 Image 上面，則 Image 上面的檔案會 copy 到 volume 上，但不包括 host directory</li>
+</ul>
+
+
+<pre><code class="ruby"># 列出所有的 volume
+docker volume ls
+
+# 列出所有沒有被關聯到 container 的 volume 的 VOLUME NAME
+docker volume ls -qf dangling=true
+
+# 一次刪除所有 volume
+docker volume rm $(docker volume ls -qf dangling=true)
+
+# 查看 volume 的資訊
+docker volume inspect 52b29486c72090675d52814414eec7d62024b2328a644bd7924e647ee1a24884
+
+# 查看某一個 container 的 volume 狀況
+docker inspect -f '' 825005afab43
+</code></pre>
+
+<h3>Example1:</h3>
+
+<p><code>Host Volume</code> 指定 host 的資料夾</p>
+
+<pre><code class="ruby">cd ~
+mkdir volume-test
+# 測試發現即使一開始沒新增 volume-test，執行指令後也是會在 local 新增這個檔案 
+docker run -it -v /Users/leon/volume-test:/volume-test ubuntu:14.04 /bin/bash
+# 會發現裡面也會有一個資料夾 volume-test，不管在 docker 的 /volume-test 或是 local /Users/leon/volume-test，新增檔案，另一邊都會同步
+exit
+# 離開了 container，會發現 /Users/leon/volume-test 裡面的檔案還是保留在裡面
+docker run -it -v /Users/leon/volume-test:/volume-test ubuntu:14.04 /bin/bash
+# 即使在開新的 container 檔案還是一樣會在
+</code></pre>
+
+<h3>Example2:</h3>
+
+<p><code>named volume</code> 沒有指定 loacl 的路徑，檔案會去哪裡?</p>
+
+<pre><code class="ruby">docker run -it -v /volume-test ubuntu:14.04 /bin/bash
+docker volume ls
+
+# 發現多了一個，因為沒指定名稱所以就產生亂碼
+DRIVER              VOLUME NAME
+local               c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a
+</code></pre>
+
+<pre><code class="ruby"># 尋找 container 的 loacl volume, 825005afab43 是 container id
+docker inspect -f '' 825005afab43
+[{volume c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a /var/lib/docker/volumes/c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a/_data /vo-test local  true }]
+</code></pre>
+
+<p>透過上面指令就可以找到 local 的檔案，照理說可以 cd 到 <code>/var/lib/docker/volumes/c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a/_data /vo-test</code>，但是 mac 無法，有找到以下有人也在詢問</p>
+
+<ul>
+<li><a href="https://forums.docker.com/t/host-path-of-volume/12277">Host path of volume</a></li>
+</ul>
+
+
+<h3>Example 3.</h3>
+
+<p><code>named volume</code> 先在 local 建立 volume 在指定</p>
+
+<pre><code class="ruby">docker volume create db_data2
+docker run -d -v db_data2:/var/lib/mysql mysql:5.7.17
+</code></pre>
+
+<h3>Example 4.</h3>
+
+<p>讓 Container 和 Container 之間的資料共享</p>
+
+<pre><code class="ruby">docker run -it -v /data --name=container1 ubuntu:14.04 /bin/bash
+docker run -it --volumes-from container1 --name=container2 ubuntu:14.04 /bin/bash
+
+# --volumes-from 參數指定 Container Name 為 Container1 的 Volume 資料和Container2 做共享
+</code></pre>
+
+<h3>Example 5.</h3>
+
+<p>Dockerfile 指定</p>
+
+<pre><code class="ruby">FROM ubuntu:14.04
+VOLUME /data
+</code></pre>
+
+<p>docker-compose.yml 指定</p>
+
+<pre><code class="ruby">version: '3'
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432"
+  backend:
+    build:
+      context: test-backend
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./test-backend:/usr/src/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    user: rails
+  frontend:
+    build:
+      context: test-frontend
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./test-frontend:/usr/src/app
+    ports:
+      - "3000:3000"
+    user: frontend
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://docs.docker.com/storage/volumes/">Use volumes</a></li>
+<li><a href="http://dockone.io/article/128">深入理解Docker Volume（一）</a></li>
+<li><a href="https://deepzz.com/post/the-docker-volumes-basic.html">docker volume 容器卷的那些事（一）</a></li>
+<li><a href="https://julianchu.net/2016/04/19-docker.html">Docker volume 簡單用法</a></li>
+<li><a href="https://larrylu.blog/using-volumn-to-persist-data-in-container-a3640cc92ce4">Docker 實戰系列（三）：使用 Volume 保存容器內的數據</a></li>
+<li><a href="https://ithelp.ithome.com.tw/articles/10192397">Day17：使用 Docker Volume 的功能 (一)</a></li>
+<li><a href="https://ithelp.ithome.com.tw/articles/10192703">Day18：使用 Docker Volume 的功能 (二)</a></li>
+<li><a href="http://blog.maxkit.com.tw/2017/03/docker-volume.html">Docker Volume 初步閱讀與學習紀錄</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

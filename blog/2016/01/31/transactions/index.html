@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Transactions 交易 - Leon's Blogging</title>
+  <title>Transactions 交易 - Isolation Level - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
@@ -93,6 +93,7 @@ ActiveRecord::Base.transaction do User.create!(:name =&gt; &#39; &hellip;">
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/tool">Tool</a></li>
   <li><a href="/about">About</a></li>
 </ul>
 
@@ -105,7 +106,7 @@ ActiveRecord::Base.transaction do User.create!(:name =&gt; &#39; &hellip;">
   <header>
     
       
-        <h1 class="entry-title">Transactions 交易</h1>
+        <h1 class="entry-title">Transactions 交易 - Isolation Level</h1>
       
     
     
@@ -168,8 +169,111 @@ ActiveRecord::Base.transaction do User.create!(:name =&gt; &#39; &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>參考文件：<br/>
-<a href="https://ihower.tw/rails4/activerecord-others.html">ActiveRecord - 進階功能</a></p>
+<h1>Isolation level</h1>
+
+<p>Transactions 又可以分成以下四種 level</p>
+
+<table>
+<thead>
+<tr>
+<th> 隔離層級                     </th>
+<th> Dirty Read </th>
+<th> Unrepeatable Read </th>
+<th> Phantom Read </th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td> 未提交讀（Read uncommitted） </td>
+<td> YES        </td>
+<td> YES               </td>
+<td> YES          </td>
+</tr>
+<tr>
+<td> 已提交讀（Read committed）   </td>
+<td> NO         </td>
+<td> YES               </td>
+<td> YES          </td>
+</tr>
+<tr>
+<td> 可重複讀（Repeatable read）  </td>
+<td> NO         </td>
+<td> NO                </td>
+<td> YES          </td>
+</tr>
+<tr>
+<td> 可串行化（Serializable ）    </td>
+<td> NO         </td>
+<td> NO                </td>
+<td> NO           </td>
+</tr>
+</tbody>
+</table>
+
+
+<h3>提交讀(Read Committed)</h3>
+
+<ul>
+<li>能讀取到已經 commit 的 data。</li>
+<li>Oracle等多數數據庫預設都是該級別</li>
+<li>換句話說，在這樣個 isolation level 下，不會有 &ldquo;讀到別人還沒 commit 的 data&rdquo; 這回事(dirty read)</li>
+</ul>
+
+
+<h3>未提交讀（Read uncommitted)</h3>
+
+<ul>
+<li>允許髒讀(dirty read)，也就是可能讀取到其他會話中未提交事務修改的數據</li>
+</ul>
+
+
+<h3>可重複讀(Repeated Read)</h3>
+
+<ul>
+<li>可重複讀。在同一個事務內的查詢都是事務開始時刻一致的，InnoDB 預設級別。在SQL標準中，該隔離級別消除了不可重複讀，但是還存在幻象讀</li>
+<li>對於該 transaction 內讀過的 data, 在 transaction 的過程中不允許有別的 transaction 改動到這些 data。</li>
+</ul>
+
+
+<h3>串行讀(Serializable)</h3>
+
+<ul>
+<li>完全串行化的讀，每次讀都需要獲得表級共享鎖，讀寫相互都會阻塞</li>
+<li>這是最進階的 isolation level。基本上可以想像使用這樣 isolation level 的 transaction，概念上可以視為同時間只有它一個 transaction 存在。</li>
+</ul>
+
+
+<p>rails 指定 <code>isolation level</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">MyRecord</span><span class="o">.</span><span class="n">transaction</span><span class="p">(</span><span class="ss">isolation</span><span class="p">:</span> <span class="ss">:read_committed</span><span class="p">)</span> <span class="k">do</span>
+</span><span class='line'>  <span class="c1"># do your transaction work</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># :read_uncommitted</span>
+</span><span class='line'><span class="c1"># :read_committed</span>
+</span><span class='line'><span class="c1"># :repeatable_read</span>
+</span><span class='line'><span class="c1"># :serializable</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://openhome.cc/Gossip/HibernateGossip/IsolationLevel.html">簡介隔離層級</a></li>
+<li><a href="https://ihower.tw/rails4/activerecord-others.html">ActiveRecord - 進階功能</a></li>
+<li><a href="https://blog.mz026.rocks/20180320/db-isolation-level-w-payment-service">透過 Payment Service 與 DB Isolation Level 成為莫逆之交</a></li>
+<li><a href="https://tech.meituan.com/innodb-lock.html">Innodb中的事務隔離級別和鎖的關係</a></li>
+<li><a href="https://apidock.com/rails/ActiveRecord/ConnectionAdapters/DatabaseStatements/transaction">transaction api doc</a></li>
+</ul>
+
 </div>
 
 

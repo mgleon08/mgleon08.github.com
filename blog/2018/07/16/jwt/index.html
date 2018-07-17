@@ -1,0 +1,434 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>JSON Web Token(JWT) 簡單介紹 - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="之前常常聽到 jwt，但沒有很了解，就來研究一下吧 什麼是 JWT JWT 是基於 JSON 的開放標準 (RFC 7519)
+一般被用來在 身份提供者 和 服務提供者 間傳遞被 認證 的用戶身份訊息，以便於從資源伺服器獲取資源
+同時也可以增加一些額外的聲明訊息，該 token 也可直接被用於認證 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2018/07/16/jwt">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">JSON Web Token(JWT) 簡單介紹</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-07-16T17:48:22+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>5:48 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>之前常常聽到 jwt，但沒有很了解，就來研究一下吧</p>
+
+<!-- more -->
+
+
+<h1>什麼是 JWT</h1>
+
+<ul>
+<li>JWT 是基於 JSON 的開放標準 (RFC 7519)</li>
+<li>一般被用來在 身份提供者 和 服務提供者 間傳遞被 認證 的用戶身份訊息，以便於從資源伺服器獲取資源</li>
+<li>同時也可以增加一些額外的聲明訊息，該 token 也可直接被用於認證，也可被加密</li>
+<li>特別適用於分佈式站點的單點登錄（SSO）場景</li>
+</ul>
+
+
+<p>先來瞭解一般 session 和 jwt 的差別</p>
+
+<h2>Session</h2>
+
+<p>Http 協議本身是無狀態的，所以無法知道每個 request 來的是誰? 因此用戶每次 request 就必須提供帳號密碼，以便證明身份，但每次都要另外輸入帳號密碼，豈不是很麻煩?</p>
+
+<p>所以當用戶第一次發 request 過來後，就會產生一組 token 紀錄在 db 和 session，並且將這組 token 給用戶，告訴其保存在 cookie，當下次發 request 的時候，就直接帶這組 token 以便證明身份。</p>
+
+<h2>JWT</h2>
+
+<p>JWT 的組成內容有三個部分，由 <code>.</code> 做區隔，最後透過這三個部分，串成一個 Jwt 字串</p>
+
+<h3>1. Header 頭部</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;typ&#39;</span><span class="p">:</span> <span class="s1">&#39;JWT&#39;</span><span class="p">,</span> <span class="c1"># 聲明類型</span>
+</span><span class='line'>  <span class="s1">&#39;alg&#39;</span><span class="p">:</span> <span class="s1">&#39;HS256&#39;</span> <span class="c1"># 加密的方法: HMAC、SHA256、RSA 進行 Base64 編碼</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>進行 base64 加密（該加密是可以對稱解密的)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>2. Payload 載荷</h3>
+
+<p>這裡放聲明內容，可以說就是存放溝通訊息的地方，在定義上有 3 種聲明 (Claims)</p>
+
+<ul>
+<li>Reserved (註冊聲明)</li>
+<li>Public (公開聲明)</li>
+<li>Private (私有聲明)</li>
+</ul>
+
+
+<p>註冊聲明參數 (建議但不強制使用)</p>
+
+<ul>
+<li>iss (Issuer) - jwt簽發者</li>
+<li>sub (Subject) -  jwt所面向的用戶</li>
+<li>aud (Audience) - 接收jwt的一方</li>
+<li>exp (Expiration Time) - jwt的過期時間，這個過期時間必須要大於簽發時間</li>
+<li>nbf (Not Before) - 定義在什麼時間之前，該jwt都是不可用的</li>
+<li>iat (Issued At) - jwt的簽發時間</li>
+<li>jti (JWT ID) - jwt的唯一身份標識，主要用來作為一次性token,從而迴避重放攻擊</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;sub&quot;</span><span class="p">:</span> <span class="s2">&quot;1234567890&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;name&quot;</span><span class="p">:</span> <span class="s2">&quot;John Doe&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;iat&quot;</span><span class="p">:</span> <span class="mi">1516239022</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>進行 base64 加密（該加密是可以對稱解密的)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3. Signature</h3>
+
+<p>由三個部分組成</p>
+
+<ul>
+<li>header (base64後的)</li>
+<li>payload (base64後的)</li>
+<li>secret</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">HMACSHA256</span><span class="p">(</span><span class="n">base64UrlEncode</span><span class="p">(</span><span class="n">header</span><span class="p">)</span> <span class="o">+</span> <span class="s2">&quot;.&quot;</span> <span class="o">+</span> <span class="n">base64UrlEncode</span><span class="p">(</span><span class="n">payload</span><span class="p">),</span> <span class="s1">&#39;secret&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><p>secret 要保存在 server 端，jwt 的 簽發驗證都必須使用這個 secret，當其他人得知這個 secret，那就意味著客戶端是可以自我簽發 jwt ，因此在任何場景都不應該外流</p></blockquote>
+
+<p>進行 base64 加密</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>最後由三個部分由 <code>.</code> 組成</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9</span><span class="o">.</span><span class="n">eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ</span><span class="o">.</span><span class="n">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>使用方法</h1>
+
+<p>在發 request 的時候在 header 加入 <code>Authorization: Bearer &lt;token&gt;</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">post</span><span class="p">(</span><span class="s1">&#39;api/user/1&#39;</span><span class="p">,</span> <span class="p">{</span>
+</span><span class='line'>  <span class="ss">headers</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s1">&#39;Authorization&#39;</span><span class="p">:</span> <span class="s1">&#39;Bearer &#39;</span> <span class="o">+</span> <span class="n">token</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">})</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="https://cdn.auth0.com/content/jwt/jwt-diagram.png" alt="" /></p>
+
+<h1>優點</h1>
+
+<ul>
+<li>跨語言，因為 json 格式大部分語言都可使用</li>
+<li>可儲存一些簡單但非敏感的商業邏輯 - role ..</li>
+<li>構成內容簡單，佔用 Size 小方便傳輸</li>
+<li>不需在 server 保存 session，所以它易於應用的擴展</li>
+</ul>
+
+
+<h1>安全相關 Security</h1>
+
+<ul>
+<li>Base64 是可逆的加密方式，不適合存放敏感訊息，因為該部分是客戶端可解密的部分</li>
+<li>用來加密的 Secret 要保護好，存在 server 端</li>
+<li>使用 Https 協議 - 避免敏感訊息被嗅探</li>
+<li>使用 HttpOnly 來防止 Cookie 被 JavaScript 讀取，從而避免跨站腳本攻擊（XSS攻擊）</li>
+</ul>
+
+
+<h1>JWT的適用場景</h1>
+
+<ul>
+<li>一次性驗證  ex: 信件中的連結</li>
+<li>restful api 的無狀態認證</li>
+<li>單點登錄+會話管理(不推薦，絕大多數情況下，傳統的 cookie-session 機制工作得更好)</li>
+</ul>
+
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://jwt.io/">JWT</a></li>
+<li><a href="https://www.jianshu.com/p/576dbf44b2ae">什麼是 JWT &ndash; JSON WEB TOKEN</a></li>
+<li><a href="https://hk.saowen.com/a/e86e2d932aa9b5dc3d11d639e9940eb55812f030029fac54245f6d1f9eef6f23">不要用JWT替代session管理（上）：全面瞭解Token,JWT,OAuth,SAML,SSO</a></li>
+<li><a href="https://blog.leapoahead.com/2015/09/06/understanding-jwt/">JSON Web Token - 在Web應用間安全地傳遞訊息</a></li>
+<li><a href="http://blog.leapoahead.com/2015/09/07/user-authentication-with-jwt/">八幅漫畫理解使用JSON Web Token設計單點登錄系統</a></li>
+<li><a href="https://hk.saowen.com/a/afdc2b0fb445a973bed63330596f8588ad8f86da0faf6b5af5211ff3e29c2da8">理解JWT的使用場景和優劣</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-07-16T17:48:22+08:00'><span class='date'><span class='date-month'>Jul</span> <span class='date-day'>16</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>5:48 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/token/'>token</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2018/07/16/jwt/" data-via="" data-counturl="http://mgleon08.github.com/blog/2018/07/16/jwt/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/07/14/rails-credentials/" title="Previous Post: Rails 5.2 credentials">&laquo; Rails 5.2 credentials</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2018/07/17/rails-nuxt-jwt/" title="Next Post: Rails API + Nuxt.js + Devise-JWT">Rails API + Nuxt.js + Devise-JWT &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2018/07/16/jwt/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2018/07/16/jwt/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

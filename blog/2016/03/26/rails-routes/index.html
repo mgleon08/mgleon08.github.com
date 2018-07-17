@@ -107,6 +107,7 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/tool">Tool</a></li>
   <li><a href="/about">About</a></li>
 </ul>
 
@@ -197,19 +198,51 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">get</span> <span class="s1">&#39;foo/meetings/:id&#39;</span><span class="p">,</span> <span class="ss">:to</span> <span class="o">=&gt;</span> <span class="s1">&#39;events#show&#39;</span>
 </span><span class='line'><span class="n">post</span> <span class="s1">&#39;foo/meetings&#39;</span><span class="p">,</span> <span class="ss">:to</span> <span class="o">=&gt;</span> <span class="s1">&#39;events#create&#39;</span>
 </span><span class='line'>
 </span><span class='line'><span class="err">可以改寫成</span>
 </span><span class='line'>
 </span><span class='line'><span class="n">scope</span> <span class="ss">:controller</span> <span class="o">=&gt;</span> <span class="s2">&quot;events&quot;</span><span class="p">,</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s2">&quot;/foo&quot;</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="s2">&quot;bar&quot;</span> <span class="k">do</span>
-</span><span class='line'>  <span class="n">get</span> <span class="s1">&#39;meetings/:id&#39;</span> <span class="o">=&gt;</span> <span class="ss">:show</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="s2">&quot;meeting&quot;</span>
-</span><span class='line'>  <span class="n">post</span> <span class="s1">&#39;meetings&#39;</span> <span class="o">=&gt;</span> <span class="s1">&#39;:create , :as =&gt; &quot;meetings&quot;</span>
-</span><span class='line'><span class="s1">end</span>
+</span><span class='line'>  <span class="n">get</span> <span class="s1">&#39;meetings/:id&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:show</span><span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="s2">&quot;meeting&quot;</span>
+</span><span class='line'>  <span class="n">post</span> <span class="s1">&#39;meetings&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="ss">:create</span> <span class="p">,</span> <span class="ss">as</span><span class="p">:</span> <span class="s2">&quot;meetings&quot;</span>
+</span><span class='line'><span class="k">end</span>
 </span><span class='line'>
-</span><span class='line'><span class="s1">scope :path =&gt; &#39;</span><span class="o">/</span><span class="n">api</span><span class="o">/</span><span class="n">v1</span><span class="o">/</span><span class="s1">&#39;, :module =&gt; &quot;api_v1&quot;, :as =&gt; &#39;</span><span class="n">v1</span><span class="err">&#39;</span> <span class="k">do</span>
+</span><span class='line'><span class="c1"># bar_meeting GET   /foo/meetings/:id(.:format) events#show</span>
+</span><span class='line'><span class="c1"># bar_meetings POST /foo/meetings(.:format)     events#create</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">scope</span> <span class="ss">:path</span> <span class="o">=&gt;</span> <span class="s1">&#39;/api/v1/&#39;</span><span class="p">,</span> <span class="ss">:module</span> <span class="o">=&gt;</span> <span class="s2">&quot;api_v1&quot;</span><span class="p">,</span> <span class="ss">:as</span> <span class="o">=&gt;</span> <span class="s1">&#39;v1&#39;</span> <span class="k">do</span>
 </span><span class='line'>  <span class="n">resources</span> <span class="ss">:projects</span>
 </span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># GET  /api/v1/projects(.:format) api_v1/projects#index</span>
+</span><span class='line'><span class="c1"># POST /api/v1/projects(.:format) api_v1/projects#create</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:users</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">member</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">scope</span> <span class="s1">&#39;graphs&#39;</span> <span class="k">do</span>
+</span><span class='line'>     <span class="n">get</span> <span class="ss">:dashboard</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;users/graphs#dashboard&quot;</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># /users/:id/graphs/dashboard</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -246,11 +279,17 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
 <span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#靜態</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 靜態</span>
 </span><span class='line'><span class="n">get</span> <span class="s2">&quot;/welcome&quot;</span> <span class="ss">to</span><span class="p">:</span> <span class="n">redirect</span><span class="p">(</span><span class="s2">&quot;/hello&quot;</span><span class="p">)</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">#動態</span>
+</span><span class='line'><span class="c1"># 動態</span>
 </span><span class='line'><span class="n">get</span> <span class="s1">&#39;/stories/:name&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;/articles/%{name}&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 導外</span>
+</span><span class='line'> <span class="n">get</span> <span class="s1">&#39;/welcome&#39;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="n">redirect</span><span class="p">(</span><span class="s1">&#39;https://google.com&#39;</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -383,7 +422,31 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h3>限制</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 所有沒有設定的 GET routes 都會導到 application#index</span>
+</span><span class='line'><span class="n">match</span> <span class="s2">&quot;*path&quot;</span><span class="p">,</span> <span class="ss">to</span><span class="p">:</span> <span class="s2">&quot;application#index&quot;</span><span class="p">,</span> <span class="nb">format</span><span class="p">:</span> <span class="kp">false</span><span class="p">,</span> <span class="ss">via</span><span class="p">:</span> <span class="ss">:get</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://guides.rubyonrails.org/routing.html#route-globbing-and-wildcard-segments">route-globbing-and-wildcard-segments</a></li>
+<li><a href="http://guides.rubyonrails.org/routing.html#http-verb-constraints">http-verb-constraints</a></li>
+</ul>
+
+
 <h1>DRY</h1>
+
+<h3>none</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 不需要任何 resources 產生的 restful，可能是要做 member or collection</span>
+</span><span class='line'><span class="n">resources</span> <span class="ss">:users</span><span class="p">,</span> <span class="ss">only</span><span class="p">:</span> <span class="ss">:none</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3>concern</h3>
 
@@ -616,6 +679,72 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>單數 resource</h1>
+
+<p>當使用者能檢視、更新、刪除自己的 profile，就能夠用單數的 resource</p>
+
+<p>需要檢視每個人的話就用複數，像是管理員</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">draw</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">resource</span> <span class="ss">:profile</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'>  <span class="no">Prefix</span> <span class="no">Verb</span>   <span class="no">URI</span> <span class="no">Pattern</span>             <span class="no">Controller</span><span class="c1">#Action</span>
+</span><span class='line'> <span class="n">profile</span> <span class="no">POST</span>   <span class="sr">/profile(.:format)      profiles#create</span>
+</span><span class='line'><span class="sr"> new_profile GET    /</span><span class="n">profile</span><span class="o">/</span><span class="kp">new</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>  <span class="n">profiles</span><span class="c1">#new</span>
+</span><span class='line'><span class="n">edit_profile</span> <span class="no">GET</span>    <span class="sr">/profile/e</span><span class="n">dit</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span> <span class="n">profiles</span><span class="c1">#edit</span>
+</span><span class='line'>         <span class="no">GET</span>    <span class="sr">/profile(.:format)      profiles#show</span>
+</span><span class='line'><span class="sr">         PATCH  /</span><span class="n">profile</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">profiles</span><span class="c1">#update</span>
+</span><span class='line'>         <span class="no">PUT</span>    <span class="sr">/profile(.:format)      profiles#update</span>
+</span><span class='line'><span class="sr">         DELETE /</span><span class="n">profile</span><span class="p">(</span><span class="o">.</span><span class="ss">:format</span><span class="p">)</span>      <span class="n">profiles</span><span class="c1">#destroys</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>On</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resources</span> <span class="ss">:orders</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">member</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">post</span> <span class="ss">:confirm</span>
+</span><span class='line'>    <span class="n">delete</span> <span class="ss">:cancel</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可改寫為</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">resources</span> <span class="ss">:orders</span> <span class="k">do</span>
+</span><span class='line'>  <span class="n">post</span> <span class="ss">:confirm</span><span class="p">,</span> <span class="ss">on</span><span class="p">:</span> <span class="ss">:member</span>
+</span><span class='line'>  <span class="n">delete</span> <span class="ss">:cancel</span><span class="p">,</span> <span class="ss">on</span><span class="p">:</span> <span class="ss">:member</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <p>參考文件:</p>
 
 <ul>
@@ -633,8 +762,12 @@ get &#39;/patients/:id&#39;, to: &#39;patients#show&# &hellip;">
 </ul>
 
 
-<p>參考文件：<br/>
-* <a href="https://ihower.tw/rails4/routing.html">路由(Routing)</a></p>
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://ihower.tw/rails4/routing.html">路由(Routing)</a></li>
+</ul>
+
 </div>
 
 

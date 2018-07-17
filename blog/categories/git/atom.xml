@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Git | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/git/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-06-23T00:40:50+08:00</updated>
+  <updated>2018-07-17T18:11:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -78,16 +78,17 @@
 <h1>基本設定</h1>
 
 <ul>
-<li><code>git config --global user.name "&lt;使用者名字&gt;"</code></li>
-<li><code>git config --global user.email "&lt;電子信箱&gt;"</code></li>
+<li><code>git config --global user.name "&lt;使用者名字&gt;"</code> (個別專案可用 &ndash;local)</li>
+<li><code>git config --global user.email "&lt;電子信箱&gt;"</code> (個別專案可用 &ndash;local)</li>
 <li><code>git config --list</code>　看 Git 設定內容</li>
 <li><code>git config --global alias.st status</code>　縮短字串（將 git status 縮寫為 git st）</li>
 <li><code>git config --global color.ui true</code>　設定輸出顏色</li>
 <li><code>git config --global apply.whitespace nowarn</code> 空白對有些語言是有影響的(像是Ruby)，因此我們會希望 Git 去忽略空白的變化</li>
+<li><code>git config --global alias.co checkout</code> 設定 alias</li>
 </ul>
 
 
-<p>以上皆可直接 <code>vi .gitconfig</code> 去做修正</p>
+<p>以上皆可直接 <code>vim ~/.gitconfig</code> 去做修正</p>
 
 <h1>基本功能</h1>
 
@@ -147,6 +148,7 @@
 <li><code>git commit -m [commit 訊息]</code> 直接寫入 commit 訊息。</li>
 <li><code>git commit -am [commit 訊息]</code> 等於 <code>git add .</code> + <code>git commit -m</code>。</li>
 <li><code>git commit --amend</code> 合併到上一個 commit 訊息。</li>
+<li><code>git commit --amend --no-edit</code> 合併到上一個 commit 訊息，並且不需要更改訊息</li>
 </ul>
 
 
@@ -320,6 +322,11 @@ exec   = 執行一條指令
 <li><code>git log</code> 查詢歷史紀錄。</li>
 <li><code>git log -10</code> 限定輸出最近幾筆紀錄。</li>
 <li><code>git log --oneline --graph --all --decorate</code> 圖像化 log。</li>
+<li><code>git log --oneline --author="leon"</code> 找出 leon 所有的 commit(<code>多個名稱 --author="leon1\|leon2"</code>)</li>
+<li><code>git log --oneline --grep="rails"</code> 找出 commit 訊息有 rails 的字眼</li>
+<li><code>git log -S "Ruby"</code> 找出 commit 的內容有包括 <code>Ruby</code> 的字</li>
+<li><code>git log --oneline --since="9am" --until="12am"</code> 今天早上 9 點到 12 點之間所有的 Commit</li>
+<li><code>git log --oneline --since="9am" --until="12am" --after="2017-01"</code>  2017 年 1 月之後，每天早上 9 點到 12 點的 Commit</li>
 </ul>
 
 
@@ -331,6 +338,8 @@ exec   = 執行一條指令
 <li><code>git reflog delete HEAD@{1}</code> 刪除特定幾個版本的歷史紀錄。</li>
 </ul>
 
+
+<p><a href="https://gitbook.tw/chapters/using-git/restore-hard-reset-commit.html">【狀況題】不小心使用 hard 模式 Reset 了某個 Commit，救得回來嗎？</a></p>
 
 <h1>標籤</h1>
 
@@ -471,7 +480,11 @@ git commit -m "fixed untracked files"
 </ul>
 
 
-<pre><code>git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch 檔案名稱' --prune-empty --tag-name-filter cat -- --all
+<pre><code class="ruby">git filter-branch --force --index-filter 'git rm --cached --ignore-unmatch 檔案名稱' --prune-empty --tag-name-filter cat -- --all
+
+git filter-branch --tree-filter "rm -f config/database.yml"
+# filter-branch 這個指令可以讓你根據不同的 filter，一個一個 Commit 的來處理它。
+# --tree-filter 這個 filter，它可以讓你在 Checkout 到每個 Commit 的時候執行你指定的指令，執行完後再自動幫你重新再 Commit
 </code></pre>
 
 <h3>開乾淨的 branch</h3>
@@ -506,6 +519,7 @@ git checkout -b development
 git clean -f -n
 git clean -f
 git clean -df #刪除 untracked directory
+git clean -fX # 清除被忽略的檔案
 </code></pre>
 
 <p><a href="http://stackoverflow.com/questions/61212/how-do-i-remove-local-untracked-files-from-my-current-git-branch">How do I remove local (untracked) files from my current Git branch?</a></p>
@@ -532,6 +546,9 @@ git clean -df #刪除 untracked directory
 <pre><code class="ruby"># 看目前 branch 的 sha1
 git rev-parse &lt;branch name&gt;
 
+# 或使用 git reflog 找找看有沒有之前的記錄
+git reflog
+
 # 建立新的 branch 並給予 sha1
 git branch new_name &lt;sha1&gt;
 </code></pre>
@@ -542,7 +559,7 @@ git branch new_name &lt;sha1&gt;
 git reflog
 
 # 強制回復到該節點
-# git reset &lt;sha1&gt; --hard
+git reset &lt;sha1&gt; --hard
 </code></pre>
 
 <h3>拯救已刪除的檔案</h3>
@@ -562,9 +579,19 @@ git show &lt;hash&gt;
 
 <p>自己設定的一些 alias</p>
 
-<p>可以建立新的檔案 <code>.aliases</code>, 並在 <code>.zshrc</code> 加上 <code>source ~/.aliases</code></p>
+<p>可以建立在 <code>~/.gitconfig</code> 裡面，但是前面 <code>git</code> 就無法縮寫成 <code>g</code></p>
 
-<pre><code>#base
+<pre><code class="ruby">[alias]
+  co = checkout
+  br = branch
+  st = status
+  l  = log --oneline --graph
+  ls = log --graph --pretty=format:"%h &lt;%an&gt; %ar %s"
+</code></pre>
+
+<p>也可以建立新的檔案 <code>.aliases</code>, 並在 <code>.zshrc</code> 加上 <code>source ~/.aliases</code></p>
+
+<pre><code class="ruby">#base
 alias g='git'
 
 alias grs='git reset'
@@ -668,13 +695,15 @@ alias glog='git log --oneline --decorate --color --graph'
 <li><a href="https://github.com/JuanitoFatas/git-style-guide">Git 風格指南</a></li>
 <li><a href="http://chris.beams.io/posts/git-commit/">How to Write a Git Commit Message</a></li>
 <li><a href="http://kaochenlong.com/2017/08/11/git-on-modern-web/">你知道 Git 是怎麼一回事嗎</a></li>
+<li><a href="https://gitbook.tw/">為你自己學 Git</a></li>
+<li><a href="https://kaochenlong.com/git-tips/">Git 小說連載系列</a></li>
 </ul>
 
 
 <p>練習：</p>
 
 <ul>
-<li><a href="https://try.github.io/levels/1/challenges/1">codeschool</a></li>
+<li><a href="https://try.github.io/levels/1/challenges%E3%84%8B/1">codeschool</a></li>
 <li><a href="http://dylandy.github.io/Easy-Git-Tutorial/">Easy-Git-Tutorial</a></li>
 <li><a href="http://pcottle.github.io/learnGitBranching/">learnGitBranching</a></li>
 </ul>
