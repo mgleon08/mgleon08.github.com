@@ -686,6 +686,8 @@ command + K + C
 command + K + U
 // Select All Occurrences of Find Match
 command + shift + Ls
+// open terminal
+control + `
 ```
 
 官方文件: 
@@ -709,6 +711,8 @@ command + shift + Ls
 :set tabstop=4
 #自動縮排對齊間隔數：向右或向左一個縮排的寬度
 :set shiftwidth=4
+#vim底下有一個視窗，用以顯示狀態
+:set laststatus=2
 ```
 
 * [vimrc設定教學](http://wiki.csie.ncku.edu.tw/vim/vimrc)
