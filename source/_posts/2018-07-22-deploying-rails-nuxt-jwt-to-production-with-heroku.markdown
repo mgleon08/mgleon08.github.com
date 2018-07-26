@@ -14,7 +14,7 @@ categories: rails
 
 由於一開始我們希望用 docker-compose 來 build 環境，因此將前後端都 commit 在一起，但在部屬的時候希望將兩個分開，這時就可以用到 `git subtree`
 
-[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com) 
+[![Deploy](https://www.herokucdn.com/deploy/button.svg)](https://heroku.com)
 
 
 # Backend

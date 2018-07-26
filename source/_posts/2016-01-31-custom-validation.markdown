@@ -140,6 +140,17 @@ update_columns
 update_counters
 ```
 
+只有以下會驗證
+
+```ruby
+create
+create!
+save
+save!
+update
+update!
+```
+
 其他內建驗證直接參考官網
 
 官方文件：  

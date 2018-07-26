@@ -222,6 +222,20 @@ exec   = 執行一條指令
 
 [【狀況題】不小心使用 hard 模式 Reset 了某個 Commit，救得回來嗎？](https://gitbook.tw/chapters/using-git/restore-hard-reset-commit.html)
 
+### rev-parse
+
+`git rev-parse` 
+
+可以把任意「參考名稱」或「相對名稱」解析出「絕對名稱」sha1
+
+* `git rev-parse master` 看 master 的 sha1
+* `git rev-parse HEAD` 看 HEAD 的 sha1
+* `git rev-parse ORIG_HEAD`
+* `git rev-parse HEAD^`
+* `git rev-parse HEAD~5`
+* `git rev-parse --abbrev-ref HEAD` 看 HEAD 的 sha1 對應的 branch 名稱 
+
+
 #標籤
 
 * `git tag` 列出所有標籤。

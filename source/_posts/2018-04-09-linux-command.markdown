@@ -99,3 +99,93 @@ bg %jobnumber 將任務放到後台中去處理
 * [man7 hier](http://man7.org/linux/man-pages/man7/hier.7.html)
 * [ubuntu hier](http://manpages.ubuntu.com/manpages/xenial/man7/hier.7.html)
 * [鳥哥的私房菜](http://linux.vbird.org/)
+
+# curl
+
+能夠通過http、ftp等方式下載文件，也能夠上傳文件。
+
+```ruby
+curl -O https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
+```
+
+* [一天一條Linux指令-curl](https://blog.csdn.net/u012313689/article/details/53038398)
+
+
+# tar
+
+壓縮，解壓縮
+
+```ruby
+tar xf ffmpeg-release-64bit-static.tar.xz
+```
+
+* [每天一個linux命令（28）：tar命令](http://www.cnblogs.com/peida/archive/2012/11/30/2795656.html)
+
+
+# readlink
+
+用來找出符號鏈接所指向的位置，如果是 symbolic link 加上 `-f` 可以一直查下去直到最後一個
+
+```ruby
+readlink -f /usr/bin/awk
+```
+
+* [readlink命令](https://blog.csdn.net/diabloneo/article/details/7173438)
+
+# ln
+
+ln 建立的連結分為 “硬連結” (hard link) 及 “軟連結” (symbolic link), 預設 ln 會使用 hard link。
+
+```ruby
+# -h hard link
+# -s symbolic link
+ln -s /home/wordpress /var/www/wpmu
+```
+
+* [ln — 建立連結指令– Linux 技術手札](https://caloskao.org/linux-use-ln-command-to-link-files-or-folders/)
+* [ln — 建立連結指令](https://www.phpini.com/linux/ln-create-link-command)
+
+
+# awk
+
+文本分析工具，它是 Linux 中功能強大的數據處理引擎之一。相對於 grep 的查找，sed 的編輯
+
+```ruby
+awk ' /MA/ { print $1 }' list # 打印包含 MA 的行中的第一個單詞。
+awk [options] 'script' file
+```
+
+* [每天學習一個命令：awk ](http://einverne.github.io/post/2018/01/awk.html)
+
+# /dev/null
+
+`/dev/null` 在 Unix 或 Linux 就像黑洞, 會將任何導入的東西吃掉, 簡單來說就是程式會照常執行, 但不會輸出任何執行結果
+
+所以當要清空 file 內容時也可以執行
+
+```ruby
+cat /dev/null > access.log # 將空的內容丟給 access.log
+cp /dev/null access.log # 複製一份空的蓋掉原本的檔案
+``` 
+
+* [5 Ways to Empty or Delete a Large File Content in Linux](https://www.tecmint.com/empty-delete-file-content-linux/)
+
+# 2>&1
+
+`>/dev/null 2>&1`
+
+代表將左邊執行的結果丟給 `/dev/null` 
+
+而 `>` 是重新導向的意思，當左右兩邊沒有數字時，代表它會讀取左方程式的標準輸出 (也就是 fd=1) 重新導向給右邊的東西
+
+因此 `2>&1` 代表將標準錯誤輸出導向給 `&1 (fd)`，而為什麼後面要加 `&` 因為如果沒有加的話系統會誤以為是檔案名稱，而不是 fd.
+
+* 標準輸入    stdin  (fd 是 0)
+* 標準輸出    stdout (fd 是 1)
+* 標準錯誤輸出 stderr (fd 是 2)
+
+> fd: file descriptor, 檔案描述子
+
+參考文件
+
+* [Unix 重新導向跟 2>&1](http://ibookmen.blogspot.com/2010/11/unix-2.html)
