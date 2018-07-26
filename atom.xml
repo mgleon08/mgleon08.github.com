@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-07-22T23:16:37+08:00</updated>
+  <updated>2018-07-26T21:40:11+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,793 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Nothing Is Something by Sandi Metz]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/26/nothing-is-something-by-sandi-metz/"/>
+    <updated>2018-07-26T21:36:02+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/26/nothing-is-something-by-sandi-metz</id>
+    <content type="html"><![CDATA[<p>這是 Sandi Metz 2015 的演講，雖然有點舊，但還是很不錯，來紀錄一下</p>
+
+<!-- more -->
+
+
+<h3>Smalltalk Infected</h3>
+
+<p>一開始先介紹 <code>if</code> 可以改寫為自己的 method</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="kp">true</span><span class="o">.</span><span class="n">class</span> <span class="c1"># TrueClass</span>
+</span><span class='line'><span class="kp">false</span><span class="o">.</span><span class="n">class</span> <span class="c1"># FalseClass</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">TrueClass</span>
+</span><span class='line'> <span class="k">def</span> <span class="nf">if_true</span>
+</span><span class='line'>    <span class="k">yield</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">if_false</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">FalseClass</span>
+</span><span class='line'> <span class="k">def</span> <span class="nf">if_true</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">if_false</span>
+</span><span class='line'>    <span class="k">yield</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span> <span class="o">==</span> <span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">if_true</span><span class="p">{</span> <span class="nb">puts</span> <span class="s2">&quot;evaluated block&quot;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">evaluated</span> <span class="n">block</span>
+</span><span class='line'><span class="c1"># =&gt; true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接下來改寫為 <code>Object</code> <code>FalseClass</code> <code>NilClass</code> 因為在 ruby 的世界中，除了 <code>false</code> 和 <code>nil</code> 是 &ldquo;Falsy"，其他都是 "truthy&rdquo;</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Object</span>
+</span><span class='line'> <span class="k">def</span> <span class="nf">if_true</span>
+</span><span class='line'>    <span class="k">yield</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">if_false</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">FalseClass</span>
+</span><span class='line'> <span class="k">def</span> <span class="nf">if_true</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">if_false</span>
+</span><span class='line'>    <span class="k">yield</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">NilClass</span>
+</span><span class='line'> <span class="k">def</span> <span class="nf">if_true</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'> <span class="k">def</span> <span class="nf">NilClass</span>
+</span><span class='line'>    <span class="k">yield</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'> <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">==</span><span class="mi">1</span><span class="p">)</span><span class="o">.</span><span class="n">if_true</span><span class="p">{</span> <span class="nb">puts</span> <span class="s1">&#39;a&#39;</span> <span class="p">}</span><span class="o">.</span><span class="n">if_false</span><span class="p">{</span> <span class="nb">puts</span><span class="s1">&#39;b&#39;</span> <span class="p">}</span>
+</span><span class='line'><span class="n">a</span>
+</span><span class='line'><span class="c1"># true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但我們並不想改寫 ruby 原本就有的 method，而是將上面的技巧應用在需要的地方</p>
+
+<h3>Condition Averse</h3>
+
+<p>Sometimes nil is nothing</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ids</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;pig&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;sheep&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">animals</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="nb">id</span><span class="o">|</span> <span class="no">Animal</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)}</span>
+</span><span class='line'><span class="c1"># =&gt; [#&lt;Animal:0x007f94b290ae90 @name=&quot;pig&quot;&gt;, nil,</span>
+</span><span class='line'>     <span class="c1">#&lt;Animal:0x007f94b290ae18 @name=&quot;sheep&quot;&gt;]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">animals</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">animal</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">animal</span><span class="o">.</span><span class="n">name</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; &#39;pig&#39;</span>
+</span><span class='line'><span class="c1"># NoMethodError: undefined method `name&#39; for nil:NilClass</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">animals</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">animal</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">animal</span><span class="o">.</span><span class="n">nil?</span> <span class="p">?</span> <span class="s1">&#39;no animal&#39;</span> <span class="p">:</span> <span class="n">animal</span><span class="o">.</span><span class="n">name</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; &#39;pig&#39;</span>
+</span><span class='line'><span class="c1">#    &#39;no animal&#39;</span>
+</span><span class='line'><span class="c1">#    &#39;sheep&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">animals</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">animal</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">animal</span> <span class="o">&amp;&amp;</span> <span class="n">animal</span><span class="o">.</span><span class="n">name</span> <span class="p">}</span>
+</span><span class='line'><span class="n">animals</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">animal</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">animal</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:name</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="n">animals</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">animal</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">animal</span><span class="o">.</span><span class="n">nil?</span> <span class="p">?</span> <span class="s1">&#39;&#39;</span> <span class="p">:</span> <span class="n">animal</span><span class="o">.</span><span class="n">name</span> <span class="p">}</span>
+</span><span class='line'><span class="n">animals</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">animal</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">animal</span> <span class="o">==</span> <span class="kp">nil</span> <span class="p">?</span> <span class="s1">&#39;&#39;</span> <span class="p">:</span> <span class="n">animal</span><span class="o">.</span><span class="n">name</span> <span class="p">}</span>
+</span><span class='line'><span class="n">animals</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">animal</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">animal</span><span class="o">.</span><span class="n">is_a?</span><span class="p">(</span><span class="no">NilClass</span><span class="p">)</span> <span class="p">?</span> <span class="s1">&#39;&#39;</span> <span class="p">:</span> <span class="n">animal</span><span class="o">.</span><span class="n">name</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; &#39;pig&#39;</span>
+</span><span class='line'><span class="c1">#    empty string</span>
+</span><span class='line'><span class="c1">#    &#39;sheep&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Message Centric</h3>
+
+<p>新增 <code>MissingAnimal</code> class</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Animal</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">name</span>
+</span><span class='line'>    <span class="o">.</span><span class="n">.</span><span class="o">.</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">MissingAnimal</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">name</span>
+</span><span class='line'>    <span class="s1">&#39;no animal&#39;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">ids</span> <span class="o">=</span> <span class="o">[</span><span class="s1">&#39;pig&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">,</span> <span class="s1">&#39;sheep&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">animals</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span><span class="o">|</span><span class="nb">id</span><span class="o">|</span> <span class="no">Animal</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="o">||</span> <span class="no">MissingAnimal</span><span class="o">.</span><span class="n">new</span><span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; [#&lt;Animal: @name=&quot;pig&quot;&gt;, #&lt;MissingAnimal:&gt;, #&lt;Animal: @name=&quot;sheep&quot;&gt;]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">animals</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">animal</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">animal</span><span class="o">.</span><span class="n">name</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; &#39;pig&#39;</span>
+</span><span class='line'><span class="c1">#    &#39;no animal&#39;</span>
+</span><span class='line'><span class="c1">#    &#39;sheep&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但是這樣反而對 <code>MissingAnimal</code> 會有 dependency，接著在外面再包一層，將 dependency 封裝起來</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">GuaranteedAnimal</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nc">self</span><span class="o">.</span><span class="nf">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</span><span class='line'>    <span class="no">Animal</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="o">||</span> <span class="no">MissingAnimal</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">animals</span> <span class="o">=</span> <span class="n">ids</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="nb">id</span><span class="o">|</span><span class="no">GuaranteedAnimal</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; [#&lt;Animal: @name=&quot;pig&quot;&gt;, </span>
+</span><span class='line'>      <span class="c1">#&lt;MissingAnimal:&gt;,</span>
+</span><span class='line'>      <span class="c1">#&lt;Animal: @name=&quot;sheep&quot;&gt;]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">animals</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span><span class="o">|</span><span class="n">animal</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">animal</span><span class="o">.</span><span class="n">name</span> <span class="p">}</span>
+</span><span class='line'><span class="c1"># =&gt; &#39;pig&#39;</span>
+</span><span class='line'><span class="c1">#    &#39;no animal&#39;</span>
+</span><span class='line'><span class="c1">#    &#39;sheep&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Abstraction Seeking</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">House</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">recite</span>
+</span><span class='line'>    <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.data</span><span class="o">.</span><span class="n">length</span><span class="p">)</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">i</span><span class="o">|</span> <span class="n">line</span><span class="p">(</span><span class="n">i</span><span class="p">)</span> <span class="p">}</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;</span><span class="se">\n</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">line</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+</span><span class='line'>    <span class="s2">&quot;This is </span><span class="si">#{</span><span class="n">phrase</span><span class="p">(</span><span class="n">number</span><span class="p">)</span><span class="si">}</span><span class="s2">.</span><span class="se">\n</span><span class="s2">&quot;</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">phrase</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">parts</span><span class="p">(</span><span class="n">number</span><span class="p">)</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot; &quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">parts</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">data</span><span class="o">.</span><span class="n">last</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">data</span>
+</span><span class='line'>    <span class="o">[</span> <span class="s1">&#39;the horse and the hound and the horn that belonged to&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="c1"># ...</span>
+</span><span class='line'>    <span class="s1">&#39;the malt that lay in&#39;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s1">&#39;the house that Jack built&#39;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著 Implement <code>RandomHouse</code> <code>EchoHouse</code> without &lsquo;if&rsquo; statements</p>
+
+<p>用繼承 Inheritance?</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">RandomHouse</span> <span class="o">&lt;</span> <span class="no">House</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">data</span>
+</span><span class='line'>    <span class="vi">@data</span> <span class="o">||=</span> <span class="k">super</span><span class="o">.</span><span class="n">shuffle</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">EchoHouse</span> <span class="o">&lt;</span> <span class="no">House</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">parts</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">super</span><span class="o">.</span><span class="n">zip</span><span class="p">(</span><span class="k">super</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但這樣一個要改寫 <code>data</code> 另一個改寫 <code>parts</code>，當有新需求 <code>RandomEchoHouse</code>，那不就要這兩個 method 在寫一次，也不可能只繼承其中一個</p>
+
+<blockquote><p>Inheritance is for specialization is not for sharing code</p></blockquote>
+
+<p>改用組合 Composition 的方式來處理</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">House</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:formatter</span><span class="p">,</span> <span class="ss">:data</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="ss">orderer</span><span class="p">:</span> <span class="no">DefaultOrder</span><span class="o">.</span><span class="n">new</span><span class="p">,</span> <span class="ss">formatter</span><span class="p">:</span> <span class="no">DefaultFormatter</span><span class="o">.</span><span class="n">new</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@formatter</span> <span class="o">=</span> <span class="n">formatter</span>
+</span><span class='line'>    <span class="vi">@data</span> <span class="o">=</span> <span class="n">orderer</span><span class="o">.</span><span class="n">order</span><span class="p">(</span><span class="no">DATA</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">parts</span><span class="p">(</span><span class="n">number</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">formatter</span><span class="o">.</span><span class="n">format</span><span class="p">(</span><span class="n">data</span><span class="o">.</span><span class="n">last</span><span class="p">(</span><span class="n">number</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DefaultOrder</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">order</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">data</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">RandomOrder</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">order</span><span class="p">(</span><span class="n">data</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">data</span><span class="o">.</span><span class="n">shuffle</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">DefaultFormatter</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">parts</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">EchoFormatter</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">format</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span>
+</span><span class='line'>    <span class="n">parts</span><span class="o">.</span><span class="n">zip</span><span class="p">(</span><span class="n">parts</span><span class="p">)</span><span class="o">.</span><span class="n">flatten</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="no">House</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">orderer</span><span class="p">:</span> <span class="no">RandomOrder</span><span class="o">.</span><span class="n">new</span><span class="p">)</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+</span><span class='line'><span class="no">House</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="ss">formatter</span><span class="p">:</span> <span class="no">EchoFormatter</span><span class="o">.</span><span class="n">new</span><span class="p">)</span><span class="o">.</span><span class="n">line</span><span class="p">(</span><span class="mi">12</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://www.youtube.com/watch?v=OMPfEXIlTVE">[Video]RailsConf 2015 - Nothing is Something</a></li>
+<li><a href="https://speakerdeck.com/skmetz/nothing-is-something-railsconf">[Silde] RailsConf 2015 - Nothing is Something</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[TaiwanUserID 台灣身分證字號驗證]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/24/taiwan-user-id/"/>
+    <updated>2018-07-24T21:38:14+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/24/taiwan-user-id</id>
+    <content type="html"><![CDATA[<p>你知道台灣身分證字號是怎麼算出來的嗎?</p>
+
+<!-- more -->
+
+
+<p>剛好公司同事有寫到，蠻有趣的來紀錄一下，要快還是要用 <code>while</code> 阿~</p>
+
+<h1>公式</h1>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>戶籍代表的字母數字：
+</span><span class='line'>Ａ台北市-10 Ｂ台中市-11 Ｃ基隆市-12 Ｄ台南市-13 Ｅ高雄市-14 Ｆ台北縣-15
+</span><span class='line'>Ｇ宜蘭縣-16 Ｈ桃園縣-17 Ｉ嘉義市-34 Ｊ新竹縣-18 Ｋ苗栗縣-19 Ｌ台中縣-20
+</span><span class='line'>Ｍ南投縣-21 Ｎ彰化縣-22 Ｏ新竹市-35 Ｐ雲林縣-23 Ｑ嘉義縣-24 Ｒ台南縣-25
+</span><span class='line'>Ｓ高雄縣-26 Ｔ屏東縣-27 Ｕ花蓮縣-28 Ｖ台東縣-29 Ｗ金門縣-32 Ｘ澎湖縣-30
+</span><span class='line'>Ｙ陽明山-31 Ｚ連江縣-33
+</span><span class='line'>
+</span><span class='line'>公式
+</span><span class='line'>A123456789 -&gt; 10123456789
+</span><span class='line'>
+</span><span class='line'>1   0   1    2    3    4    5    6    7   8   9 (拆解字母後的數字)
+</span><span class='line'>*   *   *    *    *    *    *    *    *   *   *
+</span><span class='line'>1   9   8    7    6    5    4    3    2   1   1 (固定係數)
+</span><span class='line'>-----------------------------------------------
+</span><span class='line'>1 + 0 + 8 + 14 + 18 + 20 + 20 + 18 + 14 + 8 + 9 = 130
+</span><span class='line'>
+</span><span class='line'>130 % 10 == 0</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Code</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;benchmark&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">LOCATION_CODE</span> <span class="o">=</span> <span class="p">{</span>
+</span><span class='line'>  <span class="s1">&#39;A&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">0</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;B&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;C&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;D&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;E&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;F&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;G&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">6</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;H&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">7</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;I&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;J&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">8</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;K&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;L&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">0</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;M&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;N&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;O&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;P&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;Q&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;R&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">5</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>  <span class="s1">&#39;S&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">6</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;T&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">7</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;U&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">8</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;V&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">9</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;W&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;X&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">0</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;Y&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">1</span><span class="o">]</span><span class="p">,</span> <span class="s1">&#39;Z&#39;</span> <span class="o">=&gt;</span> <span class="o">[</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">MULTIPLIER</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">9</span><span class="p">,</span> <span class="mi">8</span><span class="p">,</span> <span class="mi">7</span><span class="p">,</span> <span class="mi">6</span><span class="p">,</span> <span class="mi">5</span><span class="p">,</span> <span class="mi">4</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">def</span> <span class="nf">id_card_validate</span><span class="p">(</span><span class="nb">id</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">return</span> <span class="kp">false</span> <span class="k">unless</span> <span class="nb">id</span> <span class="o">=~</span> <span class="sr">/\A[A-Z](1|2)\d{8}\z/</span>
+</span><span class='line'>  <span class="n">chars</span> <span class="o">=</span> <span class="nb">id</span><span class="o">.</span><span class="n">chars</span>
+</span><span class='line'>  <span class="n">numbers</span> <span class="o">=</span> <span class="no">LOCATION_CODE</span><span class="o">[</span><span class="n">chars</span><span class="o">.</span><span class="n">shift</span><span class="o">]</span> <span class="o">+</span> <span class="n">chars</span><span class="o">.</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:to_i</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">sum</span> <span class="o">=</span> <span class="n">numbers</span><span class="o">.</span><span class="n">zip</span><span class="p">(</span><span class="no">MULTIPLIER</span><span class="p">)</span><span class="o">.</span><span class="n">map</span><span class="p">{</span> <span class="o">|</span><span class="n">a</span><span class="p">,</span> <span class="n">b</span><span class="o">|</span> <span class="n">a</span> <span class="o">*</span> <span class="n">b</span> <span class="p">}</span><span class="o">.</span><span class="n">reduce</span><span class="p">(</span><span class="ss">:+</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1"># sum, i = 0, 0</span>
+</span><span class='line'>  <span class="c1"># while i &lt;= 10</span>
+</span><span class='line'>  <span class="c1">#   sum += numbers[i] * MULTIPLIER[i]</span>
+</span><span class='line'>  <span class="c1">#   i += 1</span>
+</span><span class='line'>  <span class="c1"># end</span>
+</span><span class='line'>  <span class="p">(</span><span class="n">sum</span> <span class="o">%</span> <span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">zero?</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">n</span> <span class="o">=</span> <span class="mi">100000</span>
+</span><span class='line'><span class="no">Benchmark</span><span class="o">.</span><span class="n">bmbm</span> <span class="k">do</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">x</span><span class="o">.</span><span class="n">report</span><span class="p">(</span><span class="s1">&#39;leonji&#39;</span><span class="p">){</span> <span class="n">n</span><span class="o">.</span><span class="n">times</span><span class="p">{</span> <span class="n">id_card_validate</span><span class="p">(</span><span class="s1">&#39;A123456789&#39;</span><span class="p">)</span> <span class="p">}</span> <span class="p">}</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># Rehearsal ------------------------------------------</span>
+</span><span class='line'><span class="c1"># leonji   0.770000   0.010000   0.780000 (  0.796012)</span>
+</span><span class='line'><span class="c1"># --------------------------------- total: 0.780000sec</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">#              user     system      total        real</span>
+</span><span class='line'><span class="c1"># leonji   0.770000   0.000000   0.770000 (  0.792737)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="http://tzoyiing.pixnet.net/blog/post/29821245-%5B%E8%BD%89%E8%B2%BC%5D-%E8%BA%AB%E4%BB%BD%E8%A8%BC%E5%AD%97%E8%99%9F%E7%B7%A8%E7%A2%BC%E5%85%AC%E5%BC%8F%E8%AA%AA%E6%98%8E~%E6%95%99%E4%BD%A0%E5%A6%82%E4%BD%95%E9%A9%97">[轉貼] 身份證字號編碼公式說明~教你如何驗證</a></li>
+<li><a href="https://tonytonyjan.net/2015/04/15/national-identification-card-validator-of-taiwan/">台灣身份證字號驗證器</a></li>
+<li><a href="https://github.com/wayne5540/taiwanese_id_builder">taiwanese_id_builder</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Environment Banner]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/23/environment-banner/"/>
+    <updated>2018-07-23T21:35:24+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/23/environment-banner</id>
+    <content type="html"><![CDATA[<p>可以很快速的知道目前環境上的版本是什麼</p>
+
+<!-- more -->
+
+
+<p>公司因為多台機器不同環境，因此有同事做了一個 <code>Environment banner</code>，可以很方便地知道目前是哪一個 branch 哪一個 版本，這邊就來記錄一下</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># app/helpers/environment_banner_helper.rb</span>
+</span><span class='line'><span class="k">module</span> <span class="nn">EnvironmentBannerHelper</span>
+</span><span class='line'>  <span class="no">RELEASE_INFO_PATH</span> <span class="o">=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">public_path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;release_info&#39;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">current_branch</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">git_available?</span>
+</span><span class='line'>      <span class="c1"># 讀取當前 HEAD 所在的 branch 名稱</span>
+</span><span class='line'>      <span class="sb">`git rev-parse --abbrev-ref HEAD`</span><span class="o">.</span><span class="n">chomp</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="c1"># 當在 deploy 的時候，無法用 git (除非另外裝)，因此可以先將資訊存放在某的檔案，或是環境變數</span>
+</span><span class='line'>      <span class="n">git_info</span><span class="o">[</span><span class="ss">:branch</span><span class="o">]</span> <span class="c1"># 檔案</span>
+</span><span class='line'>      <span class="c1"># ENV.fetch(&quot;CURRENT_BRANCH&quot;, &quot;--branch-not-found--&quot;) # ENV</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">current_sha</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">git_available?</span>
+</span><span class='line'>      <span class="c1"># 讀取當前的 log 最新一行</span>
+</span><span class='line'>      <span class="sb">`git log --oneline -1`</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="c1"># 當在 deploy 的時候，無法用 git (除非另外裝)，因此可以先將資訊存放在某的檔案，或是環境變數</span>
+</span><span class='line'>      <span class="n">git_info</span><span class="o">[</span><span class="ss">:sha</span><span class="o">]</span> <span class="c1"># 檔案</span>
+</span><span class='line'>      <span class="c1"># ENV.fetch(&quot;CURRENT_SHA&quot;, &quot;--sha-not-found--&quot;) # ENV</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># 確認當前環境有沒有 git</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">git_available?</span>
+</span><span class='line'>    <span class="n">to_dev_null</span> <span class="o">=</span> <span class="s2">&quot;&gt; /dev/null 2&gt;&amp;1&quot;</span>
+</span><span class='line'>    <span class="nb">system</span><span class="p">(</span><span class="s2">&quot;which git </span><span class="si">#{</span><span class="n">to_dev_null</span><span class="si">}</span><span class="s2"> &amp;&amp; git rev-parse --git-dir </span><span class="si">#{</span><span class="n">to_dev_null</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1"># 主要是為了 capistrano 上面會有不同的 release 資料夾</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">release_number</span>
+</span><span class='line'>    <span class="k">return</span> <span class="k">unless</span> <span class="n">check_release_info</span> <span class="o">&amp;&amp;</span> <span class="no">IO</span><span class="o">.</span><span class="n">readlines</span><span class="p">(</span><span class="no">RELEASE_INFO_PATH</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">]</span>
+</span><span class='line'>    <span class="no">IO</span><span class="o">.</span><span class="n">readlines</span><span class="p">(</span><span class="no">RELEASE_INFO_PATH</span><span class="p">)</span><span class="o">[</span><span class="mi">0</span><span class="o">].</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/\D/</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span><span class="o">.</span><span class="n">prepend</span><span class="p">(</span><span class="s1">&#39;#&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">git_info</span>
+</span><span class='line'>    <span class="k">return</span> <span class="p">{</span> <span class="ss">sha</span><span class="p">:</span> <span class="s2">&quot;N/A&quot;</span><span class="p">,</span> <span class="ss">branch</span><span class="p">:</span> <span class="s2">&quot;N/A&quot;</span><span class="p">}</span> <span class="k">unless</span> <span class="n">check_release_info</span> <span class="o">&amp;&amp;</span> <span class="no">IO</span><span class="o">.</span><span class="n">readlines</span><span class="p">(</span><span class="no">RELEASE_INFO_PATH</span><span class="p">)</span><span class="o">[</span><span class="mi">1</span><span class="o">]</span>
+</span><span class='line'>    <span class="n">line</span> <span class="o">=</span> <span class="no">IO</span><span class="o">.</span><span class="n">readlines</span><span class="p">(</span><span class="no">RELEASE_INFO_PATH</span><span class="p">)</span><span class="o">[</span><span class="mi">1</span><span class="o">].</span><span class="n">split</span><span class="p">(</span><span class="sr">/\s+/</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="ss">sha</span><span class="p">:</span>    <span class="n">line</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">6</span><span class="o">]</span><span class="p">,</span>
+</span><span class='line'>      <span class="ss">branch</span><span class="p">:</span> <span class="n">line</span><span class="o">[</span><span class="mi">1</span><span class="o">].</span><span class="n">gsub</span><span class="p">(</span><span class="sr">/refs\/heads\//</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">check_release_info</span>
+</span><span class='line'>    <span class="no">File</span><span class="o">.</span><span class="n">exist?</span> <span class="no">RELEASE_INFO_PATH</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># app/views/layouts/application.html.erb</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% unless </span><span class="no">Rails</span><span class="o">.</span><span class="n">env</span><span class="o">.</span><span class="n">production?</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;div class=&quot;environment-banner &lt;%= Rails.env %&gt;</span><span class="s2">&quot;&gt;</span>
+</span><span class='line'><span class="s2">    &lt;%= Rails.env %&gt; | &lt;%= &quot;</span><span class="c1">#{current_branch} @ #{current_sha} #{release_number}&quot; %&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sr">/div&gt;</span>
+</span><span class='line'><span class="sr">&lt;% end %&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="c">/* app/assets/stylesheets/application.scss */</span>
+</span><span class='line'><span class="nc">.environment-banner.development</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">background</span><span class="o">:</span> <span class="err">$</span><span class="nb">green</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">color</span><span class="o">:</span> <span class="err">$</span><span class="nb">white</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>capistrano deploy 時新增 <code>release_info</code> 檔案方式</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">set</span> <span class="ss">:repo_url</span><span class="p">,</span> <span class="s1">&#39;git@github.com:xxx/xxx.git&#39;</span>
+</span><span class='line'><span class="n">ask</span> <span class="ss">:branch</span><span class="p">,</span> <span class="sb">`git rev-parse --abbrev-ref HEAD`</span><span class="o">.</span><span class="n">chomp</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 將所有 git 撞況寫到一個 file 上，再透過該 file 來顯示</span>
+</span><span class='line'><span class="c1"># readlink 可以找到實際檔案位置，awk 分析出路徑上最後的 release 資料夾名稱</span>
+</span><span class='line'><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;echo current_release: `readlink -f </span><span class="si">#{</span><span class="n">release_path</span><span class="si">}</span><span class="s2"> | awk -F&#39;/&#39; &#39;{print $NF}&#39;` &gt; </span><span class="si">#{</span><span class="n">shared_path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;public/release_info&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># header</span>
+</span><span class='line'><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;git ls-remote -h </span><span class="si">#{</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:repo_url</span><span class="p">)</span><span class="si">}</span><span class="s2"> </span><span class="si">#{</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:branch</span><span class="p">)</span><span class="si">}</span><span class="s2"> &gt;&gt; </span><span class="si">#{</span><span class="n">shared_path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;public/release_info&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># tag</span>
+</span><span class='line'><span class="n">execute</span><span class="p">(</span><span class="s2">&quot;git ls-remote -t </span><span class="si">#{</span><span class="n">fetch</span><span class="p">(</span><span class="ss">:repo_url</span><span class="p">)</span><span class="si">}</span><span class="s2"> | tail -n 1 &gt;&gt; </span><span class="si">#{</span><span class="n">shared_path</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s1">&#39;public/release_info&#39;</span><span class="p">)</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Deploying Rails API + Nuxt.js + Devise-JWT API App to Production With Heroku]]></title>
@@ -12345,607 +13132,6 @@ s</p>
 <li><a href="http://www.flysnow.org/categories/Golang/page/5/">飛雪無情的博客 - golang</a></li>
 <li><a href="https://golangbot.com/learn-golang-series/">[golangbot.com] Golang tutorial series</a></li>
 <li><a href="https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/preface.html">astaxie.gitbooks.io</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[HTTP Benchmark 工具 Wrk]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/04/09/http-benchmark/"/>
-    <updated>2018-04-09T17:09:37+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/04/09/http-benchmark</id>
-    <content type="html"><![CDATA[<p>wrk 可以預先模擬多人來網站時，效能會如何!</p>
-
-<!-- more -->
-
-
-<p>這類的工具有很多，大概如下</p>
-
-<ul>
-<li>複雜
-
-<ul>
-<li>jmeter</li>
-<li>LoadRunner</li>
-</ul>
-</li>
-<li>簡單
-
-<ul>
-<li>wrk</li>
-<li>ab</li>
-</ul>
-</li>
-</ul>
-
-
-<p>那這次主要介紹是 wrk</p>
-
-<h1>安裝</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">wrk</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Command</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 跟服務器建立並保持的TCP連接數量 </span>
-</span><span class='line'><span class="o">-</span><span class="n">c</span><span class="p">,</span> <span class="o">--</span><span class="ss">connections</span><span class="p">:</span> <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="no">HTTP</span> <span class="n">connections</span> <span class="n">to</span> <span class="n">keep</span> <span class="nb">open</span> <span class="n">with</span>
-</span><span class='line'>                   <span class="n">each</span> <span class="n">thread</span> <span class="n">handling</span> <span class="n">N</span> <span class="o">=</span> <span class="n">connections</span><span class="o">/</span><span class="n">threads</span>
-</span><span class='line'><span class="c1"># 壓測時間</span>
-</span><span class='line'><span class="o">-</span><span class="n">d</span><span class="p">,</span> <span class="o">--</span><span class="ss">duration</span><span class="p">:</span>    <span class="n">duration</span> <span class="n">of</span> <span class="n">the</span> <span class="nb">test</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="mi">2</span><span class="n">s</span><span class="p">,</span> <span class="mi">2</span><span class="n">m</span><span class="p">,</span> <span class="mi">2</span><span class="n">h</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 使用多少個線程進行壓測   </span>
-</span><span class='line'><span class="o">-</span><span class="n">t</span><span class="p">,</span> <span class="o">--</span><span class="ss">threads</span><span class="p">:</span>     <span class="n">total</span> <span class="n">number</span> <span class="n">of</span> <span class="n">threads</span> <span class="n">to</span> <span class="n">use</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 指定Lua腳本路徑</span>
-</span><span class='line'><span class="o">-</span><span class="n">s</span><span class="p">,</span> <span class="o">--</span><span class="ss">script</span><span class="p">:</span>      <span class="no">LuaJIT</span> <span class="n">script</span><span class="p">,</span> <span class="n">see</span> <span class="no">SCRIPTING</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 為每一個HTTP請求添加HTTP頭</span>
-</span><span class='line'><span class="o">-</span><span class="n">H</span><span class="p">,</span> <span class="o">--</span><span class="ss">header</span><span class="p">:</span>      <span class="no">HTTP</span> <span class="n">header</span> <span class="n">to</span> <span class="n">add</span> <span class="n">to</span> <span class="n">request</span><span class="p">,</span> <span class="n">e</span><span class="o">.</span><span class="n">g</span><span class="o">.</span> <span class="s2">&quot;User-Agent: wrk&quot;</span>
-</span><span class='line'><span class="c1"># 在壓測結束後，打印延遲統計信息</span>
-</span><span class='line'>    <span class="o">--</span><span class="ss">latency</span><span class="p">:</span>     <span class="nb">print</span> <span class="n">detailed</span> <span class="n">latency</span> <span class="n">statistics</span>
-</span><span class='line'><span class="c1"># 超時時間</span>
-</span><span class='line'>    <span class="o">--</span><span class="ss">timeout</span><span class="p">:</span>     <span class="n">record</span> <span class="n">a</span> <span class="n">timeout</span> <span class="k">if</span> <span class="n">a</span> <span class="n">response</span> <span class="n">is</span> <span class="ow">not</span> <span class="n">received</span> <span class="n">within</span>
-</span><span class='line'>                   <span class="n">this</span> <span class="n">amount</span> <span class="n">of</span> <span class="n">time</span><span class="o">.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Exmple</h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">wrk</span> <span class="o">-</span><span class="n">t12</span> <span class="o">-</span><span class="n">c400</span> <span class="o">-</span><span class="n">d30s</span> <span class="o">-</span><span class="no">T30s</span> <span class="o">--</span><span class="n">latency</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span>
-</span><span class='line'><span class="c1"># -t12 用 12 個線程</span>
-</span><span class='line'><span class="c1"># -c400 模擬 400 個併發連接</span>
-</span><span class='line'><span class="c1"># -d30s 持續 30 秒</span>
-</span><span class='line'><span class="c1"># -T30s 設定超過 30 秒就算連接超時 </span>
-</span><span class='line'><span class="c1"># --latency 響應時間的分佈情況</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Running</span> <span class="mi">30</span><span class="n">s</span> <span class="nb">test</span> <span class="err">@</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span>
-</span><span class='line'>  <span class="mi">4</span> <span class="n">threads</span> <span class="ow">and</span> <span class="mi">1000</span> <span class="n">connections</span>
-</span><span class='line'>  <span class="no">Thread</span> <span class="no">Stats</span>   <span class="no">Avg</span>      <span class="no">Stdev</span>     <span class="no">Max</span>   <span class="o">+/-</span> <span class="no">Stdev</span>
-</span><span class='line'>    <span class="no">Latency</span>     <span class="mi">1</span><span class="o">.</span><span class="mi">38</span><span class="n">ms</span>    <span class="mi">1</span><span class="o">.</span><span class="mi">09</span><span class="n">ms</span>  <span class="mi">84</span><span class="o">.</span><span class="mi">91</span><span class="n">ms</span>   <span class="mi">91</span><span class="o">.</span><span class="mi">92</span><span class="o">%</span>
-</span><span class='line'>    <span class="no">Req</span><span class="o">/</span><span class="no">Sec</span>     <span class="mi">3</span><span class="o">.</span><span class="mi">62</span><span class="n">k</span>   <span class="mi">555</span><span class="o">.</span><span class="mi">58</span>     <span class="mi">4</span><span class="o">.</span><span class="mi">48</span><span class="n">k</span>    <span class="mi">81</span><span class="o">.</span><span class="mo">00</span><span class="o">%</span>
-</span><span class='line'>  <span class="no">Latency</span> <span class="no">Distribution</span>
-</span><span class='line'>     <span class="mi">50</span><span class="o">%</span>    <span class="mi">1</span><span class="o">.</span><span class="mi">22</span><span class="n">ms</span>
-</span><span class='line'>     <span class="mi">75</span><span class="o">%</span>    <span class="mi">1</span><span class="o">.</span><span class="mi">69</span><span class="n">ms</span>
-</span><span class='line'>     <span class="mi">90</span><span class="o">%</span>    <span class="mi">2</span><span class="o">.</span><span class="mi">27</span><span class="n">ms</span>
-</span><span class='line'>     <span class="mi">99</span><span class="o">%</span>    <span class="mi">3</span><span class="o">.</span><span class="mi">93</span><span class="n">ms</span>
-</span><span class='line'>  <span class="mi">108206</span> <span class="n">requests</span> <span class="k">in</span> <span class="mi">30</span><span class="o">.</span><span class="mi">08</span><span class="n">s</span><span class="p">,</span> <span class="mi">118</span><span class="o">.</span><span class="mi">88</span><span class="no">MB</span> <span class="n">read</span>
-</span><span class='line'>  <span class="no">Socket</span> <span class="ss">errors</span><span class="p">:</span> <span class="n">connect</span> <span class="mi">0</span><span class="p">,</span> <span class="n">read</span> <span class="mi">883</span><span class="p">,</span> <span class="n">write</span> <span class="mi">1</span><span class="p">,</span> <span class="n">timeout</span> <span class="mi">0</span>
-</span><span class='line'><span class="no">Requests</span><span class="o">/</span><span class="ss">sec</span><span class="p">:</span>   <span class="mi">3597</span><span class="o">.</span><span class="mi">39</span>
-</span><span class='line'><span class="no">Transfer</span><span class="o">/</span><span class="ss">sec</span><span class="p">:</span>      <span class="mi">3</span><span class="o">.</span><span class="mi">95</span><span class="no">MB</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><code>Latency</code>: 響應時間</li>
-<li><code>Req/Sec</code>: 每個線程每秒鐘的完成的請求數</li>
-<li><code>Avg</code>: 平均值</li>
-<li><code>Stdev (Standard Deviation)</code>: 即標準偏差，是統計學的一個名詞，這裡表示請求響應時間的離散程度，值越大代表請求響應時間的差距越大，系統的響應約不穩定。</li>
-<li><code>Max</code>: 最大值</li>
-<li><code>+/- Stdev</code>: 正負一個標準差佔比</li>
-<li><code>Latency Distribution</code>: 50% 在 1.22ms 以內完成 / 99% 在 3.93ms 以內完成</li>
-<li><code>Socket errors</code>: 分為 <code>連接錯誤</code>, <code>讀取錯誤</code>, <code>寫入錯誤</code>, <code>超時錯誤</code></li>
-<li><code>Requests/sec</code>: 每秒請求數量，也就是並發能力</li>
-</ul>
-
-
-<h1>腳本 scroipt 測試複雜場景</h1>
-
-<p>wrk 支援 <code>lua</code> 的腳本</p>
-
-<p>先建立一個 <code>test.lua</code> 的 file</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='lua'><span class='line'><span class="c1">-- example HTTP POST script which demonstrates setting the</span>
-</span><span class='line'><span class="c1">-- HTTP method, body, and adding a header</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">wrk</span><span class="p">.</span><span class="n">method</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">POST&quot;</span>
-</span><span class='line'><span class="n">wrk</span><span class="p">.</span><span class="n">body</span>   <span class="o">=</span> <span class="s2">&quot;</span><span class="s">foo=bar&amp;baz=quux&quot;</span>
-</span><span class='line'><span class="n">wrk</span><span class="p">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;</span><span class="s">Content-Type&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="s2">&quot;</span><span class="s">application/x-www-form-urlencoded&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>執行</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">wrk</span> <span class="o">-</span><span class="n">t12</span> <span class="o">-</span><span class="n">c100</span> <span class="o">-</span><span class="n">d30s</span> <span class="o">-</span><span class="no">T30s</span> <span class="o">--</span><span class="n">script</span><span class="o">=</span><span class="n">post</span><span class="o">.</span><span class="n">lua</span> <span class="o">--</span><span class="n">latency</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="ss">localhost</span><span class="p">:</span><span class="mi">3000</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>wrk 接受的屬性</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">local</span> <span class="n">wrk</span> <span class="o">=</span> <span class="p">{</span>
-</span><span class='line'>   <span class="n">scheme</span>  <span class="o">=</span> <span class="s2">&quot;http&quot;</span><span class="p">,</span>
-</span><span class='line'>   <span class="n">host</span>    <span class="o">=</span> <span class="s2">&quot;localhost&quot;</span><span class="p">,</span>
-</span><span class='line'>   <span class="n">port</span>    <span class="o">=</span> <span class="kp">nil</span><span class="p">,</span>
-</span><span class='line'>   <span class="nb">method</span>  <span class="o">=</span> <span class="s2">&quot;GET&quot;</span><span class="p">,</span>
-</span><span class='line'>   <span class="n">path</span>    <span class="o">=</span> <span class="s2">&quot;/&quot;</span><span class="p">,</span>
-</span><span class='line'>   <span class="n">headers</span> <span class="o">=</span> <span class="p">{},</span>
-</span><span class='line'>   <span class="n">body</span>    <span class="o">=</span> <span class="kp">nil</span><span class="p">,</span>
-</span><span class='line'>   <span class="n">thread</span>  <span class="o">=</span> <span class="kp">nil</span><span class="p">,</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>wrk 提供的 hook 函數</h3>
-
-<ul>
-<li>setup 函數</li>
-</ul>
-
-
-<p>這個函數在目標 IP 地址已經解析完, 並且所有 thread 已經生成, 但是還沒有開始時被調用. 每個線程執行一次這個函數.
-可以通過thread:get(name),  thread:set(name, value)設置線程級別的變量.</p>
-
-<ul>
-<li>init 函數</li>
-</ul>
-
-
-<p>每次請求發送之前被調用.
-可以接受 wrk 命令行的額外參數. 通過 &ndash; 指定.</p>
-
-<ul>
-<li>delay函數</li>
-</ul>
-
-
-<p>這個函數返回一個數值, 在這次請求執行完以後延遲多長時間執行下一個請求. 可以對應 thinking time 的場景.</p>
-
-<ul>
-<li>request函數</li>
-</ul>
-
-
-<p>通過這個函數可以每次請求之前修改本次請求的屬性. 返回一個字符串. 這個函數要慎用, 會影響測試端性能.</p>
-
-<ul>
-<li>response</li>
-</ul>
-
-
-<p>每次請求返回以後被調用，可以根據響應內容做特殊處理，比如遇到特殊響應停止執行測試，或輸出到控制台等等。</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='lua'><span class='line'><span class="c1">-- 實現每個請求前會有隨機的延遲</span>
-</span><span class='line'><span class="c1">-- example script that demonstrates adding a random</span>
-</span><span class='line'><span class="c1">-- 10-50ms delay before each request</span>
-</span><span class='line'><span class="k">function</span> <span class="nf">delay</span><span class="p">()</span>
-</span><span class='line'>   <span class="k">return</span> <span class="nb">math.random</span><span class="p">(</span><span class="mi">10</span><span class="p">,</span> <span class="mi">50</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='lua'><span class='line'><span class="c1">-- 每個線程要先進行認證，認證之後獲取token以進行壓測</span>
-</span><span class='line'><span class="n">token</span> <span class="o">=</span> <span class="kc">nil</span>
-</span><span class='line'><span class="n">path</span>  <span class="o">=</span> <span class="s2">&quot;</span><span class="s">/authenticate&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">request</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
-</span><span class='line'>   <span class="k">return</span> <span class="n">wrk</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="s2">&quot;</span><span class="s">GET&quot;</span><span class="p">,</span> <span class="n">path</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">response</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">status</span><span class="p">,</span> <span class="n">headers</span><span class="p">,</span> <span class="n">body</span><span class="p">)</span>
-</span><span class='line'>   <span class="k">if</span> <span class="ow">not</span> <span class="n">token</span> <span class="ow">and</span> <span class="n">status</span> <span class="o">==</span> <span class="mi">200</span> <span class="k">then</span>
-</span><span class='line'>      <span class="n">token</span> <span class="o">=</span> <span class="n">headers</span><span class="p">[</span><span class="s2">&quot;</span><span class="s">X-Token&quot;</span><span class="p">]</span>
-</span><span class='line'>      <span class="n">path</span>  <span class="o">=</span> <span class="s2">&quot;</span><span class="s">/resource&quot;</span>
-</span><span class='line'>      <span class="n">wrk</span><span class="p">.</span><span class="n">headers</span><span class="p">[</span><span class="s2">&quot;</span><span class="s">X-Token&quot;</span><span class="p">]</span> <span class="o">=</span> <span class="n">token</span>
-</span><span class='line'>   <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='lua'><span class='line'><span class="c1">-- 壓測支持HTTP pipeline的服務</span>
-</span><span class='line'><span class="c1">-- 通過在init方法中將三個HTTP request請求拼接在一起，實現每次發送三個請求，以使用HTTP pipeline。</span>
-</span><span class='line'><span class="n">init</span> <span class="o">=</span> <span class="k">function</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
-</span><span class='line'>   <span class="kd">local</span> <span class="n">r</span> <span class="o">=</span> <span class="p">{}</span>
-</span><span class='line'>   <span class="n">r</span><span class="p">[</span><span class="mi">1</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrk</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s">/?foo&quot;</span><span class="p">)</span>
-</span><span class='line'>   <span class="n">r</span><span class="p">[</span><span class="mi">2</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrk</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s">/?bar&quot;</span><span class="p">)</span>
-</span><span class='line'>   <span class="n">r</span><span class="p">[</span><span class="mi">3</span><span class="p">]</span> <span class="o">=</span> <span class="n">wrk</span><span class="p">.</span><span class="n">format</span><span class="p">(</span><span class="kc">nil</span><span class="p">,</span> <span class="s2">&quot;</span><span class="s">/?baz&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>   <span class="n">req</span> <span class="o">=</span> <span class="nb">table.concat</span><span class="p">(</span><span class="n">r</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">request</span> <span class="o">=</span> <span class="k">function</span><span class="p">()</span>
-</span><span class='line'>   <span class="k">return</span> <span class="n">req</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><a href="https://github.com/wg/wrk/tree/master/scripts">更多 scripts 範本</a></li>
-</ul>
-
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="https://github.com/wg/wrk">wrk git</a></li>
-<li><a href="https://www.restran.net/2016/09/27/wrk-http-benchmark/">使用 wrk 來測試 HTTP 性能</a></li>
-<li><a href="http://zjumty.iteye.com/blog/2221040">wrk &ndash; 小巧輕盈的 http 性能測試工具</a></li>
-<li><a href="https://yq.aliyun.com/articles/35251">使用ab和wrk對OSS進行benchmark測試</a></li>
-<li><a href="https://coolshell.cn/articles/17381.html">性能測試應該怎麼做？</a></li>
-<li><a href="http://zhaox.github.io/benchmark/2016/12/28/wrk-guidelines">Http壓測工具wrk使用指南</a></li>
-<li><a href="https://github.com/wg/wrk/tree/master/scripts">更多 scripts 範本</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Linux 指令]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/04/09/linux-command/"/>
-    <updated>2018-04-09T17:03:31+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/04/09/linux-command</id>
-    <content type="html"><![CDATA[<p>大部分人都只知道，基本指令 <code>ls</code> <code>cd</code> 等等，但其實還有很多好用的指令</p>
-
-<!-- more -->
-
-
-<p></p>
-
-<h1>screen</h1>
-
-<blockquote><p>可以讓一個終端機當成好幾個來使用</p></blockquote>
-
-<h3>參數</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 開新的視窗</span>
-</span><span class='line'><span class="n">screen</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 列出目前所有執行中的 screen 工作環境</span>
-</span><span class='line'><span class="n">screen</span> <span class="o">-</span><span class="n">ls</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 重新連接執行中的 screen 工作環境</span>
-</span><span class='line'><span class="n">screen</span> <span class="o">-</span><span class="n">r</span> <span class="o">[</span><span class="n">pid</span><span class="o">.</span><span class="n">tty</span><span class="o">.</span><span class="n">host</span><span class="o">]</span>    
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 開啟紀錄功能，會產生log檔案 screenlog.0</span>
-</span><span class='line'><span class="n">screen</span> <span class="o">-</span><span class="n">L</span>
-</span><span class='line'><span class="n">cat</span> <span class="n">screenlog</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 將廢棄的 screen 工作環境清除</span>
-</span><span class='line'><span class="n">screen</span> <span class="o">-</span><span class="n">wipe</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>指令</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 卸離 screen 工作環境</span>
-</span><span class='line'><span class="no">Ctrl</span> <span class="o">+</span> <span class="n">A</span> <span class="o">+</span> <span class="n">D</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><a href="https://blog.gtwang.org/linux/screen-command-examples-to-manage-linux-terminals/">使用 Screen 指令操控 UNIX/Linux 終端機的教學與範例</a></li>
-</ul>
-
-
-<h1>top</h1>
-
-<blockquote><p>能夠即時顯示系統中各個進程的資源佔用狀況</p></blockquote>
-
-<ul>
-<li><a href="http://www.cnblogs.com/peida/archive/2012/12/24/2831353.html">每天一個linux命令（44）：top命令</a></li>
-<li><a href="http://blog.xuite.net/tolarku/blog/66114556-htop+%E8%A7%80%E6%B8%AC%E7%B3%BB%E7%B5%B1%E7%9A%84%E7%8B%80%E6%85%8B+-+%E5%8F%96%E4%BB%A3+top+%E6%8C%87%E4%BB%A4">htop 觀測系統的狀態 - 取代 top 指令</a></li>
-<li><a href="https://linux.cn/article-3141-1.html">為什麼 Linux 的 htop 命令完勝 top 命令</a></li>
-<li><a href="https://blog.gtwang.org/linux/ps-top-find-processes-by-cpu-memory-usage/">Linux 用 ps 與 top 指令找出最耗費 CPU 與記憶體資源的程式</a></li>
-</ul>
-
-
-<h1>ps</h1>
-
-<blockquote><p>Process Status的縮寫。用來列出系統中當前運行的那些進程。</p>
-
-<p>ps命令列出的是當前那些進程的快照，就是執行ps命令的那個時刻的那些進程，如果想要動態的顯示進程信息，就可以使用top命令。</p></blockquote>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 顯示較詳細的資訊</span>
-</span><span class='line'><span class="n">ps</span> <span class="n">au</span>
-</span><span class='line'><span class="c1"># 顯示所有包含其他使用者的行程 </span>
-</span><span class='line'><span class="n">ps</span> <span class="n">auxs</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><a href="http://www.cnblogs.com/peida/archive/2012/12/19/2824418.html">每天一個linux命令（41）：ps命令</a></li>
-</ul>
-
-
-<h1>df</h1>
-
-<blockquote><p>用來檢查linux伺服器的檔案系統的磁碟空間佔用情況。</p></blockquote>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># -h 方便閱讀方式顯示</span>
-</span><span class='line'><span class="n">df</span> <span class="o">-</span><span class="n">h</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><a href="http://www.cnblogs.com/peida/archive/2012/12/07/2806483.html">每天一個linux命令（33）：df 命令</a></li>
-</ul>
-
-
-<h1>jobs</h1>
-
-<blockquote><p>可以看到背景目前有的指令狀況</p></blockquote>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">&amp;</span> <span class="c1"># 指令後面加上 `&amp;`，可將指令丟到後台中去執行</span>
-</span><span class='line'><span class="n">ctrl</span> <span class="o">+</span> <span class="n">z</span> <span class="c1">#前台任務丟到後台中暫停</span>
-</span><span class='line'><span class="n">jobs</span> <span class="c1"># 顯示目前所有的 jobs 狀態</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="o">]</span>  <span class="o">+</span> <span class="mi">93594</span> <span class="n">running</span>    <span class="nb">sleep</span> <span class="mi">10</span>
-</span><span class='line'><span class="n">fg</span> <span class="o">%</span><span class="n">jobnumber</span> <span class="err">將後台的任務拿到前台來處理</span>
-</span><span class='line'><span class="n">bg</span> <span class="o">%</span><span class="n">jobnumber</span> <span class="err">將任務放到後台中去處理</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件:</p>
-
-<ul>
-<li><a href="https://blog.gtwang.org/linux/screen-command-examples-to-manage-linux-terminals/">使用 Screen 指令操控 UNIX/Linux 終端機的教學與範例</a></li>
-<li><a href="http://www.cnblogs.com/peida/archive/2012/12/05/2803591.html">每天一個linux命令目錄</a></li>
-<li><a href="http://man7.org/linux/man-pages/man7/hier.7.html">man7 hier</a></li>
-<li><a href="http://manpages.ubuntu.com/manpages/xenial/man7/hier.7.html">ubuntu hier</a></li>
-<li><a href="http://linux.vbird.org/">鳥哥的私房菜</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[樂觀鎖 與 悲觀鎖 Optimistic Locking & Pessimistic Locking]]></title>
-    <link href="http://mgleon08.github.com/blog/2017/11/01/optimistic-locking-and-pessimistic-locking/"/>
-    <updated>2017-11-01T12:16:10+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2017/11/01/optimistic-locking-and-pessimistic-locking</id>
-    <content type="html"><![CDATA[<p>有時候在 db 中會發現重複的值，在交易頻繁的網站更是如此，那就需要 lock，rails 也提供方便的方法來鎖!</p>
-
-<!-- more -->
-
-
-<h2>樂觀鎖</h2>
-
-<ul>
-<li>每次去拿數據的時候，都認為別人不會修改數據，所以不會對數據上鎖，這樣在你拿數據的時候別人也能拿和你屬於同一條的數據。</li>
-<li>在更新數據時，會判斷在這期間是否有人更新過數據，如果有，則本次更新失敗；否則成功。</li>
-<li>由於多個用戶可以同時對同一條數據進行訪問，增加了數據庫的吞吐量。</li>
-<li>適合在資源爭用不激烈的時候使用。</li>
-</ul>
-
-
-<blockquote><p>使用樂觀鎖之前需要給數據庫增加一列 :lock_version，Rails 會自動識別這一列，像數據庫提交數據的時候自動帶上。</p></blockquote>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">retry_times</span> <span class="o">=</span> <span class="mi">3</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">begin</span>
-</span><span class='line'>    <span class="vi">@order</span><span class="o">.</span><span class="n">with_lock</span> <span class="k">do</span>
-</span><span class='line'>        <span class="vi">@order</span><span class="o">.</span><span class="n">set_paid!</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'><span class="k">rescue</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">StaleObjectError</span> <span class="o">=&gt;</span> <span class="n">e</span>
-</span><span class='line'>    <span class="n">retry_times</span> <span class="o">-=</span> <span class="mi">1</span>
-</span><span class='line'>    <span class="k">if</span> <span class="n">retry_times</span> <span class="o">&gt;</span> <span class="mi">0</span>
-</span><span class='line'>        <span class="k">retry</span>
-</span><span class='line'>    <span class="k">else</span>
-</span><span class='line'>        <span class="k">raise</span> <span class="n">e</span>
-</span><span class='line'>    <span class="k">end</span>
-</span><span class='line'><span class="k">rescue</span> <span class="o">=&gt;</span> <span class="n">e</span>
-</span><span class='line'>    <span class="k">raise</span> <span class="n">e</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h2>悲觀鎖</h2>
-
-<ul>
-<li>每次去拿數據的時候，都認為別人會修改數據，因此會對數據上鎖，這樣在自己讀寫數據的過程中，別人不能讀寫這條數據，只能等待本次處理結束，才能訪問。</li>
-<li>嚴謹、有效的保證了數據的有效行</li>
-<li>不能同時對數據庫中同一條數據進行訪問，大大減少了數據庫的吞吐量。</li>
-<li>需要持續的與數據庫保持連接，因此不適合web應用</li>
-<li>實現起來，比較麻煩。</li>
-<li>在資源爭用比較嚴重的時候比較合適</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># rails</span>
-</span><span class='line'><span class="n">account</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">find</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
-</span><span class='line'><span class="no">Account</span><span class="o">.</span><span class="n">transaction</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">lock!</span>
-</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">balance</span> <span class="o">-=</span> <span class="mi">100</span>
-</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">save!</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 和下面是等價的</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">account</span><span class="o">.</span><span class="n">with_lock</span> <span class="k">do</span>
-</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">balance</span> <span class="o">-=</span> <span class="mi">100</span>
-</span><span class='line'>    <span class="n">account</span><span class="o">.</span><span class="n">save!</span>
-</span><span class='line'><span class="k">end</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件:</p>
-
-<ul>
-<li><a href="https://rails.ruby.tw/active_record_querying.html#%E6%9B%B4%E6%96%B0%E6%99%82%E9%8E%96%E5%AE%9A%E8%A8%98%E9%8C%84">更新時鎖定記錄</a></li>
-<li><a href="https://ruby-china.org/topics/28963">Rails 中樂觀鎖與悲觀鎖的使用</a></li>
-<li><a href="https://openhome.cc/Gossip/HibernateGossip/IsolationLevel.html">簡介隔離層級</a></li>
-<li><a href="https://ruby-china.org/topics/28963">Rails 中樂觀鎖與悲觀鎖的使用</a></li>
-<li><a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Pessimistic.html">ActiveRecord::Locking::Pessimistic</a></li>
-<li><a href="http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html">ActiveRecord::Locking::Optimistic</a></li>
 </ul>
 
 ]]></content>

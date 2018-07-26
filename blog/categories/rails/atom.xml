@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-07-22T23:16:37+08:00</updated>
+  <updated>2018-07-26T21:40:11+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,450 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Nothing Is Something by Sandi Metz]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/26/nothing-is-something-by-sandi-metz/"/>
+    <updated>2018-07-26T21:36:02+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/26/nothing-is-something-by-sandi-metz</id>
+    <content type="html"><![CDATA[<p>這是 Sandi Metz 2015 的演講，雖然有點舊，但還是很不錯，來紀錄一下</p>
+
+<!-- more -->
+
+
+<h3>Smalltalk Infected</h3>
+
+<p>一開始先介紹 <code>if</code> 可以改寫為自己的 method</p>
+
+<pre><code class="ruby">true.class # TrueClass
+false.class # FalseClass
+</code></pre>
+
+<pre><code class="ruby">class TrueClass
+ def if_true
+    yield
+    self
+ end
+
+ def if_false
+    self
+ end
+end
+
+class FalseClass
+ def if_true
+    self
+ end
+
+ def if_false
+    yield
+    self
+ end
+end
+</code></pre>
+
+<pre><code class="ruby">(1 == 1).if_true{ puts "evaluated block" }
+evaluated block
+# =&gt; true
+</code></pre>
+
+<p>接下來改寫為 <code>Object</code> <code>FalseClass</code> <code>NilClass</code> 因為在 ruby 的世界中，除了 <code>false</code> 和 <code>nil</code> 是 &ldquo;Falsy"，其他都是 "truthy&rdquo;</p>
+
+<pre><code class="ruby">class Object
+ def if_true
+    yield
+    self
+ end
+
+ def if_false
+    self
+ end
+end
+
+class FalseClass
+ def if_true
+    self
+ end
+
+ def if_false
+    yield
+    self
+ end
+end
+
+class NilClass
+ def if_true
+    self
+ end
+
+ def NilClass
+    yield
+    self
+ end
+end
+</code></pre>
+
+<pre><code class="ruby">(1==1).if_true{ puts 'a' }.if_false{ puts'b' }
+a
+# true
+</code></pre>
+
+<p>但我們並不想改寫 ruby 原本就有的 method，而是將上面的技巧應用在需要的地方</p>
+
+<h3>Condition Averse</h3>
+
+<p>Sometimes nil is nothing</p>
+
+<pre><code class="ruby">ids = ['pig', '', 'sheep']
+animals = ids.map {|id| Animal.find(id)}
+# =&gt; [#&lt;Animal:0x007f94b290ae90 @name="pig"&gt;, nil,
+     #&lt;Animal:0x007f94b290ae18 @name="sheep"&gt;]
+
+animals.each { |animal| puts animal.name }
+# =&gt; 'pig'
+# NoMethodError: undefined method `name' for nil:NilClass
+
+animals.each { |animal| puts animal.nil? ? 'no animal' : animal.name }
+# =&gt; 'pig'
+#    'no animal'
+#    'sheep'
+
+animals.each { |animal| puts animal &amp;&amp; animal.name }
+animals.each { |animal| puts animal.try(:name) }
+animals.each { |animal| puts animal.nil? ? '' : animal.name }
+animals.each { |animal| puts animal == nil ? '' : animal.name }
+animals.each { |animal| puts animal.is_a?(NilClass) ? '' : animal.name }
+# =&gt; 'pig'
+#    empty string
+#    'sheep'
+</code></pre>
+
+<h3>Message Centric</h3>
+
+<p>新增 <code>MissingAnimal</code> class</p>
+
+<pre><code class="ruby">class Animal
+  def name
+    ...
+  end 
+end
+
+class MissingAnimal 
+  def name
+    'no animal'
+  end 
+end
+
+ids = ['pig', '', 'sheep']
+animals = ids.map {|id| Animal.find(id) || MissingAnimal.new}
+# =&gt; [#&lt;Animal: @name="pig"&gt;, #&lt;MissingAnimal:&gt;, #&lt;Animal: @name="sheep"&gt;]
+
+animals.each { |animal| puts animal.name } 
+# =&gt; 'pig'
+#    'no animal'
+#    'sheep'
+</code></pre>
+
+<p>但是這樣反而對 <code>MissingAnimal</code> 會有 dependency，接著在外面再包一層，將 dependency 封裝起來</p>
+
+<pre><code class="ruby">class GuaranteedAnimal 
+  def self.find(id)
+    Animal.find(id) || MissingAnimal.new 
+  end
+end
+
+animals = ids.map { |id|GuaranteedAnimal.find(id) }
+# =&gt; [#&lt;Animal: @name="pig"&gt;, 
+      #&lt;MissingAnimal:&gt;,
+      #&lt;Animal: @name="sheep"&gt;]
+
+animals.each {|animal| puts animal.name }
+# =&gt; 'pig'
+#    'no animal'
+#    'sheep'
+</code></pre>
+
+<h3>Abstraction Seeking</h3>
+
+<pre><code class="ruby">class House
+  def recite
+    (1..data.length).map { |i| line(i) }.join("\n")
+  end
+
+  def line(number)
+    "This is #{phrase(number)}.\n"
+  end
+
+  def phrase(number) 
+    parts(number).join(" ")
+  end
+
+  def parts(number) 
+    data.last(number)
+  end
+
+  def data
+    [ 'the horse and the hound and the horn that belonged to',
+    # ...
+    'the malt that lay in',
+    'the house that Jack built']
+  end
+end
+</code></pre>
+
+<p>接著 Implement <code>RandomHouse</code> <code>EchoHouse</code> without &lsquo;if&rsquo; statements</p>
+
+<p>用繼承 Inheritance?</p>
+
+<pre><code class="ruby">class RandomHouse &lt; House 
+  def data
+    @data ||= super.shuffle 
+  end
+end
+
+class EchoHouse &lt; House 
+  def parts(number)
+    super.zip(super).flatten 
+  end
+end
+</code></pre>
+
+<p>但這樣一個要改寫 <code>data</code> 另一個改寫 <code>parts</code>，當有新需求 <code>RandomEchoHouse</code>，那不就要這兩個 method 在寫一次，也不可能只繼承其中一個</p>
+
+<blockquote><p>Inheritance is for specialization is not for sharing code</p></blockquote>
+
+<p>改用組合 Composition 的方式來處理</p>
+
+<pre><code class="ruby">class House 
+  attr_reader :formatter, :data
+
+  def initialize(orderer: DefaultOrder.new, formatter: DefaultFormatter.new) 
+    @formatter = formatter
+    @data = orderer.order(DATA)
+  end
+
+  def parts(number) 
+    formatter.format(data.last(number))
+  end
+  # ...
+end
+
+class DefaultOrder 
+  def order(data)
+    data
+  end 
+end
+
+class RandomOrder 
+  def order(data)
+    data.shuffle 
+  end
+end
+
+class DefaultFormatter 
+  def format(parts)
+    parts
+  end 
+end
+
+class EchoFormatter 
+  def format(parts)
+    parts.zip(parts).flatten 
+  end
+end
+
+
+House.new(orderer: RandomOrder.new).line(12)
+House.new(formatter: EchoFormatter.new).line(12)
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://www.youtube.com/watch?v=OMPfEXIlTVE">[Video]RailsConf 2015 - Nothing is Something</a></li>
+<li><a href="https://speakerdeck.com/skmetz/nothing-is-something-railsconf">[Silde] RailsConf 2015 - Nothing is Something</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[TaiwanUserID 台灣身分證字號驗證]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/24/taiwan-user-id/"/>
+    <updated>2018-07-24T21:38:14+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/24/taiwan-user-id</id>
+    <content type="html"><![CDATA[<p>你知道台灣身分證字號是怎麼算出來的嗎?</p>
+
+<!-- more -->
+
+
+<p>剛好公司同事有寫到，蠻有趣的來紀錄一下，要快還是要用 <code>while</code> 阿~</p>
+
+<h1>公式</h1>
+
+<pre><code>戶籍代表的字母數字：
+Ａ台北市-10 Ｂ台中市-11 Ｃ基隆市-12 Ｄ台南市-13 Ｅ高雄市-14 Ｆ台北縣-15
+Ｇ宜蘭縣-16 Ｈ桃園縣-17 Ｉ嘉義市-34 Ｊ新竹縣-18 Ｋ苗栗縣-19 Ｌ台中縣-20
+Ｍ南投縣-21 Ｎ彰化縣-22 Ｏ新竹市-35 Ｐ雲林縣-23 Ｑ嘉義縣-24 Ｒ台南縣-25
+Ｓ高雄縣-26 Ｔ屏東縣-27 Ｕ花蓮縣-28 Ｖ台東縣-29 Ｗ金門縣-32 Ｘ澎湖縣-30
+Ｙ陽明山-31 Ｚ連江縣-33
+
+公式
+A123456789 -&gt; 10123456789
+
+1   0   1    2    3    4    5    6    7   8   9 (拆解字母後的數字)
+*   *   *    *    *    *    *    *    *   *   *
+1   9   8    7    6    5    4    3    2   1   1 (固定係數)
+-----------------------------------------------
+1 + 0 + 8 + 14 + 18 + 20 + 20 + 18 + 14 + 8 + 9 = 130
+
+130 % 10 == 0
+</code></pre>
+
+<h1>Code</h1>
+
+<pre><code class="ruby">require 'benchmark'
+
+LOCATION_CODE = {
+  'A' =&gt; [1, 0], 'B' =&gt; [1, 1], 'C' =&gt; [1, 2], 'D' =&gt; [1, 3], 'E' =&gt; [1, 4], 'F' =&gt; [1, 5], 'G' =&gt; [1, 6], 'H' =&gt; [1, 7], 'I' =&gt; [3, 4],
+  'J' =&gt; [1, 8], 'K' =&gt; [1, 9], 'L' =&gt; [2, 0], 'M' =&gt; [2, 1], 'N' =&gt; [2, 2], 'O' =&gt; [3, 5], 'P' =&gt; [2, 3], 'Q' =&gt; [2, 4], 'R' =&gt; [2, 5],
+  'S' =&gt; [2, 6], 'T' =&gt; [2, 7], 'U' =&gt; [2, 8], 'V' =&gt; [2, 9], 'W' =&gt; [3, 2], 'X' =&gt; [3, 0], 'Y' =&gt; [3, 1], 'Z' =&gt; [3, 3]
+}
+
+MULTIPLIER = [1, 9, 8, 7, 6, 5, 4, 3, 2, 1, 1]
+
+def id_card_validate(id)
+  return false unless id =~ /\A[A-Z](1|2)\d{8}\z/
+  chars = id.chars
+  numbers = LOCATION_CODE[chars.shift] + chars.map(&amp;:to_i)
+  sum = numbers.zip(MULTIPLIER).map{ |a, b| a * b }.reduce(:+)
+  # sum, i = 0, 0
+  # while i &lt;= 10
+  #   sum += numbers[i] * MULTIPLIER[i]
+  #   i += 1
+  # end
+  (sum % 10).zero?
+end
+
+n = 100000
+Benchmark.bmbm do |x|
+  x.report('leonji'){ n.times{ id_card_validate('A123456789') } }
+end
+
+# Rehearsal ------------------------------------------
+# leonji   0.770000   0.010000   0.780000 (  0.796012)
+# --------------------------------- total: 0.780000sec
+
+#              user     system      total        real
+# leonji   0.770000   0.000000   0.770000 (  0.792737)
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="http://tzoyiing.pixnet.net/blog/post/29821245-%5B%E8%BD%89%E8%B2%BC%5D-%E8%BA%AB%E4%BB%BD%E8%A8%BC%E5%AD%97%E8%99%9F%E7%B7%A8%E7%A2%BC%E5%85%AC%E5%BC%8F%E8%AA%AA%E6%98%8E~%E6%95%99%E4%BD%A0%E5%A6%82%E4%BD%95%E9%A9%97">[轉貼] 身份證字號編碼公式說明~教你如何驗證</a></li>
+<li><a href="https://tonytonyjan.net/2015/04/15/national-identification-card-validator-of-taiwan/">台灣身份證字號驗證器</a></li>
+<li><a href="https://github.com/wayne5540/taiwanese_id_builder">taiwanese_id_builder</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Environment Banner]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/23/environment-banner/"/>
+    <updated>2018-07-23T21:35:24+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/23/environment-banner</id>
+    <content type="html"><![CDATA[<p>可以很快速的知道目前環境上的版本是什麼</p>
+
+<!-- more -->
+
+
+<p>公司因為多台機器不同環境，因此有同事做了一個 <code>Environment banner</code>，可以很方便地知道目前是哪一個 branch 哪一個 版本，這邊就來記錄一下</p>
+
+<pre><code class="ruby"># app/helpers/environment_banner_helper.rb
+module EnvironmentBannerHelper
+  RELEASE_INFO_PATH = Rails.public_path.join('release_info')
+
+  def current_branch
+    if git_available?
+      # 讀取當前 HEAD 所在的 branch 名稱
+      `git rev-parse --abbrev-ref HEAD`.chomp
+    else
+      # 當在 deploy 的時候，無法用 git (除非另外裝)，因此可以先將資訊存放在某的檔案，或是環境變數
+      git_info[:branch] # 檔案
+      # ENV.fetch("CURRENT_BRANCH", "--branch-not-found--") # ENV
+    end
+  end
+
+  def current_sha
+    if git_available?
+      # 讀取當前的 log 最新一行
+      `git log --oneline -1`
+    else
+      # 當在 deploy 的時候，無法用 git (除非另外裝)，因此可以先將資訊存放在某的檔案，或是環境變數
+      git_info[:sha] # 檔案
+      # ENV.fetch("CURRENT_SHA", "--sha-not-found--") # ENV
+    end
+  end
+
+  # 確認當前環境有沒有 git
+  def git_available?
+    to_dev_null = "&gt; /dev/null 2&gt;&amp;1"
+    system("which git #{to_dev_null} &amp;&amp; git rev-parse --git-dir #{to_dev_null}")
+  end
+
+  # 主要是為了 capistrano 上面會有不同的 release 資料夾
+  def release_number
+    return unless check_release_info &amp;&amp; IO.readlines(RELEASE_INFO_PATH)[0]
+    IO.readlines(RELEASE_INFO_PATH)[0].gsub(/\D/, '').prepend('#')
+  end
+
+  def git_info
+    return { sha: "N/A", branch: "N/A"} unless check_release_info &amp;&amp; IO.readlines(RELEASE_INFO_PATH)[1]
+    line = IO.readlines(RELEASE_INFO_PATH)[1].split(/\s+/)
+    {
+      sha:    line[0][0..6],
+      branch: line[1].gsub(/refs\/heads\//, '')
+    }
+  end
+
+  def check_release_info
+    File.exist? RELEASE_INFO_PATH
+  end
+end
+</code></pre>
+
+<pre><code class="ruby"># app/views/layouts/application.html.erb
+&lt;% unless Rails.env.production? %&gt;
+  &lt;div class="environment-banner &lt;%= Rails.env %&gt;"&gt;
+    &lt;%= Rails.env %&gt; | &lt;%= "#{current_branch} @ #{current_sha} #{release_number}" %&gt;
+  &lt;/div&gt;
+&lt;% end %&gt;
+</code></pre>
+
+<pre><code class="css">/* app/assets/stylesheets/application.scss */
+.environment-banner.development {
+  background: $green;
+  color: $white;
+}
+</code></pre>
+
+<p>capistrano deploy 時新增 <code>release_info</code> 檔案方式</p>
+
+<pre><code class="ruby">set :repo_url, 'git@github.com:xxx/xxx.git'
+ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp
+
+# 將所有 git 撞況寫到一個 file 上，再透過該 file 來顯示
+# readlink 可以找到實際檔案位置，awk 分析出路徑上最後的 release 資料夾名稱
+execute("echo current_release: `readlink -f #{release_path} | awk -F'/' '{print $NF}'` &gt; #{shared_path.join('public/release_info')}")
+# header
+execute("git ls-remote -h #{fetch(:repo_url)} #{fetch(:branch)} &gt;&gt; #{shared_path.join('public/release_info')}")
+# tag
+execute("git ls-remote -t #{fetch(:repo_url)} | tail -n 1 &gt;&gt; #{shared_path.join('public/release_info')}")
+</code></pre>
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Deploying Rails API + Nuxt.js + Devise-JWT API App to Production With Heroku]]></title>
@@ -1073,395 +1517,6 @@ export default {
 <ul>
 <li><a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></li>
 <li><a href="https://medium.com/@fishpercolator/deploying-your-nuxt-rails-api-app-to-production-with-heroku-54efd09eec22">Deploying your Nuxt+Rails API app to production with Heroku</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rails 5.2 Credentials]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/07/14/rails-credentials/"/>
-    <updated>2018-07-14T00:22:53+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/07/14/rails-credentials</id>
-    <content type="html"><![CDATA[<p>rails5.2 開始 <code>config/secrets.yml</code> 已經被移除了，取而代之的是 <code>credentials</code></p>
-
-<!-- more -->
-
-
-<p>rails5.2 會新增兩個檔案</p>
-
-<ul>
-<li><p><code>config/credentials.yml.enc</code> is an encrypted file that will contain all your secret credentials，因為加密過可以很放新的推到 github</p></li>
-<li><p><code>config/master.key</code> is a file containing your encryption key</p></li>
-</ul>
-
-
-<p><code>mater.key</code> 是用來加解密 <code>credentials.yml.enc</code>，記得不要上到 github，要放到 <code>.gitignore</code></p>
-
-<pre><code class="ruby"># .gitignore
-# Ignore master key for decrypting credentials and more.
-/config/master.key
-</code></pre>
-
-<pre><code class="ruby"># 可以看說明
-rails credentials:help
-</code></pre>
-
-<p>因為經過加密，所以打開 <code>credentials.yml.enc</code> 會發現一串亂碼</p>
-
-<pre><code class="ruby"># credentials.yml.enc
-17NEkGq/xkDO...
-</code></pre>
-
-<p>如果要編輯檔案需要另外執行解密，才能夠進行編輯</p>
-
-<pre><code class="ruby"># EDITOR 可以改用其他編輯器 subl code 都可以
-EDITOR=vim rails credentials:edit
-</code></pre>
-
-<pre><code class="ruby"># aws:
-#   access_key_id: 123
-#   secret_access_key: 345
-
-# Used as the base secret for all MessageVerifiers in Rails, including the one protecting cookies.
-secret_key_base: 008174812dc5a309a0de...
-</code></pre>
-
-<p>離開後就會自動儲存</p>
-
-<pre><code class="ruby"># 這時候就會用 master.key 進行加密
-New credentials encrypted and saved.
-</code></pre>
-
-<p>讀取檔案</p>
-
-<pre><code class="ruby">Rails.application.credentials.dig(:secret_key_base)
-Rails.application.credentials[:secret_key_base]
-Rails.application.credentials.aws[:access_key_id]
-Rails.application.credentials.aws[:secret_access_key]
-Rails.application.credentials.secret_key_base
-</code></pre>
-
-<p>並且向其他 <code>yml</code> 檔案一樣，建立一在 <code>share</code> 的資料夾中，或是新增一個環境變數 <code>RAILS_MASTER_KEY</code></p>
-
-<h3>Environments</h3>
-
-<p>如果想像之前一樣，不同環境有不同的 key，可以設定成跟之前的 <code>secret.yml</code> 一樣</p>
-
-<pre><code class="ruby">development:
-  aws:
-    access_key_id: 123
-    secret_access_key: 345
-production:
-  aws:
-    access_key_id: 321
-    secret_access_key: 543
-</code></pre>
-
-<pre><code class="ruby">Rails.application.credentials[Rails.env.to_sym][:aws][:access_key_id]
-</code></pre>
-
-<h3>Production</h3>
-
-<p>如果在 <code>production</code> 環境，要做以下設定</p>
-
-<pre><code class="ruby">#config/environments/production.rb
-...
-config.require_master_key = true
-...
-</code></pre>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://medium.com/cedarcode/rails-5-2-credentials-9b3324851336">Rails 5.2 credentials</a></li>
-<li><a href="https://www.viget.com/articles/storing-secret-credentials-in-rails-5-2-and-up/">Storing Secret Credentials in Rails 5.2 and Up</a></li>
-<li><a href="https://keithpblog.org/post/encrypted-secrets/">Rails 5.2: encrypted secrets</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rails 中的 Attr_accessor, Has_many, Scope 怎麼來?]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/07/04/rails-class/"/>
-    <updated>2018-07-04T21:56:05+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/07/04/rails-class</id>
-    <content type="html"><![CDATA[<p>相信學 rails 的一定對 <code>attr_accessor</code>, <code>has_many</code>, <code>scope</code> 這些不陌生</p>
-
-<!-- more -->
-
-
-<p>但是到底是為什麼可以在 model 裡面直接下這些 method?</p>
-
-<p>先看一下 rails 的 model，可以這樣定義</p>
-
-<pre><code class="ruby"># 5.x.x
-class Klass &lt; ApplicationRecord
-  attr_accessor :name
-  has_many :books
-  scope :male, -&gt;{ where(gender:1) }
-end
-
-# 4.x.x
-class Klass &lt; ActiveRecord::Base
-  attr_accessor :name
-  has_many :books
-  scope :male, -&gt;{ where(gender:1) }
-end
-</code></pre>
-
-<p>可以知道 model 裡的是 <code>class</code> 並且是繼承 <code>ApplicationRecord</code> 因此判斷可能是屬於 <code>ApplicationRecord</code> 或者是更上層的某一個物件</p>
-
-<p>在 ruby 中，所有類別的類別都是 class 類別</p>
-
-<pre><code class="ruby">Object.class
-# =&gt; Class
-Kernel.class
-# =&gt; Module
-Module.class
-# =&gt; Class
-Class.class
-# =&gt; Class
-</code></pre>
-
-<h3>Class 的寫法</h3>
-
-<p>一般看到的 class</p>
-
-<pre><code class="ruby">class Klass
-  def hi
-    puts 'hi'
-  end
-end
-</code></pre>
-
-<p>相當於</p>
-
-<pre><code class="ruby"># 所有類別的名字都是一個常數(大寫開頭)，如果不是大寫就不會有自己的名字
-Klass = Class.new do
-  def hi
-    puts 'hi'
-  end
-end
-</code></pre>
-
-<p>既然知道了 model 裡的 class 實際上是 <code>Class.new</code> 接下來看一下 doc <a href="https://ruby-doc.org/core-2.2.0/Class.html#method-c-new">Class new</a></p>
-
-<blockquote><p>If a block is given, it is passed the class object, and the block is evaluated in the context of this class using class_eval.</p></blockquote>
-
-<p>意思是指，中間那段 Block 都會用 <code>class_eval</code> 來執行，</p>
-
-<pre><code class="ruby">Klass = Class.new do
-  def meth1
-    "hello"
-  end
-  def meth2
-    "bye"
-  end
-end
-
-a = Klass.new     #=&gt; #&lt;Klass:0x007f916006aa60&gt;
-a.meth1          #=&gt; "hello"
-a.meth2          #=&gt; "bye"
-</code></pre>
-
-<p>由此推斷以下相等</p>
-
-<pre><code class="ruby">class Klass
-  attr_accessor :name
-  has_many :books
-  scope :male, -&gt;{ where(gender:1) }
-end
-
-Klass = Class.new do
-  attr_accessor :name
-  has_many :books
-  scope :male, -&gt;{ where(gender:1) }
-end
-
-class Klass; end
-Klass.class_eval do 
-  attr_accessor :name
-  has_many :books
-  scope :male, -&gt;{ where(gender:1) }
-end
-</code></pre>
-
-<p>由此可知，<code>attr_accessor</code>, <code>has_many</code>, <code>scope</code> 都是由上層物件所定義好的 method</p>
-
-<p>看一下原始碼其中一段，可看到 <code>has_many</code>，是在一個 module 裡面，應該是透過 <code>include</code> 或是 <code>extend</code> 的方式，變成了 class 的 methods</p>
-
-<pre><code class="ruby"># rails/activerecord/lib/active_record/associations.rb
-# ...
-module ClassMethods
-# ...
-  def has_many(name, scope = nil, **options, &amp;extension)
-    reflection = Builder::HasMany.build(self, name, scope, options, &amp;extension)
-  Reflection.add_reflection self, name, reflection
-  end
-# ...
-end
-# ...
-</code></pre>
-
-<p>主要是研究一下看 rails 一些特別的功能是怎麼來的，要仔細的話就要去挖原始碼才能知道了</p>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="http://mgleon08.github.io/blog/2016/03/08/instance-eval-class-eval/">用 Instance_eval &amp; Class_eval 自己加 Method!</a></li>
-<li><a href="http://mgleon08.github.io/blog/2016/02/24/include-extend-require/">Ruby 中的 Include Extend Require Load</a></li>
-<li><a href="https://blog.frost.tw/posts/2017/10/22/The-ruby-s-class-is-free-Part-1/">自由的 Ruby 類別（一）</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[GCP BigQuery With API]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/06/27/gcp-bigquery-with-api/"/>
-    <updated>2018-06-27T21:18:35+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/06/27/gcp-bigquery-with-api</id>
-    <content type="html"><![CDATA[<p>最近剛好碰到 BigQuery，可以直接透過 API 帶 sql 指令去拉資料!</p>
-
-<!-- more -->
-
-
-<h3>安裝</h3>
-
-<pre><code class="ruby"># Gemfile
-gem 'google-cloud-bigquery'
-</code></pre>
-
-<pre><code class="ruby">bundle
-</code></pre>
-
-<p>裝 <a href="https://cloud.google.com/sdk/docs/downloads-interactive">安 gcp SDK</a></p>
-
-<pre><code class="ruby"># 安裝
-curl https://sdk.cloud.google.com | bash
-# Restart your shell
-exec -l $SHELL
-# 記得在 google 那邊要先開權限，才可以指定到自己要的 project
-gcloud init
-# auth，但最好的話是要申請一個 憑證，並設定在環境變數(environmentvalue)
-gcloud auth application-default login
-# 取得憑證
-gcloud auth application-default print-access-token
-</code></pre>
-
-<h3>執行</h3>
-
-<pre><code class="ruby">require "google/cloud/bigquery"
-
-# This uses Application Default Credentials to authenticate.
-# @see https://cloud.google.com/bigquery/docs/authentication/getting-started
-bigquery = Google::Cloud::Bigquery.new(project: "project_id")
-
-sql     = "SELECT " +
-          "CONCAT('https://stackoverflow.com/questions/', " +
-          "       CAST(id as STRING)) as url, view_count " +
-          "FROM `bigquery-public-data.stackoverflow.posts_questions` " +
-          "WHERE tags like '%google-bigquery%' " +
-          "ORDER BY view_count DESC LIMIT 10"
-results = bigquery.query sql
-
-results.each do |row|
-  puts "#{row[:url]}: #{row[:view_count]} views"
-end
-</code></pre>
-
-<h3>問題</h3>
-
-<p>在執行上有遇到一些問題，ruby 用 query 第一次去打的時候，回來的值卻會是空 Array，第二次就會有值</p>
-
-<p>可以看到下面 <code>job_complete</code> 也是 <code>false</code>，第二次打就會是 true</p>
-
-<pre><code class="ruby">bigquery.query(sql)
-
-# Sending HTTP post https://www.googleapis.com/bigquery/v2/projects/project_id/queries?
-# 200
-# #&lt;Hurley::Response POST https://www.googleapis.com/bigquery/v2/projects/project_id/queries == 200 (184 bytes) 11197ms&gt;
-# Success - #&lt;Google::Apis::BigqueryV2::QueryResponse:0x007fa1021033f8
-#  @job_complete=false,
-#  @job_reference=
-#   #&lt;Google::Apis::BigqueryV2::JobReference:0x007fa102102318
-#    @job_id="job_0HlGAo3KB4WrAGz20MypIHluup9B",
-#    @project_id="project_id"&gt;,
-#  @kind="bigquery#queryResponse"&gt;
-#  =&gt; []
-</code></pre>
-
-<h3>原因</h3>
-
-<p>Google 回覆</p>
-
-<p><code>job_complete=false</code> 代表這個 bigquery job 還沒跑完.</p>
-
-<p>在 bigquery 下 query 的時候, 執行 query 的 API call 會有一個 timeout, 當 API call 執行的時間超過這個 timeout 但是 query 還沒跑完的時候, API call 會 return HTTP code 200, 但是 query result 是空的, 並且 <code>job_complete = false.</code></p>
-
-<p>詳細可以參考文件[1]一開頭 &ldquo;Runs a BigQuery SQL query and returns results if the query completes within a specified timeout.&rdquo; 以及同一份文件下方的 timeoutMs 以及 jobComplete 這些參數.</p>
-
-<p>如前所述, 如果收到 job_complete = false 的 HTTP code 200 response, 表示 job 還在執行. 這時候的標準做法是去 poll GetQueryResults 這個 API (參考文件[2]) 直到 job_complete = true 再拿取結果.</p>
-
-<ul>
-<li><a href="https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query">1. query</a></li>
-<li><a href="https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/getQueryResults">2. getQueryResults</a></li>
-</ul>
-
-
-<h3>解決方式</h3>
-
-<p>在 new 的時候，新增 timeout 時間(也可以設定 retries)</p>
-
-<pre><code class="ruby">Google::Cloud::Bigquery.new(project: project_id, timeout: 120, retries: 10)
-</code></pre>
-
-<blockquote><p>但實際測試加上 <code>timeout</code> 卻好像沒有用..</p></blockquote>
-
-<p>在試的時候，有用另外的方式去解決，自己去處理 job 就可以確保 job 跑完，再拿資料回來</p>
-
-<pre><code class="ruby"># 先設定 job
-bigquery.query_job(sql)
-# 再讓它去執行 wait_until_done!
-job.wait_until_done!
-# 最後再將結果回傳，這樣就可以確保第一次可以拉到值
-job.query_results
-</code></pre>
-
-<p>但去看原始碼，實際上也是做一樣的動作..</p>
-
-<blockquote><p>因該是內建的 <code>query</code> 有設定 10 秒就會 response，因此改直接去執行裡面的動作，就沒有這個限制</p></blockquote>
-
-<pre><code class="ruby">def query query, params: nil, external: nil, max: nil, cache: true,
-          standard_sql: nil, legacy_sql: nil, &amp;block
-  job = query_job query, params: params, external: external,
-                  cache: cache, standard_sql: standard_sql,
-                  legacy_sql: legacy_sql, &amp;block
-  job.wait_until_done!
-  ensure_job_succeeded! job
-  job.data max: max
-end
-</code></pre>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://cloud.google.com/bigquery/create-simple-app-api">Create A Simple Application With the API</a></li>
-<li><a href="https://github.com/GoogleCloudPlatform/google-cloud-ruby/tree/master/google-cloud-bigquery">google-cloud-bigquery</a></li>
-<li><a href="https://cloud.google.com/sdk/docs/downloads-interactive">安裝 gcp SDK</a></li>
-<li><a href="https://cloud.google.com/bigquery/docs/bq-command-line-tool">Command Line</a></li>
-<li><a href="https://cloud.google.com/docs/authentication/production">Auth</a></li>
-<li><a href="https://cloud.google.com/ruby/">在 GOOGLE CLOUD PLATFORM 上執行 RUBY</a></li>
-</ul>
-
-
-<p>Auth</p>
-
-<ul>
-<li><a href="https://stackoverflow.com/questions/13212991/how-to-query-bigquery-programmatically-from-python-without-end-user-interaction">How to query BigQuery programmatically from Python without end-user interaction?</a></li>
-<li><a href="https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login">gcloud auth application-default login</a></li>
 </ul>
 
 ]]></content>
