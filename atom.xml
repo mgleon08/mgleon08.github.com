@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-07-26T21:40:11+08:00</updated>
+  <updated>2018-07-29T21:56:41+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,487 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Javascript30 - 001. JavaScript Drum Kit]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/29/javascript30-001-javascript-drum-kit/"/>
+    <updated>2018-07-29T21:49:28+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/29/javascript30-001-javascript-drum-kit</id>
+    <content type="html"><![CDATA[<p><img src="https://mgleon08.github.io/JavaScript30/001.JavaScript-Drum-Kit/images/thumbnail.png" alt="" /></p>
+
+<!-- more -->
+
+
+<h1><a href="https://mgleon08.github.io/JavaScript30/001.JavaScript-Drum-Kit/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/001.JavaScript-Drum-Kit">GitHub</a> | <a href="http://mgleon08.github.com/blog/categories/javascript30/">JS30-list</a></h1>
+
+<p>利用 js 監聽鍵盤 event，使其發出對應的音效</p>
+
+<h1>window.addEventListener</h1>
+
+<p>監聽 event</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// 在全局監聽 keydown 動作，並執行 playSound function</span>
+</span><span class='line'><span class="nb">window</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;keydown&#39;</span><span class="p">,</span> <span class="nx">playSound</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 在所有 key 都加上監聽 transitionend (CSS Transition Events) 特效，特效結束後就執行 removeTransition function</span>
+</span><span class='line'><span class="nx">keys</span><span class="p">.</span><span class="nx">forEach</span><span class="p">(</span><span class="nx">key</span> <span class="o">=&gt;</span> <span class="nx">key</span><span class="p">.</span><span class="nx">addEventListener</span><span class="p">(</span><span class="s1">&#39;transitionend&#39;</span><span class="p">,</span> <span class="nx">removeTransition</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">相當於</span>
+</span><span class='line'><span class="cm">keys.forEach(function (key) {</span>
+</span><span class='line'><span class="cm">  return key.addEventListener(&#39;transitionend&#39;, removeTransition);</span>
+</span><span class='line'><span class="cm">});</span>
+</span><span class='line'><span class="cm">*/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>data-key</h1>
+
+<p>html 可以自行定義一個屬性為 <code>data-* attribute</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;div</span> <span class="na">class=</span><span class="s">&quot;key&quot;</span> <span class="na">data-key=</span><span class="s">&quot;65&quot;</span><span class="nt">&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;kbd&gt;</span>A<span class="nt">&lt;/kbd&gt;</span>
+</span><span class='line'>  <span class="nt">&lt;span</span> <span class="na">class=</span><span class="s">&quot;sound&quot;</span><span class="nt">&gt;</span>clap<span class="nt">&lt;/span&gt;</span>
+</span><span class='line'><span class="nt">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nt">&lt;audio</span> <span class="na">data-key=</span><span class="s">&quot;65&quot;</span> <span class="na">src=</span><span class="s">&quot;../sounds/clap.wav&quot;</span><span class="nt">&gt;&lt;/audio&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// 透過 e.keyCode 拿到對應的 data-key</span>
+</span><span class='line'><span class="kr">const</span> <span class="nx">key</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="err">`</span><span class="p">.</span><span class="nx">key</span><span class="p">[</span><span class="nx">data</span><span class="o">-</span><span class="nx">key</span><span class="o">=</span><span class="s2">&quot;${e.keyCode}&quot;</span><span class="p">]</span><span class="err">`</span><span class="p">)</span>
+</span><span class='line'><span class="kr">const</span> <span class="nx">audio</span> <span class="o">=</span> <span class="nb">document</span><span class="p">.</span><span class="nx">querySelector</span><span class="p">(</span><span class="err">`</span><span class="nx">audio</span><span class="p">[</span><span class="nx">data</span><span class="o">-</span><span class="nx">key</span><span class="o">=</span><span class="s2">&quot;${e.keyCode}&quot;</span><span class="p">]</span><span class="err">`</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://pjchender.blogspot.com/2017/01/html-5-data-attribute.html">[技術分享] 什麼是 HTML 5 中的資料屬性（data-* attribute）</a></li>
+</ul>
+
+
+<h1>classList</h1>
+
+<p>在既有的 class 上面，新增或刪除 class</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">key</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="s1">&#39;playing&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="k">this</span><span class="p">.</span><span class="nx">classList</span><span class="p">.</span><span class="nx">remove</span><span class="p">(</span><span class="s1">&#39;playing&#39;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>audio</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='html'><span class='line'><span class="nt">&lt;audio</span> <span class="na">data-key=</span><span class="s">&quot;65&quot;</span> <span class="na">src=</span><span class="s">&quot;../sounds/clap.wav&quot;</span><span class="nt">&gt;&lt;/audio&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// 設定時間</span>
+</span><span class='line'><span class="nx">audio</span><span class="p">.</span><span class="nx">currentTime</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'><span class="c1">// 開始播放</span>
+</span><span class='line'><span class="nx">audio</span><span class="p">.</span><span class="nx">play</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>vh</h1>
+
+<p>vh, vw 可視範圍，可隨著螢幕的長寬去做變化</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nc">.keys</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">min-height</span><span class="o">:</span> <span class="m">100</span><span class="n">vh</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://pjchender.blogspot.com/2015/04/css-3vh-vw.html">[筆記] 好用的css 3新單位vh vw ─ 讓你的圖片可以隨著螢幕大小而不同</a></li>
+</ul>
+
+
+<h1>shadow</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nc">.key</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">text-shadow</span><span class="o">:</span> <span class="m">0px</span> <span class="m">0px</span> <span class="m">15px</span> <span class="k">rgb</span><span class="p">(</span><span class="m">255</span><span class="o">,</span> <span class="m">251</span><span class="o">,</span> <span class="m">40</span><span class="p">);</span>
+</span><span class='line'>  <span class="c">/* </span>
+</span><span class='line'><span class="c">    h-shadow：水平位移距離</span>
+</span><span class='line'><span class="c">    v-shadow：垂直位移距離</span>
+</span><span class='line'><span class="c">    blur：模糊半徑</span>
+</span><span class='line'><span class="c">    spread：擴散距離</span>
+</span><span class='line'><span class="c">    color：顏色 </span>
+</span><span class='line'><span class="c">  */</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">box</span><span class="o">-</span><span class="n">shadow</span><span class="o">:</span> <span class="m">0</span> <span class="m">0</span> <span class="m">15px</span> <span class="m">#ffc600</span><span class="p">;</span>
+</span><span class='line'>  <span class="c">/* </span>
+</span><span class='line'><span class="c">     h-shadow：水平位移距離</span>
+</span><span class='line'><span class="c">     v-shadow：垂直位移距離</span>
+</span><span class='line'><span class="c">     blur：模糊半徑</span>
+</span><span class='line'><span class="c">     spread：擴散距離</span>
+</span><span class='line'><span class="c">     color：顏色</span>
+</span><span class='line'><span class="c">     inset：內陰影</span>
+</span><span class='line'><span class="c">     最少要有 h-shadow 及 v-shadow 兩個參數</span>
+</span><span class='line'><span class="c">  */</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://abgne.tw/css/css3-lab/css3-text-shadow.html">[CSS3]text-shadow 文字陰影</a></li>
+<li><a href="https://abgne.tw/css/css3-lab/css3-box-shadow.html">[CSS3]box-shadow 區塊陰影</a></li>
+</ul>
+
+
+<h1>letter-spacing</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nc">.sound</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">font-size</span><span class="o">:</span> <span class="m">1</span><span class="o">.</span><span class="m">2</span><span class="n">rem</span><span class="p">;</span>
+</span><span class='line'>  <span class="k">text-transform</span><span class="o">:</span> <span class="k">uppercase</span><span class="p">;</span> <span class="c">/* 轉大寫 */</span>
+</span><span class='line'>  <span class="k">letter-spacing</span><span class="o">:</span> <span class="m">1px</span><span class="p">;</span> <span class="c">/* 字間距離 */</span>
+</span><span class='line'>  <span class="k">color</span><span class="o">:</span> <span class="m">#ffc600</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>transform</h1>
+
+<p>控制元素的變形的效果 (translate 位移、scale 放大縮小、rotate 旋轉、skew 傾斜、<a href="http://www.oxxostudio.tw/articles/201409/svg-20-transform-matrix.html">matrix</a>)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='css'><span class='line'><span class="nc">.playing</span> <span class="p">{</span>
+</span><span class='line'>  <span class="n">transform</span><span class="o">:</span><span class="n">scale</span><span class="p">(</span><span class="m">1</span><span class="o">.</span><span class="m">1</span><span class="p">);</span> <span class="c">/* (x軸,y軸) 放大 1.1 倍 */</span>
+</span><span class='line'>  <span class="k">border-color</span><span class="o">:</span><span class="m">#ffc600</span><span class="p">;</span>
+</span><span class='line'>  <span class="n">box</span><span class="o">-</span><span class="n">shadow</span><span class="o">:</span> <span class="m">0</span> <span class="m">0</span> <span class="m">15px</span> <span class="m">#ffc600</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://www.w3schools.com/css/css3_2dtransforms.asp">CSS 2D Transforms</a></li>
+<li><a href="http://www.oxxostudio.tw/articles/201409/svg-19-transform.html">SVG 研究之路 (19) - transform 基礎篇</a></li>
+</ul>
+
+
+<p>參考文章</p>
+
+<ul>
+<li><a href="https://javascript30.com/">Wes Bos javascript30</a></li>
+<li><a href="https://guahsu.io/2017/05/JavaScript30-01-Java-Script-Drum-Kit/">「JS30紀錄＆心得」01 - JavaScript Drum Kit</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[CSS Flex 屬性]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/28/css-flex/"/>
+    <updated>2018-07-28T21:46:59+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/28/css-flex</id>
+    <content type="html"><![CDATA[<p>css 用來排版的新語法，以前都是用 float 來做排版，但相當麻煩，用了 flex 變的相當輕鬆好用</p>
+
+<!-- more -->
+
+
+<h1>Flex 外容器屬性</h1>
+
+<h3>display</h3>
+
+<p>必須宣告才能使用 flex</p>
+
+<ul>
+<li><code>flex</code></li>
+<li><code>inline-flex</code>: 相當於 <code>inline-block</code> + <code>flex</code></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">display</span><span class="o">:</span> <span class="n">flex</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>flex-direction</h3>
+
+<p>排序方向</p>
+
+<ul>
+<li><code>row</code>: 水平 - Items are placed the same as the text direction.</li>
+<li><code>row-reverse</code>: 水平反轉 - Items are placed opposite to the text direction.</li>
+<li><code>column</code>: 垂直 - Items are placed top to bottom.</li>
+<li><code>column-reverse</code>: 垂直反轉 - Items are placed bottom to top</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">display</span><span class="o">:</span> <span class="n">flex</span><span class="p">;</span>
+</span><span class='line'>  <span class="na">flex-direction</span><span class="o">:</span> <span class="n">row</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>flex-wrap</h3>
+
+<p>超出範圍時的處理方式</p>
+
+<ul>
+<li><code>nowrap</code>: 換行 (<em>default</em>)</li>
+<li><code>wrap</code>: 不換行</li>
+<li><code>wrap-reverse</code>: 換行時反轉</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">display</span><span class="o">:</span> <span class="n">flex</span><span class="p">;</span>
+</span><span class='line'>  <span class="na">flex-wrap</span><span class="o">:</span> <span class="no">nowrap</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>flex-flow</h3>
+
+<p><code>flex-direction</code> 與 <code>flex-wrap</code> 的縮寫</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">display</span><span class="o">:</span> <span class="n">flex</span><span class="p">;</span>
+</span><span class='line'>  <span class="na">flex-flow</span><span class="o">:</span> <span class="n">row</span> <span class="no">nowrap</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>justify-content</h3>
+
+<p>水平軸對齊設定</p>
+
+<ul>
+<li><code>flex-start</code>: Items align to the left side of the container.</li>
+<li><code>flex-end</code>: Items align to the right side of the container.</li>
+<li><code>center</code>: Items align at the center of the container.</li>
+<li><code>space-between</code>: Items display with equal spacing between them. 平均分配內容元素，左右元素將會與 main start 和 main end 貼齊</li>
+<li><code>space-around</code>: Items display with equal spacing around them. 平均分配內容元素，間距也是平均分配</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">display</span><span class="o">:</span> <span class="n">flex</span><span class="p">;</span>
+</span><span class='line'>  <span class="na">justify-content</span><span class="o">:</span> <span class="no">center</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>align-items</h3>
+
+<p>交錯軸的對齊設定</p>
+
+<ul>
+<li><code>flex-start</code>: Items align to the top of the container.</li>
+<li><code>flex-end</code>: Items align to the bottom of the container.</li>
+<li><code>center</code>: Items align at the vertical center of the container.</li>
+<li><code>baseline</code>: Items display at the baseline of the container. 以所有內容元素的基線作為對齊標準</li>
+<li><code>stretch</code>: Items are stretched to fit the container. 將內容元素全部撐開至 Flexbox 的高度 (<em>default</em>)</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">display</span><span class="o">:</span> <span class="n">flex</span><span class="p">;</span>
+</span><span class='line'>  <span class="na">align-items</span><span class="o">:</span> <span class="no">center</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>align-content</h3>
+
+<p><code>align-items</code> 多行版本</p>
+
+<blockquote><p>注意 stretch 在高度被限制的情況下不會正常伸展。</p></blockquote>
+
+<ul>
+<li><code>flex-start</code>: Lines are packed at the top of the container.</li>
+<li><code>flex-end</code>: Lines are packed at the bottom of the container.</li>
+<li><code>center</code>: Lines are packed at the vertical center of the container.</li>
+<li><code>space-between</code>: Lines display with equal spacing between them. 將第一行與最後一行分別對齊最上方與最下方</li>
+<li><code>space-around</code>: Lines display with equal spacing around them. 每行平均分配間距</li>
+<li><code>stretch</code>: Lines are stretched to fit the container.內容元素全部撐開（<em>default</em>）</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">display</span><span class="o">:</span> <span class="n">flex</span><span class="p">;</span>
+</span><span class='line'>  <span class="na">align-content</span><span class="o">:</span> <span class="no">center</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Flex 內元件屬性</h1>
+
+<h3>flex</h3>
+
+<p>包含了 <code>flex-grow</code> <code>flex-shrink</code> <code>flex-basis</code></p>
+
+<ul>
+<li><code>flex-grow</code>: 數字，無單位，當子元素的 flex-basis 長度「小」於它自己在父元素分配到的長度，按照數字做相對應的「伸展」比例分配，預設值為 0，不會進行彈性變化，不可為負值，設為 1 則會進行彈性變化。</li>
+<li><code>flex-shrink</code>: 數字，無單位，當子元素的 flex-basis 長度「大」於它自己在父元素分配到的長度，按照數字做相對應的「壓縮」比例分配，預設值為 1，設為 0 的話不會進行彈性變化，不可為負值。</li>
+<li><code>flex-basis</code>: 子元素的基本大小，作為父元素的大小比較基準，預設值為 0，也因為預設值為 0，所以沒有設定此屬性的時候，會以直接採用 flex-grow 屬性，flex-basis 也可以設為 auto，如果設為 auto，就表示子元素以自己的基本大小為單位。</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">flex</span><span class="o">:</span> <span class="mi">1</span><span class="p">;</span> <span class="c1">// 當設定一個是 flex-grow</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>align-self</h3>
+
+<p><code>align-self</code> 的作用在於覆寫已經套用 <code>align-items</code> 的屬性，可調整內元件交錯軸的對齊設定(主軸線則不能另外做設定)，且可以個別設定單一元件的值。</p>
+
+<ul>
+<li><code>auto</code></li>
+<li><code>flex-start</code></li>
+<li><code>flex-end</code></li>
+<li><code>center</code></li>
+<li><code>baseline</code></li>
+<li><code>stretch</code></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">display</span><span class="o">:</span> <span class="n">flex</span><span class="p">;</span>
+</span><span class='line'>  <span class="na">align-self</span><span class="o">:</span> <span class="no">center</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>order</h3>
+
+<p>可重新定義元件的排列順序，順序會依據數值的大小排列。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='scss'><span class='line'><span class="nc">.container</span> <span class="p">{</span>
+</span><span class='line'>  <span class="na">display</span><span class="o">:</span> <span class="n">flex</span><span class="p">;</span>
+</span><span class='line'>  <span class="na">order</span><span class="o">:</span> <span class="mi">-1</span><span class="p">;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>playground</h1>
+
+<p data-height="265" data-theme-id="0" data-slug-hash="rrYjvX" data-default-tab="css,result" data-user="leonji" data-pen-title="rrYjvX" class="codepen">See the Pen <a href="https://codepen.io/leonji/pen/rrYjvX/">rrYjvX</a> by leonji (<a href="https://codepen.io/leonji">@leonji</a>) on <a href="https://codepen.io">CodePen</a>.</p>
+
+
+<script async src="https://static.codepen.io/assets/embed/ei.js"></script>
+
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://flexboxfroggy.com/">flexboxfroggy</a></li>
+<li><a href="https://flexbox.io/">flexbox Wes Bos</a></li>
+<li><a href="http://www.oxxostudio.tw/articles/201501/css-flexbox.html">深入解析 CSS Flexbox </a></li>
+<li><a href="https://wcc723.github.io/css/2017/07/21/css-flex/">圖解：CSS Flex 屬性一點也不難</a></li>
+<li><a href="https://hackernoon.com/the-ultimate-css-battle-grid-vs-flexbox-d40da0449faf">The ultimate CSS battle: Grid vs Flexbox</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Nothing Is Something by Sandi Metz]]></title>
@@ -11424,1714 +11905,6 @@ s</p>
 
 <ul>
 <li><a href="https://golangbot.com/learn-golang-series/">golangbot.com</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang - Function]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/05/02/golang-function/"/>
-    <updated>2018-05-02T18:20:11+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/05/02/golang-function</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<ul>
-<li><a href="#function">函式 function</a>
-
-<ul>
-<li><a href="#anonymous">匿名函式 Anonymous function</a></li>
-<li><a href="#higher_order_functions">Higher-order functionsn</a>s</li>
-<li><a href="#closure">閉包函式 Closure function</a></li>
-<li><a href="#init">初始化函式 Init function </a></li>
-</ul>
-</li>
-</ul>
-
-
-<h1><span id="function">函式 function</span></h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 定義, Functions are values too</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">function_name</span><span class="p">(</span> <span class="p">[</span><span class="nx">parameter</span> <span class="nx">list</span><span class="p">]</span> <span class="p">)</span> <span class="p">[</span><span class="nx">return_types</span> <span class="nx">list</span><span class="p">]</span> <span class="p">{</span>
-</span><span class='line'>   <span class="c1">//function body</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">foo1</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;1. Hi &quot;</span> <span class="o">+</span> <span class="nx">name</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 多個傳入值</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">foo2</span><span class="p">(</span><span class="nx">name1</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">name2</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;2. Hi &quot;</span> <span class="o">+</span> <span class="nx">name1</span> <span class="o">+</span> <span class="s">&quot;, &quot;</span> <span class="o">+</span> <span class="nx">name2</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 傳入值同個形態，可只寫一個</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">foo3</span><span class="p">(</span><span class="nx">name1</span><span class="p">,</span> <span class="nx">name2</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;3. Hi &quot;</span> <span class="o">+</span> <span class="nx">name1</span> <span class="o">+</span> <span class="s">&quot;, &quot;</span> <span class="o">+</span> <span class="nx">name2</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// return 值的型態定義在後面</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">foo4</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">str</span> <span class="p">=</span> <span class="s">&quot;Hi &quot;</span> <span class="o">+</span> <span class="nx">name</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">str</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 可以直接在 func 的回傳區塊命名回傳變數</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">foo5</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="nx">str</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">str</span> <span class="p">=</span> <span class="s">&quot;Hi &quot;</span> <span class="o">+</span> <span class="nx">name</span>
-</span><span class='line'>  <span class="k">return</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 多重return</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">foo6</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="kt">int</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">x</span> <span class="o">-</span> <span class="nx">y</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 多個傳入值 (s當會有不確定的個數傳入值，當有兩個變數，不確定的要放置在最後)</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">foo7</span><span class="p">(</span><span class="nx">x</span> <span class="o">...</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">t</span> <span class="kt">int</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">n</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">x</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">t</span> <span class="o">+=</span> <span class="nx">n</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">t</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 傳入slice, slice是類似矩陣的東西</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">foo8</span><span class="p">(</span><span class="nx">x</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">t</span> <span class="kt">int</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">n</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">x</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">t</span> <span class="o">+=</span> <span class="nx">n</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">t</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// function回傳function，function可以當變數，也可以用來回傳</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">foo9</span><span class="p">()</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">string</span> <span class="p">{</span>
-</span><span class='line'>    <span class="k">return</span> <span class="s">&quot;foo9s&quot;</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// 自動判別型別，必須宣告再 main 裡面</span>
-</span><span class='line'>  <span class="nx">foo10</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;10. Hi &quot;</span> <span class="o">+</span> <span class="nx">name</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">foo1</span><span class="p">(</span><span class="s">&quot;foo1&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">foo2</span><span class="p">(</span><span class="s">&quot;foo2&quot;</span><span class="p">,</span> <span class="s">&quot;bar2&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">foo3</span><span class="p">(</span><span class="s">&quot;foo3&quot;</span><span class="p">,</span> <span class="s">&quot;bar3&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;4.&quot;</span><span class="p">,</span> <span class="nx">foo4</span><span class="p">(</span><span class="s">&quot;foo4&quot;</span><span class="p">))</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;5.&quot;</span><span class="p">,</span> <span class="nx">foo5</span><span class="p">(</span><span class="s">&quot;foo5&quot;</span><span class="p">))</span>
-</span><span class='line'>  <span class="nx">a6</span><span class="p">,</span> <span class="nx">b6</span> <span class="o">:=</span> <span class="nx">foo6</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;6.&quot;</span><span class="p">,</span> <span class="nx">a6</span><span class="p">,</span> <span class="nx">b6</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;7.&quot;</span><span class="p">,</span> <span class="nx">foo7</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">))</span>
-</span><span class='line'>  <span class="nx">nums</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">}</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;8.&quot;</span><span class="p">,</span> <span class="nx">foo8</span><span class="p">(</span><span class="nx">nums</span><span class="p">))</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;9.&quot;</span><span class="p">,</span> <span class="nx">foo9</span><span class="p">()())</span>
-</span><span class='line'>  <span class="nx">foo10</span><span class="p">(</span><span class="s">&quot;foo10&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 1. Hi foo1</span>
-</span><span class='line'><span class="c1">// 2. Hi foo2, bar2</span>
-</span><span class='line'><span class="c1">// 3. Hi foo3, bar3</span>
-</span><span class='line'><span class="c1">// 4. Hi foo4</span>
-</span><span class='line'><span class="c1">// 5. Hi foo5</span>
-</span><span class='line'><span class="c1">// 6. 3 -1</span>
-</span><span class='line'><span class="c1">// 7. 6</span>
-</span><span class='line'><span class="c1">// 8. 10</span>
-</span><span class='line'><span class="c1">// 9. foo9s</span>
-</span><span class='line'><span class="c1">// 10. Hi foo10</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>variadic function</h3>
-
-<p>當有不確定的參數時，可用 <code>...</code> 來代替</p>
-
-<blockquote><p>只能夠放在最後一個參數</p></blockquote>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">find</span><span class="p">(</span><span class="nx">num</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">nums</span> <span class="o">...</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;type of nums is %T\n&quot;</span><span class="p">,</span> <span class="nx">nums</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;nums is&quot;</span><span class="p">,</span> <span class="nx">nums</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">find</span><span class="p">(</span><span class="mi">89</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">95</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">nums</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">89</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">95</span><span class="p">}</span>
-</span><span class='line'>  <span class="nx">find</span><span class="p">(</span><span class="mi">89</span><span class="p">,</span> <span class="nx">nums</span><span class="o">...</span><span class="p">)</span> <span class="c1">// 必須加上 ... 否則會造成 type error</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">/**</span>
-</span><span class='line'><span class="cm">type of nums is []int</span>
-</span><span class='line'><span class="cm">nums is [89 90 95]</span>
-</span><span class='line'><span class="cm">type of nums is []int</span>
-</span><span class='line'><span class="cm">nums is [89 90 95]</span>
-</span><span class='line'><span class="cm">**/</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 做法是 golang 會自動將後面的值，轉成 slice，並且根據 type</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3><span id="anonymous"> 匿名函式 Anonymous function</span></h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;匿名函式&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="nx">a</span><span class="p">()</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;hello world first class function&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}()</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">func</span><span class="p">(</span><span class="nx">n</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Welcome&quot;</span><span class="p">,</span> <span class="nx">n</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}(</span><span class="s">&quot;Gophers&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm">匿名函式</span>
-</span><span class='line'><span class="cm">hello world first class function</span>
-</span><span class='line'><span class="cm">Welcome Gophers</span>
-</span><span class='line'><span class="cm">*/</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Class Functions</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">type</span> <span class="nx">add</span> <span class="kd">func</span><span class="p">(</span><span class="nx">a</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">a</span> <span class="nx">add</span> <span class="p">=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">a</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="nx">s</span> <span class="o">:=</span> <span class="nx">a</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">6</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Sum&quot;</span><span class="p">,</span> <span class="nx">s</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Sum 11</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3><span id="higher_order_functions"> Higher-order functions </span></h3>
-
-<ul>
-<li>takes one or more functions as arguments</li>
-<li>returns a function as its result</li>
-</ul>
-
-
-<p>Passing functions as arguments to other functions</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">simple</span><span class="p">(</span><span class="nx">a</span> <span class="kd">func</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">f</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="nx">simple</span><span class="p">(</span><span class="nx">f</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Returning functions from other functions</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">simple</span><span class="p">()</span> <span class="kd">func</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">f</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>        <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">f</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">s</span> <span class="o">:=</span> <span class="nx">simple</span><span class="p">()</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">(</span><span class="mi">60</span><span class="p">,</span> <span class="mi">7</span><span class="p">))</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3><span id="closure"> 閉包函式 Closure function </span></h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 該閉包涵數接收一個int型參數，其返回值是函式類型</span>
-</span><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// return func(int) int</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">closure</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="kd">func</span><span class="p">(</span><span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;1.&quot;</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">x</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">return</span> <span class="kd">func</span><span class="p">(</span><span class="nx">y</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;2. x =&quot;</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">x</span><span class="p">)</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;3. y =&quot;</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">y</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">y</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">f</span> <span class="o">:=</span> <span class="nx">closure</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;closure(10)\n&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">f</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;f(1))\n&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">f</span><span class="p">(</span><span class="mi">2</span><span class="p">))</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;f(2)&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 1. 10 0x10414020</span>
-</span><span class='line'><span class="c1">// closure(10)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 此時 x 變數形成了一個 closure</span>
-</span><span class='line'><span class="c1">// 2. x = 10 0x10414020</span>
-</span><span class='line'><span class="c1">// 3. y = 1 0x10414040</span>
-</span><span class='line'><span class="c1">// 11</span>
-</span><span class='line'><span class="c1">// f(1))</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 2. x = 10 0x10414020</span>
-</span><span class='line'><span class="c1">// 3. y = 2 0x10414050</span>
-</span><span class='line'><span class="c1">// 12</span>
-</span><span class='line'><span class="c1">// f(2)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">appendStr</span><span class="p">()</span> <span class="kd">func</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">t</span> <span class="o">:=</span> <span class="s">&quot;Hello&quot;</span>
-</span><span class='line'>    <span class="nx">c</span> <span class="o">:=</span> <span class="kd">func</span><span class="p">(</span><span class="nx">b</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">t</span> <span class="p">=</span> <span class="nx">t</span> <span class="o">+</span> <span class="s">&quot; &quot;</span> <span class="o">+</span> <span class="nx">b</span>
-</span><span class='line'>        <span class="k">return</span> <span class="nx">t</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">c</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">a</span> <span class="o">:=</span> <span class="nx">appendStr</span><span class="p">()</span>
-</span><span class='line'>    <span class="nx">b</span> <span class="o">:=</span> <span class="nx">appendStr</span><span class="p">()</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">(</span><span class="s">&quot;World&quot;</span><span class="p">))</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">b</span><span class="p">(</span><span class="s">&quot;Everyone&quot;</span><span class="p">))</span>
-</span><span class='line'>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">(</span><span class="s">&quot;Gopher&quot;</span><span class="p">))</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">b</span><span class="p">(</span><span class="s">&quot;!&quot;</span><span class="p">))</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm">Hello World</span>
-</span><span class='line'><span class="cm">Hello Everyone</span>
-</span><span class='line'><span class="cm">Hello World Gopher</span>
-</span><span class='line'><span class="cm">Hello Everyone !s</span>
-</span><span class='line'><span class="cm">*/</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3><span id="init"> 初始化函式 Init function </span></h3>
-
-<ul>
-<li>The init function should not have any return type and should not have any parameters</li>
-<li>Package level variables are initialised first</li>
-<li>init function is called next. A package can have multiple init functions (either in a single file or distributed across multiple files) and they are called in the order in which they are presented to the compiler.</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">init</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Init&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Main&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Init</span>
-</span><span class='line'><span class="c1">// Main</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>fibonacci</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// fibonacci is a function that returns</span>
-</span><span class='line'><span class="c1">// a function that returns an int.</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">fibonacci</span><span class="p">()</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="mi">1</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;test1 x=&quot;</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="s">&quot;y=&quot;</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">return</span> <span class="kd">func</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;test2 x=&quot;</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="s">&quot;y=&quot;</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">x</span><span class="p">,</span> <span class="nx">y</span> <span class="p">=</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">x</span> <span class="o">+</span> <span class="nx">y</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;test3 x=&quot;</span><span class="p">,</span> <span class="nx">x</span><span class="p">,</span> <span class="s">&quot;y=&quot;</span><span class="p">,</span> <span class="nx">y</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">return</span> <span class="nx">x</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">f</span> <span class="o">:=</span> <span class="nx">fibonacci</span><span class="p">()</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">f</span><span class="p">())</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">/**</span>
-</span><span class='line'><span class="cm">test1 x= 0 y= 1</span>
-</span><span class='line'><span class="cm">test2 x= 0 y= 1</span>
-</span><span class='line'><span class="cm">test3 x= 1 y= 1</span>
-</span><span class='line'><span class="cm">1</span>
-</span><span class='line'><span class="cm">test2 x= 1 y= 1</span>
-</span><span class='line'><span class="cm">test3 x= 1 y= 2</span>
-</span><span class='line'><span class="cm">1</span>
-</span><span class='line'><span class="cm">test2 x= 1 y= 2</span>
-</span><span class='line'><span class="cm">test3 x= 2 y= 3</span>
-</span><span class='line'><span class="cm">2</span>
-</span><span class='line'><span class="cm">test2 x= 2 y= 3</span>
-</span><span class='line'><span class="cm">test3 x= 3 y= 5</span>
-</span><span class='line'><span class="cm">3</span>
-</span><span class='line'><span class="cm">test2 x= 3 y= 5</span>
-</span><span class='line'><span class="cm">test3 x= 5 y= 8</span>
-</span><span class='line'><span class="cm">5</span>
-</span><span class='line'><span class="cm">test2 x= 5 y= 8</span>
-</span><span class='line'><span class="cm">test3 x= 8 y= 13</span>
-</span><span class='line'><span class="cm">8</span>
-</span><span class='line'><span class="cm">test2 x= 8 y= 13</span>
-</span><span class='line'><span class="cm">test3 x= 13 y= 21</span>
-</span><span class='line'><span class="cm">13</span>
-</span><span class='line'><span class="cm">test2 x= 13 y= 21</span>
-</span><span class='line'><span class="cm">test3 x= 21 y= 34</span>
-</span><span class='line'><span class="cm">21</span>
-</span><span class='line'><span class="cm">test2 x= 21 y= 34</span>
-</span><span class='line'><span class="cm">test3 x= 34 y= 55</span>
-</span><span class='line'><span class="cm">34</span>
-</span><span class='line'><span class="cm">test2 x= 34 y= 55</span>
-</span><span class='line'><span class="cm">test3 x= 55 y= 89</span>
-</span><span class='line'><span class="cm">55</span>
-</span><span class='line'><span class="cm">**/</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件:</p>
-
-<ul>
-<li><a href="https://golangbot.com/functions/">[golangbot.com] functions</a></li>
-<li><a href="https://golangbot.com/packages/">[golangbot.com] functions</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang 初探 - Install, Variables, Constants, Conversions and Output]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/04/26/golang-install-variables-constants-conversions-output/"/>
-    <updated>2018-04-26T22:38:09+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/04/26/golang-install-variables-constants-conversions-output</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<ul>
-<li><a href="#install">安裝 Golang install</a></li>
-<li><a href="#variables">變數 variables</a></li>
-<li><a href="#constants">常數 Constants</a></li>
-<li><a href="#conversions">轉型 conversions</a></li>
-<li><a href="#output">輸出 output</a></li>
-</ul>
-
-
-<h1>Golang 介紹</h1>
-
-<p>Golang 是 Google 建立的新語言，主要特色有</p>
-
-<ul>
-<li>open source</li>
-<li>靜態語言</li>
-<li>可編譯</li>
-</ul>
-
-
-<h1>選擇用 Golang 的原因</h1>
-
-<ul>
-<li>Concurrency 並發，可以簡單的就可以使用多線程</li>
-<li>可編譯</li>
-<li>有固定的語言規範<a href="https://golang.org/ref/spec">(spec)</a>，不需要擔心要怎麼去寫</li>
-<li>支援靜態的連結，也可以簡單的部署在 server 上面不需要任何的依賴</li>
-</ul>
-
-
-<h1><span id="install">安裝 Golang install </span></h1>
-
-<h3>安裝 (mac)</h3>
-
-<ol>
-<li><code>brew update &amp;&amp; brew upgrade</code></li>
-<li><code>brew install go</code></li>
-</ol>
-
-
-<h3>設定 $GOPATH</h3>
-
-<p>GOPATH 就是 golang 的 Workspace</p>
-
-<p>設定在<code>.bashrc</code> or <code>.zshrc</code></p>
-
-<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class=''><span class='line'>export GOPATH="$HOME/Golang"
-</span><span class='line'>export GOBIN="$GOPATH/bin" 
-</span><span class='line'>export PATH="$PATH:$GOBIN"</span></code></pre></td></tr></table></div></figure>
-
-
-<p>設定好可以打 <code>go env</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">GOARCH</span><span class="o">=</span><span class="s2">&quot;amd64&quot;</span>
-</span><span class='line'><span class="no">GOBIN</span><span class="o">=</span><span class="s2">&quot;/Users/username/Golang/bin&quot;</span>
-</span><span class='line'><span class="no">GOEXE</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
-</span><span class='line'><span class="no">GOHOSTARCH</span><span class="o">=</span><span class="s2">&quot;amd64&quot;</span>
-</span><span class='line'><span class="no">GOHOSTOS</span><span class="o">=</span><span class="s2">&quot;darwin&quot;</span>
-</span><span class='line'><span class="no">GOOS</span><span class="o">=</span><span class="s2">&quot;darwin&quot;</span>
-</span><span class='line'><span class="no">GOPATH</span><span class="o">=</span><span class="s2">&quot;/Users/username/Golang&quot;</span>
-</span><span class='line'><span class="no">GORACE</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
-</span><span class='line'><span class="no">GOROOT</span><span class="o">=</span><span class="s2">&quot;/usr/local/Cellar/go/1.8.3/libexec&quot;</span>
-</span><span class='line'><span class="no">GOTOOLDIR</span><span class="o">=</span><span class="s2">&quot;/usr/local/Cellar/go/1.8.3/libexec/pkg/tool/darwin_amd64&quot;</span>
-</span><span class='line'><span class="no">GCCGO</span><span class="o">=</span><span class="s2">&quot;gccgo&quot;</span>
-</span><span class='line'><span class="no">CC</span><span class="o">=</span><span class="s2">&quot;clang&quot;</span>
-</span><span class='line'><span class="no">GOGCCFLAGS</span><span class="o">=</span><span class="s2">&quot;-fPIC -m64 -pthread -fno-caret-diagnostics -Qunused-arguments -fmessage-length=0 -fdebug-prefix-map=/var/folders/xh/qq6rsrxs7_v15q07sq5rhqtm0000gn/T/go-build862412071=/tmp/go-build -gno-record-gcc-switches -fno-common&quot;</span>
-</span><span class='line'><span class="no">CXX</span><span class="o">=</span><span class="s2">&quot;clang++&quot;</span>
-</span><span class='line'><span class="no">CGO_ENABLED</span><span class="o">=</span><span class="s2">&quot;1&quot;</span>
-</span><span class='line'><span class="no">PKG_CONFIG</span><span class="o">=</span><span class="s2">&quot;pkg-config&quot;</span>
-</span><span class='line'><span class="no">CGO_CFLAGS</span><span class="o">=</span><span class="s2">&quot;-g -O2&quot;</span>
-</span><span class='line'><span class="no">CGO_CPPFLAGS</span><span class="o">=</span><span class="s2">&quot;&quot;</span>
-</span><span class='line'><span class="no">CGO_CXXFLAGS</span><span class="o">=</span><span class="s2">&quot;-g -O2&quot;</span>
-</span><span class='line'><span class="no">CGO_FFLAGS</span><span class="o">=</span><span class="s2">&quot;-g -O2&quot;</span>
-</span><span class='line'><span class="no">CGO_LDFLAGS</span><span class="o">=</span><span class="s2">&quot;-g -O2&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>目錄結構</h3>
-
-<p>GOPATH中 會在細分三個資料夾</p>
-
-<p><code>$HOME/Golang/</code></p>
-
-<ul>
-<li><code>src</code> - This directory contains source files organized as packages. You will write your Go applications inside this directory.</li>
-<li><code>pkg</code> -  This directory contains Go package objects.</li>
-<li><code>bin</code> - This directory contains executable programs.</li>
-</ul>
-
-
-<h3>Golang Example</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 宣告程式屬於哪個 package，所有的 go 檔案都必須聲明</span>
-</span><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 引入套件，多個可以加括號 ()</span>
-</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 希望使用匯入的套件，是為了要觸發那個套件的 main() 函式而引用的話，可以在前面加上一個底線 _</span>
-</span><span class='line'><span class="kn">import</span> <span class="nx">_</span> <span class="nx">math</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 如果名字有衝突可以加上 neko</span>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>    <span class="s">&quot;github.com/test1/teameow&quot;</span>
-</span><span class='line'>    <span class="nx">neko</span> <span class="s">&quot;github.com/test2/teameow&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 程式執行入口，main 在 golang 中是特殊的 function</span>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'><span class="c1">// 使用 fmt 套件印出字串 word</span>
-</span><span class='line'> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;hello world&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Outside a function, every statement begins with a keyword (var, func, and so on) and so the := construct is not available.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p> <code>go run main.go</code> 就可以直接執行</p>
-
-<p> 另外也可以先 <code>build</code> 產生執行檔於當前目錄</p>
-
-<p> 在該目錄跑 <code>go build main.go</code> 後執行 <code>./main</code></p>
-
-<h3>command</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">go</span> <span class="nx">run</span>
-</span><span class='line'><span class="c1">// 直接執行</span>
-</span><span class='line'><span class="k">go</span> <span class="nx">build</span>
-</span><span class='line'><span class="c1">// 產生執行檔於當前目錄，並可以直接執行</span>
-</span><span class='line'><span class="k">go</span> <span class="nx">install</span>
-</span><span class='line'><span class="c1">// 如果沒有錯誤則產生執行檔於 GOPATH/bin</span>
-</span><span class='line'><span class="k">go</span> <span class="nx">clean</span>
-</span><span class='line'><span class="c1">// 執行後會將 build 產生的檔案都刪除( install 的不會刪)</span>
-</span><span class='line'><span class="k">go</span> <span class="nx">tool</span>
-</span><span class='line'><span class="c1">// 顯示目前能用的 tool</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>命名規則</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="mf">1.</span> <span class="nx">golang</span> <span class="nx">use</span> <span class="nx">camelcase</span>
-</span><span class='line'><span class="mf">2.</span> <span class="nx">字首大寫代表可讓其他</span> <span class="kn">package</span> <span class="nx">使用</span><span class="err">，</span><span class="nx">可理解為大寫</span> <span class="nx">public</span> <span class="nx">小寫</span> <span class="nx">private</span>
-</span><span class='line'><span class="mf">3.</span> <span class="nx">在</span> <span class="kd">func</span> <span class="nx">外面一定要加上</span> <span class="kd">var</span> <span class="nx">OR</span> <span class="kd">func</span> <span class="nx">才可以去做定義</span>
-</span><span class='line'><span class="mf">4.</span> <span class="nx">常數const</span><span class="p">(</span><span class="nx">constants</span><span class="p">)</span> <span class="nx">通常也會第一個字大寫</span>
-</span><span class='line'><span class="mf">5.</span> <span class="nx">沒用到的參數可用</span> <span class="nx">blank</span> <span class="nx">identifier</span> <span class="p">(</span><span class="nx">_</span><span class="p">)</span> <span class="nx">來代替</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>單引號 / 雙引號 / 反引號</h3>
-
-<ul>
-<li>雙引號</li>
-</ul>
-
-
-<p>用來建立可解析的字串字面量(支援轉義，但不能用來引用多行)</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\u65e5\u672c\u8a9e&quot;</span><span class="p">)</span> <span class="c1">// 日本語</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>反引號</li>
-</ul>
-
-
-<p>用來建立原生的字串字面量，這些字串可能由多行組成(不支援任何轉義序列)，原生的字串字面量多用於書寫多行訊息、HTML以及正則表達式</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">`\u65e5\u672c\u8a9e`</span><span class="p">)</span> <span class="c1">// \u65e5\u672c\u8a9e</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>單引號</li>
-</ul>
-
-
-<p>表示 Golang 的一個特殊類型：rune(int32的別稱)，類似其他語言的byte但又不完全一樣，是指：碼點字面量（Unicode code point），不做任何轉義的原始內容。</p>
-
-<ul>
-<li><a href="https://naveenr.net/unicode-character-set-and-utf-8-utf-16-utf-32-encoding/">Unicode Character Set and UTF-8, UTF-16, UTF-32 Encoding</a></li>
-<li><a href="https://mothereff.in/utf-8#%C3%B1">UTF-8 encoder/decoder</a></li>
-</ul>
-
-
-<h1><span id="variables"> 變數 variables </span></h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// = 使用必須使用先var聲明</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">a</span>
-</span><span class='line'><span class="c1">// 不定型別的變數</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">a</span> <span class="kt">int</span>
-</span><span class='line'><span class="c1">// 宣告成 int</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">a</span> <span class="kt">int</span> <span class="p">=</span> <span class="mi">10</span>
-</span><span class='line'><span class="c1">// 初始化同時宣告</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span>
-</span><span class='line'><span class="c1">// a 跟 b 都是 int，沒有給值 int 預設是 0</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span> <span class="p">=</span> <span class="mi">100</span><span class="p">,</span> <span class="mi">50</span>
-</span><span class='line'><span class="c1">// 同時宣告一樣 type 並給值</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">a</span> <span class="p">=</span> <span class="mi">10</span>
-</span><span class='line'><span class="c1">// 自動推斷型別</span>
-</span><span class='line'><span class="kd">var</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="p">=</span> <span class="mi">0</span><span class="p">,</span> <span class="s">&quot;test&quot;</span>
-</span><span class='line'><span class="c1">// 同時宣告自動判斷 type (必須是同時給值)</span>
-</span><span class='line'><span class="kd">var</span> <span class="p">(</span>
-</span><span class='line'>   <span class="nx">a</span> <span class="kt">bool</span> <span class="p">=</span> <span class="kc">false</span>
-</span><span class='line'>   <span class="nx">b</span> <span class="kt">int</span>
-</span><span class='line'>   <span class="nx">c</span> <span class="p">=</span> <span class="s">&quot;hello&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'><span class="c1">// 多個同時宣告和給值，可以用括號包再一起 (不能同行，不然會錯)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Short hand declaration</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// := 是聲明並賦值，並且系統自動推斷類型，必須放在 main function 裡面</span>
-</span><span class='line'><span class="c1">// := only works in functions and the lower case &#39;t&#39; is so that it is only visible to the package (unexported).</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">a</span> <span class="o">:=</span> <span class="mi">0</span>
-</span><span class='line'><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">c</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">,</span> <span class="kc">true</span><span class="p">,</span> <span class="s">&quot;test&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
-</span><span class='line'><span class="nx">b</span><span class="p">,</span> <span class="nx">c</span> <span class="o">:=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span> <span class="c1">// 重複宣告，因為 c 是新的變數，因此可以通過</span>
-</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">c</span><span class="p">)</span>
-</span><span class='line'><span class="c1">// 1, 3, 4</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
-</span><span class='line'><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span> <span class="c1">// 重複宣告，因為沒有新的參數，因此會報錯</span>
-</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
-</span><span class='line'><span class="c1">// no new variables on left side of :=</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">age</span> <span class="o">:=</span> <span class="mi">29</span>
-</span><span class='line'><span class="nx">age</span> <span class="p">=</span> <span class="s">&quot;naveen&quot;</span> <span class="c1">// golang 是強型別，一但定義就無法轉換成其他型別</span>
-</span><span class='line'><span class="c1">// cannot use &quot;test&quot; (type string) as type int in assignment</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">sum</span> <span class="o">:=</span> <span class="nb">float64</span><span class="p">(</span><span class="mi">0</span><span class="p">)</span> <span class="c1">// 宣告並給值</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1><span id="constants"> 常數 Constants </span></h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// Constants cannot be declared using the := syntax.</span>
-</span><span class='line'>  <span class="kd">const</span> <span class="nx">Pi</span> <span class="p">=</span> <span class="mf">3.14</span>
-</span><span class='line'>  <span class="kd">const</span> <span class="nx">World</span> <span class="p">=</span> <span class="s">&quot;世界&quot;</span>
-</span><span class='line'>  <span class="kd">const</span> <span class="p">(</span>
-</span><span class='line'>      <span class="c1">// Create a huge number by shifting a 1 bit left 100 places.</span>
-</span><span class='line'>      <span class="c1">// In other words, the binary number that is 1 followed by 100 zeroes.</span>
-</span><span class='line'>      <span class="nx">Big</span> <span class="p">=</span> <span class="mi">1</span> <span class="o">&lt;&lt;</span> <span class="mi">100</span>
-</span><span class='line'>      <span class="c1">// Shift it right again 99 places, so we end up with 1&lt;&lt;1, or 2.</span>
-</span><span class='line'>      <span class="nx">Small</span> <span class="p">=</span> <span class="nx">Big</span> <span class="o">&gt;&gt;</span> <span class="mi">99</span>
-</span><span class='line'>  <span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Pi&quot;</span><span class="p">,</span> <span class="nx">Pi</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;World&quot;</span><span class="p">,</span> <span class="nx">World</span><span class="p">)</span>
-</span><span class='line'>  <span class="c1">//fmt.Println(Big)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">Small</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Pi 3.14</span>
-</span><span class='line'><span class="c1">// World 世界</span>
-</span><span class='line'><span class="c1">// 2</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Assign</h3>
-
-<p>在 golang 當中，不允許不同 type 的 assign</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">defaultName</span> <span class="p">=</span> <span class="s">&quot;Sam&quot;</span> <span class="c1">//allowed</span>
-</span><span class='line'>    <span class="kd">type</span> <span class="nx">myString</span> <span class="kt">string</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">customName</span> <span class="nx">myString</span> <span class="p">=</span> <span class="s">&quot;Sam&quot;</span> <span class="c1">//allowed</span>
-</span><span class='line'>    <span class="nx">customName</span> <span class="p">=</span> <span class="nx">defaultName</span> <span class="c1">//not allowed</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// cannot use defaultName (type string) as type myString in assignment</span>
-</span><span class='line'><span class="c1">// myString 是新建立的 type，相當於 string 的 alias，但因為是不同的 type，因此不能夠直接 assign</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>但是在 const 沒有特別聲明是哪種型態時，是屬於 untyped</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">const</span> <span class="nx">a</span> <span class="p">=</span> <span class="mi">5</span>  <span class="c1">// 改成 vat 就會 error</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">intVar</span> <span class="kt">int</span> <span class="p">=</span> <span class="nx">a</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">int32Var</span> <span class="kt">int32</span> <span class="p">=</span> <span class="nx">a</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">float64Var</span> <span class="kt">float64</span> <span class="p">=</span> <span class="nx">a</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">complex64Var</span> <span class="kt">complex64</span> <span class="p">=</span> <span class="nx">a</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;intVar&quot;</span><span class="p">,</span> <span class="nx">intVar</span><span class="p">,</span> <span class="s">&quot;\nint32Var&quot;</span><span class="p">,</span> <span class="nx">int32Var</span><span class="p">,</span> <span class="s">&quot;\nfloat64Var&quot;</span><span class="p">,</span> <span class="nx">float64Var</span><span class="p">,</span> <span class="s">&quot;\ncomplex64Var&quot;</span><span class="p">,</span> <span class="nx">complex64Var</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// intVar 5 </span>
-</span><span class='line'><span class="c1">// int32Var 5 </span>
-</span><span class='line'><span class="c1">// float64Var 5 </span>
-</span><span class='line'><span class="c1">// complex64Var (5+0i)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1><span id="conversions"> 轉型 conversions  </span></h1>
-
-<h3>Basic Types</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="o">-</span> <span class="kt">string</span>
-</span><span class='line'><span class="o">-</span> <span class="kt">bool</span>
-</span><span class='line'><span class="o">-</span> <span class="nx">Numeric</span> <span class="nx">Types</span>
-</span><span class='line'>  <span class="o">-</span> <span class="kt">int</span>  <span class="kt">int8</span>  <span class="kt">int16</span>  <span class="kt">int32</span>  <span class="kt">int64</span>
-</span><span class='line'>  <span class="o">-</span> <span class="kt">uint</span> <span class="kt">uint8</span> <span class="kt">uint16</span> <span class="kt">uint32</span> <span class="kt">uint64</span>
-</span><span class='line'>  <span class="o">-</span> <span class="kt">float32</span> <span class="kt">float64</span>
-</span><span class='line'>  <span class="o">-</span> <span class="kt">complex64</span> <span class="kt">complex128</span>
-</span><span class='line'>  <span class="o">-</span> <span class="kt">byte</span> <span class="c1">// alias for uint8</span>
-</span><span class='line'>  <span class="o">-</span> <span class="kt">rune</span> <span class="c1">// alias for int32，represents a Unicode code point</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>  <span class="s">&quot;strconv&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">i</span> <span class="o">:=</span> <span class="mi">123</span>
-</span><span class='line'>  <span class="nx">i64</span> <span class="o">:=</span> <span class="nb">int64</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>                               <span class="c1">// int to int64</span>
-</span><span class='line'>  <span class="nx">f64</span> <span class="o">:=</span> <span class="nb">float64</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>                             <span class="c1">// int to float64</span>
-</span><span class='line'>  <span class="nx">is</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nx">Itoa</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>                         <span class="c1">// int to string</span>
-</span><span class='line'>  <span class="nx">i64s</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nx">FormatInt</span><span class="p">(</span><span class="nx">i64</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>            <span class="c1">//int64 to string 10 進位</span>
-</span><span class='line'>  <span class="nx">f64s</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nx">FormatFloat</span><span class="p">(</span><span class="nx">f64</span><span class="p">,</span> <span class="sc">&#39;f&#39;</span><span class="p">,</span> <span class="o">-</span><span class="mi">1</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span> <span class="c1">// float64 to string</span>
-</span><span class='line'>  <span class="nx">f64i64</span> <span class="o">:=</span> <span class="nb">int64</span><span class="p">(</span><span class="nx">f64</span><span class="p">)</span>                          <span class="c1">// float64 to int64</span>
-</span><span class='line'>  <span class="nx">letter</span> <span class="o">:=</span> <span class="s">&quot;abc&quot;</span>                               <span class="c1">// string to byte</span>
-</span><span class='line'>  <span class="nx">si</span><span class="p">,</span> <span class="nx">sierr</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nx">Atoi</span><span class="p">(</span><span class="nx">is</span><span class="p">)</span>                 <span class="c1">// string to int</span>
-</span><span class='line'>  <span class="nx">si64</span><span class="p">,</span> <span class="nx">si64err</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nx">ParseInt</span><span class="p">(</span><span class="nx">is</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span> <span class="c1">// string to int64 [func ParseInt(s string, base int, bitSize int) (i int64, err error)]</span>
-</span><span class='line'>  <span class="nx">sf64</span><span class="p">,</span> <span class="nx">sf64err</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nx">ParseFloat</span><span class="p">(</span><span class="nx">is</span><span class="p">,</span> <span class="mi">64</span><span class="p">)</span>   <span class="c1">//  string to float64 [func ParseFloat(s string, bitSize int) (f float64, err error)]</span>
-</span><span class='line'>  <span class="nx">sb</span><span class="p">,</span> <span class="nx">sberr</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nx">ParseBool</span><span class="p">(</span><span class="s">&quot;true&quot;</span><span class="p">)</span>        <span class="c1">// string to bool [func ParseBool(str string) (value bool, err error)]</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;i      Type: %T, Value: %v\n&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;i64    Type: %T, Value: %v\n&quot;</span><span class="p">,</span> <span class="nx">i64</span><span class="p">,</span> <span class="nx">i64</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;f64    Type: %T, Value: %v\n&quot;</span><span class="p">,</span> <span class="nx">f64</span><span class="p">,</span> <span class="nx">f64</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;is     Type: %T, Value: %v\n&quot;</span><span class="p">,</span> <span class="nx">is</span><span class="p">,</span> <span class="nx">is</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;i64s   Type: %T, Value: %v\n&quot;</span><span class="p">,</span> <span class="nx">i64s</span><span class="p">,</span> <span class="nx">i64s</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;f64s   Type: %T, Value: %v\n&quot;</span><span class="p">,</span> <span class="nx">f64s</span><span class="p">,</span> <span class="nx">f64s</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;f64i64 Type: %T, Value: %v\n&quot;</span><span class="p">,</span> <span class="nx">f64i64</span><span class="p">,</span> <span class="nx">f64i64</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;letter Type: %T, Value: %v\n&quot;</span><span class="p">,</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="nx">letter</span><span class="p">),</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="nx">letter</span><span class="p">))</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;si     Type: %T, Value: %v Err: %v\n&quot;</span><span class="p">,</span> <span class="nx">si</span><span class="p">,</span> <span class="nx">si</span><span class="p">,</span> <span class="nx">sierr</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;si64   Type: %T, Value: %v Err: %v\n&quot;</span><span class="p">,</span> <span class="nx">si64</span><span class="p">,</span> <span class="nx">si64</span><span class="p">,</span> <span class="nx">si64err</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;sf64   Type: %T, Value: %v Err: %v\n&quot;</span><span class="p">,</span> <span class="nx">sf64</span><span class="p">,</span> <span class="nx">sf64</span><span class="p">,</span> <span class="nx">sf64err</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;sb     Type: %T, Value: %v Err: %v\n&quot;</span><span class="p">,</span> <span class="nx">sb</span><span class="p">,</span> <span class="nx">sb</span><span class="p">,</span> <span class="nx">sberr</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm">i      Type: int, Value: 123</span>
-</span><span class='line'><span class="cm">i64    Type: int64, Value: 123</span>
-</span><span class='line'><span class="cm">f64    Type: float64, Value: 123</span>
-</span><span class='line'><span class="cm">is     Type: string, Value: 123</span>
-</span><span class='line'><span class="cm">i64s   Type: string, Value: 123</span>
-</span><span class='line'><span class="cm">f64s   Type: string, Value: 123</span>
-</span><span class='line'><span class="cm">f64i64 Type: int64, Value: 123</span>
-</span><span class='line'><span class="cm">letter Type: []uint8, Value: [97 98 99]</span>
-</span><span class='line'><span class="cm">si     Type: int, Value: 123 Err: &lt;nil&gt;</span>
-</span><span class='line'><span class="cm">si64   Type: int64, Value: 123 Err: &lt;nil&gt;</span>
-</span><span class='line'><span class="cm">sf64   Type: float64, Value: 123 Err: &lt;nil&gt;</span>
-</span><span class='line'><span class="cm">sb     Type: bool, Value: true Err: &lt;nil&gt;</span>
-</span><span class='line'><span class="cm">*/</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>string</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">printBytes</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%x &quot;</span><span class="p">,</span> <span class="nx">s</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">printChars</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">runes</span> <span class="o">:=</span> <span class="p">[]</span><span class="nb">rune</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nb">len</span><span class="p">(</span><span class="nx">runes</span><span class="p">);</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%c &quot;</span><span class="p">,</span> <span class="nx">runes</span><span class="p">[</span><span class="nx">i</span><span class="p">])</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">printCharsAndBytes</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">index</span><span class="p">,</span> <span class="kt">rune</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">s</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%c starts at byte %d\n&quot;</span><span class="p">,</span> <span class="kt">rune</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">name</span> <span class="o">:=</span> <span class="s">&quot;哈囉&quot;</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">name</span><span class="p">))</span> <span class="c1">// 6，中文字串是用3個位元組存的</span>
-</span><span class='line'>  <span class="nx">printBytes</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">printChars</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">printCharsAndBytes</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n\n&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">name</span> <span class="p">=</span> <span class="s">&quot;Señor&quot;</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">name</span><span class="p">))</span>
-</span><span class='line'>  <span class="nx">printBytes</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">printChars</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">printCharsAndBytes</span><span class="p">(</span><span class="nx">name</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">byteSlice</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{</span><span class="mh">0x43</span><span class="p">,</span> <span class="mh">0x61</span><span class="p">,</span> <span class="mh">0x66</span><span class="p">,</span> <span class="mh">0xC3</span><span class="p">,</span> <span class="mh">0xA9</span><span class="p">}</span>
-</span><span class='line'>  <span class="nx">str</span> <span class="o">:=</span> <span class="nb">string</span><span class="p">(</span><span class="nx">byteSlice</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">runeSlice</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">rune</span><span class="p">{</span><span class="mh">0x0053</span><span class="p">,</span> <span class="mh">0x0065</span><span class="p">,</span> <span class="mh">0x00f1</span><span class="p">,</span> <span class="mh">0x006f</span><span class="p">,</span> <span class="mh">0x0072</span><span class="p">}</span>
-</span><span class='line'>  <span class="nx">runestr</span> <span class="o">:=</span> <span class="nb">string</span><span class="p">(</span><span class="nx">runeSlice</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">runestr</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">/**</span>
-</span><span class='line'><span class="cm">6</span>
-</span><span class='line'><span class="cm">e5 93 88 e5 9b 89 </span>
-</span><span class='line'><span class="cm">哈 囉 </span>
-</span><span class='line'><span class="cm">哈 starts at byte 0</span>
-</span><span class='line'><span class="cm">囉 starts at byte 3</span>
-</span><span class='line'>
-</span><span class='line'>
-</span><span class='line'><span class="cm">6</span>
-</span><span class='line'><span class="cm">53 65 c3 b1 6f 72 </span>
-</span><span class='line'><span class="cm">S e ñ o r </span>
-</span><span class='line'><span class="cm">S starts at byte 0</span>
-</span><span class='line'><span class="cm">e starts at byte 1</span>
-</span><span class='line'><span class="cm">ñ starts at byte 2</span>
-</span><span class='line'><span class="cm">o starts at byte 4</span>
-</span><span class='line'><span class="cm">r starts at byte 5</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">Café</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">Señor</span>
-</span><span class='line'><span class="cm">**/</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li><a href="https://golangbot.com/strings/">[golangbot] strings</a></li>
-</ul>
-
-
-<h3>complex</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">c1</span> <span class="o">:=</span> <span class="nb">complex</span><span class="p">(</span><span class="mi">5</span><span class="p">,</span> <span class="mi">7</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">c2</span> <span class="o">:=</span> <span class="mi">8</span> <span class="o">+</span> <span class="m">27i</span>
-</span><span class='line'>    <span class="nx">cadd</span> <span class="o">:=</span> <span class="nx">c1</span> <span class="o">+</span> <span class="nx">c2</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;sum:&quot;</span><span class="p">,</span> <span class="nx">cadd</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">cmul</span> <span class="o">:=</span> <span class="nx">c1</span> <span class="o">*</span> <span class="nx">c2</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;product:&quot;</span><span class="p">,</span> <span class="nx">cmul</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// sum: (13+34i)</span>
-</span><span class='line'><span class="c1">// product: (-149+191i)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1><span id="output"> 輸出 output </span></h1>
-
-<p><code>fmt</code> 是 golang 的一個套件，一開始必須 import 進來才可以使用</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Hello&quot;</span><span class="p">)</span> <span class="c1">// Hello</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">A</span> <span class="o">:=</span> <span class="s">&quot;Hello&quot;</span>
-</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">A</span><span class="p">)</span> <span class="c1">// Hello</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">B</span> <span class="o">:=</span> <span class="s">&quot;Hello&quot;</span>
-</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%s, world!&quot;</span><span class="p">,</span> <span class="nx">B</span><span class="p">)</span> <span class="c1">// Hello, world!</span>
-</span><span class='line'>
-</span><span class='line'><span class="nx">C</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>
-</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">C</span><span class="p">)</span> <span class="c1">// [1 2 3]  </span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">Foo</span> <span class="kt">bool</span> <span class="p">=</span> <span class="kc">false</span>
-</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Type: %T Value: %v\n&quot;</span><span class="p">,</span> <span class="nx">Foo</span><span class="p">,</span> <span class="nx">Foo</span><span class="p">)</span> <span class="c1">// Type: bool Value: false</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="p">(</span>
-</span><span class='line'>  <span class="nx">i</span> <span class="kt">int</span>
-</span><span class='line'>  <span class="nx">f</span> <span class="kt">float64</span>
-</span><span class='line'>  <span class="nx">b</span> <span class="kt">bool</span>
-</span><span class='line'>  <span class="nx">s</span> <span class="kt">string</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%v %v %v %q\n&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">f</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">s</span><span class="p">)</span> <span class="c1">// 0 0 false &quot;&quot;</span>
-</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%T %T %T %T\n&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">f</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">s</span><span class="p">)</span> <span class="c1">// int float64 bool string</span>
-</span><span class='line'><span class="c1">// 0 for numeric types</span>
-</span><span class='line'><span class="c1">// false for the boolean type</span>
-</span><span class='line'><span class="c1">// &quot;&quot; (the empty string) for string</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件:</p>
-
-<ul>
-<li><a href="https://golangbot.com/learn-golang-series/">[golangbot.com] learn-golang-series</a></li>
-<li><a href="https://golang.org/pkg/strconv/">strconv pkg</a></li>
-<li><a href="https://golang.org/pkg/reflect/">reflect</a></li>
-<li><a href="https://studygolang.com/articles/2644">golang fmt格式「佔位符」</a></li>
-<li><a href="https://golang.org/pkg/fmt/">pkg fmt</a></li>
-<li><a href="https://zybuluo.com/codemanship/note/21183">學習Golang語言(4):類型&ndash;字串</a></li>
-<li><a href="https://golangtc.com/t/528cc004320b52227200000f">string rune byte 的關係</a></li>
-<li><a href="http://www.ruanyifeng.com/blog/2007/10/ascii_unicode_and_utf-8.html">字串編碼筆記：ASCII，Unicode 和 UTF-8</a></li>
-</ul>
-
-
-<p>官方文件：</p>
-
-<ul>
-<li><a href="https://golang.org/doc/code.html#GOPATH">How to Write Go Code</a></li>
-<li><a href="https://golang.org/">golang</a></li>
-<li><a href="https://tour.golang.org/welcome/1">A Tour of Go</a></li>
-<li><a href="https://gobyexample.com/">gobyexample</a></li>
-<li><a href="http://www.golang-book.com/books/intro">golang-book</a></li>
-<li><a href="https://godoc.org/">godoc</a></li>
-<li><a href="https://golang.org/ref/spec">The Go Programming Language Specification</a></li>
-<li><a href="https://blog.golang.org/gos-declaration-syntax">Go&rsquo;s Declaration Syntax</a></li>
-<li><a href="https://play.golang.org/">線上 play golong</a></li>
-<li><a href="https://github.com/golang/go/wiki/PackageManagementTools">PackageManagementTools</a></li>
-<li><a href="https://tour.golang.org/concurrency/11">Where to Go from here&hellip;</a></li>
-</ul>
-
-
-<p>陸陸續續有看到的網站紀錄一下：</p>
-
-<ul>
-<li><a href="https://wizardforcel.gitbooks.io/gopl-zh/content/">Go語言聖經（中文版)</a></li>
-<li><a href="https://bingohuang.gitbooks.io/effective-go-zh-en/content/">Effective Go 中英雙語版</a></li>
-<li><a href="https://astaxie.gitbooks.io/build-web-application-with-golang/content/">Go Web 程式設計</a></li>
-<li><a href="https://github.com/luciotato/golang-notes/blob/master/OOP.md">Golang concepts from an OOP point of view</a></li>
-<li><a href="https://blog.helloarron.com/2015/08/29/go/mac-install-go/">Mac下安裝Go和配置相應環境</a></li>
-<li><a href="http://steventtud.com/install-go-in-mac-osx-with-homebrew/">在 Mac OS X 下使用 brew 安裝 Go</a></li>
-<li><a href="http://chen-tao.github.io/2017/09/14/Use-gvm-manage-golang-version/">使用gvm管理多版本golang</a></li>
-<li><a href="https://github.com/a8m/go-lang-cheat-sheet#basic-syntax">go-lang-cheat-sheet</a></li>
-<li><a href="https://yami.io/php-to-golang/s">從 PHP 到 Golang 的筆記</a></li>
-<li><a href="https://tiancaiamao.gitbooks.io/go-internals/content/zh/">深入解析Go</a></li>
-<li><a href="https://segmentfault.com/a/1190000011446643#articleHeader5">Go基礎學習四之函式function、結構struct、方法method</a></li>
-<li><a href="https://go101.org/article/101.html">go101</a></li>
-<li><a href="https://cyent.github.io/golang/"> Go語言學習 - cyent筆記</a></li>
-<li><a href="https://github.com/golang/tour/tree/master/solutions">golang tour solutions</a></li>
-<li><a href="http://www.flysnow.org/categories/Golang/page/5/">飛雪無情的博客 - golang</a></li>
-<li><a href="https://golangbot.com/learn-golang-series/">[golangbot.com] Golang tutorial series</a></li>
-<li><a href="https://astaxie.gitbooks.io/build-web-application-with-golang/content/en/preface.html">astaxie.gitbooks.io</a></li>
 </ul>
 
 ]]></content>
