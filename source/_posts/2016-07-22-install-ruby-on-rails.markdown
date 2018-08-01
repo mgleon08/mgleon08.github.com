@@ -584,7 +584,8 @@ Prefrences > Setting-User
 	"tab_size": 2,
 	"theme": "Spacegray Eighties.sublime-theme",
 	"translate_tabs_to_spaces": true,
-	"trim_trailing_white_space_on_save": true
+	"trim_trailing_white_space_on_save": true,
+	"word_wrap": true
 }
 
 
@@ -651,7 +652,8 @@ vscodeicon
   "prettier.singleQuote": true,
   "prettier.trailingComma": "none",
   "prettier.printWidth": 120,
-  "files.trimTrailingWhitespace": true
+  "files.trimTrailingWhitespace": true,
+  "editor.wordWrap": true
 }
 ```
 
