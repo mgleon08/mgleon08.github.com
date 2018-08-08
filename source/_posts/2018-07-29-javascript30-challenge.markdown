@@ -28,3 +28,6 @@ categories: javascript
 | 007 | Array Cardio Day 2 | [Demo](https://mgleon08.github.io/JavaScript30/007.Array-Cardio-Day-2/index.html) | [Github](https://github.com/mgleon08/JavaScript30/tree/master/007.Array-Cardio-Day-2) 
 | 008 | Fun with HTML5 Canvas | [Demo](https://mgleon08.github.io/JavaScript30/008.Fun-with-HTML5-Canvas/index.html) | [Github](https://github.com/mgleon08/JavaScript30/tree/master/008.Fun-with-HTML5-Canvas) |
 | 009 | 14 Must Know Dev Tools Tricks | [Demo](https://mgleon08.github.io/JavaScript30/009.14-Must-Know-Dev-Tools-Tricks/index.html) | [Github](https://github.com/mgleon08/JavaScript30/tree/master/009.14-Must-Know-Dev-Tools-Tricks) |
+| 010 | Hold Shift to Check Multiple Checkboxes | [Demo](https://mgleon08.github.io/JavaScript30/010.Hold-Shift-to-Check-Multiple-Checkboxes/index.html) | [Github](https://github.com/mgleon08/JavaScript30/tree/master/010.Hold-Shift-to-Check-Multiple-Checkboxes) |
+| 011 | Custom HTML5 Video Player | [Demo](https://mgleon08.github.io/JavaScript30/011.Custom-HTML5-Video-Player/index.html) | [Github](https://github.com/mgleon08/JavaScript30/tree/master/011.Custom-HTML5-Video-Player) |
+
