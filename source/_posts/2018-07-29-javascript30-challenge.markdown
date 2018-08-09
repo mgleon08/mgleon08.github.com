@@ -30,4 +30,4 @@ categories: javascript
 | 009 | 14 Must Know Dev Tools Tricks | [Demo](https://mgleon08.github.io/JavaScript30/009.14-Must-Know-Dev-Tools-Tricks/index.html) | [Github](https://github.com/mgleon08/JavaScript30/tree/master/009.14-Must-Know-Dev-Tools-Tricks) |
 | 010 | Hold Shift to Check Multiple Checkboxes | [Demo](https://mgleon08.github.io/JavaScript30/010.Hold-Shift-to-Check-Multiple-Checkboxes/index.html) | [Github](https://github.com/mgleon08/JavaScript30/tree/master/010.Hold-Shift-to-Check-Multiple-Checkboxes) |
 | 011 | Custom HTML5 Video Player | [Demo](https://mgleon08.github.io/JavaScript30/011.Custom-HTML5-Video-Player/index.html) | [Github](https://github.com/mgleon08/JavaScript30/tree/master/011.Custom-HTML5-Video-Player) |
-
+| 012 | Key Sequence Detection (KONAMI CODE) | [Demo](https://mgleon08.github.io/JavaScript30/012.Key-Sequence-Detection(KONAMI-CODE)/index.html) | [Github](https://github.com/mgleon08/JavaScript30/tree/master/012.Key-Sequence-Detection(KONAMI-CODE)) |

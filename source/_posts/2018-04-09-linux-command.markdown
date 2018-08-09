@@ -115,11 +115,34 @@ curl -O https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.ta
 
 壓縮，解壓縮
 
+* `x` 解壓縮
+* `j` bzip2
+* `z` bzip
+* `J` xz
+* `v` verbose
+* `f` 後指定要解的檔案，或是壓縮後的指定檔名
+
 ```ruby
 tar xf ffmpeg-release-64bit-static.tar.xz
 ```
 
+下載 + 解壓縮
+
+```ruby
+curl -L https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz | tar Jxvf - -C /usr/local/src/
+```
+
+linux ffmpeg 下載流程
+
+先將原本的 `/usr/local/bin/ffmpeg` 移除
+
+1. 下載 `curl -O https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz`
+2. 解壓縮 `tar xf ffmpeg-release-64bit-static.tar.xz`
+3. 將 ffmpeg 移到 bin/ `mv ffmpeg-4.0.2-64bit-static/ffmpeg /usr/local/bin/`
+4. 更改權限 `chmod +x /usr/local/bin/ffmpeg`
+
 * [每天一個linux命令（28）：tar命令](http://www.cnblogs.com/peida/archive/2012/11/30/2795656.html)
+* [GNU / Linux 各種壓縮與解壓縮指令](http://note.drx.tw/2008/04/command.html)
 
 
 # readlink
