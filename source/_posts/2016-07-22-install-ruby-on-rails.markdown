@@ -638,6 +638,7 @@ code
 ESLint // 如果你有用程式碼規範的話
 Prettier - code formatter // alt + shift + f
 vscodeicon
+CSScomb
 // 其他可以看上面推薦的安裝
 ```
 
