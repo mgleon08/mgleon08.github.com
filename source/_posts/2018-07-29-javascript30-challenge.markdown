@@ -34,3 +34,5 @@ categories: javascript
 | 013 | Slide In on Scroll | <a href="https://mgleon08.github.io/JavaScript30/013.Slide-In-on-Scroll/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/013.Slide-In-on-Scroll">Github</a> |
 | 014 | Object and Arrays - Reference VS Copy | <a href="https://mgleon08.github.io/JavaScript30/014.Object-and-Arrays-Reference-VS-Copy/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/014.Object-and-Arrays-Reference-VS-Copy">Github</a> |
 | 015 | LocalStorage and Event Delegation | <a href="https://mgleon08.github.io/JavaScript30/015.LocalStorage-and-Event-Delegation/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/015.LocalStorage-and-Event-Delegation">Github</a> |
+| 016 | CSS Text Shadow Mouse Move Effect | <a href="https://mgleon08.github.io/JavaScript30/016.CSS-Text-Shadow-Mouse-Move-Effect/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/016.CSS-Text-Shadow-Mouse-Move-Effect">Github</a> |
+
