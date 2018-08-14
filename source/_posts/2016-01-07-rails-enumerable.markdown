@@ -96,6 +96,8 @@ my_hash.keep("Joe", "Jim")
 對物件，挑出指定欄位的值，並回傳一個新的 `array`
 像是 `map` 和 `select` 合在一起的指令
 
+> pluck 每次都會發 query 跟 map 不太一樣，因此如果是已經 preload 的 data 最好用 map 會比較好
+
 Approach - map
 
 ```ruby
