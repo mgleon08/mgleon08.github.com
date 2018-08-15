@@ -8,6 +8,8 @@ categories: ruby
 
 常常搞不清楚，`include`，`extend`，`require`，`load`這幾個差異。
 
+> 後來發現還有一個 [autoload](https://blog.yorkxin.org/2014/02/10/autoload-in-ruby-autoload-paths-in-rails-and-module-reopening.html)
+
 <!-- more -->
 
 # module
