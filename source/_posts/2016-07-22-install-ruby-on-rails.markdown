@@ -654,9 +654,12 @@ CSScomb
   "prettier.trailingComma": "none",
   "prettier.printWidth": 120,
   "files.trimTrailingWhitespace": true,
-  "editor.wordWrap": true
+  "editor.wordWrap": true,
+  "vetur.format.defaultFormatter.html": "js-beautify-html"
 }
 ```
+
+* [在 vscode 中統一 vue 編碼風格](http://www.52cik.com/2018/02/20/vscode-vue.html)
 
 ### command line
 
