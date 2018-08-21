@@ -42,3 +42,4 @@ categories: javascript
 | 021 | Geolocation based Speedometer and Compass | <a href="https://mgleon08.github.io/JavaScript30/021.Geolocation-based-Speedometer-and-Compass/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/021.Geolocation-based-Speedometer-and-Compass">Github</a> |
 | 022 | Follow Along Links | <a href="https://mgleon08.github.io/JavaScript30/022.Follow-Along-Links/">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/022.Follow-Along-Links">Github</a> |
 | 023 | Speech Synthesis | <a href="https://mgleon08.github.io/JavaScript30/023.Speech-Synthesis/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/023.Speech-Synthesis">Github</a> |
+| 024 | Sticky Nav | <a href="https://mgleon08.github.io/JavaScript30/024.Sticky-Nav/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/024.Sticky-Nav">Github</a> |
