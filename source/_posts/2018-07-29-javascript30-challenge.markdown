@@ -43,3 +43,6 @@ categories: javascript
 | 022 | Follow Along Links | <a href="https://mgleon08.github.io/JavaScript30/022.Follow-Along-Links/">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/022.Follow-Along-Links">Github</a> |
 | 023 | Speech Synthesis | <a href="https://mgleon08.github.io/JavaScript30/023.Speech-Synthesis/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/023.Speech-Synthesis">Github</a> |
 | 024 | Sticky Nav | <a href="https://mgleon08.github.io/JavaScript30/024.Sticky-Nav/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/024.Sticky-Nav">Github</a> |
+| 025 | Event Capture, Propagation, Bubbling and Once | <a href="https://mgleon08.github.io/JavaScript30/025.Event-Capture-Propagation-Bubbling-and-Once/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/025.Event-Capture-Propagation-Bubbling-and-Once">Github</a> |
+| 026 | Stripe Follow Along Dropdown | <a href="https://mgleon08.github.io/JavaScript30/026.Stripe-Follow-Along-Dropdown/">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/026.Stripe-Follow-Along-Dropdown">Github</a> |
+

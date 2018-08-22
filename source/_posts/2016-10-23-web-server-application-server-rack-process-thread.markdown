@@ -122,7 +122,6 @@ Video：
 
 參考文件：
 
-
 * [How we've made Phusion Passenger 5 (「Raptor」) up to 4x faster than Unicorn, up to 2x faster than Puma, Torquebox](http://www.rubyraptor.org/how-we-made-raptor-up-to-4x-faster-than-unicorn-and-up-to-2x-faster-than-puma-torquebox/)    [(中譯)](http://ohcoder.com/blog/2014/11/11/raptor-part-1/) 
 * [Web server / Application server 傻傻分不清楚 ？](http://michaelhsu.tw/2013/07/04/server/)  
 * [Ruby on Rails 伺服器的選擇](http://blog.chh.tw/posts/ruby-on-rails-server-options/) 
@@ -131,3 +130,4 @@ Video：
 * [Ruby on Rails Server options [closed]](http://stackoverflow.com/questions/4113299/ruby-on-rails-server-options) [Ruby 伺服器對比](https://ruby-china.org/topics/25276) 
 * [Ruby 的多執行緒應用伺服器介紹](https://ruby-china.org/topics/10832)
 * [大戰 Rails Connection Leak](http://blog.mz026.rocks/20160917/rails-connection-leak)
+* [Rails 部署工具，原來是這樣](https://5xruby.tw/posts/rails-deploy)
