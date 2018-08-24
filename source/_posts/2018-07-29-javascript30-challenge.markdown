@@ -46,4 +46,5 @@ categories: javascript
 | 025 | Event Capture, Propagation, Bubbling and Once | <a href="https://mgleon08.github.io/JavaScript30/025.Event-Capture-Propagation-Bubbling-and-Once/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/025.Event-Capture-Propagation-Bubbling-and-Once">Github</a> |
 | 026 | Stripe Follow Along Dropdown | <a href="https://mgleon08.github.io/JavaScript30/026.Stripe-Follow-Along-Dropdown/">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/026.Stripe-Follow-Along-Dropdown">Github</a> |
 | 027 | Click and Drag to Scroll | <a href="https://mgleon08.github.io/JavaScript30/027.Click-and-Drag-to-Scroll/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/027.Click-and-Drag-to-Scroll">Github</a> |
+| 028 | Video Speed Controller UI | <a href="https://mgleon08.github.io/JavaScript30/028.Video-Speed-Controller-UI/index.html">Demo</a> | <a href="https://github.com/mgleon08/JavaScript30/tree/master/028.Video-Speed-Controller-UI">Github</a> |
 
