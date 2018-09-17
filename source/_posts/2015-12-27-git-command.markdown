@@ -482,6 +482,10 @@ alias gbd='git branch -d'
 alias gbr='git branch --remote'
 alias gba='git branch -a'
 
+# branch delete
+alias gbmd = git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d
+alias gbrmd = git branch -r --merged | egrep -v "(^\*|master|dev)" | xargs git branch -r -d
+
 #git push
 alias gp='git push'
 alias gpo='git push origin'

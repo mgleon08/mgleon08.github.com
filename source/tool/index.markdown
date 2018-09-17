@@ -61,3 +61,25 @@ footer: true
 * [primer](https://primer.github.io/)
 * [milligram](https://milligram.io/)
 * [purecss](https://purecss.io/)
+
+
+# <span id="code-quality"> Code Quality </span>
+
+
+* [flay - 找出相似的程式碼讓 code 更 dry](https://github.com/seattlerb/flay)
+* [rubocop - codeing style](https://github.com/rubocop-hq/rubocop)
+* [simplecov - 測試覆蓋率](https://github.com/colszowka/simplecov)
+* [brakeman - 檢查安全性](https://github.com/presidentbeef/brakeman)
+* [Bullet - 檢查 N+1 Query](https://github.com/flyerhzm/bullet)
+* [rubycritic - 靜態分析程式碼(Reek, Flay 和 Flog)](https://github.com/whitesmith/rubycritic)
+* [pronto - review 完後 commit 在 github comment 上面](https://github.com/prontolabs/pronto)
+* [traceroute - 找出沒有在使用的 router](https://github.com/amatsuda/traceroute)
+* [rack-mini-profiler - profiling每一頁花的時間](https://github.com/MiniProfiler/rack-mini-profiler)
+
+# <span id="code-review"> Automated Code Review</span>
+
+* [codacy](https://www.codacy.com/)
+* [codeclimate](https://codeclimate.com/)
+* [codefactor](https://www.codefactor.io/)
+* [houndci](https://houndci.com/)
+* [sider](https://sider.review/)

@@ -212,3 +212,41 @@ cp /dev/null access.log # 複製一份空的蓋掉原本的檔案
 參考文件
 
 * [Unix 重新導向跟 2>&1](http://ibookmen.blogspot.com/2010/11/unix-2.html)
+
+# scp
+
+複製本機檔案到遠端機器，也可以反向
+
+```ruby
+scp [帳號@來源主機]:來源檔案 [帳號@目的主機]:目的檔案
+
+# 從本地端複製到遠端
+scp /path/file1 myuser@192.168.0.1:/path/file2
+
+# 從遠端複製到本地端
+scp myuser@192.168.0.1:/path/file2 /path/file1
+```
+
+* [Linux 的 scp 指令用法教學與範例：遠端加密複製檔案與目錄](https://blog.gtwang.org/linux/linux-scp-command-tutorial-examples/)
+
+# xargs
+
+xargs 這個指令會標準輸入（standard input）讀取資料，並以空白字元或換行作為分隔，將輸入的資料切割成多個字串，並將這些字串當成指定指令（預設為 /bin/echo）執行時的參數。
+
+```ruby
+xargs
+
+arg1 arg2
+arg3
+
+# arg1 arg2 arg3
+```
+
+```ruby
+echo a b c d e f | xargs -n 3
+
+# echo a b c
+# echo d e f
+```
+
+* [Linux 系統 xargs 指令範例與教學](https://blog.gtwang.org/linux/xargs-command-examples-in-linux-unix/)

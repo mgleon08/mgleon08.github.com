@@ -48,6 +48,7 @@ ARG UID
 RUN adduser rails --uid $UID --disabled-password --gecos ""
 # 可以透過 $UID 給予不同的 user ID，並且進到任何的 container 都可以用相同的 user ID
 # --disabled-password - 讓 rails 無法用密碼登入
+# --gecos 用戶的詳細訊息（如姓名，年齡，電話等），因為 adduser 會提示你輸入用戶的密碼和相關的finger訊息，但是這個可以用選項--gecos來覆蓋。
 
 ENV APP /usr/src/app
 RUN mkdir $APP
