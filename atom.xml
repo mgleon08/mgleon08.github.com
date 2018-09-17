@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-08-26T12:54:13+08:00</updated>
+  <updated>2018-09-17T21:38:23+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,318 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Drone]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/09/17/drone/"/>
+    <updated>2018-09-17T11:25:36+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/09/17/drone</id>
+    <content type="html"><![CDATA[<p>透過 drone 可以很輕易的自己架設一個 CI CD server</p>
+
+<!-- more -->
+
+
+<blockquote><p>Drone 是一套基於 Docker 容器技術的持續交付平台。</p></blockquote>
+
+<h3>dockerfile</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">version</span><span class="p">:</span> <span class="s1">&#39;3&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="ss">services</span><span class="p">:</span>
+</span><span class='line'>  <span class="n">drone</span><span class="o">-</span><span class="ss">server</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">image</span><span class="p">:</span> <span class="n">drone</span><span class="o">/</span><span class="ss">drone</span><span class="p">:</span><span class="mi">0</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'>    <span class="ss">container_name</span><span class="p">:</span> <span class="n">drone</span><span class="o">-</span><span class="n">server</span>
+</span><span class='line'>    <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="mi">80</span><span class="p">:</span><span class="mi">8000</span>
+</span><span class='line'>      <span class="o">-</span> <span class="mi">9000</span>
+</span><span class='line'>    <span class="ss">volumes</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="o">.</span><span class="n">/</span><span class="ss">db</span><span class="p">:</span><span class="sr">/var/</span><span class="n">lib</span><span class="o">/</span><span class="n">drone</span><span class="o">/</span>
+</span><span class='line'>    <span class="ss">restart</span><span class="p">:</span> <span class="n">always</span>
+</span><span class='line'>    <span class="ss">environment</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_OPEN</span><span class="o">=</span><span class="kp">true</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_HOST</span><span class="o">=</span><span class="err">$</span><span class="p">{</span><span class="no">DRONE_HOST</span><span class="p">}</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_GITHUB</span><span class="o">=</span><span class="kp">true</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_GITHUB_CLIENT</span><span class="o">=</span><span class="err">$</span><span class="p">{</span><span class="no">DRONE_GITHUB_CLIENT</span><span class="p">}</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_GITHUB_SECRET</span><span class="o">=</span><span class="err">$</span><span class="p">{</span><span class="no">DRONE_GITHUB_SECRET</span><span class="p">}</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_SECRET</span><span class="o">=</span><span class="err">$</span><span class="p">{</span><span class="no">DRONE_SECRET</span><span class="p">}</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_ADMIN</span><span class="o">=</span><span class="n">leon</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_ORGS</span><span class="o">=</span><span class="nb">test</span> <span class="c1"># Organization 名稱</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_DEBUG</span><span class="o">=</span><span class="kp">true</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="n">drone</span><span class="o">-</span><span class="ss">agent</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">image</span><span class="p">:</span> <span class="n">drone</span><span class="o">/</span><span class="ss">agent</span><span class="p">:</span><span class="mi">0</span><span class="o">.</span><span class="mi">8</span><span class="o">.</span><span class="mi">5</span>
+</span><span class='line'>    <span class="ss">command</span><span class="p">:</span> <span class="n">agent</span>
+</span><span class='line'>    <span class="ss">restart</span><span class="p">:</span> <span class="n">always</span>
+</span><span class='line'>    <span class="ss">depends_on</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="n">drone</span><span class="o">-</span><span class="n">server</span>
+</span><span class='line'>    <span class="ss">scale</span><span class="p">:</span> <span class="mi">3</span>
+</span><span class='line'>    <span class="ss">volumes</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="sr">/var/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span><span class="ss">:/</span><span class="n">var</span><span class="o">/</span><span class="n">run</span><span class="o">/</span><span class="n">docker</span><span class="o">.</span><span class="n">sock</span>
+</span><span class='line'>    <span class="ss">environment</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_SERVER</span><span class="o">=</span><span class="n">drone</span><span class="o">-</span><span class="ss">server</span><span class="p">:</span><span class="mi">9000</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_SECRET</span><span class="o">=</span><span class="err">$</span><span class="p">{</span><span class="no">DRONE_SECRET</span><span class="p">}</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_MAX_PROCS</span><span class="o">=</span><span class="mi">3</span>
+</span><span class='line'>      <span class="o">-</span> <span class="no">DRONE_DEBUG</span><span class="o">=</span><span class="kp">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>.drone.yml</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+<span class='line-number'>97</span>
+<span class='line-number'>98</span>
+<span class='line-number'>99</span>
+<span class='line-number'>100</span>
+<span class='line-number'>101</span>
+<span class='line-number'>102</span>
+<span class='line-number'>103</span>
+</pre></td><td class='code'><pre><code class='yaml'><span class='line'><span class="c1"># 所有流程共享一個 workspace</span>
+</span><span class='line'><span class="l-Scalar-Plain">workspace</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">base</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">/rails</span> <span class="c1"># 所有步驟都可以存取此目錄資料</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">path</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">src/github.com/mgleon08/project</span> <span class="c1"># 所有指令都在此目錄執行</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># pull git 下來</span>
+</span><span class='line'><span class="l-Scalar-Plain">clone</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">git</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">plugins/git:next</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">pull</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">true</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">depth</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">50</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">tags</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">true</span> <span class="c1"># 將 tag 一起拉下來</span>
+</span><span class='line'>
+</span><span class='line'><span class="l-Scalar-Plain">pipeline</span><span class="p-Indicator">:</span>
+</span><span class='line'><span class="c1"># 將一些不需要重複 build 的檔案 cache 起來 e.g. gem, node_module</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">restore-cache</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">drillster/drone-volume-cache</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">restore</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">true</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">mount</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">./vendor</span>
+</span><span class='line'>    <span class="c1"># Mount the cache volume, needs &quot;Trusted&quot;</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">volumes</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">/tmp/cache:/cache</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">when</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">local</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="l-Scalar-Plain">install</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ruby:2.5</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">pull</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">true</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">environment</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">RAILS_ENV=test</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">RAKE_ENV=test</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">commands</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">ruby -v</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">gem -v</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="c1"># bundle，檔案位置設定在 vendor/bundle</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="c1"># config</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">cp config/database.ci.yml config/database.yml</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="c1"># setup secrets and db migration</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle exec rails -v</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle exec rake generate:secrets --trace</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle exec rake db:create db:migrate --trace</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">when</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">local</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="l-Scalar-Plain">rubocop</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ruby:2.5</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">group</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">testing</span> <span class="c1"># 同一個 group 可同時執行，平行測試</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">commands</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle exec rubocop -c .rubocop.yml || true</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle exec rubocop -c .rubocop.yml --format=json --out=rubocop-result.json || true</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="l-Scalar-Plain">flay</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ruby:2.5</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">group</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">testing</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">commands</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle exec flay app</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="l-Scalar-Plain">rspec</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">ruby:2.5</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">group</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">testing</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">environment</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">RAILS_ENV=test</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">RAKE_ENV=test</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">commands</span><span class="p-Indicator">:</span>
+</span><span class='line'>        <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3</span>
+</span><span class='line'>        <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">bundle exec rspec --color --tag ~@feature</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">when</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">local</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="l-Scalar-Plain">rebuild-cache</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">drillster/drone-volume-cache</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">group</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">cleanup</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">rebuild</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">true</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">mount</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">./vendor</span>
+</span><span class='line'>    <span class="c1"># Mount the cache volume, needs &quot;Trusted&quot;</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">volumes</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">/tmp/cache:/cache</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">when</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">local</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="l-Scalar-Plain">notify</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">plugins/slack</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">secrets</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span> <span class="nv">slack_webhook</span> <span class="p-Indicator">]</span> <span class="c1"># 在 drone 介面上設定環境變數 secrets</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">channel</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">channel_name</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">username</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">Drone CI</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">when</span><span class="p-Indicator">:</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">status</span><span class="p-Indicator">:</span> <span class="p-Indicator">[</span> <span class="nv">success</span><span class="p-Indicator">,</span> <span class="nv">failure</span> <span class="p-Indicator">]</span> <span class="c1"># 成功或失敗都通知訊息</span>
+</span><span class='line'>      <span class="l-Scalar-Plain">local</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">false</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># database.yml 裡面的 database 要跟下面定義的名字一樣，這邊也是叫 database</span>
+</span><span class='line'><span class="l-Scalar-Plain">services</span><span class="p-Indicator">:</span>
+</span><span class='line'>  <span class="l-Scalar-Plain">database</span><span class="p-Indicator">:</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">image</span><span class="p-Indicator">:</span> <span class="l-Scalar-Plain">mysql:5.7</span>
+</span><span class='line'>    <span class="l-Scalar-Plain">environment</span><span class="p-Indicator">:</span> <span class="c1"># 全域變數</span>
+</span><span class='line'>      <span class="p-Indicator">-</span> <span class="l-Scalar-Plain">MYSQL_ALLOW_EMPTY_PASSWORD=yes</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://yeasy.gitbooks.io/docker_practice/cases/ci/drone.html">Build Drone</a></li>
+<li><a href="http://docs.drone.io/zh/">docs drone</a></li>
+<li><a href="http://plugins.drone.io/">plugins.drone.io</a></li>
+<li><a href="https://www.slideshare.net/appleboy/drone-79506886">用 Drone 打造輕量級容器持續交付平台</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Javascript 30 天挑戰]]></title>
@@ -1618,6 +1930,7 @@
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
 <span class='line-number'>21</span>
+<span class='line-number'>22</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># autheg/autheg-backend/Dockerfile</span>
 </span><span class='line'><span class="no">FROM</span> <span class="ss">ruby</span><span class="p">:</span><span class="mi">2</span><span class="o">.</span><span class="mi">5</span>
 </span><span class='line'>
@@ -1625,6 +1938,7 @@
 </span><span class='line'><span class="no">RUN</span> <span class="n">adduser</span> <span class="n">rails</span> <span class="o">--</span><span class="n">uid</span> <span class="vg">$UID</span> <span class="o">--</span><span class="n">disabled</span><span class="o">-</span><span class="n">password</span> <span class="o">--</span><span class="n">gecos</span> <span class="s2">&quot;&quot;</span>
 </span><span class='line'><span class="c1"># 可以透過 $UID 給予不同的 user ID，並且進到任何的 container 都可以用相同的 user ID</span>
 </span><span class='line'><span class="c1"># --disabled-password - 讓 rails 無法用密碼登入</span>
+</span><span class='line'><span class="c1"># --gecos 用戶的詳細訊息（如姓名，年齡，電話等），因為 adduser 會提示你輸入用戶的密碼和相關的finger訊息，但是這個可以用選項--gecos來覆蓋。</span>
 </span><span class='line'>
 </span><span class='line'><span class="no">ENV</span> <span class="no">APP</span> <span class="sr">/usr/s</span><span class="n">rc</span><span class="o">/</span><span class="n">app</span>
 </span><span class='line'><span class="no">RUN</span> <span class="n">mkdir</span> <span class="vg">$APP</span>
@@ -11254,635 +11568,6 @@ s</p>
 <li><a href="https://hsinyu.gitbooks.io/golang_note/content/map_1.html">map (1)</a></li>
 <li><a href="http://blog.cyeam.com/json/2017/11/02/go-map-delete#map-%E7%9A%84%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C">Golang map 如何進行刪除操作？</a></li>
 </ul>
-
-
-<p>參考文件:</p>
-
-<ul>
-<li><a href="https://golangbot.com/learn-golang-series/">golangbot.com</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang - if Else, Loops, Switch]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/05/03/golang-if-else-loops-switch/"/>
-    <updated>2018-05-03T18:42:50+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/05/03/golang-if-else-loops-switch</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<ul>
-<li><a href="#if-else">if else 條件式</a></li>
-<li><a href="#loops">迴圈 loops (for、while、each)</a>
-
-<ul>
-<li><a href="#range">range (each)</a></li>
-</ul>
-</li>
-<li><a href="#switch">switch 條件式</a></li>
-</ul>
-
-
-<h1><span id="if-else">if else 條件式</span></h1>
-
-<h3>syntax</h3>
-
-<ul>
-<li><code>else</code> 一定要接續在 <code>}</code> 否則會 <code>syntax error</code>(因為 golang 會自動在後面加上 <code>;</code>)</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">if</span> <span class="nx">condition</span> <span class="p">{</span>
-</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">condition</span> <span class="p">{</span>
-</span><span class='line'><span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">if</span> <span class="nx">statement</span><span class="p">;</span> <span class="nx">condition</span> <span class="p">{</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>example</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>  <span class="s">&quot;math&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">pow</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">n</span><span class="p">,</span> <span class="nx">lim</span> <span class="kt">float64</span><span class="p">)</span> <span class="kt">float64</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// 判斷式前，先宣告變數</span>
-</span><span class='line'>  <span class="k">if</span> <span class="nx">v</span> <span class="o">:=</span> <span class="nx">math</span><span class="p">.</span><span class="nx">Pow</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">n</span><span class="p">);</span> <span class="nx">v</span> <span class="p">&lt;</span> <span class="nx">lim</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">return</span> <span class="nx">v</span> <span class="c1">// v 範圍只在 if 的 scope 裡</span>
-</span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">v</span> <span class="o">==</span> <span class="nx">lim</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%g = %g\n&quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">,</span> <span class="nx">lim</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%g &gt;= %g\n&quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">,</span> <span class="nx">lim</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">lim</span> <span class="c1">// 若改成 v 則會出現 undefined: v</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span>
-</span><span class='line'>      <span class="nx">pow</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">10</span><span class="p">),</span>
-</span><span class='line'>      <span class="nx">pow</span><span class="p">(</span><span class="mi">3</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">20</span><span class="p">),</span> <span class="c1">// 因為有換行所以必須要加上 ,</span>
-</span><span class='line'>  <span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 27 &gt;= 20</span>
-</span><span class='line'><span class="c1">// 9 20</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1><span id="loops">迴圈 loops (for、while、each)</span></h1>
-
-<p>Golang 中只有 for 一種迴圈，但能夠達成 for、while、foreach 多種用法</p>
-
-<h3>syntaxs</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">for</span> <span class="nx">initialisation</span><span class="p">;</span> <span class="nx">condition</span><span class="p">;</span> <span class="nx">post</span> <span class="p">{</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>example</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// 必須先定義起始的變數</span>
-</span><span class='line'>  <span class="c1">// The most basic type, with a single condition.</span>
-</span><span class='line'>  <span class="c1">// 1, 2, 3</span>
-</span><span class='line'>  <span class="nx">i</span> <span class="o">:=</span> <span class="mi">1</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">3</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
-</span><span class='line'>      <span class="nx">i</span> <span class="p">=</span> <span class="nx">i</span> <span class="o">+</span> <span class="mi">1</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">// A classic initial/condition/after `for` loop.</span>
-</span><span class='line'>  <span class="c1">// 7, 8, 9</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">j</span> <span class="o">:=</span> <span class="mi">7</span><span class="p">;</span> <span class="nx">j</span> <span class="o">&lt;=</span> <span class="mi">9</span><span class="p">;</span> <span class="nx">j</span><span class="o">++</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">j</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">// initialisation and post are omitted</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">10</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%d &quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
-</span><span class='line'>      <span class="nx">i</span> <span class="o">+=</span> <span class="mi">2</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="c1">//multiple initialisation and increment</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">no</span><span class="p">,</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">10</span><span class="p">,</span> <span class="mi">1</span><span class="p">;</span> <span class="nx">i</span> <span class="o">&lt;=</span> <span class="mi">10</span> <span class="o">&amp;&amp;</span> <span class="nx">no</span> <span class="o">&lt;=</span> <span class="mi">19</span><span class="p">;</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">no</span> <span class="p">=</span> <span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">,</span> <span class="nx">no</span><span class="o">+</span><span class="mi">1</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%d * %d = %d\n&quot;</span><span class="p">,</span> <span class="nx">no</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">no</span><span class="o">*</span><span class="nx">i</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="c1">// You can also `continue` to the next iteration of</span>
-</span><span class='line'>  <span class="c1">// the loop.</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">n</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">n</span> <span class="o">&lt;=</span> <span class="mi">5</span><span class="p">;</span> <span class="nx">n</span><span class="o">++</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span> <span class="nx">n</span><span class="o">%</span><span class="mi">2</span> <span class="o">==</span> <span class="mi">0</span> <span class="p">{</span>
-</span><span class='line'>          <span class="k">continue</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">n</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>infinite loop (while)</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// `for` without a condition will loop repeatedly</span>
-</span><span class='line'>  <span class="c1">// until you `break` out of the loop or `return` from</span>
-</span><span class='line'>  <span class="c1">// the enclosing function.</span>
-</span><span class='line'>  <span class="c1">// loop</span>
-</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;loop&quot;</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">break</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 實作 math.Sqrt(x) func, 並驗證與原本的 func 是否相同</span>
-</span><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>  <span class="s">&quot;math&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">Sqrt</span><span class="p">(</span><span class="nx">x</span> <span class="kt">float64</span><span class="p">)</span> <span class="p">(</span><span class="kt">float64</span><span class="p">,</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">z</span> <span class="o">:=</span> <span class="mf">1.0</span>
-</span><span class='line'>  <span class="nx">index</span> <span class="o">:=</span> <span class="mi">1</span>
-</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">z</span> <span class="o">-=</span> <span class="p">(</span><span class="nx">z</span><span class="o">*</span><span class="nx">z</span> <span class="o">-</span> <span class="nx">x</span><span class="p">)</span> <span class="o">/</span> <span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nx">z</span><span class="p">)</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">z</span><span class="p">)</span>
-</span><span class='line'>      <span class="nx">index</span><span class="o">++</span>
-</span><span class='line'>      <span class="k">if</span> <span class="nx">z</span> <span class="o">==</span> <span class="nx">math</span><span class="p">.</span><span class="nx">Sqrt</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>          <span class="k">break</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">z</span><span class="p">,</span> <span class="nx">index</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">i</span> <span class="o">:=</span> <span class="nb">float64</span><span class="p">(</span><span class="mi">169</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">output</span><span class="p">,</span> <span class="nx">index</span> <span class="o">:=</span> <span class="nx">Sqrt</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;index:&quot;</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;output:&quot;</span><span class="p">,</span> <span class="nx">output</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="cm">/**</span>
-</span><span class='line'><span class="cm">85</span>
-</span><span class='line'><span class="cm">43.49411764705882</span>
-</span><span class='line'><span class="cm">23.68985027605849</span>
-</span><span class='line'><span class="cm">15.41185354894443</span>
-</span><span class='line'><span class="cm">13.188719595702175</span>
-</span><span class='line'><span class="cm">13.00135021013767</span>
-</span><span class='line'><span class="cm">13.000000070110696</span>
-</span><span class='line'><span class="cm">13</span>
-</span><span class='line'><span class="cm">index: 9</span>
-</span><span class='line'><span class="cm">output: 13</span>
-</span><span class='line'><span class="cm">**/</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3><span id="range">range (each)</span></h3>
-
-<p>可以達成 foreach 的方式</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">data</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;a&quot;</span><span class="p">,</span> <span class="s">&quot;b&quot;</span><span class="p">,</span> <span class="s">&quot;c&quot;</span><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">value</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">data</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%d%s|&quot;</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="c1">// 輸出：0a|1b|2c|</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">index</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">data</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%d|&quot;</span><span class="p">,</span> <span class="nx">index</span><span class="p">)</span> <span class="c1">// 輸出：0|1|2|</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">value</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">data</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%s|&quot;</span><span class="p">,</span> <span class="nx">value</span><span class="p">)</span> <span class="c1">// 輸出：a|b|c|</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1><span id="switch">switch 條件式</span></h1>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 判斷式前，先宣告變數</span>
-</span><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>  <span class="s">&quot;runtime&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Print</span><span class="p">(</span><span class="s">&quot;Go runs on &quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">switch</span> <span class="nx">os</span> <span class="o">:=</span> <span class="nx">runtime</span><span class="p">.</span><span class="nx">GOOS</span><span class="p">;</span> <span class="nx">os</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">case</span> <span class="s">&quot;darwin&quot;</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;OS X.&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="s">&quot;linux&quot;</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Linux.&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">default</span><span class="p">:</span>
-</span><span class='line'>      <span class="c1">// freebsd, openbsd,</span>
-</span><span class='line'>      <span class="c1">// plan9, windows...</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%s.&quot;</span><span class="p">,</span> <span class="nx">os</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Go runs on nacl.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>  <span class="s">&quot;time&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;When&#39;s Saturday?&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">today</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">().</span><span class="nx">Weekday</span><span class="p">()</span>
-</span><span class='line'>  <span class="k">switch</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Saturday</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nx">today</span> <span class="o">+</span> <span class="mi">0</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Today.&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nx">today</span> <span class="o">+</span> <span class="mi">1</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Tomorrow.&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nx">today</span> <span class="o">+</span> <span class="mi">2</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;In two days.&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">default</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Too far away.&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// When&#39;s Saturday?</span>
-</span><span class='line'><span class="c1">// Too far away.</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Expressionless switch</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>  <span class="s">&quot;time&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">t</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">()</span>
-</span><span class='line'>  <span class="k">switch</span> <span class="p">{</span> <span class="c1">// expression is omitted</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nx">t</span><span class="p">.</span><span class="nx">Hour</span><span class="p">()</span> <span class="p">&lt;</span> <span class="mi">12</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Good morning!&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nx">t</span><span class="p">.</span><span class="nx">Hour</span><span class="p">()</span> <span class="p">&lt;</span> <span class="mi">17</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Good afternoon.&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">default</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Good evening.&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Multiple expressions in case</h3>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">letter</span> <span class="o">:=</span> <span class="s">&quot;i&quot;</span>
-</span><span class='line'>  <span class="k">switch</span> <span class="nx">letter</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">case</span> <span class="s">&quot;a&quot;</span><span class="p">,</span> <span class="s">&quot;e&quot;</span><span class="p">,</span> <span class="s">&quot;i&quot;</span><span class="p">,</span> <span class="s">&quot;o&quot;</span><span class="p">,</span> <span class="s">&quot;u&quot;</span><span class="p">:</span> <span class="c1">//multiple expressions in case</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;vowel&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">default</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;not a vowel&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="c1">// vowel</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>fallthrough</h3>
-
-<p>可以遇到條件符合之後，繼續往下走</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">number</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">num</span> <span class="o">:=</span> <span class="mi">15</span> <span class="o">*</span> <span class="mi">5</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">num</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">switch</span> <span class="nx">num</span> <span class="o">:=</span> <span class="nx">number</span><span class="p">();</span> <span class="p">{</span> <span class="c1">//num is not a constant</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nx">num</span> <span class="p">&lt;</span> <span class="mi">50</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%d is lesser than 50\n&quot;</span><span class="p">,</span> <span class="nx">num</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">fallthrough</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nx">num</span> <span class="p">&lt;</span> <span class="mi">100</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%d is lesser than 100\n&quot;</span><span class="p">,</span> <span class="nx">num</span><span class="p">)</span>
-</span><span class='line'>      <span class="k">fallthrough</span>
-</span><span class='line'>  <span class="k">case</span> <span class="nx">num</span> <span class="p">&lt;</span> <span class="mi">200</span><span class="p">:</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%d is lesser than 200&quot;</span><span class="p">,</span> <span class="nx">num</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 75 is lesser than 100</span>
-</span><span class='line'><span class="c1">// 75 is lesser than 200</span>
-</span></code></pre></td></tr></table></div></figure>
 
 
 <p>參考文件:</p>

@@ -1,0 +1,186 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Drone | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/drone/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2018-09-17T21:38:23+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Drone]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/09/17/drone/"/>
+    <updated>2018-09-17T11:25:36+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/09/17/drone</id>
+    <content type="html"><![CDATA[<p>透過 drone 可以很輕易的自己架設一個 CI CD server</p>
+
+<!-- more -->
+
+
+<blockquote><p>Drone 是一套基於 Docker 容器技術的持續交付平台。</p></blockquote>
+
+<h3>dockerfile</h3>
+
+<pre><code class="ruby">version: '3'
+
+services:
+  drone-server:
+    image: drone/drone:0.8.5
+    container_name: drone-server
+    ports:
+      - 80:8000
+      - 9000
+    volumes:
+      - ./db:/var/lib/drone/
+    restart: always
+    environment:
+      - DRONE_OPEN=true
+      - DRONE_HOST=${DRONE_HOST}
+      - DRONE_GITHUB=true
+      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
+      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
+      - DRONE_SECRET=${DRONE_SECRET}
+      - DRONE_ADMIN=leon
+      - DRONE_ORGS=test # Organization 名稱
+      - DRONE_DEBUG=true
+
+  drone-agent:
+    image: drone/agent:0.8.5
+    command: agent
+    restart: always
+    depends_on:
+      - drone-server
+    scale: 3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DRONE_SERVER=drone-server:9000
+      - DRONE_SECRET=${DRONE_SECRET}
+      - DRONE_MAX_PROCS=3
+      - DRONE_DEBUG=true
+</code></pre>
+
+<h3>.drone.yml</h3>
+
+<pre><code class="yaml"># 所有流程共享一個 workspace
+workspace:
+  base: /rails # 所有步驟都可以存取此目錄資料
+  path: src/github.com/mgleon08/project # 所有指令都在此目錄執行
+
+# pull git 下來
+clone:
+  git:
+    image: plugins/git:next
+    pull: true
+    depth: 50
+    tags: true # 將 tag 一起拉下來
+
+pipeline:
+# 將一些不需要重複 build 的檔案 cache 起來 e.g. gem, node_module
+  restore-cache:
+    image: drillster/drone-volume-cache
+    restore: true
+    mount:
+      - ./vendor
+    # Mount the cache volume, needs "Trusted"
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      local: false
+
+  install:
+    image: ruby:2.5
+    pull: true
+    environment:
+      - RAILS_ENV=test
+      - RAKE_ENV=test
+    commands:
+      - ruby -v
+      - gem -v
+
+      # bundle，檔案位置設定在 vendor/bundle
+      - bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3
+
+      # config
+      - cp config/database.ci.yml config/database.yml
+
+      # setup secrets and db migration
+      - bundle exec rails -v
+      - bundle exec rake generate:secrets --trace
+      - bundle exec rake db:create db:migrate --trace
+    when:
+      local: false
+
+  rubocop:
+    image: ruby:2.5
+    group: testing # 同一個 group 可同時執行，平行測試
+    commands:
+      - bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3
+      - bundle exec rubocop -c .rubocop.yml || true
+      - bundle exec rubocop -c .rubocop.yml --format=json --out=rubocop-result.json || true
+
+  flay:
+    image: ruby:2.5
+    group: testing
+    commands:
+      - bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3
+      - bundle exec flay app
+
+  rspec:
+    image: ruby:2.5
+    group: testing
+    environment:
+      - RAILS_ENV=test
+      - RAKE_ENV=test
+    commands:
+        - bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3
+        - bundle exec rspec --color --tag ~@feature
+    when:
+      local: false
+
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    group: cleanup
+    rebuild: true
+    mount:
+      - ./vendor
+    # Mount the cache volume, needs "Trusted"
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      local: false
+
+  notify:
+    image: plugins/slack
+    secrets: [ slack_webhook ] # 在 drone 介面上設定環境變數 secrets
+    channel: channel_name
+    username: Drone CI
+    when:
+      status: [ success, failure ] # 成功或失敗都通知訊息
+      local: false
+
+# database.yml 裡面的 database 要跟下面定義的名字一樣，這邊也是叫 database
+services:
+  database:
+    image: mysql:5.7
+    environment: # 全域變數
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
+</code></pre>
+
+<ul>
+<li><a href="https://yeasy.gitbooks.io/docker_practice/cases/ci/drone.html">Build Drone</a></li>
+<li><a href="http://docs.drone.io/zh/">docs drone</a></li>
+<li><a href="http://plugins.drone.io/">plugins.drone.io</a></li>
+<li><a href="https://www.slideshare.net/appleboy/drone-79506886">用 Drone 打造輕量級容器持續交付平台</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
