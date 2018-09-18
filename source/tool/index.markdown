@@ -15,6 +15,7 @@ footer: true
   <li><a href="{{ root_url }}/blog/2018/06/14/sql-command/"> Sql 好用的 Command </a></li>
   <li><a href="{{ root_url }}/blog/2018/04/09/linux-command/"> Linux 指令 </a></li>
     <li><a href="{{ root_url }}/blog/2016/11/25/docker/"> Docker - Dockerfile, Docker Compose, Docker Volumn </a></li>
+    <li><a href="{{ root_url }}/blog/categories/golang/"> Golang </a></li>
 </ul>
 
 # <span id="mac_tool">Mac Tool</span>
