@@ -95,18 +95,9 @@ package main
 // 引入套件，多個可以加括號 ()
 import "fmt"
 
-// 希望使用匯入的套件，是為了要觸發那個套件的 main() 函式而引用的話，可以在前面加上一個底線 _
-import _ math
-
-// 如果名字有衝突可以加上 neko
-import (  
-    "github.com/test1/teameow"
-    neko "github.com/test2/teameow"
-)
-
-// 程式執行入口，main 在 golang 中是特殊的 function
+// 程式執行入口，main 在 golang 中是特殊的 function，每個執行檔只能有一個 
 func main() {
-// 使用 fmt 套件印出字串 word
+// 使用 fmt 套件印出字串 hello world
  fmt.Println("hello world")
 }
 
@@ -119,6 +110,72 @@ func main() {
  
  在該目錄跑 `go build main.go` 後執行 `./main`
 
+### package
+
+```
+package test
+```
+
+宣告程式屬於哪個 `package`，所有的 go 檔案都必須聲明，要 import 這個檔案時，就必須使用 `test` 這個名稱。
+
+而 go 又分兩種專案
+
+* 執行檔 (executable)
+* 函式庫 (library)
+
+執行檔一定要宣告為 `main` 套件
+
+```go
+// 沒聲明 main 會顯示
+go run: cannot run non-main package
+```
+
+main 是一個比較特殊的 package，
+
+> Package main is special. It defines a standalone executable program, not a library. Within package main the function main is also special—it’s where execution of the program begins. Whatever main does is what the program does.
+
+因此一定要有個 `main` package 當作是程式入口
+
+* [PackageNames](https://golang.org/doc/code.html#PackageNames)
+* [Program_execution](https://golang.org/ref/spec#Program_execution)
+* [Package “main” and func “main”](https://stackoverflow.com/questions/42333488/package-main-and-func-main)
+
+### import
+
+代表載入的相依套件
+
+* import 只能指定資料夾，無法指定檔案
+* 同一個資料夾底下只能有一個 package，指的是 test 資料夾裡面所有的 package 都會是 test
+
+```go
+// 引入套件，多個可以加括號 ()
+import "fmt"
+
+// 希望使用匯入的套件，是為了要觸發那個套件的 init func 而引用的話，可以在前面加上一個底線 _
+import _ math
+
+// 如果名字有衝突可以加上 neko
+import (
+    "github.com/test1/teameow"
+    neko "github.com/test2/teameow"
+)
+
+// 當前文件同一目錄的 model 目錄，但是不建議這種方式 import
+import "./test"
+
+// 載入 GOPATH/src/test1/teameow 模組
+import "github.com/test1/teameow"
+
+// 點操作
+import(
+    . "fmt" // 可以使 fmt.Println("Hi") 省略為 Println("Hi")
+)
+
+// 別名操作
+import(
+    f "fmt" // 就可以改為用 f 來呼叫，f.Println("Hi")
+)
+```
 
 ### command
 
@@ -133,6 +190,10 @@ go clean
 // 執行後會將 build 產生的檔案都刪除( install 的不會刪)
 go tool
 // 顯示目前能用的 tool
+go vet
+// 靜態分析潛在 bug
+go fmt
+// 格式化
 ```
 
 ### 命名規則
