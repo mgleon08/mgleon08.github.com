@@ -260,33 +260,15 @@
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 宣告程式屬於哪個 package，所有的 go 檔案都必須聲明</span>
 </span><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">// 引入套件，多個可以加括號 ()</span>
 </span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">// 希望使用匯入的套件，是為了要觸發那個套件的 main() 函式而引用的話，可以在前面加上一個底線 _</span>
-</span><span class='line'><span class="kn">import</span> <span class="nx">_</span> <span class="nx">math</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 如果名字有衝突可以加上 neko</span>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>    <span class="s">&quot;github.com/test1/teameow&quot;</span>
-</span><span class='line'>    <span class="nx">neko</span> <span class="s">&quot;github.com/test2/teameow&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// 程式執行入口，main 在 golang 中是特殊的 function</span>
+</span><span class='line'><span class="c1">// 程式執行入口，main 在 golang 中是特殊的 function，每個執行檔只能有一個 </span>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'><span class="c1">// 使用 fmt 套件印出字串 word</span>
+</span><span class='line'><span class="c1">// 使用 fmt 套件印出字串 hello world</span>
 </span><span class='line'> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;hello world&quot;</span><span class="p">)</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
@@ -300,6 +282,112 @@
 
 <p> 在該目錄跑 <code>go build main.go</code> 後執行 <code>./main</code></p>
 
+<h3>package</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">test</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>宣告程式屬於哪個 <code>package</code>，所有的 go 檔案都必須聲明，要 import 這個檔案時，就必須使用 <code>test</code> 這個名稱。</p>
+
+<p>而 go 又分兩種專案</p>
+
+<ul>
+<li>執行檔 (executable)</li>
+<li>函式庫 (library)</li>
+</ul>
+
+
+<p>執行檔一定要宣告為 <code>main</code> 套件</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 沒聲明 main 會顯示</span>
+</span><span class='line'><span class="k">go</span> <span class="nx">run</span><span class="p">:</span> <span class="nx">cannot</span> <span class="nx">run</span> <span class="nx">non</span><span class="o">-</span><span class="nx">main</span> <span class="kn">package</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>main 是一個比較特殊的 package，</p>
+
+<blockquote><p>Package main is special. It defines a standalone executable program, not a library. Within package main the function main is also special—it’s where execution of the program begins. Whatever main does is what the program does.</p></blockquote>
+
+<p>因此一定要有個 <code>main</code> package 當作是程式入口</p>
+
+<ul>
+<li><a href="https://golang.org/doc/code.html#PackageNames">PackageNames</a></li>
+<li><a href="https://golang.org/ref/spec#Program_execution">Program_execution</a></li>
+<li><a href="https://stackoverflow.com/questions/42333488/package-main-and-func-main">Package “main” and func “main”</a></li>
+</ul>
+
+
+<h3>import</h3>
+
+<p>代表載入的相依套件</p>
+
+<ul>
+<li>import 只能指定資料夾，無法指定檔案</li>
+<li>同一個資料夾底下只能有一個 package，指的是 test 資料夾裡面所有的 package 都會是 test</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 引入套件，多個可以加括號 ()</span>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 希望使用匯入的套件，是為了要觸發那個套件的 init func 而引用的話，可以在前面加上一個底線 _</span>
+</span><span class='line'><span class="kn">import</span> <span class="nx">_</span> <span class="nx">math</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 如果名字有衝突可以加上 neko</span>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;github.com/test1/teameow&quot;</span>
+</span><span class='line'>    <span class="nx">neko</span> <span class="s">&quot;github.com/test2/teameow&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 當前文件同一目錄的 model 目錄，但是不建議這種方式 import</span>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;./test&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 載入 GOPATH/src/test1/teameow 模組</span>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;github.com/test1/teameow&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 點操作</span>
+</span><span class='line'><span class="kn">import</span><span class="p">(</span>
+</span><span class='line'>    <span class="p">.</span> <span class="s">&quot;fmt&quot;</span> <span class="c1">// 可以使 fmt.Println(&quot;Hi&quot;) 省略為 Println(&quot;Hi&quot;)</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 別名操作</span>
+</span><span class='line'><span class="kn">import</span><span class="p">(</span>
+</span><span class='line'>    <span class="nx">f</span> <span class="s">&quot;fmt&quot;</span> <span class="c1">// 就可以改為用 f 來呼叫，f.Println(&quot;Hi&quot;)</span>
+</span><span class='line'><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h3>command</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -312,6 +400,10 @@
 <span class='line-number'>8</span>
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">go</span> <span class="nx">run</span>
 </span><span class='line'><span class="c1">// 直接執行</span>
 </span><span class='line'><span class="k">go</span> <span class="nx">build</span>
@@ -322,6 +414,10 @@
 </span><span class='line'><span class="c1">// 執行後會將 build 產生的檔案都刪除( install 的不會刪)</span>
 </span><span class='line'><span class="k">go</span> <span class="nx">tool</span>
 </span><span class='line'><span class="c1">// 顯示目前能用的 tool</span>
+</span><span class='line'><span class="k">go</span> <span class="nx">vet</span>
+</span><span class='line'><span class="c1">// 靜態分析潛在 bug</span>
+</span><span class='line'><span class="k">go</span> <span class="nx">fmt</span>
+</span><span class='line'><span class="c1">// 格式化</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
