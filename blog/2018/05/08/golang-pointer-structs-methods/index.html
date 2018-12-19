@@ -15,8 +15,9 @@ Pointers to structs
 Nested structs
 Promoted fields
 New struct
+Structs Equality
 組合 combination
-建構子 Constructors 方法 methods &hellip;">
+建構子 &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -142,6 +143,7 @@ New struct
 <li><a href="#nested_structs">Nested structs</a></li>
 <li><a href="#promoted_fields">Promoted fields</a></li>
 <li><a href="#new_struct">New struct</a></li>
+<li><a href="#equality">Structs Equality</a></li>
 <li><a href="#combination">組合 combination</a></li>
 <li><a href="#constructors">建構子 Constructors</a></li>
 </ul>
@@ -150,6 +152,7 @@ New struct
 
 <ul>
 <li><a href="#pointer_receivers">Pointer receivers</a></li>
+<li><a href="#receivers">receivers in methods vs arguments in functions</a></li>
 <li><a href="#pointer_or_value">function use pointer or value ??</a></li>
 </ul>
 </li>
@@ -158,13 +161,15 @@ New struct
 
 <h1><span id="pointer">指標 Pointer</span></h1>
 
-<blockquote><p>A pointer holds the memory address of a value<br/>
+<blockquote><p>A pointer holds the memory address of a value
 將變數直接指向記憶體位置就叫做Pointer，要修改內容就直接到該記憶體位置修改</p></blockquote>
 
 <ul>
-<li>The type <code>*T</code> is a pointer to a T value. Its zero value is nil.</li>
+<li>The type <code>*T</code> is a pointer to a T value. Its zero value is <code>nil</code>.</li>
 <li>The <code>&amp;</code> operator generates a pointer to its operand.</li>
 <li>Do not pass a pointer to an array as a argument to a function. Use slice instead.</li>
+<li>Go does not support pointer arithmetic(pointer 位置運算)</li>
+<li>使用 value receivers，function 會用 copy 的方式，並且改不到原本的值，pointer receivers 則會使用 reference 且會改到原本的值，比較不會浪費記憶體</li>
 </ul>
 
 
@@ -200,6 +205,8 @@ New struct
 <span class='line-number'>30</span>
 <span class='line-number'>31</span>
 <span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
@@ -212,14 +219,15 @@ New struct
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Type of p is %T\n&quot;</span><span class="p">,</span> <span class="nx">p</span><span class="p">)</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Type of &amp;i is %T\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">i</span><span class="p">)</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;p =&quot;</span><span class="p">,</span> <span class="nx">p</span><span class="p">)</span> <span class="c1">// The zero value of a pointer is nil</span>
-</span><span class='line'>  
+</span><span class='line'>
 </span><span class='line'>  <span class="nx">p</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">i</span>          <span class="c1">// 將 p 指到 i 的記憶體位置</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;p =&quot;</span><span class="p">,</span> <span class="nx">p</span><span class="p">)</span>  <span class="c1">// p 所指到的記憶體位置，就是i</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;&amp;p =&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">p</span><span class="p">)</span> <span class="c1">// p 的記憶體位置</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;*p =&quot;</span><span class="p">,</span> <span class="o">*</span><span class="nx">p</span><span class="p">)</span> <span class="c1">// &#39;*&#39; 代表透過 pointer 顯示該記憶體位置的值</span>
-</span><span class='line'>  
+</span><span class='line'>
 </span><span class='line'>  <span class="o">*</span><span class="nx">p</span> <span class="p">=</span> <span class="mi">20</span>         <span class="c1">// 透過 pointer 寫入 i 的值</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;*p =&quot;</span><span class="p">,</span> <span class="o">*</span><span class="nx">p</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;i =&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="cm">/**</span>
@@ -230,6 +238,7 @@ New struct
 </span><span class='line'><span class="cm">&amp;p = 0x1040c128</span>
 </span><span class='line'><span class="cm">*p = 8</span>
 </span><span class='line'><span class="cm">*p = 20</span>
+</span><span class='line'><span class="cm">i = 20</span>
 </span><span class='line'><span class="cm">**/</span>
 </span><span class='line'><span class="c1">// 當用 * 宣告為指標時，必須再去指向記憶體位置 &amp;</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -428,6 +437,53 @@ New struct
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h3>Anonymous fields</h3>
+
+<p><code>Anonymous fields</code> 因為沒有 name，預設會將 type 當作是自己的 name</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Person</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kt">string</span>
+</span><span class='line'>    <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">p</span> <span class="nx">Person</span>
+</span><span class='line'>    <span class="c1">// or p := Person{&quot;Naveen&quot;, 50}</span>
+</span><span class='line'>    <span class="nx">p</span><span class="p">.</span><span class="kt">string</span> <span class="p">=</span> <span class="s">&quot;leon&quot;</span>
+</span><span class='line'>    <span class="nx">p</span><span class="p">.</span><span class="kt">int</span> <span class="p">=</span> <span class="mi">50</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// {leon 50}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h3><span id="pointers_to_structs"> Pointers to structs </span></h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -576,7 +632,7 @@ New struct
 
 <h3><span id="promoted_fields"> Promoted fields </span></h3>
 
-<p>當 struct 裡面有 <code>anonymous struct</code>，那該 <code>anonymous struct</code> 的 field 就叫做 <code>promoted fields</code></p>
+<p>當 struct 裡面有 <code>anonymous struct field</code>，就叫做 <code>promoted fields</code></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -620,7 +676,7 @@ New struct
 </span><span class='line'><span class="kd">type</span> <span class="nx">Person</span> <span class="kd">struct</span> <span class="p">{</span>
 </span><span class='line'>    <span class="nx">name</span> <span class="kt">string</span>
 </span><span class='line'>    <span class="nx">age</span>  <span class="kt">int</span>
-</span><span class='line'>    <span class="nx">Address</span> <span class="c1">// anonymous struct</span>
+</span><span class='line'>    <span class="nx">Address</span> <span class="c1">// anonymous struct field 因此 name 就會是 Address</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
@@ -683,6 +739,79 @@ New struct
 </span><span class='line'>
 </span><span class='line'><span class="c1">// &amp;{0 0}</span>
 </span><span class='line'><span class="c1">// &amp;{11 9}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><span id="equality"> Structs Equality </span></h3>
+
+<p>如果 structs 的 fields 是相等的話，就可以比較，還有裡面的 type 是可以比較的(像是  maps 就無法做比較)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">name</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">firstName</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">lastName</span> <span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">name1</span> <span class="o">:=</span> <span class="nx">name</span><span class="p">{</span><span class="s">&quot;Steve&quot;</span><span class="p">,</span> <span class="s">&quot;Jobs&quot;</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">name2</span> <span class="o">:=</span> <span class="nx">name</span><span class="p">{</span><span class="s">&quot;Steve&quot;</span><span class="p">,</span> <span class="s">&quot;Jobs&quot;</span><span class="p">}</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nx">name1</span> <span class="o">==</span> <span class="nx">name2</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;name1 and name2 are equal&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;name1 and name2 are not equal&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">name3</span> <span class="o">:=</span> <span class="nx">name</span><span class="p">{</span><span class="nx">firstName</span><span class="p">:</span><span class="s">&quot;Steve&quot;</span><span class="p">,</span> <span class="nx">lastName</span><span class="p">:</span><span class="s">&quot;Jobs&quot;</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">name4</span> <span class="o">:=</span> <span class="nx">name</span><span class="p">{}</span>
+</span><span class='line'>    <span class="nx">name4</span><span class="p">.</span><span class="nx">firstName</span> <span class="p">=</span> <span class="s">&quot;Steve&quot;</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nx">name3</span> <span class="o">==</span> <span class="nx">name4</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;name3 and name4 are equal&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;name3 and name4 are not equal&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// name1 and name2 are equal</span>
+</span><span class='line'><span class="c1">// name3 and name4 are not equal</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -800,7 +929,7 @@ New struct
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">w</span> <span class="nx">website</span><span class="p">)</span> <span class="nx">contents</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Contents of Website\n&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Contents of Website&quot;</span><span class="p">)</span>
 </span><span class='line'>  <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">w</span><span class="p">.</span><span class="nx">posts</span> <span class="p">{</span>
 </span><span class='line'>      <span class="nx">v</span><span class="p">.</span><span class="nx">details</span><span class="p">()</span>
 </span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">()</span>
@@ -893,7 +1022,7 @@ New struct
 </span><span class='line'>  <span class="nx">b</span><span class="p">.</span><span class="nx">show</span><span class="p">()</span> <span class="c1">// 輸出：foobar</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">// foobar </span>
+</span><span class='line'><span class="c1">// foobar</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -980,7 +1109,7 @@ New struct
 <ul>
 <li>golang 並不完全屬於<a href="https://golang.org/doc/faq#Is_Go_an_object-oriented_language">物件導向語言</a>，但是透過 methods 和 types 使行為像 class 一樣</li>
 <li>function 可以達成跟 methods 一樣的方法，但是 function 不允許有同樣的名稱，methods 可以，只要是不同的 struct</li>
-<li>function 通常只接收一種接受者 receiver，但 methods 可以接受 <code>value receiver</code> &amp; <code>pointer receiver</code>s</li>
+<li>function 通常只接收一種接受者 receiver，但 methods 可以接受 <code>value receiver</code> &amp; <code>pointer receiver</code></li>
 </ul>
 
 
@@ -1343,7 +1472,19 @@ New struct
 <span class='line-number'>45</span>
 <span class='line-number'>46</span>
 <span class='line-number'>47</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">type</span> <span class="nx">Vertex</span> <span class="kd">struct</span> <span class="p">{</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Vertex</span> <span class="kd">struct</span> <span class="p">{</span>
 </span><span class='line'>  <span class="nx">X</span><span class="p">,</span> <span class="nx">Y</span> <span class="kt">float64</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
@@ -1390,6 +1531,237 @@ New struct
 </span><span class='line'><span class="c1">// 7</span>
 </span><span class='line'><span class="c1">// 7</span>
 </span><span class='line'><span class="c1">// 7</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><span id="receivers"> receivers in methods vs arguments in functions </span></h3>
+
+<ul>
+<li>When a function has a <code>value/point argument</code>, it will accept only a value argument.</li>
+<li>When a method has a <code>value/point</code> receiver, it will accept both pointer and value receivers.</li>
+</ul>
+
+
+<blockquote><ul>
+<li>原因是在於 <code>p.area()</code> 會自動解讀為 <code>(*p).area()</code>，因此實際上 value receiver 也是只能接收 value</li>
+<li>而 Pointer receivers 也是一樣 <code>r.perimeter()</code> 會解讀為 <code>(&amp;r).perimeter()</code></li>
+</ul>
+</blockquote>
+
+<h5>value</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">rectangle</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">length</span> <span class="kt">int</span>
+</span><span class='line'>    <span class="nx">width</span>  <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">area</span><span class="p">(</span><span class="nx">r</span> <span class="nx">rectangle</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Area Function result: %d\n&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">length</span> <span class="o">*</span> <span class="nx">r</span><span class="p">.</span><span class="nx">width</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="nx">rectangle</span><span class="p">)</span> <span class="nx">area</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Area Method result: %d\n&quot;</span><span class="p">,</span> <span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">length</span> <span class="o">*</span> <span class="nx">r</span><span class="p">.</span><span class="nx">width</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">r</span> <span class="o">:=</span> <span class="nx">rectangle</span><span class="p">{</span>
+</span><span class='line'>        <span class="nx">length</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+</span><span class='line'>        <span class="nx">width</span><span class="p">:</span>  <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">area</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">r</span><span class="p">.</span><span class="nx">area</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">p</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">r</span>
+</span><span class='line'>    <span class="cm">/*</span>
+</span><span class='line'><span class="cm">       compilation error, cannot use p (type *rectangle) as type rectangle</span>
+</span><span class='line'><span class="cm">       in argument to area</span>
+</span><span class='line'><span class="cm">    */</span>
+</span><span class='line'>    <span class="c1">//area(p)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">p</span><span class="p">.</span><span class="nx">area</span><span class="p">()</span><span class="c1">//calling value receiver with a pointer</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Area Function result: 50</span>
+</span><span class='line'><span class="c1">// Area Method result: 50</span>
+</span><span class='line'><span class="c1">// Area Method result: 50</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>point</h5>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">rectangle</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">length</span> <span class="kt">int</span>
+</span><span class='line'>    <span class="nx">width</span>  <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">perimeter</span><span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">rectangle</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;perimeter function output:&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">length</span><span class="o">+</span><span class="nx">r</span><span class="p">.</span><span class="nx">width</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">rectangle</span><span class="p">)</span> <span class="nx">perimeter</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;perimeter method output:&quot;</span><span class="p">,</span> <span class="mi">2</span><span class="o">*</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">length</span><span class="o">+</span><span class="nx">r</span><span class="p">.</span><span class="nx">width</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">r</span> <span class="o">:=</span> <span class="nx">rectangle</span><span class="p">{</span>
+</span><span class='line'>        <span class="nx">length</span><span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+</span><span class='line'>        <span class="nx">width</span><span class="p">:</span>  <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">p</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">r</span> <span class="c1">//pointer to r</span>
+</span><span class='line'>    <span class="nx">perimeter</span><span class="p">(</span><span class="nx">p</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">p</span><span class="p">.</span><span class="nx">perimeter</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="cm">/*</span>
+</span><span class='line'><span class="cm">        cannot use r (type rectangle) as type *rectangle in argument to perimeter</span>
+</span><span class='line'><span class="cm">    */</span>
+</span><span class='line'>    <span class="c1">//perimeter(r)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nx">r</span><span class="p">.</span><span class="nx">perimeter</span><span class="p">()</span><span class="c1">//calling pointer receiver with a value</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// perimeter function output: 30</span>
+</span><span class='line'><span class="c1">// perimeter method output: 30</span>
+</span><span class='line'><span class="c1">// perimeter method output: 30</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><span id="methods_on_non_struct_types"> Methods on non struct types </span></h3>
+
+<p>method 必須定義才 local type 才可以，因此像要再 <code>int</code> 新增 method 則會出現 error <code>cannot define new methods on non-local type int</code>，必須定義新的 type 才行</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">myInt</span> <span class="kt">int</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 不可以直接用 int</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">a</span> <span class="nx">myInt</span><span class="p">)</span> <span class="nx">add</span><span class="p">(</span><span class="nx">b</span> <span class="nx">myInt</span><span class="p">)</span> <span class="nx">myInt</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">num1</span> <span class="o">:=</span> <span class="nx">myInt</span><span class="p">(</span><span class="mi">5</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">num2</span> <span class="o">:=</span> <span class="nx">myInt</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="nx">num1</span><span class="p">.</span><span class="nx">add</span><span class="p">(</span><span class="nx">num2</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Sum is&quot;</span><span class="p">,</span> <span class="nx">sum</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Sum is 15</span>
 </span></code></pre></td></tr></table></div></figure>
 
 

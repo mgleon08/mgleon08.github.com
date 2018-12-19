@@ -5,7 +5,7 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Ruby Logger - Leon's Blogging</title>
+  <title>Ruby Logger, MultiIO - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
@@ -113,7 +113,7 @@ logger = Logger.new( &hellip;">
   <header>
     
       
-        <h1 class="entry-title">Ruby Logger</h1>
+        <h1 class="entry-title">Ruby Logger, MultiIO</h1>
       
     
     
@@ -184,6 +184,8 @@ logger = Logger.new( &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>MultiIO</h1>
+
 <p>同時輸出到 terminal &amp; file</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -206,12 +208,18 @@ logger = Logger.new( &hellip;">
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Logger</span> <span class="o">&lt;</span> <span class="o">::</span><span class="no">Logger</span>
 </span><span class='line'>  <span class="k">class</span> <span class="o">&lt;&lt;</span> <span class="nb">self</span>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">default</span><span class="p">(</span><span class="n">log</span><span class="p">)</span>
+</span><span class='line'>      <span class="c1"># 設定兩種要輸出的 io 方式</span>
 </span><span class='line'>      <span class="n">io</span> <span class="o">=</span> <span class="o">[</span><span class="no">STDOUT</span><span class="p">,</span> <span class="n">log_file</span><span class="o">]</span>
 </span><span class='line'>      <span class="n">logger</span> <span class="o">=</span> <span class="no">Logger</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">MultiIO</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">*</span><span class="n">io</span><span class="p">))</span>
+</span><span class='line'>      <span class="c1"># 設定 log 層級</span>
 </span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">level</span> <span class="o">=</span> <span class="no">Logger</span><span class="o">::</span><span class="no">INFO</span>
+</span><span class='line'>      <span class="c1"># 設定每次輸出 log 的格式</span>
 </span><span class='line'>      <span class="n">logger</span><span class="o">.</span><span class="n">formatter</span> <span class="o">=</span> <span class="nb">proc</span> <span class="k">do</span> <span class="o">|</span><span class="n">_severity</span><span class="p">,</span> <span class="n">_datetime</span><span class="p">,</span> <span class="n">_progname</span><span class="p">,</span> <span class="n">msg</span><span class="o">|</span>
 </span><span class='line'>        <span class="s2">&quot;</span><span class="si">#{</span><span class="n">msg</span><span class="si">}</span><span class="se">\n</span><span class="s2">&quot;</span>
 </span><span class='line'>      <span class="k">end</span>
@@ -244,16 +252,20 @@ logger = Logger.new( &hellip;">
 <span class='line-number'>11</span>
 <span class='line-number'>12</span>
 <span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">MultiIO</span>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="o">*</span><span class="n">targets</span><span class="p">)</span>
 </span><span class='line'>    <span class="vi">@targets</span> <span class="o">=</span> <span class="n">targets</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">write</span><span class="p">(</span><span class="n">args</span><span class="p">)</span>
+</span><span class='line'>      <span class="c1"># 每個 io 都寫入</span>
 </span><span class='line'>    <span class="vi">@targets</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span> <span class="o">|</span><span class="n">target</span><span class="o">|</span> <span class="n">target</span><span class="o">.</span><span class="n">write</span><span class="p">(</span><span class="n">args</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">close</span>
+</span><span class='line'>    <span class="c1"># 寫入完要 close</span>
 </span><span class='line'>    <span class="vi">@targets</span><span class="o">.</span><span class="n">each</span><span class="p">(</span><span class="o">&amp;</span><span class="ss">:close</span><span class="p">)</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>

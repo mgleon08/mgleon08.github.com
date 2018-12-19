@@ -390,6 +390,11 @@
 
 <h3>command</h3>
 
+<ul>
+<li><a href="https://golang.org/pkg/cmd/go/internal/clean/">go clean</a></li>
+</ul>
+
+
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -545,6 +550,10 @@
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
 <span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// := 是聲明並賦值，並且系統自動推斷類型，必須放在 main function 裡面</span>
 </span><span class='line'><span class="c1">// := only works in functions and the lower case &#39;t&#39; is so that it is only visible to the package (unexported).</span>
 </span><span class='line'>
@@ -561,6 +570,10 @@
 </span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
 </span><span class='line'><span class="c1">// no new variables on left side of :=</span>
 </span><span class='line'>
+</span><span class='line'><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+</span><span class='line'><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="p">=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span> <span class="c1">// 這邊是用 = 不是 := 因此是 assign 新的值</span>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span><span class='line'>
 </span><span class='line'><span class="nx">age</span> <span class="o">:=</span> <span class="mi">29</span>
 </span><span class='line'><span class="nx">age</span> <span class="p">=</span> <span class="s">&quot;naveen&quot;</span> <span class="c1">// golang 是強型別，一但定義就無法轉換成其他型別</span>
 </span><span class='line'><span class="c1">// cannot use &quot;test&quot; (type string) as type int in assignment</span>
@@ -570,6 +583,8 @@
 
 
 <h1><span id="constants"> 常數 Constants </span></h1>
+
+<p>constants 常用於用固定常數</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -594,13 +609,11 @@
 <span class='line-number'>21</span>
 <span class='line-number'>22</span>
 <span class='line-number'>23</span>
-<span class='line-number'>24</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// Constants cannot be declared using the := syntax.</span>
 </span><span class='line'>  <span class="kd">const</span> <span class="nx">Pi</span> <span class="p">=</span> <span class="mf">3.14</span>
 </span><span class='line'>  <span class="kd">const</span> <span class="nx">World</span> <span class="p">=</span> <span class="s">&quot;世界&quot;</span>
 </span><span class='line'>  <span class="kd">const</span> <span class="p">(</span>
@@ -622,9 +635,24 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>Assign</h3>
+<h3>constants 宣告後就不能重複 asssign</h3>
 
-<p>在 golang 當中，不允許不同 type 的 assign</p>
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">const</span> <span class="nx">a</span> <span class="p">=</span> <span class="mi">55</span> <span class="c1">//allowed</span>
+</span><span class='line'>    <span class="nx">a</span> <span class="p">=</span> <span class="mi">89</span> <span class="c1">//reassignment not allowed</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>constants 在編譯的時候就要定義，不能在執行時才給值</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -637,21 +665,25 @@
 <span class='line-number'>9</span>
 <span class='line-number'>10</span>
 <span class='line-number'>11</span>
+<span class='line-number'>12</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">defaultName</span> <span class="p">=</span> <span class="s">&quot;Sam&quot;</span> <span class="c1">//allowed</span>
-</span><span class='line'>    <span class="kd">type</span> <span class="nx">myString</span> <span class="kt">string</span>
-</span><span class='line'>    <span class="kd">var</span> <span class="nx">customName</span> <span class="nx">myString</span> <span class="p">=</span> <span class="s">&quot;Sam&quot;</span> <span class="c1">//allowed</span>
-</span><span class='line'>    <span class="nx">customName</span> <span class="p">=</span> <span class="nx">defaultName</span> <span class="c1">//not allowed</span>
-</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;math&quot;</span>
+</span><span class='line'><span class="p">)</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">// cannot use defaultName (type string) as type myString in assignment</span>
-</span><span class='line'><span class="c1">// myString 是新建立的 type，相當於 string 的 alias，但因為是不同的 type，因此不能夠直接 assign</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Hello, playground&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">a</span> <span class="p">=</span> <span class="nx">math</span><span class="p">.</span><span class="nx">Sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="c1">//allowed</span>
+</span><span class='line'>    <span class="kd">const</span> <span class="nx">b</span> <span class="p">=</span> <span class="nx">math</span><span class="p">.</span><span class="nx">Sqrt</span><span class="p">(</span><span class="mi">4</span><span class="p">)</span><span class="c1">//not allowed</span>
+</span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>但是在 const 沒有特別聲明是哪種型態時，是屬於 untyped</p>
+<h3>const 沒有特別聲明是哪種型態時，是屬於 untyped</h3>
+
+<p>當 const assign 給任意 type 的值時，會由 untyped 會自動轉變為該 type，而 var 一開始就會給定 type，因此會 error</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -679,7 +711,7 @@
 </span><span class='line'><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">const</span> <span class="nx">a</span> <span class="p">=</span> <span class="mi">5</span>  <span class="c1">// 改成 vat 就會 error</span>
+</span><span class='line'>  <span class="kd">const</span> <span class="nx">a</span> <span class="p">=</span> <span class="mi">5</span>  <span class="c1">// 改成 var 就會 error</span>
 </span><span class='line'>  <span class="kd">var</span> <span class="nx">intVar</span> <span class="kt">int</span> <span class="p">=</span> <span class="nx">a</span>
 </span><span class='line'>  <span class="kd">var</span> <span class="nx">int32Var</span> <span class="kt">int32</span> <span class="p">=</span> <span class="nx">a</span>
 </span><span class='line'>  <span class="kd">var</span> <span class="nx">float64Var</span> <span class="kt">float64</span> <span class="p">=</span> <span class="nx">a</span>
@@ -691,6 +723,46 @@
 </span><span class='line'><span class="c1">// int32Var 5 </span>
 </span><span class='line'><span class="c1">// float64Var 5 </span>
 </span><span class='line'><span class="c1">// complex64Var (5+0i)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>也可以宣告 const 時，就定義 type</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">const</span> <span class="nx">typedhello</span> <span class="kt">string</span> <span class="p">=</span> <span class="s">&quot;Hello World&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>在 golang 當中，不允許不同 type 的 assign</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">defaultName</span> <span class="p">=</span> <span class="s">&quot;Sam&quot;</span> <span class="c1">//allowed</span>
+</span><span class='line'>    <span class="kd">type</span> <span class="nx">myString</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">customName</span> <span class="nx">myString</span> <span class="p">=</span> <span class="s">&quot;Sam&quot;</span> <span class="c1">//allowed</span>
+</span><span class='line'>    <span class="nx">customName</span> <span class="p">=</span> <span class="nx">defaultName</span> <span class="c1">//not allowed 一個 type 是 myString,  一個是 string</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">customName2</span> <span class="kt">string</span> <span class="p">=</span> <span class="s">&quot;Sam&quot;</span> <span class="c1">// allowed</span>
+</span><span class='line'>    <span class="nx">customName2</span> <span class="p">=</span> <span class="nx">defaultName</span> <span class="c1">// allowed 同樣是 string 因此是可以</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// cannot use defaultName (type string) as type myString in assignment</span>
+</span><span class='line'><span class="c1">// myString 是新建立的 type，相當於 string 的 alias，但因為是不同的 type，因此不能夠直接 assign</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -824,7 +896,9 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>string</h3>
+<h3>String</h3>
+
+<blockquote><p>Since a string is a slice of bytes, its possible to access each byte of a string</p></blockquote>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -904,6 +978,8 @@
 <span class='line-number'>76</span>
 <span class='line-number'>77</span>
 <span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
@@ -950,12 +1026,14 @@
 </span><span class='line'>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
 </span><span class='line'>
+</span><span class='line'>  <span class="c1">// Constructing string from slice of bytes</span>
 </span><span class='line'>  <span class="nx">byteSlice</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">byte</span><span class="p">{</span><span class="mh">0x43</span><span class="p">,</span> <span class="mh">0x61</span><span class="p">,</span> <span class="mh">0x66</span><span class="p">,</span> <span class="mh">0xC3</span><span class="p">,</span> <span class="mh">0xA9</span><span class="p">}</span>
 </span><span class='line'>  <span class="nx">str</span> <span class="o">:=</span> <span class="nb">string</span><span class="p">(</span><span class="nx">byteSlice</span><span class="p">)</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">str</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
 </span><span class='line'>
+</span><span class='line'>  <span class="c1">// Constructing a string from slice of runes</span>
 </span><span class='line'>  <span class="nx">runeSlice</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">rune</span><span class="p">{</span><span class="mh">0x0053</span><span class="p">,</span> <span class="mh">0x0065</span><span class="p">,</span> <span class="mh">0x00f1</span><span class="p">,</span> <span class="mh">0x006f</span><span class="p">,</span> <span class="mh">0x0072</span><span class="p">}</span>
 </span><span class='line'>  <span class="nx">runestr</span> <span class="o">:=</span> <span class="nb">string</span><span class="p">(</span><span class="nx">runeSlice</span><span class="p">)</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">runestr</span><span class="p">)</span>
@@ -982,6 +1060,86 @@
 </span><span class='line'>
 </span><span class='line'><span class="cm">Señor</span>
 </span><span class='line'><span class="cm">**/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Length of the string</h3>
+
+<p>必須用到 <code>utf8</code> package</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;unicode/utf8&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">length</span><span class="p">(</span><span class="nx">s</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;length of %s is %d\n&quot;</span><span class="p">,</span> <span class="nx">s</span><span class="p">,</span> <span class="nx">utf8</span><span class="p">.</span><span class="nx">RuneCountInString</span><span class="p">(</span><span class="nx">s</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">word1</span> <span class="o">:=</span> <span class="s">&quot;Señor&quot;</span>
+</span><span class='line'>    <span class="nx">length</span><span class="p">(</span><span class="nx">word1</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">word2</span> <span class="o">:=</span> <span class="s">&quot;Pets&quot;</span>
+</span><span class='line'>    <span class="nx">length</span><span class="p">(</span><span class="nx">word2</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Strings are immutable</h3>
+
+<p>string 是不可變的</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">mutate</span><span class="p">(</span><span class="nx">s</span> <span class="p">[]</span><span class="kt">rune</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="sc">&#39;a&#39;</span> <span class="c1">// 改變後</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nb">string</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="c1">// 在組成 string 傳回來</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">h</span> <span class="o">:=</span> <span class="s">&quot;hello&quot;</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">mutate</span><span class="p">([]</span><span class="nb">rune</span><span class="p">(</span><span class="nx">h</span><span class="p">)))</span> <span class="c1">// 必須先轉成 rune slice type</span>
+</span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1027,6 +1185,68 @@
 </span><span class='line'><span class="c1">// sum: (13+34i)</span>
 </span><span class='line'><span class="c1">// product: (-149+191i)</span>
 </span></code></pre></td></tr></table></div></figure>
+
+
+<h3>float</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// float/float</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="mi">7</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">s</span> <span class="o">:=</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="s">&quot;1234567&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="c1">// int/int</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="c1">// 3.5</span>
+</span><span class='line'><span class="c1">// 3</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>造成第一個是 <code>3.5</code> 第二個是 <code>3</code> 原因是在於</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 如果左側運算子類型確定，則右側轉為左側類型再運算</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">num1</span> <span class="kt">int</span> <span class="p">=</span> <span class="mi">7</span>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">num1</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">num1</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 如果左側類型不確定，則根據右側類型推導左側類型</span>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="mi">7</span> <span class="o">/</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="mi">7</span> <span class="o">/</span> <span class="mf">2.0</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://golang.org/ref/spec#Conversions">Conversions</a></li>
+<li><a href="https://segmentfault.com/q/1010000011519048">go：整數除以浮點數的問題</a></li>
+</ul>
 
 
 <h1><span id="output"> 輸出 output </span></h1>
@@ -1190,7 +1410,7 @@
         <a class="basic-alignment left" href="/blog/2018/04/09/http-benchmark/" title="Previous Post: HTTP benchmark 工具 Wrk">&laquo; HTTP benchmark 工具 Wrk</a>
       
       
-        <a class="basic-alignment right" href="/blog/2018/05/02/golang-function/" title="Next Post: Golang - function">Golang - function &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2018/05/02/golang-function/" title="Next Post: Golang - function, packages">Golang - function, packages &raquo;</a>
       
     </p>
   </footer>

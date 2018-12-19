@@ -9,14 +9,10 @@
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="Concurrency
-Parallelism
+  <meta name="description" content="Concurrency &amp; Parallelism
 Goroutine
-Channel
-Buffered Channels
-Worker Pool
-Select
-sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
+Channel Unidirectional channels (單向 channels)
+Closing channels and for range loops on channels Buffered &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -133,24 +129,29 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 
 
 <ul>
-<li><a href="#concurrency">Concurrency</a></li>
-<li><a href="#parallelism">Parallelism</a></li>
+<li><a href="#concurrency_parallelism">Concurrency &amp;  Parallelism</a></li>
 <li><a href="#goroutine">Goroutine</a></li>
-<li><a href="#channel">Channel</a></li>
+<li><a href="#channel">Channel</a>
+
+<ul>
+<li><a href="#unidirectional_channels">Unidirectional channels (單向 channels)</a></li>
+<li><a href="#closing_channels">Closing channels and for range loops on channels</a></li>
+</ul>
+</li>
 <li><a href="#buffered_channels">Buffered Channels</a></li>
 <li><a href="#worker_pool">Worker Pool</a></li>
 <li><a href="#select">Select</a></li>
-<li><a href="mutex">sync.Mutex</a></li>
+<li><a href="#mutex">sync.Mutex</a></li>
 </ul>
 
 
-<h1>Concurrency &amp;  Parallelism</h1>
+<h1><span id="concurrency_parallelism"> Concurrency &amp;  Parallelism </span></h1>
 
 <blockquote><p>Goroutines are part of making concurrency easy to use.</p></blockquote>
 
 <p>要了解 Goroutine 可能要先了解一下，Concurrency 跟 parallelism 的差別</p>
 
-<h3><span id="concurrency"> Concurrency </span></h3>
+<h3>Concurrency</h3>
 
 <blockquote><p>Concurrency is the capability to deal with lots of things at once.</p></blockquote>
 
@@ -158,13 +159,27 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 
 <p><img src="http://i.imgur.com/WOthNHb.png" alt="" /></p>
 
-<h3><span id="parallelism"> Parallelism </span></h3>
+<p>concurrency 只能在單一 CPU 核裡執行</p>
+
+<h3>Parallelism</h3>
 
 <blockquote><p>Parallelism is doing lots of things at the same time. It might sound similar to concurrency but its actually different.</p></blockquote>
 
 <p>同樣用慢跑來解釋的話，在慢跑的人，同時在用耳機聽音樂，在同一時間做了很多事。</p>
 
 <p><img src="http://i.imgur.com/cTonbBE.png" alt="" /></p>
+
+<p>Parallelism 可以同時多核處理</p>
+
+<h3>總結</h3>
+
+<blockquote><p>用 CPU 來解釋</p>
+
+<p>If the person is doing running on 1 core and tying his laces on another core its Parallelism. If he is running on on 1 core and then switching/stopping to tie his laces on the same core then its concurrent</p></blockquote>
+
+<p>但這不代表 Parallelism 速度會比較快，因為相對於 Concurrency，可能要花更多時間去做溝通</p>
+
+<p>像是要在執行完下載，要跳出訊息顯示成功，用 concurrency 就非常單純，但用 Parallelism 就必須判斷什麼時間點要去通知</p>
 
 <ul>
 <li><a href="https://golangbot.com/concurrency/">concurrency &amp; parallelism</a></li>
@@ -177,14 +192,26 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 
 <ul>
 <li>go 本身就有數千個 goroutine 在跑</li>
-<li>goroutine can be thought of as light weight threads.</li>
-<li>與 threads 相比，goroutine 成本非常小</li>
+<li>goroutine 可以想像成是輕量級的 threads.</li>
+<li>與 threads 相比，goroutine 成本非常小，通常只有幾 kb，並且不像 threads 會固定 size，而是會根據狀況成長和收縮</li>
+<li>一個 threads 可能就會有幾千個 goroutine，因此開 OS thread 的量會比較少</li>
+<li>當 thread 被阻塞時，可以開新 thread 並將剩餘的 goroutine 轉移過去</li>
 <li>goroutine 最多運行 GOMAXPROCS 數量(可以設定)</li>
 <li>main() 也是一個 goroutine 稱為 <code>main Goroutine</code></li>
+<li>Goroutine 可以透過 channel 來進行溝通，防止同時訪問共享的資源，造成競爭</li>
 </ul>
 
 
-<h3>Example 1</h3>
+<h3>syntax</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// keyword go</span>
+</span><span class='line'><span class="k">go</span> <span class="nx">hello</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>start a Goroutine</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -206,6 +233,7 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
 <span class='line-number'>20</span>
+<span class='line-number'>21</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
@@ -219,17 +247,18 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>    <span class="k">go</span> <span class="nx">hello</span><span class="p">()</span>
-</span><span class='line'>    <span class="c1">// time.Sleep(1 * time.Second)</span>
+</span><span class='line'>    <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">1</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
 </span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;main function&quot;</span><span class="p">)</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
+</span><span class='line'><span class="c1">// Hello world goroutine</span>
 </span><span class='line'><span class="c1">// main function</span>
-</span><span class='line'><span class="c1">// 因為 hello() 進入背景處理，但是 main() 已經結束，因此所有的 goroutine 都會直接打斷，程序退出。</span>
-</span><span class='line'><span class="c1">// 加入 sleep 1 秒，讓 hello() 有足夠的時間 retuen 回來</span>
+</span><span class='line'><span class="c1">// 因為 hello() 進入 goroutine，但是 main() 已經結束，因此所有的 goroutine 都會直接打斷，程序退出。</span>
+</span><span class='line'><span class="c1">// 加入 sleep 1 秒，讓 hello() 有足夠的時間 retuen 回來，1秒後已經先 return 回來再顯示 &quot;main function&quot;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>Example 2</h3>
+<h3>Starting multiple Goroutines</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -302,10 +331,36 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 
 <ul>
 <li>Channel 是 goroutine 之間相互通信的機制（goroutine之間是相互獨立的，因此需要 Channel 來做溝通）</li>
-<li>Channel 中使用的 type 稱之為 element type，比如 int 類型的 channel 寫作為 <code>chan int</code></li>
-<li>Go 使用 make 內建函式建立 channel</li>
-<li>The zero value of a channel is <code>nil</code></li>
+<li>Channel 中使用的 type 稱之為 element type，比如 int 類型的 channel 寫作為 <code>chan int</code>，無法允許不同 type data 傳輸</li>
+<li>The zero value of a channel is <code>nil</code>，這種 nil chaneel 無法使用，必須向 <code>maps</code> 和 <code>slices</code> 一樣，使用 &lsquo;make&rsquo;</li>
+<li>若沒填寫第二個參數，預設就為 0，則為 unbuffered channel，意思是 sender 和 receiver 必須是同步的才能發送</li>
 </ul>
+
+
+<blockquote><ul>
+<li><a href="https://golang.org/pkg/builtin/#make">make</a></li>
+<li><p>Slice: The size specifies the length. The capacity of the slice is
+equal to its length. A second integer argument may be provided to
+specify a different capacity; it must be no smaller than the
+length. For example, make([]int, 0, 10) allocates an underlying array
+of size 10 and returns a slice of length 0 and capacity 10 that is
+backed by this underlying array.</p></li>
+<li><p>Map: An empty map is allocated with enough space to hold the
+specified number of elements. The size may be omitted, in which case
+a small starting size is allocated.</p></li>
+<li><p>Channel: The channel&rsquo;s buffer is initialized with the specified
+buffer capacity. If zero, or the size is omitted, the channel is
+unbuffered.</p></li>
+</ul>
+</blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">var</span> <span class="nx">a</span> <span class="kd">chan</span> <span class="kt">int</span>
+</span><span class='line'><span class="nx">a</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -341,19 +396,12 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">a</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
 <h3>send、receive、close</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">data</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span> <span class="c1">// read from channel ch </span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">data</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span> <span class="c1">// read from channel ch</span>
 </span><span class='line'><span class="o">&lt;-</span> <span class="nx">ch</span> <span class="c1">// read from channel ch</span>
 </span><span class='line'><span class="nx">ch</span> <span class="o">&lt;-</span> <span class="nx">data</span> <span class="c1">// write to channel ch</span>
 </span></code></pre></td></tr></table></div></figure>
@@ -368,7 +416,7 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </ul>
 </blockquote>
 
-<h5>Example</h5>
+<h5>將上面範例 sleep 改用 channel 改寫</h5>
 
 <p><code>&lt;-done</code> 這行會導致 <code>main goroutine</code> blocked 在這邊，直到其他 goroutine 將 data 寫入 done，不然是不會繼續往下走，也意味著就不需要用 sleep 來停止</p>
 
@@ -398,13 +446,14 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
 <span class='line-number'>26</span>
+<span class='line-number'>27</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
 </span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
 </span><span class='line'>    <span class="s">&quot;time&quot;</span>
 </span><span class='line'><span class="p">)</span>
-</span><span class='line'>
+</span><span class='line'><span class="c1">// 接收 bool 的 cahnnel</span>
 </span><span class='line'><span class="kd">func</span> <span class="nx">hello</span><span class="p">(</span><span class="nx">done</span> <span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;hello go routine is going to sleep&quot;</span><span class="p">)</span>
 </span><span class='line'>    <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">4</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
@@ -412,6 +461,7 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'>    <span class="nx">done</span> <span class="o">&lt;-</span> <span class="kc">true</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">//用 make 建立一個不為 nil 的 channel</span>
 </span><span class='line'>    <span class="nx">done</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span>
 </span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Main going to call hello go goroutine&quot;</span><span class="p">)</span>
 </span><span class='line'>    <span class="k">go</span> <span class="nx">hello</span><span class="p">(</span><span class="nx">done</span><span class="p">)</span>
@@ -427,86 +477,13 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h5>Exampale</h5>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">calcSquares</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">squareop</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
-</span><span class='line'>    <span class="k">for</span> <span class="nx">number</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">digit</span> <span class="o">:=</span> <span class="nx">number</span> <span class="o">%</span> <span class="mi">10</span>
-</span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
-</span><span class='line'>        <span class="nx">number</span> <span class="o">/=</span> <span class="mi">10</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="nx">squareop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">calcCubes</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">cubeop</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
-</span><span class='line'>    <span class="k">for</span> <span class="nx">number</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
-</span><span class='line'>        <span class="nx">digit</span> <span class="o">:=</span> <span class="nx">number</span> <span class="o">%</span> <span class="mi">10</span>
-</span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
-</span><span class='line'>        <span class="nx">number</span> <span class="o">/=</span> <span class="mi">10</span>
-</span><span class='line'>    <span class="p">}</span>
-</span><span class='line'>    <span class="nx">cubeop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>    <span class="nx">number</span> <span class="o">:=</span> <span class="mi">589</span>
-</span><span class='line'>    <span class="nx">sqrch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">cubech</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">go</span> <span class="nx">calcSquares</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">sqrch</span><span class="p">)</span>
-</span><span class='line'>    <span class="k">go</span> <span class="nx">calcCubes</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">cubech</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">squares</span><span class="p">,</span> <span class="nx">cubes</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">sqrch</span><span class="p">,</span> <span class="o">&lt;-</span><span class="nx">cubech</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Final output&quot;</span><span class="p">,</span> <span class="nx">squares</span> <span class="o">+</span> <span class="nx">cubes</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Final output 1536</span>
-</span></code></pre></td></tr></table></div></figure>
+<ul>
+<li><code>&lt;-done</code> 會等到 channel data 回來才會繼續執行下一行</li>
+<li><code>&lt;-done</code> 左邊並沒有任何 variable 去接收，因為這邊只是會了要讓他先執行 <code>hello()</code> 並不是要回傳的 value</li>
+</ul>
 
 
-<p>refactor with close &amp; range</p>
+<h5>另一個範例</h5>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -553,12 +530,113 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <span class='line-number'>43</span>
 <span class='line-number'>44</span>
 <span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">squares = (1 * 1) + (2 * 2) + (3 * 3) </span>
+</span><span class='line'><span class="cm">cubes = (1 * 1 * 1) + (2 * 2 * 2) + (3 * 3 * 3) </span>
+</span><span class='line'><span class="cm">output = squares + cubes = 50</span>
+</span><span class='line'><span class="cm">*/</span>
+</span><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">calcSquares</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">squareop</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">number</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">digit</span> <span class="o">:=</span> <span class="nx">number</span> <span class="o">%</span> <span class="mi">10</span>
+</span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
+</span><span class='line'>        <span class="nx">number</span> <span class="o">/=</span> <span class="mi">10</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">// 最後將 sum 傳送到 squareop channel</span>
+</span><span class='line'>    <span class="nx">squareop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">calcCubes</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">cubeop</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">number</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">digit</span> <span class="o">:=</span> <span class="nx">number</span> <span class="o">%</span> <span class="mi">10</span>
+</span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
+</span><span class='line'>        <span class="nx">number</span> <span class="o">/=</span> <span class="mi">10</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">// 最後將 sum 傳送到 cubeop channel</span>
+</span><span class='line'>    <span class="nx">cubeop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">number</span> <span class="o">:=</span> <span class="mi">589</span>
+</span><span class='line'>    <span class="nx">sqrch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">cubech</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">calcSquares</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">sqrch</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">calcCubes</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">cubech</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1">// 會等到 sqrch &amp; cubech data 回來才會繼續執行</span>
+</span><span class='line'>    <span class="nx">squares</span><span class="p">,</span> <span class="nx">cubes</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">sqrch</span><span class="p">,</span> <span class="o">&lt;-</span><span class="nx">cubech</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Final output&quot;</span><span class="p">,</span> <span class="nx">squares</span> <span class="o">+</span> <span class="nx">cubes</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Final output 1536</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>refactor with close &amp; range</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
 </span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
 </span><span class='line'><span class="p">)</span>
 </span><span class='line'>
+</span><span class='line'><span class="c1">// 將數字分成個別數字 123 -&gt; 1, 2, 3 丟到 channel</span>
 </span><span class='line'><span class="kd">func</span> <span class="nx">digits</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">dchnl</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>    <span class="k">for</span> <span class="nx">number</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
 </span><span class='line'>        <span class="nx">digit</span> <span class="o">:=</span> <span class="nx">number</span> <span class="o">%</span> <span class="mi">10</span>
@@ -571,9 +649,11 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
 </span><span class='line'>    <span class="nx">dch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
 </span><span class='line'>    <span class="k">go</span> <span class="nx">digits</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">dch</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1">// range 會自動將 channel 的值，一個一個取出</span>
 </span><span class='line'>    <span class="k">for</span> <span class="nx">digit</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dch</span> <span class="p">{</span>
 </span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
 </span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">// 將總數 send 到 main 裡面的 channel</span>
 </span><span class='line'>    <span class="nx">squareop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
@@ -581,9 +661,11 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
 </span><span class='line'>    <span class="nx">dch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
 </span><span class='line'>    <span class="k">go</span> <span class="nx">digits</span><span class="p">(</span><span class="nx">number</span><span class="p">,</span> <span class="nx">dch</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1">// range 會自動將 channel 的值，一個一個取出</span>
 </span><span class='line'>    <span class="k">for</span> <span class="nx">digit</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">dch</span> <span class="p">{</span>
 </span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span> <span class="o">*</span> <span class="nx">digit</span>
 </span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">// 將總數 send 到 main 裡面的 channel</span>
 </span><span class='line'>    <span class="nx">cubeop</span> <span class="o">&lt;-</span> <span class="nx">sum</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
@@ -603,7 +685,7 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 
 <h3>Deadlock</h3>
 
-<p>當 Goroutine send data 到 channel，但沒有其他的 Goroutine 去接收這個 data，就會造成 Deadlock，並且出現錯誤 <code>panic</code></p>
+<p>當 Goroutine send data 到 channel，但沒有其他的 Goroutine 去接收這個 data，就會造成 Deadlock，並且出現錯誤 panic <code>fatal error: all goroutines are asleep - deadlock!</code></p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -620,11 +702,24 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>Unidirectional channels (單向 channels)</h3>
+<h3><span id="unidirectional_channels"> Unidirectional channels (單向 channels) </span></h3>
 
 <p>到目前為止，說的都是 bidirectional channels(雙向 channels)</p>
 
 <p>channel 也可以是單向的，<code>only send or receive data</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="c1">// 雙向 channel</span>
+</span><span class='line'><span class="nx">sendch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">int</span><span class="p">)</span> <span class="c1">// 單向 channel</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">send</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">int</span> <span class="c1">//只能發送 data 到 channel</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">receive</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="kt">int</span> <span class="c1">//只能接收 chaneel 裡的 data</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -641,10 +736,13 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
 <span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
 </span><span class='line'>
+</span><span class='line'><span class="c1">// send only channel</span>
 </span><span class='line'><span class="kd">func</span> <span class="nx">sendData</span><span class="p">(</span><span class="nx">sendch</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>    <span class="nx">sendch</span> <span class="o">&lt;-</span> <span class="mi">10</span>
 </span><span class='line'><span class="p">}</span>
@@ -652,7 +750,8 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>    <span class="nx">sendch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">int</span><span class="p">)</span> <span class="c1">// 單向 channel</span>
 </span><span class='line'>    <span class="k">go</span> <span class="nx">sendData</span><span class="p">(</span><span class="nx">sendch</span><span class="p">)</span>
-</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="nx">sendch</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&lt;-</span><span class="nx">sendch</span><span class="p">)</span> <span class="c1">// error 因為只有單向進去，沒有出來</span>
+</span><span class='line'>    <span class="c1">// invalid operation: &lt;-sendch (receive from send-only type chan&lt;- int)</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">// main.go:11: invalid operation: &lt;-sendch (receive from send-only type chan&lt;- int)</span>
@@ -676,10 +775,12 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <span class='line-number'>13</span>
 <span class='line-number'>14</span>
 <span class='line-number'>15</span>
+<span class='line-number'>16</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
 </span><span class='line'>
+</span><span class='line'><span class="c1">// send only channel</span>
 </span><span class='line'><span class="kd">func</span> <span class="nx">sendData</span><span class="p">(</span><span class="nx">sendch</span> <span class="kd">chan</span><span class="o">&lt;-</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span> <span class="c1">// 單向 channel</span>
 </span><span class='line'>  <span class="nx">sendch</span> <span class="o">&lt;-</span> <span class="mi">10</span>
 </span><span class='line'><span class="p">}</span>
@@ -696,10 +797,11 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 
 <p>將單向改成雙向，並且透過 <code>func</code> 來控制單向</p>
 
-<h3>Closing channels and for range loops on channels</h3>
+<h3><span id="closing_channels"> Closing channels and for range loops on channels </span></h3>
 
 <ul>
-<li>Only the sender should close a channel, never the receiver. Sending on a closed channel will cause a <code>panic</code></li>
+<li>sender 可以關閉 channel 已告知 receivers，已經沒有 dat</li>
+<li>只有 sender 要關閉 channel，如果沒有 close channel 可能會導致 panic <code>fatal error: all goroutines are asleep - deadlock!</code></li>
 <li>Channels aren&rsquo;t like files; you don&rsquo;t usually need to close them. Closing is only necessary when the receiver must be told there are no more values coming, such as to terminate a <code>range</code> loop.</li>
 </ul>
 
@@ -708,10 +810,14 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
 <span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="o">&lt;-</span> <span class="nx">ch</span>
-</span><span class='line'><span class="c1">// ok </span>
+</span><span class='line'><span class="c1">// ok</span>
 </span><span class='line'><span class="c1">// true: 可以接收的狀態</span>
 </span><span class='line'><span class="c1">// false: 沒有任何 value &amp; channel 已經關閉</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">close</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span> <span class="c1">// 關閉 channel，用 range 取出 channel 東西時，必須用 close() 告知已經沒東西了，否則會 deadlock</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -761,22 +867,22 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">3</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
 </span><span class='line'>      <span class="nx">chnl</span> <span class="o">&lt;-</span> <span class="nx">i</span>
 </span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="nb">close</span><span class="p">(</span><span class="nx">chnl</span><span class="p">)</span> <span class="c1">// close</span>
+</span><span class='line'>  <span class="nb">close</span><span class="p">(</span><span class="nx">chnl</span><span class="p">)</span> <span class="c1">// range 就不需要這行去關閉</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
 </span><span class='line'>  <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span>
 </span><span class='line'>  <span class="k">go</span> <span class="nx">producer</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span>
-</span><span class='line'>  <span class="c1">// 用 range，當 channel close 會自動離開</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">ch</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Received &quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">ch</span> <span class="c1">// 當沒有 close(chnl) 時，這邊就會產生 decklock，因為裡面並沒有 data 了</span>
+</span><span class='line'>      <span class="k">if</span> <span class="nx">ok</span> <span class="o">==</span> <span class="kc">false</span> <span class="p">{</span>
+</span><span class='line'>          <span class="k">break</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Received &quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span><span class="p">)</span>
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>  <span class="cm">/*</span>
-</span><span class='line'><span class="cm"> for {</span>
-</span><span class='line'><span class="cm">     v, ok := &lt;-ch</span>
-</span><span class='line'><span class="cm">     if ok == false {</span>
-</span><span class='line'><span class="cm">         break</span>
-</span><span class='line'><span class="cm">     }</span>
-</span><span class='line'><span class="cm">     fmt.Println(&quot;Received &quot;, v, ok)</span>
+</span><span class='line'><span class="cm"> 用 range，當 channel close 會自動離開</span>
+</span><span class='line'><span class="cm"> for v := range ch {</span>
+</span><span class='line'><span class="cm">     fmt.Println(&quot;Received &quot;, v)</span>
 </span><span class='line'><span class="cm"> }</span>
 </span><span class='line'><span class="cm"> */</span>
 </span><span class='line'><span class="p">}</span>
@@ -868,7 +974,7 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">100</span><span class="p">)</span>
 </span><span class='line'><span class="c1">// ch := make(chan type, capacity)</span>
-</span><span class='line'><span class="c1">// The capacity for an unbuffered channel is 0 </span>
+</span><span class='line'><span class="c1">// The capacity for an unbuffered channel is 0，代表必須同步</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -911,7 +1017,7 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
 </span><span class='line'>  <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="mi">1</span>
 </span><span class='line'>  <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="mi">2</span>
 </span><span class='line'>  <span class="c1">// ch &lt;- 3 再多傳一個就會 deadlock</span>
@@ -925,21 +1031,17 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="cm">/*</span>
-</span><span class='line'><span class="cm">capacity is 3</span>
+</span><span class='line'><span class="cm">capacity is 2</span>
 </span><span class='line'><span class="cm">length is 2</span>
 </span><span class='line'><span class="cm">1</span>
 </span><span class='line'><span class="cm">2</span>
-</span><span class='line'><span class="cm">capacity is 3</span>
+</span><span class='line'><span class="cm">capacity is 2</span>
 </span><span class='line'><span class="cm">length is 0</span>
 </span><span class='line'><span class="cm">*/</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h1><span id="worker_pool"> Worker Pool </span></h1>
-
-<h3>WaitGroup</h3>
-
-<p>透過 WaitGroup，可以讓所有的 Goroutine 都跑完，最後再結束</p>
+<h3>Example2</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -966,6 +1068,152 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <span class='line-number'>23</span>
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">write</span><span class="p">(</span><span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">5</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="nx">i</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;successfully wrote&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="s">&quot;to ch&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nb">close</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">write</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">ch</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;read value&quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">,</span><span class="s">&quot;from ch&quot;</span><span class="p">)</span>
+</span><span class='line'>        <span class="c1">// 另外如果沒有特別設定，就會一瞬間完成</span>
+</span><span class='line'>        <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">successfully wrote 0 to ch  </span>
+</span><span class='line'><span class="cm">successfully wrote 1 to ch  </span>
+</span><span class='line'><span class="cm">read value 0 from ch  </span>
+</span><span class='line'><span class="cm">successfully wrote 2 to ch  </span>
+</span><span class='line'><span class="cm">read value 1 from ch  </span>
+</span><span class='line'><span class="cm">successfully wrote 3 to ch  </span>
+</span><span class='line'><span class="cm">read value 2 from ch  </span>
+</span><span class='line'><span class="cm">successfully wrote 4 to ch  </span>
+</span><span class='line'><span class="cm">read value 3 from ch  </span>
+</span><span class='line'><span class="cm">read value 4 from ch  </span>
+</span><span class='line'><span class="cm">*/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>ch buffered channel 容量設定 2，當丟給 <code>write</code> 跑 for loop，將 0, 1, 2, 3 丟到 ch 裡面，但因為容量只有 2，所以丟到 1 之後，ch 就會被 block 住，直到 ch 的東西被 reader 取出來，因此一開始顯示兩行就停住</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">successfully</span> <span class="nx">wrote</span> <span class="mi">0</span> <span class="nx">to</span> <span class="nx">ch</span>
+</span><span class='line'><span class="nx">successfully</span> <span class="nx">wrote</span> <span class="mi">1</span> <span class="nx">to</span> <span class="nx">ch</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>因為 reader 在 sleep 後面，所以等兩秒後，<code>main()</code> range 就會開始取出，取出一個就會停兩秒，因此同時間，<code>write()</code> 發現 ch 又有容量，就會繼續塞，因此又滿了</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">read</span> <span class="nx">value</span> <span class="mi">0</span> <span class="nx">from</span> <span class="nx">ch</span>
+</span><span class='line'><span class="nx">successfully</span> <span class="nx">wrote</span> <span class="mi">2</span> <span class="nx">to</span> <span class="nx">ch</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>接著就會一直重複</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">read</span> <span class="nx">value</span> <span class="mi">1</span> <span class="nx">from</span> <span class="nx">ch</span>
+</span><span class='line'><span class="nx">successfully</span> <span class="nx">wrote</span> <span class="mi">3</span> <span class="nx">to</span> <span class="nx">ch</span>
+</span><span class='line'><span class="nx">read</span> <span class="nx">value</span> <span class="mi">2</span> <span class="nx">from</span> <span class="nx">ch</span>
+</span><span class='line'><span class="nx">successfully</span> <span class="nx">wrote</span> <span class="mi">4</span> <span class="nx">to</span> <span class="nx">ch</span>
+</span><span class='line'><span class="nx">read</span> <span class="nx">value</span> <span class="mi">3</span> <span class="nx">from</span> <span class="nx">ch</span>
+</span><span class='line'><span class="nx">read</span> <span class="nx">value</span> <span class="mi">4</span> <span class="nx">from</span> <span class="nx">ch</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1><span id="worker_pool"> Worker Pool </span></h1>
+
+<h3>WaitGroup</h3>
+
+<p>透過 WaitGroup，可以讓所有的 Goroutine 都跑完，最後再結束</p>
+
+<blockquote><ul>
+<li>WaitGroup is a struct type and we are creating a zero value variable</li>
+<li>The way WaitGroup works is by using a counter</li>
+</ul>
+</blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
@@ -991,6 +1239,17 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'>    <span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span> <span class="c1">// 會 wait 到 0 才會繼續下一步</span>
 </span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;All go routines finished executing&quot;</span><span class="p">)</span>
 </span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/*</span>
+</span><span class='line'><span class="cm">output 有可能都不一樣，因為每個 Goroutines 執行的順序不同</span>
+</span><span class='line'><span class="cm">started Goroutine  2  </span>
+</span><span class='line'><span class="cm">started Goroutine  0  </span>
+</span><span class='line'><span class="cm">started Goroutine  1  </span>
+</span><span class='line'><span class="cm">Goroutine 0 ended  </span>
+</span><span class='line'><span class="cm">Goroutine 2 ended  </span>
+</span><span class='line'><span class="cm">Goroutine 1 ended  </span>
+</span><span class='line'><span class="cm">All go routines finished executing  </span>
+</span><span class='line'><span class="cm">*/</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1005,6 +1264,211 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 
 <h3>Example</h3>
 
+<p>Core functionalities of our worker pool</p>
+
+<ul>
+<li>Creation of a pool of Goroutines which listen on an input buffered channel waiting for jobs to be assigned</li>
+<li>Addition of jobs to the input buffered channel</li>
+<li>Writing results to an output buffered channel after job completion</li>
+<li>Read and print results from the output buffered channel</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+<span class='line-number'>55</span>
+<span class='line-number'>56</span>
+<span class='line-number'>57</span>
+<span class='line-number'>58</span>
+<span class='line-number'>59</span>
+<span class='line-number'>60</span>
+<span class='line-number'>61</span>
+<span class='line-number'>62</span>
+<span class='line-number'>63</span>
+<span class='line-number'>64</span>
+<span class='line-number'>65</span>
+<span class='line-number'>66</span>
+<span class='line-number'>67</span>
+<span class='line-number'>68</span>
+<span class='line-number'>69</span>
+<span class='line-number'>70</span>
+<span class='line-number'>71</span>
+<span class='line-number'>72</span>
+<span class='line-number'>73</span>
+<span class='line-number'>74</span>
+<span class='line-number'>75</span>
+<span class='line-number'>76</span>
+<span class='line-number'>77</span>
+<span class='line-number'>78</span>
+<span class='line-number'>79</span>
+<span class='line-number'>80</span>
+<span class='line-number'>81</span>
+<span class='line-number'>82</span>
+<span class='line-number'>83</span>
+<span class='line-number'>84</span>
+<span class='line-number'>85</span>
+<span class='line-number'>86</span>
+<span class='line-number'>87</span>
+<span class='line-number'>88</span>
+<span class='line-number'>89</span>
+<span class='line-number'>90</span>
+<span class='line-number'>91</span>
+<span class='line-number'>92</span>
+<span class='line-number'>93</span>
+<span class='line-number'>94</span>
+<span class='line-number'>95</span>
+<span class='line-number'>96</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;math/rand&quot;</span>
+</span><span class='line'>    <span class="s">&quot;sync&quot;</span>
+</span><span class='line'>    <span class="s">&quot;time&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Job</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">id</span>       <span class="kt">int</span>
+</span><span class='line'>    <span class="nx">randomno</span> <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Result</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">job</span>         <span class="nx">Job</span>
+</span><span class='line'>    <span class="nx">sumofdigits</span> <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// buffered channel 最多 10 個，沒有取出會 block 住</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">jobs</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">Job</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">results</span> <span class="p">=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="nx">Result</span><span class="p">,</span> <span class="mi">10</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 用來運算 123 = 1 + 2 + 3 = 6</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">digits</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">sum</span> <span class="o">:=</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="nx">no</span> <span class="o">:=</span> <span class="nx">number</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">no</span> <span class="o">!=</span> <span class="mi">0</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">digit</span> <span class="o">:=</span> <span class="nx">no</span> <span class="o">%</span> <span class="mi">10</span>
+</span><span class='line'>        <span class="nx">sum</span> <span class="o">+=</span> <span class="nx">digit</span>
+</span><span class='line'>        <span class="nx">no</span> <span class="o">/=</span> <span class="mi">10</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">time</span><span class="p">.</span><span class="nx">Sleep</span><span class="p">(</span><span class="mi">2</span> <span class="o">*</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Second</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">sum</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">worker</span><span class="p">(</span><span class="nx">wg</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'><span class="c1">// 從 jobs buffered channel 一個一個取出</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">job</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">jobs</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">output</span> <span class="o">:=</span> <span class="nx">Result</span><span class="p">{</span><span class="nx">job</span><span class="p">,</span> <span class="nx">digits</span><span class="p">(</span><span class="nx">job</span><span class="p">.</span><span class="nx">randomno</span><span class="p">)}</span>
+</span><span class='line'>        <span class="c1">// 將 output 的結果，丟到 results buffered channel</span>
+</span><span class='line'>        <span class="nx">results</span> <span class="o">&lt;-</span> <span class="nx">output</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">// 每完成一個就 done</span>
+</span><span class='line'>    <span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">createWorkerPool</span><span class="p">(</span><span class="nx">noOfWorkers</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">wg</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">noOfWorkers</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="c1">//每執行一個 worker 就加1</span>
+</span><span class='line'>        <span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>        <span class="c1">// 每個 Goroutines 執行的時間都不一樣</span>
+</span><span class='line'>        <span class="k">go</span> <span class="nx">worker</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">wg</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">// 等待到全部 wotker 都執行完畢</span>
+</span><span class='line'>    <span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
+</span><span class='line'>    <span class="c1">// 告知關閉 results channel，用 range 取出 channel 的值必須關閉</span>
+</span><span class='line'>    <span class="nb">close</span><span class="p">(</span><span class="nx">results</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 主要是將要執行的 job 存放到 channel 裡面</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">allocate</span><span class="p">(</span><span class="nx">noOfJobs</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="nx">noOfJobs</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="c1">//產生最高為 998 的亂數</span>
+</span><span class='line'>        <span class="nx">randomno</span> <span class="o">:=</span> <span class="nx">rand</span><span class="p">.</span><span class="nx">Intn</span><span class="p">(</span><span class="mi">999</span><span class="p">)</span>
+</span><span class='line'>        <span class="nx">job</span> <span class="o">:=</span> <span class="nx">Job</span><span class="p">{</span><span class="nx">i</span><span class="p">,</span> <span class="nx">randomno</span><span class="p">}</span>
+</span><span class='line'>        <span class="c1">// 將 job 丟到 buffered channel</span>
+</span><span class='line'>        <span class="nx">jobs</span> <span class="o">&lt;-</span> <span class="nx">job</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">// 告知關閉 jobs channel，用 range 取出 channel 的值必須關閉</span>
+</span><span class='line'>    <span class="nb">close</span><span class="p">(</span><span class="nx">jobs</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">result</span><span class="p">(</span><span class="nx">done</span> <span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">result</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">results</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Job id %d, input random no %d , sum of digits %d\n&quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">job</span><span class="p">.</span><span class="nx">id</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">job</span><span class="p">.</span><span class="nx">randomno</span><span class="p">,</span> <span class="nx">result</span><span class="p">.</span><span class="nx">sumofdigits</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">done</span> <span class="o">&lt;-</span> <span class="kc">true</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">startTime</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">()</span>
+</span><span class='line'>    <span class="nx">noOfJobs</span> <span class="o">:=</span> <span class="mi">100</span>
+</span><span class='line'>    <span class="c1">// 丟 100 個 job 進去</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">allocate</span><span class="p">(</span><span class="nx">noOfJobs</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">done</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">go</span> <span class="nx">result</span><span class="p">(</span><span class="nx">done</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1">// 同時有 10 個 worker 在跑</span>
+</span><span class='line'>    <span class="nx">noOfWorkers</span> <span class="o">:=</span> <span class="mi">10</span>
+</span><span class='line'>    <span class="nx">createWorkerPool</span><span class="p">(</span><span class="nx">noOfWorkers</span><span class="p">)</span>
+</span><span class='line'>    <span class="o">&lt;-</span><span class="nx">done</span>
+</span><span class='line'>    <span class="nx">endTime</span> <span class="o">:=</span> <span class="nx">time</span><span class="p">.</span><span class="nx">Now</span><span class="p">()</span>
+</span><span class='line'>    <span class="nx">diff</span> <span class="o">:=</span> <span class="nx">endTime</span><span class="p">.</span><span class="nx">Sub</span><span class="p">(</span><span class="nx">startTime</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;total time taken &quot;</span><span class="p">,</span> <span class="nx">diff</span><span class="p">.</span><span class="nx">Seconds</span><span class="p">(),</span> <span class="s">&quot;seconds&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <ul>
 <li><a href="https://golangbot.com/buffered-channels-worker-pools/">Worker Pool Implementation</a></li>
 </ul>
@@ -1015,10 +1479,10 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <ul>
 <li>The select statement lets a goroutine wait on multiple communication operations.</li>
 <li>A select blocks until one of its cases can run, then it executes that case. It chooses one at random if multiple are ready.</li>
+<li>The syntax is similar to switch except that each of the case statement will be a channel operation</li>
+<li>當有個任務需要即時的 output，並且有兩台 server 有同樣的 api 可以呼叫，就可以用 <code>select</code> 選擇最快 response 那台來執行</li>
 </ul>
 
-
-<blockquote><p>The syntax is similar to switch except that each of the case statement will be a channel operation</p></blockquote>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1073,8 +1537,8 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'>  <span class="nx">output2</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
 </span><span class='line'>  <span class="k">go</span> <span class="nx">server1</span><span class="p">(</span><span class="nx">output1</span><span class="p">)</span>
 </span><span class='line'>  <span class="k">go</span> <span class="nx">server2</span><span class="p">(</span><span class="nx">output2</span><span class="p">)</span>
-</span><span class='line'>  
-</span><span class='line'>  <span class="c1">// 等待到其中一個 channel 回來，就執行，如果都有就會隨機</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// 等待到其中一個 channel 回來，就執行，如果都有就會隨機，執行完後，接續 terminal 就會結束，因此另一個就不會有 output 了</span>
 </span><span class='line'>  <span class="k">select</span> <span class="p">{</span>
 </span><span class='line'>  <span class="k">case</span> <span class="nx">s1</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">output1</span><span class="p">:</span>
 </span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s1</span><span class="p">)</span>
@@ -1174,7 +1638,11 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 
 <h3>Default Selection</h3>
 
-<p>The default case in a select is run if no other case is ready.</p>
+<ul>
+<li>The default case in a select is run if no other case is ready.</li>
+<li>加上 default 就不會有 deadlock 情形發生</li>
+</ul>
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1195,7 +1663,38 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>不會 deadlock</p>
 
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1">// var ch chan string nil 也不會有問題</span>
+</span><span class='line'>    <span class="k">select</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">case</span> <span class="o">&lt;-</span><span class="nx">ch</span><span class="p">:</span>
+</span><span class='line'>    <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;default case executed&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h5>Example 1</h5>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1254,7 +1753,7 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-
+<h5>Example 2</h5>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1307,11 +1806,40 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 
 <h1><span id="mutex"> sync.Mutex </span></h1>
 
-<h3><a href="https://zh.wikipedia.org/wiki/%E8%87%A8%E7%95%8C%E5%8D%80%E6%AE%B5">Critical section</a></h3>
+<p>Before jumping to mutex, it is important to understand the concept of <a href="https://en.wikipedia.org/wiki/Critical_section">Critical section</a> in concurrent programming</p>
 
 <p>一個存取共用資源（例如：共用裝置或是共用記憶體）的程式片段，而這些共用資源有無法同時被多個執行緒存取的特性。</p>
 
-<p>當兩個以上的 goroutine 對同一個 value 做計算時，可能會因為前後順序的差異，導致最後的結果不同。(e.g. x = x + 1)</p>
+<p>舉例來說，當兩個以上的 goroutine 對同一個 value 做計算時，可能會因為前後順序的差異，導致最後的結果不同。(e.g. x = x + 1)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 情境1</span>
+</span><span class='line'><span class="mf">1.</span> <span class="nx">goroutine1</span> <span class="nx">取得</span> <span class="nx">x</span> <span class="p">=</span> <span class="mi">0</span><span class="err">，</span><span class="nx">並加上</span> <span class="mi">1</span>
+</span><span class='line'><span class="mf">2.</span> <span class="nx">goroutine2</span> <span class="nx">取的</span> <span class="nx">x</span> <span class="p">=</span> <span class="mi">0</span><span class="err">，</span><span class="nx">並加上</span> <span class="mi">1</span>
+</span><span class='line'><span class="mf">3.</span> <span class="nx">goroutine1</span> <span class="nx">將結果存回</span> <span class="nx">x</span>
+</span><span class='line'><span class="mf">4.</span> <span class="nx">goroutine2</span> <span class="nx">將結果存回</span> <span class="nx">x</span>
+</span><span class='line'><span class="mf">5.</span> <span class="nx">結果</span> <span class="nx">x</span> <span class="p">=</span> <span class="mi">1</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 情境2</span>
+</span><span class='line'><span class="mf">1.</span> <span class="nx">goroutine1</span> <span class="nx">取得</span> <span class="nx">x</span> <span class="p">=</span> <span class="mi">0</span><span class="err">，</span><span class="nx">並加上</span> <span class="mi">1</span>
+</span><span class='line'><span class="mf">2.</span> <span class="nx">goroutine1</span> <span class="nx">將結果存回</span> <span class="nx">x</span>
+</span><span class='line'><span class="mf">3.</span> <span class="nx">goroutine2</span> <span class="nx">取的</span> <span class="nx">x</span> <span class="p">=</span> <span class="mi">1</span><span class="err">，</span><span class="nx">並加上</span> <span class="mi">1</span><span class="err">，</span><span class="nx">在存回</span> <span class="nx">x</span>
+</span><span class='line'><span class="mf">4.</span> <span class="nx">goroutine2</span> <span class="nx">將結果存回</span> <span class="nx">x</span>
+</span><span class='line'><span class="mf">4.</span> <span class="nx">結果</span> <span class="nx">x</span> <span class="p">=</span> <span class="mi">2</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3><a href="https://tip.golang.org/pkg/sync/#Mutex">Mutex</a></h3>
 
@@ -1332,7 +1860,7 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3>Example</h3>
+<h3>Solving the race condition using mutex</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1362,6 +1890,7 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 <span class='line-number'>26</span>
 <span class='line-number'>27</span>
 <span class='line-number'>28</span>
+<span class='line-number'>29</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
@@ -1388,12 +1917,13 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;final value of x&quot;</span><span class="p">,</span> <span class="nx">x</span><span class="p">)</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
+</span><span class='line'><span class="c1">// 必須在 local 跑</span>
 </span><span class='line'><span class="c1">// 1000</span>
 </span><span class='line'><span class="c1">// 如果沒加上 lock，同時就會有很多個 goroutine 在跑，導致最後結果不一樣</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>用 buffered channel 的方式</p>
+<h3>Solving the race condition using buffered channel</h3>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -1431,8 +1961,8 @@ sync.Mutex Concurrency &amp; Parallelism Goroutines are part of &hellip;">
 </span><span class='line'>
 </span><span class='line'><span class="kd">func</span> <span class="nx">increment</span><span class="p">(</span><span class="nx">wg</span> <span class="o">*</span><span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span><span class="p">,</span> <span class="nx">ch</span> <span class="kd">chan</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
 </span><span class='line'>  <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="kc">true</span> <span class="c1">// 當前面的 channel 還有東西，就會 block 住，導致後面無法繼續</span>
-</span><span class='line'>  <span class="nx">x</span> <span class="p">=</span> <span class="nx">x</span> <span class="o">+</span> <span class="mi">1</span>
-</span><span class='line'>  <span class="o">&lt;-</span><span class="nx">ch</span>
+</span><span class='line'>  <span class="nx">x</span> <span class="p">=</span> <span class="nx">x</span> <span class="o">+</span> <span class="mi">1</span> <span class="c1">// 因此同時只會有一個 goroutine 執行這行</span>
+</span><span class='line'>  <span class="o">&lt;-</span><span class="nx">ch</span> <span class="c1">// 等這邊釋放出來後，才能夠繼續塞</span>
 </span><span class='line'>  <span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>

@@ -1,0 +1,381 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>簡單理解 CDN 原理 - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="近期遇到 CDN 的問題，順便瞭解一下 CDN 整個運作模式 原先以為 CDN 會自動做快取直到我們去 purge CDN，但實際上 CDN 是會根據 Response Headers 的 1
+cache-control: max-age=60, public 1
+2
+3
+# rails 中設定 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2018/10/29/understand-cdn">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">簡單理解 CDN 原理</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-10-29T15:06:53+08:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>3:06 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>近期遇到 CDN 的問題，順便瞭解一下 CDN 整個運作模式</p>
+
+<!-- more -->
+
+
+<p>原先以為 CDN 會自動做快取直到我們去 purge CDN，但實際上 CDN 是會根據 <code>Response Headers</code> 的</p>
+
+<figure class='code'><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class=''><span class='line'>cache-control: max-age=60, public</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># rails 中設定 max-age 的方式</span>
+</span><span class='line'><span class="n">expires_in</span> <span class="mi">1</span><span class="o">.</span><span class="n">minutes</span><span class="p">,</span> <span class="kp">public</span><span class="p">:</span> <span class="kp">true</span> <span class="c1"># public</span>
+</span><span class='line'><span class="n">expires_in</span> <span class="mi">5</span><span class="o">.</span><span class="n">minutes</span> <span class="c1"># private</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>去做對應的 cache (必須用 public)，另外做了 <code>max-age</code> 之後，不只 CDN 會有設定，使用者的瀏覽器也會有設定</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">server</span> <span class="o">-&gt;</span> <span class="no">CDN</span> <span class="o">-&gt;</span> <span class="no">Browser</span>
+</span><span class='line'><span class="mi">60</span>         <span class="mi">60</span>       <span class="mi">60</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>因此如果設定 <code>max-age</code> 60 秒</p>
+
+<ul>
+<li>CDN cache 60 秒，在這 60 秒就不會再打 server，直到 60秒過 or <code>purge CDN</code></li>
+<li>Browser cache 60 秒，在這 60 秒就不會再打 CDN，直到 60秒過 or <code>clear browser cache</code></li>
+</ul>
+
+
+<blockquote><p>這邊有個重點，當測試的時候，必須開不同的 browser 去做測試，不然直接打 CDN 跟 HTML 打 API 的 url cache 會同步</p></blockquote>
+
+<h1>cache-control</h1>
+
+<blockquote><p>HTTP 1.1 才出現 Cache-Control</p></blockquote>
+
+<p>接著再根據 cache-control 瞭解一下行為，當 browser 設定</p>
+
+<h3>max-age</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cache</span><span class="o">-</span><span class="ss">control</span><span class="p">:</span> <span class="n">max</span><span class="o">-</span><span class="n">age</span><span class="o">=</span><span class="mi">60</span><span class="p">,</span> <span class="kp">public</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>第一次訪問，200</li>
+<li>第二次訪問時，則會顯示 200(from cache)，後來 google 有更新，就有分 <code>from disk cache(磁盤緩存)</code> 和 <code>from memory cache(內存緩存)</code></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Status</span> <span class="ss">Code</span><span class="p">:</span> <span class="mi">200</span>  <span class="p">(</span><span class="n">from</span> <span class="n">disk</span> <span class="n">cache</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># 記得必須是用 code 去呼叫才會，不是直接打 api，之前測試直接打會變成 304，改用 script 成功了</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>但什麼時候是哪種緩存，目前看起來是會根據 google 來判斷 <a href="https://www.zhihu.com/question/64201378">求教大神瀏覽器是根據什麼決定from disk cache 與 from memory cache？</a></li>
+<li>如果有 expires(HTTP1.0) 也存在的話，max-age 會蓋過 expires</li>
+</ul>
+
+
+<blockquote><p>「public」和「private」
+如果回應標記為「public」，即使具備關聯的 HTTP 認證，甚至回應狀態碼無法正常快取，回應也可以供使用者快取。在大多數情況下，「public」並不是必要項目，因為明確的快取資訊 (例如「max-age」) 已表示 回應可供快取。</p>
+
+<p>另一方面，瀏覽器可以快取「private」回應，但是通常只開放給單一使用者快取，因此不允許任何中繼快取對其進行快取，例如使用者瀏覽器可以快取包含使用者私人資訊的 HTML 網頁，但是 CDN 不能快取。
+<a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching?hl=zh-tw">HTTP 快取</a></p></blockquote>
+
+<h3>no-cache</h3>
+
+<p>當設定以下 <code>no-cache</code>，代表每次都會發送 Request 去確認是否有新的檔案，沒有就會  return <code>304</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cache</span><span class="o">-</span><span class="ss">control</span><span class="p">:</span> <span class="n">no</span><span class="o">-</span><span class="n">cache</span>
+</span><span class='line'><span class="c1"># 相當於 cache-control: max-age=0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>no-store</h3>
+
+<p>當設定以下 <code>no-store</code>，代表完全不使用快取</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cache</span><span class="o">-</span><span class="ss">control</span><span class="p">:</span> <span class="n">no</span><span class="o">-</span><span class="n">store</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Purge CDN</h1>
+
+<p>通常廠商會提供一隻 API，可以做 purge CDN 的動作，當資料有更新時就可以透過這支 API 把 CDN 清除，讓它重新跟 server 拉取，但有個重點是，<code>max-age</code> 就不能夠設定太長，太長會導致 brower 那邊一直 cache 舊的，即使我們 purge 掉 CDN，brower 也是會等到 <code>max-age</code> 時間到，才會重新去拉 CDN。</p>
+
+<h1>params cache object</h1>
+
+<p>一開始 url 本來是希望帶 params 的方式做 cache，在測試的時候發現，雖然可以做 cache，但在 purge 的時候卻無法清除，看 log 發現顯示 <code>none cache-existing</code>
+代表根本沒有清掉 cache，詢問了 cdn 的廠商，原來要有帶 params 的 url，當作是 unique object 算是特殊需求，要另外開啟。</p>
+
+<p>但這家開啟後，萬一之後要換別家，會不會別家沒有支援或是要另外開啟? 所以後來還是改用 <code>path_params</code> 的方式，以防換別家的時候又會有問題</p>
+
+<h1>File Extension</h1>
+
+<p>CDN cache 是根據整個 url，包括副檔名，因此 <code>http://localhost:3000/test.js</code> 和 <code>http://localhost:3000/test.json</code> 會是不同的 url，purge 時也必須指定對應的 url 才能夠 purge</p>
+
+<h1>http/https</h1>
+
+<p>purge 的 url 必須要打一開始設定的 url，<code>http/https</code> 會有差別，如果設定的是 <code>http</code> 就必須針對 <code>http</code> 去做 purge 而不是 <code>https</code></p>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching?hl=zh-tw">HTTP 快取</a></li>
+<li><a href="https://cythilya.github.io/2018/07/27/http-caching/?fbclid=IwAR1jJfxG2o25i06Pqueb8yE0copC4VSJpbXmr4lG76wPTcDQzGa7ncE6iTk">HTTP Caching</a></li>
+<li><a href="https://blog.techbridge.cc/2017/06/17/cache-introduction/">循序漸進理解 HTTP Cache 機制</a></li>
+<li><a href="https://excaliburhan.com/post/things-you-should-know-about-browser-cache.html">你應該知道的瀏覽器緩存知識</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-10-29T15:06:53+08:00'><span class='date'><span class='date-month'>Oct</span> <span class='date-day'>29</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>3:06 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/cdn/'>cdn</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2018/10/29/understand-cdn/" data-via="" data-counturl="http://mgleon08.github.com/blog/2018/10/29/understand-cdn/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/10/19/golang-oop-composition-polymorphism/" title="Previous Post: Golang - OOP, Composition, Polymorphism">&laquo; Golang - OOP, Composition, Polymorphism</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2018/11/05/golang-reflection/" title="Next Post: Golang - Reflection">Golang - Reflection &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2018/10/29/understand-cdn/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2018/10/29/understand-cdn/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

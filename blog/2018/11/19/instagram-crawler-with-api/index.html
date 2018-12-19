@@ -1,0 +1,526 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Instagram Crawler With API (Ruby 爬蟲) - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="這是換透過分析 Instagram API，取得所有圖片和影片 根據上一篇 Instagram Crawler with selenium (ruby 爬蟲) 會有幾個問題 因為是操作 browser 所以跟網路速度會有關係，萬一網路斷線或是很慢的話就沒辦法那麼順利爬取
+頁面上的 class &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2018/11/19/instagram-crawler-with-api">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Instagram Crawler With API (Ruby 爬蟲)</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-11-19T22:19:08+08:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>10:19 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>這是換透過分析 Instagram API，取得所有圖片和影片</p>
+
+<!-- more -->
+
+
+<p>根據上一篇 <a href="/blog/2018/11/18/instagram-crawler-with-selenium/1.ins.png">Instagram Crawler with selenium (ruby 爬蟲)</a> 會有幾個問題</p>
+
+<ol>
+<li>因為是操作 browser 所以跟網路速度會有關係，萬一網路斷線或是很慢的話就沒辦法那麼順利爬取</li>
+<li>頁面上的 class 都是亂數，可能是透過編譯自行產生，因此下次 Instagram 重新編譯，可能所有的 class 名稱又都不同了..</li>
+</ol>
+
+
+<p>因此這次換用 API 的方式來爬取 Instagram 的貼文，因為是用 API 所以也不需要去操作 browser，取得對應的 class，也就不會有上述的問題!</p>
+
+<h1>Think</h1>
+
+<h2>分析 API</h2>
+
+<p>首先先觀察一下 Instagram 上面的 API <code>https://www.instagram.com/marvel/</code> (隨便一個都可以)</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/1.ins.png"></p>
+
+<p>可以發現每次進到頁面會 request 三條 API，打開後發現其中一條 API，裡面有我們要的資訊 (<code>edges</code> 就是 API 取回的貼文)</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/2.ins.png"></p>
+
+<p>開始分析裡面的資訊，首先是 API</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/3.ins.png"></p>
+
+<p>會發現後面都會帶兩個參數 <code>query_hash</code> &amp; <code>variables</code> 而 <code>variables</code> 裡面是一個 json 又包了很多資訊</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s2">&quot;id&quot;</span><span class="ss">:&quot;204633036&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;first&quot;</span> <span class="mi">12</span><span class="p">,</span>
+</span><span class='line'>  <span class="s2">&quot;after&quot;</span><span class="p">:</span> <span class="s2">&quot;QVFEeDUzd05jNVczMXpMRTNwYzlnYldCM0p4SGIyRmh4Q2VHYy1jZm1sUlRSalY3cVdoUklKWWdBT2RNSjJxc1pZbVBGZlN1REdjUExLMGlOWDhpR0VTcQ==&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<blockquote><ul>
+<li>id: 研判應該是 user_id 之類，用來判斷使用者，因為所有 API 所使用的 id 都一樣</li>
+<li>first: 嘗試更換 first 的數字，就可以發現可以要到更多資料，應該是取得數量的設定</li>
+<li>after: 後面的參數，跟 API 裡面的 <code>end_cursor</code> 長度格式都是一樣，研判是用來判斷下一個 API 的參數所用，在 API 裡面還有一個參數是 <code>has_next_page</code>，因此可以確定 <code>has_next_page</code> 是用來判斷是否有下一頁，<code>end_cursor</code> 是下一頁所需要的參數值</li>
+</ul>
+</blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">page_info</span><span class="s2">&quot;: {</span>
+</span><span class='line'><span class="s2">  &quot;</span><span class="n">has_next_page</span><span class="s2">&quot;: true,</span>
+</span><span class='line'><span class="s2">  &quot;</span><span class="n">end_cursor</span><span class="s2">&quot;:   &quot;</span><span class="no">QVFDbml1aFJVRkM2QkVJdzRIN1pJTEpMVlpVTl9hdHh0YlBXUDZGRDRDa1NYLUpvX3hBaGlDcXNLSlhud0dma1hBWnNyOG5DWEFjNTNlOEJibXdyaml4Vg</span><span class="o">==</span><span class="s2">&quot;</span>
+</span><span class='line'><span class="s2">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>嘗試將 API 上的 <code>variables</code> 裡的 <code>end_cursor</code> 換成 API 取回來的 <code>end_cursor</code></p>
+
+<p>Request 取得新貼文成功!</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="n">www</span><span class="o">.</span><span class="n">instagram</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">graphql</span><span class="o">/</span><span class="n">query</span><span class="o">/</span><span class="p">?</span><span class="n">query_hash</span><span class="o">=</span><span class="mi">50</span><span class="n">d3631032cf38ebe1a2d758524e3492</span><span class="o">&amp;</span><span class="n">variables</span><span class="o">=%</span><span class="mi">7</span><span class="n">B</span><span class="o">%</span><span class="mi">22</span><span class="nb">id</span><span class="o">%</span><span class="mi">22</span><span class="o">%</span><span class="mi">3</span><span class="n">A</span><span class="o">%</span><span class="mi">22204633036</span><span class="o">%</span><span class="mi">22</span><span class="o">%</span><span class="mi">2</span><span class="n">C</span><span class="o">%</span><span class="mi">22</span><span class="n">first</span><span class="o">%</span><span class="mi">22</span><span class="o">%</span><span class="mi">3</span><span class="no">A12</span><span class="o">%</span><span class="mi">2</span><span class="n">C</span><span class="o">%</span><span class="mi">22</span><span class="n">after</span><span class="o">%</span><span class="mi">22</span><span class="o">%</span><span class="mi">3</span><span class="n">A</span><span class="o">%</span><span class="mi">22</span><span class="no">QVFDbml1aFJVRkM2QkVJdzRIN1pJTEpMVlpVTl9hdHh0YlBXUDZGRDRDa1NYLUpvX3hBaGlDcXNLSlhud0dma1hBWnNyOG5DWEFjNTNlOEJibXdyaml4Vg</span><span class="o">%</span><span class="mi">3</span><span class="n">D</span><span class="o">%</span><span class="mi">3</span><span class="n">D</span><span class="o">%</span><span class="mi">22</span><span class="o">%</span><span class="mi">7</span><span class="n">D</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>第一個 API?</h2>
+
+<p>接著會發現，每個 API 給的都是下一條 API 的 <code>end_cursor</code>，那第一條呢???</p>
+
+<p>如果希望讓爬蟲自動去爬所有的貼文，而不是還要餵食第一條 API 給它..勢必還是要找到啊..</p>
+
+<p>一開始怎麼找都找不到，最後終於在頁面原始碼找到了 (command + F <code>end_cursor</code>)</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/4.ins.png"></p>
+
+<p>仔細觀察，發現都是包在 <code>window._sharedData</code> 裡面，因此第一條 API 的 <code>end_cursor</code> 就透過爬頁面的 <code>window._sharedData</code> 將參數帶到之前的 API 即可!</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">doc</span> <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+</span><span class='line'><span class="n">js_data</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">at_xpath</span><span class="p">(</span><span class="s2">&quot;//script[contains(text(),&#39;window._sharedData&#39;)]&quot;</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>前 12 個貼文?</h2>
+
+<p>再來會發現，我們已經取得了第一個 API，但是回來的資料，卻是從第 13 個貼文開始，而不是第一個??</p>
+
+<p>原來第一個 API 會是從第 13 個貼文開始，而前 12 個貼文，在剛剛頁面的 <code>window._sharedData</code> 就可以找到!</p>
+
+<p>分析後，如果前面 12 個有包含 video 或是 post，就沒辦法取得影片跟後面的連續圖片，仔細想想在這頁面也並不需要這兩種資訊，於是點貼文之後，會發現 video 和 post 連續圖片就跑出來了</p>
+
+<p>Video 會發現在 <code>property="og:video"</code> 裡面</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/5.ins.png"></p>
+
+<p>Post 則會在 <code>"edges"</code> 底下的 array 裡面</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/6.ins.png"></p>
+
+<p>那要怎麼知道貼文的連結?仔細觀察貼文的 url 都是 <code>https://www.instagram.com/p/BqAlq0wh9wV/</code> 看起來只要得到後面那段亂碼，就可以取得連結，接著就來看看
+<code>window._sharedData</code> 裡面是否找得到</p>
+
+<p>command + F <code>BqAlq0wh9wV</code>，就可以找到 <code>shortcode":"BqAlq0wh9wV"</code>，判斷 shortcode 應該就是每個貼文的代碼，這樣就可以進到每個頁面，各自取得相關的資訊</p>
+
+<h2>策略</h2>
+
+<p>由上面分析過後，我們的策略就是前 12 個貼文，透過爬 html 來取得，第 13 個貼文開始，就透過 API 來取得!</p>
+
+<h2>Data</h2>
+
+<p>資料基本上都是在 edges 的 node 裡面</p>
+
+<h3>HTML</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># json = window._sharedData 裡面內容</span>
+</span><span class='line'><span class="n">page_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">[</span><span class="s2">&quot;entry_data&quot;</span><span class="o">][</span><span class="s2">&quot;ProfilePage&quot;</span><span class="o">][</span><span class="mi">0</span><span class="o">][</span><span class="s2">&quot;graphql&quot;</span><span class="o">][</span><span class="s2">&quot;user&quot;</span><span class="o">][</span><span class="s2">&quot;edge_owner_to_timeline_media&quot;</span><span class="o">][</span><span class="s1">&#39;page_info&#39;</span><span class="o">]</span>
+</span><span class='line'><span class="n">edges</span>     <span class="o">=</span> <span class="n">json</span><span class="o">[</span><span class="s2">&quot;entry_data&quot;</span><span class="o">][</span><span class="s2">&quot;ProfilePage&quot;</span><span class="o">][</span><span class="mi">0</span><span class="o">][</span><span class="s2">&quot;graphql&quot;</span><span class="o">][</span><span class="s2">&quot;user&quot;</span><span class="o">][</span><span class="s2">&quot;edge_owner_to_timeline_media&quot;</span><span class="o">][</span><span class="s2">&quot;edges&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">edges</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">edge</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">node</span> <span class="o">=</span> <span class="n">edge</span><span class="o">[</span><span class="s2">&quot;node&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="n">page_url</span> <span class="o">=</span> <span class="s2">&quot;https://www.instagram.com/p/</span><span class="si">#{</span><span class="n">node</span><span class="o">[</span><span class="s2">&quot;shortcode&quot;</span><span class="o">]</span><span class="si">}</span><span class="s2">/&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="n">node</span><span class="o">[</span><span class="s2">&quot;is_video&quot;</span><span class="o">]</span>
+</span><span class='line'>     <span class="c1"># VIDEO</span>
+</span><span class='line'>    <span class="n">url</span> <span class="o">=</span> <span class="no">Html</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">page_url</span><span class="p">)</span><span class="o">.</span><span class="n">video_page</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">shortcode_media</span> <span class="o">=</span> <span class="no">Html</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="n">page_url</span><span class="p">)</span><span class="o">.</span><span class="n">photo_page</span>
+</span><span class='line'>    <span class="k">if</span> <span class="n">shortcode_media</span><span class="o">.</span><span class="n">is_a?</span> <span class="nb">Array</span>
+</span><span class='line'>      <span class="c1"># POST</span>
+</span><span class='line'>      <span class="n">shortcode_media</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
+</span><span class='line'>        <span class="n">url</span> <span class="o">=</span> <span class="n">post</span><span class="o">[</span><span class="s2">&quot;node&quot;</span><span class="o">][</span><span class="s2">&quot;display_url&quot;</span><span class="o">]</span>
+</span><span class='line'>     <span class="k">end</span>
+</span><span class='line'>    <span class="k">else</span>
+</span><span class='line'>      <span class="c1"># PHOTO</span>
+</span><span class='line'>      <span class="n">url</span> <span class="o">=</span> <span class="n">shortcode_media</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">video_page</span>
+</span><span class='line'>  <span class="n">doc</span>    <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">meta_v</span> <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">at_xpath</span><span class="p">(</span><span class="s2">&quot;//meta[@property=&#39;og:video&#39;]&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">url</span>    <span class="o">=</span> <span class="n">meta_v</span><span class="o">.</span><span class="n">attribute_nodes</span><span class="o">.</span><span class="n">last</span><span class="o">.</span><span class="n">value</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">photo_page</span>
+</span><span class='line'>  <span class="n">doc</span>       <span class="o">=</span> <span class="no">Nokogiri</span><span class="o">::</span><span class="no">HTML</span><span class="p">(</span><span class="n">html</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">js_data</span>   <span class="o">=</span> <span class="n">doc</span><span class="o">.</span><span class="n">at_xpath</span><span class="p">(</span><span class="s2">&quot;//script[contains(text(),&#39;window._sharedData&#39;)]&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">json</span>      <span class="o">=</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">js_data</span><span class="o">.</span><span class="n">text</span><span class="o">[</span><span class="mi">21</span><span class="o">.</span><span class="n">.</span><span class="o">-</span><span class="mi">2</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>  <span class="n">shortcode_media</span> <span class="o">=</span> <span class="n">json</span><span class="o">[</span><span class="s2">&quot;entry_data&quot;</span><span class="o">][</span><span class="s2">&quot;PostPage&quot;</span><span class="o">][</span><span class="mi">0</span><span class="o">][</span><span class="s2">&quot;graphql&quot;</span><span class="o">][</span><span class="s2">&quot;shortcode_media&quot;</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="n">shortcode_media</span><span class="o">[</span><span class="s2">&quot;edge_sidecar_to_children&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="c1"># POST</span>
+</span><span class='line'>    <span class="n">shortcode_media</span><span class="o">[</span><span class="s2">&quot;edge_sidecar_to_children&quot;</span><span class="o">][</span><span class="s2">&quot;edges&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>  <span class="c1"># PHOTO</span>
+</span><span class='line'>    <span class="n">shortcode_media</span><span class="o">[</span><span class="s2">&quot;display_url&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>API</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">page_info</span> <span class="o">=</span> <span class="n">json</span><span class="o">[</span><span class="s2">&quot;data&quot;</span><span class="o">][</span><span class="s2">&quot;user&quot;</span><span class="o">][</span><span class="s2">&quot;edge_owner_to_timeline_media&quot;</span><span class="o">][</span><span class="s2">&quot;page_info&quot;</span><span class="o">]</span>
+</span><span class='line'><span class="n">edges</span> <span class="o">=</span> <span class="n">json</span><span class="o">[</span><span class="s2">&quot;data&quot;</span><span class="o">][</span><span class="s2">&quot;user&quot;</span><span class="o">][</span><span class="s2">&quot;edge_owner_to_timeline_media&quot;</span><span class="o">][</span><span class="s2">&quot;edges&quot;</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">edges</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">edge</span><span class="o">|</span>
+</span><span class='line'>  <span class="n">node</span> <span class="o">=</span> <span class="n">edge</span><span class="o">[</span><span class="s2">&quot;node&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">node</span><span class="o">[</span><span class="s2">&quot;is_video&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="c1"># VIDEO</span>
+</span><span class='line'>    <span class="n">url</span> <span class="o">=</span> <span class="n">node</span><span class="o">[</span><span class="s2">&quot;video_url&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">elsif</span> <span class="o">!</span><span class="n">node</span><span class="o">[</span><span class="s2">&quot;edge_sidecar_to_children&quot;</span><span class="o">].</span><span class="n">nil?</span>
+</span><span class='line'>  <span class="c1"># POST</span>
+</span><span class='line'>    <span class="n">posts</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">post</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">url</span> <span class="o">=</span> <span class="n">post</span><span class="o">[</span><span class="s2">&quot;node&quot;</span><span class="o">][</span><span class="s2">&quot;display_url&quot;</span><span class="o">]</span>
+</span><span class='line'>   <span class="k">end</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>  <span class="c1"># PHOTO</span>
+</span><span class='line'>    <span class="n">url</span> <span class="o">=</span> <span class="n">node</span><span class="o">[</span><span class="s2">&quot;display_url&quot;</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Ruby Gem</h1>
+
+<p>以上是 Instagram 爬蟲邏輯和概念，最後這邊做成一個 gem 可以直接使用!</p>
+
+<ul>
+<li><a href="https://github.com/mgleon08/instagram-crawler">instagram-crawler</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-11-19T22:19:08+08:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>19</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>10:19 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/crawler/'>crawler</a>, <a class='category' href='/blog/categories/ruby/'>ruby</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2018/11/19/instagram-crawler-with-api/" data-via="" data-counturl="http://mgleon08.github.com/blog/2018/11/19/instagram-crawler-with-api/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/11/18/instagram-crawler-with-selenium/" title="Previous Post: Instagram Crawler with selenium (ruby 爬蟲)">&laquo; Instagram Crawler with selenium (ruby 爬蟲)</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2018 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2018/11/19/instagram-crawler-with-api/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2018/11/19/instagram-crawler-with-api/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-09-18T22:06:09+08:00</updated>
+  <updated>2018-12-19T23:47:16+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -14,7 +14,381 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Ruby Logger]]></title>
+    <title type="html"><![CDATA[Instagram Crawler With API (Ruby 爬蟲)]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/11/19/instagram-crawler-with-api/"/>
+    <updated>2018-11-19T22:19:08+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/11/19/instagram-crawler-with-api</id>
+    <content type="html"><![CDATA[<p>這是換透過分析 Instagram API，取得所有圖片和影片</p>
+
+<!-- more -->
+
+
+<p>根據上一篇 <a href="/blog/2018/11/18/instagram-crawler-with-selenium/1.ins.png">Instagram Crawler with selenium (ruby 爬蟲)</a> 會有幾個問題</p>
+
+<ol>
+<li>因為是操作 browser 所以跟網路速度會有關係，萬一網路斷線或是很慢的話就沒辦法那麼順利爬取</li>
+<li>頁面上的 class 都是亂數，可能是透過編譯自行產生，因此下次 Instagram 重新編譯，可能所有的 class 名稱又都不同了..</li>
+</ol>
+
+
+<p>因此這次換用 API 的方式來爬取 Instagram 的貼文，因為是用 API 所以也不需要去操作 browser，取得對應的 class，也就不會有上述的問題!</p>
+
+<h1>Think</h1>
+
+<h2>分析 API</h2>
+
+<p>首先先觀察一下 Instagram 上面的 API <code>https://www.instagram.com/marvel/</code> (隨便一個都可以)</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/1.ins.png"></p>
+
+<p>可以發現每次進到頁面會 request 三條 API，打開後發現其中一條 API，裡面有我們要的資訊 (<code>edges</code> 就是 API 取回的貼文)</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/2.ins.png"></p>
+
+<p>開始分析裡面的資訊，首先是 API</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/3.ins.png"></p>
+
+<p>會發現後面都會帶兩個參數 <code>query_hash</code> &amp; <code>variables</code> 而 <code>variables</code> 裡面是一個 json 又包了很多資訊</p>
+
+<pre><code class="ruby">{
+  "id":"204633036",
+  "first" 12,
+  "after": "QVFEeDUzd05jNVczMXpMRTNwYzlnYldCM0p4SGIyRmh4Q2VHYy1jZm1sUlRSalY3cVdoUklKWWdBT2RNSjJxc1pZbVBGZlN1REdjUExLMGlOWDhpR0VTcQ=="
+}
+</code></pre>
+
+<blockquote><ul>
+<li>id: 研判應該是 user_id 之類，用來判斷使用者，因為所有 API 所使用的 id 都一樣</li>
+<li>first: 嘗試更換 first 的數字，就可以發現可以要到更多資料，應該是取得數量的設定</li>
+<li>after: 後面的參數，跟 API 裡面的 <code>end_cursor</code> 長度格式都是一樣，研判是用來判斷下一個 API 的參數所用，在 API 裡面還有一個參數是 <code>has_next_page</code>，因此可以確定 <code>has_next_page</code> 是用來判斷是否有下一頁，<code>end_cursor</code> 是下一頁所需要的參數值</li>
+</ul>
+</blockquote>
+
+<pre><code class="ruby">page_info": {
+  "has_next_page": true,
+  "end_cursor":   "QVFDbml1aFJVRkM2QkVJdzRIN1pJTEpMVlpVTl9hdHh0YlBXUDZGRDRDa1NYLUpvX3hBaGlDcXNLSlhud0dma1hBWnNyOG5DWEFjNTNlOEJibXdyaml4Vg=="
+}
+</code></pre>
+
+<p>嘗試將 API 上的 <code>variables</code> 裡的 <code>end_cursor</code> 換成 API 取回來的 <code>end_cursor</code></p>
+
+<p>Request 取得新貼文成功!</p>
+
+<pre><code class="ruby">https://www.instagram.com/graphql/query/?query_hash=50d3631032cf38ebe1a2d758524e3492&amp;variables=%7B%22id%22%3A%22204633036%22%2C%22first%22%3A12%2C%22after%22%3A%22QVFDbml1aFJVRkM2QkVJdzRIN1pJTEpMVlpVTl9hdHh0YlBXUDZGRDRDa1NYLUpvX3hBaGlDcXNLSlhud0dma1hBWnNyOG5DWEFjNTNlOEJibXdyaml4Vg%3D%3D%22%7D
+</code></pre>
+
+<h2>第一個 API?</h2>
+
+<p>接著會發現，每個 API 給的都是下一條 API 的 <code>end_cursor</code>，那第一條呢???</p>
+
+<p>如果希望讓爬蟲自動去爬所有的貼文，而不是還要餵食第一條 API 給它..勢必還是要找到啊..</p>
+
+<p>一開始怎麼找都找不到，最後終於在頁面原始碼找到了 (command + F <code>end_cursor</code>)</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/4.ins.png"></p>
+
+<p>仔細觀察，發現都是包在 <code>window._sharedData</code> 裡面，因此第一條 API 的 <code>end_cursor</code> 就透過爬頁面的 <code>window._sharedData</code> 將參數帶到之前的 API 即可!</p>
+
+<pre><code class="ruby">doc = Nokogiri::HTML(html)
+js_data = doc.at_xpath("//script[contains(text(),'window._sharedData')]")
+</code></pre>
+
+<h2>前 12 個貼文?</h2>
+
+<p>再來會發現，我們已經取得了第一個 API，但是回來的資料，卻是從第 13 個貼文開始，而不是第一個??</p>
+
+<p>原來第一個 API 會是從第 13 個貼文開始，而前 12 個貼文，在剛剛頁面的 <code>window._sharedData</code> 就可以找到!</p>
+
+<p>分析後，如果前面 12 個有包含 video 或是 post，就沒辦法取得影片跟後面的連續圖片，仔細想想在這頁面也並不需要這兩種資訊，於是點貼文之後，會發現 video 和 post 連續圖片就跑出來了</p>
+
+<p>Video 會發現在 <code>property="og:video"</code> 裡面</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/5.ins.png"></p>
+
+<p>Post 則會在 <code>"edges"</code> 底下的 array 裡面</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/6.ins.png"></p>
+
+<p>那要怎麼知道貼文的連結?仔細觀察貼文的 url 都是 <code>https://www.instagram.com/p/BqAlq0wh9wV/</code> 看起來只要得到後面那段亂碼，就可以取得連結，接著就來看看
+<code>window._sharedData</code> 裡面是否找得到</p>
+
+<p>command + F <code>BqAlq0wh9wV</code>，就可以找到 <code>shortcode":"BqAlq0wh9wV"</code>，判斷 shortcode 應該就是每個貼文的代碼，這樣就可以進到每個頁面，各自取得相關的資訊</p>
+
+<h2>策略</h2>
+
+<p>由上面分析過後，我們的策略就是前 12 個貼文，透過爬 html 來取得，第 13 個貼文開始，就透過 API 來取得!</p>
+
+<h2>Data</h2>
+
+<p>資料基本上都是在 edges 的 node 裡面</p>
+
+<h3>HTML</h3>
+
+<pre><code class="ruby"># json = window._sharedData 裡面內容
+page_info = json["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]['page_info']
+edges     = json["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"]
+</code></pre>
+
+<pre><code class="ruby">edges.each do |edge|
+  node = edge["node"]
+  page_url = "https://www.instagram.com/p/#{node["shortcode"]}/"
+
+  if node["is_video"]
+     # VIDEO
+    url = Html.new(page_url).video_page
+  else
+    shortcode_media = Html.new(page_url).photo_page
+    if shortcode_media.is_a? Array
+      # POST
+      shortcode_media.each do |post|
+        url = post["node"]["display_url"]
+     end
+    else
+      # PHOTO
+      url = shortcode_media
+    end
+  end
+end
+</code></pre>
+
+<pre><code class="ruby">def video_page
+  doc    = Nokogiri::HTML(html)
+  meta_v = doc.at_xpath("//meta[@property='og:video']")
+  url    = meta_v.attribute_nodes.last.value
+end
+</code></pre>
+
+<pre><code class="ruby">def photo_page
+  doc       = Nokogiri::HTML(html)
+  js_data   = doc.at_xpath("//script[contains(text(),'window._sharedData')]")
+  json      = JSON.parse(js_data.text[21..-2])
+  shortcode_media = json["entry_data"]["PostPage"][0]["graphql"]["shortcode_media"]
+
+  if shortcode_media["edge_sidecar_to_children"]
+  # POST
+    shortcode_media["edge_sidecar_to_children"]["edges"]
+  else
+  # PHOTO
+    shortcode_media["display_url"]
+  end
+end
+</code></pre>
+
+<h2>API</h2>
+
+<pre><code class="ruby">page_info = json["data"]["user"]["edge_owner_to_timeline_media"]["page_info"]
+edges = json["data"]["user"]["edge_owner_to_timeline_media"]["edges"]
+</code></pre>
+
+<pre><code class="ruby">edges.each do |edge|
+  node = edge["node"]
+  if node["is_video"]
+  # VIDEO
+    url = node["video_url"]
+  elsif !node["edge_sidecar_to_children"].nil?
+  # POST
+    posts.each do |post|
+      url = post["node"]["display_url"]
+   end
+  else
+  # PHOTO
+    url = node["display_url"]
+  end
+end
+</code></pre>
+
+<h1>Ruby Gem</h1>
+
+<p>以上是 Instagram 爬蟲邏輯和概念，最後這邊做成一個 gem 可以直接使用!</p>
+
+<ul>
+<li><a href="https://github.com/mgleon08/instagram-crawler">instagram-crawler</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Instagram Crawler With Selenium (Ruby 爬蟲)]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/11/18/instagram-crawler-with-selenium/"/>
+    <updated>2018-11-18T21:55:00+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/11/18/instagram-crawler-with-selenium</id>
+    <content type="html"><![CDATA[<p>透過模擬瀏覽器行為，取得 Instagram 所有圖片和影片!</p>
+
+<!-- more -->
+
+
+<p>一般常見的 crawler，只要透過 http request，把 html 拉回來，就可以直接爬上面的原始碼</p>
+
+<p>但現在很多網頁都是透過 frontend 透過 API 拉資料，在用 javascript 去做動態 render，導致直接拉 html 也拉不到什麼東西。</p>
+
+<p>因此改用模擬 browser 的行為，讓它將 html 都長出來，再去爬裡面的資料。</p>
+
+<h1><a href="https://github.com/SeleniumHQ/selenium">selenium</a></h1>
+
+<blockquote><p>A browser automation framework and ecosystem</p></blockquote>
+
+<p>簡單的來說就是可以透過程式，直接驅動瀏覽器進行各種網站操作，透過這個 WebDriver  就可以讓頁面長出資料後，再把要的資料爬出來!</p>
+
+<h1>WebDriver</h1>
+
+<p>一開始要先安裝 WebDriver，根據你要用的 browser 去安裝對應的 WebDriver，像我基本上都是用 Chrome，因此就要去安裝 <a href="https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver">ChromeDriver</a>，比較簡單方式是直接執行</p>
+
+<pre><code>brew tap homebrew/cask &amp;&amp; brew cask install chromedriver
+</code></pre>
+
+<h1>Think</h1>
+
+<p>接著就開始分析要如何透過它來爬 instagram 頁面，這裡就用比較常用的 ruby 來講解。</p>
+
+<p>用 ruby 來爬的話首先都會想到用 <a href="https://github.com/sparklemotion/nokogiri">nokogiri</a>，之前也有介紹過 <a href="https://mgleon08.github.io/blog/2016/02/07/ruby-crawler/">用 Ruby 做網頁爬蟲</a>，但這次必須模擬 browser 行為，因此改用 <a href="https://github.com/watir/watir">watir</a>，watir 是一個已經整合 selenium 的 ruby gem，那現在來開始了。</p>
+
+<p>首先先隨便找一個頁面來觀察，</p>
+
+<h2>一. 關閉不需要的區塊</h2>
+
+<pre><code class="ruby">browser = Watir::Browser.new
+browser.goto('https://www.instagram.com/marvel/')
+</code></pre>
+
+<p>一開始會開一個全新的頁面，沒有 login，這時候下方會有個 login 的區塊，先找出關閉的button，並先將其關閉(避免影響瀏覽器操作)</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/1.ins.png"></p>
+
+<pre><code class="ruby"># find close login button
+close_login_button = browser.button(class: ["Ls00D", "coreSpriteDismissLarge", "Jx1OT"])
+# click close login button
+close_login_button.click if close_login_button.exist?
+</code></pre>
+
+<h2>二. 解析</h2>
+
+<p>接著觀察在 instagram 裡面，每一行<code>&lt;div class="Nnq7C weEfm"&gt;&lt;/div&gt;</code>都有 3 個 po 文 <code>&lt;div class="v1Nh3 kIKUG _bz0w"&gt;&lt;/div&gt;</code>，而每個貼文的資訊就在  裡面，因此我們要的資訊都會在這裡頭</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/2.ins.png"></p>
+
+<pre><code class="ruby"># find all post div
+items = browser.divs(class:["v1Nh3", "kIKUG", "_bz0w"])
+</code></pre>
+
+<p>裡面的資訊又分為 Photo, Video, Post，那要怎麼分辨這三個?</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/3.ins.png"></p>
+
+<p>首先注意到右上角除了單一 Photo，就會有個 icon，再仔細看 Video 跟 Post 的 icon 的 class 不同，所以判斷就如下</p>
+
+<ul>
+<li>Photo: 沒有 <code>&lt;div class="u7YqG"&gt;&lt;/div&gt;</code></li>
+<li>Video: 有 <code>&lt;div class="u7YqG"&gt;&lt;/div&gt;</code>，並且裡面有 <code>&lt;div class="Byj2F"&gt;&lt;/div&gt;</code></li>
+<li>Post: 有 <code>&lt;div class="u7YqG"&gt;&lt;/div&gt;</code>，並且裡面有 <code>&lt;div class="qFq_l"&gt;&lt;/div&gt;</code></li>
+</ul>
+
+
+<p>接著知道在哪後就要取得對應資訊</p>
+
+<h3>Photo</h3>
+
+<p>找到對應的 div 之後，取得 div 底下 image 的 src 即可。</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/4.ins.png"></p>
+
+<pre><code class="ruby">dom = browser.div(class: ["_97aPb"]).div(class: ["KL4Bh"])
+image_src = dom.img.src
+</code></pre>
+
+<h3>Video</h3>
+
+<p>Video 在找到對應的 dom，之後發現並沒有 video 相關的資訊，因為這個頁面只有 Video 的封面，並沒有實際在播放影片，因此必須打開影片的播放頁面，才能找到對應的檔案位置</p>
+
+<p>因此先操作 browser 去打開影片頁面，並爬裡面的 html，發現在 <code>&lt;video class="tWeCl"&gt;&lt;/video&gt;</code> 裡面</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/5.ins.png"></p>
+
+<pre><code class="ruby">video_src = browser.video(class: "tWeCl").src
+</code></pre>
+
+<h3>Post</h3>
+
+<p>跟 Video，在該頁面只能找到第一張，無法找到後面其他圖片，因此也打開 Post 的頁面去爬，接著找到放在 <code>&lt;li class="_-1_m6"&gt;&lt;/li&gt;</code> 裡面</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/6.ins.png"></p>
+
+<pre><code class="ruby">browser.div(class: ["_2dDPU", "vCf6V"]).lis(class: ["_-1_m6"])
+</code></pre>
+
+<p>但這邊有個問題，會發現第三個之後，並沒有箭頭可以往下展開，需要點往右的箭頭，滑動圖片，才會接著展開，因此每次都必須點往右的箭頭，一個一個爬，直到最後一張</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/7.ins.png"></p>
+
+<pre><code class="ruby">post_src = []
+lis.each.with_index(1) do |post, index|
+  post_src &lt;&lt; post.img.src
+  # 還沒到最後一張就按一下圖片右鍵
+  browser.button(class: ["  _6CZji"]).click if index &lt; lis.size
+end
+</code></pre>
+
+<p>記得 Video &amp; Post 打開貼文後要關閉才能繼續找下一張!</p>
+
+<h2>三. 迴圈</h2>
+
+<p>接著會發現上面的 <code>&lt;div class="v1Nh3 kIKUG _bz0w"&gt;&lt;/div&gt;</code> 數量，跟實際上的貼文數量，是不成比例，但只要往下滑就會發現，div 的數量會不斷增加</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/8.ins.png"></p>
+
+<p>因此接著就是要操作 browser 往下滑到最後，讓頁面載入新的 div 進來</p>
+
+<pre><code class="ruby">browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+sleep(5) # 讓頁面讀取一下資訊
+</code></pre>
+
+<p>並且要判斷何時滑到最下面，這邊直接取回頁面的高度，每滑一次，爬完，在滑一次時，判斷是否高度跟上次一樣，一樣就代表已經到最底了</p>
+
+<pre><code class="ruby">begin
+  scrollHeight = new_scrollHeight
+  new_scrollHeight = browser.execute_script("return document.body.scrollHeight")
+end while (new_scrollHeight - scrollHeight) != 0
+</code></pre>
+
+<p>接著就是就是無限迴圈直到滑到最下面就停止。</p>
+
+<h2>Preview</h2>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/9.ins.gif"></p>
+
+<h2>Other</h2>
+
+<ol>
+<li>因為是操作 browser 所以跟網路速度會有關係，最好的方式是在每次要讀取新頁面時，先暫停讓頁面讀取再繼續下一步</li>
+<li>頁面上的 class 都是亂數，可能是透過編譯自行產生，因此下次 Instagram 重新編譯，可能所有的 class 名稱又都不同了..</li>
+<li>另外如果不希望打開 browser 可以使用 headless 模式</li>
+</ol>
+
+
+<pre><code class="ruby">Watir::Browser.new :chrome, headless: true
+</code></pre>
+
+<h2>example</h2>
+
+<p><a href="https://github.com/mgleon08/instagram_crawler_with_selenium">instagram_crawler_with_selenium</a></p>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://github.com/watir/watir">watir</a></li>
+<li><a href="https://readysteadycode.com/howto-scrape-websites-with-ruby-and-watir">HOWTO scrape websites with Ruby &amp; Watir</a></li>
+<li><a href="https://readysteadycode.com/howto-decide-which-ruby-web-scraping-library-to-use">HOWTO decide which Ruby web scraping library to use</a></li>
+<li><a href="https://www.seleniumhq.org/">seleniumhq</a></li>
+<li><a href="https://sites.google.com/a/chromium.org/chromedriver/downloads">ChromeDriver - WebDriver for Chrome</a></li>
+<li><a href="https://www.youtube.com/watch?v=1UYBAn69Qrk&amp;feature=youtu.be&amp;t=4m24s">The Ultimate Introduction to Web Scraping and Browser Automation</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Logger, MultiIO]]></title>
     <link href="http://mgleon08.github.com/blog/2016/10/17/ruby-logger/"/>
     <updated>2016-10-17T17:47:38+08:00</updated>
     <id>http://mgleon08.github.com/blog/2016/10/17/ruby-logger</id>
@@ -47,14 +421,19 @@ logger.info('initialize') { "Initializing..." }
 logger.add(Logger::FATAL) { 'Fatal error!' }
 </code></pre>
 
+<h1>MultiIO</h1>
+
 <p>同時輸出到 terminal &amp; file</p>
 
 <pre><code class="ruby">class Logger &lt; ::Logger
   class &lt;&lt; self
     def default(log)
+      # 設定兩種要輸出的 io 方式
       io = [STDOUT, log_file]
       logger = Logger.new(MultiIO.new(*io))
+      # 設定 log 層級
       logger.level = Logger::INFO
+      # 設定每次輸出 log 的格式
       logger.formatter = proc do |_severity, _datetime, _progname, msg|
         "#{msg}\n"
       end
@@ -77,10 +456,12 @@ end
   end
 
   def write(args)
+    # 每個 io 都寫入
     @targets.each { |target| target.write(args) }
   end
 
   def close
+    # 寫入完要 close
     @targets.each(&amp;:close)
   end
 end
@@ -240,387 +621,6 @@ export TOKEN=123
 <ul>
 <li><a href="http://railsapps.github.io/rails-environment-variables.html">Rails Environment Variables</a></li>
 <li><a href="http://braavos.me/blog/2014/08/05/rails-env/">Rails的環境變數</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[I/O 輸入輸出]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/08/30/io/"/>
-    <updated>2016-08-30T10:32:37+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/08/30/io</id>
-    <content type="html"><![CDATA[<p>先來說說什麼是 IO</p>
-
-<!-- more -->
-
-
-<blockquote><ul>
-<li>所謂「I/O」，是input/output(輸出入) 的縮寫，泛指所有的輸出入動作。</li>
-<li>我們從鍵盤上輸入資料、移動滑鼠、由掃描器輸入影像、從磁碟機讀入檔案，都是屬於輸入的動作；從印表機印出報表、顯示圖形到螢幕、將執行結果存入磁碟中，都是屬於輸出的一種。</li>
-<li>I/O也指磁碟機的存取、或是通訊埠的接收資料和傳送資料等動作，一般都是針對可兼做輸出和輸入的設備。</li>
-</ul>
-</blockquote>
-
-<p>由以上可知，當我們鍵盤上打字，就是一種輸入的動作，再 terminal 顯示我們輸入的字，就是一種輸出的動作</p>
-
-<h1>ruby IO</h1>
-
-<ul>
-<li>標準輸入：$stdin</li>
-<li>標準輸出：$stdout</li>
-<li>標準錯誤輸出：$stderr</li>
-<li>命令列引數的陣列: ARGV</li>
-</ul>
-
-
-<h3>標準輸出 vs 標準錯誤輸出</h3>
-
-<pre><code class="ruby">#io.rb
-$stdout.print  "標準輸出"
-$stderr.print  "標準錯誤輸出"
-
-#執行 ruby io.rb &gt; log.txt，會發現 console 只會顯示 '標準錯誤輸出'，而標準輸出則會輸出到 log.txt
-</code></pre>
-
-<pre><code class="ruby">##&lt;IO:&lt;STDIN&gt;&gt;
-STDIN
-$stdin
-
-##&lt;IO:&lt;STDOUT&gt;&gt;
-$&gt;
-STDOUT
-$stdout
-
-#雖然有很多種表示法，但是比較偏好 $stdin，因為再 ruby 全大寫通常是常數，會讓人誤會，另一個則是不懂的人難以理解
-</code></pre>
-
-<h3>輸入 input</h3>
-
-<p><code>$stdin.gets</code></p>
-
-<pre><code class="ruby">$stdin.gets
-&gt; hello
-#=&gt; "hello\n"
-</code></pre>
-
-<p><code>#chomp!</code> 去除掉 \n</p>
-
-<pre><code class="ruby">$stdin.gets.chomp!
-&gt; hello
-#=&gt; "hello"
-</code></pre>
-
-<p><code>#eof?</code> 判斷是否讀到最後</p>
-
-<pre><code class="ruby">io = File.open( 'ruby.rb' , "r" )
-io.eof?
-#=&gt; false
-io.gets
-#=&gt; "1\n"
-io.eof?
-#=&gt; false
-io.gets
-#=&gt; "2\n"
-io.gets
-#=&gt; nil
-io.eof?
-#=&gt; true
-</code></pre>
-
-<p><code>#getc</code> 每次讀取一個字元</p>
-
-<pre><code class="ruby">io = open( 'ruby.rb' , "r" )
-io.getc
-#=&gt; "1"
-io.getc
-#=&gt; "\n"
-
-#會被主動轉換成 ASCII 編碼，因此第二個會讀出 \n
-</code></pre>
-
-<p><code>io.read</code> 指定讀取長度，預設為全部</p>
-
-<pre><code class="ruby">io = open( 'ruby.rb' , "r" )
-io.read
-#=&gt; "1\n2\n3"
-io.rewind
-=&gt; 0
-io.read(3)
-#=&gt; "1\n2"
-</code></pre>
-
-<h3>輸出 output</h3>
-
-<pre><code class="ruby">#adds a new line character
-#is an equivalent to the $stdout.puts
-puts 'a'
-#=&gt;a\n
-
-#is an equivalent to the $stdout.print
-printf 'a'
-#a
-
-#prints one character to the console
-putc 97
-#a=&gt; 97
-
-#p calls the inspect method upon the object being printed, The method is useful for debugging.
-p "a"
-#=&gt; 'a'
-
-a = StringIO.new
-#=&gt; #&lt;StringIO:0x007fc9a08813e8&gt;
-a.puts(123)
-#=&gt; nil
-a.rewind
-#=&gt; 0
-a.gets
-#=&gt; "123\n"
-</code></pre>
-
-<h3>指標</h3>
-
-<p>資料流的存取方法，有區分成「固定長度」與「非固定長度」</p>
-
-<ul>
-<li><p>固定長度的讀取方式</p>
-
-<ul>
-<li>優點：讀取速度快，資料都以固定的長度儲存，可以很快的找到指定的位置</li>
-<li>缺點：浪費空間，即使用不到大的空間也是會空下位置</li>
-</ul>
-</li>
-<li><p>非固定長度的讀取方式</p>
-
-<ul>
-<li>優點：省空間，有用到才會有空間</li>
-<li>缺點：讀取速度慢，每次讀取資料時，都必須從頭開始讀取</li>
-</ul>
-</li>
-</ul>
-
-
-<pre><code class="ruby">io.rewind  #將指標移到最前面
-
-io.pos     #目前指標位置
-
-io.seek(位置, 方式) #指定位置
-#方式有三種：
-#SEEK_SET ： 直接移動到指定位置
-#SEEK_CUR ： 移動到目前位置的相對位置
-#SEEK_END ： 移動到檔尾算起的相對位置
-
-io.truncate(0)
-io.truncate(io.pos)
-#引數為 0 的話，表示全部清空
-#引數為 io.pos 的話，表示將目前指標後的檔案全清空
-</code></pre>
-
-<pre><code class="ruby">io = File.open("ruby.rb", 'a+')
-io.write("123")
-#=&gt; 3
-io.read
-#=&gt; ""
-
-#因為 a 若有檔案在會寫在檔案後面，此時指標會指向最後面，因此可以用 rewind 將指標移致最前面
-io.rewind
-io.read
-#=&gt; 123
-</code></pre>
-
-<h1>Readline</h1>
-
-<blockquote><p>The Readline module provides interface for GNU Readline. This module defines a number of methods to facilitate completion and accesses input history from the Ruby interpreter. This module supported Edit Line(libedit) too. libedit is compatible with GNU Readline.</p></blockquote>
-
-<p>GNU的readline是一個開源的跨平台程序庫，提供了交互式的文本編輯功能</p>
-
-<p><a href="http://ruby-doc.org/stdlib-2.1.1/libdoc/readline/rdoc/Readline.html">Readline</a></p>
-
-<h1>stringIO 物件</h1>
-
-<ul>
-<li><a href="http://ruby-doc.org/stdlib-2.3.0/libdoc/stringio/rdoc/StringIO.html">StringIO</a></li>
-</ul>
-
-
-<p>設一個能夠儲存字串的物件</p>
-
-<blockquote><p>Pseudo I/O on String object.<br/>
-Commonly used to simulate <code>$stdio</code> or <code>$stderr</code></p></blockquote>
-
-<p>此時對 io 操作 puts 並不會真正的輸出，而是將字串存入 io 物件之中</p>
-
-<pre><code class="ruby">io = StringIO.new
-io.puts("A")
-io.puts("B")
-io.puts("C")
-io.rewind
-p io.read
-
-#"A\nB\nC\n"
-</code></pre>
-
-<h1>檔案輸出入</h1>
-
-<p>File 繼承自 IO</p>
-
-<blockquote><p>File.new 與 File.open 和 IO.new 與 IO.open 幾乎一樣，只差在覆寫了 initialize 方法，使其接受的參數不再是 FD 而是檔案的路徑字串。</p></blockquote>
-
-<ul>
-<li><a href="http://ruby-doc.org/core-2.1.5/File.html">File</a></li>
-<li><a href="http://mgleon08.github.io/blog/2016/01/31/ruby-file-dir/">用 Ruby 進行 File ＆ Dir 檔案操作</a></li>
-</ul>
-
-
-<pre><code class="ruby"># r  讀取，檔案必須存在
-# w  會主動建立空檔案，檔案已存在則會被覆蓋
-# a  寫入。主動建檔，檔案已存在則追加在後。
-# r+ 讀取 / 寫入，不會主動建檔，將內容加在檔案最前面，會覆蓋原有內容，檔案必須存在)
-# w+ 讀取 / 寫入。同 w 功能
-# a+ 讀取 / 寫入。同 a 功能
-
-#在每個模式後面加上"b"
-#例如 "rb" 或 "rb+"，就可以開啟「二進位」模式 
-
-io = File.new("ruby.rb", "w")
-io = File.open("/home/work/ruby.rb")
-io.close
-io.closed? #檢查是否關閉
-#若後面沒有 block (結束會自動關閉) 必須要再加上，io.close，關閉檔案，否則會出錯
-</code></pre>
-
-<pre><code class="ruby"># 打開檔案，並寫入文字（若沒檔案會直接新增）
-File.open('langs', 'w') do |f|
-  f.puts "Ruby"
-  f.write "Java\n"
-  f &lt;&lt; "Python\n"
-end
-</code></pre>
-
-<pre><code class="ruby">#查看檔案是否存在，建立時間，檔案大小
-puts File.exists? 'tempfile'
-
-f = File.new 'tempfile', 'w'
-puts File.mtime 'tempfile'
-puts f.size
-
-File.rename 'tempfile', 'tempfile2'
-
-f.close
-</code></pre>
-
-<pre><code class="ruby">#逐一行印出
-f = File.open("stones")
-while line = f.gets do
-    puts line
-end
-f.close
-
-#逐一行顯示
-File.open( "ruby.rb" , "r" ) do |f|
-    while line = f.gets
-      puts line
-    end
-end
-</code></pre>
-
-<pre><code class="ruby">#刪除檔案
-File.delete("/home/work/ruby.rb")
-
-#讀取檔案
-File.read("ruby.rb")
-</code></pre>
-
-<blockquote><h3>IO 的世界相當大啊，還有很多沒有提及，以後若有機會接觸到比較深的再來研究~.~</h3></blockquote>
-
-<ul>
-<li><a href="http://mgleon08.github.io/blog/2016/01/31/ruby-file-dir/">用 Ruby 進行 File ＆ Dir 檔案操作</a></li>
-<li><a href="http://mgleon08.github.io/blog/2016/02/07/callsystem/">用 Ruby 來 Calling Shell Commands</a></li>
-</ul>
-
-
-<p>官方文件：</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/core-2.2.2/IO.html">IO</a></li>
-<li><a href="http://ruby-doc.org/stdlib-1.9.3/libdoc/stringio/rdoc/StringIO.html">StringIO</a></li>
-<li><a href="http://ruby-doc.org/core-2.1.5/File.html">File</a></li>
-<li><a href="https://ruby-doc.org/core-2.2.0/Dir.html">Dir</a></li>
-<li><a href="http://ruby-doc.org/core-2.3.1/Kernel.html">Kernel</a></li>
-<li><a href="http://ruby-doc.org/stdlib-2.1.1/libdoc/readline/rdoc/Readline.html">Readline</a></li>
-</ul>
-
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="http://zetcode.com/lang/rubytutorial/io/">Input &amp; output in Ruby</a></li>
-<li><a href="https://blog.alphacamp.co/2016/06/30/ruby-open/">Ruby#open 知多少？</a></li>
-<li><a href="http://rpg0822.pixnet.net/blog/post/2844850-ruby-%E7%AD%86%E8%A8%98---7----%E8%A9%B2%E6%AD%BB%E7%9A%84-io-">Ruby 筆記 - 7 - 該死的 IO</a></li>
-<li><a href="http://stackoverflow.com/questions/4279604/what-is-the-difference-between-stdin-and-stdin-in-ruby">What is the difference between STDIN and $stdin in Ruby?</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[ERB Template]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/08/30/erb-template/"/>
-    <updated>2016-08-30T10:31:47+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/08/30/erb-template</id>
-    <content type="html"><![CDATA[<p>相信學過 rails 一定知道 erb，可以很方便地將 ruby code 寫在 view 中</p>
-
-<!-- more -->
-
-
-<p>但不一定是要有 rails 才可以用 erb</p>
-
-<pre><code class="ruby">#template.rb
-require 'erb'
-
-class Template
-  def initialize(foo, bar)
-    @foo = foo
-    @bar = bar
-  end
-
-  def open_template
-    puts ERB.new(File.read(templates_path), nil).result(binding)
-  end
-
-  def templates_path
-    File.expand_path("../template.erb", __FILE__)
-  end
-end
-
-Template.new('hi', 'hello').open_template
-</code></pre>
-
-<pre><code class="ruby">#template.erb
-1. &lt;%= @foo %&gt;
-2. &lt;%= @bar %&gt;
-</code></pre>
-
-<pre><code class="ruby">#執行
-ruby template.rb
-#1. hi
-#2. hello
-</code></pre>
-
-<h3>也可以利用 erb 來寫設定檔</h3>
-
-<ul>
-<li><a href="http://mgleon08.github.io/blog/2016/02/07/yaml/">用 Yaml 來寫文件, 設定檔</a></li>
-</ul>
-
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="http://ruby-doc.org/stdlib-2.3.1/libdoc/erb/rdoc/ERB.html">ERB doc</a></li>
-<li><a href="http://stackoverflow.com/questions/1338960/ruby-templates-how-to-pass-variables-into-inlined-erb">Ruby templates: How to pass variables into inlined ERB?</a></li>
-<li><a href="http://stackoverflow.com/questions/8954706/render-an-erb-template-with-values-from-a-hash">Render an ERB template with values from a hash</a></li>
 </ul>
 
 ]]></content>

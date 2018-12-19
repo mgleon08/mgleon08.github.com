@@ -11,9 +11,10 @@
   
   <meta name="description" content="陣列 Array Range (each)
 Slices
-Maps 陣列 Array Array 的長度是其類型的一部分，因此陣列不能改變大小。
+Maps
+Variadic Functions 陣列 Array Array 的長度是其類型的一部分，因此陣列不能改變大小。
 當定義為 int Array，之後就只能放 int，不能放其他 type
-int default 值是 0, string 是 nil &hellip;">
+int default 值是 0, &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -134,6 +135,7 @@ int default 值是 0, string 是 nil &hellip;">
 <li><a href="#range">Range (each)</a></li>
 <li><a href="#slices">Slices</a></li>
 <li><a href="#maps">Maps</a></li>
+<li><a href="#variadic">Variadic Functions</a></li>
 </ul>
 
 
@@ -173,9 +175,15 @@ int default 值是 0, string 是 nil &hellip;">
 <span class='line-number'>23</span>
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">var</span> <span class="nx">a</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="kt">int</span> <span class="c1">// 宣告一個變數 a 為一個 int type 的 Array 並且長度只有10.</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">var</span> <span class="nx">a</span> <span class="p">[</span><span class="mi">10</span><span class="p">]</span><span class="kt">int</span> <span class="c1">// 宣告一個變數 a 為一個 int type 的 Array 並且長度只有10.(int 預設是 0, string 則為 nil)</span>
 </span><span class='line'>
-</span><span class='line'><span class="c1">// 宣告一個變數 ｂ 為 string type, 並且裡面的值是 A, B 並且長度只有 2 </span>
+</span><span class='line'><span class="nx">a</span> <span class="o">:=</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">}</span>
+</span><span class='line'><span class="c1">// [1 0 0]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 宣告一個變數 ｂ 為 string type, 並且裡面的值是 A, B 並且長度只有 2</span>
 </span><span class='line'><span class="nx">b</span> <span class="o">:=</span> <span class="p">[</span><span class="mi">2</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="s">&quot;B&quot;</span><span class="p">}</span>
 </span><span class='line'><span class="nx">b</span> <span class="o">:=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="s">&quot;B&quot;</span><span class="p">}</span> <span class="c1">// ... makes the compiler determine the length</span>
 </span><span class='line'>
@@ -262,7 +270,7 @@ int default 值是 0, string 是 nil &hellip;">
 
 <h3>Passing a array to a function</h3>
 
-<p>傳遞給 function 部會改變原來的值</p>
+<p>傳遞給 function 不會改變原來的值，因為 array 不是 reference types 而是 value types</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -302,9 +310,9 @@ int default 值是 0, string 是 nil &hellip;">
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="cm">/**</span>
-</span><span class='line'><span class="cm">before passing to function  [5 6 7 8 8]  </span>
-</span><span class='line'><span class="cm">inside function  [55 6 7 8 8]  </span>
-</span><span class='line'><span class="cm">after passing to function  [5 6 7 8 8]  </span>
+</span><span class='line'><span class="cm">before passing to function  [5 6 7 8 8]</span>
+</span><span class='line'><span class="cm">inside function  [55 6 7 8 8]</span>
+</span><span class='line'><span class="cm">after passing to function  [5 6 7 8 8]</span>
 </span><span class='line'><span class="cm">**/</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -346,21 +354,115 @@ int default 值是 0, string 是 nil &hellip;">
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>如果是在 map，就會是 key, value</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">kvs</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;a&quot;</span><span class="p">:</span> <span class="s">&quot;apple&quot;</span><span class="p">,</span> <span class="s">&quot;b&quot;</span><span class="p">:</span> <span class="s">&quot;banana&quot;</span><span class="p">}</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">kvs</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%s -&gt; %s\n&quot;</span><span class="p">,</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也可以只要 index or key</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">(){</span>
+</span><span class='line'>    <span class="nx">kvs</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;a&quot;</span><span class="p">:</span> <span class="s">&quot;apple&quot;</span><span class="p">,</span> <span class="s">&quot;b&quot;</span><span class="p">:</span> <span class="s">&quot;banana&quot;</span><span class="p">}</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">k</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">kvs</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;key:&quot;</span><span class="p">,</span> <span class="nx">k</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>當是 string 時，則是會轉成 Unicode code <code>rune</code> type</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// `range` on strings iterates over Unicode code</span>
+</span><span class='line'>  <span class="c1">// points. The first value is the starting byte index</span>
+</span><span class='line'>  <span class="c1">// of the `rune` and the second the `rune` itself.</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">c</span> <span class="o">:=</span> <span class="k">range</span> <span class="s">&quot;go&quot;</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">c</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 0 103</span>
+</span><span class='line'><span class="c1">// 1 111</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1><span id="slices"> Slices </span></h1>
 
 <p>不用定義其最大長度，而且可以直接賦予值</p>
 
 <blockquote><ul>
 <li>An array has a fixed size. A slice, on the other hand, is a dynamically-sizeds</li>
-<li>slice 的零值是 nil，一個 nil 的 slice 的長度和容量是 0</li>
+<li>slice 的零值是 nil，一個 nil 的 slice 的長度和容量是 0，使用 make 就不會是 nil</li>
 <li>Slice 是用 reference</li>
+</ul>
+</blockquote>
+
+<ul>
+<li><a href="https://golang.org/pkg/builtin/#make">make</a></li>
+</ul>
+
+
+<blockquote><ul>
+<li><p>Slice: The size specifies the length. The capacity of the slice is
+equal to its length. A second integer argument may be provided to
+specify a different capacity; it must be no smaller than the
+length. For example, make([]int, 0, 10) allocates an underlying array
+of size 10 and returns a slice of length 0 and capacity 10 that is
+backed by this underlying array.</p></li>
+<li><p>Map: An empty map is allocated with enough space to hold the
+specified number of elements. The size may be omitted, in which case
+a small starting size is allocated.</p></li>
+<li><p>Channel: The channel&rsquo;s buffer is initialized with the specified
+buffer capacity. If zero, or the size is omitted, the channel is
+unbuffered.</p></li>
 </ul>
 </blockquote>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 範圍 low ~ hight -1</span>
 </span><span class='line'><span class="nx">a</span><span class="p">[</span><span class="nx">low</span> <span class="p">:</span> <span class="nx">high</span><span class="p">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span> <span class="c1">//creates and array and returns a slice reference</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">numa</span> <span class="o">:=</span> <span class="p">[</span><span class="mi">3</span><span class="p">]</span><span class="kt">int</span><span class="p">{</span><span class="mi">78</span><span class="p">,</span> <span class="mi">79</span> <span class="p">,</span><span class="mi">80</span><span class="p">}</span>
+</span><span class='line'><span class="nx">nums1</span> <span class="o">:=</span> <span class="nx">numa</span><span class="p">[:]</span> <span class="c1">//creates a slice which contains all elements of the array</span>
+</span><span class='line'><span class="c1">// tart and end are 0 and len(numa)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -448,7 +550,7 @@ int default 值是 0, string 是 nil &hellip;">
 <span class='line-number'>23</span>
 <span class='line-number'>24</span>
 <span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// slices 都是用 references 的方式，因此改值</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// slices 都是用 references 的方式，因此改值也會影響到原本的值</span>
 </span><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
@@ -533,7 +635,7 @@ int default 值是 0, string 是 nil &hellip;">
 </span><span class='line'>    <span class="nx">printSlice</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
 </span><span class='line'>    <span class="nx">s</span> <span class="p">=</span> <span class="nx">s</span><span class="p">[</span><span class="mi">2</span><span class="p">:]</span> <span class="c1">// Drop its first two values.</span>
 </span><span class='line'>    <span class="nx">printSlice</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
-</span><span class='line'>  
+</span><span class='line'>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">func</span> <span class="nx">printSlice</span><span class="p">(</span><span class="nx">s</span> <span class="p">[]</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
@@ -548,6 +650,43 @@ int default 值是 0, string 是 nil &hellip;">
 </span><span class='line'><span class="cm">len=6 cap=6 [2 3 5 7 11 13]</span>
 </span><span class='line'><span class="cm">len=4 cap=4 [5 7 11 13]</span>
 </span><span class='line'><span class="cm">**/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>re-sliced upto its capacity</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fruitarray</span> <span class="o">:=</span> <span class="p">[</span><span class="o">...</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;apple&quot;</span><span class="p">,</span> <span class="s">&quot;orange&quot;</span><span class="p">,</span> <span class="s">&quot;grape&quot;</span><span class="p">,</span> <span class="s">&quot;mango&quot;</span><span class="p">,</span> <span class="s">&quot;water melon&quot;</span><span class="p">,</span> <span class="s">&quot;pine apple&quot;</span><span class="p">,</span> <span class="s">&quot;chikoo&quot;</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">fruitslice</span> <span class="o">:=</span> <span class="nx">fruitarray</span><span class="p">[</span><span class="mi">1</span><span class="p">:</span><span class="mi">3</span><span class="p">]</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;length of slice %d capacity %d\n&quot;</span><span class="p">,</span> <span class="nb">len</span><span class="p">(</span><span class="nx">fruitslice</span><span class="p">),</span> <span class="nb">cap</span><span class="p">(</span><span class="nx">fruitslice</span><span class="p">))</span>
+</span><span class='line'>    <span class="nx">fruitslice</span> <span class="p">=</span> <span class="nx">fruitslice</span><span class="p">[:</span><span class="nb">cap</span><span class="p">(</span><span class="nx">fruitslice</span><span class="p">)]</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;After re-slicing length is&quot;</span><span class="p">,</span><span class="nb">len</span><span class="p">(</span><span class="nx">fruitslice</span><span class="p">),</span> <span class="s">&quot;and capacity is&quot;</span><span class="p">,</span><span class="nb">cap</span><span class="p">(</span><span class="nx">fruitslice</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// length of slice 2 capacity 6</span>
+</span><span class='line'><span class="c1">// After re-slicing length is 6 and capacity is 6</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -623,7 +762,7 @@ int default 值是 0, string 是 nil &hellip;">
 
 <h3>Append</h3>
 
-<p>當空間不夠時，會自動擴充 capacity(*2)，實際上是建立一個新的 array，將原有的值 copy 過去，新的 slice 在 reference 到 新的 array 上面</p>
+<p>當空間不夠時，會自動擴充 capacity(*2)，實際上是建立一個新的 array，將原有的值 copy 過去，新的 slice 在 reference 到新的 array 上面</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -663,7 +802,7 @@ int default 值是 0, string 是 nil &hellip;">
 </span><span class='line'><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">s</span> <span class="p">[]</span><span class="kt">int</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">s</span> <span class="p">[]</span><span class="kt">int</span> <span class="c1">//zero value of a slice is nil</span>
 </span><span class='line'>  <span class="nx">printSlice</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
 </span><span class='line'>
 </span><span class='line'>  <span class="c1">// append works on nil slices.</span>
@@ -684,8 +823,8 @@ int default 值是 0, string 是 nil &hellip;">
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'>
 </span><span class='line'><span class="c1">// len=0 cap=0 []</span>
-</span><span class='line'><span class="c1">// len=1 cap=2 [0] </span>
-</span><span class='line'><span class="c1">// len=2 cap=2 [0 1]  </span>
+</span><span class='line'><span class="c1">// len=1 cap=2 [0]</span>
+</span><span class='line'><span class="c1">// len=2 cap=2 [0 1]</span>
 </span><span class='line'><span class="c1">// len=3 cap=4 [0 1 2]</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -877,16 +1016,22 @@ int default 值是 0, string 是 nil &hellip;">
 
 <h1><span id="maps"> Maps </span></h1>
 
-<p>A map maps keys to values.</p>
+<p>A map maps keys to values. (相當於其當語言的 hash)</p>
 
 <blockquote><ul>
 <li>Similar to slices, maps are reference types</li>
-<li>Only be compared to nil</li>
+<li>Only be compared to ni</li>
+<li>The zero value of a map is nil</li>
+<li>nil 的 map 無法賦值，必須用 make</li>
 </ul>
 </blockquote>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span><span class="nx">value</span><span class="p">)</span>
+</span><span class='line'><span class="nx">value</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="nx">key</span><span class="p">]</span> <span class="c1">// 判斷 key 的 value 在不在</span>
+</span><span class='line'><span class="nb">delete</span><span class="p">(</span><span class="kd">map</span><span class="p">,</span> <span class="nx">key</span><span class="p">)</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -992,7 +1137,7 @@ int default 值是 0, string 是 nil &hellip;">
 </span><span class='line'>  <span class="p">}</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;m3 =&quot;</span><span class="p">,</span> <span class="nx">m3</span><span class="p">)</span>
 </span><span class='line'>
-</span><span class='line'>  <span class="c1">// 查找鍵值是否存在</span>
+</span><span class='line'>  <span class="c1">// 查找鍵值是否存在，ok 為 true / false, v 為 value</span>
 </span><span class='line'>  <span class="k">if</span> <span class="nx">v</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">m1</span><span class="p">[</span><span class="s">&quot;c&quot;</span><span class="p">];</span> <span class="nx">ok</span> <span class="p">{</span>
 </span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">)</span>
 </span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
@@ -1003,11 +1148,11 @@ int default 值是 0, string 是 nil &hellip;">
 </span><span class='line'>  <span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">m3</span> <span class="p">{</span>
 </span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
 </span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  
+</span><span class='line'>
 </span><span class='line'>  <span class="c1">// delete</span>
 </span><span class='line'>  <span class="nb">delete</span><span class="p">(</span><span class="nx">m3</span><span class="p">,</span> <span class="s">&quot;a&quot;</span><span class="p">)</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">m3</span><span class="p">)</span>
-</span><span class='line'>  
+</span><span class='line'>
 </span><span class='line'>  <span class="c1">//Length of the map</span>
 </span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">len</span><span class="p">(</span><span class="nx">m3</span><span class="p">))</span>
 </span><span class='line'><span class="p">}</span>
@@ -1087,6 +1232,157 @@ int default 值是 0, string 是 nil &hellip;">
 <ul>
 <li><a href="https://hsinyu.gitbooks.io/golang_note/content/map_1.html">map (1)</a></li>
 <li><a href="http://blog.cyeam.com/json/2017/11/02/go-map-delete#map-%E7%9A%84%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C">Golang map 如何進行刪除操作？</a></li>
+</ul>
+
+
+<h1><span id="variadic"> Variadic Functions </span></h1>
+
+<p><code>Variadic Functions</code> 是一個可接受任意的參數，一定要放最後面一個</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="o">...</span><span class="nx">Type</span> <span class="c1">// 代表可以接收任意參數</span>
+</span><span class='line'><span class="kd">func</span> <span class="nb">append</span><span class="p">(</span><span class="nx">slice</span> <span class="p">[]</span><span class="nx">Type</span><span class="p">,</span> <span class="nx">elems</span> <span class="o">...</span><span class="nx">Type</span><span class="p">)</span> <span class="p">[]</span><span class="nx">Type</span>
+</span><span class='line'><span class="c1">// elems 可以接收任意參數</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>example 1</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">find</span><span class="p">(</span><span class="nx">num</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">nums</span> <span class="o">...</span><span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;type of nums is %T\n&quot;</span><span class="p">,</span> <span class="nx">nums</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">found</span> <span class="o">:=</span> <span class="kc">false</span>
+</span><span class='line'>    <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">nums</span> <span class="p">{</span>
+</span><span class='line'>        <span class="k">if</span> <span class="nx">v</span> <span class="o">==</span> <span class="nx">num</span> <span class="p">{</span>
+</span><span class='line'>            <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="s">&quot;found at index&quot;</span><span class="p">,</span> <span class="nx">i</span><span class="p">,</span> <span class="s">&quot;in&quot;</span><span class="p">,</span> <span class="nx">nums</span><span class="p">)</span>
+</span><span class='line'>            <span class="nx">found</span> <span class="p">=</span> <span class="kc">true</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="k">if</span> <span class="p">!</span><span class="nx">found</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">num</span><span class="p">,</span> <span class="s">&quot;not found in &quot;</span><span class="p">,</span> <span class="nx">nums</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;\n&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">find</span><span class="p">(</span><span class="mi">89</span><span class="p">,</span> <span class="mi">89</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">95</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">find</span><span class="p">(</span><span class="mi">45</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">67</span><span class="p">,</span> <span class="mi">45</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">109</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">find</span><span class="p">(</span><span class="mi">78</span><span class="p">,</span> <span class="mi">38</span><span class="p">,</span> <span class="mi">56</span><span class="p">,</span> <span class="mi">98</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">find</span><span class="p">(</span><span class="mi">87</span><span class="p">)</span>
+</span><span class='line'>    <span class="c1">// 相當於</span>
+</span><span class='line'>    <span class="nx">nums</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">89</span><span class="p">,</span> <span class="mi">90</span><span class="p">,</span> <span class="mi">95</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">find</span><span class="p">(</span><span class="mi">89</span><span class="p">,</span> <span class="nx">nums</span><span class="o">...</span><span class="p">)</span> <span class="c1">// 要加 ... 否則 type 會是 []int，造成 error</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">/**</span>
+</span><span class='line'><span class="cm">type of nums is []int</span>
+</span><span class='line'><span class="cm">89 found at index 0 in [89 90 95]</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">type of nums is []int</span>
+</span><span class='line'><span class="cm">45 found at index 2 in [56 67 45 90 109]</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">type of nums is []int</span>
+</span><span class='line'><span class="cm">78 not found in  [38 56 98]</span>
+</span><span class='line'>
+</span><span class='line'><span class="cm">type of nums is []int</span>
+</span><span class='line'><span class="cm">87 not found in  []s</span>
+</span><span class='line'><span class="cm">**/</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>原理是會將，後面的參數轉成 slice，所以 type 會變成 <code>[]int</code>，但是因為 <code>find</code> 後面接收的參數 type 是 int，因此也不能直接將 <code>[]int</code> 帶進去，因此 <code>[]int</code> 透過 <code>...</code> 語法糖，帶到 Variadic Functions 裡</p>
+
+<h3>example 2</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">change</span><span class="p">(</span><span class="nx">s</span> <span class="o">...</span><span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">s</span><span class="p">[</span><span class="mi">0</span><span class="p">]</span> <span class="p">=</span> <span class="s">&quot;Go&quot;</span>
+</span><span class='line'>    <span class="nx">s</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="s">&quot;playground&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span> <span class="c1">// [Go world playground]</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">welcome</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="s">&quot;world&quot;</span><span class="p">}</span>
+</span><span class='line'>    <span class="nx">change</span><span class="p">(</span><span class="nx">welcome</span><span class="o">...</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">welcome</span><span class="p">)</span> <span class="c1">// [Go world]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>一開始是用 slice(reference) 傳入，因此改變值，外面也會跟著改變</li>
+<li>append 則是空間不夠時會建立一個新的 array， 因此不會影響到原來的值</li>
 </ul>
 
 

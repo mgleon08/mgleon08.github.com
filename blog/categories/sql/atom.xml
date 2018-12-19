@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Sql | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/sql/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-09-18T22:06:09+08:00</updated>
+  <updated>2018-12-19T23:47:16+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -20,10 +20,27 @@
     <id>http://mgleon08.github.com/blog/2018/06/14/sql-command</id>
     <content type="html"><![CDATA[<p>最近常常使用 sql，因應各種需求，也發現一些蠻好用的指令~</p>
 
+<ul>
+<li><a href="#FIELD">FIELD</a></li>
+<li><a href="#GROUP_CONCAT">GROUP_CONCAT</a></li>
+<li><a href="#CONCAT">CONCAT</a></li>
+<li><a href="#IFNULL">IFNULL</a></li>
+<li><a href="#CONVERT">CONVERT</a></li>
+<li><a href="#CASE">CASE</a></li>
+<li><a href="#LOWER_UPPER">LOWER() &amp; UPPER()</a></li>
+<li><a href="#AUTO_INCREMENT">AUTO_INCREMENT</a></li>
+<li><a href="#unix_timestamp">unix_timestamp</a></li>
+<li><a href="#BETWEEN">BETWEEN</a></li>
+<li><a href="#Time">Time</a></li>
+<li><a href="#specify_order">specify order</a></li>
+<li><a href="#table_view">Table View</a></li>
+</ul>
+
+
 <!-- more -->
 
 
-<h1>FIELD()</h1>
+<h1><span id="FIELD"> FIELD() <span></h1>
 
 <p>FIELD 會 return 第一個參數的，position</p>
 
@@ -51,7 +68,7 @@ users = User.where(id: user_ids).order("FIELD(id, #{user_ids.join(',')})")
 </ul>
 
 
-<h1>GROUP_CONCAT</h1>
+<h1><span id="GROUP_CONCAT"> GROUP_CONCAT <span></h1>
 
 <p>可以透過 group 將所有的 book 做分類，並且依照分類將 <code>book name</code> group 起來</p>
 
@@ -75,26 +92,26 @@ GROUP BY books.type
 <pre><code class="sql">SELECT GROUP_CONCAT(DISTINCT books.id ORDER BY books.id ASC SEPARATOR ', ') as book_name
 </code></pre>
 
-<h1>CONCAT</h1>
+<h1><span id="CONCAT"> CONCAT <span></h1>
 
 <p>可以將多的 column 串在一起</p>
 
 <pre><code class="sql">CONCAT(字串1, 字串2, 字串3, ...)
 </code></pre>
 
-<h1>IFNULL</h1>
+<h1><span id="IFNULL"> IFNULL <span></h1>
 
 <pre><code class="sql">// 如果x不是NULL(不包含0)，IFNULL()返回x，否則它返回y。
 IFNULL(x, y)
 </code></pre>
 
-<h1>CONVERT</h1>
+<h1><span id="CONVERT"> CONVERT <span></h1>
 
 <pre><code class="sql">// 將時間轉成 date
 CONVERT(created_at, date)
 </code></pre>
 
-<h1>CASE</h1>
+<h1><span id="CASE"> CASE <span></h1>
 
 <p>像 <code>if else</code> 一樣，可以根據條件，給不同的值</p>
 
@@ -107,7 +124,7 @@ CONVERT(created_at, date)
 FROM "表格名";
 </code></pre>
 
-<h1>LOWER() &amp;  UPPER()</h1>
+<h1><span id="LOWER_UPPER"> LOWER() &amp;  UPPER() <span></h1>
 
 <p>將字串轉小寫或大寫</p>
 
@@ -115,12 +132,12 @@ FROM "表格名";
 UPPER("hi");
 </code></pre>
 
-<h1>AUTO_INCREMENT</h1>
+<h1><span id="AUTO_INCREMENT"> AUTO_INCREMENT <span></h1>
 
 <pre><code class="sql">ALTER TABLE `pre_campaign_details_channels` CHANGE `id` `id` INT(11)  NOT NULL  AUTO_INCREMENT , ADD UNIQUE (`id`);
 </code></pre>
 
-<h1>unix_timestamp</h1>
+<h1><span id="unix_timestamp"> unix_timestamp <span></h1>
 
 <p>date 轉成 Unix Timestamp</p>
 
@@ -133,7 +150,7 @@ SELECT unix_timestamp(my_datetime_column) * 1000 as stamp
 
 <p><a href="https://stackoverflow.com/questions/3075577/convert-mysql-datetime-stamp-into-javascripts-date-format">Convert MySql DateTime stamp into JavaScript&rsquo;s Date format</a></p>
 
-<h1>BETWEEN</h1>
+<h1><span id="BETWEEN"> BETWEEN <span></h1>
 
 <p>可以直接指定在某個區段的時間</p>
 
@@ -142,7 +159,52 @@ FROM Store_Information
 WHERE Txn_Date BETWEEN 'Jan-06-1999' AND 'Jan-10-1999';
 </code></pre>
 
-<p><a href="https://www.1keydata.com/tw/sql/sqlbetween.html">SQL Between</a>s</p>
+<p><a href="https://www.1keydata.com/tw/sql/sqlbetween.html">SQL Between</a></p>
+
+<h1><span id="Time"> Time <span></h1>
+
+<pre><code class="sql">SELECT NOW(), CURTIME(), CURDATE(), (CURDATE() - INTERVAL 1 DAY), (CURDATE() - INTERVAL 1 MONTH) 
+-- 2018-09-20 17:20:48  
+-- 17:20:48 
+-- 2018-09-20   
+-- 2018-09-19
+-- 2018-10-20
+-- INTERVAL - 可以將時間去做加減
+</code></pre>
+
+<h1><span id="specify_order"> specify order <span></h1>
+
+<p>指定順序</p>
+
+<pre><code class="sql">SELECT `users`.*
+FROM `users` 
+WHERE `users`.`id` IN (11, 13, 3, 5, 7, 9)  
+ORDER BY 
+  CASE 
+  WHEN `users`.`id`=11 THEN 0 
+  WHEN `users`.`id`=13 THEN 1 
+  WHEN `users`.`id`=9 THEN 2 
+  ELSE 3 END ASC
+</code></pre>
+
+<h1><span id="table_view"> Table View <span></h1>
+
+<p>虛擬表格。它跟表格的不同是，表格中有實際儲存資料，而視觀表是建立在表格之上的一個架構，它本身並不實際儲存資料。</p>
+
+<pre><code class="sql">CREATE VIEW "視觀表名" 
+AS "SQL SELECT 語句";
+</code></pre>
+
+<pre><code class="sql">CREATE VIEW OR REPLACE "視觀表名" 
+AS "SQL SELECT 語句";
+</code></pre>
+
+<ul>
+<li><a href="http://www.codedata.com.tw/database/mysql-tutorial-11-views/">MySQL 超新手入門（11）Views</a></li>
+<li><a href="https://www.1keydata.com/tw/sql/sql-create-view.html">sql-create-view</a></li>
+<li><a href="http://www.runoob.com/sql/sql-view.html">sql-view</a></li>
+</ul>
+
 ]]></content>
   </entry>
   

@@ -1,0 +1,444 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Crawler | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/crawler/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2018-12-19T23:47:16+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Instagram Crawler With API (Ruby 爬蟲)]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/11/19/instagram-crawler-with-api/"/>
+    <updated>2018-11-19T22:19:08+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/11/19/instagram-crawler-with-api</id>
+    <content type="html"><![CDATA[<p>這是換透過分析 Instagram API，取得所有圖片和影片</p>
+
+<!-- more -->
+
+
+<p>根據上一篇 <a href="/blog/2018/11/18/instagram-crawler-with-selenium/1.ins.png">Instagram Crawler with selenium (ruby 爬蟲)</a> 會有幾個問題</p>
+
+<ol>
+<li>因為是操作 browser 所以跟網路速度會有關係，萬一網路斷線或是很慢的話就沒辦法那麼順利爬取</li>
+<li>頁面上的 class 都是亂數，可能是透過編譯自行產生，因此下次 Instagram 重新編譯，可能所有的 class 名稱又都不同了..</li>
+</ol>
+
+
+<p>因此這次換用 API 的方式來爬取 Instagram 的貼文，因為是用 API 所以也不需要去操作 browser，取得對應的 class，也就不會有上述的問題!</p>
+
+<h1>Think</h1>
+
+<h2>分析 API</h2>
+
+<p>首先先觀察一下 Instagram 上面的 API <code>https://www.instagram.com/marvel/</code> (隨便一個都可以)</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/1.ins.png"></p>
+
+<p>可以發現每次進到頁面會 request 三條 API，打開後發現其中一條 API，裡面有我們要的資訊 (<code>edges</code> 就是 API 取回的貼文)</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/2.ins.png"></p>
+
+<p>開始分析裡面的資訊，首先是 API</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/3.ins.png"></p>
+
+<p>會發現後面都會帶兩個參數 <code>query_hash</code> &amp; <code>variables</code> 而 <code>variables</code> 裡面是一個 json 又包了很多資訊</p>
+
+<pre><code class="ruby">{
+  "id":"204633036",
+  "first" 12,
+  "after": "QVFEeDUzd05jNVczMXpMRTNwYzlnYldCM0p4SGIyRmh4Q2VHYy1jZm1sUlRSalY3cVdoUklKWWdBT2RNSjJxc1pZbVBGZlN1REdjUExLMGlOWDhpR0VTcQ=="
+}
+</code></pre>
+
+<blockquote><ul>
+<li>id: 研判應該是 user_id 之類，用來判斷使用者，因為所有 API 所使用的 id 都一樣</li>
+<li>first: 嘗試更換 first 的數字，就可以發現可以要到更多資料，應該是取得數量的設定</li>
+<li>after: 後面的參數，跟 API 裡面的 <code>end_cursor</code> 長度格式都是一樣，研判是用來判斷下一個 API 的參數所用，在 API 裡面還有一個參數是 <code>has_next_page</code>，因此可以確定 <code>has_next_page</code> 是用來判斷是否有下一頁，<code>end_cursor</code> 是下一頁所需要的參數值</li>
+</ul>
+</blockquote>
+
+<pre><code class="ruby">page_info": {
+  "has_next_page": true,
+  "end_cursor":   "QVFDbml1aFJVRkM2QkVJdzRIN1pJTEpMVlpVTl9hdHh0YlBXUDZGRDRDa1NYLUpvX3hBaGlDcXNLSlhud0dma1hBWnNyOG5DWEFjNTNlOEJibXdyaml4Vg=="
+}
+</code></pre>
+
+<p>嘗試將 API 上的 <code>variables</code> 裡的 <code>end_cursor</code> 換成 API 取回來的 <code>end_cursor</code></p>
+
+<p>Request 取得新貼文成功!</p>
+
+<pre><code class="ruby">https://www.instagram.com/graphql/query/?query_hash=50d3631032cf38ebe1a2d758524e3492&amp;variables=%7B%22id%22%3A%22204633036%22%2C%22first%22%3A12%2C%22after%22%3A%22QVFDbml1aFJVRkM2QkVJdzRIN1pJTEpMVlpVTl9hdHh0YlBXUDZGRDRDa1NYLUpvX3hBaGlDcXNLSlhud0dma1hBWnNyOG5DWEFjNTNlOEJibXdyaml4Vg%3D%3D%22%7D
+</code></pre>
+
+<h2>第一個 API?</h2>
+
+<p>接著會發現，每個 API 給的都是下一條 API 的 <code>end_cursor</code>，那第一條呢???</p>
+
+<p>如果希望讓爬蟲自動去爬所有的貼文，而不是還要餵食第一條 API 給它..勢必還是要找到啊..</p>
+
+<p>一開始怎麼找都找不到，最後終於在頁面原始碼找到了 (command + F <code>end_cursor</code>)</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/4.ins.png"></p>
+
+<p>仔細觀察，發現都是包在 <code>window._sharedData</code> 裡面，因此第一條 API 的 <code>end_cursor</code> 就透過爬頁面的 <code>window._sharedData</code> 將參數帶到之前的 API 即可!</p>
+
+<pre><code class="ruby">doc = Nokogiri::HTML(html)
+js_data = doc.at_xpath("//script[contains(text(),'window._sharedData')]")
+</code></pre>
+
+<h2>前 12 個貼文?</h2>
+
+<p>再來會發現，我們已經取得了第一個 API，但是回來的資料，卻是從第 13 個貼文開始，而不是第一個??</p>
+
+<p>原來第一個 API 會是從第 13 個貼文開始，而前 12 個貼文，在剛剛頁面的 <code>window._sharedData</code> 就可以找到!</p>
+
+<p>分析後，如果前面 12 個有包含 video 或是 post，就沒辦法取得影片跟後面的連續圖片，仔細想想在這頁面也並不需要這兩種資訊，於是點貼文之後，會發現 video 和 post 連續圖片就跑出來了</p>
+
+<p>Video 會發現在 <code>property="og:video"</code> 裡面</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/5.ins.png"></p>
+
+<p>Post 則會在 <code>"edges"</code> 底下的 array 裡面</p>
+
+<p><img src="/images/custom/2018-11-19-instagram-crawler-with-api/6.ins.png"></p>
+
+<p>那要怎麼知道貼文的連結?仔細觀察貼文的 url 都是 <code>https://www.instagram.com/p/BqAlq0wh9wV/</code> 看起來只要得到後面那段亂碼，就可以取得連結，接著就來看看
+<code>window._sharedData</code> 裡面是否找得到</p>
+
+<p>command + F <code>BqAlq0wh9wV</code>，就可以找到 <code>shortcode":"BqAlq0wh9wV"</code>，判斷 shortcode 應該就是每個貼文的代碼，這樣就可以進到每個頁面，各自取得相關的資訊</p>
+
+<h2>策略</h2>
+
+<p>由上面分析過後，我們的策略就是前 12 個貼文，透過爬 html 來取得，第 13 個貼文開始，就透過 API 來取得!</p>
+
+<h2>Data</h2>
+
+<p>資料基本上都是在 edges 的 node 裡面</p>
+
+<h3>HTML</h3>
+
+<pre><code class="ruby"># json = window._sharedData 裡面內容
+page_info = json["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]['page_info']
+edges     = json["entry_data"]["ProfilePage"][0]["graphql"]["user"]["edge_owner_to_timeline_media"]["edges"]
+</code></pre>
+
+<pre><code class="ruby">edges.each do |edge|
+  node = edge["node"]
+  page_url = "https://www.instagram.com/p/#{node["shortcode"]}/"
+
+  if node["is_video"]
+     # VIDEO
+    url = Html.new(page_url).video_page
+  else
+    shortcode_media = Html.new(page_url).photo_page
+    if shortcode_media.is_a? Array
+      # POST
+      shortcode_media.each do |post|
+        url = post["node"]["display_url"]
+     end
+    else
+      # PHOTO
+      url = shortcode_media
+    end
+  end
+end
+</code></pre>
+
+<pre><code class="ruby">def video_page
+  doc    = Nokogiri::HTML(html)
+  meta_v = doc.at_xpath("//meta[@property='og:video']")
+  url    = meta_v.attribute_nodes.last.value
+end
+</code></pre>
+
+<pre><code class="ruby">def photo_page
+  doc       = Nokogiri::HTML(html)
+  js_data   = doc.at_xpath("//script[contains(text(),'window._sharedData')]")
+  json      = JSON.parse(js_data.text[21..-2])
+  shortcode_media = json["entry_data"]["PostPage"][0]["graphql"]["shortcode_media"]
+
+  if shortcode_media["edge_sidecar_to_children"]
+  # POST
+    shortcode_media["edge_sidecar_to_children"]["edges"]
+  else
+  # PHOTO
+    shortcode_media["display_url"]
+  end
+end
+</code></pre>
+
+<h2>API</h2>
+
+<pre><code class="ruby">page_info = json["data"]["user"]["edge_owner_to_timeline_media"]["page_info"]
+edges = json["data"]["user"]["edge_owner_to_timeline_media"]["edges"]
+</code></pre>
+
+<pre><code class="ruby">edges.each do |edge|
+  node = edge["node"]
+  if node["is_video"]
+  # VIDEO
+    url = node["video_url"]
+  elsif !node["edge_sidecar_to_children"].nil?
+  # POST
+    posts.each do |post|
+      url = post["node"]["display_url"]
+   end
+  else
+  # PHOTO
+    url = node["display_url"]
+  end
+end
+</code></pre>
+
+<h1>Ruby Gem</h1>
+
+<p>以上是 Instagram 爬蟲邏輯和概念，最後這邊做成一個 gem 可以直接使用!</p>
+
+<ul>
+<li><a href="https://github.com/mgleon08/instagram-crawler">instagram-crawler</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Instagram Crawler With Selenium (Ruby 爬蟲)]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/11/18/instagram-crawler-with-selenium/"/>
+    <updated>2018-11-18T21:55:00+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/11/18/instagram-crawler-with-selenium</id>
+    <content type="html"><![CDATA[<p>透過模擬瀏覽器行為，取得 Instagram 所有圖片和影片!</p>
+
+<!-- more -->
+
+
+<p>一般常見的 crawler，只要透過 http request，把 html 拉回來，就可以直接爬上面的原始碼</p>
+
+<p>但現在很多網頁都是透過 frontend 透過 API 拉資料，在用 javascript 去做動態 render，導致直接拉 html 也拉不到什麼東西。</p>
+
+<p>因此改用模擬 browser 的行為，讓它將 html 都長出來，再去爬裡面的資料。</p>
+
+<h1><a href="https://github.com/SeleniumHQ/selenium">selenium</a></h1>
+
+<blockquote><p>A browser automation framework and ecosystem</p></blockquote>
+
+<p>簡單的來說就是可以透過程式，直接驅動瀏覽器進行各種網站操作，透過這個 WebDriver  就可以讓頁面長出資料後，再把要的資料爬出來!</p>
+
+<h1>WebDriver</h1>
+
+<p>一開始要先安裝 WebDriver，根據你要用的 browser 去安裝對應的 WebDriver，像我基本上都是用 Chrome，因此就要去安裝 <a href="https://github.com/SeleniumHQ/selenium/wiki/ChromeDriver">ChromeDriver</a>，比較簡單方式是直接執行</p>
+
+<pre><code>brew tap homebrew/cask &amp;&amp; brew cask install chromedriver
+</code></pre>
+
+<h1>Think</h1>
+
+<p>接著就開始分析要如何透過它來爬 instagram 頁面，這裡就用比較常用的 ruby 來講解。</p>
+
+<p>用 ruby 來爬的話首先都會想到用 <a href="https://github.com/sparklemotion/nokogiri">nokogiri</a>，之前也有介紹過 <a href="https://mgleon08.github.io/blog/2016/02/07/ruby-crawler/">用 Ruby 做網頁爬蟲</a>，但這次必須模擬 browser 行為，因此改用 <a href="https://github.com/watir/watir">watir</a>，watir 是一個已經整合 selenium 的 ruby gem，那現在來開始了。</p>
+
+<p>首先先隨便找一個頁面來觀察，</p>
+
+<h2>一. 關閉不需要的區塊</h2>
+
+<pre><code class="ruby">browser = Watir::Browser.new
+browser.goto('https://www.instagram.com/marvel/')
+</code></pre>
+
+<p>一開始會開一個全新的頁面，沒有 login，這時候下方會有個 login 的區塊，先找出關閉的button，並先將其關閉(避免影響瀏覽器操作)</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/1.ins.png"></p>
+
+<pre><code class="ruby"># find close login button
+close_login_button = browser.button(class: ["Ls00D", "coreSpriteDismissLarge", "Jx1OT"])
+# click close login button
+close_login_button.click if close_login_button.exist?
+</code></pre>
+
+<h2>二. 解析</h2>
+
+<p>接著觀察在 instagram 裡面，每一行<code>&lt;div class="Nnq7C weEfm"&gt;&lt;/div&gt;</code>都有 3 個 po 文 <code>&lt;div class="v1Nh3 kIKUG _bz0w"&gt;&lt;/div&gt;</code>，而每個貼文的資訊就在  裡面，因此我們要的資訊都會在這裡頭</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/2.ins.png"></p>
+
+<pre><code class="ruby"># find all post div
+items = browser.divs(class:["v1Nh3", "kIKUG", "_bz0w"])
+</code></pre>
+
+<p>裡面的資訊又分為 Photo, Video, Post，那要怎麼分辨這三個?</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/3.ins.png"></p>
+
+<p>首先注意到右上角除了單一 Photo，就會有個 icon，再仔細看 Video 跟 Post 的 icon 的 class 不同，所以判斷就如下</p>
+
+<ul>
+<li>Photo: 沒有 <code>&lt;div class="u7YqG"&gt;&lt;/div&gt;</code></li>
+<li>Video: 有 <code>&lt;div class="u7YqG"&gt;&lt;/div&gt;</code>，並且裡面有 <code>&lt;div class="Byj2F"&gt;&lt;/div&gt;</code></li>
+<li>Post: 有 <code>&lt;div class="u7YqG"&gt;&lt;/div&gt;</code>，並且裡面有 <code>&lt;div class="qFq_l"&gt;&lt;/div&gt;</code></li>
+</ul>
+
+
+<p>接著知道在哪後就要取得對應資訊</p>
+
+<h3>Photo</h3>
+
+<p>找到對應的 div 之後，取得 div 底下 image 的 src 即可。</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/4.ins.png"></p>
+
+<pre><code class="ruby">dom = browser.div(class: ["_97aPb"]).div(class: ["KL4Bh"])
+image_src = dom.img.src
+</code></pre>
+
+<h3>Video</h3>
+
+<p>Video 在找到對應的 dom，之後發現並沒有 video 相關的資訊，因為這個頁面只有 Video 的封面，並沒有實際在播放影片，因此必須打開影片的播放頁面，才能找到對應的檔案位置</p>
+
+<p>因此先操作 browser 去打開影片頁面，並爬裡面的 html，發現在 <code>&lt;video class="tWeCl"&gt;&lt;/video&gt;</code> 裡面</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/5.ins.png"></p>
+
+<pre><code class="ruby">video_src = browser.video(class: "tWeCl").src
+</code></pre>
+
+<h3>Post</h3>
+
+<p>跟 Video，在該頁面只能找到第一張，無法找到後面其他圖片，因此也打開 Post 的頁面去爬，接著找到放在 <code>&lt;li class="_-1_m6"&gt;&lt;/li&gt;</code> 裡面</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/6.ins.png"></p>
+
+<pre><code class="ruby">browser.div(class: ["_2dDPU", "vCf6V"]).lis(class: ["_-1_m6"])
+</code></pre>
+
+<p>但這邊有個問題，會發現第三個之後，並沒有箭頭可以往下展開，需要點往右的箭頭，滑動圖片，才會接著展開，因此每次都必須點往右的箭頭，一個一個爬，直到最後一張</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/7.ins.png"></p>
+
+<pre><code class="ruby">post_src = []
+lis.each.with_index(1) do |post, index|
+  post_src &lt;&lt; post.img.src
+  # 還沒到最後一張就按一下圖片右鍵
+  browser.button(class: ["  _6CZji"]).click if index &lt; lis.size
+end
+</code></pre>
+
+<p>記得 Video &amp; Post 打開貼文後要關閉才能繼續找下一張!</p>
+
+<h2>三. 迴圈</h2>
+
+<p>接著會發現上面的 <code>&lt;div class="v1Nh3 kIKUG _bz0w"&gt;&lt;/div&gt;</code> 數量，跟實際上的貼文數量，是不成比例，但只要往下滑就會發現，div 的數量會不斷增加</p>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/8.ins.png"></p>
+
+<p>因此接著就是要操作 browser 往下滑到最後，讓頁面載入新的 div 進來</p>
+
+<pre><code class="ruby">browser.execute_script("window.scrollTo(0, document.body.scrollHeight);")
+sleep(5) # 讓頁面讀取一下資訊
+</code></pre>
+
+<p>並且要判斷何時滑到最下面，這邊直接取回頁面的高度，每滑一次，爬完，在滑一次時，判斷是否高度跟上次一樣，一樣就代表已經到最底了</p>
+
+<pre><code class="ruby">begin
+  scrollHeight = new_scrollHeight
+  new_scrollHeight = browser.execute_script("return document.body.scrollHeight")
+end while (new_scrollHeight - scrollHeight) != 0
+</code></pre>
+
+<p>接著就是就是無限迴圈直到滑到最下面就停止。</p>
+
+<h2>Preview</h2>
+
+<p><img src="/images/custom/2018-11-18-instagram-crawler-with-selenium/9.ins.gif"></p>
+
+<h2>Other</h2>
+
+<ol>
+<li>因為是操作 browser 所以跟網路速度會有關係，最好的方式是在每次要讀取新頁面時，先暫停讓頁面讀取再繼續下一步</li>
+<li>頁面上的 class 都是亂數，可能是透過編譯自行產生，因此下次 Instagram 重新編譯，可能所有的 class 名稱又都不同了..</li>
+<li>另外如果不希望打開 browser 可以使用 headless 模式</li>
+</ol>
+
+
+<pre><code class="ruby">Watir::Browser.new :chrome, headless: true
+</code></pre>
+
+<h2>example</h2>
+
+<p><a href="https://github.com/mgleon08/instagram_crawler_with_selenium">instagram_crawler_with_selenium</a></p>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://github.com/watir/watir">watir</a></li>
+<li><a href="https://readysteadycode.com/howto-scrape-websites-with-ruby-and-watir">HOWTO scrape websites with Ruby &amp; Watir</a></li>
+<li><a href="https://readysteadycode.com/howto-decide-which-ruby-web-scraping-library-to-use">HOWTO decide which Ruby web scraping library to use</a></li>
+<li><a href="https://www.seleniumhq.org/">seleniumhq</a></li>
+<li><a href="https://sites.google.com/a/chromium.org/chromedriver/downloads">ChromeDriver - WebDriver for Chrome</a></li>
+<li><a href="https://www.youtube.com/watch?v=1UYBAn69Qrk&amp;feature=youtu.be&amp;t=4m24s">The Ultimate Introduction to Web Scraping and Browser Automation</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[用 Ruby 做網頁爬蟲]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/07/ruby-crawler/"/>
+    <updated>2016-02-07T15:21:59+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/07/ruby-crawler</id>
+    <content type="html"><![CDATA[<p>網頁爬蟲是一個蠻常聽到的名詞，簡單的來說就是可以透過程式，去分析網站頁面，將想要的資訊抓下來!</p>
+
+<!-- more -->
+
+
+<h3>wget</h3>
+
+<p>command line 下載檔案的指令<br/>
+mac 本身沒有內建要另外安裝。</p>
+
+<pre><code>brew install wget
+</code></pre>
+
+<pre><code class="ruby">require "open-uri" #open-uri 把一個網頁當一個檔案來打開 stb-lib
+require "nokogiri" #解析 html gem
+
+html = open("http://ezprice.com.tw/").read
+doc = Nokogiri::HTML(html)
+ans = []
+
+doc.search('img').each do |i|
+  ans &lt;&lt; i.attr('src')
+end
+
+#將相對路徑改成絕對路徑
+temp_ans = ans.map do 
+  |url| url.match(/^http/) ? url : "http://ezprice.com.tw/#{url}"
+end
+
+#透過 wget 下載檔案到目前的資料夾
+temp_ans.each do |full_url|
+  `wget #{full_url}`
+end
+</code></pre>
+
+<p><code>open-uri</code> 只能一個網址<br/>
+<code>curb</code> 比較豐富</p>
+
+<p>官方文件：<br/>
+<a href="http://ruby-doc.org/stdlib-2.3.0/libdoc/open-uri/rdoc/index.html">open-uri</a><br/>
+<a href="http://www.nokogiri.org/">nokogiri</a></p>
+
+<p>參考文件：<br/>
+<a href="https://www.youtube.com/watch?v=6XUnYRB0Zpo&amp;list=PLJ6M-k9dQEQ3VsyOZQwjZ5GdjaLJH3eB_">RailsFun</a><br/>
+<a href="http://tonytonyjan.net/slides/2014-07-03-simple-crawler/">Ruby Crawler 輕輕鬆鬆做個 Ruby 爬蟲機器人</a><br/>
+<a href="http://yukaihuang93.logdown.com/posts/243459/how-to-write-web-crawler-for-the-first-time-using-ruby">第十一篇 - 第一次自幹爬蟲就上手 - 使用 Ruby</a></p>
+]]></content>
+  </entry>
+  
+</feed>
