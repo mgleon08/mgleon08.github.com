@@ -190,3 +190,4 @@ Gem
 * [Speed Up Your Rails App by 66% - The Complete Guide to Rails Caching](https://www.nateberkopec.com/2015/07/15/the-complete-guide-to-rails-caching.html)
 * [Accelerating Rails, Part 1: Built-in Caching](https://www.fastly.com/blog/accelerating-rails-part-1-built-caching)
 * [Accelerating Rails, Part 2: Dynamic HTTP Caching](https://www.fastly.com/blog/accelerating-rails-part-2-dynamic-http-caching)
+* [[不是工程師] 讓網站速度飛快的秘密，你瞭解什麼是網頁快取(Cache)嗎?](https://progressbar.tw/posts/93)

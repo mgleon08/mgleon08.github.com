@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Golang - function"
+title: "Golang - function, packages"
 date: 2018-05-02 18:20:11 +0800
 comments: true
 categories: golang
@@ -10,9 +10,12 @@ categories: golang
 
 * [函式 function](#function)
   * [匿名函式 Anonymous function](#anonymous)
-  * [Higher-order functionsn](#higher_order_functions)s
-  * [閉包函式 Closure function](#closure) 
+  * [Defined function types](#types)
+  * [Higher-order functionsn](#higher_order_functions)
+  * [閉包函式 Closure function](#closure)
   * [初始化函式 Init function ](#init)
+  * [Practical use of first class functions](#first_class_function)
+* [packages](#packages)
 
 # <span id="function">函式 function</span>
 
@@ -90,17 +93,17 @@ func main() {
     fmt.Println("10. Hi " + name)
   }
 
-  foo1("foo1")                     
-  foo2("foo2", "bar2")             
-  foo3("foo3", "bar3")             
-  fmt.Println("4.", foo4("foo4"))  
-  fmt.Println("5.", foo5("foo5")) 
+  foo1("foo1")
+  foo2("foo2", "bar2")
+  foo3("foo3", "bar3")
+  fmt.Println("4.", foo4("foo4"))
+  fmt.Println("5.", foo5("foo5"))
   a6, b6 := foo6(1, 2)
   fmt.Println("6.", a6, b6)
   fmt.Println("7.", foo7(1, 2, 3))
   nums := []int{1, 2, 3, 4}
-  fmt.Println("8.", foo8(nums))   
-  fmt.Println("9.", foo9()())      
+  fmt.Println("8.", foo8(nums))
+  fmt.Println("9.", foo9()())
   foo10("foo10")
 }
 
@@ -187,6 +190,34 @@ Welcome Gophers
 ```go
 package main
 
+import (
+    "fmt"
+)
+
+type add func(a int, b int) int
+
+func main() {
+    var a add = func(a int, b int) int {
+        return a + b
+    }
+    s := a(5, 6)
+    fmt.Println("Sum", s)
+}
+
+// Sum 11
+```
+
+### <span id="types"> Defined function types </span>
+
+像定義 struct type 一樣，也可以定義 func type
+
+```go
+type add func(a int, b int) int  
+```
+
+```go
+package main
+
 import (  
     "fmt"
 )
@@ -200,8 +231,6 @@ func main() {
     s := a(5, 6)
     fmt.Println("Sum", s)
 }
-
-// Sum 11
 ```
 
 ### <span id="higher_order_functions"> Higher-order functions </span>
@@ -214,15 +243,16 @@ Passing functions as arguments to other functions
 ```go
 package main
 
-import (  
+import (
     "fmt"
 )
 
-func simple(a func(a, b int) int) {  
+// 變數 a，type 是 a func(a, b int) int
+func simple(a func(a, b int) int) {
     fmt.Println(a(60, 7))
 }
 
-func main() {  
+func main() {
     f := func(a, b int) int {
         return a + b
     }
@@ -235,18 +265,18 @@ Returning functions from other functions
 ```go
 package main
 
-import (  
+import (
     "fmt"
 )
 
-func simple() func(a, b int) int {  
+func simple() func(a, b int) int {
     f := func(a, b int) int {
         return a + b
     }
     return f
 }
 
-func main() {  
+func main() {
     s := simple()
     fmt.Println(s(60, 7))
 }
@@ -301,11 +331,11 @@ func main() {
 ```go
 package main
 
-import (  
+import (
     "fmt"
 )
 
-func appendStr() func(string) string {  
+func appendStr() func(string) string {
     t := "Hello"
     c := func(b string) string {
         t = t + " " + b
@@ -314,7 +344,7 @@ func appendStr() func(string) string {
     return c
 }
 
-func main() {  
+func main() {
     a := appendStr()
     b := appendStr()
     fmt.Println(a("World"))
@@ -420,7 +450,269 @@ test3 x= 55 y= 89
 **/
 ```
 
+### <span id="first_class_function"> Practical use of first class functions </span>
+
+> What are first class functions?
+> 
+> A language which supports first class functions allows functions to be assigned to variables, passed as arguments to other functions and returned from other functions. Go has support for first class functions.
+
+```go
+package main
+
+import (  
+    "fmt"
+)
+
+type student struct {  
+    firstName string
+    lastName  string
+    grade     string
+    country   string
+}
+
+func filter(s []student, f func(student) bool) []student {  
+    var r []student
+    for _, v := range s {
+        if f(v) == true {
+            r = append(r, v)
+        }
+    }
+    return r
+}
+
+func main() {  
+    s1 := student{
+        firstName: "Naveen",
+        lastName:  "Ramanathan",
+        grade:     "A",
+        country:   "India",
+    }
+    s2 := student{
+        firstName: "Samuel",
+        lastName:  "Johnson",
+        grade:     "B",
+        country:   "USA",
+    }
+    s := []student{s1, s2}
+    f := filter(s, func(s student) bool {
+        if s.grade == "B" {
+            return true
+        }
+        return false
+    })
+    
+    // 透過此方式，可以很輕易更改 filter 的條件，例如改成 country
+    fmt.Println(f)
+}
+
+// [{Samuel Johnson B USA}]
+```
+
+```go
+package main
+
+import (  
+    "fmt"
+)
+
+func iMap(s []int, f func(int) int) []int {  
+    var r []int
+    for _, v := range s {
+        r = append(r, f(v))
+    }
+    return r
+}
+func main() {  
+    a := []int{5, 6, 7, 8, 9}
+    r := iMap(a, func(n int) int {
+        return n * 5
+    })
+    fmt.Println(r)
+}
+// [25 30 35 40 45]
+```
+
+# <span id="packages"> packages </span>
+
+```
+package test
+```
+
+宣告程式屬於哪個 `package`，所有的 go 檔案都必須聲明，要 import 這個檔案時，就必須使用 `test` 這個名稱。
+
+而 go 又分兩種專案
+
+* 執行檔 (executable)
+* 函式庫 (library)
+
+執行檔一定要宣告為 `main` 套件
+
+```go
+// 沒聲明 main 會顯示
+go run: cannot run non-main package
+```
+
+main 是一個比較特殊的 package，
+
+> Package main is special. It defines a standalone executable program, not a library. Within package main the function main is also special—it’s where execution of the program begins. Whatever main does is what the program does.
+
+因此一定要有個 `main` package 當作是程式入口
+
+* [PackageNames](https://golang.org/doc/code.html#PackageNames)
+* [Program_execution](https://golang.org/ref/spec#Program_execution)
+* [Package “main” and func “main”](https://stackoverflow.com/questions/42333488/package-main-and-func-main)
+
+
+### Custom Package
+
+目錄結構
+
+```go
+src/
+└── geometry
+		├── geometry.go
+		└── rectangle
+				└── rectprops.go
+
+// go install geometry 產生的執行檔會放以下路徑
+bin/
+└── geometry
+```
+
+```go
+//geometry.go
+package main
+
+import (
+    "fmt"
+    "geometry/rectangle" //importing custom package
+)
+
+func main() {
+    var rectLen, rectWidth float64 = 6, 7
+    fmt.Println("Geometrical shape properties")
+        /*Area function of rectangle package used
+        */
+    fmt.Printf("area of rectangle %.2f\n", rectangle.Area(rectLen, rectWidth))
+        /*Diagonal function of rectangle package used
+        */
+    fmt.Printf("diagonal of the rectangle %.2f ",rectangle.Diagonal(rectLen, rectWidth))
+}
+```
+
+* 記得檔案要放在 `$GOPATH/src` 底下，預設會去抓這底下的 `src/geometry/rectangle`
+* 在 rectangle 資料夾底下的檔案，package 都必須是 rectangle
+* 要 export 的變數都必須是大寫開頭，如以下 `Area` `Diagonal`，改成 `area` `diagonal` 就會變成 private method
+
+```go
+//rectprops.go
+package rectangle
+
+import "math"
+
+func Area(len, wid float64) float64 {
+    area := len * wid
+    return area
+}
+
+func Diagonal(len, wid float64) float64 {
+    diagonal := math.Sqrt((len * len) + (wid * wid))
+    return diagonal
+}
+```
+
+### init function
+
+每個 package 都可以有多個 `init(){}`，並且是一開始就會執行
+
+```go
+func init() {
+}
+```
+
+執行的順序為
+
+1. Package level variables are initialised first
+2. init function is called next. A package can have multiple init functions (either in a single file or distributed across multiple files) and they are called in the order in which they are presented to the compiler.
+
+```go
+//geometry.go
+package main
+
+import (
+    "fmt"
+    "geometry/rectangle" //importing custom package
+    "log"
+)
+/*
+ * 1. package variables
+*/
+var rectLen, rectWidth float64 = 6, 7
+
+/*
+*2. init function to check if length and width are greater than zero
+*/
+func init() {
+    println("main package initialized")
+    if rectLen < 0 {
+        log.Fatal("length is less than zero")
+    }
+    if rectWidth < 0 {
+        log.Fatal("width is less than zero")
+    }
+}
+
+func main() {
+    fmt.Println("Geometrical shape properties")
+    fmt.Printf("area of rectangle %.2f\n", rectangle.Area(rectLen, rectWidth))
+    fmt.Printf("diagonal of the rectangle %.2f ",rectangle.Diagonal(rectLen, rectWidth))
+}
+```
+
+import 其他 package 時，就會執行該 package `init(){}`
+
+有時候只是為了 `init(){}` 並不是真的要使用該 package 就可以用 `_` 來代替
+
+```go
+import(
+	_ "fmt"
+)
+```
+
+* import 只能指定資料夾，無法指定檔案
+* 同一個資料夾底下只能有一個 package，指的是 test 資料夾裡面所有的 package 都會是 test
+
+```go
+// 引入套件，多個可以加括號 ()
+import "fmt"
+
+// 希望使用匯入的套件，是為了要觸發那個套件的 init func 而引用的話，可以在前面加上一個底線 _
+import _ math
+
+// 如果名字有衝突可以加上 neko
+import (
+    "github.com/test1/teameow"
+    neko "github.com/test2/teameow"
+)
+
+// 當前文件同一目錄的 model 目錄，但是不建議這種方式 import
+import "./test"
+
+// 載入 GOPATH/src/test1/teameow 模組
+import "github.com/test1/teameow"
+
+// 點操作
+import(
+    . "fmt" // 可以使 fmt.Println("Hi") 省略為 Println("Hi")
+)
+
+// 別名操作
+import(
+    f "fmt" // 就可以改為用 f 來呼叫，f.Println("Hi")
+)
+```
+
 參考文件:
 
 * [[golangbot.com] functions](https://golangbot.com/functions/)
-* [[golangbot.com] functions](https://golangbot.com/packages/)
+* [[golangbot.com] packages](https://golangbot.com/packages/)

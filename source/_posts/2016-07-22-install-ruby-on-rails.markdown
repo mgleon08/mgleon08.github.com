@@ -99,6 +99,9 @@ brew install redis
 redis-server --daemonize yes
 redis-server &
 
+#清除
+redis-cli flushall
+
 #imagemagick
 brew install imagemagick
 gem install rmagick
@@ -646,16 +649,27 @@ CSScomb
 
 ```js
 {
-  "editor.tabSize": 2,
-  "editor.renderControlCharacters": true,
-  "editor.renderWhitespace": "all",
-  "prettier.semi": false,
-  "prettier.singleQuote": true,
-  "prettier.trailingComma": "none",
-  "prettier.printWidth": 120,
-  "files.trimTrailingWhitespace": true,
-  "editor.wordWrap": true,
-  "vetur.format.defaultFormatter.html": "js-beautify-html"
+  "window.zoomLevel": 1, // 調整視窗的縮放比例。原始大小為 0
+  "editor.fontSize": 12, // 字型大小
+  "editor.renderControlCharacters": true, // 顯示控制字元
+  "editor.renderWhitespace": "all", // 顯示空白字元
+  "editor.tabSize": 2, // 預設縮排
+  "editor.minimap.enabled": true, // 顯示 MiniMap
+  "editor.minimap.renderCharacters": false, // MiniMap 不渲染實際字元
+  "editor.formatOnSave": false, // 存擋時不進行排版
+  "[go]": {
+    "editor.tabSize": 4 // golang 縮排 4 格
+  },
+  "editor.renderIndentGuides": true, // 顯示縮排線
+  "editor.wordWrap": "off", // 文字過長換行
+  "files.trimTrailingWhitespace": true, // 檔案最後面留空格
+  "breadcrumbs.enabled": true, // 顯示麵包屑
+  "prettier.semi": false, // 結束是否加分號
+  "prettier.singleQuote": true, // 單引號
+  "prettier.trailingComma": "none",  // 屬性後新增逗號
+  "prettier.printWidth": 120, // 行寬
+  "vetur.format.defaultFormatter.html": "prettyhtml",
+  "explorer.openEditors.visible": 1 // 設定已開啟的頁面是否顯示於左側
 }
 ```
 
@@ -691,7 +705,7 @@ command + K + C
 // Remove Comment One Line
 command + K + U
 // Select All Occurrences of Find Match
-command + shift + Ls
+command + shift + L
 // open terminal
 control + `
 ```

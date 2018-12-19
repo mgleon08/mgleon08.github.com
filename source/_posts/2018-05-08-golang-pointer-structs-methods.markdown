@@ -15,20 +15,24 @@ categories: golang
 	* [Nested structs](#nested_structs)
 	* [Promoted fields](#promoted_fields)
 	* [New struct](#new_struct)
+	* [Structs Equality](#equality)
 	* [組合 combination](#combination)
 	* [建構子 Constructors](#constructors)
 * [方法 methods](#methods)
 	* [Pointer receivers](#pointer_receivers)
+	* [receivers in methods vs arguments in functions](#receivers)
 	* [function use pointer or value ??](#pointer_or_value)
 
 # <span id="pointer">指標 Pointer</span>
 
-> A pointer holds the memory address of a value  
+> A pointer holds the memory address of a value
 > 將變數直接指向記憶體位置就叫做Pointer，要修改內容就直接到該記憶體位置修改
 
-* The type `*T` is a pointer to a T value. Its zero value is nil.
+* The type `*T` is a pointer to a T value. Its zero value is `nil`.
 * The `&` operator generates a pointer to its operand.
 * Do not pass a pointer to an array as a argument to a function. Use slice instead.
+* Go does not support pointer arithmetic(pointer 位置運算)
+* 使用 value receivers，function 會用 copy 的方式，並且改不到原本的值，pointer receivers 則會使用 reference 且會改到原本的值，比較不會浪費記憶體
 
 ```go
 package main
@@ -43,14 +47,15 @@ func main() {
 	fmt.Printf("Type of p is %T\n", p)
 	fmt.Printf("Type of &i is %T\n", &i)
 	fmt.Println("p =", p) // The zero value of a pointer is nil
-	
+
 	p = &i          // 將 p 指到 i 的記憶體位置
 	fmt.Println("p =", p)  // p 所指到的記憶體位置，就是i
 	fmt.Println("&p =", &p) // p 的記憶體位置
 	fmt.Println("*p =", *p) // '*' 代表透過 pointer 顯示該記憶體位置的值
-	
+
 	*p = 20         // 透過 pointer 寫入 i 的值
 	fmt.Println("*p =", *p)
+	fmt.Println("i =", i)
 }
 
 /**
@@ -61,6 +66,7 @@ p = 0x10414020
 &p = 0x1040c128
 *p = 8
 *p = 20
+i = 20
 **/
 // 當用 * 宣告為指標時，必須再去指向記憶體位置 &
 ```
@@ -172,6 +178,34 @@ func main() {
 // Employee 3 {Andreah Nikola 31 5000}
 ```
 
+### Anonymous fields
+
+`Anonymous fields` 因為沒有 name，預設會將 type 當作是自己的 name
+
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+type Person struct {
+    string
+    int
+}
+
+func main() {
+    var p Person
+    // or p := Person{"Naveen", 50}
+    p.string = "leon"
+    p.int = 50
+    fmt.Println(p)
+}
+
+// {leon 50}
+```
+
 ### <span id="pointers_to_structs"> Pointers to structs </span>
 
 ```go
@@ -214,21 +248,21 @@ func main() {
 ```go
 package main
 
-import (  
+import (
     "fmt"
 )
 
-type Address struct {  
+type Address struct {
     city, state string
 }
 
-type Person struct {  
+type Person struct {
     name string
     age int
     address Address
 }
 
-func main() {  
+func main() {
     var p Person
     p.name = "Naveen"
     p.age = 50
@@ -251,28 +285,28 @@ State: Illinois
 ```
 
 
-### <span id="promoted_fields"> Promoted fields </span> 
+### <span id="promoted_fields"> Promoted fields </span>
 
-當 struct 裡面有 `anonymous struct`，那該 `anonymous struct` 的 field 就叫做 `promoted fields`
+當 struct 裡面有 `anonymous struct field`，就叫做 `promoted fields`
 
 ```go
 package main
 
-import (  
+import (
     "fmt"
 )
 
-type Address struct {  
+type Address struct {
     city, state string
 }
 
-type Person struct {  
+type Person struct {
     name string
     age  int
-    Address // anonymous struct
+    Address // anonymous struct field 因此 name 就會是 Address
 }
 
-func main() {  
+func main() {
     var p Person
     p.name = "Naveen"
     p.age = 50
@@ -311,6 +345,46 @@ func main() {
 
 // &{0 0}
 // &{11 9}
+```
+
+### <span id="equality"> Structs Equality </span>
+
+如果 structs 的 fields 是相等的話，就可以比較，還有裡面的 type 是可以比較的(像是  maps 就無法做比較)
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+type name struct {
+    firstName string
+    lastName string
+}
+
+
+func main() {
+    name1 := name{"Steve", "Jobs"}
+    name2 := name{"Steve", "Jobs"}
+    if name1 == name2 {
+        fmt.Println("name1 and name2 are equal")
+    } else {
+        fmt.Println("name1 and name2 are not equal")
+    }
+
+    name3 := name{firstName:"Steve", lastName:"Jobs"}
+    name4 := name{}
+    name4.firstName = "Steve"
+    if name3 == name4 {
+        fmt.Println("name3 and name4 are equal")
+    } else {
+        fmt.Println("name3 and name4 are not equal")
+    }
+}
+
+// name1 and name2 are equal
+// name3 and name4 are not equal
 ```
 
 ### <span id="combination">組合 combination</span>
@@ -356,7 +430,7 @@ type website struct {
 }
 
 func (w website) contents() {
-	fmt.Println("Contents of Website\n")
+	fmt.Println("Contents of Website")
 	for _, v := range w.posts {
 		v.details()
 		fmt.Println()
@@ -422,7 +496,7 @@ func main() {
 	b.show() // 輸出：foobar
 }
 
-// foobar 
+// foobar
 ```
 
 ##### Example 2
@@ -431,7 +505,7 @@ func main() {
 // employee/employee.go
 package employee
 
-import (  
+import (
     "fmt"
 )
 
@@ -442,23 +516,23 @@ type employee struct {  // 改成小寫，不需要外面呼叫，必須都要�
     leavesTaken int
 }
 
-func New(firstName string, lastName string, totalLeave int, leavesTaken int) employee {  
+func New(firstName string, lastName string, totalLeave int, leavesTaken int) employee {
     e := employee {firstName, lastName, totalLeave, leavesTaken}
     return e
 }
 
-func (e employee) LeavesRemaining() {  
+func (e employee) LeavesRemaining() {
     fmt.Printf("%s %s has %d leaves remaining", e.firstName, e.lastName, (e.totalLeaves - e.leavesTaken))
 }
 ```
 
 ```go
 // main.go
-package main  
+package main
 
 import "oop/employee"
 
-func main() {  
+func main() {
     e := employee.New("Sam", "Adolf", 30, 20)
     e.LeavesRemaining()
 }
@@ -476,7 +550,7 @@ Golang 中 structs 的成員還有方法都是在 structs 外面所定義的
 
 * golang 並不完全屬於[物件導向語言](https://golang.org/doc/faq#Is_Go_an_object-oriented_language)，但是透過 methods 和 types 使行為像 class 一樣
 * function 可以達成跟 methods 一樣的方法，但是 function 不允許有同樣的名稱，methods 可以，只要是不同的 struct
-* function 通常只接收一種接受者 receiver，但 methods 可以接受 `value receiver` & `pointer receiver`s
+* function 通常只接收一種接受者 receiver，但 methods 可以接受 `value receiver` & `pointer receiver`
 
 ```go
 // 定義
@@ -650,6 +724,12 @@ func main() {
 ### Methods and pointer indirection
 
 ```go
+package main
+
+import (
+	"fmt"
+)
+
 type Vertex struct {
   X, Y float64
 }
@@ -682,7 +762,7 @@ func main() {
   ScaleFunc(p, 8)
 
   fmt.Println(v, p)
-  
+
   a := Vertex{3, 4}
   fmt.Println(a.Abs())
   fmt.Println(AbsFunc(a))
@@ -697,6 +777,131 @@ func main() {
 // 7
 // 7
 // 7
+```
+
+### <span id="receivers"> receivers in methods vs arguments in functions </span>
+
+* When a function has a `value/point argument`, it will accept only a value argument.
+* When a method has a `value/point` receiver, it will accept both pointer and value receivers.
+
+> * 原因是在於 `p.area()` 會自動解讀為 `(*p).area()`，因此實際上 value receiver 也是只能接收 value
+> * 而 Pointer receivers 也是一樣 `r.perimeter()` 會解讀為 `(&r).perimeter()`
+
+##### value
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+type rectangle struct {
+    length int
+    width  int
+}
+
+func area(r rectangle) {
+    fmt.Printf("Area Function result: %d\n", (r.length * r.width))
+}
+
+func (r rectangle) area() {
+    fmt.Printf("Area Method result: %d\n", (r.length * r.width))
+}
+
+func main() {
+    r := rectangle{
+        length: 10,
+        width:  5,
+    }
+    area(r)
+    r.area()
+
+    p := &r
+    /*
+       compilation error, cannot use p (type *rectangle) as type rectangle
+       in argument to area
+    */
+    //area(p)
+
+    p.area()//calling value receiver with a pointer
+}
+
+// Area Function result: 50
+// Area Method result: 50
+// Area Method result: 50
+```
+
+##### point
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+type rectangle struct {
+    length int
+    width  int
+}
+
+func perimeter(r *rectangle) {
+    fmt.Println("perimeter function output:", 2*(r.length+r.width))
+
+}
+
+func (r *rectangle) perimeter() {
+    fmt.Println("perimeter method output:", 2*(r.length+r.width))
+}
+
+func main() {
+    r := rectangle{
+        length: 10,
+        width:  5,
+    }
+    p := &r //pointer to r
+    perimeter(p)
+    p.perimeter()
+
+    /*
+        cannot use r (type rectangle) as type *rectangle in argument to perimeter
+    */
+    //perimeter(r)
+
+    r.perimeter()//calling pointer receiver with a value
+
+}
+
+// perimeter function output: 30
+// perimeter method output: 30
+// perimeter method output: 30
+```
+
+### <span id="methods_on_non_struct_types"> Methods on non struct types </span>
+
+method 必須定義才 local type 才可以，因此像要再 `int` 新增 method 則會出現 error `cannot define new methods on non-local type int`，必須定義新的 type 才行
+
+```go
+package main
+
+import "fmt"
+
+type myInt int
+
+// 不可以直接用 int
+func (a myInt) add(b myInt) myInt {
+    return a + b
+}
+
+func main() {
+    num1 := myInt(5)
+    num2 := myInt(10)
+    sum := num1.add(num2)
+    fmt.Println("Sum is", sum)
+}
+
+// Sum is 15
 ```
 
 ### <span id="pointer_or_value">function use pointer or value ??</span>

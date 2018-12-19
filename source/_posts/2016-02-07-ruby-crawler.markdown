@@ -3,7 +3,7 @@ layout: post
 title: "用 ruby 做網頁爬蟲"
 date: 2016-02-07 15:21:59 +0800
 comments: true
-categories: ruby
+categories: ruby crawler
 ---
 
 網頁爬蟲是一個蠻常聽到的名詞，簡單的來說就是可以透過程式，去分析網站頁面，將想要的資訊抓下來!

@@ -12,6 +12,7 @@ categories: golang
 * [Range (each)](#range)
 * [Slices](#slices)
 * [Maps](#maps)
+* [Variadic Functions](#variadic)
 
 # <span id="array"> 陣列 Array </span>
 
@@ -22,9 +23,12 @@ categories: golang
 > * size 不一樣的 Array 是不同的 Type
 
 ```go
-var a [10]int // 宣告一個變數 a 為一個 int type 的 Array 並且長度只有10.
+var a [10]int // 宣告一個變數 a 為一個 int type 的 Array 並且長度只有10.(int 預設是 0, string 則為 nil)
 
-// 宣告一個變數 ｂ 為 string type, 並且裡面的值是 A, B 並且長度只有 2 
+a := [3]int{1}
+// [1 0 0]
+
+// 宣告一個變數 ｂ 為 string type, 並且裡面的值是 A, B 並且長度只有 2
 b := [2]string{"A", "B"}
 b := [...]string{"A", "B"} // ... makes the compiler determine the length
 
@@ -35,7 +39,7 @@ a := [3][2]string{
         {"cat", "dog"},
         {"pigeon", "peacock"}, //this comma is necessary. The compiler will complain if you omit this comma
     }
-    
+
 s := []struct {
     i int
     b bool
@@ -81,19 +85,19 @@ func main() {
 
 ### Passing a array to a function
 
-傳遞給 function 部會改變原來的值
+傳遞給 function 不會改變原來的值，因為 array 不是 reference types 而是 value types
 
 ```go
 package main
 
 import "fmt"
 
-func changeLocal(num [5]int) {  
+func changeLocal(num [5]int) {
     num[0] = 55
     fmt.Println("inside function ", num)
 
 }
-func main() {  
+func main() {
     num := [...]int{5, 6, 7, 8, 8}
     fmt.Println("before passing to function ", num)
     changeLocal(num) //num is passed by value
@@ -101,9 +105,9 @@ func main() {
 }
 
 /**
-before passing to function  [5 6 7 8 8]  
-inside function  [55 6 7 8 8]  
-after passing to function  [5 6 7 8 8]  
+before passing to function  [5 6 7 8 8]
+inside function  [55 6 7 8 8]
+after passing to function  [5 6 7 8 8]
 **/
 ```
 
@@ -129,17 +133,78 @@ func main() {
 }
 ```
 
+如果是在 map，就會是 key, value
+
+```go
+func main() {
+	kvs := map[string]string{"a": "apple", "b": "banana"}
+	for k, v := range kvs {
+		fmt.Printf("%s -> %s\n", k, v)
+	}
+}
+```
+
+也可以只要 index or key
+
+```go
+func main(){
+    kvs := map[string]string{"a": "apple", "b": "banana"}
+	for k := range kvs {
+		fmt.Println("key:", k)
+	}
+}
+```
+
+當是 string 時，則是會轉成 Unicode code `rune` type
+
+```go
+func main() {
+	// `range` on strings iterates over Unicode code
+	// points. The first value is the starting byte index
+	// of the `rune` and the second the `rune` itself.
+	for i, c := range "go" {
+		fmt.Println(i, c)
+	}
+}
+
+// 0 103
+// 1 111
+```
+
 # <span id="slices"> Slices </span>
 
 不用定義其最大長度，而且可以直接賦予值
 
 > * An array has a fixed size. A slice, on the other hand, is a dynamically-sizeds
-> * slice 的零值是 nil，一個 nil 的 slice 的長度和容量是 0
+> * slice 的零值是 nil，一個 nil 的 slice 的長度和容量是 0，使用 make 就不會是 nil
 > * Slice 是用 reference
+
+* [make](https://golang.org/pkg/builtin/#make)
+
+> * Slice: The size specifies the length. The capacity of the slice is
+equal to its length. A second integer argument may be provided to
+specify a different capacity; it must be no smaller than the
+length. For example, make([]int, 0, 10) allocates an underlying array
+of size 10 and returns a slice of length 0 and capacity 10 that is
+backed by this underlying array.
+
+>* Map: An empty map is allocated with enough space to hold the
+specified number of elements. The size may be omitted, in which case
+a small starting size is allocated.
+
+>* Channel: The channel's buffer is initialized with the specified
+buffer capacity. If zero, or the size is omitted, the channel is
+unbuffered.
 
 ```go
 // 範圍 low ~ hight -1
 a[low : high]
+
+[]int{1, 2, 3} //creates and array and returns a slice reference
+
+numa := [3]int{78, 79 ,80}
+nums1 := numa[:] //creates a slice which contains all elements of the array
+// tart and end are 0 and len(numa)
 ```
 
 ```go
@@ -174,7 +239,7 @@ func main() {
 ### Slices are like references to arrays
 
 ```go
-// slices 都是用 references 的方式，因此改值
+// slices 都是用 references 的方式，因此改值也會影響到原本的值
 package main
 
 import (
@@ -224,7 +289,7 @@ func main() {
     printSlice(s)
     s = s[2:] // Drop its first two values.
     printSlice(s)
-	
+
 }
 
 func printSlice(s []int) {
@@ -239,6 +304,27 @@ len=4 cap=6 [2 3 5 7]
 len=6 cap=6 [2 3 5 7 11 13]
 len=4 cap=4 [5 7 11 13]
 **/
+```
+
+### re-sliced upto its capacity
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    fruitarray := [...]string{"apple", "orange", "grape", "mango", "water melon", "pine apple", "chikoo"}
+    fruitslice := fruitarray[1:3]
+    fmt.Printf("length of slice %d capacity %d\n", len(fruitslice), cap(fruitslice))
+    fruitslice = fruitslice[:cap(fruitslice)]
+	fmt.Println("After re-slicing length is",len(fruitslice), "and capacity is",cap(fruitslice))
+}
+
+// length of slice 2 capacity 6
+// After re-slicing length is 6 and capacity is 6
 ```
 
 ### Slices of slices 二維陣列
@@ -280,7 +366,7 @@ func main() {
 
 ### Append
 
-當空間不夠時，會自動擴充 capacity(*2)，實際上是建立一個新的 array，將原有的值 copy 過去，新的 slice 在 reference 到 新的 array 上面
+當空間不夠時，會自動擴充 capacity(*2)，實際上是建立一個新的 array，將原有的值 copy 過去，新的 slice 在 reference 到新的 array 上面
 
 ```go
 package main
@@ -290,7 +376,7 @@ import (
 )
 
 func main() {
-	var s []int
+	var s []int //zero value of a slice is nil
 	printSlice(s)
 
 	// append works on nil slices.
@@ -311,8 +397,8 @@ func printSlice(s []int) {
 }
 
 // len=0 cap=0 []
-// len=1 cap=2 [0] 
-// len=2 cap=2 [0 1]  
+// len=1 cap=2 [0]
+// len=2 cap=2 [0 1]
 // len=3 cap=4 [0 1 2]
 ```
 
@@ -365,11 +451,11 @@ d len=3 cap=3 [0 0 0]
 ```go
 package main
 
-import (  
+import (
     "fmt"
 )
 
-func subtactOne(numbers []int) {  
+func subtactOne(numbers []int) {
     for i := range numbers {
         numbers[i] -= 2
     }
@@ -391,25 +477,25 @@ slice after function call [6 5 4]
 
 ### Memory Optimisation
 
-用 slices 時，會 reference 到 array，此時會造成 array 無法被 garbage collected，因此會造成 memory 的浪費  
+用 slices 時，會 reference 到 array，此時會造成 array 無法被 garbage collected，因此會造成 memory 的浪費
 
 因此要解決的話可以利用 [copy](https://golang.org/pkg/builtin/#copy)，copy 會產生新的 slices 跟 array ，而原本的 array 就可以被 garbage collected
 
 ```go
 package main
 
-import (  
+import (
     "fmt"
 )
 
-func countries() []string {  
+func countries() []string {
     countries := []string{"USA", "Singapore", "Germany", "India", "Australia"}
     neededCountries := countries[:len(countries)-2]
     countriesCpy := make([]string, len(neededCountries))
     copy(countriesCpy, neededCountries) //copies neededCountries to countriesCpy
     return countriesCpy
 }
-func main() {  
+func main() {
     countriesNeeded := countries()
     fmt.Println(countriesNeeded)
 }
@@ -421,14 +507,17 @@ func main() {
 
 # <span id="maps"> Maps </span>
 
-A map maps keys to values.
+A map maps keys to values. (相當於其當語言的 hash)
 
 > * Similar to slices, maps are reference types
-> * Only be compared to nil
-
+> * Only be compared to ni
+> * The zero value of a map is nil
+> * nil 的 map 無法賦值，必須用 make
 
 ```go
-make(map[key]value)  
+make(map[key]value)
+value, ok := map[key] // 判斷 key 的 value 在不在
+delete(map, key)
 ```
 
 ```go
@@ -465,7 +554,7 @@ func main() {
 	}
 	fmt.Println("m3 =", m3)
 
-	// 查找鍵值是否存在
+	// 查找鍵值是否存在，ok 為 true / false, v 為 value
 	if v, ok := m1["c"]; ok {
 		fmt.Println(v)
 	} else {
@@ -476,11 +565,11 @@ func main() {
 	for k, v := range m3 {
 		fmt.Println(k, v)
 	}
-	
+
 	// delete
 	delete(m3, "a")
 	fmt.Println(m3)
-	
+
 	//Length of the map
 	fmt.Println(len(m3))
 }
@@ -531,6 +620,92 @@ func main() {
 
 * [map (1)](https://hsinyu.gitbooks.io/golang_note/content/map_1.html)
 * [Golang map 如何進行刪除操作？](http://blog.cyeam.com/json/2017/11/02/go-map-delete#map-%E7%9A%84%E5%88%A0%E9%99%A4%E6%93%8D%E4%BD%9C)
+
+
+# <span id="variadic"> Variadic Functions </span>
+
+`Variadic Functions` 是一個可接受任意的參數，一定要放最後面一個
+
+```go
+...Type // 代表可以接收任意參數
+func append(slice []Type, elems ...Type) []Type
+// elems 可以接收任意參數
+```
+
+### example 1
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func find(num int, nums ...int) {
+    fmt.Printf("type of nums is %T\n", nums)
+    found := false
+    for i, v := range nums {
+        if v == num {
+            fmt.Println(num, "found at index", i, "in", nums)
+            found = true
+        }
+    }
+    if !found {
+        fmt.Println(num, "not found in ", nums)
+    }
+    fmt.Printf("\n")
+}
+func main() {
+    find(89, 89, 90, 95)
+    find(45, 56, 67, 45, 90, 109)
+    find(78, 38, 56, 98)
+    find(87)
+    // 相當於
+    nums := []int{89, 90, 95}
+    find(89, nums...) // 要加 ... 否則 type 會是 []int，造成 error
+}
+
+/**
+type of nums is []int
+89 found at index 0 in [89 90 95]
+
+type of nums is []int
+45 found at index 2 in [56 67 45 90 109]
+
+type of nums is []int
+78 not found in  [38 56 98]
+
+type of nums is []int
+87 not found in  []s
+**/
+```
+
+原理是會將，後面的參數轉成 slice，所以 type 會變成 `[]int`，但是因為 `find` 後面接收的參數 type 是 int，因此也不能直接將 `[]int` 帶進去，因此 `[]int` 透過 `...` 語法糖，帶到 Variadic Functions 裡
+
+### example 2
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func change(s ...string) {
+    s[0] = "Go"
+    s = append(s, "playground")
+    fmt.Println(s) // [Go world playground]
+}
+
+func main() {
+    welcome := []string{"hello", "world"}
+    change(welcome...)
+    fmt.Println(welcome) // [Go world]
+}
+```
+
+* 一開始是用 slice(reference) 傳入，因此改變值，外面也會跟著改變
+* append 則是空間不夠時會建立一個新的 array， 因此不會影響到原來的值
 
 參考文件:
 

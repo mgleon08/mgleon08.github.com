@@ -44,6 +44,8 @@ footer: true
 * [wrk](http://mgleon08.github.io/blog/2018/04/09/http-benchmark/) - http benchmark
 * [Ngrok](http://mgleon08.github.io/blog/2018/06/14/share-localhost-ngrok-serveo/) - 內網分享
 * [z](https://github.com/rupa/z) - jump around
+* [autojump](https://github.com/wting/autojump) - A cd command that learns - easily navigate directories from the command line (跟 z 類似)
+* [peco](https://github.com/peco/peco) - 可以將一些指令變成互動式的指令 e.g. git checkout
 
 
 
@@ -84,3 +86,8 @@ footer: true
 * [codefactor](https://www.codefactor.io/)
 * [houndci](https://houndci.com/)
 * [sider](https://sider.review/)
+
+
+# <span id="others"> Others </span>
+
+* [thesaurus - 找出相似的單字](https://www.thesaurus.com/)

@@ -436,7 +436,17 @@ git show <hash>
 
  * [Git 救回已刪除的檔案](http://blog.hsatac.net/2012/07/git-restore-removed-files/)
 
-#alias
+### 取的 remote git 資訊
+
+* [git-ls-remote](https://git-scm.com/docs/git-ls-remote.html)
+
+```ruby
+# 顯示特定遠端儲存庫的參照名稱。包含遠端分支與遠端標籤 -h 遠端 heads,  -t 顯示 tag 
+git ls-remote .
+```
+
+# alias
+
 自己設定的一些 alias
 
 可以建立在 `~/.gitconfig` 裡面，但是前面 `git` 就無法縮寫成 `g` 
@@ -482,9 +492,9 @@ alias gbd='git branch -d'
 alias gbr='git branch --remote'
 alias gba='git branch -a'
 
-# branch delete
-alias gbmd = git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d
-alias gbrmd = git branch -r --merged | egrep -v "(^\*|master|dev)" | xargs git branch -r -d
+# merged branch delete
+alias gbmd='git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d'
+alias gbrmd='git branch -r --merged | egrep -v "(^\*|master|dev)" | xargs git branch -r -d'
 
 #git push
 alias gp='git push'
@@ -541,6 +551,14 @@ alias glo='git log --oneline --decorate --color'
 alias glol="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit"
 alias glola="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all"
 alias glog='git log --oneline --decorate --color --graph'
+
+#git peco
+# interactive checkout
+alias gcoi='git checkout $(git branch | cut -c 3- | peco)'
+# interactive merge
+alias gmi='git merge $(git branch | cut -c 3- | peco)'
+# interactive add
+alias gai='git add $(git status -s | cut -c 4- | peco)'
 ```
 
 官方文件：

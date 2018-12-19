@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Ruby logger"
+title: "Ruby logger, MultiIO"
 date: 2016-10-17 17:47:38 +0800
 comments: true
 categories: ruby
@@ -35,15 +35,20 @@ logger.info('initialize') { "Initializing..." }
 logger.add(Logger::FATAL) { 'Fatal error!' }
 ```
 
+# MultiIO
+
 同時輸出到 terminal & file
 
 ```ruby
 class Logger < ::Logger
   class << self
     def default(log)
+      # 設定兩種要輸出的 io 方式
       io = [STDOUT, log_file]
       logger = Logger.new(MultiIO.new(*io))
+      # 設定 log 層級
       logger.level = Logger::INFO
+      # 設定每次輸出 log 的格式
       logger.formatter = proc do |_severity, _datetime, _progname, msg|
         "#{msg}\n"
       end
@@ -67,10 +72,12 @@ class MultiIO
   end
 
   def write(args)
+  	# 每個 io 都寫入
     @targets.each { |target| target.write(args) }
   end
 
   def close
+    # 寫入完要 close
     @targets.each(&:close)
   end
 end

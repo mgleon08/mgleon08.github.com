@@ -29,3 +29,841 @@ Javascript：
 * [JavaScript 標準參考課程](http://javascript.ruanyifeng.com/#toc0)
 * [從ES6開始的JavaScript學習生活](https://eyesofkids.gitbooks.io/javascript-start-from-es6/content/)
 * [JavaScript Promise迷你書（中文版）](http://liubin.org/promises-book/#introduction)
+
+<h1 id="vueweek1todolist">Vue - Week1 Todo list</h1>
+
+<p>之前就有玩過 vue 不過太久沒碰，就變得生疏，剛好這次同事有開 vue 的 bookclub，就再來複習一下吧~</p>
+
+<!-- more -->
+
+<ul>
+<li><a href="https://github.com/mgleon08/vue_practice">vue_practice</a></li>
+
+<li><a href="http://mgleon08.github.io/blog/2016/11/29/front-end-tools">前端工具整理 NVM,NPM,YARN,Webpack,Babel 等等</a></li>
+</ul>
+
+<h3 id="vscode">vs code 套件</h3>
+
+<pre><code class="js language-js">Vetur
+Vue 2 Snippets
+</code></pre>
+
+<h3 id="">環境建置</h3>
+
+<ul>
+<li><a href="https://yarnpkg.com/en/docs/migrating-from-npm">yarn migrating from npm</a></li>
+</ul>
+
+<h5 id="1vuecl">1. 安裝 vue-cl</h5>
+
+<pre><code class="js language-js">// -g 為 global 的意思，沒有加的話，會裝在當下的
+npm install -g vue-cli
+yarn global add vue-cli
+</code></pre>
+
+<h5 id="2">2. 建立專案</h5>
+
+<pre><code class="js language-js">vue init webpack vue-book-club
+</code></pre>
+
+<h5 id="3">3.專案選項</h5>
+
+<pre><code class="js language-js">? Project name vue-book-club // 直接enter
+? Project description A Vue.js project // 直接enter
+? Author GuaHsu &lt;guaswork@gmail.com&gt; // 直接enter
+? Vue build standalone
+// ❯ Runtime + Compiler: recommended for most users
+//   Runtime-only: about 6KB lighter min+gzip, but templates (or any Vue-specific HTML) are ONLY allowed in .vue files - render functions are required elsewhere
+? Install vue-router? Yes
+? Use ESLint to lint your code? Yes  // [可選]程式碼規範，建議安裝
+? Pick an ESLint preset Standard 
+// ❯ Standard (https://github.com/standard/standard)
+//   Airbnb (https://github.com/airbnb/javascript)
+//   none (configure it yourself)
+? Set up unit tests Yes // [可選]建議先裝JEST日後有空可讀這個
+? Pick a test runner jest
+// ❯ Jest
+//   Karma and Mocha
+//   none (configure it yourself)
+? Setup e2e tests with Nightwatch? Yes // [可選]建議先裝起來，日後有空可讀這個
+? Should we run `npm install` for you after the project has been created? (recommended) npm // [可選] npm or yarn
+// ❯ Yes, use NPM
+//   Yes, use Yarn
+//   No, I will handle that myself
+</code></pre>
+
+<h5 id="4">4.安裝套件</h5>
+
+<ul>
+<li>Sass(Scss) - for css 建議使用</li>
+</ul>
+
+<pre><code class="js language-js">npm install sass sass-loader node-sass --save
+yarn add sass sass-loader node-sass
+</code></pre>
+
+<ul>
+<li>Pug - for html 可選用</li>
+</ul>
+
+<pre><code class="js language-js">npm install pug pug-loader pug-filters --save
+yarn add pug pug-loader pug-filters
+</code></pre>
+
+<ul>
+<li>安裝 <code>package.json</code> 內其它套件</li>
+</ul>
+
+<pre><code class="js language-js">npm install
+yarn install
+</code></pre>
+
+<h5 id="5eslintforprettiercodestandard">5. 修改一下eslint規則 - for Prettier code / standard</h5>
+
+<blockquote>
+  <p>Prettier code 目前不支援 standard 的 function 空格設定所以改一下</p>
+</blockquote>
+
+<pre><code class="js language-js">// vue-book-club/.eslintrc.js
+rules: {
+    // allow async-await
+    'generator-star-spacing': 'off',
+    // allow debugger during development
+    'no-debugger': process.env.NODE_ENV === 'production' ? 'error' : 'off',
+    // 新增的是下面這兩個
+    'space-before-function-paren': 0,
+    'new-cap': [
+      'error', {
+        'properties': false
+      }
+    ]
+  }
+</code></pre>
+
+<h3 id="todolist">TODO List</h3>
+
+<p>vue 主要都是在 <code>src</code> 的資料夾底下</p>
+
+<pre><code>src
+├── App.vue
+├── assets
+│   └── logo.png
+├── components
+│   ├── HelloWorld.vue
+│   └── TodoList.vue
+├── main.js
+└── router
+    └── index.js
+</code></pre>
+
+<h5 id="vrouter">使用 v-router</h5>
+
+<pre><code class="js language-js">import Vue from 'vue'
+import Router from 'vue-router'
+import HelloWorld from '@/components/HelloWorld'
+// 這邊的 @ 指的是 src/
+
+Vue.use(Router)
+
+export default new Router({
+  routes: [
+    {
+      path: '/',
+      name: 'HelloWorld',
+      component: HelloWorld
+    }
+  ]
+})
+
+// name 主要在之後要 mapping 可以用 name 去對應
+// component 對應最上面 import 進來的
+</code></pre>
+
+<p>vue 的一個 component 大致上分 </p>
+
+<ul>
+<li>template - html</li>
+
+<li>script - js</li>
+
+<li>style - css</li>
+</ul>
+
+<h5 id="template">template</h5>
+
+<pre><code class="html language-html">&lt;template&gt;
+  &lt;div id="TodoList"&gt;
+    &lt;div class="top-area"&gt;
+      &lt;input class="top-area-input" type="text" v-model.trim="todoMessage"&gt;
+      &lt;button class="top-area-add" @click="addTodo"&gt;Add Todo&lt;/button&gt;
+      &lt;div class="top-area-info"&gt;
+        共有: {{ todoList.length }} 筆資料，有 {{ checkedItemCount.length }} 筆完成
+      &lt;/div&gt;
+      &lt;div v-if="isMaxLimit" class="top-area-info--full"&gt;已達新增上限！v-if&lt;/div&gt;
+      &lt;div v-show="isMaxLimit" class="top-area-info--full"&gt;已達新增上限！v-show&lt;/div&gt;
+    &lt;/div&gt;
+    &lt;div class="content"&gt;
+      &lt;ul class="todolist"&gt;
+        &lt;li v-for="(todo, index) in todoList" :key="index" class="todolist-item"&gt;
+          &lt;input :id="`todo-${index}`" type="checkbox" v-model="todo.checked"&gt;
+          &lt;label :for="`todo-${index}`" :class="[{ 'todolist-item--checked': todo.checked }]"&gt;{{ todo.name }}&lt;/label&gt;
+          &lt;button class="todolist-item-remove" @click="removeTodo(index)"&gt;remove&lt;/button&gt;
+        &lt;/li&gt;
+      &lt;/ul&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+
+<h5 id="vmodel">v-model</h5>
+
+<p>設定 data</p>
+
+<pre><code class="js language-js">&lt;input class="top-area-input" type="text" v-model.trim="todoMessage"&gt;
+// trim 去掉前後多於的空白
+</code></pre>
+
+<h5 id="vbind">v-bind</h5>
+
+<p>屬性繫結，綁在 HTML 上的屬性 (attribute)</p>
+
+<pre><code class="js language-js">&lt;label :for="`todo-${index}`" :class="[{ 'todolist-item--checked': todo.checked }]"&gt;{{ todo.name }}&lt;/label&gt;
+
+// : = v-bind
+// :class = "{checked: true}" 後面是 true 才會吃
+// 複數加 [], :class = [anotherClass, "{checked: true}"]
+// 字串裡塞變數，必須外面包 ``，變數用 ${} 
+</code></pre>
+
+<h5 id="von">v-on</h5>
+
+<p>在 click 的時候觸發 addTodo method</p>
+
+<pre><code class="js language-js">&lt;button class="top-area-add" @click="addTodo"&gt;Add Todo&lt;/button&gt;
+// @ = v-on
+</code></pre>
+
+<p></p>
+
+<h5 id="vfor">v-for</h5>
+
+<pre><code class="js language-js">&lt;li v-for="(todo, index) in todoList" :key="index" class="todolist-item"&gt;
+// 可識別唯一性的 key，可用來排序
+</code></pre>
+
+<h5 id="vshowvif">v-show, v-if</h5>
+
+<pre><code class="js language-js">&lt;div v-if="isMaxLimit" class="top-area-info--full"&gt;已達新增上限！v-if&lt;/div&gt;
+// 要是 true 的時候才會有畫面，並且 dom 會長出來
+&lt;div v-show="isMaxLimit" class="top-area-info--full"&gt;已達新增上限！v-show&lt;/div&gt;
+// 如果是 false 就是畫面隱藏，dom 還在
+// 另外還有 v-else v-else-id，同一組必須寫在一起
+</code></pre>
+
+<h5 id="script">script</h5>
+
+<pre><code class="js language-js">export default {
+  name: 'TodoList',
+  data() {
+    return {
+      maxLimit: 3,
+      todoMessage: '',
+      todoList: [{ name: 'test', checked: false }]
+    }
+  },
+  computed: {
+    checkedItemCount() {
+      return this.todoList.filter(todo =&gt; todo.checked)
+    },
+    isMaxLimit() {
+      return this.todoList.length === this.maxLimit
+    }
+  },
+  watch: {
+    // todoMessage (newVal, oldVal) {
+    //   console.log(newVal, oldVal)
+    // }
+    // todoList: {
+    //   handler(newVal, oldVal) {
+    //     console.log(newVal, oldVal)
+    //     this.checkedItemCount = this.todoList.filter(todo =&gt; todo.checked)
+    //   },
+    //   deep: true
+    // }
+  },
+  methods: {
+    addTodo() {
+      if (!this.isMaxLimit &amp;&amp; this.todoMessage) {
+        this.todoList.push({
+          name: this.todoMessage,
+          checked: false
+        })
+        this.todoMessage = ''
+      }
+    },
+    removeTodo(index) {
+      this.todoList.splice(index, 1)
+    }
+  }
+}
+&lt;/script&gt;
+
+// computed 可當作一種屬性，當裡面值有變動會跟著變動
+// watch 不能 watch array object 必須用 deep watch (比較耗效能)
+// methods 可以 call 的 method
+</code></pre>
+
+<h5 id="style">style</h5>
+
+<pre><code class="css language-css">&lt;style lang="scss" scoped&gt;
+#TodoList {
+  * {
+    user-select: none;
+  }
+  .top-area {
+    &amp;-info {
+      &amp;--full {
+        color: pink;
+      }
+    }
+  }
+  .todolist {
+    &amp;-item {
+      &amp;--checked {
+        text-decoration: line-through;
+      }
+    }
+  }
+}
+&lt;/style&gt;
+
+/*
+scoped 為了將每個 components 會產生亂數的屬性 data-v-3de47834，這樣每個 components 就都可以用同樣的 class &amp; id name
+*/
+</code></pre>
+
+<h5 id="run">run</h5>
+
+<pre><code class="js language-js">npm run dev
+yarn run start
+</code></pre>
+
+<p>範例</p>
+
+<ul>
+<li><a href="https://github.com/mgleon08/vue-book-club/blob/master/src/views/TodoList.vue">TodoList</a></li>
+</ul>
+
+<p>官方文件</p>
+
+<ul>
+<li><a href="https://vuejs.org/">vuejs</a></li>
+
+<li><a href="https://router.vuejs.org/">router.vuejs</a></li>
+</ul>
+
+<hr />
+
+<h1 id="vueweek2lifecyclenvm">Vue - Week 2 Lifecycle &amp; nvm</h1>
+
+<p>npm 之前有寫過 <a href="http://mgleon08.github.io/blog/2016/07/22/install-ruby-on-rails/">Ruby on Rails 裝機趴 (Only Mac)</a></p>
+
+<p>所以主要是 vue 的 life cycle</p>
+
+<p><img src="https://vuejs.org/images/lifecycle.png" alt="" /></p>
+
+<h3 id="instancelifecyclehooks">Instance Lifecycle Hooks</h3>
+
+<p>Vue 提供了每個 liftcycle 的各種 hook，可以藉由這些 hook，在不同階段，處理不同事情</p>
+
+<pre><code class="js language-js">var vm = new Vue({
+  beforeCreate: function() {
+    //vue instance 被 constructor 建立前
+    console.log('beforeCreate');
+  },
+  created: function() {
+    //vue instance 被 constructor 建立後，在這裡完成 data binding
+    // call API 可以在這邊處理好，這樣 DOM 綁定前就可以拿到資料
+    console.log('created');
+  },
+  beforeMount: function() {
+    //繫結 DOM 之前
+    console.log('beforeMount');
+  },
+  mounted: function() {
+    //繫結 DOM 之後
+    console.log('mounted');
+  },
+  beforeUpdate: function() {
+    //資料更新，但尚未更新 DOM
+    console.log('beforeUpdate');
+  },
+  updated: function() {
+    //因資料更新，而更新 DOM
+    console.log('updated');
+  },
+  beforeDestroy: function() {
+    //移除 vue instance 之前
+    console.log('beforeDestroy');
+  },
+  destroyed: function() {
+    //移除 vue instance 之後
+    console.log('destroyed');
+  }
+});
+</code></pre>
+
+<ul>
+<li>一般狀況使用v-if和v-for來控制資料即可，不需要用到vm.$destroy()。</li>
+
+<li>如果是使用 server-side rendering，則除了beforeCreate和created，其他 method 都不會被呼叫。</li>
+</ul>
+
+<pre><code class="js language-js">// 官方解釋: 在下次 DOM 更新循環結束之後執行延遲回調。在修改數據之後立即使用這個方法，獲取更新後的 DOM。
+// nextTick 可以到下一個階段再去執行，比如說等 update 完 dom 的值，再透過 reference 將 dom 的值拉下來
+this.$nextTick(() =&gt; {
+  this.msg = this.$refs.msgDiv.innerHTML
+})
+</code></pre>
+
+<p>範例</p>
+
+<ul>
+<li><a href="https://github.com/mgleon08/vue-book-club/blob/master/src/views/LifeCycle.vue">LifeCycle.vue</a></li>
+</ul>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://cythilya.github.io/2017/04/11/vue-instance/">Vue Instance</a></li>
+
+<li><a href="https://medium.com/@toumasaya/node-js-%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A-for-mac-a2628836feaf">Node.js 環境設定-for mac</a></li>
+
+<li><a href="https://segmentfault.com/a/1190000008570874">我理解的關於Vue.nextTick()的正確使用</a></li>
+</ul>
+
+<h1 id="vueweek3component">Vue - Week3 Component</h1>
+
+<p>主要介紹如何使用 component 來架構頁面</p>
+
+<p>透過 import 將要使用的 components 引入，並放置在 script 裡面的 <code>components</code></p>
+
+<h3 id="-1">父層</h3>
+
+<p>使用與 script 裡面引入同名的 components 當作 tag 來使用 <code>TabA</code> <code>TabB</code> <code>TabC</code></p>
+
+<pre><code class="html language-html">&lt;template&gt;
+  &lt;div id="W3Index"&gt;
+    &lt;h1&gt;Index {{ tabIndex }}&lt;/h1&gt;
+    &lt;h2&gt;ChildMessage: {{ childMessage }}&lt;/h2&gt;
+    &lt;h2&gt;{{ obj }}&lt;/h2&gt;
+    &lt;input v-model="message" type="text"&gt;
+    &lt;div class="tab-buttons"&gt;
+      &lt;span
+        v-for="(tab, index) in tabs"
+        @click="tabIndex = index"
+        :class="{ 'active': tabIndex === index }"
+        :key="index"&gt;
+        {{ tab.name }}
+      &lt;/span&gt;
+    &lt;/div&gt;
+    &lt;div class="tab-content"&gt;
+      &lt;!-- data 是由 TabA 作定義的 props 屬性 --&gt;
+      &lt;TabA v-show="tabIndex === 0" :data="obj"&gt;&lt;/TabA&gt;
+      &lt;TabB v-show="tabIndex === 1" :data="childMessage"&gt;
+        &lt;!-- mapping component 的 slot 名稱，就可將 template 傳到下層 --&gt;ㄋ
+        &lt;div slot="content"&gt;
+          &lt;div style="width: 100px; height: 100px; border: solid 1px #333"&gt; I am slot &lt;/div&gt;
+        &lt;/div&gt;
+      &lt;/TabB&gt;
+      &lt;!-- 監聽 childMessage，監聽到就執行 getChildMessage --&gt;
+      &lt;TabC v-show="tabIndex === 2" :message="message" @childMessage="getChildMessage"&gt;&lt;/TabC&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+
+<p>透過 import 將需要的 component 引入，並放進 <code>components object</code></p>
+
+<pre><code class="js language-js">&lt;script&gt;
+import TabA from '@/components/week3/TabA'
+import TabB from '@/components/week3/TabB'
+import TabC from '@/components/week3/TabC'
+export default {
+  name: 'W3Index',
+  components: {
+    // es6 於許 key value 一樣時，只需要寫一次，如果不一樣就必須都寫 TabZ: TabA
+    TabA,
+    TabB,
+    TabC
+  },
+  data() {
+    return {
+      message: '',
+      childMessage: '',
+      obj: {
+        name: 'AAAAA',
+        value: 123
+      },
+      tabIndex: 0,
+      tabs: [{ name: 'TabA' }, { name: 'TabB' }, { name: 'TabC' }]
+    }
+  },
+  methods: {
+    getChildMessage(msg) {
+      this.childMessage = msg
+    }
+  }
+}
+&lt;/script&gt;
+</code></pre>
+
+<h3 id="-2">子層</h3>
+
+<ul>
+<li><code>props</code> 可接收上層給的 data，如果子層需要更改到資料，必須使用 <code>deep-copy</code>，否則像 <code>obejct</code> <code>array</code> 用 <code>reference</code> 就會更改到</li>
+
+<li><code>slot</code> 可接收上層給的 template</li>
+
+<li><code>$emit</code> 可回傳給上層的 event，上層必須有人接收，並且上層接收後執行的 method，自動會將 <code>$emit</code> 後面的參數傳進去</li>
+</ul>
+
+<blockquote>
+  <p>deep-copy: JSON.parse(JSON.stringify(this.data))</p>
+</blockquote>
+
+<h5 id="taba">TabA</h5>
+
+<pre><code class="html language-html">&lt;template&gt;
+  &lt;div id="TabA"&gt;
+    &lt;h1&gt;TabA&lt;/h1&gt;
+    &lt;h2&gt;{{ childData }}&lt;/h2&gt;
+    &lt;button @click="changeChildObj"&gt;changeChildObj&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+
+<pre><code class="js language-js">&lt;script&gt;
+export default {
+  name: 'TabA',
+  // props: ['data'], 可以這樣寫需要的屬性，但就沒辦法限制 type 等等..
+  props: {
+  // 這樣寫就可以限制每個屬性要的條件
+    data: {
+      type: Object,
+      default: () =&gt; { return {} },
+      required: false
+    }
+  },
+  data() {
+    return {
+      // 要改 props 資料，必須做深拷貝，不然原本 object 會 reference 上一層的資料
+      childData: JSON.parse(JSON.stringify(this.data))
+    }
+  },
+  methods: {
+    changeChildObj() {
+      this.childData.name = 'BBBBBB'
+    }
+  }
+}
+&lt;/script&gt;
+</code></pre>
+
+<h5 id="tabb">TabB</h5>
+
+<pre><code class="html language-html">&lt;template&gt;
+  &lt;div id="TabB"&gt;
+    &lt;h1&gt;TabB&lt;/h1&gt;
+    &lt;h2&gt;{{ data }}&lt;/h2&gt;
+    &lt;!-- slot 設定，外面必須 name 也是 content --&gt;
+    &lt;slot name="content"&gt;&lt;/slot&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+
+<pre><code class="js language-js">&lt;script&gt;
+export default {
+  name: 'TabB',
+  props: ['data', 'data2'],
+  data() {
+    return {
+    }
+  }
+}
+&lt;/script&gt;
+</code></pre>
+
+<h5 id="tabc">TabC</h5>
+
+<pre><code class="html language-html">&lt;template&gt;
+  &lt;div id="TabC"&gt;
+    &lt;h2&gt;TabC&lt;/h2&gt;
+    &lt;input v-model="childMessage" type="text"&gt;
+    &lt;h3 :class="{'hasPink': hasPink}"&gt;Message: {{ message }}&lt;/h3&gt;
+    &lt;button @click="emitMsg"&gt;emit&lt;/button&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+
+<pre><code class="js language-js">&lt;script&gt;
+export default {
+  name: 'TabC',
+  props: {
+    message: {
+      type: String,
+      default: '',
+      required: true
+    }
+  },
+  data() {
+    return {
+      childMessage: ''
+    }
+  },
+  computed: {
+    hasPink() {
+      return this.message.match(/pink/gi)
+    }
+  },
+  methods: {
+    emitMsg() {
+      // 傳回上一層，上一層必須有在監聽 childMessage
+      this.$emit('childMessage', this.childMessage)
+    }
+  }
+}
+&lt;/script&gt;
+</code></pre>
+
+<pre><code class="scss language-scss">&lt;style lang="scss"&gt;
+#TabC {
+  .hasPink {
+    color: pink;
+  }
+}
+&lt;/style&gt;
+</code></pre>
+
+<p>範例</p>
+
+<ul>
+<li><a href="https://github.com/mgleon08/vue-book-club/blob/master/src/views/ComponentTab.vue">ComponentTab</a></li>
+
+<li><a href="https://github.com/mgleon08/vue-book-club/blob/master/src/views/ComponentStep.vue">ComponentStep</a></li>
+</ul>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://cn.vuejs.org/v2/guide/components.html">Vue components</a></li>
+</ul>
+
+<hr />
+
+<h1 id="week4vuex">Week4 - Vuex</h1>
+
+<pre><code>yarn add vuex
+</code></pre>
+
+<p>照慣例會將 vux 統一放在 <code>src/store/</code> 裡面</p>
+
+<p>因此在 <code>main.js</code></p>
+
+<pre><code class="js language-js">import store from './store'
+
+new Vue({
+  el: '#app',
+  router,
+  store,
+  components: { App },
+  template: '&lt;App/&gt;'
+})
+</code></pre>
+
+<p>預設都會抓 <code>index.js</code></p>
+
+<pre><code class="js language-js">// src/store/index.js
+import Vue from 'vue'
+import Vuex from 'vuex'
+
+// 第一種方式全部都分開
+import { state, mutations } from './mutations.js'
+import * as getters from './getters.js'
+import * as actions from './actions.js'
+
+// 第二種方式全都放在一起
+import shop from './modules/shop'
+
+Vue.use(Vuex)
+
+export default new Vuex.Store({
+  state,
+  mutations,
+  getters,
+  actions,
+  modules: {
+    shop
+  },
+  // 嚴格模式，禁止直接修改 state
+  strict: true
+})
+</code></pre>
+
+<ul>
+<li>State: 所有資料狀態存取的地方，</li>
+
+<li>Getter 給前端資料 (像是計算屬性 compute)</li>
+
+<li>Mutation: 更改資料只能用 commit 的方式透過 mutation 來更改 
+
+
+<ul>
+<li>必須是同步函數</li></ul>
+</li>
+
+<li>Action 類似於 mutation，不同在於：
+
+
+<ul>
+<li>Action 提交的是 mutation，而不是直接變更狀態。</li>
+
+<li>Action 可以包含任意非同步操作。 </li></ul>
+</li>
+</ul>
+
+<pre><code class="js language-js">// src/store/modules/shop.js
+
+import shopAPI from '@/api/shop'
+
+// 命名 muation 觸發的名稱，方便管理
+const types = {
+  ADD_CART_ITEM: 'ADD_CART_ITEM',
+  REMOVE_CART_ITEM: 'REMOVE_CART_ITEM',
+  SET_PRODUCT_LIST_DATA: 'SET_PRODUCT_LIST_DATA',
+  SET_COUNTRY: 'SET_COUNTRY'
+}
+
+// 拿資料可以透過 state 或是 getter 來拿，要怎麼組合就看自己
+// 也可以資料透過 state 要計算的資料就透過 getter 去拿取
+const state = {
+  country: 'tw',
+  cartItems: [],
+  productListData: []
+}
+
+const getters = {
+  country: state =&gt; state.country,
+  productListData: state =&gt; state.productListData,
+  cartItemCount: state =&gt; state.cartItems.length,
+  cartItemTotalAmount: state =&gt; state.cartItems.reduce((total, product) =&gt; total + product.price, 0)
+}
+
+// actions 主要是執行一些非同步，最後更改資料還是要透過 mutation
+// 跟 state 和 getter 一樣，都可以組合
+
+const actions = {
+  setCountry({ commit }, country) {
+    commit(types.SET_COUNTRY, country)
+  },
+  getProductListData({ commit }, data) {
+    shopAPI.getProductData().then(res =&gt; {
+      commit(types.SET_PRODUCT_LIST_DATA, res)
+    })
+  },
+  addCartItem({ commit }, data) {
+    // if 庫存檢查 then
+    commit(types.ADD_CART_ITEM, data)
+    // else alert('庫存不足)
+  },
+  removeCartItem({ commit }, index) {
+    commit(types.REMOVE_CART_ITEM, index)
+  }
+}
+
+const mutations = {
+  [types.ADD_CART_ITEM](state, data) {
+    state.cartItems.push(data)
+  },
+  [types.REMOVE_CART_ITEM](state, index) {
+    state.cartItems.splice(index, 1)
+  },
+  [types.SET_PRODUCT_LIST_DATA](state, data) {
+    state.productListData = data
+  },
+  [types.SET_COUNTRY](state, country) {
+    state.country = country
+  }
+}
+
+export default {
+// 宣告 namespaced true 在 import 時就必須指定 file 名稱
+  namespaced: true,
+  state,
+  getters,
+  actions,
+  mutations
+}
+</code></pre>
+
+<pre><code class="js language-js">// src/components/ProductList.vue
+&lt;template&gt;
+  &lt;div id="Index"&gt;
+    &lt;AppHeader&gt;&lt;/AppHeader&gt;
+    &lt;h1 v-if="!productListData.length"&gt;讀取中&lt;/h1&gt;
+    &lt;div class="product" v-for="product in productListData" :key="product.id"&gt;
+      &lt;img class="product-img" src="@/assets/logo.png"&gt;
+      &lt;div class="product-name"&gt;{{ product.name }}&lt;/div&gt;
+      &lt;div class="product-price"&gt;{{ product.price }}&lt;/div&gt;
+      &lt;div class="product-add" @click="addToCart(product)"&gt;加入購物車&lt;/div&gt;
+    &lt;/div&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+
+&lt;script&gt;
+// import shopAPI from '@/api/shop'
+import AppHeader from './AppHeader'
+// 先 iport 進來才可以使用
+import { mapActions, mapGetters } from 'vuex'
+export default {
+  name: 'ProductList',
+  components: {
+    AppHeader
+  },
+  data() {
+    return {
+      productList: []
+    }
+  },
+  computed: {
+       // states 和 getters 寫在 computed 裡面
+    ...mapGetters('shop', ['productListData'])
+  },
+  created() {
+    this.getProductListData()
+    // shopAPI.getProductData().then(res =&gt; {
+    //   this.productList = res
+    // })
+  },
+  methods: {
+  // actions 和 mutations 寫在 methods 裡面
+    ...mapActions('shop', ['addCartItem', 'getProductListData']),
+    addToCart(product) {
+      this.addCartItem(product)
+      // 原本 mutation 觸發的寫法
+      // this.$store.commit('shop/ADD_CART_ITEM', product)
+      // 原本 action 觸發的寫法
+      // this.$store.dispatch('shop/addCartItem', product)
+    }
+  }
+}
+&lt;/script&gt;
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://vuex.vuejs.org/zh/guide/">Vuex</a></li>
+
+<li><a href="https://github.com/mgleon08/vue-book-club/commit/4b5d729892d37feb1e256a5ac676dce469a3f59a">vue-book-club</a></li>
+</ul>

@@ -9,54 +9,211 @@ categories: golang
 <!-- more -->
 
 * [介面 Interfaces](#interfaces)
-  * [Stringer Interface](#stringer)
-  * [Errors Interface](#errors)
-  * [Reader Interface](#reader)
-  * [Image Interface](#image)
-  * [HTTP interface](#http)
+* [Why Interface?](#why_interface)
+* [Practical use of interface](#practical_use_of_interface)
+* [Interface internal representation](#interface_internal_representation)
+* [Empty Interface](#empty_interface)
+* [Type Assertion](#type_assertion)
+* [Type Switch](#type_switch)
+* [Implementing interfaces using pointer receivers vs value receivers](#pointer_receivers_vs_value_receivers)
+* [Implementing multiple interfaces](#implementing_multiple_interfaces)
+* [Embedding interfaces](#embedding_interfaces)
+* [範例: 實作 sort interface](#sort_interface)
+* [Stringer Interface](#stringer)
+* [Errors Interface](#errors)
+* [Reader Interface](#reader)
+* [Image Interface](#image)
+* [HTTP interface](#http)
 
 # <span id="interfaces">介面 Interfaces</span>
 
 Golang 本身並沒有泛型程式設計(generic types)，但可以利用 interface 來達成
 
-> 泛型程式設計:   
+> 泛型程式設計:
 > 簡單來說就是，編寫的程式碼不是針對特定的類型（比如適用於int, 不適用於string）才有效，而是大部分類型的參數都是可以工作的。
 
 在 Golang 中，interface 是一組 method 的集合，是 [duck typing programming](https://en.wikipedia.org/wiki/Duck_typing) 的一種體現。不關心屬性（數據），只關心行為（方法）
-
 
 ### 實作條件
 
 欲實作的建構體必須要有 Interface 所定義的所有函式、接收參數、回傳值
 
 ```go
-type Database interface {  
+type Database interface {
     Read(string) string
     Write(string)
 }
 // Read 一定要接收一個字串，然後回傳一個字串
 // Write 則必須接收一個字串。
 
-type Database interface {  
+type Database interface {
     Read(name string) string
     Write(data string)
 }
 // 允許定義 Interface 的時候擺上參數名稱用以辨別，但實作的時候並不需要遵循這個參數名稱。
 ```
 
-### Why Interface?
+### <span id="why_interface"> Why Interface? </span>
 
-> Interface specifies what methods a type should have and the type decides how to implement these methods.
+簡單的來說就是 `interface defines the behaviour of an object` 當一個類型提供了 interface 定義的所有 method，就可以說這個類型實作了這個 interface
+
+interface 指定 type 應該要有的方法， type 決定如何實現這些方法
+
+> 像是 WashingMachine 的 interface，包含了 Cleaning() 和 Drying()，任何有提供 Cleaning() 和 Drying() 的 type，都可以說是實作了 WashingMachine 的 interface
 
 * writing generic algorithm （泛型程式設計）
 * hiding implementation detail （隱藏具體實現）
 * providing interception points
 
-Golang 裡有兩種 Interface (型態 & 定義)
+##### Declaring and implementing an interface
 
-### 1. 型態
 
-### Empty Interface
+定義了 VowelsFinder 的 interface，裡面有個 `FindVowels` 的 method，因此 MyString 的 type，提供了 `FindVowels` method，因此可以說 MyString 實作了 VowelsFinder 的 interface
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+//interface definition
+type VowelsFinder interface {
+    FindVowels() []rune // 必須回傳 []rune type
+}
+
+type MyString string
+
+//MyString implements VowelsFinder
+func (ms MyString) FindVowels() []rune {
+    var vowels []rune
+    for _, rune := range ms {
+        if rune == 'a' || rune == 'e' || rune == 'i' || rune == 'o' || rune == 'u' {
+            vowels = append(vowels, rune)
+        }
+    }
+    return vowels
+}
+
+func main() {
+    name := MyString("Sam Anderson")
+    var v VowelsFinder // 宣告 v 是 VowelsFinder interface type
+    v = name // possible since MyString implements VowelsFinder
+    fmt.Printf("Vowels are %c", v.FindVowels())
+
+}
+
+// Vowels are [a e o]
+```
+
+### <span id="practical_use_of_interface"> Practical use of interface </span>
+
+上面範例比較無法體現出為什麼要用 interface，即使用 `name.FindVowels()` 也是可以，以下是比較實際上的用法
+
+> If a variable has an interface type, then we can call methods that are in the named interface.
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+type SalaryCalculator interface {
+    CalculateSalary() int //第一個是 method 名稱，第二個是 return type
+}
+
+// 長期雇工
+type Permanent struct {
+    empId    int
+    basicpay int
+    pf       int
+}
+
+// 合約雇工
+type Contract struct {
+    empId  int
+    basicpay int
+}
+
+// 長期雇工 實作 CalculateSalary()
+func (p Permanent) CalculateSalary() int {
+    return p.basicpay + p.pf
+}
+
+// 合約雇工實作 CalculateSalary()
+func (c Contract) CalculateSalary() int {
+    return c.basicpay
+}
+
+/*
+total expense is calculated by iterating though the SalaryCalculator slice and summing
+the salaries of the individual employees
+*/
+
+// 必須傳 slice 並且 type 是 SalaryCalculator interface
+func totalExpense(s []SalaryCalculator) {
+    expense := 0
+    for _, v := range s {
+		// v 必須都有實作 CalculateSalary()
+        expense = expense + v.CalculateSalary()
+    }
+    fmt.Printf("Total Expense Per Month $%d", expense)
+}
+
+func main() {
+    pemp1 := Permanent{1, 5000, 20}
+    pemp2 := Permanent{2, 6000, 30}
+    cemp1 := Contract{3, 3000}
+    employees := []SalaryCalculator{pemp1, pemp2, cemp1}
+    totalExpense(employees)
+}
+
+// Total Expense Per Month $14050
+```
+
+好處在於，當之後有新增新的員工，薪資計算方式也不一樣，只需要新增新的 struct 並實作 `CalculateSalary()`，就加到 `[]SalaryCalculator` 上面就可以直接擴充了
+
+### <span id="interface_internal_representation"> Interface internal representation </span>
+
+An interface can be thought of as being represented internally by a tuple `(type, value)`
+
+`type` is the underlying concrete type of the interface and value holds the value of the concrete type.
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+type Test interface {
+    Tester()
+}
+
+type MyFloat float64
+
+func (m MyFloat) Tester() {
+    fmt.Println(m)
+}
+
+func describe(t Test) {
+    fmt.Printf("Interface type %T value %v\n", t, t)
+}
+
+func main() {
+    var t Test
+    f := MyFloat(89.7)
+    t = f // 這裡將 type 是 MyFloat assign 給 type 是 Test interface 的 t
+    describe(t) // 但印出 type 的時候會是原本底層具體的 type MyFloat 而不是 Test
+    t.Tester()
+}
+
+// Interface type main.MyFloat value 89.7
+// 89.7
+```
+
+### <span id="empty_interface"> Empty Interface </span>
 
 `interface{}` 意味著任何型態的值，因為裡面沒有任何 method，也代表所有 type 都 implement
 
@@ -95,10 +252,12 @@ Type = struct { name string }, value = {Hi}
 */
 ```
 
-### interface{}類型的 slice 是不是就可以接受任何類型的 slice ?
+##### interface{} 類型的 slice 是不是就可以接受任何類型的 slice ?
 
-go 不會對 類型是interface{} 的 slice 進行轉換
+go 不會對類型是interface{} 的 slice 進行轉換
 [InterfaceSlice](https://github.com/golang/go/wiki/InterfaceSlice)
+
+* 因為 `[]interface{}` 並不是 interface 而是 slice
 
 ```go
 package main
@@ -118,23 +277,63 @@ func main() {
 // prog.go:14:10: cannot use names (type []string) as type []interface {} in argument to printAll
 ```
 
+### <span id="type_assertion"> Type Assertion </span>
 
-### Interface value 的賦值
+Type assertion 可以用來取出 interface 底層的 value
 
-從概念上來講，interface value 有兩部分組成：type 部分是一個 concrete type，vlaue 部分是這個 concrete type 對應的 instance，它們分別稱之為 interface value 的 dynamic type 和 dynamic value。
+```go
+i.(T)
+// used to get the underlying value of interface i whose concrete type is T.
+```
 
-* [Go interface 詳解 (三) ：interface 的值](http://sanyuesha.com/2017/10/18/go-interface-3/)
+```go
+package main
 
+import (
+    "fmt"
+)
 
-### 型態斷言 Type Assertion
+func assert(i interface{}) {
+    s := i.(int) //get the underlying int value from i
+    // 如果改成 string 則會 error
+    // panic: interface conversion: interface {} is int, not string
+    fmt.Println(s)
+}
+func main() {
+    var s interface{} = 56
+    assert(s)
+}
 
-* [Go interface 詳解 (四) ：type assertion](http://sanyuesha.com/2017/12/01/go-interface-4/)
-
-Type assertion is used extract the underlying value of the interface.
-
-`i.(T)` is the syntax which is used to get the underlying value of interface `i` whose concrete type is `T`.
+// 56
+```
 
 `t, ok := i.(T)` i 是 interface 類型的變數，T代表要斷言的類型，t 是 interface 變數存儲的值，ok 是 bool 類型表示是否為該斷言的類型 T
+
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func assert(i interface{}) {
+    v, ok := i.(int) // 如果底層的 type 是 int，就會回傳 value & true
+    fmt.Println(v, ok)
+}
+func main() {
+    var s interface{} = 56
+    assert(s)
+    var i interface{} = "Steven Paul"
+    assert(i)
+}
+// 56 true
+// 0 false
+```
+
+### <span id="type_switch"> Type Switch </span>
+
+當有多個或不確定的底層 type 時，可以用 switch 去做個別處理
 
 ```go
 package main
@@ -168,9 +367,7 @@ I don't know about type bool!
 */
 ```
 
-##### compare a type to an interface
-
-當一個 type implements 了一個 interface，就可以做比較
+實現該 interface 的 type，也可以用 interface 來做比對
 
 ```go
 package main
@@ -191,7 +388,7 @@ func (p Person) Describe() {
 
 func findType(i interface{}) {
 	switch v := i.(type) {
-	case Describer:
+	case Describer: // 這邊可以用 Describer or Person
 		v.Describe()
 	default:
 		fmt.Printf("unknown type\n")
@@ -213,186 +410,38 @@ Naveen R is 25 years old
 */
 ```
 
-##### 具體類型 vs 介面類型
+### <span id="pointer_receivers_vs_value_receivers"> Implementing interfaces using pointer receivers vs value receivers </span>
 
-在 `x.(T)` 當中，`x` 是 interface 介面的表達式，`T`是類型，稱為被斷言類型
-
-> 介面有介面值的概念，其包括 `動態類型 dynamic type` 和 `動態值 dynamic value` 兩部分。
-
-T 有分兩種 `具體類型` `介面類型`
-
-##### 具體類型 concrete type
-
-類型斷言首先檢查 `x` 的動態類型是否是 `T`
-
-* 如果是，類型斷言的結果就是 `x` 的動態值，動態值的 type 就是 T.
-* 如果否，操作就會 `panic`
-* 對 concrete type 的斷言實際上是獲取 x 的 dynamic value。
-
-
-```go
-// os.Stdout 的類型就是 *os.File
-var w io.Writer
-w = os.Stdout
-f := w.(*os.File) // success: f == os.Stdout
-c := w.(*bytes.Buffer) // panic: interface holds *os.File, not *bytes.Buffer
-```
-
-##### 介面類型 interface type
-
-類型斷言首先檢查x的動態類型是否滿足T
-
-* 斷言的目的是為了檢測 x 的 dynamic type 是否滿足 T
-* 如果是，x 的動態值不會被提取，結果仍然是以前的動態類型和動態值。但結果的類型是介面類型T.
-* 換句話説，對介面類型的斷言，結果的類型是T，不是x的類型，改變了類型的表述方式，從而改變了可訪問的方法集合(通常更大)，但會保留x介面值中的動態類型和動態值。
-
-```go
-/*
-第一個類別型斷言後，
-w、rw兩個介面的動態值都是os.Stout，動態類型都是*os.File。
-
-w的類型是io.Writer，只暴露Write方法，
-rw的類型是io.ReadWriter,暴露Read和Write方法。
-*/
-var w io.Writer
-w = os.Stdout // w = os.Stdout 賦值 *os.File 類型的 value 給 w
-rw := w.(io.ReadWriter) // success: *os.File has both Read and Write
-```
-
-
-##### Testing
-
-* [pointer struct](https://play.golang.org/p/7_uCMhUNGVb)
-* [struct](https://play.golang.org/p/1eZxJWA9ok3)
-* [interface](https://play.golang.org/p/Uqq6oE7py2Q)
-
-### 型態宣告 Type Casting
-
-若很確定這個 interface{} 是什麼型態，可以直接透過 value.(型態) 來進行型態宣告
-
-倘若該型態不正確，則會出現 `panic` 警告。
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func Test(i interface{}) {
-	v, k := i.(int)
-	fmt.Println(v, k)
-}
-
-func Panic(i interface{}) {
-	fmt.Println(i.(string))
-}
-
-func main() {
-	Test("Hi")
-	Test(123)
-	Panic(111)
-}
-
-// 0 false
-// 123 true
-// panic: interface conversion: interface {} is int, not string
-```
-
-### 2. 定義
-
-### Example 1
-
-```go
-package main
-
-import (  
-    "fmt"
-)
-
-type SalaryCalculator interface {  
-    CalculateSalary() int //第一個是 method 名稱，第二個是 return type
-}
-
-// 長期雇工
-type Permanent struct {  
-    empId    int
-    basicpay int
-    pf       int
-}
-
-// 合約雇工
-type Contract struct {  
-    empId  int
-    basicpay int
-}
-
-// 長期雇工 實作 CalculateSalary()
-func (p Permanent) CalculateSalary() int {  
-    return p.basicpay + p.pf
-}
-
-// 合約雇工實作 CalculateSalary()
-func (c Contract) CalculateSalary() int {  
-    return c.basicpay
-}
-
-/*
-total expense is calculated by iterating though the SalaryCalculator slice and summing  
-the salaries of the individual employees  
-*/
-
-// 必須傳 slice 並且 type 是 SalaryCalculator
-func totalExpense(s []SalaryCalculator) {  
-    expense := 0
-    for _, v := range s {
-    	// v 必須都有實作 CalculateSalary()
-        expense = expense + v.CalculateSalary()
-    }
-    fmt.Printf("Total Expense Per Month $%d", expense)
-}
-
-func main() {  
-    pemp1 := Permanent{1, 5000, 20}
-    pemp2 := Permanent{2, 6000, 30}
-    cemp1 := Contract{3, 3000}
-    employees := []SalaryCalculator{pemp1, pemp2, cemp1}
-    totalExpense(employees)
-}
-
-// Total Expense Per Month $14050
-```
-
-### Implementing interfaces using pointer receivers vs value receivers
+###
 
 ```go
 package main
 
 import "fmt"
 
-type Describer interface {  
+type Describer interface {
     Describe()
 }
 
-type Person struct {  
+type Person struct {
     name string
     age  int
 }
 
-func (p Person) Describe() { //implemented using value receiver  
+func (p Person) Describe() { //implemented using value receiver
     fmt.Printf("%s is %d years old\n", p.name, p.age)
 }
 
-type Address struct {  
+type Address struct {
     state   string
     country string
 }
 
-func (a *Address) Describe() { //implemented using pointer receiver  
+func (a *Address) Describe() { //implemented using pointer receiver
     fmt.Printf("State %s Country %s", a.state, a.country)
 }
 
-func main() {  
+func main() {
     var d1 Describer // 聲明 d1 是 Describer(interface) 類型
     p1 := Person{"Sam", 25}
     d1 = p1  // 賦值 p1 到 d1
@@ -403,16 +452,16 @@ func main() {
 
     var d2 Describer // 聲明 d2 是 Describer(interface) 類型
     a := Address{"Washington", "USA"}
-    
-    //d2 = a 
+    //d2 = a
     // 當 assign value 時，必須要 implements interface 的內容，否則會 error
-    /* 
+    // 原因在於 a 並沒有實作 Describe()，實作 Describe() 的是 pointer receiver，因此不能說 a 實作 Describer interface
+    /*
        cannot use a (type Address) as type Describer
        in assignment: Address does not implement
        Describer (Describe method has pointer
        receiver)
     */
-    
+
     d2 = &a // 賦值 &a 到 d2
     d2.Describe()
 }
@@ -424,7 +473,63 @@ State Washington Country USA
 */
 ```
 
-### Embedding interfaces
+### <span id="implementing_multiple_interfaces"> Implementing multiple interfaces </span>
+
+
+type 可以實作多個 interface
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+type SalaryCalculator interface {
+    DisplaySalary()
+}
+
+type LeaveCalculator interface {
+    CalculateLeavesLeft() int
+}
+
+type Employee struct {
+    firstName string
+    lastName string
+    basicPay int
+    pf int
+    totalLeaves int
+    leavesTaken int
+}
+
+func (e Employee) DisplaySalary() {
+    fmt.Printf("%s %s has salary $%d", e.firstName, e.lastName, (e.basicPay + e.pf))
+}
+
+func (e Employee) CalculateLeavesLeft() int {
+    return e.totalLeaves - e.leavesTaken
+}
+
+func main() {
+    e := Employee {
+        firstName: "Naveen",
+        lastName: "Ramanathan",
+        basicPay: 5000,
+        pf: 200,
+        totalLeaves: 30,
+        leavesTaken: 5,
+    }
+    var s SalaryCalculator = e
+    s.DisplaySalary()
+    var l LeaveCalculator = e
+    fmt.Println("\nLeaves left =", l.CalculateLeavesLeft())
+}
+
+// Naveen Ramanathan has salary $5200
+// Leaves left = 25
+```
+
+### <span id="embedding_interfaces"> Embedding interfaces </span>
 
 ```go
 package main
@@ -441,6 +546,7 @@ type LeaveCalculator interface {
 	CalculateLeavesLeft() int
 }
 
+// 跟上面比較，多了一個這個
 type EmployeeOperations interface {
 	SalaryCalculator
 	LeaveCalculator
@@ -483,7 +589,7 @@ Leaves left = 25
 */
 ```
 
-##### Example 2
+### <span id="sort_interface"> 範例: 實作 sort interface </span>
 
 Go語言中也提供了sort函式，原始碼，src/sort/sort.go
 
@@ -538,13 +644,14 @@ type Person struct {
     Age  int
 }
 
+// Person struct method String()
 func (p Person) String() string {
     return fmt.Sprintf("%s: %d", p.Name, p.Age)
 }
 
 // ByAge implements sort.Interface for []Person based on
 // the Age field.
-type ByAge []Person
+type ByAge []Person // Declare a method on non-struct types.
 
 func (a ByAge) Len() int           { return len(a) }
 func (a ByAge) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
@@ -559,19 +666,13 @@ func main() {
     }
 
     fmt.Println(people)
-    sort.Sort(ByAge(people))
+    sort.Sort(ByAge(people)) // ByAg(people) because non-struct types
     fmt.Println(people)
 }
 
 // [Bob: 31 John: 42 Michael: 17 Jenny: 26]
 // [Michael: 17 Jenny: 26 Bob: 31 John: 42]
 ```
-
-
-
-
-
-
 
 ### <span id="stringer">Stringer Interface</span>
 
@@ -624,7 +725,7 @@ func (ip IPAddr) String() string {
 
 func main() {
    // key 為 string type
-   // value 為 IPAddr type 
+   // value 為 IPAddr type
    // 因此只有 IPAddr 會轉換成上方定義的 func 形式
   hosts := map[string]IPAddr{
     "loopback":  {127, 0, 0, 1},
@@ -797,7 +898,7 @@ func main() {
 ##### [範例 3](https://tour.golang.org/methods/23)
 
 rot13Reader
-s 
+s
 > Wiki [`ROT13`](https://en.wikipedia.org/wiki/ROT13)
 
 ```go
@@ -814,13 +915,13 @@ func rot13(b byte) byte {
   var a, z byte
   switch {
   // 判斷是小寫還是大寫的範圍
-  case 'a' <= b && b <= 'z': 
+  case 'a' <= b && b <= 'z':
     a, z = 'a', 'z'
   case 'A' <= b && b <= 'Z':
     a, z = 'A', 'Z'
    // 特殊符號就直接回傳
   default:
-    return b 
+    return b
   }
   // a & b 會自動轉成 ASCII 碼數字
   return (b-a+13)%(z-a+1) + a

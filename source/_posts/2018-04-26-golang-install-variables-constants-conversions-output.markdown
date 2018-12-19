@@ -179,6 +179,8 @@ import(
 
 ### command
 
+* [go clean](https://golang.org/pkg/cmd/go/internal/clean/)
+
 ```go
 go run
 // 直接執行
@@ -277,6 +279,10 @@ a, b := 3, 4 // 重複宣告，因為沒有新的參數，因此會報錯
 fmt.Println(a, b)
 // no new variables on left side of :=
 
+a, b := 1, 2
+a, b = 3, 4 // 這邊是用 = 不是 := 因此是 assign 新的值
+fmt.Println(a, b)
+
 age := 29
 age = "naveen" // golang 是強型別，一但定義就無法轉換成其他型別
 // cannot use "test" (type string) as type int in assignment
@@ -286,13 +292,14 @@ sum := float64(0) // 宣告並給值
 
 # <span id="constants"> 常數 Constants </span>
 
+constants 常用於用固定常數
+
 ```go
 package main
 
 import "fmt"
 
 func main() {
-	// Constants cannot be declared using the := syntax.
 	const Pi = 3.14
 	const World = "世界"
 	const (
@@ -313,25 +320,37 @@ func main() {
 // 2
 ```
 
-### Assign
-
-在 golang 當中，不允許不同 type 的 assign
+### constants 宣告後就不能重複 asssign
 
 ```go
 package main
 
 func main() {  
-    var defaultName = "Sam" //allowed
-    type myString string
-    var customName myString = "Sam" //allowed
-    customName = defaultName //not allowed
+    const a = 55 //allowed
+    a = 89 //reassignment not allowed
 }
-
-// cannot use defaultName (type string) as type myString in assignment
-// myString 是新建立的 type，相當於 string 的 alias，但因為是不同的 type，因此不能夠直接 assign
 ```
 
-但是在 const 沒有特別聲明是哪種型態時，是屬於 untyped
+### constants 在編譯的時候就要定義，不能在執行時才給值
+
+```go
+package main
+
+import (
+    "fmt"
+    "math"
+)
+
+func main() {
+    fmt.Println("Hello, playground")
+    var a = math.Sqrt(4)//allowed
+    const b = math.Sqrt(4)//not allowed
+}
+```
+
+### const 沒有特別聲明是哪種型態時，是屬於 untyped
+
+當 const assign 給任意 type 的值時，會由 untyped 會自動轉變為該 type，而 var 一開始就會給定 type，因此會 error
 
 ```go
 package main
@@ -341,7 +360,7 @@ import (
 )
 
 func main() {
-	const a = 5  // 改成 vat 就會 error
+	const a = 5  // 改成 var 就會 error
 	var intVar int = a
 	var int32Var int32 = a
 	var float64Var float64 = a
@@ -353,6 +372,31 @@ func main() {
 // int32Var 5 
 // float64Var 5 
 // complex64Var (5+0i)
+```
+
+### 也可以宣告 const 時，就定義 type
+
+```go
+const typedhello string = "Hello World"
+```
+
+### 在 golang 當中，不允許不同 type 的 assign
+
+```go
+package main
+
+func main() {
+    var defaultName = "Sam" //allowed
+    type myString string
+    var customName myString = "Sam" //allowed
+    customName = defaultName //not allowed 一個 type 是 myString,  一個是 string
+
+    var customName2 string = "Sam" // allowed
+    customName2 = defaultName // allowed 同樣是 string 因此是可以
+}
+
+// cannot use defaultName (type string) as type myString in assignment
+// myString 是新建立的 type，相當於 string 的 alias，但因為是不同的 type，因此不能夠直接 assign
 ```
 
 # <span id="conversions"> 轉型 conversions  </span>
@@ -424,7 +468,9 @@ sb     Type: bool, Value: true Err: <nil>
 */
 ```
 
-### string
+### String
+
+> Since a string is a slice of bytes, its possible to access each byte of a string
 
 ```go
 package main
@@ -473,12 +519,14 @@ func main() {
 
 	fmt.Printf("\n")
 
+	// Constructing string from slice of bytes
 	byteSlice := []byte{0x43, 0x61, 0x66, 0xC3, 0xA9}
 	str := string(byteSlice)
 	fmt.Println(str)
 
 	fmt.Printf("\n")
 
+	// Constructing a string from slice of runes
 	runeSlice := []rune{0x0053, 0x0065, 0x00f1, 0x006f, 0x0072}
 	runestr := string(runeSlice)
 	fmt.Println(runestr)
@@ -507,6 +555,53 @@ Señor
 **/
 ```
 
+### Length of the string
+
+必須用到 `utf8` package
+
+```go
+package main
+
+import (
+    "fmt"
+    "unicode/utf8"
+)
+
+
+
+func length(s string) {
+    fmt.Printf("length of %s is %d\n", s, utf8.RuneCountInString(s))
+}
+func main() {
+    word1 := "Señor"
+    length(word1)
+    word2 := "Pets"
+    length(word2)
+}
+```
+
+### Strings are immutable
+
+string 是不可變的
+
+```go
+package main
+
+import (
+    "fmt"
+)
+
+func mutate(s []rune) string {
+    s[0] = 'a' // 改變後
+    return string(s) // 在組成 string 傳回來
+}
+
+func main() {
+    h := "hello"
+    fmt.Println(mutate([]rune(h))) // 必須先轉成 rune slice type
+}
+```
+
 * [[golangbot] strings](https://golangbot.com/strings/)
 
 ### complex
@@ -530,6 +625,44 @@ func main() {
 // sum: (13+34i)
 // product: (-149+191i)
 ```
+
+
+### float
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	// float/float
+	fmt.Println(7 / 2.0)
+	s := []byte("1234567")
+	// int/int
+	fmt.Println(len(s) / 2.0)
+}
+// 3.5
+// 3
+```
+
+造成第一個是 `3.5` 第二個是 `3` 原因是在於
+
+```go
+// 如果左側運算子類型確定，則右側轉為左側類型再運算
+var num1 int = 7
+fmt.Println(num1 / 2)
+fmt.Println(num1 / 2.0)
+
+// 如果左側類型不確定，則根據右側類型推導左側類型
+fmt.Println(7 / 2)
+fmt.Println(7 / 2.0)
+```
+
+* [Conversions](https://golang.org/ref/spec#Conversions)
+* [go：整數除以浮點數的問題](https://segmentfault.com/q/1010000011519048)
+
 # <span id="output"> 輸出 output </span>
 
 `fmt` 是 golang 的一個套件，一開始必須 import 進來才可以使用

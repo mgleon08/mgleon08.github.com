@@ -20,14 +20,14 @@ categories: golang
 * `else` 一定要接續在 `}` 否則會 `syntax error`(因為 golang 會自動在後面加上 `;`)
 
 ```go
-if condition {  
+if condition {
 } else if condition {
 } else {
 }
 ```
 
 ```go
-if statement; condition {  
+if statement; condition {
 }
 ```
 
@@ -72,7 +72,7 @@ Golang 中只有 for 一種迴圈，但能夠達成 for、while、foreach 多種
 ### syntaxs
 
 ```go
-for initialisation; condition; post {  
+for initialisation; condition; post {
 }
 ```
 
@@ -106,7 +106,7 @@ func main() {
 		fmt.Printf("%d ", i)
 		i += 2
 	}
-	
+
 	//multiple initialisation and increment
 	for no, i := 10, 1; i <= 10 && no <= 19; i, no = i+1, no+1 {
 	    fmt.Printf("%d * %d = %d\n", no, i, no*i)

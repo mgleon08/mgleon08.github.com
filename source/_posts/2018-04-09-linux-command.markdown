@@ -10,7 +10,23 @@ categories: linux
 
 <!-- more --> 
 
-# screen
+* [screen](#screen)
+* [top](#top)
+* [ps](#ps)
+* [df](#df)
+* [jobs](#jobs)
+* [curl](#curl)
+* [tar](#tar)
+* [readlink](#readlink)
+* [ln](#ln)
+* [awk](#awk)
+* [/dev/null](#/dev/null)
+* [2>&1](#2&1)
+* [scp](#scp)
+* [xargs](#xargs)
+* [> & >>](#arrow)
+
+# <span id="screen"> screen </span>
 
 > 可以讓一個終端機當成好幾個來使用
 
@@ -43,7 +59,7 @@ Ctrl + A + D
 
 * [使用 Screen 指令操控 UNIX/Linux 終端機的教學與範例](https://blog.gtwang.org/linux/screen-command-examples-to-manage-linux-terminals/)
 
-# top
+# <span id="top"> top </span>
 
 > 能夠即時顯示系統中各個進程的資源佔用狀況
 
@@ -53,7 +69,7 @@ Ctrl + A + D
 * [為什麼 Linux 的 htop 命令完勝 top 命令](https://linux.cn/article-3141-1.html)
 * [Linux 用 ps 與 top 指令找出最耗費 CPU 與記憶體資源的程式](https://blog.gtwang.org/linux/ps-top-find-processes-by-cpu-memory-usage/)
 
-# ps
+# <span id="ps"> ps </span>
 
 > Process Status的縮寫。用來列出系統中當前運行的那些進程。  
 > 
@@ -68,7 +84,7 @@ ps auxs
 
 * [每天一個linux命令（41）：ps命令](http://www.cnblogs.com/peida/archive/2012/12/19/2824418.html)
 
-# df
+# <span id="df"> df </span>
 
 > 用來檢查linux伺服器的檔案系統的磁碟空間佔用情況。
 
@@ -79,7 +95,7 @@ df -h
 
 * [每天一個linux命令（33）：df 命令](http://www.cnblogs.com/peida/archive/2012/12/07/2806483.html)
 
-# jobs
+# <span id="jobs"> jobs </span>
 
 > 可以看到背景目前有的指令狀況
 
@@ -100,18 +116,20 @@ bg %jobnumber 將任務放到後台中去處理
 * [ubuntu hier](http://manpages.ubuntu.com/manpages/xenial/man7/hier.7.html)
 * [鳥哥的私房菜](http://linux.vbird.org/)
 
-# curl
+# <span id="curl"> curl </span>
 
 能夠通過http、ftp等方式下載文件，也能夠上傳文件。
 
 ```ruby
 curl -O https://johnvansickle.com/ffmpeg/releases/ffmpeg-release-64bit-static.tar.xz
+
+// -L 如果有做跳轉，-L 可以一直 follow 下去
 ```
 
 * [一天一條Linux指令-curl](https://blog.csdn.net/u012313689/article/details/53038398)
 
 
-# tar
+# <span id="tar"> tar </span>
 
 壓縮，解壓縮
 
@@ -145,7 +163,7 @@ linux ffmpeg 下載流程
 * [GNU / Linux 各種壓縮與解壓縮指令](http://note.drx.tw/2008/04/command.html)
 
 
-# readlink
+# <span id="readlink"> readlink </span>
 
 用來找出符號鏈接所指向的位置，如果是 symbolic link 加上 `-f` 可以一直查下去直到最後一個
 
@@ -155,7 +173,7 @@ readlink -f /usr/bin/awk
 
 * [readlink命令](https://blog.csdn.net/diabloneo/article/details/7173438)
 
-# ln
+# <span id="ln"> ln </span>
 
 ln 建立的連結分為 “硬連結” (hard link) 及 “軟連結” (symbolic link), 預設 ln 會使用 hard link。
 
@@ -169,18 +187,33 @@ ln -s /home/wordpress /var/www/wpmu
 * [ln — 建立連結指令](https://www.phpini.com/linux/ln-create-link-command)
 
 
-# awk
+# <span id="awk"> awk </span>
 
 文本分析工具，它是 Linux 中功能強大的數據處理引擎之一。相對於 grep 的查找，sed 的編輯
 
 ```ruby
-awk ' /MA/ { print $1 }' list # 打印包含 MA 的行中的第一個單詞。
-awk [options] 'script' file
+# awk 動作 文件名
+awk '{print $0}' test.txt 
+# $0 印出所有的，$1, $2..，則是根據指的是第1個字段, 第2個字段..
+awk -F '/' '/MA/ { print $1 }' test.txt 
+# 打印包含 MA 的行中的第一個單詞。
+pwd | awk -F '/' '{print NR ") " $NF}' 
+# -F 指定分隔參數，NF 表示當前行有多少段落，$NF 最後一個字段 
+```
+另外也提供了一些 func
+
+```ruby
+tolower()：轉小寫
+length()：字串長度
+substr()：子字串
+rand()：隨機數
 ```
 
-* [每天學習一個命令：awk ](http://einverne.github.io/post/2018/01/awk.html)
 
-# /dev/null
+* [每天學習一個命令：awk ](http://einverne.github.io/post/2018/01/awk.html)
+* [awk 入門課程](http://www.ruanyifeng.com/blog/2018/11/awk.html)
+
+# <span id="/dev/null"> /dev/null </span>
 
 `/dev/null` 在 Unix 或 Linux 就像黑洞, 會將任何導入的東西吃掉, 簡單來說就是程式會照常執行, 但不會輸出任何執行結果
 
@@ -193,7 +226,7 @@ cp /dev/null access.log # 複製一份空的蓋掉原本的檔案
 
 * [5 Ways to Empty or Delete a Large File Content in Linux](https://www.tecmint.com/empty-delete-file-content-linux/)
 
-# 2>&1
+# <span id="2&1"> 2>&1 </span>
 
 `>/dev/null 2>&1`
 
@@ -213,7 +246,7 @@ cp /dev/null access.log # 複製一份空的蓋掉原本的檔案
 
 * [Unix 重新導向跟 2>&1](http://ibookmen.blogspot.com/2010/11/unix-2.html)
 
-# scp
+# <span id="scp"> scp </span>
 
 複製本機檔案到遠端機器，也可以反向
 
@@ -229,7 +262,7 @@ scp myuser@192.168.0.1:/path/file2 /path/file1
 
 * [Linux 的 scp 指令用法教學與範例：遠端加密複製檔案與目錄](https://blog.gtwang.org/linux/linux-scp-command-tutorial-examples/)
 
-# xargs
+# <span id="xargs"> xargs </span>
 
 xargs 這個指令會標準輸入（standard input）讀取資料，並以空白字元或換行作為分隔，將輸入的資料切割成多個字串，並將這些字串當成指定指令（預設為 /bin/echo）執行時的參數。
 
@@ -250,3 +283,10 @@ echo a b c d e f | xargs -n 3
 ```
 
 * [Linux 系統 xargs 指令範例與教學](https://blog.gtwang.org/linux/xargs-command-examples-in-linux-unix/)
+
+# <span id="arrow"> > & >> </span>
+
+```ruby
+echo hi > test # 覆蓋整個檔案
+echo hello >> test # 夾在檔案最後一行
+```
