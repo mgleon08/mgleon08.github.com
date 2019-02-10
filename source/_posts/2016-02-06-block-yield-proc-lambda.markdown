@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby 中的 Block & Yield & Proc & Lambda & method"
+title: "Ruby Tips - Block & Yield & Proc & Lambda & method"
 date: 2016-02-06 10:37:37 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 在學 ruby 時，經常會搞不清楚這幾個，因為都非常相像!  

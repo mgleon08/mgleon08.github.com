@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Golang 初探 - install, variables, constants, conversions And output"
+title: "Golang - install, variables, constants, conversions And output"
 date: 2018-04-26 22:38:09 +0800
 comments: true
 categories: golang

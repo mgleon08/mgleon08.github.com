@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Forwardable 轉發 & Delegate 委派"
+title: "Ruby Tips - Forwardable 轉發 & Delegate 委派"
 date: 2016-05-29 20:15:26 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 在 OO 的世界裡，經常會去用到不同 class 的 method，因此透過這個方法，可以將不同 class 的 method `轉發` 過來!

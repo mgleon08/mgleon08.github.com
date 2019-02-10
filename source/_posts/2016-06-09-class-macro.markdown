@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Class Macro (Ruby’s declarative style)"
+title: "Ruby Tips - Class Macro (Ruby’s declarative style)"
 date: 2016-06-09 20:14:09 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
+
 Class Macro 就是在 rails 的 ActiveRecord 中，經常會看到，`validates` `belongs_to` `hsa_manay` 等等的宣告
 
 <!-- more -->
@@ -103,5 +104,6 @@ puts book.price_origin
 #=> 100
 ```
 
-參考文件：  
-[How To Write "Macros" in Ruby](https://pragmaticstudio.com/blog/2015/4/14/ruby-macros)
+參考文件：
+
+* [How To Write "Macros" in Ruby](https://pragmaticstudio.com/blog/2015/4/14/ruby-macros)

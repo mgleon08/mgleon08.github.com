@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "用 ruby 來 Calling shell commands"
+title: "Ruby Tips - 用 ruby 來 Calling shell commands"
 date: 2016-02-07 14:31:31 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 可以直接透過 ruby 來執行 commands 的指令。
@@ -59,13 +59,13 @@ exec(cmd) # Note: this will never be reached because of the line above
 
 官方文件：
 
-[Kernel](http://ruby-doc.org/core-2.3.0/Kernel.html)  
-[Open3 - 可執行精密的操作](http://ruby-doc.org/stdlib-2.3.0/libdoc/open3/rdoc/Open3.html#method-c-pipeline)
+* [Kernel](http://ruby-doc.org/core-2.3.0/Kernel.html)
+* [Open3 - 可執行精密的操作](http://ruby-doc.org/stdlib-2.3.0/libdoc/open3/rdoc/Open3.html#method-c-pipeline)
 
 參考文件：
 
-[Input & output in Ruby](http://zetcode.com/lang/rubytutorial/io/)  
-[Calling shell commands from Ruby](http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby)  
-[6 Ways to Run Shell Commands in Ruby Tuesday](http://tech.natemurray.com/2007/03/ruby-shell-commands.html)  
-[Ruby#open 知多少？](https://blog.alphacamp.co/2016/06/30/ruby-open/)
-[, Difference between exec, system and %x() or Backticks](https://stackoverflow.com/questions/6338908/ruby-difference-between-exec-system-and-x-or-backticks)
+* [Input & output in Ruby](http://zetcode.com/lang/rubytutorial/io/)
+* [Calling shell commands from Ruby](http://stackoverflow.com/questions/2232/calling-shell-commands-from-ruby)
+* [6 Ways to Run Shell Commands in Ruby Tuesday](http://tech.natemurray.com/2007/03/ruby-shell-commands.html)
+* [Ruby#open 知多少？](https://blog.alphacamp.co/2016/06/30/ruby-open/)
+* [, Difference between exec, system and %x() or Backticks](https://stackoverflow.com/questions/6338908/ruby-difference-between-exec-system-and-x-or-backticks)

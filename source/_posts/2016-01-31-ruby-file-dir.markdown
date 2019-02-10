@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "用 ruby 進行 File ＆ Dir 檔案操作"
+title: "Ruby Tips - File ＆ Dir 檔案操作"
 date: 2016-01-31 19:07:00 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 用 ruby 來操作 file ＆ Dir 檔案。
 

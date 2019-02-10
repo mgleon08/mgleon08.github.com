@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Ruby logger, MultiIO"
+title: "Ruby Tips - MultiIO logger"
 date: 2016-10-17 17:47:38 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
+
 logger 可以方便我們去找尋問題在哪邊，因此設定好 logger 訊息是非常重要的
 
 <!-- more -->

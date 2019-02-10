@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "OptionParser"
+title: "Ruby Tips - OptionParser"
 date: 2016-08-30 10:30:52 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 ruby 裡內建的強大工具，可以解析命令行參數

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Module vs Class"
+title: "Ruby Tips - Module vs Class"
 date: 2016-03-26 09:34:18 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 在 ruby 中經常會使用到 `Class`，也常常看到 `Module` 
@@ -13,11 +13,13 @@ categories: ruby
 
 先看看兩者的差異
 
-#Module
+# Module
+
 * 無法 instantiated（也就是沒有 new method）
 * 可以被 include & extend
 
-#Class
+# Class
+
 * 可以 instantiated
 * 無法被 include
 
@@ -29,7 +31,8 @@ categories: ruby
 
 基本上兩種方式都有辦法達成同樣的效果，但差別就在於維護上
 
-#維護
+# 維護
+
 用 Class 的話，勢必一定要先 new 出來，並且預設會執行 `initialize` 這個method  
 就可以預先設定好一些參數，看起來就會比較簡潔
 
@@ -79,14 +82,16 @@ Man.yo #=> 'yo Man'
 因此使用上，看習慣，可維護性等等，去判斷要用 module or class  
 再細分要放在 `cocern` or `service object` or `lib`
 
-官方文件：  
-[module_function](http://apidock.com/ruby/Module/module_function)
+官方文件：
 
-參考文件：  
-[module include extend](http://mgleon08.github.io/blog/2016/02/24/include-extend-require/)
-[class與module的差異? class如何繼承](http://railsfun.tw/t/class-module-class/402)  
-[Difference between a class and a module](http://stackoverflow.com/questions/151505/difference-between-a-class-and-a-module)  
-[Rails利用Module整理Model
-](http://motion-express.com/blog/20141011-rails-module-model)  
-[Ruby class 基本的覆寫(override)及繼承(inheritance)](http://motion-express.com/blog/20141209-ruby-class-inheritance)  
+* [module_function](http://apidock.com/ruby/Module/module_function)
+
+參考文件：
+
+* [module include extend](http://mgleon08.github.io/blog/2016/02/24/include-extend-require/)
+* [class與module的差異? class如何繼承](http://railsfun.tw/t/class-module-class/402)
+* [Difference between a class and a module](http://stackoverflow.com/questions/151505/difference-between-a-class-and-a-module)
+* [Rails利用Module整理Model
+](http://motion-express.com/blog/20141011-rails-module-model)
+[Ruby class 基本的覆寫(override)及繼承(inheritance)](http://motion-express.com/blog/20141209-ruby-class-inheritance)
 [Ruby當中的class method和instance method差在哪？](http://motion-express.com/blog/20141208-class-method-and-instance-method)

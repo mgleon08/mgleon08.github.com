@@ -1,10 +1,11 @@
 ---
 layout: post
-title: "Dynamic Classes & Methods (Struct, send(), alias_method, alias_attribute, define_method eval)"
+title: "Ruby Tips - Dynamic Classes & Methods"
 date: 2016-04-19 22:16:35 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 --- 
+
 ruby 可以很方便的動態產生 Classes 和 Methods
 
 <!-- more -->
@@ -189,16 +190,18 @@ eval "str + ' Fred'"                      #=> "hello Fred"
 eval "str + ' Fred'", get_binding("bye")  #=> "bye Fred"
 ```
 
-官方文件：  
-[Struct](http://ruby-doc.org/core-2.2.0/Struct.html)  
-[send()](http://apidock.com/ruby/Object/__send__)  
-[alias_method()](http://apidock.com/ruby/Module/alias_method)  
-[method define_method](http://apidock.com/ruby/Module/define_method)   
-[eval](http://apidock.com/ruby/Kernel/eval) 
+官方文件：
+
+* [Struct](http://ruby-doc.org/core-2.2.0/Struct.html)
+* [send()](http://apidock.com/ruby/Object/__send__)
+* [alias_method()](http://apidock.com/ruby/Module/alias_method)
+* [method define_method](http://apidock.com/ruby/Module/define_method)
+* [eval](http://apidock.com/ruby/Kernel/eval)
 
 
-參考文件：  
-[What does send() do in Ruby?](http://stackoverflow.com/questions/3337285/what-does-send-do-in-ruby)  
-[alias vs alias_method](https://gist.github.com/plusor/6104625)    
-[如何設計出漂亮的 Ruby APIs](https://ihower.tw/blog/archives/4797)   
-[ruby动态编程](http://rainlife.iteye.com/blog/375531)
+參考文件：
+
+* [What does send() do in Ruby?](http://stackoverflow.com/questions/3337285/what-does-send-do-in-ruby)
+* [alias vs alias_method](https://gist.github.com/plusor/6104625)
+* [如何設計出漂亮的 Ruby APIs](https://ihower.tw/blog/archives/4797)
+* [ruby动态编程](http://rainlife.iteye.com/blog/375531)

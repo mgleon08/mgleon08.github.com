@@ -1,23 +1,23 @@
 ---
 layout: post
-title: "引數傳遞 ** double splat operator (extract_options!)"
+title: "Ruby Tips - 引數傳遞 extract_options"
 date: 2016-03-26 09:28:59 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 經常會看到 `argument` 和 `parameter` 兩個很類似，卻代表的不同意義。  
 另外也有許多符號 * ** & 可以使用。
 
 <!-- more -->
 
-#介紹
+# 介紹
 * argument(actual argument 實際的值) 引數  
 「呼叫端」傳給呼叫對象的「值」
 
 * parameter(formal parameter 代表參數的符號) = 參數  
 「被呼叫端」用來接收引數的「變數」
 
-#範例
+# 範例
 有預設值的 `parameter` 要相連在一起
 
 ```ruby
@@ -54,7 +54,7 @@ sample(3, 1)
 #=> [3, 2, 1] #有兩個值，會先將第一個值給有預設值的第一個 a，第二個才補到 c
 ```
 
-#* Array
+# * Array
 * 當 `parameter` 前面加上 `*` 代表 `Array` 的意思
 * [extract_options!](http://apidock.com/rails/ActiveSupport/CoreExtensions/Array/ExtractOptions/extract_options!)
 
@@ -95,7 +95,7 @@ sample(1,2,3,4,5)
 #=> [1, [2, 3, 4], 5]
 ```
 
-###另一種用法將 Array 展開來
+### 另一種用法將 Array 展開來
 
 ```ruby
 def sample(a=1, b=2, *c)
@@ -122,7 +122,7 @@ sample(*array)
 #=> [4, [5, 6, 7], 8]
 ```
 
-#** Hash
+# ** Hash
 * 當 `parameter` 前面加上 `**` 代表 `Hash` 的意思
 * 一定要擺到最後一個
 * 只能有一個
@@ -176,7 +176,7 @@ sample(4, {'a':1, 'v':2}, 'c':4)
 #=> [4, {:a=>1, :v=>2}, {:c=>4}]
 ```
 
-###另一種用法將 Hash 展開
+### 另一種用法將 Hash 展開
 
 ```ruby
 def sample(a, b, **c)
@@ -220,7 +220,7 @@ sample(**hash, **hash2, 'test':100)
 sample(**hash, **hash2, 'test':100, 'b':123)
 #=> [1, 123, {:q=>4, :w=>5, :e=>6, :r=>4, :t=>{:y=>5, :u=>6}, :test=>100}]
 ```
-#& 區塊傳遞
+# & 區塊傳遞
 
 若要調用在變數，前綴一個『&』符號，並且要放在最後一個
 
@@ -242,7 +242,7 @@ end
 puts array.inspect
 ```
 
-#綜合使用
+# 綜合使用
 
 ```ruby
 def sample(a, *b, **c, &d)  

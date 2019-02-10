@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "用 instance_eval & class_eval 自己加 method! "
+title: "Ruby Tips - 用 instance_eval & class_eval 自己加 method!"
 date: 2016-03-08 22:46:28 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 有時候會發現有些 object，沒有設定 setter & getter ，剛好又需要用到，這時就可以派上用場拉。

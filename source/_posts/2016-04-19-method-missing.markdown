@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Method Missing"
+title: "Ruby Tips - Method Missing"
 date: 2016-04-19 22:18:09 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 當 ruby 找不到 method 就會 call 這個 method

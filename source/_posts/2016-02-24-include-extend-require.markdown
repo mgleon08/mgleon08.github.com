@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby 中的 include extend require load"
+title: "Ruby Tips - include vs extend vs require vs load"
 date: 2016-02-24 21:49:30 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 常常搞不清楚，`include`，`extend`，`require`，`load`這幾個差異。
@@ -138,12 +138,14 @@ load "sample.rb" #load 要加 .rb
 ```
 
 
-官方文件：  
-[ruby-doc](http://ruby-doc.org/core-2.3.0/)  
+官方文件：
 
-參考文件：  
-[Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」](http://blog.eddie.com.tw/2015/03/24/class-and-module/)   
-[Ruby 語法放大鏡之「你知道 require 幫你做了什麼事嗎?」](http://kaochenlong.com/2016/05/01/require/)  
-[require、require_relative是什麼意思？差在哪？](http://motion-express.com/blog/20150407-ruby-require-require-relative-load)  
-[環境設定與Bundle](https://ihower.tw/rails4/environments-and-bundler.html)  
-[load 與 require](http://openhome.cc/Gossip/Ruby/LoadRequire.html)
+* [ruby-doc](http://ruby-doc.org/core-2.3.0/)
+
+參考文件：
+
+* [Ruby 語法放大鏡之「類別跟模組有什麼不一樣?」](http://blog.eddie.com.tw/2015/03/24/class-and-module/)
+* [Ruby 語法放大鏡之「你知道 require 幫你做了什麼事嗎?」](http://kaochenlong.com/2016/05/01/require/)
+* [require、require_relative是什麼意思？差在哪？](http://motion-express.com/blog/20150407-ruby-require-require-relative-load)
+* [環境設定與Bundle](https://ihower.tw/rails4/environments-and-bundler.html)
+* [load 與 require](http://openhome.cc/Gossip/Ruby/LoadRequire.html)

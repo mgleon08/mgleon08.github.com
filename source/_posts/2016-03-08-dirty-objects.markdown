@@ -3,7 +3,7 @@ layout: post
 title: "Dirty Objects 追蹤 Model 的屬性是否有改變"
 date: 2016-03-08 22:36:09 +0800
 comments: true
-categories: ruby
+categories: rails
 ---
 
 可用來觀察，追蹤 Model 的屬性是否有改變  

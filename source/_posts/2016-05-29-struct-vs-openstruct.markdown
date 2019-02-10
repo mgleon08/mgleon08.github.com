@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Struct vs OpenStruct"
+title: "Ruby Tips - Struct vs OpenStruct"
 date: 2016-05-29 20:18:53 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 在 ruby 當中，經常會要定義一個新的類別，如果覺得每次都要寫 `class xxx` 太麻煩，就可以用 struct & OpenStruct 快速的產生出來!
@@ -156,4 +156,4 @@ expect(brewer.brew).to eq(true)
 參考文件：  
 [When should I use Struct vs. OpenStruct?](http://stackoverflow.com/questions/1177594/when-should-i-use-struct-vs-openstruct#answer-4459132)  
 [The simple but powerful Ruby Struct](https://www.leighhalliday.com/ruby-struct)  
-[模擬class物件：Ruby當中Struct及OpenStruct的使用](http://motion-express.com/blog/20150406-ruby-struct-and-ostruct)  
+[模擬class物件：Ruby當中Struct及OpenStruct的使用](http://motion-express.com/blog/20150406-ruby-struct-and-ostruct)

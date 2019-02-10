@@ -3,7 +3,7 @@ layout: post
 title: "Serialize & Store 將 object 塞在欄位裡"
 date: 2016-03-08 22:33:45 +0800
 comments: true
-categories: ruby
+categories: rails
 ---
 當欄位上需要塞比較多 `data` 時就可以使用，相當便利。
 

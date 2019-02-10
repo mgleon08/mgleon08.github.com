@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "ERB template"
+title: "Ruby Tips - ERB template"
 date: 2016-08-30 10:31:47 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 相信學過 rails 一定知道 erb，可以很方便地將 ruby code 寫在 view 中
@@ -46,7 +46,7 @@ ruby template.rb
 #1. hi
 #2. hello
 ```
-###也可以利用 erb 來寫設定檔
+### 也可以利用 erb 來寫設定檔
 
 * [用 Yaml 來寫文件, 設定檔](http://mgleon08.github.io/blog/2016/02/07/yaml/)
 

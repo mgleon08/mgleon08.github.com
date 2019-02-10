@@ -3,7 +3,7 @@ layout: post
 title: "環境變數 Environment variable"
 date: 2016-10-17 17:33:41 +0800
 comments: true
-categories: ruby
+categories: shell
 ---
 
 為什麼需要環境變數?

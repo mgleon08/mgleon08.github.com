@@ -1,16 +1,16 @@
 ---
 layout: post
-title: "Default Args"
+title: "Ruby Tips - Default Args || vs fetch vs merge"
 date: 2016-05-29 20:22:19 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 
 很常時候，需要給變數一個預設值，因此有以下方法，都可以設定預設值
 
 <!-- more -->
 
-#||
+# ||
 
 只要是空值，或是 false, nil 就會回傳後面的預設值
 
@@ -27,7 +27,7 @@ h['d'] || 8
 #=> 8
 ```
 
-#fetch
+# fetch
 
 即使是 nil, false 也會回傳，只有在空值的時候回傳預設值
 
@@ -81,7 +81,7 @@ batman.fetch(:powers, get_batman_powers) # get_batman_powers is an expensive cal
 batman.fetch(:powers) { get_batman_powers }
 ```
 
-#merge
+# merge
 只有在 merge 的參數裡有同樣的值，才會覆蓋掉 default 的值
 
 ```ruby

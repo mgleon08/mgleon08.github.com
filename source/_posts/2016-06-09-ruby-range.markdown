@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Range"
+title: "Ruby Tips - Range"
 date: 2016-06-09 20:13:54 +0800
 comments: true
-categories: ruby
+categories: ruby ruby_tips
 ---
 經常會使用 range 去判斷某個值，是否在某個區間  
 ruby 也提供很多好用的方法去判斷，cover?, include? 等等
