@@ -9,10 +9,13 @@
   <meta name="author" content="LeonJi">
 
   
-  <meta name="description" content="大部分人都只知道，基本指令 ls cd 等等，但其實還有很多好用的指令 screen
+  <meta name="description" content="大部分人都只知道，基本指令 ls cd 等等，但其實還有很多好用的指令 permission - sudo, su, chown, chmod
+screen
 top
 ps
 df
+du
+find
 jobs
 curl
 tar
@@ -21,9 +24,7 @@ ln
 awk
 /dev/null
 2>&amp;1
-scp
-xargs
-> &amp; >> screen 可以讓一個終端機當成好幾個來使用 參數 &hellip;">
+scp &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -103,6 +104,9 @@ xargs
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby-tips/">Ruby Tips</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
   <li><a href="/tool">Tool</a></li>
   <li><a href="/about">About</a></li>
 </ul>
@@ -144,10 +148,13 @@ xargs
 <p></p>
 
 <ul>
+<li><a href="#permission">permission - sudo, su, chown, chmod</a></li>
 <li><a href="#screen">screen</a></li>
 <li><a href="#top">top</a></li>
 <li><a href="#ps">ps</a></li>
 <li><a href="#df">df</a></li>
+<li><a href="#du">du</a></li>
+<li><a href="#find">find</a></li>
 <li><a href="#jobs">jobs</a></li>
 <li><a href="#curl">curl</a></li>
 <li><a href="#tar">tar</a></li>
@@ -159,7 +166,37 @@ xargs
 <li><a href="#scp">scp</a></li>
 <li><a href="#xargs">xargs</a></li>
 <li><a href="#arrow">> &amp; >></a></li>
+<li><a href="#envsubst">envsubst</a></li>
+<li><a href="#getent">getent</a></li>
 </ul>
+
+
+<h1><span id="permission"> permission - sudo, su, chown, chmod </span></h1>
+
+<ul>
+<li>sudo - 暫時切到最高權限</li>
+<li>su - 切換身份</li>
+<li>chown - 更改檔案／資料夾的擁有者和群組</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">sudo</span> <span class="n">chown</span> <span class="ss">root</span><span class="p">:</span><span class="n">root</span> <span class="nb">test</span><span class="o">.</span><span class="n">txt</span>
+</span><span class='line'><span class="c1"># -R Recursive 所有底下檔案</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">chown</span> <span class="o">-</span><span class="n">R</span> <span class="ss">root</span><span class="p">:</span><span class="n">root</span> <span class="nb">test</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>chmod - 更改檔案權限</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">chmod</span> <span class="mi">644</span> <span class="nb">test</span><span class="o">.</span><span class="n">txt</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 <h1><span id="screen"> screen </span></h1>
@@ -262,6 +299,42 @@ xargs
 
 <ul>
 <li><a href="http://www.cnblogs.com/peida/archive/2012/12/07/2806483.html">每天一個linux命令（33）：df 命令</a></li>
+</ul>
+
+
+<h1><span id="df"> du </span></h1>
+
+<blockquote><p>顯示目錄或是檔案的大小，與df命令不同的是 du 是對文件和目錄磁盤使用的空間的查看。</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 找目前目錄底下，檔案大小排序的前 5 個</span>
+</span><span class='line'><span class="n">du</span> <span class="o">-</span><span class="n">sh</span> <span class="o">*</span> <span class="o">|</span> <span class="n">sort</span> <span class="o">-</span><span class="n">nr</span> <span class="o">|</span> <span class="n">head</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="http://www.cnblogs.com/peida/archive/2012/12/10/2810755.html">每天一個linux命令（34）：du 命令</a></li>
+<li><a href="https://hk.saowen.com/a/e37a86c7ef13d56aeae532ac5bdd6547898449d9c5f6ba35ab819ceea2383b18">Linux系統中df與du命令查看分區大小不一致問題分析</a></li>
+<li><a href="https://medium.com/@jackyu/%E7%A7%91%E6%99%AE-df-%E5%92%8C-du-%E6%8C%87%E4%BB%A4%E7%82%BA%E4%BD%95%E6%9C%89%E6%99%82%E5%80%99%E9%A1%AF%E7%A4%BA%E4%B8%8D%E5%90%8C%E5%92%8C%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-91ed73c15dbe">[科普] df 和 du 指令為何有時候顯示不同和如何解決</a></li>
+<li><a href="https://blog.gtwang.org/linux/linux-sort-command-tutorial-and-examples/">Linux 的 sort 排序指令教學與常用範例整理</a></li>
+<li><a href="https://www.dreamjtech.com/content/linux%E5%A6%82%E4%BD%95%E6%89%BE%E5%87%BA%E4%BD%94%E7%94%A8%E8%BC%83%E5%A4%A7%E7%A9%BA%E9%96%93%E7%9A%84%E6%AA%94%E6%A1%88">linux如何找出佔用較大空間的檔案</a></li>
+</ul>
+
+
+<h1><span id="find"> find </span></h1>
+
+<blockquote><p>支援非常多的搜尋選項，可以依照權限、擁有者、群組、檔案類型、日期與大小等條件來搜尋</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 刪除 css gz js 大於 30 天以上的檔案</span>
+</span><span class='line'><span class="n">find</span> <span class="o">*.</span><span class="n">css</span> <span class="o">*.</span><span class="n">gz</span> <span class="o">*.</span><span class="n">js</span> <span class="o">-</span><span class="n">mtime</span> <span class="o">+</span><span class="mi">30</span> <span class="o">|</span> <span class="n">xargs</span> <span class="n">rm</span> <span class="o">-</span><span class="n">rf</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://blog.gtwang.org/linux/unix-linux-find-command-examples/">Unix/Linux 的 find 指令使用教學、技巧與範例整理</a></li>
 </ul>
 
 
@@ -377,6 +450,17 @@ xargs
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># -h hard link</span>
 </span><span class='line'><span class="c1"># -s symbolic link</span>
 </span><span class='line'><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="sr">/home/</span><span class="n">wordpress</span> <span class="sr">/var/</span><span class="n">www</span><span class="o">/</span><span class="n">wpmu</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">ln</span> <span class="o">-</span><span class="n">s</span> <span class="o">~</span><span class="sr">/test.txt link.txt</span>
+</span><span class='line'><span class="sr">cat link.txt</span>
+</span><span class='line'><span class="sr"># this is text.txt</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -543,6 +627,65 @@ xargs
 </span><span class='line'><span class="n">echo</span> <span class="n">hello</span> <span class="o">&gt;&gt;</span> <span class="nb">test</span> <span class="c1"># 夾在檔案最後一行</span>
 </span></code></pre></td></tr></table></div></figure>
 
+
+<h1><span id="envsubst"> envsubst </span></h1>
+
+<blockquote><p>The envsubst program substitutes the values of environment variables.</p></blockquote>
+
+<p>利用環境變數(environment variables)搭配 envsubst 來產生設定檔。</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># myconfig</span>
+</span><span class='line'><span class="no">My</span> <span class="nb">name</span> <span class="n">is</span> <span class="err">$</span><span class="p">{</span><span class="no">USER</span><span class="p">}</span>
+</span><span class='line'><span class="no">My</span> <span class="n">home</span> <span class="n">path</span> <span class="n">is</span> <span class="err">$</span><span class="p">{</span><span class="no">HOME</span><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">envsubst</span> <span class="o">&lt;</span> <span class="n">myconfig</span><span class="o">.</span><span class="n">conf</span>
+</span><span class='line'><span class="c1"># My name is foo</span>
+</span><span class='line'><span class="c1"># My home path is /home/foo</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重新導向產生設定檔案</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">envsubst</span> <span class="o">&lt;</span> <span class="n">myconfig</span><span class="o">.</span><span class="n">conf</span> <span class="o">&gt;</span> <span class="n">config</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>如果只想替換某個變數</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">envsubst</span> <span class="s1">&#39;$USER&#39;</span> <span class="o">&lt;</span> <span class="n">myconfig</span><span class="o">.</span><span class="n">conf</span> <span class="o">&gt;</span> <span class="n">config</span><span class="o">.</span><span class="n">conf</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://myapollo.com.tw/2018/02/23/linux-command-envsubst/">利用 Linux 指令 envsubst 產生設定檔</a></li>
+</ul>
+
+
+<h1><span id="getent"> getent </span></h1>
+
+<p>查看系統的數據庫中的相關記錄</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">getent</span> <span class="n">group</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://ywnz.com/linux/getent/">getent命令</a></li>
+</ul>
+
 </div>
 
 
@@ -612,7 +755,7 @@ xargs
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - LeonJi -
+  Copyright &copy; 2019 - LeonJi -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
 </p>
 

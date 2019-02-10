@@ -1,0 +1,540 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Ruby_tips | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/ruby-tips/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2019-02-10T23:54:00+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Tips - Super vs Super()]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-super/"/>
+    <updated>2019-02-04T18:19:10+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-super</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p><code>super</code> 可以在同一個 method，呼叫上層的同個 method，但有沒有 <code>()</code> 行為上會有點不一樣</p>
+
+<h1>super</h1>
+
+<p>return <code>ArgumentError</code> 代表 <code>super</code> 會將 <code>Dog say</code> 的參數，帶到 <code>Animal say</code>，因此造成 <code>ArgumentError</code></p>
+
+<p>如果剛好 <code>Animal say</code> 也有帶參數，那就不會 error</p>
+
+<pre><code class="ruby">class Animal
+  def say
+    puts 'hi'
+  end
+end
+
+class Dog &lt; Animal
+  def say(text)
+    super
+
+    puts text
+  end
+end
+
+Dog.new.say('Woo')
+# =&gt; ArgumentError (wrong number of arguments (given 1, expected 0))
+</code></pre>
+
+<h1>super()</h1>
+
+<p>而 <code>super()</code> 代表不帶任何參數的呼叫 <code>Animal say</code></p>
+
+<pre><code class="ruby">class Animal
+  def say
+    'hi'
+  end
+end
+
+class Dog &lt; Animal
+  def say(text)
+    super()
+
+    text
+  end
+end
+
+Dog.new.say('Woo')
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://stackoverflow.com/questions/4632224/super-keyword-in-ruby">Super keyword in Ruby</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Tips - A::B vs Module a; Class B]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-scope/"/>
+    <updated>2019-02-04T18:18:05+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-scope</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>在 ruby 中，<code>A::B</code> 相當於 <code>module A; class B</code> 但實際上會稍微有點不同的地方</p>
+
+<h1>module A; class B</h1>
+
+<p>在 <code>module A</code> 和 <code>class B</code> 中間宣告的變數，會變成屬於 <code>A module</code> 的 scope，而 <code>class B</code> 也包在 <code>module A</code> 底下，因此可以訪問到 parent 的變數</p>
+
+<ol>
+<li><code>class B</code> 會 search 有沒有 <code>SCOPE</code>?</li>
+<li>沒有就往上層找 <code>module A</code> 有沒有 <code>SCOPE</code>?</li>
+</ol>
+
+
+<h1>A::B</h1>
+
+<p>而在 <code>A::B</code> 裡面宣告是屬於 <code>A::B</code> 的 scope (也就是 <code>class B</code>)</p>
+
+<ol>
+<li><code>class A::B</code> search 有沒有 <code>SCOPE</code>?</li>
+<li>沒有往上層，就到了 global，並沒有 <code>module A</code> 這層</li>
+</ol>
+
+
+<pre><code class="ruby">SCOPE = 'global'
+
+module A
+  SCOPE = 'module A'
+  class B
+    def scope1
+      SCOPE
+    end
+  end
+end
+
+class A::B
+  def scope2
+    SCOPE
+  end
+end
+
+A::B.new.scope1 # =&gt; "module A"
+A::B.new.scope2 # =&gt; "global"
+</code></pre>
+
+<pre><code class="ruby">SCOPE = 'global'
+
+module A
+  class B
+    def scope1
+      SCOPE
+    end
+  end
+end
+
+class A::B
+  SCOPE = 'A::B'
+  def scope2
+    SCOPE
+  end
+end
+
+A::B.new.scope1 # =&gt; "A::B"
+A::B.new.scope2 # =&gt; "A::B"
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://kaochenlong.com/2015/04/19/namespace/">Ruby 語法放大鏡之「有時候會看到有兩個冒號寫法是什麼意思?」</a></li>
+<li><a href="https://stackoverflow.com/questions/15119724/ruby-lexical-scope-vs-inheritance">Ruby - Lexical scope vs Inheritance</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Tips - Singleton Method vs Singleton Class vs Singleton Module]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-singleton/"/>
+    <updated>2019-02-04T18:15:16+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-singleton</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<ul>
+<li><a href="#method">singleton method</a></li>
+<li><a href="#class">singleton class</a></li>
+<li><a href="#module">singleton module</a></li>
+</ul>
+
+
+<h1><span id="method"> singleton method </span></h1>
+
+<ul>
+<li><code>singleton method</code>: 屬於某一個 object 的方法，也代表只屬於該 object，儘管有相同的 class 也無法使用別人的 <code>singleton method</code> (但 <code>extend</code> 可以)</li>
+</ul>
+
+
+<pre><code class="ruby">class User
+  def self.class_hi
+    'class_hi'
+  end
+
+  class &lt;&lt; self
+    def class_hi_2
+      'class_hi_2'
+    end
+  end
+
+  def instance_hi
+    'instance_hi'
+  end
+end
+
+def User.class_hi_3
+  'class_hi_3'
+end
+</code></pre>
+
+<p>因為 <code>User class</code> 所定義的 <code>class_method</code> 都屬於 <code>User class</code> object</p>
+
+<pre><code class="ruby">User.singleton_methods # =&gt; [:class_hi, :class_hi_2, :class_hi_3]
+</code></pre>
+
+<p>每次 new 的 instance 都會有 instance_hi 所以不算是 singleton_method，並沒有屬於哪一個 object</p>
+
+<pre><code class="ruby">User.new.singleton_methods # =&gt; []
+leon = User.new
+leon.singleton_methods # =&gt; []
+</code></pre>
+
+<p>建立專屬於 leon object 的 method</p>
+
+<pre><code class="ruby">def leon.hello
+  'hello'
+end 
+
+class &lt;&lt; leon
+  def foo
+    "Hello World!"
+  end
+end
+
+leon.singleton_methods # =&gt; [:hello, : foo]
+</code></pre>
+
+<p>leon object 所定義的 method 並不存在於 <code>User class</code>，而是在 leon object 後面的 <code>singleton_class</code></p>
+
+<pre><code class="ruby">User.method_defined?(:instance_hi) # =&gt; true
+User.method_defined?(:hello) # =&gt; false
+leon.singleton_class.method_defined?(:instance_hi) # =&gt; true
+leon.singleton_class.method_defined?(:hello) # =&gt; true
+User.new.singleton_class.method_defined?(:instance_hi) # =&gt; true
+User.new.singleton_class.method_defined?(:hello) #=&gt; false
+</code></pre>
+
+<p>覆蓋原本 instance 的 method</p>
+
+<pre><code class="ruby">leon.instance_hi # =&gt; "instance_hi"
+
+def leon.instance_hi
+  'singleton_hi'
+end 
+
+leon.instance_hi # =&gt; "singleton_hi"
+</code></pre>
+
+<p>instance_eval 是所有 instance 都會有，所以也不是 singleton_method</p>
+
+<pre><code class="ruby">User.instance_eval do
+   def test
+     'instance_eval'
+   end
+end
+
+User.new.singleton_methods # =&gt; []
+</code></pre>
+
+<p>透過 <code>singleton_method</code> 取得 proc 在用 call 呼叫</p>
+
+<pre><code class="ruby">hi = leon.singleton_method(:instance_hi)
+hi.call
+</code></pre>
+
+<h1><span id="class"> singleton class </span></h1>
+
+<ul>
+<li><code>singleton class</code>: 一個隱藏在物件（不管是普通物件還是類）後面的一個特殊類，它只有一個實例（就是它自己）</li>
+</ul>
+
+
+<p><img src="https://www.devalot.com/assets/articles/2008/09/ruby-singleton/singleton-array.jpg" alt="" /></p>
+
+<blockquote><p>When you add a method to a specific object Ruby inserts a new anonymous class into the inheritance hierarchy as a container to hold these types of methods.</p></blockquote>
+
+<pre><code class="ruby">leon.singleton_class
+# =&gt; #&lt;Class:#&lt;User:0x007fa99c887c58&gt;&gt;
+User.singleton_class
+# =&gt; #&lt;Class:User&gt;
+
+# #&lt;Class: 開頭的都是 singleton_class
+User.singleton_class.ancestors
+# =&gt; [#&lt;Class:User&gt;, #&lt;Class:Object&gt;, #&lt;Class:BasicObject&gt;, Class, Module, Object, Kernel, BasicObject]
+leon.singleton_class.singleton_methods
+# =&gt; [:class_hi, :class_hi_2, :class_hi_3]
+User.singleton_class?
+# =&gt; false
+User.singleton_class.singleton_class?
+# =&gt; true
+</code></pre>
+
+<h1><span id="module"> singleton module </span></h1>
+
+<p>先來說一下 <code>singleton pattern</code></p>
+
+<p>在 <code>class</code> 當中，可以一直建立 <code>instance (object_id 都不同)</code>，每個 <code>instance</code> 都會佔用 memory，但有時候只需要建立一個，但為了避免建立多個，而造成 memory 的浪費，於是就有了 <code>singleton module</code></p>
+
+<p>在 ruby 當中不是 core library 所以必須引入 <code>singleton</code>，可以發現當 <code>include Singleton</code> 後 <code>User.new</code> 就不能使用了</p>
+
+<pre><code class="ruby">require 'singleton'
+
+class User
+  include Singleton
+
+  attr_accessor :name, :phone
+end
+
+User.instance # =&gt; #&lt;User:0x007f951a821ed0&gt;
+User.new # =&gt; NoMethodError: private method `new' called for User:Class
+</code></pre>
+
+<p>可以發現，每次的 <code>instance</code> 其實都是同一個 object(這樣就不會浪費 memory)</p>
+
+<pre><code class="ruby">User.instance.object_id
+# =&gt; 70139185794920
+User.instance.object_id
+# =&gt; 70139185794920
+User.instance.object_id
+# =&gt; 70139185794920
+</code></pre>
+
+<p>原本的 <code>new</code> 則是變成了 <code>private method</code>，而不是不見了</p>
+
+<pre><code class="ruby"> User.send(:new).object_id
+# =&gt; 70139173678780
+User.send(:new).object_id
+# =&gt; 70139173207900
+User.send(:new).object_id
+# =&gt; 70139177568960
+</code></pre>
+
+<p>透過 <a href="https://ruby-doc.org/core-2.2.0/ObjectSpace.html#method-c-each_object">ObjectSpace</a> 來看一下所有存在的 object</p>
+
+<blockquote><p>The ObjectSpace module contains a number of routines that interact with the garbage collection facility and allow you to traverse all living objects with an iterator.</p></blockquote>
+
+<pre><code class="ruby">require 'singleton'
+
+class User
+  include Singleton
+
+  attr_accessor :name, :phone
+end
+
+ObjectSpace.each_object(User){} # =&gt; 0
+User.instance # =&gt; #&lt;User:0x007fa18f02e008&gt;
+ObjectSpace.each_object(User){} # =&gt; 1
+User.instance # =&gt; #&lt;User:0x007fa18f02e008&gt;
+ObjectSpace.each_object(User){} # =&gt; 1
+User.send(:new) #&lt;User:0x007fa18f185cd0&gt;
+ObjectSpace.each_object(User){} # =&gt; 2
+</code></pre>
+
+<p>singleton 行為一樣會繼承 <a href="https://gist.github.com/mehdi-farsi/135d516254ae690335da0b14c13ed83b#file-singleton2_03-rb">使用範例</a></p>
+
+<pre><code class="ruby">require 'singleton'
+
+class User
+  include Singleton
+
+  attr_accessor :name, :phone
+end
+
+class Worker &lt; User
+end
+
+Worker.new # =&gt; NoMethodError: private method `new' called for Worker:Class
+worker = Worker.instance # =&gt; #&lt;Worker:0x007fb663837158&gt;
+worker.name = 'name' # =&gt; "name"
+worker.phone = 'phone' # =&gt; "phone"
+
+user = User.instance # =&gt; #&lt;User:0x007fa673119790&gt;
+user.name # =&gt; nil
+user.phone # =&gt; nil
+</code></pre>
+
+<pre><code class="ruby">worker.clone # =&gt; TypeError: can't clone instance of singleton Worker
+worker.dup # =&gt; TypeError: can't dup instance of singleton Worker
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://ruby-doc.org/stdlib-2.5.1/libdoc/singleton/rdoc/Singleton.html">Singleton</a></li>
+<li><a href="https://ruby-doc.org/core-2.5.1/Object.html#method-i-singleton_method">singleton_method</a></li>
+<li><a href="https://bparanj.gitbooks.io/ruby-basics/content/sixth_chapter.html">Ruby-Basics Singleton Methods</a></li>
+<li><a href="https://medium.com/@zneuray/ruby%E7%9A%84class%E8%88%87eigenclass-f994aa2b988f">Ruby的Class與Eigenclass</a></li>
+<li><a href="https://stackoverflow.com/questions/212407/what-exactly-is-the-singleton-class-in-ruby">What exactly is the singleton class in ruby?</a></li>
+<li><a href="https://www.devalot.com/articles/2008/09/ruby-singleton">Understanding Ruby Singleton Classes</a></li>
+<li><a href="https://ruby-china.org/topics/31734">求解 singleton_class, singleton_methods 的深入問題</a></li>
+<li><a href="https://medium.com/rubycademy/the-singleton-module-in-ruby-part-i-7a26de39319d">The Singleton module in Ruby - Part I</a></li>
+<li><a href="https://medium.com/rubycademy/the-singleton-module-in-ruby-part-ii-91b74366dd00">The Singleton module in Ruby - Part II</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Tips - Hash With Default Values]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-hash-default-value/"/>
+    <updated>2019-02-04T18:12:51+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-hash-default-value</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p><code>hash</code> 若沒給值，預設任何一個 key 都是 <code>nil</code></p>
+
+<pre><code class="ruby">hash = {} # =&gt; {}
+hash[:a]  # =&gt; nil
+</code></pre>
+
+<p>也可以給定 default value</p>
+
+<pre><code class="ruby">hash = Hash.new('hi') # =&gt; {}
+hash[:a] # =&gt; "hi"
+
+# or use default=
+hash = Hash.new # =&gt; {}
+hash.default = 'h1' # =&gt; "hi"
+hash[:a] # =&gt; "hi"
+</code></pre>
+
+<p>但有時候會用到比較複雜的，<code>key -&gt; array</code></p>
+
+<p>會發現如果用 <code>Hash.new([])</code> 實際上會回傳同樣的 <code>object_id</code>，因此每個 <code>key</code> 操作的 <code>object</code> 都會是同一個</p>
+
+<pre><code class="ruby">hash = Hash.new([]) # =&gt; {}
+hash[:a] # =&gt; []
+hash[:a] &lt;&lt; 1 # =&gt; [1]
+hash[:a] # =&gt; [1]
+
+# 發現 a 的 1 也在
+hash[:b] &lt;&lt; 2 # =&gt; [1, 2]
+hash[:b] # =&gt; [1, 2]
+
+# 連 object_id 也是一樣
+hash[:b].object_id == hash[:b].object_id # =&gt; true
+
+# 最後 hash 其實都是空的
+hash # =&gt; {}
+
+# 必須用 &lt;&lt;= 相當於 += 才會存在 hash，但還是共用同一個 arry
+hash[:c] &lt;&lt;= 3 # =&gt; [1, 2, 3]
+hash # =&gt; {:c=&gt;[1, 2, 3]}
+hash[:d] = hash[:d] &lt;&lt; 4 # =&gt; [1, 2, 3, 4]
+hash # =&gt; {:c=&gt;[1, 2, 3, 4], :d=&gt;[1, 2, 3, 4]}
+</code></pre>
+
+<h3>why</h3>
+
+<p>那為什麼會這樣? 實際上是 <code>&lt;&lt;</code> 的問題，在之前的文章有提到 <code>&lt;&lt;</code> 每次都是回傳相同的 <code>object_id</code> 這就是造成的問題，因此可以改用 <code>+=</code> 每次都回傳不同的 <code>object_id</code></p>
+
+<pre><code class="ruby">hash = Hash.new([]) # =&gt; {}
+hash[:a] += [1] # =&gt; [1]
+hash # =&gt; {:a=&gt;[1]}
+hash[:b] += [2] # =&gt; [2]
+hash # =&gt; {:a=&gt;[1], :b=&gt;[2]}
+</code></pre>
+
+<h3>default_proc</h3>
+
+<p>另一個方式是使用 <code>block</code>，每次就會分配不同的 <code>object</code></p>
+
+<blockquote><p><a href="http://ruby-doc.org/core-2.5.1/Hash.html#method-c-new">Hash new</a> If a block is specified, it will be called with the hash object and the key, and should return the default value. It is the block&rsquo;s responsibility to store the value in the hash if required.</p></blockquote>
+
+<pre><code class="ruby">hash = Hash.new { |h, k| h[k] = [] } # =&gt; {}
+hash[:a].object_id # =&gt; 70228210560820
+hash[:a] &lt;&lt; 1 # =&gt; [1]
+hash # =&gt; {:a=&gt;[1]}
+hash[:b] &lt;&lt; 2 # =&gt; [2]
+hash[:b].object_id # =&gt; 70228210545760
+hash # =&gt; {:a=&gt;[1], :b=&gt;[2]}
+
+# or
+hash = Hash.new
+hash.default_proc = Proc.new{ |h, k| h[k] = [] }
+</code></pre>
+
+<p>也可以透過遞迴 <code>default_proc</code> 建立一個動態深度的 hash</p>
+
+<pre><code class="ruby">hash = Hash.new { |hash, key| hash[key] = Hash.new(&amp;hash.default_proc) } 
+# =&gt; {}
+
+hash[:a][:b][:c][:d] = 'hi' # =&gt; "hi"
+hash # =&gt; {:a=&gt;{:b=&gt;{:c=&gt;{:d=&gt;"hi"}}}}
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6/Hash.html">Hash</a></li>
+<li><a href="https://stackoverflow.com/questions/2698460/strange-unexpected-behavior-disappearing-changing-values-when-using-hash-defa">Strange, unexpected behavior (disappearing/changing values) when using Hash default value, e.g. Hash.new([])</a></li>
+<li><a href="https://keepthecodesimple.com/ruby-hashes-default-values/">Ruby Hashes and Default Values</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Tips - Array With Default Value]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-array-default-value/"/>
+    <updated>2019-02-04T18:10:41+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-array-default-value</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p><code>Array.new</code> 可以建立一個長度的 <code>default value</code></p>
+
+<p>這樣建立的話會對應到一樣的 <code>object</code></p>
+
+<pre><code class="ruby">a = Array.new(2, Hash.new) # =&gt; [{}, {}]
+
+a[0]['animal'] = 'dog' # =&gt; "dog"
+a # =&gt; [{"animal"=&gt;"dog"}, {"animal"=&gt;"dog"}]
+
+a[1]['animal'] = 'cat' # =&gt; "cat"
+a # =&gt; [{"animal"=&gt;"cat"}, {"animal"=&gt;"cat"}]
+</code></pre>
+
+<p>必須給 <code>block</code> 每個 <code>object</code> 才會是獨立的</p>
+
+<pre><code class="ruby">a = Array.new(2) { Hash.new } # =&gt; [{}, {}]
+a[0]['animal'] = 'dog' # =&gt; "dog"
+a # =&gt; [{"animal"=&gt;"dog"}, {}]
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6.1/Array.html#method-c-new">Array new</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Security | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/security/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2019-02-10T23:54:00+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[常見的安全漏洞與攻擊]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/06/20/security/"/>
+    <updated>2018-06-20T23:14:00+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/06/20/security</id>
+    <content type="html"><![CDATA[<p>這次來看一下目前常見的一些攻擊手段!</p>
+
+
+
+
+<!-- more -->
+
+
+
+
+<ul>
+<li><a href="#sql_injection">SQL Injection</a></li>
+
+<li><a href="#xss">XSS(Cross-Site Scripting) 跨站腳本攻擊</a></li>
+
+<li><a href="#csrf">CSRF(Cross-site request forgery) 跨站偽造請求</a></li>
+
+<li><a href="#mass_assignment">Mass Assignment 大量賦值</a></li>
+
+<li><a href="#dos_ddos">DoS (Denial of Service）阻斷服務攻擊／DDoS (Distrubuted Denial of Service) 分散阻斷服務攻擊</a></li>
+</ul>
+
+
+
+
+<h1 id="spanidsql_injectionsqlinjectionspan"><span id="sql_injection">SQL Injection 注入攻擊</span></h1>
+
+
+
+
+<ul>
+<li>發生在應用程式與資料庫之間的安全漏洞</li>
+
+<li>主要是透過輸入的字串中夾帶 SQL 語法，例如 <code>drop table;</code> 等等，如果程式並沒有針對這些去檢查的話，會被當成正常指令而去執行</li>
+</ul>
+
+
+
+
+<h3 id="example">Example</h3>
+
+
+
+
+<pre><code class="ruby language-ruby">User.where("name = '#{params[:name]}'")
+</code></pre>
+
+
+
+
+<p>輸入</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 將後面的語法用 -- sql 的註解，註解掉
+hi'; DROP TABLE users; --
+</code></pre>
+
+
+
+
+<p>就會變成</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 後面 drop 就會將 users 的 table 整個刪除
+SELECT * FROM users WHERE name = 'hi'; DROP TABLE users; --’
+</code></pre>
+
+
+
+
+<p>原因在於，直接將 <code>params[:name]</code> 帶入語法裡，沒做任何檢查導致</p>
+
+
+
+
+<pre><code class="ruby language-ruby">User.where("name = '#{params[:name]}'")
+</code></pre>
+
+
+
+
+<p>解決方法，主要是要將特殊字元做處理，稱作 <code>字元逸出 Escape Character</code></p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 字元逸出 Escape Character
+ActiveRecord::Base::connection.quote_string("hi'; DROP TABLE users; --")
+
+# rails auto escape character
+User.where("name = ?", params[:name])
+</code></pre>
+
+
+
+
+<ul>
+<li><a href="https://rails-sqli.org/">Rails SQL Injection</a></li>
+<li><a href="https://gist.github.com/it9gamelog/f89cbb8a3e246f9f56942e202fda6c79">SQL Injection 面試題</a></li>
+</ul>
+
+
+
+
+<h1 id="spanidxssxsscrosssitescriptingspan"><span id="xss">XSS(Cross-Site Scripting) 跨站腳本攻擊</span></h1>
+
+
+
+
+<ul>
+<li>網頁應用程式的安全漏洞</li>
+
+<li>XSS 允許惡意使用者將程式碼注入到網頁上，讓其他使用者在瀏覽該網頁時自動觸發注入的程式碼</li>
+
+<li>JavaScript 很常被用來進行 XSS 攻擊</li>
+
+<li>只要網站可以輸入資料，都要小心</li>
+</ul>
+
+
+
+
+<h3 id="example-1">Example</h3>
+
+
+
+
+<pre><code class="ruby language-ruby"># 將此語法貼入在輸入欄位上，若是沒有特別處理，每次進來都會跳出 Hack you!
+# 更嚴重會將敏感資料例如 cookie 內容傳給攻擊者
+&lt;script&gt;alert("Hack you!");&lt;/script&gt;
+</code></pre>
+
+
+
+
+<p>解決方法，也是要將特殊字元做處理，稱作 <code>字元逸出 Escape Character</code></p>
+
+
+
+
+<pre><code class="ruby language-ruby">&amp;lt;script&amp;gt;alert(&amp;quot;Hack you!&amp;quot;);&amp;lt;/script&amp;gt;
+# &lt; 變成 &amp;lt , " 變成 &amp;quot;
+</code></pre>
+
+
+
+
+<p>在 rails 當中會造成 XSS 主要是使用了 <code>html_safe</code> <code>raw</code>，否則 rails 會自動做字元逸出，除非很確定資料是安全的(但千萬別相信外面的使用者)</p>
+
+
+
+
+<pre><code class="ruby language-ruby">"&lt;p&gt;safe&lt;/p&gt;".html_safe
+raw(comment)
+</code></pre>
+
+
+
+
+<p>但有時還是必須讓使用者輸入一些部分 html tag 之類的可以使用 sanitize</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># sanitize 允許部分 HTML，rails 以建立一些白名單 tag
+sanitize("&lt;p&gt;safe&lt;/p&gt;")
+</code></pre>
+
+
+
+
+<p>查詢開放名單</p>
+
+
+
+
+<pre><code class="ruby language-ruby">ActionView::Base.sanitized_allowed_tags
+ =&gt; #&lt;Set: {"strong", "em", "b", "i", "p", "code", "pre", "tt", "samp", "kbd", "var", "sub", "sup", "dfn", "cite", "big", "small", "address", "hr", "br", "div", "span", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li", "dl", "dt", "dd", "abbr", "acronym", "a", "img", "blockquote", "del", "ins"}&gt;
+
+ ActionView::Base.sanitized_allowed_attributes
+ =&gt; #&lt;Set: {"href", "src", "width", "height", "alt", "cite", "datetime", "title", "class", "name", "xml:lang", "abbr"}&gt;
+</code></pre>
+
+
+
+
+<p>也可以自行新增白名單</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># config/application.rb
+config.action_view.sanitized_allowed_tags = ['strong', 'em', 'a']
+config.action_view.sanitized_allowed_attributes = ['href', 'title']
+</code></pre>
+
+
+
+
+<p>另外特別提到，有時候會需要讓使用者輸入 js 語法，這時候可以用到，主要會將一些語法做跳脫</p>
+
+
+
+
+<pre><code class="ruby language-ruby">escape_javascript(js) 也能寫成 j(js)
+
+# '\\'   =&gt; '\\\\'
+# "&lt;/"   =&gt; '&lt;\/'
+# "\r\n" =&gt; '\n'
+# "\n"   =&gt; '\n'
+# "\r"   =&gt; '\n'
+# '"'    =&gt; '\\"'
+# "'"    =&gt; "\\'"
+</code></pre>
+
+
+
+
+<ul>
+<li><a href="https://apidock.com/rails/ActionView/Helpers/JavaScriptHelper/escape_javascript">escape_javascript</a></li>
+
+<li><a href="https://api.rubyonrails.org/classes/ActionView/Helpers/SanitizeHelper.html">SanitizeHelper</a></li>
+</ul>
+
+
+
+
+<h1 id="spanidcsrfcsrfcrosssiterequestforgeryspan"><span id="csrf">CSRF(Cross-site request forgery) 跨站偽造請求</span></h1>
+
+
+
+
+<ul>
+<li>利用使用者身份驗證的一個安全漏洞</li>
+
+<li>攻擊者透過技術，利用別人的權限去執行網站上的操作，由於瀏覽器被認證過，被訪問的網站會認為是真正的使用者在操作。</li>
+
+<li>簡單的身份驗證只能確保請求發自某個使用者的瀏覽器，無法保證該請求發自使用者本身。</li>
+</ul>
+
+
+
+
+<h3 id="example-2">Example</h3>
+
+
+
+
+<p>GET 攻擊 - 當有權限的使用者讀到這個 img，自動會發送 get action 去執行</p>
+
+
+
+
+<pre><code class="ruby language-ruby">&lt;img src="http://mgleon08.github.com/posts/delete_all"&gt;
+</code></pre>
+
+
+
+
+<p>解決方式 - 將 route 改成用 POST，會修改或刪除到資料的，則要用POST、PATCH/PUT或DELETE</p>
+
+
+
+
+<p>POST 攻擊</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 處理完請求的網頁伺服器會丟回應給 form，導致頁面跳轉，這樣會讓使用者察覺到自己觸發了 CSRF 陷阱，因此加上 &lt;iframe&gt; 作為 &lt;form&gt; 的 target ，將回應放入 &lt;iframe&gt; 隱藏起來，跳轉頁面就不會發生
+&lt;iframe style="display:none" name="csrf-frame"&gt;&lt;/iframe&gt;
+
+# 透過 form 發出 POST 請求
+&lt;form method='POST' action='http://localhost:3000/posts/delete_all' target="csrf-frame" id="csrf-form"&gt;
+  &lt;input type='submit' value='submit'&gt;
+&lt;/form&gt;
+
+# 讓使用者載入完網頁後自動觸發 submit ，但對某些瀏覽器無效
+&lt;script&gt;document.getElementById("csrf-form").submit()&lt;/script&gt;
+</code></pre>
+
+
+
+
+<p>解決方式 - 所有 POST 操作加上額外的驗證碼，確保使用者是透過含有驗證碼的網站表單發送請求，而不是不小心觸發了 CSRF 攻擊</p>
+
+
+
+
+<p>Rails 內建表單 CSRF 防禦</p>
+
+
+
+
+<pre><code class="ruby language-ruby">class ApplicationController &lt; ActionController::Base
+  protect_from_forgery with: :exception
+end
+</code></pre>
+
+
+
+
+<p>設定後表單會自帶 token，如果發過來的 POST 沒有帶此 token 就會跳出<code>ActionController:InvalidAuthenticityToken</code> 的錯誤訊息</p>
+
+
+
+
+<pre><code class="ruby language-ruby">&lt;input type="hidden" name="authenticity_token" value="cuI+ljBAcBxcEkv4pbeqLTEnRUb9mUYMgfpkwOtoyiA="&gt;
+</code></pre>
+
+
+
+
+<p>Rails 也內建了防禦來自其他網站的 AJAX 請求的機制</p>
+
+
+
+
+<pre><code class="ruby language-ruby">&lt;%= csrf_meta_tags %&gt;
+# 在前端產生 csrf_token 的安全驗證碼供 JavaScript 取用。
+</code></pre>
+
+
+
+
+<h1 id="spanidmass_assignmentmassassignmentspan"><span id="mass_assignment">Mass Assignment 大量賦值</span></h1>
+
+
+
+
+<ul>
+<li>Rails專屬，因為太方便而造成的安全性議題</li>
+
+<li>透過更改 html 上面的屬性，進而更改想要改變的欄位</li>
+</ul>
+
+
+
+
+<pre><code class="ruby language-ruby"># rails 後面直接接一個 hash 就可以做新增更新的動作
+User.create( { name: "Leon", :comment =&gt; "hi" } )
+User.update( { name: "Leon", :comment =&gt; "hi" } )
+</code></pre>
+
+
+
+
+<p>因此透過這個形式，將 html 上面的 name 改成 role，在帶 admin 的值過去</p>
+
+
+
+
+<pre><code class="ruby language-ruby">{ role: admin }
+</code></pre>
+
+
+
+
+<p>這樣就會被更新到</p>
+
+
+
+
+<p>解決方法是，rails 內建 <code>Strong Parameter</code></p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 只允許 user 裡面的 name 和 comment parasm 其他都不接受，否則會跳出 Unpermitted parameter: role
+params.require(:user).permit(:name, :comment)
+</code></pre>
+
+
+
+
+<h1 id="spaniddos_ddosdosdenialofserviceddosdistrubuteddenialofservicespan"><span id="dos_ddos">DoS (Denial of Service）阻斷服務攻擊／DDoS (Distrubuted Denial of Service) 分散阻斷服務攻擊</span></h1>
+
+
+
+
+<ul>
+<li>DoS 透過發送大量請求讓伺服器處於忙碌甚至癱瘓的狀態，以至於無法服務正常的使用者</li>
+
+<li>DDoS 以分散的方式從不同來源（Source）對一個伺服器進行 DoS 攻擊</li>
+</ul>
+
+
+
+
+<h3 id="example-3">Example</h3>
+
+
+
+
+<p>安裝 wrk 來模擬</p>
+
+
+
+
+<pre><code class="ruby language-ruby">brew install wrk
+# 30秒內 12個thread 400 個 connect
+wrk -t12 -c400 -d30s http://localhost:3000/
+</code></pre>
+
+
+
+
+<p>防禦 DoS / DDoS</p>
+
+
+
+
+<ul>
+<li>DoS 並非因漏洞而產生，因此不好防禦</li>
+
+<li>辨識出對方進攻管道進行封鎖，如鎖對方 IP</li>
+
+<li>DDoS 利用不同位置進行攻擊，來源 IP 不只有一個，很難判斷出攻擊者</li>
+
+<li>透過辨識短時間內，大量攻擊者，就直接鎖住 IP 來防禦(限制每個 IP 位置在一分鐘內不得送出超過 100 個請求 <a href="https://github.com/kickstarter/rack-attack">rack-attack gem</a>)</li>
+
+<li>如果真面臨了大量 DDoS 攻擊，那就不是 Rails 應用層級可以解決的問題，必須購買專門的防火牆和硬體設備。</li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

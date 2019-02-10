@@ -92,6 +92,9 @@ Closing channels and for range loops on channels Buffered &hellip;">
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby-tips/">Ruby Tips</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
   <li><a href="/tool">Tool</a></li>
   <li><a href="/about">About</a></li>
 </ul>
@@ -630,6 +633,7 @@ unbuffered.</p></li>
 <span class='line-number'>48</span>
 <span class='line-number'>49</span>
 <span class='line-number'>50</span>
+<span class='line-number'>51</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
 </span><span class='line'>
 </span><span class='line'><span class="kn">import</span> <span class="p">(</span>
@@ -643,6 +647,7 @@ unbuffered.</p></li>
 </span><span class='line'>        <span class="nx">dchnl</span> <span class="o">&lt;-</span> <span class="nx">digit</span>
 </span><span class='line'>        <span class="nx">number</span> <span class="o">/=</span> <span class="mi">10</span>
 </span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="c1">// 因為後面會用 range 取出，所以要用 close() 告知已經沒東西了，否則會 deadlock</span>
 </span><span class='line'>    <span class="nb">close</span><span class="p">(</span><span class="nx">dchnl</span><span class="p">)</span>
 </span><span class='line'><span class="p">}</span>
 </span><span class='line'><span class="kd">func</span> <span class="nx">calcSquares</span><span class="p">(</span><span class="nx">number</span> <span class="kt">int</span><span class="p">,</span> <span class="nx">squareop</span> <span class="kd">chan</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
@@ -800,7 +805,7 @@ unbuffered.</p></li>
 <h3><span id="closing_channels"> Closing channels and for range loops on channels </span></h3>
 
 <ul>
-<li>sender 可以關閉 channel 已告知 receivers，已經沒有 dat</li>
+<li>sender 可以關閉 channel 已告知 receivers，已經沒有 data</li>
 <li>只有 sender 要關閉 channel，如果沒有 close channel 可能會導致 panic <code>fatal error: all goroutines are asleep - deadlock!</code></li>
 <li>Channels aren&rsquo;t like files; you don&rsquo;t usually need to close them. Closing is only necessary when the receiver must be told there are no more values coming, such as to terminate a <code>range</code> loop.</li>
 </ul>
@@ -2136,7 +2141,7 @@ unbuffered.</p></li>
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - LeonJi -
+  Copyright &copy; 2019 - LeonJi -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
 </p>
 

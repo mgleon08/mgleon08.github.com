@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Linux | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/linux/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-12-19T23:47:16+08:00</updated>
+  <updated>2019-02-10T23:54:00+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -26,10 +26,13 @@
 <p></p>
 
 <ul>
+<li><a href="#permission">permission - sudo, su, chown, chmod</a></li>
 <li><a href="#screen">screen</a></li>
 <li><a href="#top">top</a></li>
 <li><a href="#ps">ps</a></li>
 <li><a href="#df">df</a></li>
+<li><a href="#du">du</a></li>
+<li><a href="#find">find</a></li>
 <li><a href="#jobs">jobs</a></li>
 <li><a href="#curl">curl</a></li>
 <li><a href="#tar">tar</a></li>
@@ -41,8 +44,32 @@
 <li><a href="#scp">scp</a></li>
 <li><a href="#xargs">xargs</a></li>
 <li><a href="#arrow">> &amp; >></a></li>
+<li><a href="#envsubst">envsubst</a></li>
+<li><a href="#getent">getent</a></li>
 </ul>
 
+
+<h1><span id="permission"> permission - sudo, su, chown, chmod </span></h1>
+
+<ul>
+<li>sudo - 暫時切到最高權限</li>
+<li>su - 切換身份</li>
+<li>chown - 更改檔案／資料夾的擁有者和群組</li>
+</ul>
+
+
+<pre><code class="ruby">sudo chown root:root test.txt
+# -R Recursive 所有底下檔案
+sudo chown -R root:root test
+</code></pre>
+
+<ul>
+<li>chmod - 更改檔案權限</li>
+</ul>
+
+
+<pre><code class="ruby">chmod 644 test.txt
+</code></pre>
 
 <h1><span id="screen"> screen </span></h1>
 
@@ -117,6 +144,36 @@ df -h
 
 <ul>
 <li><a href="http://www.cnblogs.com/peida/archive/2012/12/07/2806483.html">每天一個linux命令（33）：df 命令</a></li>
+</ul>
+
+
+<h1><span id="df"> du </span></h1>
+
+<blockquote><p>顯示目錄或是檔案的大小，與df命令不同的是 du 是對文件和目錄磁盤使用的空間的查看。</p></blockquote>
+
+<pre><code class="ruby"># 找目前目錄底下，檔案大小排序的前 5 個
+du -sh * | sort -nr | head
+</code></pre>
+
+<ul>
+<li><a href="http://www.cnblogs.com/peida/archive/2012/12/10/2810755.html">每天一個linux命令（34）：du 命令</a></li>
+<li><a href="https://hk.saowen.com/a/e37a86c7ef13d56aeae532ac5bdd6547898449d9c5f6ba35ab819ceea2383b18">Linux系統中df與du命令查看分區大小不一致問題分析</a></li>
+<li><a href="https://medium.com/@jackyu/%E7%A7%91%E6%99%AE-df-%E5%92%8C-du-%E6%8C%87%E4%BB%A4%E7%82%BA%E4%BD%95%E6%9C%89%E6%99%82%E5%80%99%E9%A1%AF%E7%A4%BA%E4%B8%8D%E5%90%8C%E5%92%8C%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-91ed73c15dbe">[科普] df 和 du 指令為何有時候顯示不同和如何解決</a></li>
+<li><a href="https://blog.gtwang.org/linux/linux-sort-command-tutorial-and-examples/">Linux 的 sort 排序指令教學與常用範例整理</a></li>
+<li><a href="https://www.dreamjtech.com/content/linux%E5%A6%82%E4%BD%95%E6%89%BE%E5%87%BA%E4%BD%94%E7%94%A8%E8%BC%83%E5%A4%A7%E7%A9%BA%E9%96%93%E7%9A%84%E6%AA%94%E6%A1%88">linux如何找出佔用較大空間的檔案</a></li>
+</ul>
+
+
+<h1><span id="find"> find </span></h1>
+
+<blockquote><p>支援非常多的搜尋選項，可以依照權限、擁有者、群組、檔案類型、日期與大小等條件來搜尋</p></blockquote>
+
+<pre><code class="ruby"># 刪除 css gz js 大於 30 天以上的檔案
+find *.css *.gz *.js -mtime +30 | xargs rm -rf
+</code></pre>
+
+<ul>
+<li><a href="https://blog.gtwang.org/linux/unix-linux-find-command-examples/">Unix/Linux 的 find 指令使用教學、技巧與範例整理</a></li>
 </ul>
 
 
@@ -212,6 +269,11 @@ bg %jobnumber 將任務放到後台中去處理
 <pre><code class="ruby"># -h hard link
 # -s symbolic link
 ln -s /home/wordpress /var/www/wpmu
+</code></pre>
+
+<pre><code class="ruby">ln -s ~/test.txt link.txt
+cat link.txt
+# this is text.txt
 </code></pre>
 
 <ul>
@@ -334,6 +396,49 @@ arg3
 <pre><code class="ruby">echo hi &gt; test # 覆蓋整個檔案
 echo hello &gt;&gt; test # 夾在檔案最後一行
 </code></pre>
+
+<h1><span id="envsubst"> envsubst </span></h1>
+
+<blockquote><p>The envsubst program substitutes the values of environment variables.</p></blockquote>
+
+<p>利用環境變數(environment variables)搭配 envsubst 來產生設定檔。</p>
+
+<pre><code class="ruby"># myconfig
+My name is ${USER}
+My home path is ${HOME}
+</code></pre>
+
+<pre><code class="ruby">envsubst &lt; myconfig.conf
+# My name is foo
+# My home path is /home/foo
+</code></pre>
+
+<p>重新導向產生設定檔案</p>
+
+<pre><code class="ruby">envsubst &lt; myconfig.conf &gt; config.conf
+</code></pre>
+
+<p>如果只想替換某個變數</p>
+
+<pre><code class="ruby">envsubst '$USER' &lt; myconfig.conf &gt; config.conf
+</code></pre>
+
+<ul>
+<li><a href="https://myapollo.com.tw/2018/02/23/linux-command-envsubst/">利用 Linux 指令 envsubst 產生設定檔</a></li>
+</ul>
+
+
+<h1><span id="getent"> getent </span></h1>
+
+<p>查看系統的數據庫中的相關記錄</p>
+
+<pre><code class="ruby">getent group
+</code></pre>
+
+<ul>
+<li><a href="https://ywnz.com/linux/getent/">getent命令</a></li>
+</ul>
+
 ]]></content>
   </entry>
   

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Docker | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/docker/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-12-19T23:47:16+08:00</updated>
+  <updated>2019-02-10T23:54:00+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -14,528 +14,988 @@
 
   
   <entry>
-    <title type="html"><![CDATA[Docker - Dockerfile, Docker Compose, Docker Volumn]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/11/25/docker/"/>
-    <updated>2016-11-25T16:28:35+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/11/25/docker</id>
-    <content type="html"><![CDATA[<p>docker 讓應用程式佈署在軟體容器下的工作可以自動化進行，藉此在Linux作業系統上，提供一個額外的軟體抽象層，以及作業系統層虛擬化的自動管理機制。</p>
+    <title type="html"><![CDATA[Rails + Puma + Nginx + MySQL With Docker]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/01/13/rails-puma-nginx-mysql-with-docker/"/>
+    <updated>2019-01-13T23:57:34+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/01/13/rails-puma-nginx-mysql-with-docker</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>將 Rails + Puma,  Nginx,  MySQL 都拆開成各自的 container，並透過 docker-compose 將多個 container 串起來，各司其職，協同服務。</p>
+
+<ul>
+<li>Nginx 在最前面解析請求並處理靜態資源</li>
+<li>Puma 位於 Nginx 於 Rails 程序之間，用於處理動態的請求；最後面還有一個數據存儲的 MySQL</li>
+</ul>
+
+
+<p>container 分配</p>
+
+<ul>
+<li>app - 用來啟動 Rails + Puma</li>
+<li>web - 存放 nginx，負責解析各種外部請求，處理靜態的資源
+(靜態資源就是運行 rake assets:precompile 生成在 public/assets 中的內容)</li>
+<li>db - MySQL</li>
+</ul>
+
+
+<p>在現有的 rails project 加上 docker 所需的 file</p>
+
+<pre><code class="ruby">rails_project
+├── docker
+│   └── app
+│       └── Dockerfile
+│   └── db
+│       └── grant_user.sql
+│   └── web
+│       ├── Dockerfile
+│       └── nginx.conf
+├── docker-compose.yml
+└── .env
+</code></pre>
+
+<h3>docker/app/Dockerfile</h3>
+
+<pre><code class="ruby"># Base image
+FROM ruby:2.5.1
+
+# Install plugin
+RUN apt-get update -qq &amp;&amp; apt-get install -y build-essential vim
+
+# Install mysql
+RUN apt-get install -y default-libmysqlclient-dev
+
+# Install nodejs
+RUN curl -sL https://deb.nodesource.com/setup_11.x | bash - &amp;&amp;\
+    apt-get install -y nodejs
+
+# Clears out the local repository of retrieved package files
+RUN apt-get -q clean
+
+# Set an environment variable where the Rails app is installed to inside of Docker image
+ENV APP_PATH /usr/src/app
+RUN mkdir -p $APP_PATH
+
+# Set working directory
+WORKDIR $APP_PATH
+
+# Setting env up
+ENV RAILS_ENV production
+ENV RACK_ENV production
+# Setting local
+ENV LC_ALL C.UTF-8
+# Setting timezone
+ENV TZ Asia/Taipei
+RUN cp /usr/share/zoneinfo/$TZ /etc/localtime &amp;&amp; echo $TZ &gt; /etc/timezone
+
+# COPY Gemfile &amp; Gemfil.lock
+COPY Gemfile* $APP_PATH/
+
+# Run bundle
+RUN bundle install --jobs 20 --retry 5 --without development test --path vendor/bundle
+
+# Adding project files
+COPY . $APP_PATH/
+
+# Build Frond-End
+RUN RAILS_ENV=$RAILS_ENV bundle exec rake assets:precompile
+
+EXPOSE 3000
+
+CMD ["bundle", "exec", "puma", "-C", "config/puma.rb"]
+</code></pre>
+
+<h3>docker/web/Dockerfile</h3>
+
+<pre><code class="ruby"># Base image
+FROM nginx:1.15.8
+
+# Install dependencies
+RUN apt-get update -qq &amp;&amp; apt-get -y install apache2-utils vim
+
+# Establish where Nginx should look for files
+ENV RAILS_ROOT /usr/src/app
+# Setting local
+ENV LC_ALL C.UTF-8
+# Setting timezone
+ENV TZ Asia/Taipei
+RUN cp /usr/share/zoneinfo/$TZ /etc/localtime &amp;&amp; echo $TZ &gt; /etc/timezone
+
+# Set our working directory inside the image
+WORKDIR $RAILS_ROOT
+
+# create log directory
+RUN mkdir log
+
+# copy over static assets
+COPY public public/
+
+# Copy Nginx config template
+COPY docker/web/nginx.conf /tmp/docker.nginx
+
+# substitute variable references in the Nginx config template for real values from the environment
+# put the final config in its place
+RUN envsubst '$RAILS_ROOT' &lt; /tmp/docker.nginx &gt; /etc/nginx/conf.d/default.conf
+EXPOSE 80
+
+# Use the "exec" form of CMD so Nginx shuts down gracefully on SIGTERM (i.e. `docker stop`)
+CMD [ "nginx", "-g", "daemon off;" ]
+</code></pre>
+
+<h3>docker/web/nginx.conf</h3>
+
+<pre><code class="ruby"># define our application server
+
+upstream rails_app {
+  # The app service 3000 port that points to the docker-compose definition
+   server app:3000;
+}
+
+server {
+   listen 80;
+   # define your domain or IP
+   server_name localhost;
+
+   # define the public application root
+   root   $RAILS_ROOT/public;
+   index  index.html;
+
+   # define where Nginx should write its logs
+   access_log $RAILS_ROOT/log/nginx.access.log;
+   error_log $RAILS_ROOT/log/nginx.error.log;
+
+   # deny requests for files that should never be accessed
+   # ~ regular 區分大小寫, .env / .git
+   location ~ /\. {
+      deny all;
+   }
+
+   # ~* regular 不分大小寫, .rb / .log
+   location ~* ^.+\.(rb|log)$ {
+      deny all;
+   }
+
+   # serve static (compiled) assets directly if they exist (for rails production)
+   location ~ ^/(assets|images|javascripts|stylesheets|swfs|system)/   {
+      # $uri: localhost/404.html，則 $uri 為 `/404.html`
+      # @rails: 後面定義的 location @rails
+      # 如果 url 匹配進來，則先按 $uri 處理，若沒有找到，則交給 @rails 處理
+      try_files $uri @rails;
+      # close access log
+      access_log off;
+      # to serve pre-gzipped version
+      # 設定為 `on` ，在處理壓縮之前，先查找已經預壓縮的文件（.gz）
+      # 避免每次對同一個文件進行重複的壓縮處理
+      gzip_static on;
+
+      expires max;
+      # public 對每個用戶有效; private 對當前用戶有效
+      add_header Cache-Control public;
+
+      add_header Last-Modified "";
+      add_header ETag "";
+      break;
+   }
+
+   # send non-static file requests to the app server
+   location / {
+      try_files $uri @rails;
+   }
+
+   location @rails {
+      internal; # 只能被內部的請求呼叫，外部的呼叫請求會返回 'Not found'
+      proxy_set_header  X-Real-IP  $remote_addr;
+      proxy_set_header  X-Forwarded-For $proxy_add_x_forwarded_for;
+      proxy_set_header Host $http_host;
+      proxy_redirect off;
+      proxy_pass http://rails_app; # 導向到 upstream rails_app
+   }
+}
+</code></pre>
+
+<h3>database.yml</h3>
+
+<p><code>host name</code> 必須對應到 docker-compose 所定義的 <code>service name</code>，並且透過環境變數所設定的 user 來登入</p>
+
+<pre><code class="ruby">default: &amp;default
+  adapter: mysql2
+  encoding: utf8
+  pool: &lt;%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %&gt;
+  host: db
+  port: 3306
+  username: &lt;%= ENV.fetch('MYSQL_USER') { 'root' } %&gt;
+  password: &lt;%= ENV.fetch('MYSQL_PASSWORD') { 'password' } %&gt;
+  socket: /tmp/mysql.sock
+</code></pre>
+
+<h3>docker/db/grant_user.sql</h3>
+
+<p>因為在 mysql 有另外建立一個 user，並且在 database.yml 也是透過這個 user 來登入，因此必須授權給此 user 權限，才能夠操作</p>
+
+<pre><code class="ruby">GRANT ALL PRIVILEGES ON *.* TO 'user_name'@'%';
+FLUSH PRIVILEGES;
+</code></pre>
+
+<h3>docker-compose.yml</h3>
+
+<pre><code class="ruby">version: '3'
+services:
+  app:
+    build:
+      context: .
+      dockerfile: ./docker/app/Dockerfile
+    env_file:
+      - .env
+    volumes:
+      - .:/usr/src/app
+    depends_on:
+      - db
+  db:
+    image: mysql:5.7.23
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "3306:3306"
+    volumes:
+      - db-data:/var/lib/mysql
+  web:
+    build:
+      context: .
+      dockerfile: ./docker/web/Dockerfile
+    ports:
+      - 80:80
+    depends_on:
+      - app
+volumes:
+  db-data:
+    external: false
+</code></pre>
+
+<h3>.env</h3>
+
+<p>docker-compose 所需要用到的環境變數，app &amp; web 都會用到</p>
+
+<pre><code class="ruby">MYSQL_ROOT_PASSWORD=password
+MYSQL_USER=user_name
+MYSQL_PASSWORD=user_password
+</code></pre>
+
+<h3>Example project</h3>
+
+<p><a href="https://github.com/mgleon08/product_system_production">product_system_production</a></p>
+
+<pre><code class="ruby">git clone https://github.com/mgleon08/product_system_production
+# 建立 image
+docker-compose build
+# 啟動
+docker-compose up -d
+# 因為是建立新的 user 來造訪 mysql，因此必須先授權此 user 權限
+p# 確認是否授權成功
+docker-compose exec db mysql -u user_name -p -e"show grants;"
+# 建立資料庫
+docker-compose run --rm app bundle exec rails db:create
+# 跑 migrate
+docker-compose run --rm app bundle exec rails db:migrate
+# 建立假資料
+docker-compose run --rm app bundle exec rails db:seed
+# 查看畫面, 記得是 http
+http://localhost
+</code></pre>
+
+<h3>Production</h3>
+
+<p>Rails5.2 之後，secret_key_base 的設定改了，在 production 上要在 config 裡面加上 master.key file，並將 local 的亂碼貼上去</p>
+
+<ul>
+<li><a href="https://mgleon08.github.io/blog/2018/07/14/rails-credentials/">Rails 5.2 Credentials</a></li>
+<li><a href="https://keithpblog.org/post/encrypted-secrets/">Rails 5.2: encrypted secrets</a></li>
+</ul>
+
+
+<h1>最後另外附上 develop 的 docker</h1>
+
+<pre><code class="ruby"># docker-compose
+version: '3'
+services:
+  db:
+    image: mysql:5.7.23
+    command: --default-authentication-plugin=mysql_native_password
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+    ports:
+      - "3306:3306"
+    volumes:
+      - ./opt/data:/var/lib/mysql
+  backend:
+    container_name: product_system
+    build:
+      context: .
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - .:/usr/src/app
+    ports:
+      - "3000:3000"
+    depends_on:
+      - db
+    user: deploy
+</code></pre>
+
+<pre><code class="ruby"># Dockerfile
+FROM ruby:2.5.1
+
+RUN apt-get update -qq &amp;&amp;\
+    curl -sL https://deb.nodesource.com/setup_11.x | bash - &amp;&amp;\
+    apt-get install -y nodejs cmake &amp;&amp;\
+    apt-get clean
+
+ARG UID
+RUN adduser deploy --uid $UID --disabled-password --gecos ""
+
+ENV APP /usr/src/app
+RUN mkdir $APP
+WORKDIR $APP
+
+COPY Gemfile* $APP/
+RUN bundle install -j3 --path vendor/bundle
+
+COPY . $APP/
+
+CMD ["bundle", "exec", "rails", "server", "-p", "3000", "-b", "0.0.0.0"]
+</code></pre>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://qiita.com/eighty8/items/0288ab9c127ddb683315#db%E6%8E%A5%E7%B6%9A%E7%94%A8%E3%81%AE%E6%83%85%E5%A0%B1%E3%83%95%E3%82%A1%E3%82%A4%E3%83%AB">Docker + Rails + Puma + Nginx + MySQL</a></li>
+<li><a href="https://itnext.io/docker-rails-puma-nginx-postgres-999cd8866b18">Docker + Rails + Puma + Nginx + Postgres</a></li>
+<li><a href="https://stackoverflow.com/questions/8821864/config-assets-compile-true-in-rails-production-why-not/8827757#8827757">config.assets.compile=true in Rails production, why not?</a></li>
+<li><a href="http://chrisstump.online/2016/02/20/docker-existing-rails-application/">Docker for an Existing Rails Application</a></li>
+<li><a href="https://stackoverflow.com/questions/5877929/what-does-upstream-mean-in-nginx">What does upstream mean in nginx?</a></li>
+<li><a href="https://www.fooish.com/sql/grant-privileges.html">SQL GRANT 授與資料庫使用權限</a></li>
+<li><a href="https://blog.hellojcc.tw/2015/12/07/nginx-beginner-tutorial/">nginx 基礎設定教學</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Install Docker & Docker Compose With Ubuntu]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/01/08/install-docker-and-docker-compose-with-ubuntu/"/>
+    <updated>2019-01-08T20:51:40+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/01/08/install-docker-and-docker-compose-with-ubuntu</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<h1>Install Docker</h1>
+
+<h3>Prerequsites</h3>
+
+<p>Install packages to allow apt to use a repository over <a href="HTTPS:">HTTPS:</a></p>
+
+<pre><code class="`ruby">sudo apt-get install apt-transport-https ca-certificates curl software-properties-common
+</code></pre>
+
+<h3>Setup Docker Repository</h3>
+
+<p> Add Docker’s official GPG key:</p>
+
+<pre><code class="`ruby">curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo apt-key add -
+</code></pre>
+
+<p>After that add the Docker repository on your Ubuntu system which contains Docker packages including its dependencies</p>
+
+<pre><code class="`ruby"> sudo add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
+</code></pre>
+
+<h3>Install Docker on Ubuntu</h3>
+
+<p> Update the apt package index.</p>
+
+<pre><code class="`ruby"> sudo apt-get update
+</code></pre>
+
+<p> Install the latest version of Docker CE, or go to the next step to install a specific version:</p>
+
+<pre><code class="`ruby"> sudo apt-get install -y docker-ce
+</code></pre>
+
+<p> Verify that Docker CE is installed correctly by running the hello-world image.</p>
+
+<pre><code class="`ruby"> sudo docker container run hello-world
+</code></pre>
+
+<h1>Install Docker Compose</h1>
+
+<p>Run this command to download the latest version of Docker Compose</p>
+
+<pre><code class="`ruby">sudo curl -L "https://github.com/docker/compose/releases/download/1.23.2/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
+</code></pre>
+
+<p>Apply executable permissions to the binary:</p>
+
+<pre><code class="`ruby"> sudo chmod +x /usr/local/bin/docker-compose
+</code></pre>
+
+<h1>免 sudo 用 docker 指令</h1>
+
+<p>因為使用的是 <code>sudo</code> 來安裝 docker，因此在普通用戶的狀況，使用 docker 的指令會導致</p>
+
+<pre><code class="`ruby">docker ps -a
+
+# Got permission denied while trying to connect to the Docker daemon socket at unix:///var/run/docker.sock: Get http://%2Fvar%2Frun%2Fdocker.sock/v1.39/containers/json?all=1: dial unix /var/run/docker.sock: connect: permission denied
+</code></pre>
+
+<p>可以看到最後一行 <code>var/run/docker.sock: connect: permission denied</code> 因此來看一下這個檔案的權限狀況</p>
+
+<pre><code class="ruby">ls -al /var/run/
+srw-rw----  1 root docker    0 Jan 20 14:59 docker.sock
+</code></pre>
+
+<p>可以看到</p>
+
+<ul>
+<li><code>user 權限</code>  rw-</li>
+<li><code>group 權限</code> rw-</li>
+<li><code>other 權限</code>: &mdash;</li>
+<li><code>擁有人</code>: root</li>
+<li><code>組別</code>&ldquo; docker</li>
+</ul>
+
+
+<p>所以希望有權限，要嗎是 <code>root</code> 或是在 <code>docker</code> 這個組別裡面，先查一下目前有沒有這個組別</p>
+
+<p>entire group list</p>
+
+<pre><code class="ruby">cut -d: -f1 /etc/group | sort
+</code></pre>
+
+<p>發現沒有 <code>docker</code> 這個組別，那就自己新增一個</p>
+
+<pre><code class="ruby">sudo groupadd docker
+</code></pre>
+
+<p>將自己加入 docker group</p>
+
+<pre><code class="ruby">sudo gpasswd -a ${USER} docker
+# 或是 sudo usermod -G docker -a ${USER}
+</code></pre>
+
+<blockquote><p>usemod -G 改寫用戶的組之後 如果用戶同時屬於多個組 那麼最終只會屬於一個組
+而 gpasswd -a 則是將一個用戶加入到另一個組 同時不改變用戶原來的組</p></blockquote>
+
+<p>重啟 docker</p>
+
+<pre><code class="ruby">sudo service docker restart
+</code></pre>
+
+<p>切換當前 group，或重開新的 session</p>
+
+<pre><code class="ruby">newgrp - docker
+</code></pre>
+
+<p>接著就可以試著用普通用戶來執行，成功!</p>
+
+<pre><code class="ruby">docker ps -a
+</code></pre>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://docs.docker.com/install/linux/docker-ce/ubuntu/#install-docker-ce">InstallDocker CE</a></li>
+<li><a href="https://tecadmin.net/install-docker-on-ubuntu/">How To Install Docker on Ubuntu 18.04 &amp; 16.04 LTS</a></li>
+<li><a href="https://docs.docker.com/compose/install/">Compose Install</a></li>
+<li><a href="https://www.jianshu.com/p/95e397570896">免sudo使用docker命令</a></li>
+<li><a href="https://stackoverflow.com/questions/14059916/is-there-a-command-to-list-all-unix-group-names">Is there a command to list all Unix group names? [closed]</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Docker - Docker Machine, Docker Swarm]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/12/28/docker-swarm/"/>
+    <updated>2018-12-28T23:14:00+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/12/28/docker-swarm</id>
+    <content type="html"><![CDATA[<p>透過 docker machine 在 local 測試 docker swarm!
+雖然目前是 k8s 比較紅，但還是先來玩玩看 swarm，之後再來研究 k8s (Kubernetes)</p>
+
+<!-- more -->
+
+
+<h2>Docker Machine</h2>
+
+<p>Docker Machine 最主要的目的就是可以快速的把虛擬機和 Docker 環境架設起來。</p>
+
+<p><img src="https://docs.docker.com/machine/img/machine.png" alt="" /></p>
+
+<pre><code class="ruby"># 建立, --driver=virtualbox
+docker-machine create -d virtualbox machine1
+
+#啟動
+docker-machine start machine1
+
+# 停止
+docker-machine stop machine1
+
+# 重啟
+docker-machine restart machine1
+
+# 刪除
+docker-machine rm machine1
+
+# list
+docker-machine ls
+
+# ssh
+docker-machine ssh machine1
+
+#檢查訊息
+docker-machine inspect
+
+#查看狀態
+docker-machine status machine1
+</code></pre>
+
+<h2>Docker Swarm</h2>
+
+<p><img src="https://docs.docker.com/engine/swarm/images/ingress-routing-mesh.png" alt="" /></p>
+
+<ul>
+<li>運行 docker 的主機可初始化或加入 Swarm 集群，這樣主機就成為 Swarm 集群的節點 (node)。</li>
+<li>節點分為管理 (manager 管理成員以及指派任務) 節點和工作 (worker 執行 swarm service) 節點。</li>
+<li>可以有多個 manager 但只能有一個 leader</li>
+<li>管理節點用於 Swarm 集群的管理，docker swarm 命令基本只能在管理節點執行（節點退出集群命令 docker swarm leave 可以在工作節點執行）。</li>
+<li>一個 Swarm 集群可以有多個管理節點，但只有一個管理節點可以成為 leader。</li>
+</ul>
+
+
+<blockquote><p>由於 docker swarm 最主要是多台機器可以在同一個群集，但在 local 並沒有那個多台機器，因此可以透過 docker machine 的方式，建立多台 vm，來模擬多台機器的狀況</p></blockquote>
+
+<p>一開始記得先安裝 <a href="https://www.virtualbox.org">virtualbox</a></p>
+
+<p>執行</p>
+
+<pre><code class="ruby">brew cask install virtualbox
+</code></pre>
+
+<p>建立用來當 manager 的機器，如果沒有 Boot2Docker 就會自動去安裝</p>
+
+<pre><code class="ruby"># docker-machine create --driver virtualbox manager1
+# 由於新版會有問題，所以改指定版本
+docker-machine create --virtualbox-boot2docker-url https://github.com/boot2docker/boot2docker/releases/download/v18.06.1-ce/boot2docker.iso  --driver virtualbox manager1
+</code></pre>
+
+<ul>
+<li><a href="https://github.com/docker/machine/issues/4608">18.09.0 iso breaks swarm ingress</a></li>
+</ul>
+
+
+<pre><code class="ruby">Running pre-create checks...
+(manager1) Image cache directory does not exist, creating it at /Users/leon/.docker/machine/cache...
+(manager1) No default Boot2Docker ISO found locally, downloading the latest release...
+(manager1) Latest release for github.com/boot2docker/boot2docker is v18.09.0
+(manager1) Downloading /Users/leon/.docker/machine/cache/boot2docker.iso from https://github.com/boot2docker/boot2docker/releases/download/v18.09.0/boot2docker.iso...
+(manager1) 0%....10%....20%....30%....40%....50%....60%....70%....80%....90%....100%
+Creating machine...
+(manager1) Unable to get the local Boot2Docker ISO version:  Did not find prefix "-v" in version string
+(manager1) Default Boot2Docker ISO is out-of-date, downloading the latest release...
+(manager1) Latest release for github.com/boot2docker/boot2docker is v18.09.0
+(manager1) Downloading /Users/leon/.docker/machine/cache/boot2docker.iso from https://github.com/boot2docker/boot2docker/releases/download/v18.09.0/boot2docker.iso...
+(manager1) 0%....10%....20%....30%....40%....50%....60%....70%....80%....90%....100%
+(manager1) Copying /Users/leon/.docker/machine/cache/boot2docker.iso to /Users/leon/.docker/machine/machines/manager1/boot2docker.iso...
+(manager1) Creating VirtualBox VM...
+(manager1) Creating SSH key...
+(manager1) Starting the VM...
+(manager1) Check network to re-create if needed...
+(manager1) Found a new host-only adapter: "vboxnet0"
+(manager1) Waiting for an IP...
+Waiting for machine to be running, this may take a few minutes...
+Detecting operating system of created instance...
+Waiting for SSH to be available...
+Detecting the provisioner...
+Provisioning with boot2docker...
+Copying certs to the local machine directory...
+Copying certs to the remote machine...
+Setting Docker configuration on the remote daemon...
+Checking connection to Docker...
+Docker is up and running!
+To see how to connect your Docker Client to the Docker Engine running on this virtual machine, run: docker-machine env manager1
+</code></pre>
+
+<p>接著查看 ip</p>
+
+<pre><code class="ruby">docker-machine env manager1
+</code></pre>
+
+<pre><code class="ruby">export DOCKER_TLS_VERIFY="1"
+export DOCKER_HOST="tcp://192.168.99.100:2376"
+export DOCKER_CERT_PATH="/Users/leon/.docker/machine/machines/manager1"
+export DOCKER_MACHINE_NAME="manager1"
+# Run this command to configure your shell:
+# eval $(docker-machine env manager1)
+</code></pre>
+
+<p>再新增兩台機器中當作 worker</p>
+
+<pre><code class="ruby">docker-machine create --virtualbox-boot2docker-url https://github.com/boot2docker/boot2docker/releases/download/v18.06.1-ce/boot2docker.iso  --driver virtualbox worker1
+docker-machine create --virtualbox-boot2docker-url https://github.com/boot2docker/boot2docker/releases/download/v18.06.1-ce/boot2docker.iso  --driver virtualbox worker2
+</code></pre>
+
+<h3>接著建立 docker swarm 集群</h3>
+
+<p><img src="https://docs.docker.com/engine/swarm/images/swarm-diagram.png" alt="" /></p>
+
+<p>進入 manager</p>
+
+<pre><code class="ruby">docker-machine ssh manager1
+</code></pre>
+
+<p>將 manager1 指定為 manager</p>
+
+<pre><code class="ruby">docker swarm init --advertise-addr 192.168.99.100
+</code></pre>
+
+<pre><code class="ruby">Swarm initialized: current node (2vo249yn5wa5inamg7r20hu1q) is now a manager.
+
+To add a worker to this swarm, run the following command:
+
+    docker swarm join --token SWMTKN-1-4vl3brd3z91s6kqsqjhz4p9dqnesanq30bu2kgty1krin8e5wp-0yd8lyh4g1l30njzo2yxflcjo 192.168.99.100:2377
+
+To add a manager to this swarm, run 'docker swarm join-token manager' and follow the instructions.
+</code></pre>
+
+<p>進入 worker1 &amp; worker2</p>
+
+<pre><code class="ruby">docker-machine ssh worker1
+docker-machine ssh worker2
+</code></pre>
+
+<p>加入 swarm</p>
+
+<pre><code class="ruby"> docker swarm join --token SWMTKN-1-4vl3brd3z91s6kqsqjhz4p9dqnesanq30bu2kgty1krin8e5wp-0yd8lyh4g1l30njzo2yxflcjo 192.168.99.100:2377
+</code></pre>
+
+<p>接著到 manager 看目前 node 狀況，只有 manager1 是 leader</p>
+
+<pre><code class="ruby">docker node ls
+</code></pre>
+
+<pre><code class="ruby">ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+2vo249yn5wa5inamg7r20hu1q *   manager1            Ready               Active              Leader              18.09.0
+jhv6fv23627gpja6nhu06bx1a     worker1             Ready               Active                                  18.09.0
+80x4t8oyhh7orpck7uksuv24c     worker2             Ready               Active                                  18.09.0
+</code></pre>
+
+<p>網路狀況，可看到 swarm 是 overlay</p>
+
+<pre><code class="ruby">docker network ls
+</code></pre>
+
+<pre><code class="ruby">NETWORK ID          NAME                DRIVER              SCOPE
+f01fa41ff7a6        bridge              bridge              local
+1979e800b7d0        docker_gwbridge     bridge              local
+85fd158c6bb0        host                host                local
+jpgat6x8ukxl        ingress             overlay             swarm
+4e106b8319a7        none                null                local
+</code></pre>
+
+<p>進到 manager1 啟動一個 service</p>
+
+<pre><code class="ruby">docker service create --replicas 1 -d -p 8080:80 --name my_nginx nginx
+</code></pre>
+
+<p>查看跑在哪個 worker</p>
+
+<pre><code class="ruby">docker service ps my_nginx
+</code></pre>
+
+<pre><code class="ruby">ID                  NAME                IMAGE               NODE                DESIRED STATE       CURRENT STATE           ERROR               PORTS
+lu4in7orcr7t        my_nginx.1          nginx:latest        worker2             Running             Running 9 minutes ago
+</code></pre>
+
+<p>查看詳細資料</p>
+
+<pre><code class="ruby">docker service inspect --pretty my_nginx
+</code></pre>
+
+<p>接著就可以在</p>
+
+<pre><code class="ruby"># 看到所有 nginx
+192.168.99.100:8080
+192.168.99.101:8080
+192.168.99.102:8080
+
+# 可以試試看更改 /usr/share/nginx/html/index.html
+</code></pre>
+
+<p>調整 replicas</p>
+
+<pre><code class="ruby">docker service update --replicas 2 my_nginx
+</code></pre>
+
+<h3>相關指令</h3>
+
+<pre><code class="ruby"># 查看 ip 等相關訊息
+docker-machine env manager1
+
+# 初始化一個 Swarm 集群(manager, leader)
+docker swarm init --advertise-addr 192.168.99.100
+
+# 其他 worker join 到同一個集群
+docker swarm join --token [token] [master的IP]:[master的port]
+
+# 獲取加入集群的token
+docker swarm join-token worker
+
+# 取得 manager toke，可以用另外一台當 manager 的職代，可以有多個 manager 但只能有一個 leader
+docker swarm join-token manager
+
+# 離開 swarm
+docker swarm leave manager
+
+# 查看 node 資料
+docker node inspect
+
+# 移除 node
+docker node rm worker1
+
+# 讓其中2份nginx容器副本，分配到集群中
+docker service create --replicas 2 -d -p 8080:80 --name my_nginx nginx
+
+# 查看
+docker service ls
+
+# 查看目前跑在哪個 service
+docker service ps my_nginx
+docker service inspect --pretty my_nginx
+
+# 擴容service中的任務，到第三台
+docker service scale my_nginx=3
+
+# remove service
+docker service rm my_nginx
+</code></pre>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://docs.docker.com/machine/overview/">Docker Machine Overview</a></li>
+<li><a href="https://docs.docker.com/engine/swarm/">Swarm mode overview</a></li>
+<li><a href="https://docs.docker.com/engine/reference/commandline/service/">docker service</a></li>
+<li><a href="https://docs.docker.com/engine/swarm/ingress/">Use swarm mode routing mesh</a></li>
+<li><a href="https://github.com/twtrubiks/docker-swarm-tutorial">docker-swarm-tutorial</a></li>
+<li><a href="http://www.ityouknow.com/docker/2018/03/30/docker-machine.html">Docker(五)：Docker 三剑客之 Docker Machine</a></li>
+<li><a href="http://www.ityouknow.com/docker/2018/04/19/docker-swarm.html">Docker(六)：Docker 三劍客之 Docker Swarm</a></li>
+<li><a href="https://www.jianshu.com/p/3f3c9e0e3db5">Docker Swarm集群初探</a></li>
+<li><a href="https://www.jianshu.com/p/9eb9995884a5">Docker Swarm 入門一篇文章就夠了</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Docker - Docker Volumn]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/11/27/docker-volumn/"/>
+    <updated>2016-11-27T16:28:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/11/27/docker-volumn</id>
+    <content type="html"><![CDATA[<p>Docker Volume 是個介於主機與容器間的共享資料夾，可用來匯入或匯出容器內的資料，或者共享容器間的資料</p>
 
 <!-- more -->
 
 
 <ul>
-<li><a href="#dockerfile">Dockerfile</a></li>
-<li><a href="#docker_compose">Docker Compose</a></li>
-<li><a href="#docker_volumn">Docker Volumn</a></li>
+<li>Docker image 由多個 read-only 的 file system 疊加而成一個 stack，這些組合稱為 Union File System。</li>
+<li>啟動 container 的時候，會在 stack 上方新增一個 read-write layer，更動都在這邊，砍掉 container 這邊也就沒了</li>
+<li>Volume 是為了要解決 container 之間資料共享與資料保存而提出的</li>
+<li>Volume 就是目錄或是檔案，可以繞過 UFS 以正常的檔案或目錄的方式存在 host 本機上</li>
+<li>啟動 Container 的時候產生 volume，如果 Volume 掛載的目標路徑已經有檔案存在於 Image 上面，則 Image 上面的檔案會 copy 到 volume 上，但不包括 host directory</li>
 </ul>
 
 
-<p>Docker 的優點</p>
+<p><img src="https://docs.docker.com/storage/images/types-of-mounts-volume.png" alt="" /></p>
+
+<pre><code class="ruby"># 建立 volume，沒指定名稱會給個亂數
+docker volume create --name db-data
+
+# 列出所有的 volume
+docker volume ls
+
+# 列出所有沒有被關聯到 container 的 volume 的 VOLUME NAME
+docker volume ls -qf dangling=true
+
+# 一次刪除所有 volume
+docker volume rm $(docker volume ls -qf dangling=true)
+
+# 查看 volume 的資訊
+docker volume inspect volume_name
+
+# 查看某一個 container 的 volume 狀況
+docker inspect -f '' 825005afab43
+</code></pre>
+
+<h3>實戰範例 named volume 1</h3>
+
+<blockquote><p>先 create 再使用的 volume 稱作 named volume</p></blockquote>
+
+<p>建立新的 volume</p>
+
+<pre><code class="ruby">docker volume create --name db-data
+docker volume ls # 查看是否建立成功
+</code></pre>
+
+<p>使用 volume</p>
+
+<pre><code class="ruby"># 將剛剛建立的 volume 掛載到 container 裡面的 /db/data
+# 確認一開始資料夾是空的
+docker run --rm -v db-data:/db/data -it ubuntu:14.04 ls -l /db/data
+# 在 container 建立新的檔案
+docker run --rm -v db-data:/db/data -it ubuntu:14.04 touch /db/data/file
+在查看一次是否有檔案
+docker run --rm -v db-data:/db/data -it ubuntu:14.04 ls -l /db/data
+</code></pre>
+
+<p>以上都是個別開 container 去操作，因此可以發現每次新的 container 資料還是會存在這，因為都是掛載同樣的 volume</p>
+
+<h3>實戰範例 named volume 2</h3>
+
+<p><code>named volume</code> 沒有指定 loacl 的路徑，檔案會去哪裡?</p>
+
+<pre><code class="ruby">docker run -it -v /volume-test ubuntu:14.04 /bin/bash
+docker volume ls
+
+# 發現多了一個，因為沒指定名稱所以就產生亂碼
+DRIVER              VOLUME NAME
+local               c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a
+</code></pre>
+
+<pre><code class="ruby"># 尋找 container 的 loacl volume, 825005afab43 是 container id
+docker inspect -f '' 825005afab43
+[{volume c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a /var/lib/docker/volumes/c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a/_data /vo-test local  true }]
+</code></pre>
+
+<p>透過上面指令就可以找到 local 的檔案，照理說可以 cd 到 <code>/var/lib/docker/volumes/c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a/_data /vo-test</code>，但是 mac 無法，有找到以下有人也在詢問</p>
 
 <ul>
-<li>秒級實作</li>
-<li>對系統資源的使用率很高，一台主機可以同時執行數千個 Docker 容器</li>
-<li>更快速的交付和部署
-
-<ul>
-<li>使用一個標準的映像檔來建立一套開發容器，開發完成之後，維運人員可以直接使用這個容器來部署程式碼。</li>
-</ul>
-</li>
-<li>更有效率的虛擬化
-
-<ul>
-<li>不需額外的虛擬化支援，它是核心層級的虛擬化</li>
-</ul>
-</li>
-<li>更輕鬆的遷移和擴展
-
-<ul>
-<li>Docker 容器幾乎可以在任意的平台上執行</li>
-</ul>
-</li>
-<li>更簡單的管理</li>
+<li><a href="https://forums.docker.com/t/host-path-of-volume/12277">Host path of volume</a></li>
 </ul>
 
 
-<p>Docker vs VM</p>
+<h3>實戰範例 host volume 1</h3>
 
-<ul>
-<li>Docker 僅載入所需要的函式庫與執行檔，而不像VM需要安裝大容量的作業系統</li>
-<li>VM是用硬體端的hypervisor技術來同時執行多個虛擬主機，一般可預見需要大量的運行資源。Docker則是用軟體端的作業系統來實現虛擬分割的技術，由於僅載入核心的函式庫</li>
-</ul>
+<p><code>Host Volume</code> 指定 host 的資料夾</p>
 
-
-<h3>Basic</h3>
-
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/docker/">base command</a></li>
-<li><a href="https://docs.docker.com/engine/reference/commandline/ps/#description">ps</a></li>
-<li><a href="https://docs.docker.com/engine/reference/commandline/container/">container</a></li>
-<li><a href="https://docs.docker.com/engine/reference/commandline/image/">image</a></li>
-<li><a href="https://docs.docker.com/engine/reference/commandline/images/">images</a></li>
-</ul>
-
-
-<pre><code class="ruby"># 查看版本
-docker --version
-docker-compose --version
-docker-machine --version
-
-# 從 hub 取得所需要的 images :後面為版本號，若沒加則會拉最新的
-docker pull ubuntu:12.04 
-
-# 搜尋官方的 Image
-docker search 
-
-# container (有些 container 可改 ps)
-docker container ls                              # List all running containers
-docker container ls -a                           # List all vcontainers, even those not running
-docker container stop &lt;containerID&gt;              # Gracefully stop the specified container
-docker container kill &lt;containerID&gt;              # Force shutdown of the specified container
-docker container rm &lt;containerID&gt;                # Remove specified container from this machine
-docker container rm $(docker container ls -a -q) # Remove all containers; -q show all ID
-docker start &lt;containerID&gt;
-docker stop &lt;containerID&gt;
-
-# images
-docker image ls -a                       # List all images on this machine
-docker image rm &lt;image id&gt;               # Remove specified image from this machine
-docker image rm $(docker image ls -a -q) # Remove all images from this machine
-docker rmi &lt;imageID&gt;|&lt;imageName&gt;
-docker rmi nginx
-docker rmi nginx -f
-
-# 顯示 container 的資訊
-docker inspect &lt;containerID&gt;
-
-# 跳回 terminal 而不關閉 container
-ctrl + p + ctrl + q
-# 回去 container
-docker attach &lt;containerID&gt;
+<pre><code class="ruby"># 讓 local /app dir 連結到 container 裡面的 /app
+docker run --rm  -v ~/app:/app --workdir /app node yarn init -y
 </code></pre>
 
-<h3>Run</h3>
+<p>在 container 新增新的 <code>package.json</code> 在 local 的 <code>~/app</code> 就會產生一樣的檔案</p>
 
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/run/">run</a></li>
-</ul>
+<h3>實戰範例 host volume 2</h3>
 
-
-<pre><code class="ruby"># 執行 docker ，若本地沒有 image，就會自動去 Docker Hub pull 下來，如果沒有指定 TAG，預設使用 latest
-docker run -t -i ubuntu:12.04 bash
-# -t 在容器中分配一個虛擬終端（pseudo-tty）並綁定到容器的標準輸入上
-# -i 建立與容器標準輸入（STDIN）的互動連結，讓容器的標準輸入保持打開
-# 執行後啟動 bash
-
-docker run -d -p 80:80 --name webserver nginx
-# -p 80:80 (主機 port, container port)
-# --name webserver
-# -d daemon 模式，放到背景去跑
-
-docker run -it -v ~/Downloads: ubuntu:12.04 bash
-# 建立容器並啟動，且掛載本地目錄(local 在前，container 在後)
-
-# 加上 -rm 可以在 container 結束後自動刪除
-docker run -it --rm ubuntu:latest bash
-
-# 如果 container 停下來會自動 restart
---restart=always
+<pre><code class="ruby">cd ~
+mkdir volume-test
+# 測試發現即使一開始沒新增 volume-test，執行指令後也是會在 local 新增這個檔案 
+docker run -it -v /Users/leon/volume-test:/volume-test ubuntu:14.04 /bin/bash
+# 會發現裡面也會有一個資料夾 volume-test，不管在 docker 的 /volume-test 或是 local /Users/leon/volume-test，新增檔案，另一邊都會同步
+exit
+# 離開了 container，會發現 /Users/leon/volume-test 裡面的檔案還是保留在裡面
+docker run -it -v /Users/leon/volume-test:/volume-test ubuntu:14.04 /bin/bash
+# 即使在開新的 container 檔案還是一樣會在
 </code></pre>
 
-<h3>Attach</h3>
+<h3>Example 3.</h3>
 
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/attach/">attach</a></li>
-</ul>
+<p>讓 Container 和 Container 之間的資料共享</p>
 
+<pre><code class="ruby">docker run -it -v /data --name=container1 ubuntu:14.04 /bin/bash
+docker run -it --volumes-from container1 --name=container2 ubuntu:14.04 /bin/bash
 
-<pre><code class="ruby"># 連到 container 最後執行
-# 當多個窗口同時 attach 到同一個容器的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了
-docker attach &lt;imageID&gt;|&lt;imageName&gt;
+# 舊版參數
+# --volumes-from 參數指定 Container Name 為 Container1 的 Volume 資料和Container2 做共享
 </code></pre>
 
-<h3>Exec</h3>
+<h3>Example 4.</h3>
 
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/exec/">exec</a></li>
-</ul>
-
-
-<pre><code class="ruby"># 進去 container 執行 bash
-docker exec -it &lt;imageID&gt;|&lt;imageName&gt; bash
-</code></pre>
-
-<h3>Volume</h3>
-
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/volume_create/">volume</a></li>
-</ul>
-
-
-<pre><code class="ruby"># Volume mapping to map the local directory /opt/datadir to /var/lib/mysql
-docker run -v /opt/datadir:/var/lib/mysql mysql
-</code></pre>
-
-<h3>log</h3>
-
-<pre><code class="ruby"># 看 container log，-f=follow, -t=time
-docker logs -tf &lt;imageID&gt;|&lt;imageName&gt;
-</code></pre>
-
-<h3>建立映像檔</h3>
-
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/commit/">commit</a></li>
-<li><a href="https://philipzheng.gitbooks.io/docker_practice/content/image/create.html">images create</a></li>
-</ul>
-
-
-<h3>1.修改已有映像檔</h3>
-
-<p>進去現有的 container，加入新的套件，再用此 container build 新的 images</p>
-
-<pre><code class="ruby"># commit 建立新的 images
-# docker commit -m '&lt;message&gt;' -a '&lt;author&gt;' &lt;containerID&gt; &lt;tag&gt;
-docker commit -m "Added json gem" -a "Docker Newbee" 0b2616b0e5a8 ouruser/sinatra:v2
-# -m 指定提交的說明信息，跟我們使用的版本控制工具一樣；
-# -a 可以指定更新的使用者信息
-# 之後是用來建立映像檔的容器的 CONTAINER ID
-# 最後指定新映像檔的名稱和 tag 。建立成功後會印出新映像檔的 ID。
-</code></pre>
-
-<h3><a href="#dockerfile">2.利用 Dockerfile 建立映像檔</a></h3>
-
-<h3>Tag and Publish the image</h3>
-
-<p>要 push 的話，必須將 image tag 成 username/imagename 的形式才可以 push</p>
-
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/tag/">tag</a></li>
-<li><a href="https://docs.docker.com/engine/reference/commandline/push/">push</a></li>
-</ul>
-
-
-<pre><code class="ruby"># Tag the image
-docker tag username/repository:tag
-docker tag helloworld leon/get-started:part1
-
-# Upload your tagged image to the repository:
-docker push leon/get-started:part1
-</code></pre>
-
-<h3>Pull and run the image from the remote repository</h3>
-
-<pre><code class="ruby">docker run -p 4000:80 username/repository:tag
-</code></pre>
-
-<h3>儲存映像檔</h3>
-
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/save/">save</a></li>
-</ul>
-
-
-<p>如果要建立映像檔到本地檔案，可以使用 docker save 命令</p>
-
-<pre><code class="ruby">$ sudo docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED             VIRTUAL SIZE
-ubuntu              14.04               c4ff7513909d        5 weeks ago         225.4 MB
-
-docker save -o ubuntu_14.04.tar ubuntu:14.04
-</code></pre>
-
-<h3>載入映像檔</h3>
-
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/load/">load</a></li>
-</ul>
-
-
-<p>可以使用 docker load 從建立的本地檔案中再匯入到本地映像檔庫</p>
-
-<pre><code class="ruby">docker load --input ubuntu_14.04.tar
-docker load &lt; ubuntu_14.04.tar
-</code></pre>
-
-<h3><a href="https://philipzheng.gitbooks.io/docker_practice/content/container/enter.html">進入容器</a></h3>
-
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/attach/">attach</a></li>
-</ul>
-
-
-<p>attach 開啟一個和正在運行的處理序交互的終端，如果該處理序結束，原docker container的處理序也會結束。attach只可以用在以 /bin/bash 命令啟動的容器， 比如 docker run ubuntu /bin/bash</p>
-
-<p>attach 命令有時候並不方便。當多個窗口同時 attach 到同一個容器的時候，所有窗口都會同步顯示。當某個窗口因命令阻塞時,其他窗口也無法執行操作了</p>
-
-<ul>
-<li><a href="https://docs.docker.com/engine/reference/commandline/exec/">exec</a></li>
-</ul>
-
-
-<p>exec 可以開啟多個終端實例， exec -i /bin/bash，由此可見exec其實是在運行中的容器中執行一個命令，比如/bin/bash 來達到交互的目的。</p>
-
-<p><img src="https://blog.fntsr.tw/wp-content/uploads/2014/12/Docker-Command-Diagram.png" alt="" /></p>
-
-<h2><span id="dockerfile">Dockerfile</span></h2>
-
-<pre><code class="ruby"># 1. OS-Ubuntu
-FROM Ubuntu
-
-# 2. Update apt repo
-RUN apt-get update
-# 3. Install denpendencies using apt
-RUN apt-get install python
-
-# 4. Install python denpendencies using pip
-RUN pip install flask
-RUN pip install flask-mysql
-
-# 5. Copy source code to /opt folder
-COPY . /opt/source-code
-
-# 6. Run the web server using 'flask' command
-ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run 
-</code></pre>
-
-<pre><code class="ruby"># 可加 --no-cache 
-docker build -t user_name/custom_app Dockerfile
-docker push user_name/custom_app
-</code></pre>
-
-<p><a href="https://philipzheng.gitbooks.io/docker_practice/content/dockerfile/instructions.html">Dockerfile 指令</a></p>
-
-<blockquote><p>注意一個映像檔不能超過 127 層</p></blockquote>
-
-<pre><code class="ruby">#一般會建議放置 Dockerfile 的目錄為空目錄。也可以透過 .dockerignore 檔案（每一行新增一條排除模式：exclusion patterns）來讓 Docker 忽略路徑下的目錄和檔案。
-docker build -t &lt;repositoryName&gt;:&lt;tagName&gt; .
-
-#這樣也可以，只是不指定名稱
-docker build .
-</code></pre>
-
-<h3>FROM</h3>
-
-<p>一定要有，只能有一個 FROM，基於某個已存在的 image 進行二次開發。</p>
-
-<pre><code class="ruby">FROM ubuntu:14.04.2
-</code></pre>
-
-<h3>MAINTAINER</h3>
-
-<p>指定維護者訊息。</p>
-
-<pre><code class="ruby">MAINTAINER &lt;name | email&gt;
-</code></pre>
-
-<h3>RUN</h3>
-
-<p>對映像檔執行相對應的命令。每運行一條 RUN 指令，映像檔就會新增一層，主要用來安裝 packages、設定系統環境等</p>
-
-<pre><code class="ruby"># shell形式
-RUN &lt;command&gt; &lt;param1&gt; &lt;param2&gt;
-# exec形式
-RUN ["executable", "param1", "param2"]
-</code></pre>
-
-<p>前者將在 shell 終端中運行命令，即 <code>/bin/sh -c</code>；後者則使用 exec 執行。指定使用其它終端可以透過第二種方式實作，例如 <code>RUN ["/bin/bash", "-c", "echo hello"]</code>。</p>
-
-<p>每條 RUN 指令將在當前映像檔基底上執行指定命令，並產生新的映像檔。當命令較長時可以使用 \ 來換行。</p>
-
-<h3>EXPOSE</h3>
-
-<p>設定 Docker 伺服器容器對外的埠號，供外界使用。在啟動容器時需要透過 -P，Docker 會自動分配一個埠號轉發到指定的埠號（當然也可以自己給，例如 -p 1055:80)</p>
-
-<pre><code class="ruby">EXPOSE 80
-</code></pre>
-
-<h3>ADD</h3>
-
-<p>該命令將複製指定的 <code>&lt;src&gt;</code> 到容器中的 <code>&lt;dest&gt;</code>。 其中 <code>&lt;src&gt;</code> 可以是 Dockerfile 所在目錄的相對路徑；也可以是一個 URL；還可以是一個 tar 檔案（其複製後會自動解壓縮）。</p>
-
-<pre><code class="ruby">ADD &lt;src&gt; &lt;dest&gt;
-ADD text.conf /etc/apache2/test.conf
-</code></pre>
-
-<h3>USER</h3>
-
-<p>切換使用者身份，Docker 預設使用者是 root，但若不需要，建議切換使用者身份，畢竟 root 權限太大了，使用上有安全的風險。</p>
-
-<pre><code class="ruby">USER Leon
-</code></pre>
-
-<h3>VOLUME</h3>
-
-<p>建立一個可以從本地端或其他容器掛載的掛載點，一般用來存放資料庫和需要保存的資料等。</p>
-
-<pre><code class="ruby">VOLUME ["/data"]
-VOLUME ["/storage1", "/storage2", "/storage2"]
-</code></pre>
-
-<h3>WORKDIR</h3>
-
-<p>用來切換工作目錄，Docker 預設工作目錄是在根目錄，只有 RUN 能執行 cd 指令切換目錄，只作用在當下的 RUN，也就是說每一個 RUN 都是獨立進行的。如果想讓其他指令在指定的目錄下執行，就得靠 WORKDIR。WORKDIR 的變更影響是持續的，不用每個指令前都使用一次 WORKDIR</p>
-
-<pre><code class="ruby">WORKDIR /a
-WORKDIR b
-WORKDIR c
-RUN pwd
-
-#則最終路徑為 /a/b/c
-</code></pre>
-
-<h3>ENV</h3>
-
-<p>指定一個環境變數，會被後續 RUN 指令使用，並在容器運行時保持。</p>
-
-<pre><code class="ruby">ENV &lt;key&gt; &lt;value&gt;
-
-ENV PG_MAJOR 9.3
-ENV PG_VERSION 9.3.4
-RUN curl -SL http://example.com/postgres-$PG_VERSION.tar.xz | tar -xJC /usr/src/postgress &amp;&amp; …
-ENV PATH /usr/local/postgres-$PG_MAJOR/bin:$PATH
-</code></pre>
-
-<h3>ARG</h3>
-
-<pre><code class="ruby">格式：ARG &lt;參數名&gt;[=&lt;預設值&gt;]
-</code></pre>
-
-<p>建構參數和 ENV 的效果一樣，都是設定環境變數。所不同的是，ARG 所設定的建構環境的環境變數，在將來容器運行時是不會存在這些環境變數的。但是不要因此就使用 ARG 保存密碼之類別的訊息，因為 docker history 還是可以看到所有值的。</p>
-
-<p>Dockerfile 中的 ARG 指令是定義參數名稱，以及定義其預設值。
-該預設值可以在建構命令</p>
-
-<pre><code class="ruby">docker build 中用 --build-arg &lt;參數名&gt;=&lt;值&gt;
-</code></pre>
-
-<p>來覆蓋。</p>
-
-<h3>COPY</h3>
-
-<p>能將本機端的檔案或目錄，複製到 image 內。（與 ADD 雷同，差別在於不會做解壓縮，一般都是使用COPY）</p>
-
-<pre><code class="ruby">#複製本地端的 &lt;src&gt;（為 Dockerfile 所在目錄的相對路徑）到容器中的 &lt;dest&gt;。
-COPY &lt;src&gt; &lt;dest&gt;
-COPY test.rb ./
-</code></pre>
-
-<h3>ENTRYPOINT</h3>
-
-<p>指定 Docker image 運行成 instance (也就是 Docker container) 時，要執行的指令或檔案。在這個範本中，test.rb 就是要執行的檔案。</p>
-
-<pre><code class="ruby">ENTRYPOINT ["./test.rb"]
-
-# shell形式
-ENTRYPOINT ["executable", "param1", "param2"]
-# exec形式
-ENTRYPOINT command param1 param2
-</code></pre>
-
-<blockquote><p>會將 docker run xxx 後面的參數，當作 ENTRYPOINT 指令的參數</p></blockquote>
-
-<pre><code class="ruby">ENTRYPOINT ["echo"]
-docker run CONTAINER echo foo
-# =&gt; echo foo
-</code></pre>
-
-<h3>CMD</h3>
-
-<p>指定啟動容器時執行的命令，每個 Dockerfile 只能有一條 CMD 命令。如果指定了多條命令，只有最後一條會被執行。</p>
-
-<pre><code class="ruby">#在 /bin/sh 中執行，使用在給需要互動的指令
-
-# shell形式
-CMD command param1 param2
-# exec形式
-CMD ["executable","param1","param2"] 
-#參數形式: 作為 ENTRYPOINT 的預設參數
-CMD ["param1","param2"]
-</code></pre>
-
-<blockquote><p>會將 docker run xxx 後面的參數，覆蓋掉 CMD 指定的命令。</p></blockquote>
-
-<pre><code class="ruby">CMD ["echo"]
-docker run CONTAINER echo foo
-# =&gt; foo
-</code></pre>
-
-<h3>RUN ENTRYPOINT &amp; CMD</h3>
-
-<h5>shell &amp; exec 形式差別</h5>
-
-<p>shell</p>
-
-<ul>
-<li>預設使用 <code>/bin/sh -c</code> 來運行命令，如果鏡像中不包含/bin/sh，容器會無法啟動。</li>
-</ul>
-
-
-<p>exec (推薦的格式)</p>
-
-<ul>
-<li>exec 直接運行指定的指令</li>
-<li>exec指定的命令不由shell啟動，因此也就無法使用shell中的環境變數，如<code>$HOME</code>。需要環境變數可以指定命令為 <code>sh</code>：<code>CMD [ "sh", "-c", "echo", "$HOME" ]</code></li>
-</ul>
-
-
-<h3>範例</h3>
-
-<pre><code class="ruby"># 記得要指定版本，不然很容易因為版本導致這個 Dockerfile 無法使用
-FROM ubuntu:14.04
-
-RUN apt-get update -qq &amp;&amp; apt-get install -y aptitude git imagemagick curl vim bash-completion htop nodejs mysql-client libmysqlclient-dev
-
-RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3
-RUN \curl -sSL https://get.rvm.io | bash -s stable
-RUN /bin/bash -l -c "rvm install 2.1.5"
-RUN /bin/bash -l -c "gem install bundler -v 1.10.5 --no-ri --no-rdoc"
-
-ENV APP_ROOT /project_name
-
-RUN mkdir $APP_ROOT
-WORKDIR $APP_ROOT
-ADD . $APP_ROOT
-RUN /bin/bash -l -c "bundle install"
-</code></pre>
-
-<h3>範例二</h3>
-
-<p><a href="https://github.com/mgleon08/slack_neuralyzer">slack_neuralyzer</a></p>
+<p>Dockerfile 指定</p>
 
 <pre><code class="ruby">FROM ubuntu:14.04
-
-MAINTAINER leonji mgleon08@gmail.com
-
-RUN apt-get update
-RUN apt-get -y upgrade
-RUN apt-get -y install curl
-
-RUN gpg --keyserver hkp://keys.gnupg.net --recv-keys 409B6B1796C275462A1703113804BB82D39DC0E3 7D2BAF1CF37B13E2069D6956105BD0E739499BDB
-RUN curl -sSL https://get.rvm.io | bash -s stable
-RUN /bin/bash -l -c "rvm install 2.4.2"
-RUN /bin/bash -l -c "gem install slack_neuralyzer"
-
-CMD /bin/bash -l -c "slack_neuralyzer -t &lt;SLACK_TOKEN&gt; -u &lt;USER_NAME&gt; -D &lt;USER_NAME&gt; -m -e -r 1"
+VOLUME /data
 </code></pre>
 
-<pre><code class="ruby"># 可加上 --no-cache，避免在 Build Docker image 時被 cache 住，而造成沒有 build 到修改過的 Dockerfile。
-docker build -t leon:slack
-# 放到背景去跑，跑完就結束
-docker run -d &lt;imageID&gt;|&lt;imageName&gt;
-# 之後會產生 container
-docker ps -a
-docker start &lt;containerID&gt;
-# 就會跑了，而且會連同原本 run 加上的 -d 參數也會一起執行
+<p>docker-compose.yml 指定</p>
+
+<pre><code class="ruby">version: '3'
+services:
+  db:
+    image: postgres
+    ports:
+      - "5432"
+  backend:
+    build:
+      context: test-backend
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./test-backend:/usr/src/app
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    user: rails
+  frontend:
+    build:
+      context: test-frontend
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./test-frontend:/usr/src/app
+    ports:
+      - "3000:3000"
+    user: frontend
 </code></pre>
 
-<blockquote><p>bin/bash -l，中的 -l <a href="https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html">6.1 Invoking Bash</a></p></blockquote>
+<h3>查看 volume 實際存取路徑</h3>
 
-<h2><span id="docker_compose">Docker Compose</span></h2>
+<pre><code class="ruby"># 查看名稱
+docker volume ls
 
-<p>Compose 是一個工具，用來定義與執行多個 container 組成的 Docker Applications。你可以使用 Compose 檔案來組態設定你的應用服務。然後使用單一命令，透過你的組態設定來建立與啟動你的服務。</p>
+# 查看路徑
+docker volume inspect --format '' volumeName
+</code></pre>
 
-<p>Compose 適合用來開發、測試、與建立 staging 環境，如同 CI workflows。</p>
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://docs.docker.com/storage/volumes/">Use volumes</a></li>
+<li><a href="https://deepzz.com/post/the-docker-volumes-basic.html">docker volume 容器卷的那些事（一）</a></li>
+<li><a href="https://julianchu.net/2016/04/19-docker.html">Docker volume 簡單用法</a></li>
+<li><a href="https://larrylu.blog/using-volumn-to-persist-data-in-container-a3640cc92ce4">Docker 實戰系列（三）：使用 Volume 保存容器內的數據</a></li>
+<li><a href="https://ithelp.ithome.com.tw/articles/10192397">Day17：使用 Docker Volume 的功能 (一)</a></li>
+<li><a href="https://ithelp.ithome.com.tw/articles/10192703">Day18：使用 Docker Volume 的功能 (二)</a></li>
+<li><a href="http://blog.maxkit.com.tw/2017/03/docker-volume.html">Docker Volume 初步閱讀與學習紀錄</a></li>
+<li><a href="https://ruby-china.org/topics/32459">部署 長文慎入：將 Rails 程序部署到 Docker 容器中</a></li>
+<li><a href="https://5xruby.tw/en/posts/rails-docker-image">2018 年的 Rails 應用 Docker Image 包裝範例</a></li>
+<li><a href="https://forums.docker.com/t/host-path-of-volume/12277">Host path of volume</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Docker - Docker Compose]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/11/26/docker-compose/"/>
+    <updated>2016-11-26T16:28:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/11/26/docker-compose</id>
+    <content type="html"><![CDATA[<p>Docker Compose 是一個工具，用來定義與執行多個 container 組成的 Docker Applications。你可以使用 Compose 檔案來組態設定你的應用服務。然後使用單一命令，透過你的組態設定來建立與啟動你的服務。</p>
+
+<!-- more -->
+
+
+<p>Docker Compose 適合用來開發、測試、與建立 staging 環境，如同 CI workflows。</p>
 
 <p>使用 Compose 有基本的三個處理步驟：</p>
 
@@ -632,148 +1092,7 @@ services:
 <li><a href="https://larrylu.blog/step-by-step-dockerize-your-app-ecd8940696f4">Docker 實戰系列（一）：一步一步帶你 dockerize 你的應用</a></li>
 <li><a href="https://blog.csdn.net/qq_36148847/article/details/79427878">docker-compose.yml 配置文件編寫詳解</a></li>
 <li><a href="https://ithelp.ithome.com.tw/users/20103456/ironman/1320">用30天來介紹和使用 Docker</a></li>
-</ul>
-
-
-<h2><span id="docker_volumn">Docker Volumn</span></h2>
-
-<p>Docker Volume 是個介於主機與容器間的共享資料夾，可用來匯入或匯出容器內的資料，或者共享容器間的資料</p>
-
-<ul>
-<li>Docker image 由多個 read-only 的 file system 疊加而成一個 stack，這些組合稱為 Union File System。</li>
-<li>啟動 container 的時候，會在 stack 上方新增一個 read-write layer，更動都在這邊，砍掉 container 這邊也就沒了</li>
-<li>Volume 是為了要解決 container 之間資料共享與資料保存而提出的</li>
-<li>Volume 就是目錄或是檔案，可以繞過 UFS 以正常的檔案或目錄的方式存在 host 本機上</li>
-<li>啟動 Container 的時候產生 volume，如果 Volume 掛載的目標路徑已經有檔案存在於 Image 上面，則 Image 上面的檔案會 copy 到 volume 上，但不包括 host directory</li>
-</ul>
-
-
-<pre><code class="ruby"># 列出所有的 volume
-docker volume ls
-
-# 列出所有沒有被關聯到 container 的 volume 的 VOLUME NAME
-docker volume ls -qf dangling=true
-
-# 一次刪除所有 volume
-docker volume rm $(docker volume ls -qf dangling=true)
-
-# 查看 volume 的資訊
-docker volume inspect 52b29486c72090675d52814414eec7d62024b2328a644bd7924e647ee1a24884
-
-# 查看某一個 container 的 volume 狀況
-docker inspect -f '' 825005afab43
-</code></pre>
-
-<h3>Example1:</h3>
-
-<p><code>Host Volume</code> 指定 host 的資料夾</p>
-
-<pre><code class="ruby">cd ~
-mkdir volume-test
-# 測試發現即使一開始沒新增 volume-test，執行指令後也是會在 local 新增這個檔案 
-docker run -it -v /Users/leon/volume-test:/volume-test ubuntu:14.04 /bin/bash
-# 會發現裡面也會有一個資料夾 volume-test，不管在 docker 的 /volume-test 或是 local /Users/leon/volume-test，新增檔案，另一邊都會同步
-exit
-# 離開了 container，會發現 /Users/leon/volume-test 裡面的檔案還是保留在裡面
-docker run -it -v /Users/leon/volume-test:/volume-test ubuntu:14.04 /bin/bash
-# 即使在開新的 container 檔案還是一樣會在
-</code></pre>
-
-<h3>Example2:</h3>
-
-<p><code>named volume</code> 沒有指定 loacl 的路徑，檔案會去哪裡?</p>
-
-<pre><code class="ruby">docker run -it -v /volume-test ubuntu:14.04 /bin/bash
-docker volume ls
-
-# 發現多了一個，因為沒指定名稱所以就產生亂碼
-DRIVER              VOLUME NAME
-local               c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a
-</code></pre>
-
-<pre><code class="ruby"># 尋找 container 的 loacl volume, 825005afab43 是 container id
-docker inspect -f '' 825005afab43
-[{volume c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a /var/lib/docker/volumes/c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a/_data /vo-test local  true }]
-</code></pre>
-
-<p>透過上面指令就可以找到 local 的檔案，照理說可以 cd 到 <code>/var/lib/docker/volumes/c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a/_data /vo-test</code>，但是 mac 無法，有找到以下有人也在詢問</p>
-
-<ul>
-<li><a href="https://forums.docker.com/t/host-path-of-volume/12277">Host path of volume</a></li>
-</ul>
-
-
-<h3>Example 3.</h3>
-
-<p><code>named volume</code> 先在 local 建立 volume 在指定</p>
-
-<pre><code class="ruby">docker volume create db_data2
-docker run -d -v db_data2:/var/lib/mysql mysql:5.7.17
-</code></pre>
-
-<h3>Example 4.</h3>
-
-<p>讓 Container 和 Container 之間的資料共享</p>
-
-<pre><code class="ruby">docker run -it -v /data --name=container1 ubuntu:14.04 /bin/bash
-docker run -it --volumes-from container1 --name=container2 ubuntu:14.04 /bin/bash
-
-# --volumes-from 參數指定 Container Name 為 Container1 的 Volume 資料和Container2 做共享
-</code></pre>
-
-<h3>Example 5.</h3>
-
-<p>Dockerfile 指定</p>
-
-<pre><code class="ruby">FROM ubuntu:14.04
-VOLUME /data
-</code></pre>
-
-<p>docker-compose.yml 指定</p>
-
-<pre><code class="ruby">version: '3'
-services:
-  db:
-    image: postgres
-    ports:
-      - "5432"
-  backend:
-    build:
-      context: test-backend
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./test-backend:/usr/src/app
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    user: rails
-  frontend:
-    build:
-      context: test-frontend
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./test-frontend:/usr/src/app
-    ports:
-      - "3000:3000"
-    user: frontend
-</code></pre>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://docs.docker.com/storage/volumes/">Use volumes</a></li>
-<li><a href="http://dockone.io/article/128">深入理解Docker Volume（一）</a></li>
-<li><a href="https://deepzz.com/post/the-docker-volumes-basic.html">docker volume 容器卷的那些事（一）</a></li>
-<li><a href="https://julianchu.net/2016/04/19-docker.html">Docker volume 簡單用法</a></li>
-<li><a href="https://larrylu.blog/using-volumn-to-persist-data-in-container-a3640cc92ce4">Docker 實戰系列（三）：使用 Volume 保存容器內的數據</a></li>
-<li><a href="https://ithelp.ithome.com.tw/articles/10192397">Day17：使用 Docker Volume 的功能 (一)</a></li>
-<li><a href="https://ithelp.ithome.com.tw/articles/10192703">Day18：使用 Docker Volume 的功能 (二)</a></li>
-<li><a href="http://blog.maxkit.com.tw/2017/03/docker-volume.html">Docker Volume 初步閱讀與學習紀錄</a></li>
-<li><a href="https://ruby-china.org/topics/32459">部署 長文慎入：將 Rails 程序部署到 Docker 容器中</a></li>
-<li><a href="https://5xruby.tw/en/posts/rails-docker-image">2018 年的 Rails 應用 Docker Image 包裝範例</a></li>
+<li><a href="http://www.ityouknow.com/docker/2018/03/22/docker-compose.html">Docker(四)：Docker 三劍客之 Docker Compose</a></li>
 </ul>
 
 ]]></content>

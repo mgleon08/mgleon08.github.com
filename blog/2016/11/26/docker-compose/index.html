@@ -1,0 +1,406 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Docker - Docker Compose - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="Docker Compose 是一個工具，用來定義與執行多個 container 組成的 Docker Applications。你可以使用 Compose 檔案來組態設定你的應用服務。然後使用單一命令，透過你的組態設定來建立與啟動你的服務。 Docker Compose 適合用來開發、測試、 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2016/11/26/docker-compose">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby-tips/">Ruby Tips</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Docker - Docker Compose</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2016-11-26T16:28:35+08:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>4:28 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>Docker Compose 是一個工具，用來定義與執行多個 container 組成的 Docker Applications。你可以使用 Compose 檔案來組態設定你的應用服務。然後使用單一命令，透過你的組態設定來建立與啟動你的服務。</p>
+
+<!-- more -->
+
+
+<p>Docker Compose 適合用來開發、測試、與建立 staging 環境，如同 CI workflows。</p>
+
+<p>使用 Compose 有基本的三個處理步驟：</p>
+
+<ol>
+<li>使用 Dockerfile 定義你的 app 環境，讓它可以在任何地方都能複製(reproduced)。</li>
+<li>使用 docker-compose.yml 定義你的服務，讓他們可以在獨立環境內一起執行。</li>
+<li>最後，執行 docker-compose up，Compose 將會開始與執行你所有的 app。</li>
+</ol>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># docker-compose.yml</span>
+</span><span class='line'><span class="ss">version</span><span class="p">:</span> <span class="s1">&#39;1&#39;</span> <span class="c1"># dockerfile 版本  </span>
+</span><span class='line'><span class="ss">services</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">web</span><span class="p">:</span>
+</span><span class='line'>     <span class="ss">container_name</span><span class="p">:</span> <span class="n">exmple</span><span class="o">-</span><span class="n">web</span> <span class="c1"># Container 名稱</span>
+</span><span class='line'>      <span class="ss">images</span><span class="p">:</span><span class="s2">&quot;mmumshad/simple-webapp&quot;</span> <span class="c1"># 使用的 Image</span>
+</span><span class='line'>      <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>          <span class="o">-</span> <span class="s2">&quot;80:5000&quot;</span> <span class="c1"># 將 container 的 port 映射到 80</span>
+</span><span class='line'>  <span class="ss">detabase</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">container_name</span><span class="p">:</span> <span class="n">exmple</span><span class="o">-</span><span class="n">detabase</span> <span class="c1"># Container 名稱</span>
+</span><span class='line'>      <span class="ss">images</span><span class="p">:</span><span class="s2">&quot;mysql&quot;</span>
+</span><span class='line'>      <span class="n">volumes</span><span class="o">::</span>
+</span><span class='line'>          <span class="o">-</span> <span class="sr">/opt/</span><span class="ss">data</span><span class="p">:</span><span class="sr">/var/</span><span class="n">lib</span><span class="o">/</span><span class="n">mysql</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><img src="https://i.imgur.com/2Z22ghU.png" alt="" /></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">build</span> <span class="c1"># 透過 docker-compose 建立好所有的 image</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">stop</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">down</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Example</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">version</span><span class="p">:</span> <span class="s1">&#39;3&#39;</span>
+</span><span class='line'><span class="ss">services</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">db</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">image</span><span class="p">:</span> <span class="n">postgres</span>
+</span><span class='line'>    <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="s2">&quot;5432&quot;</span>
+</span><span class='line'>  <span class="ss">backend</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">build</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">context</span><span class="p">:</span> <span class="nb">test</span><span class="o">-</span><span class="n">backend</span>
+</span><span class='line'>      <span class="ss">args</span><span class="p">:</span>
+</span><span class='line'>        <span class="ss">UID</span><span class="p">:</span> <span class="err">$</span><span class="p">{</span><span class="ss">UID</span><span class="p">:</span><span class="o">-</span><span class="mi">1001</span><span class="p">}</span>
+</span><span class='line'>    <span class="ss">volumes</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="o">.</span><span class="n">/</span><span class="nb">test</span><span class="o">-</span><span class="ss">backend</span><span class="p">:</span><span class="sr">/usr/s</span><span class="n">rc</span><span class="o">/</span><span class="n">app</span>
+</span><span class='line'>    <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="s2">&quot;8080:8080&quot;</span>
+</span><span class='line'>    <span class="ss">depends_on</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="n">db</span>
+</span><span class='line'>    <span class="ss">user</span><span class="p">:</span> <span class="n">rails</span>
+</span><span class='line'>  <span class="ss">frontend</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">build</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">context</span><span class="p">:</span> <span class="nb">test</span><span class="o">-</span><span class="n">frontend</span>
+</span><span class='line'>      <span class="ss">args</span><span class="p">:</span>
+</span><span class='line'>        <span class="ss">UID</span><span class="p">:</span> <span class="err">$</span><span class="p">{</span><span class="ss">UID</span><span class="p">:</span><span class="o">-</span><span class="mi">1001</span><span class="p">}</span>
+</span><span class='line'>    <span class="ss">volumes</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="o">.</span><span class="n">/</span><span class="nb">test</span><span class="o">-</span><span class="ss">frontend</span><span class="p">:</span><span class="sr">/usr/s</span><span class="n">rc</span><span class="o">/</span><span class="n">app</span>
+</span><span class='line'>    <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="s2">&quot;3000:3000&quot;</span>
+</span><span class='line'>    <span class="ss">user</span><span class="p">:</span> <span class="n">frontend</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>.env file</h3>
+
+<ul>
+<li><a href="https://docs.docker.com/compose/environment-variables/">Environment variables in Compose</a></li>
+</ul>
+
+
+<p>官方文件：</p>
+
+<ul>
+<li><a href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a></li>
+<li><a href="https://docs.docker.com/engine/reference/builder/">Docker Docs</a></li>
+<li><a href="https://docs.docker.com/compose/">Docker Compose</a></li>
+<li><a href="https://docs.docker.com/compose/compose-file/">Compose file version 3 reference</a></li>
+</ul>
+
+
+<p>參考文件：</p>
+
+<ul>
+<li><a href="https://philipzheng.gitbooks.io/docker_practice/content/index.html">Docker —— 從入門到實踐</a></li>
+<li><a href="http://www.cc.ntu.edu.tw/chinese/epaper/0036/20160321_3611.html">淺談輕量化的虛擬技術 - Docker容器</a></li>
+<li><a href="http://bonze.tw/%E4%BC%BA%E6%9C%8D%E5%99%A8%E7%A0%94%E7%A9%B6%E5%AE%A4/dockerfile%E7%B0%A1%E5%96%AE%E4%BB%8B%E7%B4%B9">Dockerfile簡單介紹</a></li>
+<li><a href="http://blog.maxkit.com.tw/2017/03/docker-compose.html">Docker Compose 初步閱讀與學習記錄</a></li>
+<li><a href="https://medium.com/@DcardLab/dcard-%E5%AF%A6%E7%BF%92%E7%94%9F%E6%B4%BB%E6%97%A5%E8%A8%98-%E5%B0%8F%E9%AF%A8%E9%AD%9A-docker-%E4%BB%8B%E7%B4%B9-a574b28feae4">Dcard 實習生活日記：小鯨魚（Docker）介紹</a></li>
+<li><a href="https://segmentfault.com/q/1010000000417103">Dockerfile裡指定執行命令用ENTRYPOING和用CMD有何不同？</a></li>
+<li><a href="https://beginor.github.io/2017/10/21/dockerfile-cmd-and-entripoint.html">Dockerfile 的 ENTRYPOINT 與 CMD</a></li>
+<li><a href="https://5xruby.tw/posts/rails-docker-image">2018 年的 Rails 應用 Docker Image 包裝範例</a></li>
+<li><a href="https://larrylu.blog/step-by-step-dockerize-your-app-ecd8940696f4">Docker 實戰系列（一）：一步一步帶你 dockerize 你的應用</a></li>
+<li><a href="https://blog.csdn.net/qq_36148847/article/details/79427878">docker-compose.yml 配置文件編寫詳解</a></li>
+<li><a href="https://ithelp.ithome.com.tw/users/20103456/ironman/1320">用30天來介紹和使用 Docker</a></li>
+<li><a href="http://www.ityouknow.com/docker/2018/03/22/docker-compose.html">Docker(四)：Docker 三劍客之 Docker Compose</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2016-11-26T16:28:35+08:00'><span class='date'><span class='date-month'>Nov</span> <span class='date-day'>26</span><span class='date-suffix'>th</span>, <span class='date-year'>2016</span></span> <span class='time'>4:28 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/docker/'>docker</a>, <a class='category' href='/blog/categories/server/'>server</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2016/11/26/docker-compose/" data-via="" data-counturl="http://mgleon08.github.com/blog/2016/11/26/docker-compose/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2016/11/25/docker/" title="Previous Post: Docker - Dockerfile">&laquo; Docker - Dockerfile</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2016/11/27/docker-volumn/" title="Next Post: Docker - Docker Volumn">Docker - Docker Volumn &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2016/11/26/docker-compose/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2016/11/26/docker-compose/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

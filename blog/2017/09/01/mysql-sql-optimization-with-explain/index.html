@@ -89,6 +89,9 @@
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby-tips/">Ruby Tips</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
   <li><a href="/tool">Tool</a></li>
   <li><a href="/about">About</a></li>
 </ul>
@@ -177,18 +180,78 @@
 <li>type: 連接使用的類型(重要項) 顯示連接使用的類型,按最 優到最差的類型排序
 
 <ul>
-<li>System</li>
-<li>const</li>
-<li>eq_ref</li>
-<li>ref</li>
-<li>fulltext</li>
-<li>ref_or_null</li>
-<li>index_merge</li>
-<li>unique_subquery</li>
-<li>index_subquery</li>
-<li>range</li>
-<li>index</li>
-<li>ALL</li>
+<li>System
+
+<ul>
+<li>表只有一行，這是一個 const type 的特殊情況</li>
+</ul>
+</li>
+<li>const
+
+<ul>
+<li>使用主鍵或者唯一索引的時候，當查詢的表僅有一行時，使用 System</li>
+</ul>
+</li>
+<li>eq_ref
+
+<ul>
+<li>MySQL在連接查詢時，會從最前面的資料表，對每一個記錄的聯合，從資料表中讀取一個記錄，在查詢時會使用索引為主鍵或唯一鍵的全部</li>
+</ul>
+</li>
+<li>ref
+
+<ul>
+<li>只有在查詢使用了非唯一鍵或主鍵時才會發生</li>
+</ul>
+</li>
+<li>fulltext
+
+<ul>
+<li>使用全文索引的時候才會出現</li>
+</ul>
+</li>
+<li>ref_or_null
+
+<ul>
+<li>查詢類型和ref很像，但是 MySQL 會做一個額外的查詢，來看哪些行包含了NULL。這種類型常見於解析子查詢的優化</li>
+</ul>
+</li>
+<li>index_merge
+
+<ul>
+<li>在一個查詢裡面很有多索引用被用到，可能會觸發 index_merge 的優化機制</li>
+</ul>
+</li>
+<li>unique_subquery
+
+<ul>
+<li>比 eq_ref 複雜的地方是使用了 in 的子查詢，而且是子查詢是主鍵或者唯一索引</li>
+</ul>
+</li>
+<li>index_subquery
+
+<ul>
+<li>和 unique_subquery 類似，但是它在子查詢裡使用的是非唯一索引。</li>
+</ul>
+</li>
+<li>range
+
+<ul>
+<li>使用索引返回一個範圍的結果，例如：使用大於 > 或小於 &lt; 查詢時發生。</li>
+</ul>
+</li>
+<li>index
+
+<ul>
+<li>全表掃瞄，此為針對索引中的資料進行查詢，主要優點就是避免了排序，但是開銷仍然非常大</li>
+</ul>
+</li>
+<li>ALL
+
+<ul>
+<li>針對每一筆記錄進行完全掃瞄，此為最壞的情況，應該儘量避免</li>
+</ul>
+</li>
 </ul>
 </li>
 <li>prossible_keys: 能在該表中使用哪些索引有助於查詢</li>
@@ -199,8 +262,6 @@
 <li>Extra:其他說明</li>
 </ol>
 
-
-<p>每個欄位詳細的一些 type 可以到參考文件裡的文章去找尋!</p>
 
 <h1>composite index</h1>
 
@@ -234,6 +295,8 @@
 <ul>
 <li><a href="http://www.shixinke.com/mysql/mysql-sql-optimization-with-using-explain-and-show-profile">使用explain和show profile來分析SQL語句實現優化SQL語句</a></li>
 <li><a href="http://blog.kejyun.com/2012/12/Using-EXPLAIN-SQL-To-Analysis-Efficient-On-MySQL.html">在MySQL使用Explain做SQL SELECT語法效能測試</a></li>
+<li><a href="https://overtrue.me/articles/2014/10/mysql-explain.html">MySQL 中 EXPLAIN 命令詳解</a></li>
+<li><a href="https://mengkang.net/1124.html">最官方的 mysql explain type 字段解讀</a></li>
 </ul>
 
 </div>
@@ -305,7 +368,7 @@
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - LeonJi -
+  Copyright &copy; 2019 - LeonJi -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
 </p>
 

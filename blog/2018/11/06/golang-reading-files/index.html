@@ -90,6 +90,9 @@ Reading a file line by line Reading an entire file into memory Use ioutil packag
 <ul class="main-navigation">
   <li><a href="/">Blog</a></li>
   <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby-tips/">Ruby Tips</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
   <li><a href="/tool">Tool</a></li>
   <li><a href="/about">About</a></li>
 </ul>
@@ -198,9 +201,44 @@ Reading a file line by line Reading an entire file into memory Use ioutil packag
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>當你用 <code>go install</code> or <code>go build</code> 出 binary 的 file，file 移到不同位置就會找不到檔案，有幾種方式可以解決</p>
+<p>當你用 <code>go install</code> or <code>go build</code> 出 binary 的 file，但 file 移到不同位置就會找不到檔案，有幾種方式可以解決</p>
 
 <h3>1. 用絕對路徑</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>    <span class="s">&quot;io/ioutil&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="c1">// $GOPATH 要換成自己電腦的路徑</span>
+</span><span class='line'>    <span class="nx">data</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">ioutil</span><span class="p">.</span><span class="nx">ReadFile</span><span class="p">(</span><span class="s">&quot;$GOPATH/src/filehandling/test.txt&quot;</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;File reading error&quot;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">return</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Contents of file:&quot;</span><span class="p">,</span> <span class="nb">string</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
 
 <h3>2. 把路徑當參數，在執行檔案時傳入</h3>
 
@@ -246,7 +284,7 @@ Reading a file line by line Reading an entire file into memory Use ioutil packag
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>更改後為</p>
+<p>將之前的 <code>test.txt</code> 加上 <code>flag</code> 後</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -287,10 +325,21 @@ Reading a file line by line Reading an entire file into memory Use ioutil packag
 </span></code></pre></td></tr></table></div></figure>
 
 
-<ol>
-<li>在編譯的時候把檔案一起編譯進去</li>
-</ol>
 
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">go</span> <span class="nx">run</span> <span class="nx">flag</span><span class="p">.</span><span class="k">go</span> <span class="o">-</span><span class="nx">fpath</span><span class="p">=</span><span class="err">$</span><span class="nx">GOPATH</span><span class="o">/</span><span class="nx">src</span><span class="o">/</span><span class="nx">filehandling</span><span class="o">/</span><span class="nx">test</span><span class="p">.</span><span class="nx">txt</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>執行 binary 的檔案時就可以加上 -fpath</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">filehandling</span> <span class="o">-</span><span class="nx">fpath</span><span class="p">=</span><span class="err">$</span><span class="nx">GOPATH</span><span class="o">/</span><span class="nx">src</span><span class="o">/</span><span class="nx">filehandling</span><span class="o">/</span><span class="nx">test</span><span class="p">.</span><span class="nx">txt</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>3. 在編譯的時候把檔案一起編譯進去</h3>
 
 <p>可以透過 <a href="https://github.com/gobuffalo/packr">packr</a> package 來實現</p>
 
@@ -451,13 +500,27 @@ Reading a file line by line Reading an entire file into memory Use ioutil packag
 </span><span class='line'>      <span class="p">}</span>
 </span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span>
 </span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span><span class="nx">s</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">go</span> <span class="nx">run</span> <span class="nx">filehandling</span><span class="p">.</span><span class="k">go</span> <span class="o">-</span><span class="nx">fpath</span><span class="p">=</span><span class="err">$</span><span class="nx">GOPATH</span><span class="o">/</span><span class="nx">src</span><span class="o">/</span><span class="nx">filehandling</span><span class="o">/</span><span class="nx">test</span><span class="p">.</span><span class="nx">txt</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
 <h1><span id="line"> Reading a file line by line </span></h1>
 
 <p>上面是一次要讀取多少個字元，這次改用一行一行去做讀取，一樣用 <a href="https://golang.org/pkg/bufio/">bufio</a></p>
+
+<ol>
+<li>Open the file</li>
+<li>Create a new scanner from the file</li>
+<li>Scan the file and read it line by line.</li>
+</ol>
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -536,6 +599,13 @@ Reading a file line by line Reading an entire file into memory Use ioutil packag
 </span></code></pre></td></tr></table></div></figure>
 
 
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">go</span> <span class="nx">run</span> <span class="nx">filehandling</span><span class="p">.</span><span class="k">go</span> <span class="o">-</span><span class="nx">fpath</span><span class="p">=</span><span class="err">$</span><span class="nx">GOPATH</span><span class="o">/</span><span class="nx">src</span><span class="o">/</span><span class="nx">filehandling</span><span class="o">/</span><span class="nx">test</span><span class="p">.</span><span class="nx">txt</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <p>參考文件:</p>
 
 <ul>
@@ -611,7 +681,7 @@ Reading a file line by line Reading an entire file into memory Use ioutil packag
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2018 - LeonJi -
+  Copyright &copy; 2019 - LeonJi -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
 </p>
 

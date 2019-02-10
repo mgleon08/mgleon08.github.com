@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Regular | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/regular/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2018-12-19T23:47:16+08:00</updated>
+  <updated>2019-02-10T23:54:00+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,48 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby Tips - Regular Expressions Security]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-regular-expressions-security/"/>
+    <updated>2019-02-04T18:10:36+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-regular-expressions-security</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>之前在做 code review 發現的一個問題，平常沒注意到很容易忽略!</p>
+
+<blockquote><p><code>^</code> and <code>$</code> are the start and end of line anchors</p></blockquote>
+
+<pre><code class="ruby"># url 的 regular expressions
+/(^$)|(^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(([0-9]{1,5})?\/?.*)?$)/ix
+</code></pre>
+
+<p>原因在於 <code>^</code> and <code>$</code> 會根據每一行去判斷，因此像以下</p>
+
+<pre><code class="ruby">javascript:exploit_code();/* # injection
+http://hi.com # pass
+*/
+</code></pre>
+
+<p>第二行會 pass，因此造成 injection 問題，改成以下</p>
+
+<blockquote><p><code>\A</code> and <code>\Z</code> are the start and end of string anchors</p></blockquote>
+
+<pre><code class="ruby">\A(^$)|(^(http|https):\/\/[a-z0-9]+([\-\.]{1}[a-z0-9]+)*\.[a-z]{2,5}(([0-9]{1,5})?\/?.*)?$)\z
+</code></pre>
+
+<p>就會判斷一整串</p>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://guides.rubyonrails.org/security.html#regular-expressions">ruby regular-expressions security</a></li>
+<li><a href="https://stackoverflow.com/questions/3632024/why-do-rubys-regular-expressions-use-a-and-z-instead-of-and">Why do Ruby&rsquo;s regular expressions use \A and \z instead of ^ and $?</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[正規表示式 Regular Expression]]></title>

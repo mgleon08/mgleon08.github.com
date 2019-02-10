@@ -1,0 +1,681 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>常見的安全漏洞與攻擊 - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="這次來看一下目前常見的一些攻擊手段! SQL Injection XSS(Cross-Site Scripting) 跨站腳本攻擊 CSRF(Cross-site request forgery) 跨站偽造請求 Mass Assignment 大量賦值 DoS (Denial of Service &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2018/06/20/security">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby-tips/">Ruby Tips</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">常見的安全漏洞與攻擊</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2018-06-20T23:14:00+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:14 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><p>這次來看一下目前常見的一些攻擊手段!</p>
+
+
+
+
+<!-- more -->
+
+
+
+
+<ul>
+<li><a href="#sql_injection">SQL Injection</a></li>
+
+<li><a href="#xss">XSS(Cross-Site Scripting) 跨站腳本攻擊</a></li>
+
+<li><a href="#csrf">CSRF(Cross-site request forgery) 跨站偽造請求</a></li>
+
+<li><a href="#mass_assignment">Mass Assignment 大量賦值</a></li>
+
+<li><a href="#dos_ddos">DoS (Denial of Service）阻斷服務攻擊／DDoS (Distrubuted Denial of Service) 分散阻斷服務攻擊</a></li>
+</ul>
+
+
+
+
+<h1 id="spanidsql_injectionsqlinjectionspan"><span id="sql_injection">SQL Injection 注入攻擊</span></h1>
+
+
+
+
+<ul>
+<li>發生在應用程式與資料庫之間的安全漏洞</li>
+
+<li>主要是透過輸入的字串中夾帶 SQL 語法，例如 <code>drop table;</code> 等等，如果程式並沒有針對這些去檢查的話，會被當成正常指令而去執行</li>
+</ul>
+
+
+
+
+<h3 id="example">Example</h3>
+
+
+
+
+<pre><code class="ruby language-ruby">User.where("name = '#{params[:name]}'")
+</code></pre>
+
+
+
+
+<p>輸入</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 將後面的語法用 -- sql 的註解，註解掉
+hi'; DROP TABLE users; --
+</code></pre>
+
+
+
+
+<p>就會變成</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 後面 drop 就會將 users 的 table 整個刪除
+SELECT * FROM users WHERE name = 'hi'; DROP TABLE users; --’
+</code></pre>
+
+
+
+
+<p>原因在於，直接將 <code>params[:name]</code> 帶入語法裡，沒做任何檢查導致</p>
+
+
+
+
+<pre><code class="ruby language-ruby">User.where("name = '#{params[:name]}'")
+</code></pre>
+
+
+
+
+<p>解決方法，主要是要將特殊字元做處理，稱作 <code>字元逸出 Escape Character</code></p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 字元逸出 Escape Character
+ActiveRecord::Base::connection.quote_string("hi'; DROP TABLE users; --")
+
+# rails auto escape character
+User.where("name = ?", params[:name])
+</code></pre>
+
+
+
+
+<ul>
+<li><a href="https://rails-sqli.org/">Rails SQL Injection</a></li>
+<li><a href="https://gist.github.com/it9gamelog/f89cbb8a3e246f9f56942e202fda6c79">SQL Injection 面試題</a></li>
+</ul>
+
+
+
+
+<h1 id="spanidxssxsscrosssitescriptingspan"><span id="xss">XSS(Cross-Site Scripting) 跨站腳本攻擊</span></h1>
+
+
+
+
+<ul>
+<li>網頁應用程式的安全漏洞</li>
+
+<li>XSS 允許惡意使用者將程式碼注入到網頁上，讓其他使用者在瀏覽該網頁時自動觸發注入的程式碼</li>
+
+<li>JavaScript 很常被用來進行 XSS 攻擊</li>
+
+<li>只要網站可以輸入資料，都要小心</li>
+</ul>
+
+
+
+
+<h3 id="example-1">Example</h3>
+
+
+
+
+<pre><code class="ruby language-ruby"># 將此語法貼入在輸入欄位上，若是沒有特別處理，每次進來都會跳出 Hack you!
+# 更嚴重會將敏感資料例如 cookie 內容傳給攻擊者
+&lt;script&gt;alert("Hack you!");&lt;/script&gt;
+</code></pre>
+
+
+
+
+<p>解決方法，也是要將特殊字元做處理，稱作 <code>字元逸出 Escape Character</code></p>
+
+
+
+
+<pre><code class="ruby language-ruby">&amp;lt;script&amp;gt;alert(&amp;quot;Hack you!&amp;quot;);&amp;lt;/script&amp;gt;
+# &lt; 變成 &amp;lt , " 變成 &amp;quot;
+</code></pre>
+
+
+
+
+<p>在 rails 當中會造成 XSS 主要是使用了 <code>html_safe</code> <code>raw</code>，否則 rails 會自動做字元逸出，除非很確定資料是安全的(但千萬別相信外面的使用者)</p>
+
+
+
+
+<pre><code class="ruby language-ruby">"&lt;p&gt;safe&lt;/p&gt;".html_safe
+raw(comment)
+</code></pre>
+
+
+
+
+<p>但有時還是必須讓使用者輸入一些部分 html tag 之類的可以使用 sanitize</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># sanitize 允許部分 HTML，rails 以建立一些白名單 tag
+sanitize("&lt;p&gt;safe&lt;/p&gt;")
+</code></pre>
+
+
+
+
+<p>查詢開放名單</p>
+
+
+
+
+<pre><code class="ruby language-ruby">ActionView::Base.sanitized_allowed_tags
+ =&gt; #&lt;Set: {"strong", "em", "b", "i", "p", "code", "pre", "tt", "samp", "kbd", "var", "sub", "sup", "dfn", "cite", "big", "small", "address", "hr", "br", "div", "span", "h1", "h2", "h3", "h4", "h5", "h6", "ul", "ol", "li", "dl", "dt", "dd", "abbr", "acronym", "a", "img", "blockquote", "del", "ins"}&gt;
+
+ ActionView::Base.sanitized_allowed_attributes
+ =&gt; #&lt;Set: {"href", "src", "width", "height", "alt", "cite", "datetime", "title", "class", "name", "xml:lang", "abbr"}&gt;
+</code></pre>
+
+
+
+
+<p>也可以自行新增白名單</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># config/application.rb
+config.action_view.sanitized_allowed_tags = ['strong', 'em', 'a']
+config.action_view.sanitized_allowed_attributes = ['href', 'title']
+</code></pre>
+
+
+
+
+<p>另外特別提到，有時候會需要讓使用者輸入 js 語法，這時候可以用到，主要會將一些語法做跳脫</p>
+
+
+
+
+<pre><code class="ruby language-ruby">escape_javascript(js) 也能寫成 j(js)
+
+# '\\'   =&gt; '\\\\'
+# "&lt;/"   =&gt; '&lt;\/'
+# "\r\n" =&gt; '\n'
+# "\n"   =&gt; '\n'
+# "\r"   =&gt; '\n'
+# '"'    =&gt; '\\"'
+# "'"    =&gt; "\\'"
+</code></pre>
+
+
+
+
+<ul>
+<li><a href="https://apidock.com/rails/ActionView/Helpers/JavaScriptHelper/escape_javascript">escape_javascript</a></li>
+
+<li><a href="https://api.rubyonrails.org/classes/ActionView/Helpers/SanitizeHelper.html">SanitizeHelper</a></li>
+</ul>
+
+
+
+
+<h1 id="spanidcsrfcsrfcrosssiterequestforgeryspan"><span id="csrf">CSRF(Cross-site request forgery) 跨站偽造請求</span></h1>
+
+
+
+
+<ul>
+<li>利用使用者身份驗證的一個安全漏洞</li>
+
+<li>攻擊者透過技術，利用別人的權限去執行網站上的操作，由於瀏覽器被認證過，被訪問的網站會認為是真正的使用者在操作。</li>
+
+<li>簡單的身份驗證只能確保請求發自某個使用者的瀏覽器，無法保證該請求發自使用者本身。</li>
+</ul>
+
+
+
+
+<h3 id="example-2">Example</h3>
+
+
+
+
+<p>GET 攻擊 - 當有權限的使用者讀到這個 img，自動會發送 get action 去執行</p>
+
+
+
+
+<pre><code class="ruby language-ruby">&lt;img src="/posts/delete_all"&gt;
+</code></pre>
+
+
+
+
+<p>解決方式 - 將 route 改成用 POST，會修改或刪除到資料的，則要用POST、PATCH/PUT或DELETE</p>
+
+
+
+
+<p>POST 攻擊</p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 處理完請求的網頁伺服器會丟回應給 form，導致頁面跳轉，這樣會讓使用者察覺到自己觸發了 CSRF 陷阱，因此加上 &lt;iframe&gt; 作為 &lt;form&gt; 的 target ，將回應放入 &lt;iframe&gt; 隱藏起來，跳轉頁面就不會發生
+&lt;iframe style="display:none" name="csrf-frame"&gt;&lt;/iframe&gt;
+
+# 透過 form 發出 POST 請求
+&lt;form method='POST' action='http://localhost:3000/posts/delete_all' target="csrf-frame" id="csrf-form"&gt;
+  &lt;input type='submit' value='submit'&gt;
+&lt;/form&gt;
+
+# 讓使用者載入完網頁後自動觸發 submit ，但對某些瀏覽器無效
+&lt;script&gt;document.getElementById("csrf-form").submit()&lt;/script&gt;
+</code></pre>
+
+
+
+
+<p>解決方式 - 所有 POST 操作加上額外的驗證碼，確保使用者是透過含有驗證碼的網站表單發送請求，而不是不小心觸發了 CSRF 攻擊</p>
+
+
+
+
+<p>Rails 內建表單 CSRF 防禦</p>
+
+
+
+
+<pre><code class="ruby language-ruby">class ApplicationController &lt; ActionController::Base
+  protect_from_forgery with: :exception
+end
+</code></pre>
+
+
+
+
+<p>設定後表單會自帶 token，如果發過來的 POST 沒有帶此 token 就會跳出<code>ActionController:InvalidAuthenticityToken</code> 的錯誤訊息</p>
+
+
+
+
+<pre><code class="ruby language-ruby">&lt;input type="hidden" name="authenticity_token" value="cuI+ljBAcBxcEkv4pbeqLTEnRUb9mUYMgfpkwOtoyiA="&gt;
+</code></pre>
+
+
+
+
+<p>Rails 也內建了防禦來自其他網站的 AJAX 請求的機制</p>
+
+
+
+
+<pre><code class="ruby language-ruby">&lt;%= csrf_meta_tags %&gt;
+# 在前端產生 csrf_token 的安全驗證碼供 JavaScript 取用。
+</code></pre>
+
+
+
+
+<h1 id="spanidmass_assignmentmassassignmentspan"><span id="mass_assignment">Mass Assignment 大量賦值</span></h1>
+
+
+
+
+<ul>
+<li>Rails專屬，因為太方便而造成的安全性議題</li>
+
+<li>透過更改 html 上面的屬性，進而更改想要改變的欄位</li>
+</ul>
+
+
+
+
+<pre><code class="ruby language-ruby"># rails 後面直接接一個 hash 就可以做新增更新的動作
+User.create( { name: "Leon", :comment =&gt; "hi" } )
+User.update( { name: "Leon", :comment =&gt; "hi" } )
+</code></pre>
+
+
+
+
+<p>因此透過這個形式，將 html 上面的 name 改成 role，在帶 admin 的值過去</p>
+
+
+
+
+<pre><code class="ruby language-ruby">{ role: admin }
+</code></pre>
+
+
+
+
+<p>這樣就會被更新到</p>
+
+
+
+
+<p>解決方法是，rails 內建 <code>Strong Parameter</code></p>
+
+
+
+
+<pre><code class="ruby language-ruby"># 只允許 user 裡面的 name 和 comment parasm 其他都不接受，否則會跳出 Unpermitted parameter: role
+params.require(:user).permit(:name, :comment)
+</code></pre>
+
+
+
+
+<h1 id="spaniddos_ddosdosdenialofserviceddosdistrubuteddenialofservicespan"><span id="dos_ddos">DoS (Denial of Service）阻斷服務攻擊／DDoS (Distrubuted Denial of Service) 分散阻斷服務攻擊</span></h1>
+
+
+
+
+<ul>
+<li>DoS 透過發送大量請求讓伺服器處於忙碌甚至癱瘓的狀態，以至於無法服務正常的使用者</li>
+
+<li>DDoS 以分散的方式從不同來源（Source）對一個伺服器進行 DoS 攻擊</li>
+</ul>
+
+
+
+
+<h3 id="example-3">Example</h3>
+
+
+
+
+<p>安裝 wrk 來模擬</p>
+
+
+
+
+<pre><code class="ruby language-ruby">brew install wrk
+# 30秒內 12個thread 400 個 connect
+wrk -t12 -c400 -d30s http://localhost:3000/
+</code></pre>
+
+
+
+
+<p>防禦 DoS / DDoS</p>
+
+
+
+
+<ul>
+<li>DoS 並非因漏洞而產生，因此不好防禦</li>
+
+<li>辨識出對方進攻管道進行封鎖，如鎖對方 IP</li>
+
+<li>DDoS 利用不同位置進行攻擊，來源 IP 不只有一個，很難判斷出攻擊者</li>
+
+<li>透過辨識短時間內，大量攻擊者，就直接鎖住 IP 來防禦(限制每個 IP 位置在一分鐘內不得送出超過 100 個請求 <a href="https://github.com/kickstarter/rack-attack">rack-attack gem</a>)</li>
+
+<li>如果真面臨了大量 DDoS 攻擊，那就不是 Rails 應用層級可以解決的問題，必須購買專門的防火牆和硬體設備。</li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2018-06-20T23:14:00+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>20</span><span class='date-suffix'>th</span>, <span class='date-year'>2018</span></span> <span class='time'>11:14 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/security/'>security</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2018/06/20/security/" data-via="" data-counturl="http://mgleon08.github.com/blog/2018/06/20/security/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2018/06/14/share-localhost-ngrok-serveo/" title="Previous Post: 分享內網 localhost to everybody - ngrok, serveo">&laquo; 分享內網 localhost to everybody - ngrok, serveo</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2018/06/21/rails-action-cable/" title="Next Post: 跟著 DHH 練習 ActionCable">跟著 DHH 練習 ActionCable &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2018/06/20/security/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2018/06/20/security/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
