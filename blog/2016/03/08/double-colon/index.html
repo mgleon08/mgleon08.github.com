@@ -5,20 +5,18 @@
 <!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
 <head>
   <meta charset="utf-8">
-  <title>Double Colon(::) 是啥? 能吃嗎？ - Leon's Blogging</title>
+  <title>Ruby Tips - Double Colon(::) - Leon's Blogging</title>
   <meta name="author" content="LeonJi">
 
   
   <meta name="description" content="在 ruby 中常常會看到各種符號， 像是 :: 在 ruby 就像是 namespace 的感覺。
-:: 加在最前面，就是會去參照最上面的 namespace。 1
+:: 加在最前面，就是會去參照最上面的 namespace。 有點像是一個是絕對路徑，一個是相對路徑 1
 2
 3
 4
 5
-6
-7
-8
-MR_COUNT = 0 # constant defined on main Object &hellip;">
+::A::B # like /A/B
+# is an absolute &hellip;">
   
 
   <!-- http://t.co/dKP3o1e -->
@@ -114,7 +112,7 @@ MR_COUNT = 0 # constant defined on main Object &hellip;">
   <header>
     
       
-        <h1 class="entry-title">Double Colon(::) 是啥? 能吃嗎？</h1>
+        <h1 class="entry-title">Ruby Tips - Double Colon(::)</h1>
       
     
     
@@ -134,10 +132,25 @@ MR_COUNT = 0 # constant defined on main Object &hellip;">
   </header>
 
 
-<div class="entry-content"><p>在 ruby 中常常會看到各種符號， 像是 <code>::</code> 在 ruby 就像是 <code>namespace</code> 的感覺。<br/>
+<div class="entry-content"><p>在 ruby 中常常會看到各種符號， 像是 <code>::</code> 在 ruby 就像是 <code>namespace</code> 的感覺。
 <code>::</code> 加在最前面，就是會去參照最上面的 <code>namespace</code>。</p>
 
 <!-- more -->
+
+
+<p>有點像是一個是絕對路徑，一個是相對路徑</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">::</span><span class="n">A</span><span class="o">::</span><span class="n">B</span> <span class="c1"># like /A/B</span>
+</span><span class='line'><span class="c1"># is an absolute path to the constant.</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">A</span><span class="o">::</span><span class="n">B</span> <span class="c1"># like ./A/B</span>
+</span><span class='line'><span class="c1"># is a path relative to the current tree level.</span>
+</span></code></pre></td></tr></table></div></figure>
 
 
 
@@ -150,14 +163,32 @@ MR_COUNT = 0 # constant defined on main Object &hellip;">
 <span class='line-number'>6</span>
 <span class='line-number'>7</span>
 <span class='line-number'>8</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">MR_COUNT</span> <span class="o">=</span> <span class="mi">0</span>        <span class="c1"># constant defined on main Object class</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">COUNT</span> <span class="o">=</span> <span class="mi">0</span>        <span class="c1"># constant defined on main Object class</span>
 </span><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="no">MR_COUNT</span> <span class="o">=</span> <span class="mi">0</span>
-</span><span class='line'>  <span class="o">::</span><span class="no">MR_COUNT</span> <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># set global count to 1</span>
-</span><span class='line'>  <span class="no">MR_COUNT</span> <span class="o">=</span> <span class="mi">2</span>      <span class="c1"># set local count to 2</span>
+</span><span class='line'>  <span class="no">COUNT</span> <span class="o">=</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="o">::</span><span class="no">COUNT</span> <span class="o">=</span> <span class="mi">1</span>    <span class="c1"># set global COUNT to 1</span>
+</span><span class='line'>  <span class="no">COUNT</span> <span class="o">=</span> <span class="mi">2</span>      <span class="c1"># set local COUNT to 2</span>
 </span><span class='line'><span class="k">end</span>
-</span><span class='line'><span class="nb">puts</span> <span class="no">MR_COUNT</span>       <span class="c1"># this is the global constant</span>
-</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">::</span><span class="no">MR_COUNT</span>  <span class="c1"># this is the local &quot;Foo&quot; constant</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 因爲 constant 通常是不能變動的，但在 ruby 只會做緊告</span>
+</span><span class='line'><span class="c1"># (irb):4: warning: already initialized constant COUNT</span>
+</span><span class='line'><span class="c1"># (irb):1: warning: previous definition of COUNT was here</span>
+</span><span class='line'><span class="c1"># (irb):5: warning: already initialized constant Foo::COUNT</span>
+</span><span class='line'><span class="c1"># (irb):3: warning: previous definition of COUNT was here</span>
+</span><span class='line'>
+</span><span class='line'><span class="nb">puts</span> <span class="no">COUNT</span>       <span class="c1"># this is the global constant</span>
+</span><span class='line'><span class="c1"># =&gt; 1</span>
+</span><span class='line'><span class="nb">puts</span> <span class="no">Foo</span><span class="o">::</span><span class="no">COUNT</span>  <span class="c1"># this is the local &quot;Foo&quot; constant</span>
+</span><span class='line'><span class="c1"># =&gt; 2</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -182,8 +213,14 @@ MR_COUNT = 0 # constant defined on main Object &hellip;">
 <span class='line-number'>17</span>
 <span class='line-number'>18</span>
 <span class='line-number'>19</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
-</span><span class='line'>  <span class="c1"># We may not know about this in real big apps</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Rails</span>
+</span><span class='line'>  <span class="k">class</span> <span class="nc">Engine</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">module</span> <span class="nn">Foo</span>
 </span><span class='line'>  <span class="k">module</span> <span class="nn">Rails</span>
 </span><span class='line'>    <span class="k">class</span> <span class="nc">Engine</span>
 </span><span class='line'>    <span class="k">end</span>
@@ -191,24 +228,26 @@ MR_COUNT = 0 # constant defined on main Object &hellip;">
 </span><span class='line'>
 </span><span class='line'>  <span class="k">class</span> <span class="nc">Engine1</span> <span class="o">&lt;</span> <span class="no">Rails</span><span class="o">::</span><span class="no">Engine</span>
 </span><span class='line'>  <span class="k">end</span>
-</span><span class='line'>
 </span><span class='line'>  <span class="k">class</span> <span class="nc">Engine2</span> <span class="o">&lt;</span> <span class="o">::</span><span class="no">Rails</span><span class="o">::</span><span class="no">Engine</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'><span class="no">Foo</span><span class="o">::</span><span class="no">Engine1</span><span class="o">.</span><span class="n">superclass</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Foo</span><span class="o">::</span><span class="no">Rails</span><span class="o">::</span><span class="no">Engine</span> <span class="c1"># not what we want</span>
-</span><span class='line'>
+</span><span class='line'><span class="c1"># =&gt; Foo::Rails::Engine</span>
 </span><span class='line'><span class="no">Foo</span><span class="o">::</span><span class="no">Engine2</span><span class="o">.</span><span class="n">superclass</span>
-</span><span class='line'> <span class="o">=&gt;</span> <span class="no">Rails</span><span class="o">::</span><span class="no">Engine</span> <span class="c1"># correct</span>
+</span><span class='line'><span class="c1"># =&gt; Rails::Engine</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>參考文件：<br/>
-<a href="http://blog.eddie.com.tw/2015/04/19/namespace/">Ruby 語法放大鏡之「有時候會看到有兩個冒號寫法是什麼意思?」</a><br/>
-<a href="http://stackoverflow.com/questions/4819312/double-colons-before-class-names-in-ruby">Double colons before class names in Ruby?</a><br/>
-<a href="http://stackoverflow.com/questions/10482772/rubys-double-colon-operator-usage-differences">Ruby&rsquo;s double colon (::) operator usage differences</a><br/>
-<a href="https://cbabhusal.wordpress.com/2015/03/26/ruby-ruby-dot-and-double-colon-operators/">Ruby : Ruby dot “.” and double Colon “::” Operators</a></p>
+<p>參考文件：</p>
+
+<ul>
+<li><a href="http://blog.eddie.com.tw/2015/04/19/namespace/">Ruby 語法放大鏡之「有時候會看到有兩個冒號寫法是什麼意思?」</a></li>
+<li><a href="http://stackoverflow.com/questions/4819312/double-colons-before-class-names-in-ruby">Double colons before class names in Ruby?</a></li>
+<li><a href="http://stackoverflow.com/questions/10482772/rubys-double-colon-operator-usage-differences">Ruby&rsquo;s double colon (::) operator usage differences</a></li>
+<li><a href="https://cbabhusal.wordpress.com/2015/03/26/ruby-ruby-dot-and-double-colon-operators/">Ruby : Ruby dot “.” and double Colon “::” Operators</a></li>
+</ul>
+
 </div>
 
 
@@ -237,7 +276,7 @@ MR_COUNT = 0 # constant defined on main Object &hellip;">
 
 <span class="categories">
   
-    <a class='category' href='/blog/categories/ruby/'>ruby</a>
+    <a class='category' href='/blog/categories/ruby/'>ruby</a>, <a class='category' href='/blog/categories/ruby-tips/'>ruby_tips</a>
   
 </span>
 
@@ -260,7 +299,7 @@ MR_COUNT = 0 # constant defined on main Object &hellip;">
         <a class="basic-alignment left" href="/blog/2016/03/08/enum/" title="Previous Post: 用 Enum 做選項">&laquo; 用 Enum 做選項</a>
       
       
-        <a class="basic-alignment right" href="/blog/2016/03/08/ask-ruby/" title="Next Post: 有什麼事，就 ask ruby 吧!">有什麼事，就 ask ruby 吧! &raquo;</a>
+        <a class="basic-alignment right" href="/blog/2016/03/08/ask-ruby/" title="Next Post: Ruby Tips - 有什麼事，就 ask ruby 吧!">Ruby Tips - 有什麼事，就 ask ruby 吧! &raquo;</a>
       
     </p>
   </footer>
