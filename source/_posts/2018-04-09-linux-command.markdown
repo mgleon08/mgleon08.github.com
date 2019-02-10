@@ -10,10 +10,13 @@ categories: linux
 
 <!-- more --> 
 
+* [permission - sudo, su, chown, chmod](#permission)
 * [screen](#screen)
 * [top](#top)
 * [ps](#ps)
 * [df](#df)
+* [du](#du)
+* [find](#find)
 * [jobs](#jobs)
 * [curl](#curl)
 * [tar](#tar)
@@ -25,6 +28,27 @@ categories: linux
 * [scp](#scp)
 * [xargs](#xargs)
 * [> & >>](#arrow)
+* [envsubst](#envsubst)
+* [getent](#getent)
+
+# <span id="permission"> permission - sudo, su, chown, chmod </span>
+
+* sudo - 暫時切到最高權限
+* su - 切換身份
+* chown - 更改檔案／資料夾的擁有者和群組
+
+```ruby
+sudo chown root:root test.txt
+# -R Recursive 所有底下檔案
+sudo chown -R root:root test
+```
+
+* chmod - 更改檔案權限
+
+```ruby
+chmod 644 test.txt
+```
+
 
 # <span id="screen"> screen </span>
 
@@ -94,6 +118,33 @@ df -h
 ```
 
 * [每天一個linux命令（33）：df 命令](http://www.cnblogs.com/peida/archive/2012/12/07/2806483.html)
+
+# <span id="df"> du </span>
+
+> 顯示目錄或是檔案的大小，與df命令不同的是 du 是對文件和目錄磁盤使用的空間的查看。
+
+```ruby
+# 找目前目錄底下，檔案大小排序的前 5 個
+du -sh * | sort -nr | head
+```
+
+* [每天一個linux命令（34）：du 命令](http://www.cnblogs.com/peida/archive/2012/12/10/2810755.html)
+* [Linux系統中df與du命令查看分區大小不一致問題分析](https://hk.saowen.com/a/e37a86c7ef13d56aeae532ac5bdd6547898449d9c5f6ba35ab819ceea2383b18)
+* [[科普] df 和 du 指令為何有時候顯示不同和如何解決](https://medium.com/@jackyu/%E7%A7%91%E6%99%AE-df-%E5%92%8C-du-%E6%8C%87%E4%BB%A4%E7%82%BA%E4%BD%95%E6%9C%89%E6%99%82%E5%80%99%E9%A1%AF%E7%A4%BA%E4%B8%8D%E5%90%8C%E5%92%8C%E5%A6%82%E4%BD%95%E8%A7%A3%E6%B1%BA-91ed73c15dbe)
+* [Linux 的 sort 排序指令教學與常用範例整理](https://blog.gtwang.org/linux/linux-sort-command-tutorial-and-examples/)
+* [linux如何找出佔用較大空間的檔案](https://www.dreamjtech.com/content/linux%E5%A6%82%E4%BD%95%E6%89%BE%E5%87%BA%E4%BD%94%E7%94%A8%E8%BC%83%E5%A4%A7%E7%A9%BA%E9%96%93%E7%9A%84%E6%AA%94%E6%A1%88)
+
+
+# <span id="find"> find </span>
+
+> 支援非常多的搜尋選項，可以依照權限、擁有者、群組、檔案類型、日期與大小等條件來搜尋
+
+```ruby
+# 刪除 css gz js 大於 30 天以上的檔案
+find *.css *.gz *.js -mtime +30 | xargs rm -rf
+```
+
+* [Unix/Linux 的 find 指令使用教學、技巧與範例整理](https://blog.gtwang.org/linux/unix-linux-find-command-examples/)
 
 # <span id="jobs"> jobs </span>
 
@@ -181,6 +232,12 @@ ln 建立的連結分為 “硬連結” (hard link) 及 “軟連結” (symbol
 # -h hard link
 # -s symbolic link
 ln -s /home/wordpress /var/www/wpmu
+```
+
+```ruby
+ln -s ~/test.txt link.txt
+cat link.txt
+# this is text.txt
 ```
 
 * [ln — 建立連結指令– Linux 技術手札](https://caloskao.org/linux-use-ln-command-to-link-files-or-folders/)
@@ -290,3 +347,44 @@ echo a b c d e f | xargs -n 3
 echo hi > test # 覆蓋整個檔案
 echo hello >> test # 夾在檔案最後一行
 ```
+
+# <span id="envsubst"> envsubst </span>
+
+> The envsubst program substitutes the values of environment variables.
+
+利用環境變數(environment variables)搭配 envsubst 來產生設定檔。
+
+```ruby
+# myconfig
+My name is ${USER}
+My home path is ${HOME}
+```
+
+```ruby
+envsubst < myconfig.conf
+# My name is foo
+# My home path is /home/foo
+```
+
+重新導向產生設定檔案
+
+```ruby
+envsubst < myconfig.conf > config.conf
+```
+
+如果只想替換某個變數
+
+```ruby
+envsubst '$USER' < myconfig.conf > config.conf
+```
+
+* [利用 Linux 指令 envsubst 產生設定檔](https://myapollo.com.tw/2018/02/23/linux-command-envsubst/)
+
+# <span id="getent"> getent </span>
+
+查看系統的數據庫中的相關記錄
+
+```ruby
+getent group
+```
+* [getent命令](https://ywnz.com/linux/getent/)

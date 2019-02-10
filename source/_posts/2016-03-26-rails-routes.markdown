@@ -80,7 +80,7 @@ api_index GET   /test(.:format)         hello/api#index
           PUT   /test/:api_id(.:format) hello/api#update
 ```
 
-# 導向
+# redirect
 
 ```ruby
 # 靜態
@@ -377,15 +377,10 @@ end
 
 參考文件:
 
+* [Rails Routing from the Outside In](http://guides.rubyonrails.org/routing.html)  
+* [Rails 路由：深入淺出](http://rails.ruby.tw/routing.html)
 * [路由參數](http://rails.ruby.tw/action_controller_overview.html#%E8%B7%AF%E7%94%B1%E5%8F%83%E6%95%B8)  
 * [default_url_options](http://apidock.com/rails/ActionController/Base/default_url_options)
 * [為你自己學的 ruby on rails (router)](http://railsbook.tw/chapters/11-routes.html)
-
-官方文件：  
-
-* [Rails Routing from the Outside In](http://guides.rubyonrails.org/routing.html)  
-* [Rails 路由：深入淺出](http://rails.ruby.tw/routing.html)
-
-參考文件：  
-
-* [路由(Routing)](https://ihower.tw/rails4/routing.html)  
+* [路由(Routing)](https://ihower.tw/rails4/routing.html) 
+* [如何指定 /beer/(beer_type) 這種 route](https://unayung.gitbooks.io/ruby-on-rails-developer-interview-questions/content/beer_type.html) 

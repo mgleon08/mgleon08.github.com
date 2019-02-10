@@ -12,7 +12,7 @@ rails5.2 開始 `config/secrets.yml` 已經被移除了，取而代之的是 `cr
 
 rails5.2 會新增兩個檔案
 
-* `config/credentials.yml.enc` is an encrypted file that will contain all your secret credentials，因為加密過可以很放新的推到 github
+* `config/credentials.yml.enc` is an encrypted file that will contain all your secret credentials，因為加密過可以很放心的推到 github
 
 * `config/master.key` is a file containing your encryption key
 

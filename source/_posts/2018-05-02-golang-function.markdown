@@ -64,6 +64,7 @@ func foo6(x, y int) (int, int) {
 
 // 多個傳入值 (s當會有不確定的個數傳入值，當有兩個變數，不確定的要放置在最後)
 func foo7(x ...int) int {
+  // 收到 Type 為 []int
   var t int
   for _, n := range x {
     t += n
@@ -185,28 +186,6 @@ Welcome Gophers
 */
 ```
 
-### Class Functions
-
-```go
-package main
-
-import (
-    "fmt"
-)
-
-type add func(a int, b int) int
-
-func main() {
-    var a add = func(a int, b int) int {
-        return a + b
-    }
-    s := a(5, 6)
-    fmt.Println("Sum", s)
-}
-
-// Sum 11
-```
-
 ### <span id="types"> Defined function types </span>
 
 像定義 struct type 一樣，也可以定義 func type
@@ -222,6 +201,7 @@ import (
     "fmt"
 )
 
+// 定義一個 type 是 func，並且裡面要給的參數和 return 的值都已經確認
 type add func(a int, b int) int
 
 func main() {  
@@ -268,6 +248,8 @@ package main
 import (
     "fmt"
 )
+
+// return func(a, b int) int
 
 func simple() func(a, b int) int {
     f := func(a, b int) int {
@@ -358,7 +340,7 @@ func main() {
 Hello World
 Hello Everyone
 Hello World Gopher
-Hello Everyone !s
+Hello Everyone !
 */
 ```
 
@@ -470,7 +452,7 @@ type student struct {
     country   string
 }
 
-func filter(s []student, f func(student) bool) []student {  
+func filter(s []student, f func(s student) bool) []student {  
     var r []student
     for _, v := range s {
         if f(v) == true {
@@ -481,25 +463,27 @@ func filter(s []student, f func(student) bool) []student {
 }
 
 func main() {  
-    s1 := student{
+    s1 := student {
         firstName: "Naveen",
         lastName:  "Ramanathan",
         grade:     "A",
         country:   "India",
     }
-    s2 := student{
+    s2 := student {
         firstName: "Samuel",
         lastName:  "Johnson",
         grade:     "B",
         country:   "USA",
     }
-    s := []student{s1, s2}
-    f := filter(s, func(s student) bool {
+    stu := []student{s1, s2}
+    con := func(s student) bool {
         if s.grade == "B" {
             return true
         }
         return false
-    })
+    }
+    
+    f := filter(stu, con)
     
     // 透過此方式，可以很輕易更改 filter 的條件，例如改成 country
     fmt.Println(f)

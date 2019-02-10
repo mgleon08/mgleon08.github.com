@@ -148,6 +148,9 @@ puts array.inspect
 ```
 
 #&
+
+[Ruby 魔法之 Symbol#to_proc() 方法](https://www.jianshu.com/p/4fa98d829fc9)
+
 & 實際上是會觸發物件的 `to_proc` 方法，並嘗試指定給 & 變數  
 因此可以在物件上定義 `to_proc`，然後使用 & 來觸發
 
@@ -179,17 +182,6 @@ symbol 都有 `to_proc` 這個 method 因此可以改寫成
 
 :downcase.to_proc.call("ABC")
 #=> "abc"
-```
-
-有些 method 甚至連 `&` 也可以省略
-
-```ruby
-[1, 2, 3].reduce { |sum, element| sum += element }
-# => 6
-[1, 2, 3].reduce(&:+)
-# => 6
-[1, 2, 3].reduce(:+)
-# => 6
 ```
 
 ###proc into block

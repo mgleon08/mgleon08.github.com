@@ -44,7 +44,8 @@ GOPATH 就是 golang 的 Workspace
 
 設定在`.bashrc` or `.zshrc`
 
-```
+```go
+// 預設會在 user 底下的 go，可以不用另外設定 GOPATH 
 export GOPATH="$HOME/Golang"
 export GOBIN="$GOPATH/bin" 
 export PATH="$PATH:$GOBIN"
@@ -52,7 +53,7 @@ export PATH="$PATH:$GOBIN"
 
 設定好可以打 `go env`
 
-```ruby
+```go
 GOARCH="amd64"
 GOBIN="/Users/username/Golang/bin"
 GOEXE=""
@@ -82,9 +83,11 @@ GOPATH中 會在細分三個資料夾
 
 `$HOME/Golang/`
 
-* `src` - This directory contains source files organized as packages. You will write your Go applications inside this directory.
-* `pkg` -  This directory contains Go package objects.
-* `bin` - This directory contains executable programs.
+* `src` - Contains the source files for your own or other downloaded packages. You can build and run
+programs while in a program directory under this directory.
+* `pkg` -   Contains compiled package files. Go uses this to make the builds (compilation & linking) faster.
+* `bin` - Contains compiled and executable Go programs. When you call go install on a program
+directory, Go will put the executable under this folder.
 
 ### Golang Example
 
@@ -95,7 +98,7 @@ package main
 // 引入套件，多個可以加括號 ()
 import "fmt"
 
-// 程式執行入口，main 在 golang 中是特殊的 function，每個執行檔只能有一個 
+// 程式執行入口，main 在 golang 中是特殊的 function，每個執行檔只能有一個，告訴 Golang 要從哪裡開始執行
 func main() {
 // 使用 fmt 套件印出字串 hello world
  fmt.Println("hello world")
@@ -112,7 +115,8 @@ func main() {
 
 ### package
 
-```
+```go
+// package clause
 package test
 ```
 
@@ -121,7 +125,13 @@ package test
 而 go 又分兩種專案
 
 * 執行檔 (executable)
+	* created for running 
+	* name should be main
+	* always `func main`
 * 函式庫 (library)
+	* created for reusability
+	* can have any name
+	* no function main
 
 執行檔一定要宣告為 `main` 套件
 
@@ -182,6 +192,8 @@ import(
 * [go clean](https://golang.org/pkg/cmd/go/internal/clean/)
 
 ```go
+go get -u github.com/inancgumus/learngo/
+// 下載 source 到 $GOPATH/src
 go run
 // 直接執行
 go build
@@ -196,6 +208,9 @@ go vet
 // 靜態分析潛在 bug
 go fmt
 // 格式化
+go help build
+go help clean
+// help
 ```
 
 ### 命名規則
@@ -343,8 +358,9 @@ import (
 
 func main() {
     fmt.Println("Hello, playground")
-    var a = math.Sqrt(4)//allowed
-    const b = math.Sqrt(4)//not allowed
+    var a = math.Sqrt(4) //allowed
+    // 因為 math.Sqrt(4) 是在 runtime 才會知道值，所以會 error
+    const b = math.Sqrt(4) //not allowed
 }
 ```
 
@@ -400,6 +416,10 @@ func main() {
 ```
 
 # <span id="conversions"> 轉型 conversions  </span>
+
+* [fmt](https://golang.org/pkg/fmt/)
+* [Unicode Character Set and UTF-8, UTF-16, UTF-32 Encoding](https://naveenr.net/unicode-character-set-and-utf-8-utf-16-utf-32-encoding/)
+* [UTF-8 encoder/decoder](https://mothereff.in/utf-8#%C3%B1)
 
 ### Basic Types
 
@@ -481,13 +501,17 @@ import (
 
 func printBytes(s string) {
 	for i := 0; i < len(s); i++ {
+		// %x base 16, lower-case, two characters per byte
 		fmt.Printf("%x ", s[i])
 	}
 }
 
 func printChars(s string) {
+	// 這裡需要用 rune(int32)，因為有些字像中文會佔據 UTF-8 3個 byte，無法直接用 %c 對應到相對應的字，必須要一個 byte 才可以對應
 	runes := []rune(s)
+	// 這邊可以改用 range，range 會直接轉成 rune 就不需要另外轉
 	for i := 0; i < len(runes); i++ {
+		// %c the character represented by the corresponding Unicode code point
 		fmt.Printf("%c ", runes[i])
 	}
 }
@@ -520,7 +544,8 @@ func main() {
 	fmt.Printf("\n")
 
 	// Constructing string from slice of bytes
-	byteSlice := []byte{0x43, 0x61, 0x66, 0xC3, 0xA9}
+	byteSlice := []byte{0x43, 0x61, 0x66, 0xC3, 0xA9}ㄋ
+	// 也可以改用 10 進位 []byte{67, 97, 102, 195, 169} 結果一樣
 	str := string(byteSlice)
 	fmt.Println(str)
 
@@ -598,6 +623,7 @@ func mutate(s []rune) string {
 
 func main() {
     h := "hello"
+    // mutate(h) 直接將 string 帶進去會出現 cannot assign to s[0]
     fmt.Println(mutate([]rune(h))) // 必須先轉成 rune slice type
 }
 ```

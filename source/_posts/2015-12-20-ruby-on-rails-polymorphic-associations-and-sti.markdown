@@ -159,10 +159,13 @@ Comment.includes(article: :user).order("articles.id DESC")
 
 [eager-load-polymorphic](http://stackoverflow.com/questions/16123492/eager-load-polymorphic)
 
-官方文件：  
-[Guides](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations)  
-[Guides 中文](http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF)
+官方文件：
+  
+* [Guides](http://guides.rubyonrails.org/association_basics.html#polymorphic-associations)  
+* [Guides 中文](http://rails.ruby.tw/association_basics.html#%E5%A4%9A%E5%9E%8B%E9%97%9C%E8%81%AF)
 
-參考資料：  
-[Ruby on Rails 實戰聖經](https://ihower.tw/rails4/activerecord-relationships.html)  
-[eager-load-polymorphic](http://stackoverflow.com/questions/16123492/eager-load-polymorphic)
+參考資料：
+  
+* [Ruby on Rails 實戰聖經](https://ihower.tw/rails4/activerecord-relationships.html)  
+* [eager-load-polymorphic](http://stackoverflow.com/questions/16123492/eager-load-polymorphic)
+* [Single-table inheritance vs. polymorphic associations in Rails: find what works for you](https://medium.freecodecamp.org/single-table-inheritance-vs-polymorphic-associations-in-rails-af3a07a204f2)

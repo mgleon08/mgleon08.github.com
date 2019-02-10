@@ -306,6 +306,7 @@ func digits(number int, dchnl chan int) {
         dchnl <- digit
         number /= 10
     }
+    // 因為後面會用 range 取出，所以要用 close() 告知已經沒東西了，否則會 deadlock
     close(dchnl)
 }
 func calcSquares(number int, squareop chan int) {
@@ -415,7 +416,7 @@ func main() {
 
 ### <span id="closing_channels"> Closing channels and for range loops on channels </span>
 
-* sender 可以關閉 channel 已告知 receivers，已經沒有 dat
+* sender 可以關閉 channel 已告知 receivers，已經沒有 data
 * 只有 sender 要關閉 channel，如果沒有 close channel 可能會導致 panic `fatal error: all goroutines are asleep - deadlock!`
 * Channels aren't like files; you don't usually need to close them. Closing is only necessary when the receiver must be told there are no more values coming, such as to terminate a `range` loop.
 

@@ -463,6 +463,22 @@ func main() {
 	}
 	w.contents()
 }
+
+// Contents of Website
+// Title:  Inheritance in Go
+// Content:  Go supports composition instead of inheritance
+// Author:  Naveen Ramanathan
+// Bio:  Golang Enthusiast
+
+// Title:  Struct instead of Classes in Go
+// Content:  Go does not support classes but methods can be added to structs
+// Author:  Naveen Ramanathan
+// Bio:  Golang Enthusiast
+
+// Title:  Concurrency
+// Content:  Go is a concurrent language and not a parallel one
+// Author:  Naveen Ramanathan
+// Bio:  Golang Enthusiast
 ```
 
 ### <span id="constructors">建構子 Constructors</span>
@@ -623,37 +639,38 @@ func main() {
 package main
 
 import (
-	"fmt"
+  "fmt"
 )
 
 // // 先定義一個 Foobar 建構體，然後有個叫做 a 的字串成員
 type Foobar struct {
-	a string
+  a string
 }
 
 // 定義一個屬於 Foobar 的 test 方法
 func (f *Foobar) test() {
-	// 接收來自 Foobar 的 a
-	fmt.Println(f.a)
+  // 接收來自 Foobar 的 a
+  fmt.Println(f.a)
 }
 func main() {
-	a := &Foobar{a: "a: hello, world!"}
-	var b = Foobar{a: "b: hello, world!"}
-	var c = &Foobar{a: "c: hello, world!"}
-	var d *Foobar = &Foobar{a: "d: hello, world!"} // 將 d 宣告為 Foobar 指標
-	a.test()
-	(&b).test()
-	b.test() // 相當於 (&b).test()
-	c.test()
-	d.test()
+  a := &Foobar{a: "a: hello, world 1"} // a point to Foobar memory address
+  var b = Foobar{a: "b: hello, world 2"}
+  var c = &Foobar{a: "c: hello, world 3"} // c point to Foobar memory address 後面沒加 type 會自動判斷
+  var d *Foobar = &Foobar{a: "d: hello, world 4"} // d point to Foobar memory address
+
+  fmt.Printf("%T, %T, %T, %T\n", a, b, c, d)
+  a.test() // (*a).test()
+  b.test() // (&b).test() or (*(&b)).test() 因為是 point 的 method 所以要給 address
+  c.test() // (*c).test()
+  d.test() // (*d).test()
 }
 
 /**
-a: hello, world!
-b: hello, world!
-b: hello, world!
-c: hello, world!
-d: hello, world!
+*main.Foobar, main.Foobar, *main.Foobar, *main.Foobar
+a: hello, world 1
+b: hello, world 2
+c: hello, world 3
+d: hello, world 4
 **/
 ```
 
@@ -781,8 +798,8 @@ func main() {
 
 ### <span id="receivers"> receivers in methods vs arguments in functions </span>
 
-* When a function has a `value/point argument`, it will accept only a value argument.
-* When a method has a `value/point` receiver, it will accept both pointer and value receivers.
+* When a function has a `value/pointer` argument, it will accept only a `value` argument.
+* When a method has a `value/pointer` receiver, it will accept both `pointer` and `value` receivers.
 
 > * 原因是在於 `p.area()` 會自動解讀為 `(*p).area()`，因此實際上 value receiver 也是只能接收 value
 > * 而 Pointer receivers 也是一樣 `r.perimeter()` 會解讀為 `(&r).perimeter()`
@@ -880,7 +897,7 @@ func main() {
 
 ### <span id="methods_on_non_struct_types"> Methods on non struct types </span>
 
-method 必須定義才 local type 才可以，因此像要再 `int` 新增 method 則會出現 error `cannot define new methods on non-local type int`，必須定義新的 type 才行
+method 必須定義成 local type 才可以，因此像要再 `int` 新增 method 則會出現 error `cannot define new methods on non-local type int`，必須定義新的 type 才行
 
 ```go
 package main

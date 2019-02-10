@@ -40,7 +40,7 @@ a := [3][2]string{
         {"pigeon", "peacock"}, //this comma is necessary. The compiler will complain if you omit this comma
     }
 
-s := []struct {
+s := [6]struct {
     i int
     b bool
   }{
@@ -510,7 +510,7 @@ func main() {
 A map maps keys to values. (相當於其當語言的 hash)
 
 > * Similar to slices, maps are reference types
-> * Only be compared to ni
+> * Only be compared to nil
 > * The zero value of a map is nil
 > * nil 的 map 無法賦值，必須用 make
 
@@ -519,6 +519,10 @@ make(map[key]value)
 value, ok := map[key] // 判斷 key 的 value 在不在
 delete(map, key)
 ```
+
+> * Map: An empty map is allocated with enough space to hold the
+specified number of elements. The size may be omitted, in which case
+a small starting size is allocated.
 
 ```go
 package main
@@ -680,7 +684,7 @@ type of nums is []int
 **/
 ```
 
-原理是會將，後面的參數轉成 slice，所以 type 會變成 `[]int`，但是因為 `find` 後面接收的參數 type 是 int，因此也不能直接將 `[]int` 帶進去，因此 `[]int` 透過 `...` 語法糖，帶到 Variadic Functions 裡
+原理是會將，後面的參數轉成 slice，所以 type 會變成 `[]int`，但是因為 `find` 後面接收的參數 type 是 int，也不能直接將 `[]int` 帶進去，因此 `[]int` 透過 `...` 語法糖，帶到 Variadic Functions 裡
 
 ### example 2
 

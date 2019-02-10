@@ -144,6 +144,10 @@ func main() {
 
 ### defer with return
 
+defer 是在 return 之前執行的。[defer_statements](https://golang.org/ref/spec#defer_statements)
+
+函式返回的過程是這樣的：先給返回值賦值，然後呼叫defer表達式，最後才是返回到呼叫函式中。
+
 Ex1.
 
 ```go
@@ -179,7 +183,7 @@ import (
 func f() (r int) {
 	t := 5
 	// 相當於 r = t，因為最後回傳的參數為 r，但 defer 裡面是針對 t + 5，因此不受影響
-	// r 改成 t 則會變成 10
+	// 改成 r = t + 5 則會變成 10
 	defer func() {
 		t = t + 5
 	}()
@@ -363,7 +367,7 @@ func main() {
 
 ### 2. Asserting the underlying struct type and getting more information using methods
 
-`DNSError` 有時做兩個 method，`Timeout()` & `Temporary()`，並且都是回傳 bool，因此可以用來判斷是哪一種的 error
+`DNSError` 有實作兩個 method，`Timeout()` & `Temporary()`，並且都是回傳 bool，因此可以用來判斷是哪一種的 error
 
 ```go
 type DNSError struct {  
@@ -687,7 +691,7 @@ panic 和 recover 就像是其他語言的，try & catch
 func panic(interface{})
 ```
 
-當使用 pacin 會因出 stack trace，就可以很輕易的知道錯在哪一行
+當使用 pacin 會印出 stack trace，就可以很輕易的知道錯在哪一行
 
 ```go
 package main

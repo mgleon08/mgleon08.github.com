@@ -22,6 +22,10 @@ categories: sql
 * [specify order](#specify_order)
 * [Table View](#table_view)
 
+tutorial
+
+* [sqlzoo.net](#https://sqlzoo.net/)
+
 <!-- more -->
 
 # <span id="FIELD"> FIELD() <span>
@@ -29,13 +33,13 @@ categories: sql
 FIELD 會 return 第一個參數的，position
 
 ```sql
-// 第一個參數 "c", 在後面第三個位置
+-- 第一個參數 "c", 在後面第三個位置
 SELECT FIELD("c", "a", "b", "c", "d", "e");
-// 3
+-- 3
 
-// 如果找不到就會是 0
+-- 如果找不到就會是 0
 SELECT FIELD("f", "a", "b", "c", "d", "e");
-// 0
+-- 0
 ```
 可以搭配 order，讓取出來的順序按照原本給的參數
 
@@ -89,14 +93,14 @@ CONCAT(字串1, 字串2, 字串3, ...)
 # <span id="IFNULL"> IFNULL <span>
 
 ```sql
-// 如果x不是NULL(不包含0)，IFNULL()返回x，否則它返回y。
+-- 如果x不是NULL(不包含0)，IFNULL()返回x，否則它返回y。
 IFNULL(x, y)
 ```
 
 # <span id="CONVERT"> CONVERT <span>
 
 ```sql
-// 將時間轉成 date
+-- 將時間轉成 date
 CONVERT(created_at, date)
 ```
 
@@ -138,7 +142,7 @@ date 轉成 Unix Timestamp
 
 ```sql
 SELECT unix_timestamp(my_datetime_column) as stamp
-# milliseconds
+-- milliseconds
 SELECT unix_timestamp(my_datetime_column) * 1000 as stamp
 ```
 

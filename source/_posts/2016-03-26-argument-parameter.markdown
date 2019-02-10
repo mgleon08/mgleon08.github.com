@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "引數的傳遞 argument parameter *** (extract_options!)"
+title: "引數傳遞 ** double splat operator (extract_options!)"
 date: 2016-03-26 09:28:59 +0800
 comments: true
 categories: ruby

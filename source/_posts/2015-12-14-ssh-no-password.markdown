@@ -15,7 +15,7 @@ categories: server
 
 <!-- more -->
 
-### Step 1.
+### Step 1. 新增權限沒那麼高的使用者
 
 ```ruby
 ssh root@123.123.12.1
@@ -30,7 +30,9 @@ sudo su deploy
 *	`--disabled-password` 讓 deploy 無法用密碼登入
 *	`su` 就是切換身份
 
-### Step 2. (也可以參考下面的 快速複製 SSH public key 到遠端主機)
+### Step 2. 新增 key (也可以參考下面的 快速複製 SSH public key 到遠端主機)
+
+`-t rsa` 表示是使用 [RSA](https://zh.wikipedia.org/zh-tw/RSA%E5%8A%A0%E5%AF%86%E6%BC%94%E7%AE%97%E6%B3%95) 加密法 來產生金鑰
 
 ```ruby
 ssh-keygen -t rsa -C "your_email@example.com"

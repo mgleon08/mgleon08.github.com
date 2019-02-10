@@ -14,8 +14,7 @@ footer: true
   <li><a href="{{ root_url }}/blog/2015/12/27/git-command/"> Git 指令操作手冊 </a></li>
   <li><a href="{{ root_url }}/blog/2018/06/14/sql-command/"> Sql 好用的 Command </a></li>
   <li><a href="{{ root_url }}/blog/2018/04/09/linux-command/"> Linux 指令 </a></li>
-    <li><a href="{{ root_url }}/blog/2016/11/25/docker/"> Docker - Dockerfile, Docker Compose, Docker Volumn </a></li>
-    <li><a href="{{ root_url }}/blog/categories/golang/"> Golang </a></li>
+  <li><a href="{{ root_url }}/blog/2015/12/14/ssh-no-password/"> SSH </a></li>
 </ul>
 
 # <span id="mac_tool">Mac Tool</span>
@@ -35,6 +34,8 @@ footer: true
 * [Welly](https://github.com/clyang/welly) - PTT
 * [Magnet](http://magnet.crowdcafe.com/) - 視窗分割
 * [AppCleaner](https://freemacsoft.net/appcleaner/) - 深度清除 APP
+* [Trailer.app](http://ptsochantaris.github.io/trailer/) - Accelerate your GitHub workflow. Never miss a comment again.
+* [getbitbar](https://getbitbar.com/) - Put anything in your Mac OS X menu bar
 
 # <span id="terminal_tool"> Terminal Tool </span>
 
@@ -46,8 +47,6 @@ footer: true
 * [z](https://github.com/rupa/z) - jump around
 * [autojump](https://github.com/wting/autojump) - A cd command that learns - easily navigate directories from the command line (跟 z 類似)
 * [peco](https://github.com/peco/peco) - 可以將一些指令變成互動式的指令 e.g. git checkout
-
-
 
 # <span id="ui-framework"> UI Framework </span>
 
@@ -68,25 +67,39 @@ footer: true
 
 # <span id="code-quality"> Code Quality </span>
 
+* [flay](https://github.com/seattlerb/flay) - 找出相似的程式碼讓 code 更 dry
+* [rubocop](https://github.com/rubocop-hq/rubocop) - codeing style
+* [simplecov](https://github.com/colszowka/simplecov) - 測試覆蓋率
+* [brakeman](https://github.com/presidentbeef/brakeman) - 檢查安全性
+* [Bullet](https://github.com/flyerhzm/bullet) - 檢查 N+1 Query
+* [rubycritic](https://github.com/whitesmith/rubycritic) - 靜態分析程式碼(Reek, Flay 和 Flog)
+* [pronto](https://github.com/prontolabs/pronto) - review 完後 commit 在 github comment 上面
+* [traceroute](https://github.com/amatsuda/traceroute) - 找出沒有在使用的 router
+* [rack-mini-profiler](https://github.com/MiniProfiler/rack-mini-profiler) - profiling 每一頁花的時間
+* [rails_panel](https://github.com/dejan/rails_panel) + [RailsPanel Chrome](https://chrome.google.com/webstore/detail/railspanel/gjpfobpafnhjhbajcjgccbbdofdckggg/related) - 在chrome的developer tool加上rails的分析工具。
+* [rails_best_practices](https://github.com/flyerhzm/rails_best_practices) - 檢查rails專案中是否有違反 [rails best practices](https://rails-bestpractices.com/)。
 
-* [flay - 找出相似的程式碼讓 code 更 dry](https://github.com/seattlerb/flay)
-* [rubocop - codeing style](https://github.com/rubocop-hq/rubocop)
-* [simplecov - 測試覆蓋率](https://github.com/colszowka/simplecov)
-* [brakeman - 檢查安全性](https://github.com/presidentbeef/brakeman)
-* [Bullet - 檢查 N+1 Query](https://github.com/flyerhzm/bullet)
-* [rubycritic - 靜態分析程式碼(Reek, Flay 和 Flog)](https://github.com/whitesmith/rubycritic)
-* [pronto - review 完後 commit 在 github comment 上面](https://github.com/prontolabs/pronto)
-* [traceroute - 找出沒有在使用的 router](https://github.com/amatsuda/traceroute)
-* [rack-mini-profiler - profiling每一頁花的時間](https://github.com/MiniProfiler/rack-mini-profiler)
 
-# <span id="code-review"> Automated Code Review</span>
+# <span id="code-review"> Third Party Automated Code Review </span>
 
 * [codacy](https://www.codacy.com/)
 * [codeclimate](https://codeclimate.com/)
 * [codefactor](https://www.codefactor.io/)
 * [houndci](https://houndci.com/)
 * [sider](https://sider.review/)
+* [sonarqube](https://www.sonarqube.org/) - 程式碼品質分析
 
+# <span id="images"> Free Images </span>
+
+* [Unsplash](https://unsplash.com/)
+* [Pexels](https://www.pexels.com/)
+* [Gratisography](https://gratisography.com/)
+* [picjumbo](https://picjumbo.com/)
+* [pixabay](https://pixabay.com/)
+* [canva](https://www.canva.com/photos/free/)
+* [reshot](https://www.reshot.com/)
+* [rawpixel](https://www.rawpixel.com/)
+* [pxhere](https://pxhere.com/)
 
 # <span id="others"> Others </span>
 

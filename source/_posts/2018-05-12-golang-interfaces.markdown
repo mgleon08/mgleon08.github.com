@@ -412,8 +412,6 @@ Naveen R is 25 years old
 
 ### <span id="pointer_receivers_vs_value_receivers"> Implementing interfaces using pointer receivers vs value receivers </span>
 
-###
-
 ```go
 package main
 
@@ -686,7 +684,7 @@ type Stringer interface {
 }
 ```
 
-##### [範例 1](tour.golang.org/methods/17)
+##### [範例 1](https://tour.golang.org/methods/17)
 
 ```go
 package main

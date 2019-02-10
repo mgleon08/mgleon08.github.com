@@ -48,9 +48,29 @@ func main() {
 }
 ```
 
-當你用 `go install` or `go build` 出 binary 的 file，file 移到不同位置就會找不到檔案，有幾種方式可以解決
+當你用 `go install` or `go build` 出 binary 的 file，但 file 移到不同位置就會找不到檔案，有幾種方式可以解決
 
 ### 1. 用絕對路徑
+
+```go
+package main
+
+import (
+    "fmt"
+    "io/ioutil"
+)
+
+func main() {
+	// $GOPATH 要換成自己電腦的路徑
+    data, err := ioutil.ReadFile("$GOPATH/src/filehandling/test.txt")
+    if err != nil {
+        fmt.Println("File reading error", err)
+        return
+    }
+    fmt.Println("Contents of file:", string(data))
+}
+```
+
 ### 2. 把路徑當參數，在執行檔案時傳入
 
 必須用到 [flag](https://golang.org/pkg/flag/) package
@@ -77,7 +97,7 @@ func main() {
 go run flag.go -fpath=/path-of-file/test.txt
 ```
 
-更改後為
+將之前的 `test.txt` 加上 `flag` 後
 
 ```go
 package main
@@ -100,7 +120,17 @@ func main() {
 }
 ```
 
-3. 在編譯的時候把檔案一起編譯進去
+```go
+go run flag.go -fpath=$GOPATH/src/filehandling/test.txt
+```
+
+執行 binary 的檔案時就可以加上 -fpath
+
+```go
+filehandling -fpath=$GOPATH/src/filehandling/test.txt
+```
+
+### 3. 在編譯的時候把檔案一起編譯進去
 
 可以透過 [packr](https://github.com/gobuffalo/packr) package 來實現
 
@@ -187,12 +217,20 @@ func main() {
 		}
 		fmt.Println(string(b))
 	}
-}s
+}
+```
+
+```go
+go run filehandling.go -fpath=$GOPATH/src/filehandling/test.txt
 ```
 
 # <span id="line"> Reading a file line by line </span>
 
 上面是一次要讀取多少個字元，這次改用一行一行去做讀取，一樣用 [bufio](https://golang.org/pkg/bufio/)
+
+1. Open the file
+2. Create a new scanner from the file
+3. Scan the file and read it line by line.
 
 ```go
 package main
@@ -232,6 +270,10 @@ func main() {
 		log.Fatal(err)
 	}
 }
+```
+
+```go
+go run filehandling.go -fpath=$GOPATH/src/filehandling/test.txt
 ```
 
 參考文件:

@@ -74,5 +74,7 @@ end
 * [Rails 中樂觀鎖與悲觀鎖的使用](https://ruby-china.org/topics/28963)
 * [簡介隔離層級](https://openhome.cc/Gossip/HibernateGossip/IsolationLevel.html)
 * [Rails 中樂觀鎖與悲觀鎖的使用](https://ruby-china.org/topics/28963)
+* [面試必備之樂觀鎖與悲觀鎖](https://zhuanlan.zhihu.com/p/40211594)
+* [Lock-Learning](https://github.com/aalansehaiyang/Lock-Learning)
 * [ActiveRecord::Locking::Pessimistic](http://api.rubyonrails.org/classes/ActiveRecord/Locking/Pessimistic.html)
 * [ActiveRecord::Locking::Optimistic](http://api.rubyonrails.org/classes/ActiveRecord/Locking/Optimistic.html)

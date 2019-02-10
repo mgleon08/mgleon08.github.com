@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Docker - Dockerfile, Docker Compose, Docker Volumn"
+title: "Docker - Dockerfile"
 date: 2016-11-25 16:28:35 +0800
 comments: true
 categories: server docker
@@ -10,10 +10,7 @@ docker 讓應用程式佈署在軟體容器下的工作可以自動化進行，�
 
 <!-- more -->
 
-
 * [Dockerfile](#dockerfile)
-* [Docker Compose](#docker_compose)
-* [Docker Volumn](#docker_volumn)
 
 Docker 的優點
 
@@ -49,8 +46,9 @@ docker-machine --version
 # 從 hub 取得所需要的 images :後面為版本號，若沒加則會拉最新的
 docker pull ubuntu:12.04 
 
-# 搜尋官方的 Image
-docker search 
+# 搜尋 Image
+docker search
+docker search ubuntu -f is-official=true # is-official=true 官方的意思
 
 # container (有些 container 可改 ps)
 docker container ls                              # List all running containers
@@ -74,9 +72,13 @@ docker rmi nginx -f
 docker inspect <containerID>
 
 # 跳回 terminal 而不關閉 container
-ctrl + p + ctrl + q
+(ctrl + p) + (ctrl + q)
+
 # 回去 container
 docker attach <containerID>
+
+# 查看 docker container 的 IP
+進去 container 執行 cat /etc/hosts
 ```
 
 ###  Run
@@ -104,7 +106,20 @@ docker run -it --rm ubuntu:latest bash
 
 # 如果 container 停下來會自動 restart
 --restart=always
+
+# net 設定網路範圍
+docker run --net=bridge -it ubuntu
 ```
+
+> * none： 在執行 container 時，網路功能是關閉的，所以無法與此 container 連線
+> container： 使用相同的 Network Namespace，所以 container1 的 IP 是 172.17.0.2 那 container2 的 IP 也會是 172.17.0.2
+> * host： container 的網路設定和實體主機使用相同的網路設定，所以 container 裡面也就可以修改實體機器的網路設定，因此使用此模式需要考慮網路安全性上的問題
+> * bridge： Docker 預設就是使用此網路模式，這種網路模式就像是 NAT 的網路模式，例如實體主機的 IP 是 192.168.1.10 它會對應到 Container 裡面的 172.17.0.2，在啟動 Docker 的 service 時會有一個 docker0 的網路卡就是在做此網路的橋接。
+> * overlay： container 之間可以在不同的實體機器上做連線，例如 Host1 有一個 container1，然後 Host2 有一個 container2，container1 就可以使用 overlay 的網路模式和 container2 做網路的連線。
+
+* [Day20：介紹 Docker 的 Network (二)](https://ithelp.ithome.com.tw/articles/10193457)
+
+
 
 ###  Attach
 
@@ -139,6 +154,22 @@ docker run -v /opt/datadir:/var/lib/mysql mysql
 ```ruby
 # 看 container log，-f=follow, -t=time
 docker logs -tf <imageID>|<imageName>
+```
+
+### export
+
+```ruby
+docker export nginx > nginx.tar
+cat nginx.tar | docker import - nginxbak
+# nginxbak 是 Import 進 Docker 取得 Image Name
+```
+
+### stats
+
+查看 Docker Container 的資源使用狀態
+
+```ruby
+docker stats <container name> | <container id>
 ```
 
 ### 建立映像檔
@@ -227,7 +258,6 @@ exec 可以開啟多個終端實例， exec -i /bin/bash，由此可見exec其�
 
 ## <span id="dockerfile">Dockerfile</span>
 
-
 ```ruby
 # 1. OS-Ubuntu
 FROM Ubuntu
@@ -247,8 +277,9 @@ COPY . /opt/source-code
 # 6. Run the web server using 'flask' command
 ENTRYPOINT FLASK_APP=/opt/source-code/app.py flask run 
 ```
+
 ```ruby
-# 可加 --no-cache 
+# 可加 --no-cache，避免在 Build Docker image 時被 cache 住，造成沒有 build 到修改過的 Dockerfile
 docker build -t user_name/custom_app Dockerfile
 docker push user_name/custom_app
 ```
@@ -482,80 +513,37 @@ docker start <containerID>
 
 > bin/bash -l，中的 -l [6.1 Invoking Bash](https://www.gnu.org/software/bash/manual/html_node/Invoking-Bash.html)
 
-## <span id="docker_compose">Docker Compose</span>
-
-Compose 是一個工具，用來定義與執行多個 container 組成的 Docker Applications。你可以使用 Compose 檔案來組態設定你的應用服務。然後使用單一命令，透過你的組態設定來建立與啟動你的服務。
-
-Compose 適合用來開發、測試、與建立 staging 環境，如同 CI workflows。
-
-使用 Compose 有基本的三個處理步驟：
-
-1. 使用 Dockerfile 定義你的 app 環境，讓它可以在任何地方都能複製(reproduced)。
-2. 使用 docker-compose.yml 定義你的服務，讓他們可以在獨立環境內一起執行。
-3. 最後，執行 docker-compose up，Compose 將會開始與執行你所有的 app。
-
-```ruby
-# docker-compose.yml
-version: '1' # dockerfile 版本  
-services:
-	web:
-	   container_name: exmple-web # Container 名稱
-		images:"mmumshad/simple-webapp" # 使用的 Image
-		ports:
-			- "80:5000" # 將 container 的 port 映射到 80
-	detabase:
-		container_name: exmple-detabase # Container 名稱
-		images:"mysql"
-		volumes::
-			- /opt/data:/var/lib/mysql
-```
-
-![](https://i.imgur.com/2Z22ghU.png)
-
-```ruby
-docker-compose build # 透過 docker-compose 建立好所有的 image
-docker-compose up
-docker-compose stop
-docker-compose down
-```
-
-### Example
-
-
-```ruby
-version: '3'
-services:
-  db:
-    image: postgres
-    ports:
-      - "5432"
-  backend:
-    build:
-      context: test-backend
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./test-backend:/usr/src/app
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    user: rails
-  frontend:
-    build:
-      context: test-frontend
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./test-frontend:/usr/src/app
-    ports:
-      - "3000:3000"
-    user: frontend
-```
-
 ### .env file
 
 * [Environment variables in Compose](https://docs.docker.com/compose/environment-variables/)
+
+
+### docker alias
+
+```ruby
+# stop all running containers
+alias dstopall='docker stop $(docker ps --no-trunc -aq)'
+# remove all containers
+alias drmall='docker rm $(docker ps -a -q)'
+# remove temp image
+alias drminone='docker rmi $(docker images -f dangling=true -q)'
+
+# or use function
+
+function dstopall() {
+    docker stop `docker ps --no-trunc -aq`
+}
+
+# remove all containers
+function drmall() {
+    docker rm `docker ps -a -q`
+}
+
+# remove temp image
+function drminone() {
+    docker rmi `docker images -f dangling=true -q`
+}
+```
 
 官方文件：
 
@@ -578,146 +566,4 @@ services:
 * [Docker 實戰系列（一）：一步一步帶你 dockerize 你的應用](https://larrylu.blog/step-by-step-dockerize-your-app-ecd8940696f4)
 * [docker-compose.yml 配置文件編寫詳解](https://blog.csdn.net/qq_36148847/article/details/79427878)
 * [用30天來介紹和使用 Docker](https://ithelp.ithome.com.tw/users/20103456/ironman/1320)
-
-
-## <span id="docker_volumn">Docker Volumn</span>
-
-Docker Volume 是個介於主機與容器間的共享資料夾，可用來匯入或匯出容器內的資料，或者共享容器間的資料
-
-* Docker image 由多個 read-only 的 file system 疊加而成一個 stack，這些組合稱為 Union File System。
-* 啟動 container 的時候，會在 stack 上方新增一個 read-write layer，更動都在這邊，砍掉 container 這邊也就沒了
-* Volume 是為了要解決 container 之間資料共享與資料保存而提出的
-* Volume 就是目錄或是檔案，可以繞過 UFS 以正常的檔案或目錄的方式存在 host 本機上
-* 啟動 Container 的時候產生 volume，如果 Volume 掛載的目標路徑已經有檔案存在於 Image 上面，則 Image 上面的檔案會 copy 到 volume 上，但不包括 host directory
-
-
-```ruby
-# 列出所有的 volume
-docker volume ls
-
-# 列出所有沒有被關聯到 container 的 volume 的 VOLUME NAME
-docker volume ls -qf dangling=true
-
-# 一次刪除所有 volume
-docker volume rm $(docker volume ls -qf dangling=true)
-
-# 查看 volume 的資訊
-docker volume inspect 52b29486c72090675d52814414eec7d62024b2328a644bd7924e647ee1a24884
-
-# 查看某一個 container 的 volume 狀況
-docker inspect -f '{{.Mounts}}' 825005afab43
-```
-
-### Example1:
-
-`Host Volume` 指定 host 的資料夾
-
-```ruby
-cd ~
-mkdir volume-test
-# 測試發現即使一開始沒新增 volume-test，執行指令後也是會在 local 新增這個檔案 
-docker run -it -v /Users/leon/volume-test:/volume-test ubuntu:14.04 /bin/bash
-# 會發現裡面也會有一個資料夾 volume-test，不管在 docker 的 /volume-test 或是 local /Users/leon/volume-test，新增檔案，另一邊都會同步
-exit
-# 離開了 container，會發現 /Users/leon/volume-test 裡面的檔案還是保留在裡面
-docker run -it -v /Users/leon/volume-test:/volume-test ubuntu:14.04 /bin/bash
-# 即使在開新的 container 檔案還是一樣會在
-```
-
-### Example2:
-
-`named volume` 沒有指定 loacl 的路徑，檔案會去哪裡?
-
-```ruby
-docker run -it -v /volume-test ubuntu:14.04 /bin/bash
-docker volume ls
-
-# 發現多了一個，因為沒指定名稱所以就產生亂碼
-DRIVER              VOLUME NAME
-local               c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a
-```
-
-```ruby
-# 尋找 container 的 loacl volume, 825005afab43 是 container id
-docker inspect -f '{{.Mounts}}' 825005afab43
-[{volume c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a /var/lib/docker/volumes/c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a/_data /vo-test local  true }]
-```
-
-透過上面指令就可以找到 local 的檔案，照理說可以 cd 到 `/var/lib/docker/volumes/c449638e58fe0c03961ce48411f31995b080f8cd4b13e8d67787cf775b1aa20a/_data /vo-test`，但是 mac 無法，有找到以下有人也在詢問
-
-* [Host path of volume](https://forums.docker.com/t/host-path-of-volume/12277)
-
-### Example 3.
-
-`named volume` 先在 local 建立 volume 在指定
-
-```ruby
-docker volume create db_data2
-docker run -d -v db_data2:/var/lib/mysql mysql:5.7.17
-```
-
-### Example 4.
-
-讓 Container 和 Container 之間的資料共享
-
-```ruby
-docker run -it -v /data --name=container1 ubuntu:14.04 /bin/bash
-docker run -it --volumes-from container1 --name=container2 ubuntu:14.04 /bin/bash
-
-# --volumes-from 參數指定 Container Name 為 Container1 的 Volume 資料和Container2 做共享
-```
-
-### Example 5.
-
-Dockerfile 指定
-
-```ruby
-FROM ubuntu:14.04
-VOLUME /data
-```
-
-docker-compose.yml 指定
-
-```ruby
-version: '3'
-services:
-  db:
-    image: postgres
-    ports:
-      - "5432"
-  backend:
-    build:
-      context: test-backend
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./test-backend:/usr/src/app
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    user: rails
-  frontend:
-    build:
-      context: test-frontend
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./test-frontend:/usr/src/app
-    ports:
-      - "3000:3000"
-    user: frontend
-```
-
-參考文件
-
-* [Use volumes](https://docs.docker.com/storage/volumes/)
-* [深入理解Docker Volume（一）](http://dockone.io/article/128)
-* [docker volume 容器卷的那些事（一）](https://deepzz.com/post/the-docker-volumes-basic.html)
-* [Docker volume 簡單用法](https://julianchu.net/2016/04/19-docker.html)
-* [Docker 實戰系列（三）：使用 Volume 保存容器內的數據](https://larrylu.blog/using-volumn-to-persist-data-in-container-a3640cc92ce4)
-* [Day17：使用 Docker Volume 的功能 (一)](https://ithelp.ithome.com.tw/articles/10192397)
-* [Day18：使用 Docker Volume 的功能 (二)](https://ithelp.ithome.com.tw/articles/10192703)
-* [Docker Volume 初步閱讀與學習紀錄](http://blog.maxkit.com.tw/2017/03/docker-volume.html)
-* [部署 長文慎入：將 Rails 程序部署到 Docker 容器中](https://ruby-china.org/topics/32459)
-* [2018 年的 Rails 應用 Docker Image 包裝範例](https://5xruby.tw/en/posts/rails-docker-image)
+* [Docker(三)：Dockerfile 命令詳解](http://www.ityouknow.com/docker/2018/03/15/docker-dockerfile-command-introduction.html)
