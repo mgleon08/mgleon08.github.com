@@ -1,0 +1,222 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Version | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/version/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2019-02-11T14:19:33+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby - RVM and Gemsets 版本控制]]></title>
+    <link href="http://mgleon08.github.com/blog/2016/02/15/rvm-and-gemsets/"/>
+    <updated>2016-02-15T21:12:09+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2016/02/15/rvm-and-gemsets</id>
+    <content type="html"><![CDATA[<p>好用的工具，可以輕鬆的切換 ruby 版本!</p>
+
+<!-- more -->
+
+
+<h1>安裝</h1>
+
+<p><a href="https://rvm.io/">rvm</a></p>
+
+<pre><code class="ruby">\curl -sSL https://get.rvm.io | bash -s stable
+</code></pre>
+
+<h3>安裝 ruby 版本</h3>
+
+<pre><code class="ruby">rvm install 2.2.3
+</code></pre>
+
+<h3>使用版本(該 terminal)</h3>
+
+<pre><code class="ruby">rvm use 2.2.3
+# use 可省略 rvm 2.2.3
+</code></pre>
+
+<h3>設定 default 使用版本</h3>
+
+<pre><code class="ruby">rvm use 2.4.0 --default
+# rvm 2.4.0 --default
+</code></pre>
+
+<h3>切回到原來系統內建的版本</h3>
+
+<pre><code class="ruby">rvm system
+</code></pre>
+
+<h3>目前有的版本</h3>
+
+<pre><code class="ruby">rvm list
+</code></pre>
+
+<h3>查目前可以安裝的版本</h3>
+
+<pre><code class="ruby">rvm list known
+</code></pre>
+
+<h3>移除</h3>
+
+<pre><code class="ruby">rvm remove 2.2.3
+</code></pre>
+
+<h3>看本機是否使用 rvm 還是本機</h3>
+
+<pre><code class="ruby">which ruby
+</code></pre>
+
+<h3>update rvm</h3>
+
+<pre><code class="ruby">rvm get stable
+#master     - install the master release
+#stable     - install the latest RVM stable release
+#latest     - install the latest RVM release
+</code></pre>
+
+<h1>設定</h1>
+
+<p>安裝好之後，基本上就是一個全新的，gem 都要全部重新安裝
+記得先去安裝 <code>bundler</code></p>
+
+<pre><code class="ruby">gem install bundler
+</code></pre>
+
+<p>之後再去專案底下輸入 <code>bundle</code> 就會重新安裝了</p>
+
+<h1>Gemset</h1>
+
+<p>在該版本的 ruby 下，在區分要安裝哪些 gem</p>
+
+<h3>目前有的 gemset</h3>
+
+<pre><code class="ruby">rvm gemset list
+</code></pre>
+
+<h3>新增</h3>
+
+<pre><code class="ruby">rvm gemset create rails4.2.4
+</code></pre>
+
+<h3>使用</h3>
+
+<pre><code class="ruby">rvm gemset use rails4.2.4
+</code></pre>
+
+<p>使用 default</p>
+
+<pre><code class="ruby">rvm gemset use default
+</code></pre>
+
+<h3>清空</h3>
+
+<p>清空裡面的 gem ，但保留 gemset
+<code>ruby
+rvm gemset empty rails4.2.4
+</code></p>
+
+<h3>刪除</h3>
+
+<pre><code class="ruby">rvm gemset delete rails4.2.4
+</code></pre>
+
+<h3>自動載入 gemset</h3>
+
+<pre><code class="ruby">#建立一個 .rvmrc 文件。
+.rvmrc
+
+#在這個文件裡可以很簡單的加一個命令：
+rvm use 1.9.3@rails313
+#然後無論你當前 Ruby 設定是什麼，cd 到這個專案的時候，RVM 會幫你載入 Ruby 1.9.3 和 rails313 gemset.
+</code></pre>
+
+<h1>Bonus</h1>
+
+<h3>直接換兩個</h3>
+
+<pre><code class="ruby">rvm 2.2.3@rails4.2.4
+# ruby 和 gemset 一起切換
+
+rvm --default use ruby-1.9.3-p0@rails3.2
+#設定好兩個的 default 值
+</code></pre>
+
+<h1>other</h1>
+
+<p>另一個版本控制是 <code>rbenv</code> 聽說比較輕量
+project 要加上 <code>.ruby-version</code> 裡面寫 ruby 版本</p>
+
+<pre><code class="ruby">2.2.3
+</code></pre>
+
+<p>才能加入控管</p>
+
+<h1>openssl</h1>
+
+<p><code>rvm install</code> 新的 ruby 版本的時候，rvm 會先自行去找編譯好的 ruby 版本</p>
+
+<ul>
+<li><a href="https://rvm_io.global.ssl.fastly.net/binaries/">rvm binaries</a></li>
+</ul>
+
+
+<p>但若沒有對應的版本，就會直接編譯，但這時候很容易沒包到 openssl</p>
+
+<pre><code class="ruby"># 安裝 openssl
+brew install openssl
+
+# 看 openssl 位置
+brew info openssl
+
+# 安裝 ruby 並且指定 openssl 位置
+rvm install 2.4.0 --with-openssl-dir=`brew --prefix openssl`
+
+# 檢查 ssl
+rvm osx-ssl-certs update all
+
+# Tells rvm to automatically use the OpenSSL library installed by Homebrew
+rvm autolibs enable
+
+# 查看 rvm 需要 require 什麼
+rvm requirements
+
+# 其他的指令
+rvm help
+</code></pre>
+
+<p>另一個方法是使用 rvm 內建的 openssl</p>
+
+<pre><code class="ruby">#要先解壓縮
+rvm pkg install openssl
+rvm remove 2.4.0
+rvm install 2.4.0 --with-openssl-dir=$HOME/.rvm/usr
+</code></pre>
+
+<p>openssl 解決方式參考:</p>
+
+<ul>
+<li><a href="https://ruby-china.org/topics/8589">RVM/Rbenv RVM 安裝 Ruby 2.0.0 的 OpenSSL 問題 </a></li>
+<li><a href="http://stackoverflow.com/questions/15511943/troubles-with-rvm-and-openssl">troubles with RVM and OpenSSL</a></li>
+<li><a href="https://schneid.io/blog/fixing-ssl-errors-in-rvm-for-osx.html">Fixing SSL errors in rvm for OSX</a></li>
+<li><a href="https://gxnotes.com/article/21594.html">SSL_connect返回= 1 errno = 0 state = SSLv3讀伺服器證書B：證書驗證失敗</a></li>
+<li><a href="https://gist.github.com/luislavena/f064211759ee0f806c88">SSL upgrades on rubygems.org and RubyInstaller versions</a></li>
+</ul>
+
+
+<p>官方文件：
+<a href="https://rvm.io/">rvm</a></p>
+
+<p>參考文件：
+<a href="http://motion-express.com/blog/20141005-ruby-rvm-gemset">Ruby gem 想要一機裝多個版本？RVM來幫你！</a>
+<a href="http://blog.eddie.com.tw/2011/04/08/rvm-and-gemsets/">RVM and Gemsets</a>
+<a href="https://ruby-china.org/wiki/rvm-guide">rvm 使用指南</a></p>
+]]></content>
+  </entry>
+  
+</feed>
