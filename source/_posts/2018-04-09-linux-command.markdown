@@ -3,12 +3,12 @@ layout: post
 title: "Linux 指令"
 date: 2018-04-09 17:03:31 +0800
 comments: true
-categories: linux
+categories: linux other
 ---
 
 大部分人都只知道，基本指令 `ls` `cd` 等等，但其實還有很多好用的指令
 
-<!-- more --> 
+<!-- more -->
 
 * [permission - sudo, su, chown, chmod](#permission)
 * [screen](#screen)
@@ -64,10 +64,10 @@ screen
 screen -ls
 
 # 重新連接執行中的 screen 工作環境
-screen -r [pid.tty.host]	
+screen -r [pid.tty.host]
 
 # 開啟紀錄功能，會產生log檔案 screenlog.0
-screen -L 
+screen -L
 cat screenlog.0
 
 # 將廢棄的 screen 工作環境清除
@@ -95,14 +95,14 @@ Ctrl + A + D
 
 # <span id="ps"> ps </span>
 
-> Process Status的縮寫。用來列出系統中當前運行的那些進程。  
-> 
+> Process Status的縮寫。用來列出系統中當前運行的那些進程。
+>
 > ps命令列出的是當前那些進程的快照，就是執行ps命令的那個時刻的那些進程，如果想要動態的顯示進程信息，就可以使用top命令。
 
 ```ruby
 # 顯示較詳細的資訊
 ps au
-# 顯示所有包含其他使用者的行程 
+# 顯示所有包含其他使用者的行程
 ps auxs
 ```
 
@@ -250,12 +250,12 @@ cat link.txt
 
 ```ruby
 # awk 動作 文件名
-awk '{print $0}' test.txt 
+awk '{print $0}' test.txt
 # $0 印出所有的，$1, $2..，則是根據指的是第1個字段, 第2個字段..
-awk -F '/' '/MA/ { print $1 }' test.txt 
+awk -F '/' '/MA/ { print $1 }' test.txt
 # 打印包含 MA 的行中的第一個單詞。
-pwd | awk -F '/' '{print NR ") " $NF}' 
-# -F 指定分隔參數，NF 表示當前行有多少段落，$NF 最後一個字段 
+pwd | awk -F '/' '{print NR ") " $NF}'
+# -F 指定分隔參數，NF 表示當前行有多少段落，$NF 最後一個字段
 ```
 另外也提供了一些 func
 
@@ -279,7 +279,7 @@ rand()：隨機數
 ```ruby
 cat /dev/null > access.log # 將空的內容丟給 access.log
 cp /dev/null access.log # 複製一份空的蓋掉原本的檔案
-``` 
+```
 
 * [5 Ways to Empty or Delete a Large File Content in Linux](https://www.tecmint.com/empty-delete-file-content-linux/)
 
@@ -287,7 +287,7 @@ cp /dev/null access.log # 複製一份空的蓋掉原本的檔案
 
 `>/dev/null 2>&1`
 
-代表將左邊執行的結果丟給 `/dev/null` 
+代表將左邊執行的結果丟給 `/dev/null`
 
 而 `>` 是重新導向的意思，當左右兩邊沒有數字時，代表它會讀取左方程式的標準輸出 (也就是 fd=1) 重新導向給右邊的東西
 

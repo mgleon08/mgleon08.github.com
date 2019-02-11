@@ -3,7 +3,7 @@ layout: post
 title: "Capistrano 自動化部署設定"
 date: 2017-03-30 12:51:42 +0800
 comments: true
-categories: deploy
+categories: rails deploy
 ---
 用 Capistrano 做自動化部署
 
@@ -40,7 +40,7 @@ cap install
 
 ### deploy.rb 設定檔
 
-可以將共用的設定放在 `config/deploy.rb` 其他個別環境的就放在 `config/deploy/production.rb` `config/deploy/staging.rb` 
+可以將共用的設定放在 `config/deploy.rb` 其他個別環境的就放在 `config/deploy/production.rb` `config/deploy/staging.rb`
 等等
 
 ```ruby

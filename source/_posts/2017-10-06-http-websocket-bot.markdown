@@ -3,7 +3,7 @@ layout: post
 title: "Http Websocket Bot"
 date: 2017-10-06 12:09:51 +0800
 comments: true
-categories: http
+categories: other
 ---
 
 簡單的 `Http` `Websocket` `Bot` 介紹
@@ -21,7 +21,7 @@ categories: http
 * Http 1.1
 	* 多出一個keep-alive，在一個HTTP連接中，可以發送多個Request，接收多個Response。
 	* 但是 Request = Response ， 在HTTP中永遠是這樣，也就是說一個request只能有一個response。而且這個response也是被動的，不能主動發起。
- 
+
 ![](https://upload.wikimedia.org/wikipedia/commons/thumb/d/d5/HTTP_persistent_connection.svg/600px-HTTP_persistent_connection.svg.png)
 
 [如何理解HTTP協議的「無連接，無狀態」特點?](https://read01.com/ePjEn2.html)
@@ -32,7 +32,7 @@ categories: http
   * 瀏覽器每隔一段時間就自動送出一個 HTTP 請求給 server ，獲取最新的網頁資料
   * 在 server 沒有新資料時，瀏覽器也是會自動送出請求，造成網路資源浪費
 * Long-Polling 長時間輪詢
-  * server 在接收到瀏覽器所送出的 HTTP 請求後， server 會等待一段時間，若在這段時間裡 server 有新的資料，它就會把最新的資料傳回給瀏覽器 
+  * server 在接收到瀏覽器所送出的 HTTP 請求後， server 會等待一段時間，若在這段時間裡 server 有新的資料，它就會把最新的資料傳回給瀏覽器
   * 如果等待的時間到了之後也沒有新資料的話，就會送一個回應給瀏覽器，告知瀏覽器資料沒有更新
   * 如果在資料更新很頻繁的狀況下，長時間輪詢並不會比傳統的輪詢有效率，而且有時候資料量很大時，會造成連續的 polls 不斷產生，反而會更糟糕。
 * Streaming
@@ -54,8 +54,8 @@ categories: http
 	* 一個處理服務請求的並發程式設計模型。多個服務請求同時發往一個服務句柄(Service Handler)。服務句柄(Service Handler)多路分用到來的請求並把它們同步轉發給相關的請求處理器。
 
 
-Github： 
- 
+Github：
+
 * [eventmachine](https://github.com/eventmachine/eventmachine) doc [rubydoc](http://www.rubydoc.info/github/eventmachine/eventmachine/index)
 * [faye-websocket-ruby](https://github.com/faye/faye-websocket-ruby)
 * [em-websocket](https://github.com/igrigorik/em-websocket)

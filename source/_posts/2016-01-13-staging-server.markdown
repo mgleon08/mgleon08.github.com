@@ -3,7 +3,7 @@ layout: post
 title: "Ruby on Rails staging 環境和部署"
 date: 2016-01-13 22:59:11 +0800
 comments: true
-categories: deploy
+categories: rails deploy
 ---
 
 部署上 server 後，通常會需要在一個 staging server

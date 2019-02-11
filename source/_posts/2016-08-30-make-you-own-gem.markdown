@@ -3,7 +3,7 @@ layout: post
 title: "Make You Own Gem"
 date: 2016-08-30 10:24:36 +0800
 comments: true
-categories: gem
+categories: ruby gem
 ---
 
 bundle 本身就有提供可以產生 gem 相關檔案的功能
@@ -116,10 +116,10 @@ gem push xxx-0.0.1.gem
 ###command-reference
 [command-reference](http://guides.rubygems.org/command-reference/)
 
-參考文件：  
+參考文件：
 
 * [https://rubygems.org/](RubyGems.org)
 * [bundle gem](http://bundler.io/v1.12/man/bundle-gem.1.html)
 * [MAKE YOUR OWN GEM](http://guides.rubygems.org/make-your-own-gem/)
-* [Ruby 建立自己的 Gem 套件](http://blog.jex.tw/blog/2013/11/29/ruby-build-own-gem/)  
+* [Ruby 建立自己的 Gem 套件](http://blog.jex.tw/blog/2013/11/29/ruby-build-own-gem/)
 * [Step-by-Step Guide to Building Your First Ruby Gem](https://quickleft.com/blog/engineering-lunch-series-step-by-step-guide-to-building-your-first-ruby-gem/)

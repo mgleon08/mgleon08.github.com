@@ -3,7 +3,7 @@ layout: post
 title: "前端工具整理 NVM,NPM,YARN,Webpack,Babel 等等"
 date: 2016-11-29 11:32:26 +0800
 comments: true
-categories: front_end
+categories: javascript
 ---
 
 前端工具，名詞實在太多了，這篇就來簡單記錄一下!
@@ -37,7 +37,7 @@ export NVM_DIR="/Users/leon/.nvm"
 . ~/.nvm/nvm.sh or source ~/.zshrc
 
 # 安裝穩定版本的 NodeJS
-nvm install stable 
+nvm install stable
 
 #顯示目前可以安裝的版本
 nvm ls-remote
@@ -46,11 +46,11 @@ nvm ls-remote
 nvm install <version>
 
 #安裝穩定版本的 NodeJS
-nvm install stable 
- 
+nvm install stable
+
 #使用版本，只有在當下，重新開新tab就會消失
-nvm use stable 
- 
+nvm use stable
+
 #設定預設版本，永久
 nvm alias default stable
 

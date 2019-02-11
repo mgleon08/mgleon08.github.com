@@ -3,7 +3,7 @@ layout: post
 title: "Sql 好用的 command"
 date: 2018-06-14 18:43:04 +0800
 comments: true
-categories: sql
+categories: sql other
 ---
 
 最近常常使用 sql，因應各種需求，也發現一些蠻好用的指令~
@@ -136,7 +136,7 @@ ALTER TABLE `pre_campaign_details_channels` CHANGE `id` `id` INT(11)  NOT NULL  
 # <span id="unix_timestamp"> unix_timestamp <span>
 
 
-date 轉成 Unix Timestamp 
+date 轉成 Unix Timestamp
 
 `2018/01/01` -> `1514736000(s)` -> `1514736000000(ms)`
 
@@ -153,8 +153,8 @@ SELECT unix_timestamp(my_datetime_column) * 1000 as stamp
 可以直接指定在某個區段的時間
 
 ```sql
-SELECT * 
-FROM Store_Information 
+SELECT *
+FROM Store_Information
 WHERE Txn_Date BETWEEN 'Jan-06-1999' AND 'Jan-10-1999';
 ```
 
@@ -163,10 +163,10 @@ WHERE Txn_Date BETWEEN 'Jan-06-1999' AND 'Jan-10-1999';
 # <span id="Time"> Time <span>
 
 ```sql
-SELECT NOW(), CURTIME(), CURDATE(), (CURDATE() - INTERVAL 1 DAY), (CURDATE() - INTERVAL 1 MONTH) 
--- 2018-09-20 17:20:48	
--- 17:20:48	
--- 2018-09-20	
+SELECT NOW(), CURTIME(), CURDATE(), (CURDATE() - INTERVAL 1 DAY), (CURDATE() - INTERVAL 1 MONTH)
+-- 2018-09-20 17:20:48
+-- 17:20:48
+-- 2018-09-20
 -- 2018-09-19
 -- 2018-10-20
 -- INTERVAL - 可以將時間去做加減
@@ -178,13 +178,13 @@ SELECT NOW(), CURTIME(), CURDATE(), (CURDATE() - INTERVAL 1 DAY), (CURDATE() - I
 
 ```sql
 SELECT `users`.*
-FROM `users` 
-WHERE `users`.`id` IN (11, 13, 3, 5, 7, 9)  
-ORDER BY 
-  CASE 
-  WHEN `users`.`id`=11 THEN 0 
-  WHEN `users`.`id`=13 THEN 1 
-  WHEN `users`.`id`=9 THEN 2 
+FROM `users`
+WHERE `users`.`id` IN (11, 13, 3, 5, 7, 9)
+ORDER BY
+  CASE
+  WHEN `users`.`id`=11 THEN 0
+  WHEN `users`.`id`=13 THEN 1
+  WHEN `users`.`id`=9 THEN 2
   ELSE 3 END ASC
 ```
 
@@ -193,12 +193,12 @@ ORDER BY
 虛擬表格。它跟表格的不同是，表格中有實際儲存資料，而視觀表是建立在表格之上的一個架構，它本身並不實際儲存資料。
 
 ```sql
-CREATE VIEW "視觀表名" 
+CREATE VIEW "視觀表名"
 AS "SQL SELECT 語句";
 ```
 
 ```sql
-CREATE VIEW OR REPLACE "視觀表名" 
+CREATE VIEW OR REPLACE "視觀表名"
 AS "SQL SELECT 語句";
 ```
 

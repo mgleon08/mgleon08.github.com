@@ -3,7 +3,7 @@ layout: post
 title: "UML Class Diagram"
 date: 2018-11-08 15:15:11 +0800
 comments: true
-categories: diagram
+categories: diagram other
 ---
 
 類別圖，跟 ERD 有些類似，可能包含了 ERD 所描述的內容，但不一定可對應

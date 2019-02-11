@@ -3,7 +3,7 @@ layout: post
 title: "簡單理解 CDN 原理"
 date: 2018-10-29 15:06:53 +0800
 comments: true
-categories: cdn
+categories: cdn other
 ---
 
 近期遇到 CDN 的問題，順便瞭解一下 CDN 整個運作模式

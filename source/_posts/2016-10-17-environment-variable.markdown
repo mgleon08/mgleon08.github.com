@@ -3,14 +3,14 @@ layout: post
 title: "環境變數 Environment variable"
 date: 2016-10-17 17:33:41 +0800
 comments: true
-categories: shell
+categories: shell other
 ---
 
 為什麼需要環境變數?
 
 <!-- more -->
 
-因為在 github 上面不會將一些敏感資料放在上面，ex: password, token..etc   
+因為在 github 上面不會將一些敏感資料放在上面，ex: password, token..etc
 所以這些資料就會在 sever 上面做設定，以免資料外漏
 
 那要設定這些資料有兩種方式

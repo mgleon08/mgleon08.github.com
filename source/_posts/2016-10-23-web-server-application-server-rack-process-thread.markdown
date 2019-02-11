@@ -4,7 +4,7 @@ title: "Web server / Application server / Rack / Process / Thread
 "
 date: 2016-10-23 16:05:22 +0800
 comments: true
-categories: server backend
+categories: server other
 ---
 
 這幾個名詞之前一直搞不太清楚，所以透過這邊來順便理解一下。
@@ -32,21 +32,21 @@ categories: server backend
 
 * WEBrick
 * Passenger
-* Unicorn 
+* Unicorn
 	* `single-threaded multi-process`
 	* ` process monitoring`
 	* 能讓所有處理序都監聽同一個共享的socket，而不是每個處理序使用單獨的socket
 * Puma
 	* `purely multi-threaded`
-* Thin 
+* Thin
 	* `evented I/O`
 	* `no process monitoring`
-	* 它的集群節點沒有處理序監控，所以需要去監控處理序是否崩潰。每個處理序監聽各自的socket，不像 Unicorn 一樣共享 socket 
+	* 它的集群節點沒有處理序監控，所以需要去監控處理序是否崩潰。每個處理序監聽各自的socket，不像 Unicorn 一樣共享 socket
 * Rainbows `multi-threaded`
 
 #Rack
 
-> 處理一個抽象過的HTTP請求和響應。而這個 HTTP 抽象層就稱之為Rack。  
+> 處理一個抽象過的HTTP請求和響應。而這個 HTTP 抽象層就稱之為Rack。
 
 * 所有的 Ruby app server (ex: Unicorn, puma, Passenger) 都實現了Rack介面, 因此能夠與所有 Ruby web frameworkm，像 Rails，Sinatra 等之間進行切換
 
@@ -122,12 +122,12 @@ Video：
 
 參考文件：
 
-* [How we've made Phusion Passenger 5 (「Raptor」) up to 4x faster than Unicorn, up to 2x faster than Puma, Torquebox](http://www.rubyraptor.org/how-we-made-raptor-up-to-4x-faster-than-unicorn-and-up-to-2x-faster-than-puma-torquebox/)    [(中譯)](http://ohcoder.com/blog/2014/11/11/raptor-part-1/) 
-* [Web server / Application server 傻傻分不清楚 ？](http://michaelhsu.tw/2013/07/04/server/)  
-* [Ruby on Rails 伺服器的選擇](http://blog.chh.tw/posts/ruby-on-rails-server-options/) 
+* [How we've made Phusion Passenger 5 (「Raptor」) up to 4x faster than Unicorn, up to 2x faster than Puma, Torquebox](http://www.rubyraptor.org/how-we-made-raptor-up-to-4x-faster-than-unicorn-and-up-to-2x-faster-than-puma-torquebox/)    [(中譯)](http://ohcoder.com/blog/2014/11/11/raptor-part-1/)
+* [Web server / Application server 傻傻分不清楚 ？](http://michaelhsu.tw/2013/07/04/server/)
+* [Ruby on Rails 伺服器的選擇](http://blog.chh.tw/posts/ruby-on-rails-server-options/)
 * [App server, Web server: What's the difference?](http://www.javaworld.com/article/2077354/learn-java/app-server-web-server-what-s-the-difference.html)
 * [A Web Server vs. An App Server](http://www.justinweiss.com/articles/a-web-server-vs-an-app-server/)
-* [Ruby on Rails Server options [closed]](http://stackoverflow.com/questions/4113299/ruby-on-rails-server-options) [Ruby 伺服器對比](https://ruby-china.org/topics/25276) 
+* [Ruby on Rails Server options [closed]](http://stackoverflow.com/questions/4113299/ruby-on-rails-server-options) [Ruby 伺服器對比](https://ruby-china.org/topics/25276)
 * [Ruby 的多執行緒應用伺服器介紹](https://ruby-china.org/topics/10832)
 * [大戰 Rails Connection Leak](http://blog.mz026.rocks/20160917/rails-connection-leak)
 * [Rails 部署工具，原來是這樣](https://5xruby.tw/posts/rails-deploy)

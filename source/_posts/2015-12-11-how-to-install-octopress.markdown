@@ -3,7 +3,7 @@ layout: post
 title: "用 Octopress + Github Pages 來架設 blog"
 date: 2015-12-11 23:15:37 +0800
 comments: true
-categories: blog
+categories: blog other
 ---
 
 最近想說要開始來寫blog，於是在網路上找了幾個之後，最後決定使用Octopress。

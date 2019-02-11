@@ -3,7 +3,7 @@ layout: post
 title: "Angular 筆記2"
 date: 2016-04-19 22:12:20 +0800
 comments: true
-categories: angular
+categories: javascript angular
 ---
 
 一些 angular 的紀錄!

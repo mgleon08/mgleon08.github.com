@@ -3,7 +3,7 @@ layout: post
 title: "HTTP benchmark 工具 Wrk"
 date: 2018-04-09 17:09:37 +0800
 comments: true
-categories: http
+categories: other
 ---
 
 wrk 可以預先模擬多人來網站時，效能會如何!
@@ -16,7 +16,7 @@ wrk 可以預先模擬多人來網站時，效能會如何!
 	* jmeter
 	* LoadRunner
 * 簡單
-	* wrk	
+	* wrk
 	* ab
 
 那這次主要介紹是 wrk
@@ -30,13 +30,13 @@ brew install wrk
 # Command
 
 ```ruby
-# 跟服務器建立並保持的TCP連接數量 
+# 跟服務器建立並保持的TCP連接數量
 -c, --connections: total number of HTTP connections to keep open with
                    each thread handling N = connections/threads
 # 壓測時間
 -d, --duration:    duration of the test, e.g. 2s, 2m, 2h
 
-# 使用多少個線程進行壓測   
+# 使用多少個線程進行壓測
 -t, --threads:     total number of threads to use
 
 # 指定Lua腳本路徑
@@ -59,7 +59,7 @@ wrk -t12 -c400 -d30s -T30s --latency http://localhost:3000
 # -t12 用 12 個線程
 # -c400 模擬 400 個併發連接
 # -d30s 持續 30 秒
-# -T30s 設定超過 30 秒就算連接超時 
+# -T30s 設定超過 30 秒就算連接超時
 # --latency 響應時間的分佈情況
 ```
 
@@ -108,42 +108,42 @@ wrk.headers["Content-Type"] = "application/x-www-form-urlencoded"
 執行
 
 ```ruby
-wrk -t12 -c100 -d30s -T30s --script=post.lua --latency http://localhost:3000 
+wrk -t12 -c100 -d30s -T30s --script=post.lua --latency http://localhost:3000
 ```
 
 ### wrk 接受的屬性
 
 ```ruby
-local wrk = {  
-   scheme  = "http",  
-   host    = "localhost",  
-   port    = nil,  
-   method  = "GET",  
-   path    = "/",  
-   headers = {},  
-   body    = nil,  
-   thread  = nil,  
-}  
+local wrk = {
+   scheme  = "http",
+   host    = "localhost",
+   port    = nil,
+   method  = "GET",
+   path    = "/",
+   headers = {},
+   body    = nil,
+   thread  = nil,
+}
 ```
 ### wrk 提供的 hook 函數
 
-* setup 函數 
+* setup 函數
 
-這個函數在目標 IP 地址已經解析完, 並且所有 thread 已經生成, 但是還沒有開始時被調用. 每個線程執行一次這個函數. 
-可以通過thread:get(name),  thread:set(name, value)設置線程級別的變量. 
+這個函數在目標 IP 地址已經解析完, 並且所有 thread 已經生成, 但是還沒有開始時被調用. 每個線程執行一次這個函數.
+可以通過thread:get(name),  thread:set(name, value)設置線程級別的變量.
 
-* init 函數 
+* init 函數
 
-每次請求發送之前被調用. 
-可以接受 wrk 命令行的額外參數. 通過 -- 指定. 
+每次請求發送之前被調用.
+可以接受 wrk 命令行的額外參數. 通過 -- 指定.
 
-* delay函數 
+* delay函數
 
-這個函數返回一個數值, 在這次請求執行完以後延遲多長時間執行下一個請求. 可以對應 thinking time 的場景. 
+這個函數返回一個數值, 在這次請求執行完以後延遲多長時間執行下一個請求. 可以對應 thinking time 的場景.
 
-* request函數 
+* request函數
 
-通過這個函數可以每次請求之前修改本次請求的屬性. 返回一個字符串. 這個函數要慎用, 會影響測試端性能. 
+通過這個函數可以每次請求之前修改本次請求的屬性. 返回一個字符串. 這個函數要慎用, 會影響測試端性能.
 
 * response
 

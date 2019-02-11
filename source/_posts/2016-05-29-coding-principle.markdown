@@ -3,7 +3,7 @@ layout: post
 title: "Coding Principle 程式設計原則 SOLID"
 date: 2016-05-29 20:27:06 +0800
 comments: true
-categories: clean_code
+categories: other
 ---
 
 在 Coding 的世界中，有許多重要的 Principle 值得我們去遵循

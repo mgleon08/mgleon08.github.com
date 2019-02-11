@@ -3,7 +3,7 @@ layout: post
 title: "Entity Relationship Diagram (ERD)"
 date: 2018-11-07 15:14:59 +0800
 comments: true
-categories: diagram
+categories: diagram other
 ---
 
 在工作上時常用到 Entity Relationship Diagram (ERD) 來規劃 DB schema 的關聯，透過這個可以在規劃專案時很清楚知道整個架構，並且讓執行的人也可以很清楚要怎麼實作。
