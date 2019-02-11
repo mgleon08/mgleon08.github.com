@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - &: with to_proc"
+title: "Ruby - &: with to_proc"
 date: 2019-02-04 17:58:51 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->

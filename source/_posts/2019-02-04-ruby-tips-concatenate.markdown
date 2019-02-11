@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips -  + vs concat vs <<"
+title: "Ruby -  + vs concat vs <<"
 date: 2019-02-04 17:14:36 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->

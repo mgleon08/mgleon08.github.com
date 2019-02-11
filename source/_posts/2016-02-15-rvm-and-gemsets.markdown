@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "RVM and Gemsets ruby版本控制"
+title: "Ruby - RVM and Gemsets 版本控制"
 date: 2016-02-15 21:12:09 +0800
 comments: true
-categories: ruby
+categories: ruby version
 ---
 好用的工具，可以輕鬆的切換 ruby 版本!
 

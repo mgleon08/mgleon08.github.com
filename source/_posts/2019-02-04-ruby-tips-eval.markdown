@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - instance_eval vs class_eval vs module_eval"
+title: "Ruby - instance_eval vs class_eval vs module_eval"
 date: 2019-02-04 17:54:57 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -13,16 +13,16 @@ categories: ruby ruby_tips
 可以定義一個實例方法
 
 > 官方解釋
-> 
+>
 > Evaluates a string containing Ruby source code, or the given block, within the context of the receiver (obj). In order to set the context, the variable self is set to obj while the code is executing, giving the code access to obj's instance variables and private methods
 
 
-# class_eval 
+# class_eval
 
 定義一個類別方法
 
 > 官方解釋
-> 
+>
 >valuates the string or block in the context of mod, except that when a block is given, constant/class variable lookup is not affected. This can be used to add methods to a class. module_eval returns the result of evaluating its argument. The optional filename and lineno parameters set the text for error messages.
 
 # module_eval
@@ -30,7 +30,7 @@ categories: ruby ruby_tips
 class_eval 的 alias
 
 > class_eval is used for adding methods and attributes to an existing class.
-> 
+>
 > module_eval is used for adding methods and attributes to an existing modules.
 
 
@@ -39,7 +39,7 @@ class KlassWithSecret
   def initialize
     @secret = 99
   end
-  
+
   private
   def the_secret
     "Ssssh! The secret is #{@secret}."

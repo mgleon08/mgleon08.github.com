@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - ||= (or-equals) mean?"
+title: "Ruby - ||= (or-equals) mean?"
 date: 2019-02-04 17:28:16 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -15,15 +15,15 @@ categories: ruby ruby_tips
 a || a = b
 a ? a : a = b
 
-if a then a 
-else a = b 
+if a then a
+else a = b
 end
 
 # 以下相等
 a = a || b
 a = a ? a : b
-if a then a = a 
-else a = b 
+if a then a = a
+else a = b
 end
 ```
 

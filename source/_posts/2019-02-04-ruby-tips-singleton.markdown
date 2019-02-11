@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - singleton method vs singleton class vs singleton module"
+title: "Ruby - singleton method vs singleton class vs singleton module"
 date: 2019-02-04 18:15:16 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -57,7 +57,7 @@ leon.singleton_methods # => []
 ```ruby
 def leon.hello
   'hello'
-end 
+end
 
 class << leon
   def foo
@@ -86,7 +86,7 @@ leon.instance_hi # => "instance_hi"
 
 def leon.instance_hi
   'singleton_hi'
-end 
+end
 
 leon.instance_hi # => "singleton_hi"
 ```
@@ -138,7 +138,7 @@ User.singleton_class.singleton_class?
 # <span id="module"> singleton module </span>
 先來說一下 `singleton pattern`
 
-在 `class` 當中，可以一直建立 `instance (object_id 都不同)`，每個 `instance` 都會佔用 memory，但有時候只需要建立一個，但為了避免建立多個，而造成 memory 的浪費，於是就有了 `singleton module` 
+在 `class` 當中，可以一直建立 `instance (object_id 都不同)`，每個 `instance` 都會佔用 memory，但有時候只需要建立一個，但為了避免建立多個，而造成 memory 的浪費，於是就有了 `singleton module`
 
 在 ruby 當中不是 core library 所以必須引入 `singleton`，可以發現當 `include Singleton` 後 `User.new` 就不能使用了
 
@@ -147,7 +147,7 @@ require 'singleton'
 
 class User
   include Singleton
-  
+
   attr_accessor :name, :phone
 end
 
@@ -167,7 +167,7 @@ User.instance.object_id
 ```
 
 原本的 `new` 則是變成了 `private method`，而不是不見了
- 
+
 ```ruby
  User.send(:new).object_id
 # => 70139173678780
@@ -186,7 +186,7 @@ require 'singleton'
 
 class User
   include Singleton
-  
+
   attr_accessor :name, :phone
 end
 
@@ -206,7 +206,7 @@ require 'singleton'
 
 class User
   include Singleton
-  
+
   attr_accessor :name, :phone
 end
 

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - hash with default values"
+title: "Ruby - hash with default values"
 date: 2019-02-04 18:12:51 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -30,7 +30,7 @@ hash[:a] # => "hi"
 但有時候會用到比較複雜的，`key -> array`
 
 會發現如果用 `Hash.new([])` 實際上會回傳同樣的 `object_id`，因此每個 `key` 操作的 `object` 都會是同一個
- 
+
 ```ruby
 hash = Hash.new([]) # => {}
 hash[:a] # => []
@@ -43,7 +43,7 @@ hash[:b] # => [1, 2]
 
 # 連 object_id 也是一樣
 hash[:b].object_id == hash[:b].object_id # => true
- 
+
 # 最後 hash 其實都是空的
 hash # => {}
 
@@ -89,7 +89,7 @@ hash.default_proc = Proc.new{ |h, k| h[k] = [] }
 也可以透過遞迴 `default_proc` 建立一個動態深度的 hash
 
 ```ruby
-hash = Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) } 
+hash = Hash.new { |hash, key| hash[key] = Hash.new(&hash.default_proc) }
 # => {}
 
 hash[:a][:b][:c][:d] = 'hi' # => "hi"

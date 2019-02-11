@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - alias vs alias method "
+title: "Ruby - alias vs alias method "
 date: 2019-02-04 17:38:58 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -47,7 +47,7 @@ class Animal
   end
 
   def self.add_hi
-    alias :hi :say 
+    alias :hi :say
     # scope 只在 Animal，因此會是 hi
   end
 end

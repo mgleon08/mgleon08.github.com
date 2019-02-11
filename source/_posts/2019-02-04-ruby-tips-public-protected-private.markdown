@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - public protected private"
+title: "Ruby - public protected private"
 date: 2019-02-04 17:12:51 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -51,7 +51,7 @@ class User
 
   # 另一種指定方式
   # protected :protected
-  # private :private  
+  # private :private
 end
 
 user = User.new     # => #<User:0x007fa756804198>
@@ -87,12 +87,12 @@ A.b
 ```ruby
 class A
   class << self
-    private    
+    private
     def b
       'hi'
-    end    
+    end
   end
-  
+
   def self.c
     hello
   end

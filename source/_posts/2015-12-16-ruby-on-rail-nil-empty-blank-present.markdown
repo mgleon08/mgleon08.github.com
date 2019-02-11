@@ -13,7 +13,8 @@ categories: ruby rails api
 
 <!-- more -->
 
-#.nil?
+# .nil?
+
 ```ruby
 nil.nil?       #true
 [].nil?        #false
@@ -26,7 +27,8 @@ nil.nil?       #true
 * ruby method
 * 任何物件都是false，只有nil是true
 
-#.empty? & .any?
+# .empty? & .any?
+
 ```ruby
 nil.empty?     #NoMethodError: undefined method `empty?' for nil:NilClass
 [].empty?      #true
@@ -52,7 +54,7 @@ nil.any?       #NoMethodError: undefined method `any?' for nil:NilClass
 ```
 但是要注意，String 並沒有提供 `.any?` 這個 method
 
-#.blank? & .present?
+# .blank? & .present?
 
 ```ruby
 nil.blank?     #true
@@ -105,7 +107,7 @@ object.present? ? object : nil
 
 * [presence](https://apidock.com/rails/Object/presence)
 
-#.persisted? & .new_record?
+# .persisted? & .new_record?
 
 最後來介紹一下，如何判斷 Object 是否已經存在資料庫的 method。
 
@@ -119,7 +121,7 @@ a.persisted?   #true
 a.new_record?  #false
 ```
 
-#如何看物件有哪些方法？或是上一層是誰？
+# 如何看物件有哪些方法？或是上一層是誰？
 
 ```ruby
 Object.superclass       ＃查上一層是誰?

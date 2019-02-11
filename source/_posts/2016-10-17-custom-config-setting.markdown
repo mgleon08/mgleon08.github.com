@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - Custom config setting"
+title: "Ruby - 理解 Custom config setting"
 date: 2016-10-17 17:36:54 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 經常看到 rails 中有很多 config 的設定，像是 rspec 等等，會用一個 black 包起來就可以做設定了，那內部實作是如何?
 

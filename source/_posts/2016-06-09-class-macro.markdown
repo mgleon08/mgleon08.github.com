@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - Class Macro (Ruby’s declarative style)"
+title: "Ruby - Class Macro (Ruby’s declarative style)"
 date: 2016-06-09 20:14:09 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 Class Macro 就是在 rails 的 ActiveRecord 中，經常會看到，`validates` `belongs_to` `hsa_manay` 等等的宣告
@@ -25,7 +25,7 @@ module ActiveRecord
   class Base
     def self.has_many(name)
       puts "#{self} has many #{name}"
-	
+
       #定義 Dynamic method
       define_method(name) do
         puts "Select * From #{name} Where.."
@@ -60,7 +60,7 @@ project.tasks
 #=>Return tasks
 ```
 
-之前有寫過 
+之前有寫過
 [Dynamic Classes & Methods](http://mgleon08.github.io/blog/2016/04/19/dynamic-classes-and-methods/)
 
 另一個範例，可以動態的將取出來的值做改變

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Garbage Collection (GC)"
+title: "Ruby - Garbage Collection (GC)"
 date: 2016-06-10 12:18:42 +0800
 comments: true
 categories: ruby

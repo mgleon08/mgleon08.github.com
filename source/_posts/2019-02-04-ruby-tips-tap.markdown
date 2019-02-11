@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - Dry your code with tap"
+title: "Ruby - Dry your code with tap"
 date: 2019-02-04 17:46:18 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -29,7 +29,7 @@ end
   .to_a                .tap {|x| puts "array: #{x.inspect}"}
   .select {|x| x%2==0} .tap {|x| puts "evens: #{x.inspect}"}
   .map { |x| x*x }     .tap {|x| puts "squares: #{x.inspect}"}
-  
+
 # original: 1..10
 # array: [1, 2, 3, 4, 5, 6, 7, 8, 9, 10]
 # evens: [2, 4, 6, 8, 10]
@@ -60,7 +60,7 @@ class Dog
   def self.create_instance
     Dog.new.tap do |dog|
       dog.name = "hey"
-    end 
+    end
   end
 end
 

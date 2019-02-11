@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - precedence with block( {} vs do..end ) and operator( && vs and, || vs or )"
+title: "Ruby - precedence with block( {} vs do..end ) and operator( && vs and, || vs or )"
 date: 2019-02-04 17:45:07 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -48,7 +48,7 @@ y # => true
 y = false or true  # 相當於 (y = false) and true
 # => true
 y # => false
-``` 
+```
 
 參考文件
 

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - A::B vs module A; class B"
+title: "Ruby - A::B vs module A; class B"
 date: 2019-02-04 18:18:05 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->

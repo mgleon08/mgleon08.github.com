@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - %Q, %q, %W, %w, %r, %s, %I, %i"
+title: "Ruby - %Q, %q, %W, %w, %r, %s, %I, %i"
 date: 2019-02-04 17:51:40 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->

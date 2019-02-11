@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - multiline"
+title: "Ruby - multiline"
 date: 2019-02-04 17:43:18 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->

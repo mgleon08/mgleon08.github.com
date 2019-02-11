@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - 用 ruby 來 Calling shell commands"
+title: "Ruby - 用 ruby 來 Calling shell commands"
 date: 2016-02-07 14:31:31 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 可以直接透過 ruby 來執行 commands 的指令。
@@ -21,11 +21,11 @@ value.class
 #=> String 回傳結果
 ```
 
-* `%x(cmd)`  
+* `%x(cmd)`
 
 > 跟上面的 ` 是類似
 
-Returns the result of the shell command, just like the backticks.  
+Returns the result of the shell command, just like the backticks.
 會以字串形式回傳結果
 
 ```ruby
@@ -37,7 +37,7 @@ value = %x[ #{cmd} ]
 
 > 指令執行結果成功與否，回傳的是布林值
 
-Return: true if the command was found and ran successfully, false otherwise  
+Return: true if the command was found and ran successfully, false otherwise
 
 ```ruby
 wasGood = system("echo 'hi'")

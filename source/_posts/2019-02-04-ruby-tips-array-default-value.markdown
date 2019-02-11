@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - array with default value"
+title: "Ruby - array with default value"
 date: 2019-02-04 18:10:41 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->

@@ -1,11 +1,11 @@
 ---
 layout: post
-title: "Ruby Tips - Range"
+title: "Ruby - Range"
 date: 2016-06-09 20:13:54 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
-經常會使用 range 去判斷某個值，是否在某個區間  
+經常會使用 range 去判斷某個值，是否在某個區間
 ruby 也提供很多好用的方法去判斷，cover?, include? 等等
 
 <!-- more -->
@@ -50,17 +50,17 @@ r.include?(0)     #=> false
 r.cover?(1)       #=> true
 r.cover?(0)       #=> false
 
-("a".."z").include?("ab")     # => false 
-("a".."z").cover?("ab")       # => true 
+("a".."z").include?("ab")     # => false
+("a".."z").cover?("ab")       # => true
 ```
 主要差異是
-  
+
 * include? 會將所有值一一拿出來做比對，因此效率較差
 * cover?   只會取出開頭和結尾，去比對，值 > 開頭 && 值 <= 結尾，效能比較好
 
-官方文件：  
+官方文件：
 [ruby-doc Range](http://ruby-doc.org/core-1.9.3/Range.html)
 
-參考文件：  
-[What is the difference between Range#include? and Range#cover? ?](http://stackoverflow.com/questions/21608935/what-is-the-difference-between-rangeinclude-and-rangecover)    
+參考文件：
+[What is the difference between Range#include? and Range#cover? ?](http://stackoverflow.com/questions/21608935/what-is-the-difference-between-rangeinclude-and-rangecover)
 [Apprentice Blog of the Week: Setting Date Ranges in Ruby](https://blog.8thlight.com/makis-otman/2014/09/03/setting-date-ranges-in-ruby.html)

@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - Default Args || vs fetch vs merge"
+title: "Ruby - Default Args || vs fetch vs merge"
 date: 2016-05-29 20:22:19 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 很常時候，需要給變數一個預設值，因此有以下方法，都可以設定預設值
@@ -92,6 +92,6 @@ default.merge(args)
 #=> {"a"=>8, "b"=>false, "c"=>nil}
 ```
 
-官方文件：  
-[fetch](http://apidock.com/ruby/Hash/fetch)  
+官方文件：
+[fetch](http://apidock.com/ruby/Hash/fetch)
 [merge](http://apidock.com/ruby/Hash/merge)

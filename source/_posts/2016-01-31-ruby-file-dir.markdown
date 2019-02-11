@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - File ＆ Dir 檔案操作"
+title: "Ruby - File ＆ Dir 檔案操作"
 date: 2016-01-31 19:07:00 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 用 ruby 來操作 file ＆ Dir 檔案。
 
@@ -20,7 +20,7 @@ categories: ruby ruby_tips
 # a+ 讀取 / 寫入。同 a 功能
 
 #在每個模式後面加上"b"
-#例如 "rb" 或 "rb+"，就可以開啟「二進位」模式 
+#例如 "rb" 或 "rb+"，就可以開啟「二進位」模式
 
 io = File.new("ruby.rb", "w")
 io = File.open("/home/work/ruby.rb")
@@ -198,13 +198,13 @@ File.open(file)
 * [檔案權限](http://s2.naes.tn.edu.tw/~kv/file.htm)
 * [第五章、Linux 的檔案權限與目錄配置](http://linux.vbird.org/linux_basic/0210filepermission.php)
 
-官方文件：  
-[Dir](https://ruby-doc.org/core-2.2.0/Dir.html)  
-[File](http://ruby-doc.org/core-2.3.0/File.html)  
+官方文件：
+[Dir](https://ruby-doc.org/core-2.2.0/Dir.html)
+[File](http://ruby-doc.org/core-2.3.0/File.html)
 [FileUtils](http://ruby-doc.org/stdlib-2.2.2/libdoc/fileutils/rdoc/FileUtils.html#method-c-cd)
 
-參考文件：  
-[Input & output in Ruby](http://zetcode.com/lang/rubytutorial/io/)  
-[Ruby#open 知多少？](https://blog.alphacamp.co/2016/06/30/ruby-open/)   
-[用Ruby Scripting維護系統](http://motion-express.com/trainings/scripting-in-ruby/screencasts/manipulating-files)  
-  
+參考文件：
+[Input & output in Ruby](http://zetcode.com/lang/rubytutorial/io/)
+[Ruby#open 知多少？](https://blog.alphacamp.co/2016/06/30/ruby-open/)
+[用Ruby Scripting維護系統](http://motion-express.com/trainings/scripting-in-ruby/screencasts/manipulating-files)
+

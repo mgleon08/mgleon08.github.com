@@ -1,20 +1,20 @@
 ---
 layout: post
-title: "Ruby Tips - 引數傳遞 extract_options"
+title: "Ruby - 引數傳遞 extract_options"
 date: 2016-03-26 09:28:59 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
-經常會看到 `argument` 和 `parameter` 兩個很類似，卻代表的不同意義。  
+經常會看到 `argument` 和 `parameter` 兩個很類似，卻代表的不同意義。
 另外也有許多符號 * ** & 可以使用。
 
 <!-- more -->
 
 # 介紹
-* argument(actual argument 實際的值) 引數  
+* argument(actual argument 實際的值) 引數
 「呼叫端」傳給呼叫對象的「值」
 
-* parameter(formal parameter 代表參數的符號) = 參數  
+* parameter(formal parameter 代表參數的符號) = 參數
 「被呼叫端」用來接收引數的「變數」
 
 # 範例
@@ -145,7 +145,7 @@ sample({'j':4, 'q':5, 'k':6}, 3, 4) # 放在前面加上 {}
 
 ```ruby
 # 'b':1 傳入的值必須 key-value 並且要對到 key
-def sample(a, b:2, c:3)  
+def sample(a, b:2, c:3)
   puts [a, b, c].inspect
 end
 sample('a':11, 'v':22, 'c':33, 's':44)
@@ -160,7 +160,7 @@ def sample(a, b, **c) # sample(a, b, c)
   puts [a, b, c].inspect
 end
 
-sample(4, 'a':1) 
+sample(4, 'a':1)
 #=> [4, {:a=>1}, {}]
 
 sample(4, 5, 'a':1, 'b':2, 'c':3)
@@ -245,12 +245,12 @@ puts array.inspect
 # 綜合使用
 
 ```ruby
-def sample(a, *b, **c, &d)  
-  puts "a=#{a}, b=#{b}, c=#{c}"  
-  d.call(100)  
-end  
-sample(1,2,3,x:4,y:5) { |x| puts x }  
-  
+def sample(a, *b, **c, &d)
+  puts "a=#{a}, b=#{b}, c=#{c}"
+  d.call(100)
+end
+sample(1,2,3,x:4,y:5) { |x| puts x }
+
 #=> a=1, b=[2, 3], c={:x=>4, :y=>5}
 #=> 100
 ```

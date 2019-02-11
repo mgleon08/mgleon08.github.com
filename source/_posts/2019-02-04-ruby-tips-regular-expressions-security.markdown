@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - Regular Expressions Security"
+title: "Ruby - Regular Expressions Security"
 date: 2019-02-04 18:10:36 +0800
 comments: true
-categories: regular ruby ruby_tips
+categories: regular ruby
 ---
 
 <!-- more -->

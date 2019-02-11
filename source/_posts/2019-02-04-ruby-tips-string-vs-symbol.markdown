@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - string vs symbol"
+title: "Ruby - string vs symbol"
 date: 2019-02-04 17:27:08 +0800
 comments: true
-categories: ruby ruby_tips 
+categories: ruby
 ---
 
 <!-- more -->

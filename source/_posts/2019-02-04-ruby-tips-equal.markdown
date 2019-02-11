@@ -1,18 +1,18 @@
 ---
 layout: post
-title: "Ruby Tips - == vs === vs eql? vs equal?"
+title: "Ruby - == vs === vs eql? vs equal?"
 date: 2019-02-04 17:25:33 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
 
 * `==`: 比較兩邊的 `value`
-* `eql?`: 比較兩邊的 `value` + `class type` 
+* `eql?`: 比較兩邊的 `value` + `class type`
 * `equal?`: 比較兩邊的 `object_id`
 * `===`: case equality ，比較像是 `A 描述了一個集合，B 屬於 A 嗎?`
- 
+
 ```ruby
 a, b = 1, 1
 a == b     # => true

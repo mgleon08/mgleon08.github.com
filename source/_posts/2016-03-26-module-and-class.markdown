@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "Ruby Tips - Module vs Class"
+title: "Ruby - Module vs Class"
 date: 2016-03-26 09:34:18 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
-在 ruby 中經常會使用到 `Class`，也常常看到 `Module` 
+在 ruby 中經常會使用到 `Class`，也常常看到 `Module`
 那到底什麼時候要用哪個?
 
 <!-- more -->
@@ -23,7 +23,7 @@ categories: ruby ruby_tips
 * 可以 instantiated
 * 無法被 include
 
-簡單的來說，module 有點像是沒有 new 的 Class  
+簡單的來說，module 有點像是沒有 new 的 Class
 
 並且可以用 `include` & `extend` mixin 到 Class 裡面，變成 Class 的 `class method` or `instance method`
 
@@ -33,7 +33,7 @@ categories: ruby ruby_tips
 
 # 維護
 
-用 Class 的話，勢必一定要先 new 出來，並且預設會執行 `initialize` 這個method  
+用 Class 的話，勢必一定要先 new 出來，並且預設會執行 `initialize` 這個method
 就可以預先設定好一些參數，看起來就會比較簡潔
 
 ```ruby
@@ -45,7 +45,7 @@ class Pepole
   def hi
     "hi, #{@name}"
   end
-  
+
   def yo
     "yo, #{@name}"
   end
@@ -56,7 +56,7 @@ p.hi #=> 'hi leon'
 p.yo #=> 'yo leon'
 ```
 
-用 Module 的話，就必須每次呼叫 `hi` `yo` method 時都要在傳入參數進去。  
+用 Module 的話，就必須每次呼叫 `hi` `yo` method 時都要在傳入參數進去。
 
 ```ruby
 module Man
@@ -79,7 +79,7 @@ Man.yo #=> 'yo Man'
 
 另外是當 Class include 很多 module 時，都會變成 Class 的 `class method` or `instance method`，這時就很難去分辨是從哪個 module 來的 method。
 
-因此使用上，看習慣，可維護性等等，去判斷要用 module or class  
+因此使用上，看習慣，可維護性等等，去判斷要用 module or class
 再細分要放在 `cocern` or `service object` or `lib`
 
 官方文件：

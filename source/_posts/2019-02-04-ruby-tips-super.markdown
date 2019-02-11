@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - super vs super()"
+title: "Ruby - super vs super()"
 date: 2019-02-04 18:19:10 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -26,7 +26,7 @@ end
 class Dog < Animal
   def say(text)
     super
-    
+
     puts text
   end
 end
@@ -49,7 +49,7 @@ end
 class Dog < Animal
   def say(text)
     super()
-    
+
     text
   end
 end

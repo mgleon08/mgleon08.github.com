@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - proc vs lambda"
+title: "Ruby - proc vs lambda"
 date: 2019-02-04 17:17:43 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->

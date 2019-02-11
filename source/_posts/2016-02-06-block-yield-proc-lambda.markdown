@@ -1,12 +1,12 @@
 ---
 layout: post
-title: "Ruby Tips - Block & Yield & Proc & Lambda & method"
+title: "Ruby - Block & Yield & Proc & Lambda & method"
 date: 2016-02-06 10:37:37 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
-在學 ruby 時，經常會搞不清楚這幾個，因為都非常相像!  
+在學 ruby 時，經常會搞不清楚這幾個，因為都非常相像!
 
 <!-- more -->
 
@@ -27,7 +27,7 @@ end
 # => 1,2,3
 ```
 
-基本上兩個是等價的，但是慣例上，一行會用 `{}` ，多行則是用 `do..end`  
+基本上兩個是等價的，但是慣例上，一行會用 `{}` ，多行則是用 `do..end`
 `block` 無法單獨存在，必須放在 `method` 後面
 
 另外 `block` 是可以傳遞的，用 `&` 表示
@@ -35,13 +35,13 @@ end
 
 #yield
 
-`yield` 其實就是調用 `block` 的一種方式  
+`yield` 其實就是調用 `block` 的一種方式
 
 ```ruby
 class Array
   def iterate!
     self.each_with_index do |n, i| #[1, 2, 3, 4].each_with_index
-      self[i] = yield(n)           #等於於 self[i] = n ** 2 
+      self[i] = yield(n)           #等於於 self[i] = n ** 2
     end
   end
 end
@@ -151,7 +151,7 @@ puts array.inspect
 
 [Ruby 魔法之 Symbol#to_proc() 方法](https://www.jianshu.com/p/4fa98d829fc9)
 
-& 實際上是會觸發物件的 `to_proc` 方法，並嘗試指定給 & 變數  
+& 實際上是會觸發物件的 `to_proc` 方法，並嘗試指定給 & 變數
 因此可以在物件上定義 `to_proc`，然後使用 & 來觸發
 
 ```ruby
@@ -186,17 +186,17 @@ symbol 都有 `to_proc` 這個 method 因此可以改寫成
 
 ###proc into block
 
-Calling a method with & in front of a parameter  
+Calling a method with & in front of a parameter
 
 ```ruby
-tweets.each(&printer) 
+tweets.each(&printer)
 ```
 
-turns a proc into block 
+turns a proc into block
 
 ###block into a proc
 
-Defining a method with & in front of a parameter  
+Defining a method with & in front of a parameter
 
 ```ruby
 def each(&block)
@@ -210,7 +210,7 @@ class Timeline
   attr_accessor :tweets
   def each(&block) #block into a proc
     tweets.each(&block) #proc into block
-  end 
+  end
 end
 ```
 
@@ -289,7 +289,7 @@ pro(123)
 
 #lambda
 
-lambda 與 method 用法相同，概念是一樣的  
+lambda 與 method 用法相同，概念是一樣的
 不同的是 `Method` 是有名字的method，而 `lambda` 是匿名 method
 
 ```ruby
@@ -315,7 +315,7 @@ lam.call(123)
 #=> nil
 ```
 
-lambda 跟 proc 非常類似，主要有兩個差異  
+lambda 跟 proc 非常類似，主要有兩個差異
 
 ###1.lambda 會檢查參數的個數
 
@@ -334,7 +334,7 @@ args(lambda{|a, b, c| puts "Give me a #{a} and a #{b} and a #{c.class}"})
 
 ###2.lambda 的return 會繼續執行，proc 則會直接終止
 
-`lambda` 比較像是一個 method 的 return，會 return 值回去，並且繼續執行   
+`lambda` 比較像是一個 method 的 return，會 return 值回去，並且繼續執行
 `proc` 則是比較像是 一整個 method 的 return，return 就結束
 
 ```ruby
@@ -359,7 +359,7 @@ puts lambda_return
 
 ###使用時機
 
-`proc` 若作用域是在外面，無法將 return 傳進去，必須用 `lambda`  
+`proc` 若作用域是在外面，無法將 return 傳進去，必須用 `lambda`
 在某些情況下，使用 `lambda` 會比 `proc` 還簡約。
 
 ```ruby
@@ -504,11 +504,11 @@ l = ->(v) { puts v }
 l.call(1)
 ```
 
-參考文件：  
-[理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。](http://rubyer.me/blog/917/)  
-[聊聊 Ruby 中的 block, proc 和 lambda](https://ruby-china.org/topics/10414)  
+參考文件：
+[理解Ruby的4种闭包：blocks, Procs, lambdas 和 Methods。](http://rubyer.me/blog/917/)
+[聊聊 Ruby 中的 block, proc 和 lambda](https://ruby-china.org/topics/10414)
 [迭代器與程式區塊](http://openhome.cc/Gossip/Ruby/IteratorBlock.html)
-[程式區塊與 Proc](http://openhome.cc/Gossip/Ruby/Proc.html)  
-[使用 lambda](http://openhome.cc/Gossip/Ruby/Lamdba.html)  
-[取得 Method](http://openhome.cc/Gossip/Ruby/Method.html)  
+[程式區塊與 Proc](http://openhome.cc/Gossip/Ruby/Proc.html)
+[使用 lambda](http://openhome.cc/Gossip/Ruby/Lamdba.html)
+[取得 Method](http://openhome.cc/Gossip/Ruby/Method.html)
 [Ruby的block, lambda, Proc與函式物件](http://chuyi.inow.tw/index.php/ruby%E7%9A%84block-lambda-proc%E8%88%87%E5%87%BD%E5%BC%8F%E7%89%A9%E4%BB%B6/)

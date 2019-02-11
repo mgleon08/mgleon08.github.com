@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - Method Missing"
+title: "Ruby - Method Missing"
 date: 2016-04-19 22:18:09 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 當 ruby 找不到 method 就會 call 這個 method
@@ -32,14 +32,14 @@ class Post
   def initialize(user)
     @user = user
   end
-  
+
   def method_missing(method_name, *args)
     if DELEGATED_METHODS.include?(method_name)
       @user.send(method_name, *args)
     else
       super #沒有在設定的 DELEGATED_METHODS 裡面，就呼叫 default method_missing handling raises a NoMethodError
     end
-  end 
+  end
 end
 ```
 
@@ -56,7 +56,7 @@ class Post
     if match
       @text << " #" + match[1]
     else
-      super 
+      super
     end
   end
 ￼end
@@ -72,7 +72,7 @@ puts post
 ###respond_to?
 
 ```ruby
-post = Post.new 
+post = Post.new
 post.respond_to?(:to_s) # => true
 post.hash_ruby #再 method_missing 有定義所以呼叫得到
 post.respond_to?(:hash_ruby) # => false #但在 respond_to 卻回傳 false
@@ -84,7 +84,7 @@ post.respond_to?(:hash_ruby) # => false #但在 respond_to 卻回傳 false
 class Post
   def respond_to?(method_name)
     method_name =~ /^hash_\w+/ || super
-  end 
+  end
 end
 ```
 
@@ -94,9 +94,9 @@ end
 
 ```ruby
 class Post
-  def respond_to_missing?(method_name) 
+  def respond_to_missing?(method_name)
     method_name =~ /^hash_\w+/ ||super
-  end 
+  end
 end
 ```
 
@@ -117,7 +117,7 @@ class Post
         define_method(method_name) do
           @text << " #" + match[1]
         end
-      end 
+      end
       send(method_name) #並且呼叫 method
     else
       super #沒有就 raises a NoMethodError
@@ -125,7 +125,7 @@ class Post
   end
 end
 
-#當 call post.hash_codeschool 就會定義出下面的 method 
+#當 call post.hash_codeschool 就會定義出下面的 method
 
 def hash_codeschool
   @text << " #" + "codeschool"
@@ -133,15 +133,15 @@ end
 ```
 
 #const_missing
-另一個跟 method_missing 一樣的，主要是常數找不到時會 call  
+另一個跟 method_missing 一樣的，主要是常數找不到時會 call
 [const_missing](http://apidock.com/ruby/Module/const_missing)
 
-官方文件：  
-[method_missing](http://apidock.com/ruby/BasicObject/method_missing)  
-[MatchData](http://ruby-doc.org/core-2.2.0/MatchData.html)  
+官方文件：
+[method_missing](http://apidock.com/ruby/BasicObject/method_missing)
+[MatchData](http://ruby-doc.org/core-2.2.0/MatchData.html)
 [Regexp](http://ruby-doc.org/core-2.1.1/Regexp.html)
 
-參考文件：    
-[如何設計出漂亮的 Ruby APIs](https://ihower.tw/blog/archives/4797)  
-[method_missing，一個Ruby 程序員的夢中情人](https://ruby-china.org/topics/3434)  
+參考文件：
+[如何設計出漂亮的 Ruby APIs](https://ihower.tw/blog/archives/4797)
+[method_missing，一個Ruby 程序員的夢中情人](https://ruby-china.org/topics/3434)
 [respond_to? vs. respond_to_missing?](http://stackoverflow.com/questions/13793060/respond-to-vs-respond-to-missing)

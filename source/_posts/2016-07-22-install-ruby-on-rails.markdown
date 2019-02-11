@@ -3,7 +3,7 @@ layout: post
 title: "Ruby on Rails 裝機趴 (only Mac)"
 date: 2016-07-22 19:58:37 +0800
 comments: true
-categories: ruby rails install
+categories: ruby rails other
 ---
 
 2018-06-30 update!

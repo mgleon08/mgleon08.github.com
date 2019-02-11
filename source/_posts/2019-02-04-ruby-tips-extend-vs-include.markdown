@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - extend vs include (Mixin) "
+title: "Ruby - extend vs include (Mixin) "
 date: 2019-02-04 17:23:28 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->

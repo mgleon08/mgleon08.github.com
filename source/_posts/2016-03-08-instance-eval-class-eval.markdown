@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - 用 instance_eval & class_eval 自己加 method!"
+title: "Ruby - 用 instance_eval & class_eval 自己加 method!"
 date: 2016-03-08 22:46:28 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 有時候會發現有些 object，沒有設定 setter & getter ，剛好又需要用到，這時就可以派上用場拉。
@@ -43,7 +43,7 @@ a.instance_eval { @num }
 #=> 1
 ```
 
-也可以直接定義 method，這樣就可以一直重複使用  
+也可以直接定義 method，這樣就可以一直重複使用
 
 ```ruby
 a.instance_eval do
@@ -58,7 +58,7 @@ b.num
 #NoMethodError: undefined method `num' for #<MyClass:0x007fba5c08e5f8 @num="2">
 ```
 
-上述指定義了 a 的 `instance method` 所以 b 會錯誤。  
+上述指定義了 a 的 `instance method` 所以 b 會錯誤。
 因此可以直接定義在 `class instance`
 
 
@@ -115,8 +115,12 @@ class Tweet
     self
   end
 
-  def mention(*users) 
-    users.each do |user|      @tweet << "@" + user    end    self  end
+  def mention(*users)
+    users.each do |user|
+      @tweet << "@" + user
+    end
+    self
+  end
 
   def text(str)
     @tweet << str
@@ -126,7 +130,8 @@ end
 
 def tweet_as(user, text = nil, &block)
   tweet = Tweet.new(user)
-  tweet.text(text) if text  tweet.instance_eval(&block) if block_given?
+  tweet.text(text) if text
+  tweet.instance_eval(&block) if block_given?
   tweet.submit_to_twitter
 end
 
@@ -137,8 +142,8 @@ tweet_as 'markkendall' do
 end
 ```
 
-參考文件：  
+參考文件：
 
-* [Understanding class_eval and instance_eval](http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php)  
+* [Understanding class_eval and instance_eval](http://web.stanford.edu/~ouster/cgi-bin/cs142-winter15/classEval.php)
 * [eval](http://openhome.cc/Gossip/Ruby/Eval.html)
 * [instance_eval 與 class_eval 的區別](https://ruby-china.org/topics/2442)

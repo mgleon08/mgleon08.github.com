@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - OptionParser"
+title: "Ruby - OptionParser"
 date: 2016-08-30 10:30:52 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 ruby 裡內建的強大工具，可以解析命令行參數
@@ -17,7 +17,7 @@ ruby 裡內建的強大工具，可以解析命令行參數
 * Option - 主要功能是用於調整命令行工具的行為
 	* Option的表現通常有兩種形式
 		* short opt​​ion
-		* long option 	
+		* long option
 	* Option的類型有兩種
 		* `switch` 不帶 argument
 		* `flag` 帶有 argument
@@ -104,21 +104,21 @@ puts "Your third variable is: #{third}"
 # 的參數依次賦予左邊的變數名稱」。
 ```
 
-官方文件：  
+官方文件：
 
 * [OptionParser](http://ruby-doc.org/stdlib-2.3.1/libdoc/optparse/rdoc/OptionParser.html)
 * [OptionParser doc](https://docs.ruby-lang.org/en/2.1.0/OptionParser.html)
 
-參考文件：  
+參考文件：
 
-* [用 OptionParser 构建 Command Line 工具](https://ruby-china.org/wiki/building-a-command-line-tool-with-optionparser)  
+* [用 OptionParser 构建 Command Line 工具](https://ruby-china.org/wiki/building-a-command-line-tool-with-optionparser)
 * [How do I make a command-line tool in Ruby?](http://rubylearning.com/blog/2011/01/03/how-do-i-make-a-command-line-tool-in-ruby/)
 * [How do you specify a required switch (not argument) with Ruby OptionParser?](http://stackoverflow.com/questions/1541294/how-do-you-specify-a-required-switch-not-argument-with-ruby-optionparser/1542658#1542658)
 
-相關 gem： 
+相關 gem：
 
 * [docopt](https://github.com/docopt/docopt.rb)
 * [slop](https://github.com/leejarvis/slop)
-* [choice](https://github.com/defunkt/choice)  
-* [trollop](https://github.com/ManageIQ/trollop) 
+* [choice](https://github.com/defunkt/choice)
+* [trollop](https://github.com/ManageIQ/trollop)
 * [gli](https://github.com/davetron5000/gli)

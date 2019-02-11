@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - include vs extend vs require vs load"
+title: "Ruby - include vs extend vs require vs load"
 date: 2016-02-24 21:49:30 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 常常搞不清楚，`include`，`extend`，`require`，`load`這幾個差異。
@@ -17,10 +17,10 @@ categories: ruby ruby_tips
 
 ###include
 ```ruby
-module Foo   
-  def hello     
-    puts 'Hello!'   
-  end 
+module Foo
+  def hello
+    puts 'Hello!'
+  end
 end
 
 class Bar
@@ -35,10 +35,10 @@ a.hello
 ```
 ###extend
 ```ruby
-module Foo   
-  def hello     
-    puts 'Hello!'   
-  end 
+module Foo
+  def hello
+    puts 'Hello!'
+  end
 end
 
 class Bar
@@ -58,7 +58,7 @@ bar.extend(Foo)
 bar.hello
 #=> Hello!
 ```
-由此可知 
+由此可知
 
 * `extend`  增加 class_methods
 	* 如果是 instance 用 extend 則會是 instance_methods
@@ -84,7 +84,7 @@ require './module'
 include Foo
 
 bar('hello')
-or 
+or
 Foo.bar('hello')
 ```
 
@@ -98,10 +98,10 @@ Foo.bar('hello')
 #require
 
 在 ruby 中，一開始用有很多 `method` 可以使用，是因為 ruby 將一些常用的都先載入進來。
-  
+
 * [core](http://ruby-doc.org/core-2.3.0/)
 
-而其他比較不常用的 method 就必須在要使用的時候，先 require 進來才可以。  
+而其他比較不常用的 method 就必須在要使用的時候，先 require 進來才可以。
 
 * [std](http://ruby-doc.org/stdlib-2.3.0/)
 
@@ -109,7 +109,7 @@ Foo.bar('hello')
 require 'fileutils'
 ```
 
-也可以載入自己設定好的檔案，通常設定在 `/lib/test.rb`  
+也可以載入自己設定好的檔案，通常設定在 `/lib/test.rb`
 
 ```ruby
 require 'test'
@@ -121,7 +121,7 @@ require 'test'
 require_relative 'test'
 ```
 
-如果是放在資料夾底下的話 `/lib/file/test.rb` 
+如果是放在資料夾底下的話 `/lib/file/test.rb`
 
 ```ruby
 require 'file/test'

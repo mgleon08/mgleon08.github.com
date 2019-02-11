@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - double colon(::)"
+title: "Ruby - double colon(::)"
 date: 2016-03-08 22:42:03 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 在 ruby 中常常會看到各種符號， 像是 `::` 在 ruby 就像是 `namespace` 的感覺。

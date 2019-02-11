@@ -1,9 +1,9 @@
 ---
 layout: post
-title: "Ruby Tips - attr_accessor vs attr_writer vs attr_reader"
+title: "Ruby - attr_accessor vs attr_writer vs attr_reader"
 date: 2019-02-04 17:40:29 +0800
 comments: true
-categories: ruby ruby_tips
+categories: ruby
 ---
 
 <!-- more -->
@@ -40,12 +40,12 @@ class Animal
   def initialize
     @name = 'Dog'
   end
-  
+
   # attr_reader
   def name
   	 @name
   end
-  
+
   # attr_writer
   def name=(new_name)
   	 @name = new_name

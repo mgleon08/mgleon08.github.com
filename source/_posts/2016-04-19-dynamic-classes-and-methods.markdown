@@ -1,10 +1,10 @@
 ---
 layout: post
-title: "Ruby Tips - Dynamic Classes & Methods"
+title: "Ruby - Dynamic Classes & Methods"
 date: 2016-04-19 22:16:35 +0800
 comments: true
-categories: ruby ruby_tips
---- 
+categories: ruby
+---
 
 ruby 可以很方便的動態產生 Classes 和 Methods
 
@@ -17,8 +17,8 @@ class Post
   attr_accessor :user, :status
   def initialize(user, status)
     @user, @status = user, status
-  end 
-  
+  end
+
   def to_s
     "#{user}: #{status}"
   end
@@ -26,7 +26,7 @@ end
 
 #上下相等
 
-Post = Struct.new(:user, :status) do 
+Post = Struct.new(:user, :status) do
   def to_s
     "#{user}: #{status}"
   end
@@ -91,11 +91,11 @@ class Post
   def draft
     @status = :draft
   end
-  
+
   def posted
     @status = :posted
   end
-  
+
   def deleted
     @status = :deleted
   end
@@ -109,7 +109,7 @@ class Post
     define_method status do
       @status = status
     end
-  end 
+  end
 end
 ```
 
@@ -126,7 +126,7 @@ class Post
   end
   def show_tweet(index)
     puts @foo[index]
-  end 
+  end
 end
 ```
 
