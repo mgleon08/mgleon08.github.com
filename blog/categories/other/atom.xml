@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Other | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/other/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-11T14:26:53+08:00</updated>
+  <updated>2019-02-11T20:48:23+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -14,1220 +14,562 @@
 
   
   <entry>
-    <title type="html"><![CDATA[GCP BigQuery With API]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/06/27/gcp-bigquery-with-api/"/>
-    <updated>2018-06-27T21:18:35+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/06/27/gcp-bigquery-with-api</id>
-    <content type="html"><![CDATA[<p>最近剛好碰到 BigQuery，可以直接透過 API 帶 sql 指令去拉資料!</p>
+    <title type="html"><![CDATA[UML Class Diagram]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/11/08/uml-class-diagram/"/>
+    <updated>2018-11-08T15:15:11+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/11/08/uml-class-diagram</id>
+    <content type="html"><![CDATA[<p>類別圖，跟 ERD 有些類似，可能包含了 ERD 所描述的內容，但不一定可對應</p>
 
 <!-- more -->
 
 
-<h3>安裝</h3>
+<p>Unified Modeling Language (UML)，透過此圖可以很清楚的畫出，每個 model 裡面有的 <code>attributes</code> &amp; <code>methods</code>，還有跟別的 model 的相互關係</p>
 
-<pre><code class="ruby"># Gemfile
-gem 'google-cloud-bigquery'
-</code></pre>
+<h3>Symbol</h3>
 
-<pre><code class="ruby">bundle
-</code></pre>
-
-<p>裝 <a href="https://cloud.google.com/sdk/docs/downloads-interactive">安 gcp SDK</a></p>
-
-<pre><code class="ruby"># 安裝
-curl https://sdk.cloud.google.com | bash
-# Restart your shell
-exec -l $SHELL
-# 記得在 google 那邊要先開權限，才可以指定到自己要的 project
-gcloud init
-# auth，但最好的話是要申請一個 憑證，並設定在環境變數(environmentvalue)
-gcloud auth application-default login
-# 取得憑證
-gcloud auth application-default print-access-token
-</code></pre>
-
-<h3>執行</h3>
-
-<pre><code class="ruby">require "google/cloud/bigquery"
-
-# This uses Application Default Credentials to authenticate.
-# @see https://cloud.google.com/bigquery/docs/authentication/getting-started
-bigquery = Google::Cloud::Bigquery.new(project: "project_id")
-
-sql     = "SELECT " +
-          "CONCAT('https://stackoverflow.com/questions/', " +
-          "       CAST(id as STRING)) as url, view_count " +
-          "FROM `bigquery-public-data.stackoverflow.posts_questions` " +
-          "WHERE tags like '%google-bigquery%' " +
-          "ORDER BY view_count DESC LIMIT 10"
-results = bigquery.query sql
-
-results.each do |row|
-  puts "#{row[:url]}: #{row[:view_count]} views"
-end
-</code></pre>
-
-<h3>問題</h3>
-
-<p>在執行上有遇到一些問題，ruby 用 query 第一次去打的時候，回來的值卻會是空 Array，第二次就會有值</p>
-
-<p>可以看到下面 <code>job_complete</code> 也是 <code>false</code>，第二次打就會是 true</p>
-
-<pre><code class="ruby">bigquery.query(sql)
-
-# Sending HTTP post https://www.googleapis.com/bigquery/v2/projects/project_id/queries?
-# 200
-# #&lt;Hurley::Response POST https://www.googleapis.com/bigquery/v2/projects/project_id/queries == 200 (184 bytes) 11197ms&gt;
-# Success - #&lt;Google::Apis::BigqueryV2::QueryResponse:0x007fa1021033f8
-#  @job_complete=false,
-#  @job_reference=
-#   #&lt;Google::Apis::BigqueryV2::JobReference:0x007fa102102318
-#    @job_id="job_0HlGAo3KB4WrAGz20MypIHluup9B",
-#    @project_id="project_id"&gt;,
-#  @kind="bigquery#queryResponse"&gt;
-#  =&gt; []
-</code></pre>
-
-<h3>原因</h3>
-
-<p>Google 回覆</p>
-
-<p><code>job_complete=false</code> 代表這個 bigquery job 還沒跑完.</p>
-
-<p>在 bigquery 下 query 的時候, 執行 query 的 API call 會有一個 timeout, 當 API call 執行的時間超過這個 timeout 但是 query 還沒跑完的時候, API call 會 return HTTP code 200, 但是 query result 是空的, 並且 <code>job_complete = false.</code></p>
-
-<p>詳細可以參考文件[1]一開頭 &ldquo;Runs a BigQuery SQL query and returns results if the query completes within a specified timeout.&rdquo; 以及同一份文件下方的 timeoutMs 以及 jobComplete 這些參數.</p>
-
-<p>如前所述, 如果收到 job_complete = false 的 HTTP code 200 response, 表示 job 還在執行. 這時候的標準做法是去 poll GetQueryResults 這個 API (參考文件[2]) 直到 job_complete = true 再拿取結果.</p>
+<p>每個 <code>attributes</code> &amp; <code>methods</code> 前面可以標示符號，代表這個目前是哪一種狀態</p>
 
 <ul>
-<li><a href="https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/query">1. query</a></li>
-<li><a href="https://cloud.google.com/bigquery/docs/reference/rest/v2/jobs/getQueryResults">2. getQueryResults</a></li>
+<li>private : -</li>
+<li>public : +</li>
+<li>protected : #</li>
+<li>package / default : ~</li>
 </ul>
 
 
-<h3>解決方式</h3>
+<p><img src="https://i.imgur.com/gkyiOkn.png" alt="" /></p>
 
-<p>在 new 的時候，新增 timeout 時間(也可以設定 retries)</p>
+<p>上圖算是比較簡易的版本，有些在 method 後面還會加入傳入的參數，跟回傳值</p>
 
-<pre><code class="ruby">Google::Cloud::Bigquery.new(project: project_id, timeout: 120, retries: 10)
+<pre><code class="ruby">- setName(string): string
+- eat(string): string
 </code></pre>
 
-<blockquote><p>但實際測試加上 <code>timeout</code> 卻好像沒有用..</p></blockquote>
+<h3>Relationship</h3>
 
-<p>在試的時候，有用另外的方式去解決，自己去處理 job 就可以確保 job 跑完，再拿資料回來</p>
-
-<pre><code class="ruby"># 先設定 job
-bigquery.query_job(sql)
-# 再讓它去執行 wait_until_done!
-job.wait_until_done!
-# 最後再將結果回傳，這樣就可以確保第一次可以拉到值
-job.query_results
-</code></pre>
-
-<p>但去看原始碼，實際上也是做一樣的動作..</p>
-
-<blockquote><p>因該是內建的 <code>query</code> 有設定 10 秒就會 response，因此改直接去執行裡面的動作，就沒有這個限制</p></blockquote>
-
-<pre><code class="ruby">def query query, params: nil, external: nil, max: nil, cache: true,
-          standard_sql: nil, legacy_sql: nil, &amp;block
-  job = query_job query, params: params, external: external,
-                  cache: cache, standard_sql: standard_sql,
-                  legacy_sql: legacy_sql, &amp;block
-  job.wait_until_done!
-  ensure_job_succeeded! job
-  job.data max: max
-end
-</code></pre>
-
-<p>參考文件</p>
+<p>透過 model 跟 model 間線的關聯，可以知道是繼承還是組合等等</p>
 
 <ul>
-<li><a href="https://cloud.google.com/bigquery/create-simple-app-api">Create A Simple Application With the API</a></li>
-<li><a href="https://github.com/GoogleCloudPlatform/google-cloud-ruby/tree/master/google-cloud-bigquery">google-cloud-bigquery</a></li>
-<li><a href="https://cloud.google.com/sdk/docs/downloads-interactive">安裝 gcp SDK</a></li>
-<li><a href="https://cloud.google.com/bigquery/docs/bq-command-line-tool">Command Line</a></li>
-<li><a href="https://cloud.google.com/docs/authentication/production">Auth</a></li>
-<li><a href="https://cloud.google.com/ruby/">在 GOOGLE CLOUD PLATFORM 上執行 RUBY</a></li>
+<li>Inheritance 繼承 –––––▷</li>
+<li>Association 關聯 ––––––</li>
+<li>Aggregation 聚合 –––––◆</li>
+<li>Composition 組合 –––––◇</li>
+<li>Dependency 依賴  &mdash;&ndash;></li>
 </ul>
 
 
-<p>Auth</p>
+<h3>Multiplicity</h3>
+
+<p>線上面的數字則可以表示，model 與 model 的對應關係</p>
 
 <ul>
-<li><a href="https://stackoverflow.com/questions/13212991/how-to-query-bigquery-programmatically-from-python-without-end-user-interaction">How to query BigQuery programmatically from Python without end-user interaction?</a></li>
-<li><a href="https://cloud.google.com/sdk/gcloud/reference/auth/application-default/login">gcloud auth application-default login</a></li>
+<li><code>0..1</code> zero to one (optional)</li>
+<li><code>n</code> specific number</li>
+<li><code>0..*</code> zero to many</li>
+<li><code>1..*</code> one to many</li>
+<li><code>m..n</code> specific number range</li>
+</ul>
+
+
+<h3>Example</h3>
+
+<p>實際上大概的圖示</p>
+
+<p><img src="https://i.imgur.com/B6mapCR.png" alt="" /></p>
+
+<ul>
+<li><a href="https://www.youtube.com/watch?v=UI6lqHOVHic">UML Class Diagram Tutorial</a></li>
+<li><a href="https://dotblogs.com.tw/lazycodestyle/2016/06/01/233545">[軟工] 類別圖「關聯」、「聚合」及「組合」比較</a></li>
+<li><a href="https://github.com/macdidi5/UMLTutorial">UML超新手入門</a></li>
 </ul>
 
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[分享內網 Localhost to Everybody - Ngrok, Serveo]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/06/14/share-localhost-ngrok-serveo/"/>
-    <updated>2018-06-14T19:06:43+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/06/14/share-localhost-ngrok-serveo</id>
-    <content type="html"><![CDATA[<p>當有時候必須請其他人來看 local 上面的狀況時，可以用以下工具，分享給其他人來看</p>
+    <title type="html"><![CDATA[Entity Relationship Diagram (ERD)]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/11/07/entity-relationship-diagram/"/>
+    <updated>2018-11-07T15:14:59+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/11/07/entity-relationship-diagram</id>
+    <content type="html"><![CDATA[<p>在工作上時常用到 Entity Relationship Diagram (ERD) 來規劃 DB schema 的關聯，透過這個可以在規劃專案時很清楚知道整個架構，並且讓執行的人也可以很清楚要怎麼實作。</p>
 
 <!-- more -->
 
 
-<p>工具有兩種</p>
+<p>畫出來的圖大概會長這樣</p>
 
-<h1>1. <a href="https://ngrok.com/">ngrok</a></h1>
+<p><img src="https://i.imgur.com/aGA5DHb.png" alt="" /></p>
+
+<p>這邊的重點就是要瞭解中間關聯的線的左右邊代表了什麼意思 (如以下圖)</p>
+
+<p><img src="https://d2slcw3kip6qmk.cloudfront.net/marketing/pages/chart/erd-symbols/ERD-Notation.PNG" alt="ERPD Cardinality" /></p>
+
+<p>以第一張圖舉例來說就代表</p>
 
 <ul>
-<li>先安裝 or <a href="https://ngrok.com/download">官網下載</a></li>
+<li>1 個 customer 可以有 0 個或多個 order</li>
+<li>1 個 order 至少有 1 個或多個 product</li>
+<li>1 個 product 可以有 0 個或多個 order</li>
+<li>1 個 order 至少且只能有一個 customer</li>
 </ul>
 
 
-<pre><code class="ruby">brew cask install ngrok
-# brew cask裝的大多是有gui界面的app以及驅動，brew cask是brew的一個官方源。 像是 chrome
-</code></pre>
+<p>更進階清楚的話，可以連所有 column 的 type 都寫進去</p>
+
+<p><img src="https://i.imgur.com/KBUmyAK.png" alt="" /></p>
 
 <ul>
-<li>如果 share 的是 5000 port</li>
+<li><a href="https://www.youtube.com/watch?v=QpdhBUYk7Kk">Entity Relationship Diagram (ERD) Tutorial - Part 1</a></li>
+<li><a href="https://www.youtube.com/watch?v=-CuY5ADwn24">Entity Relationship Diagram (ERD) Tutorial - Part 2</a></li>
+<li><a href="https://www.smartdraw.com/entity-relationship-diagram/">Entity Relationship Diagram</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[簡單理解 CDN 原理]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/10/29/understand-cdn/"/>
+    <updated>2018-10-29T15:06:53+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/10/29/understand-cdn</id>
+    <content type="html"><![CDATA[<p>近期遇到 CDN 的問題，順便瞭解一下 CDN 整個運作模式</p>
+
+<!-- more -->
+
+
+<p>原先以為 CDN 會自動做快取直到我們去 purge CDN，但實際上 CDN 是會根據 <code>Response Headers</code> 的</p>
+
+<pre><code>cache-control: max-age=60, public
+</code></pre>
+
+<pre><code class="ruby"># rails 中設定 max-age 的方式
+expires_in 1.minutes, public: true # public
+expires_in 5.minutes # private
+</code></pre>
+
+<p>去做對應的 cache (必須用 public)，另外做了 <code>max-age</code> 之後，不只 CDN 會有設定，使用者的瀏覽器也會有設定</p>
+
+<pre><code>server -&gt; CDN -&gt; Browser
+60         60       60
+</code></pre>
+
+<p>因此如果設定 <code>max-age</code> 60 秒</p>
+
+<ul>
+<li>CDN cache 60 秒，在這 60 秒就不會再打 server，直到 60秒過 or <code>purge CDN</code></li>
+<li>Browser cache 60 秒，在這 60 秒就不會再打 CDN，直到 60秒過 or <code>clear browser cache</code></li>
 </ul>
 
 
-<pre><code class="ruby">ngrok http 5000
-</code></pre>
+<blockquote><p>這邊有個重點，當測試的時候，必須開不同的 browser 去做測試，不然直接打 CDN 跟 HTML 打 API 的 url cache 會同步</p></blockquote>
 
-<pre><code class="ruby">Session Status                online
-Session Expires               7 hours, 59 minutes
-Version                       2.2.8
-Region                        United States (us)
-Web Interface                 http://127.0.0.1:4040
-Forwarding                    http://1ee7a4e7.ngrok.io -&gt; localhost:5000
-Forwarding                    https://1ee7a4e7.ngrok.io -&gt; localhost:5000
+<h1>cache-control</h1>
 
-Connections                   ttl     opn     rt1     rt5     p50     p90
-                              0       0       0.00    0.00    0.00    0.00
-</code></pre>
+<blockquote><p>HTTP 1.1 才出現 Cache-Control</p></blockquote>
 
-<p>可以看到 <code>http://1ee7a4e7.ngrok.io</code> 指向到我們剛剛指定的 <code>localhost:5000</code> 就可以將這串網址給別人來看囉</p>
+<p>接著再根據 cache-control 瞭解一下行為，當 browser 設定</p>
 
-<ul>
-<li>也可以加上密碼或是 <code>subdomain</code> 不過就是要付費囉</li>
-</ul>
+<h3>max-age</h3>
 
-
-<h1>2. <a href="https://serveo.net/">serveo</a></h1>
-
-<p>這個是同事發現的，連安裝都不需要</p>
-
-<pre><code class="ruby">ssh -R 80:localhost:5000 serveo.net
+<pre><code class="ruby">cache-control: max-age=60, public
 </code></pre>
 
 <ul>
-<li>自訂subdomain</li>
+<li>第一次訪問，200</li>
+<li>第二次訪問時，則會顯示 200(from cache)，後來 google 有更新，就有分 <code>from disk cache(磁盤緩存)</code> 和 <code>from memory cache(內存緩存)</code></li>
 </ul>
 
 
-<pre><code class="ruby">ssh -R leon.serveo.net:80:localhost:5000 serveo.net
+<pre><code class="ruby">Status Code: 200  (from disk cache)
+# 記得必須是用 code 去呼叫才會，不是直接打 api，之前測試直接打會變成 304，改用 script 成功了
 </code></pre>
 
-<p>這樣 <code>https://leon.serveo.net</code> 就可以連到了~~</p>
+<ul>
+<li>但什麼時候是哪種緩存，目前看起來是會根據 google 來判斷 <a href="https://www.zhihu.com/question/64201378">求教大神瀏覽器是根據什麼決定from disk cache 與 from memory cache？</a></li>
+<li>如果有 expires(HTTP1.0) 也存在的話，max-age 會蓋過 expires</li>
+</ul>
+
+
+<blockquote><p>「public」和「private」
+如果回應標記為「public」，即使具備關聯的 HTTP 認證，甚至回應狀態碼無法正常快取，回應也可以供使用者快取。在大多數情況下，「public」並不是必要項目，因為明確的快取資訊 (例如「max-age」) 已表示 回應可供快取。</p>
+
+<p>另一方面，瀏覽器可以快取「private」回應，但是通常只開放給單一使用者快取，因此不允許任何中繼快取對其進行快取，例如使用者瀏覽器可以快取包含使用者私人資訊的 HTML 網頁，但是 CDN 不能快取。
+<a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching?hl=zh-tw">HTTP 快取</a></p></blockquote>
+
+<h3>no-cache</h3>
+
+<p>當設定以下 <code>no-cache</code>，代表每次都會發送 Request 去確認是否有新的檔案，沒有就會  return <code>304</code></p>
+
+<pre><code class="ruby">cache-control: no-cache
+# 相當於 cache-control: max-age=0
+</code></pre>
+
+<h3>no-store</h3>
+
+<p>當設定以下 <code>no-store</code>，代表完全不使用快取</p>
+
+<pre><code class="ruby">cache-control: no-store
+</code></pre>
+
+<h1>Purge CDN</h1>
+
+<p>通常廠商會提供一隻 API，可以做 purge CDN 的動作，當資料有更新時就可以透過這支 API 把 CDN 清除，讓它重新跟 server 拉取，但有個重點是，<code>max-age</code> 就不能夠設定太長，太長會導致 brower 那邊一直 cache 舊的，即使我們 purge 掉 CDN，brower 也是會等到 <code>max-age</code> 時間到，才會重新去拉 CDN。</p>
+
+<h1>params cache object</h1>
+
+<p>一開始 url 本來是希望帶 params 的方式做 cache，在測試的時候發現，雖然可以做 cache，但在 purge 的時候卻無法清除，看 log 發現顯示 <code>none cache-existing</code>
+代表根本沒有清掉 cache，詢問了 cdn 的廠商，原來要有帶 params 的 url，當作是 unique object 算是特殊需求，要另外開啟。</p>
+
+<p>但這家開啟後，萬一之後要換別家，會不會別家沒有支援或是要另外開啟? 所以後來還是改用 <code>path_params</code> 的方式，以防換別家的時候又會有問題</p>
+
+<h1>File Extension</h1>
+
+<p>CDN cache 是根據整個 url，包括副檔名，因此 <code>http://localhost:3000/test.js</code> 和 <code>http://localhost:3000/test.json</code> 會是不同的 url，purge 時也必須指定對應的 url 才能夠 purge</p>
+
+<h1>http/https</h1>
+
+<p>purge 的 url 必須要打一開始設定的 url，<code>http/https</code> 會有差別，如果設定的是 <code>http</code> 就必須針對 <code>http</code> 去做 purge 而不是 <code>https</code></p>
 
 <p>參考文件:</p>
 
 <ul>
-<li><a href="https://tenten.co/blog/how-to-use-ngrok-to-connect-your-localhost/">怎麼將內網的 localhost 讓外面的人都看得到呢？用用 ngrok 吧！</a></li>
-<li><a href="https://guahsu.io/2018/06/expose-local-servers-to-the-internet-by-serveo/">利用serveo把local開發環境發佈到internet中</a></li>
+<li><a href="https://developers.google.com/web/fundamentals/performance/optimizing-content-efficiency/http-caching?hl=zh-tw">HTTP 快取</a></li>
+<li><a href="https://cythilya.github.io/2018/07/27/http-caching/?fbclid=IwAR1jJfxG2o25i06Pqueb8yE0copC4VSJpbXmr4lG76wPTcDQzGa7ncE6iTk">HTTP Caching</a></li>
+<li><a href="https://blog.techbridge.cc/2017/06/17/cache-introduction/">循序漸進理解 HTTP Cache 機制</a></li>
+<li><a href="https://excaliburhan.com/post/things-you-should-know-about-browser-cache.html">你應該知道的瀏覽器緩存知識</a></li>
 </ul>
 
 ]]></content>
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Ruby on Rails 裝機趴 (Only Mac)]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/07/22/install-ruby-on-rails/"/>
-    <updated>2016-07-22T19:58:37+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/07/22/install-ruby-on-rails</id>
-    <content type="html"><![CDATA[<p>2018-06-30 update!</p>
-
-<p>最近剛好新來了一台電腦，所有東西都要重新安裝，就順手把需要的東西都紀錄了一下，以便之後可以快速的安裝起來!</p>
+    <title type="html"><![CDATA[Drone]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/09/17/drone/"/>
+    <updated>2018-09-17T11:25:36+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/09/17/drone</id>
+    <content type="html"><![CDATA[<p>透過 drone 可以很輕易的自己架設一個 CI CD server</p>
 
 <!-- more -->
 
 
-<h3>目錄</h3>
+<blockquote><p>Drone 是一套基於 Docker 容器技術的持續交付平台。</p></blockquote>
 
-<ul>
-<li><a href="#iterm2">iTerm2</a></li>
-<li><a href="#homebrew">Homebrew</a></li>
-<li><a href="#git">Git</a></li>
-<li><a href="#github">GitHub</a></li>
-<li><a href="#zsh">zsh &amp; oh-my-zsh</a></li>
-<li><a href="#rvmorrbenv">rvm or rbenv</a></li>
-<li><a href="#rubygems">RubyGems</a></li>
-<li><a href="#rails">Rails</a></li>
-<li><a href="#bundle">Bundle</a></li>
-<li><a href="#nvm">NVM</a></li>
-<li><a href="#npm">NPM</a></li>
-<li><a href="#yarn">Yarn</a></li>
-<li><a href="#sublime">Sublime Text</a></li>
-<li><a href="#vscode">Visual Studio Code</a></li>
-<li><a href="#vim">Vim</a></li>
-<li><a href="#linux">Linux</a></li>
-</ul>
+<h3>dockerfile</h3>
 
+<pre><code class="ruby">version: '3'
 
-<h1><span id="iterm2">iTerm2</span></h1>
+services:
+  drone-server:
+    image: drone/drone:0.8.5
+    container_name: drone-server
+    ports:
+      - 80:8000
+      - 9000
+    volumes:
+      - ./db:/var/lib/drone/
+    restart: always
+    environment:
+      - DRONE_OPEN=true
+      - DRONE_HOST=${DRONE_HOST}
+      - DRONE_GITHUB=true
+      - DRONE_GITHUB_CLIENT=${DRONE_GITHUB_CLIENT}
+      - DRONE_GITHUB_SECRET=${DRONE_GITHUB_SECRET}
+      - DRONE_SECRET=${DRONE_SECRET}
+      - DRONE_ADMIN=leon
+      - DRONE_ORGS=test # Organization 名稱
+      - DRONE_DEBUG=true
 
-<blockquote><p>Terminal 終端機</p></blockquote>
+  drone-agent:
+    image: drone/agent:0.8.5
+    command: agent
+    restart: always
+    depends_on:
+      - drone-server
+    scale: 3
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock
+    environment:
+      - DRONE_SERVER=drone-server:9000
+      - DRONE_SECRET=${DRONE_SECRET}
+      - DRONE_MAX_PROCS=3
+      - DRONE_DEBUG=true
+</code></pre>
 
-<ul>
-<li><a href="https://www.iterm2.com/">iTerm2</a></li>
-</ul>
+<h3>.drone.yml</h3>
 
+<pre><code class="yaml"># 所有流程共享一個 workspace
+workspace:
+  base: /rails # 所有步驟都可以存取此目錄資料
+  path: src/github.com/mgleon08/project # 所有指令都在此目錄執行
 
-<h3>tmux</h3>
+# pull git 下來
+clone:
+  git:
+    image: plugins/git:next
+    pull: true
+    depth: 50
+    tags: true # 將 tag 一起拉下來
 
-<ul>
-<li><a href="http://blog.chh.tw/posts/tmux-terminal-multiplexer/">終端機必備的多工良伴：tmux</a></li>
-</ul>
+pipeline:
+# 將一些不需要重複 build 的檔案 cache 起來 e.g. gem, node_module
+  restore-cache:
+    image: drillster/drone-volume-cache
+    restore: true
+    mount:
+      - ./vendor
+    # Mount the cache volume, needs "Trusted"
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      local: false
 
+  install:
+    image: ruby:2.5
+    pull: true
+    environment:
+      - RAILS_ENV=test
+      - RAKE_ENV=test
+    commands:
+      - ruby -v
+      - gem -v
 
-<h1><span id="homebrew">Homebrew</span></h1>
+      # bundle，檔案位置設定在 vendor/bundle
+      - bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3
 
-<blockquote><p>Mac OS X 上的套件管理程式</p></blockquote>
+      # config
+      - cp config/database.ci.yml config/database.yml
 
-<pre><code class="ruby">#安裝
-/usr/bin/ruby -e "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install)"
+      # setup secrets and db migration
+      - bundle exec rails -v
+      - bundle exec rake generate:secrets --trace
+      - bundle exec rake db:create db:migrate --trace
+    when:
+      local: false
 
-#homebrew檢查 
-brew doctor
+  rubocop:
+    image: ruby:2.5
+    group: testing # 同一個 group 可同時執行，平行測試
+    commands:
+      - bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3
+      - bundle exec rubocop -c .rubocop.yml || true
+      - bundle exec rubocop -c .rubocop.yml --format=json --out=rubocop-result.json || true
 
-#已經裝了哪些套件
-brew list
+  flay:
+    image: ruby:2.5
+    group: testing
+    commands:
+      - bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3
+      - bundle exec flay app
 
-#homebrew更新
-brew update
+  rspec:
+    image: ruby:2.5
+    group: testing
+    environment:
+      - RAILS_ENV=test
+      - RAKE_ENV=test
+    commands:
+        - bundle check --path=vendor/bundle || bundle install --path=vendor/bundle --jobs=4 --retry=3
+        - bundle exec rspec --color --tag ~@feature
+    when:
+      local: false
 
-#搜尋套件
-brew search
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    group: cleanup
+    rebuild: true
+    mount:
+      - ./vendor
+    # Mount the cache volume, needs "Trusted"
+    volumes:
+      - /tmp/cache:/cache
+    when:
+      local: false
 
-#查詢套件資訊
-brew info
+  notify:
+    image: plugins/slack
+    secrets: [ slack_webhook ] # 在 drone 介面上設定環境變數 secrets
+    channel: channel_name
+    username: Drone CI
+    when:
+      status: [ success, failure ] # 成功或失敗都通知訊息
+      local: false
 
-#module會裝到/usr/local/opt/xxx
-#安裝xxx模組 
-brew install xxx
-
-#更新xxx模組 
-brew upgrade xxx
+# database.yml 裡面的 database 要跟下面定義的名字一樣，這邊也是叫 database
+services:
+  database:
+    image: mysql:5.7
+    environment: # 全域變數
+      - MYSQL_ALLOW_EMPTY_PASSWORD=yes
 </code></pre>
 
 <ul>
-<li><a href="http://brew.sh/">Homebrew</a></li>
+<li><a href="https://yeasy.gitbooks.io/docker_practice/cases/ci/drone.html">Build Drone</a></li>
+<li><a href="http://docs.drone.io/zh/">docs drone</a></li>
+<li><a href="http://plugins.drone.io/">plugins.drone.io</a></li>
+<li><a href="https://www.slideshare.net/appleboy/drone-79506886">用 Drone 打造輕量級容器持續交付平台</a></li>
 </ul>
 
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[JSON Web Token(JWT) 簡單介紹]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/16/jwt/"/>
+    <updated>2018-07-16T17:48:22+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/16/jwt</id>
+    <content type="html"><![CDATA[<p>之前常常聽到 jwt，但沒有很了解，就來研究一下吧</p>
 
-<p>推薦套件</p>
+<!-- more -->
 
-<p><a href="http://searchbrew.com/">searchbrew</a></p>
 
-<pre><code class="ruby">#postgresql
-brew install postgresql
-gem install pg
-brew services start postgresql
-brew services stop postgresql
-brew services restart postgresql
-createdb db_name
-psql db_name
-
-#mysql
-brew install mysql
-gem install mysql2
-mysql.server start
-
-#redis
-brew install redis
-
-#背景啟動
-redis-server --daemonize yes
-redis-server &amp;
-
-#清除
-redis-cli flushall
-
-#imagemagick
-brew install imagemagick
-gem install rmagick
-
-#ffmpeg
-brew install ffmpeg
-
-#MediaInfo
-brew install mediainfo
-
-#wget
-brew install wget
-</code></pre>
+<h1>什麼是 JWT</h1>
 
 <ul>
-<li><a href="https://stackoverflow.com/questions/7975556/how-to-start-postgresql-server-on-mac-os-x">How to start PostgreSQL server on Mac OS X?
-</a></li>
+<li>JWT 是基於 JSON 的開放標準 (RFC 7519)</li>
+<li>一般被用來在 身份提供者 和 服務提供者 間傳遞被 認證 的用戶身份訊息，以便於從資源伺服器獲取資源</li>
+<li>同時也可以增加一些額外的聲明訊息，該 token 也可直接被用於認證，也可被加密</li>
+<li>特別適用於分佈式站點的單點登錄（SSO）場景</li>
 </ul>
 
 
-<h1><span id="git">Git</span></h1>
+<p>先來瞭解一般 session 和 jwt 的差別</p>
 
-<blockquote><p>版本控制</p></blockquote>
+<h2>Session</h2>
 
-<pre><code class="ruby">#安裝 git
-brew install git
+<p>Http 協議本身是無狀態的，所以無法知道每個 request 來的是誰? 因此用戶每次 request 就必須提供帳號密碼，以便證明身份，但每次都要另外輸入帳號密碼，豈不是很麻煩?</p>
 
-#設定輸出顏色
-git config --global color.ui true
+<p>所以當用戶第一次發 request 過來後，就會產生一組 token 紀錄在 db 和 session，並且將這組 token 給用戶，告訴其保存在 cookie，當下次發 request 的時候，就直接帶這組 token 以便證明身份。</p>
 
-#設定 git 的 user 和 email
-git config --global user.name "YOUR NAME"
-git config --global user.email "YOUR@EMAIL.com"
+<h2>JWT</h2>
 
-#空白對有些語言是有影響的(像是Ruby)，因此我們會希望 Git 去忽略空白的變化
-git config --global apply.whitespace nowarn
+<p>JWT 的組成內容有三個部分，由 <code>.</code> 做區隔，最後透過這三個部分，串成一個 Jwt 字串</p>
 
-#讓 git 記住你，不需每次上傳 code 都要打帳號密碼
-git config --global credential.helper store 
-</code></pre>
-
-<h3>Git GUI</h3>
-
-<ul>
-<li><a href="https://www.sourcetreeapp.com/">SourceTree</a></li>
-</ul>
-
-
-<pre><code class="ruby">#建立 command line 快捷
-ln -s /Applications/SourceTree.app/Contents/Resources/stree /usr/local/bin/
-</code></pre>
-
-<ul>
-<li><a href="http://gitx.frim.nl/">GitX</a></li>
-<li><a href="http://jonas.nitro.dk/tig/manual.html#view-scrolling">tig</a></li>
-</ul>
-
-
-<h3>Git 指令</h3>
-
-<ul>
-<li><a href="http://mgleon08.github.io/blog/2015/12/27/git-command/">Git 指令操作手冊</a></li>
-</ul>
-
-
-<h1><span id="github">GitHub</span></h1>
-
-<p>設定SSH連接</p>
-
-<blockquote><p>若要沿用舊電腦的 key ， 將舊電腦的 id_rsa &amp; public key 複製過來即可，但因為新電腦第一次登入，會要求輸入就電腦的 key 的密碼</p></blockquote>
-
-<pre><code class="ruby">#本機產生 ssh key (id_rsa（private key）id_rsa.pub（public key）) ~/.ssh/
-ssh-keygen -t rsa -C [email]
-
-#設定權限(預設應該就有設好，若是自己新開檔案就要設定)
-chmod 600 id_rsa
-chmod 644 id_rsa.pub
-
-#在 github 上新增新的 ssh
-將 id_rsa.pub 內容複製過去
-
-#測試是否能連上 github
-ssh -T git@github.com
-
-#查看 ssh 功能
-man ssh
-
-#將 key 加入 ssh-agent memory
-ssh-add ~/.ssh/id_dsa
-
-#檢查目前的 key
-ssh-add -l
-
-#刪除 ssh-agent key
-ssh-add -d ~/.ssh/id_dsa.pub
-
-#刪除所有 ssh-agent key
-ssh-add -D ~/.ssh/id_dsa.pub
-
-#將 key 永久紀錄
-ssh-add -K [path/to/your/ssh-key]
-</code></pre>
-
-<ul>
-<li><a href="https://developer.github.com/guides/using-ssh-agent-forwarding/">Using SSH agent forwarding</a></li>
-<li><a href="https://ihower.tw/blog/archives/7837">SSH agent forwarding 的應用</a></li>
-<li><a href="http://man.linuxde.net/ssh">ssh命令</a></li>
-<li><a href="http://linux.vbird.org/linux_basic/0210filepermission.php#chmod">鳥哥的私房菜 - 權限指令</a></li>
-</ul>
-
-
-<h1><span id="zsh">zsh &amp; oh-my-zsh</span></h1>
-
-<blockquote><p>shell &amp; zsh 的 framework 套件</p></blockquote>
-
-<pre><code class="ruby">#安裝 zsh
-brew install zsh
-
-#將 shell 預設改成 zsh，改完記得重開 iterm or source ~/.zshrc
-chsh -s /bin/zsh
-
-#查看目前使用是哪個 shell
-echo $SHELL
-
-#下載 oh-my-zsh
-git clone git://github.com/robbyrussell/oh-my-zsh.git ~/.oh-my-zsh
-
-#將 oh-my-zsh 預設的設定複製到 ./.zshrc (.zshrc 需要自行產生)
-cp ~/.oh-my-zsh/templates/zshrc.zsh-template ~/.zshrc
-
-#安裝 zsh-completions
-brew install zsh-completions
-
-#加入以下兩行來啟動 zsh-completions
-#zsh-completions
-fpath=(/usr/local/share/zsh-completions $fpath)
-
-#同時還需要 rebuild zsh 的 .zcompdump
-rm -f ~/.zcompdump; compinit
-
-#更改 theme ( 到 .zshrc 更改 ZSH_THEME 參數 )
-ZSH_THEME="edvardm"
-
-#啟動 oh-my-zsh 內建的套件，要看有哪些套件可以去 ~/.oh-my-zsh 裡面的 plugins 看裡面的設定( 到 .zshrc 更改 plugins 參數 )
-plugins=(git ruby rbenv github gitignore rails rake python z)
-</code></pre>
-
-<ul>
-<li><a href="https://github.com/robbyrussell/oh-my-zsh">oh-my-zsh</a></li>
-<li><a href="http://icarus4.logdown.com/posts/177661-from-bash-to-zsh-setup-tips">bash 轉移 zsh (oh-my-zsh) 設定心得</a></li>
-</ul>
-
-
-<h1><span id="rvmorrbenv">rvm or rbenv</span></h1>
-
-<blockquote><p>管理 ruby &amp; gem 工具</p></blockquote>
-
-<h3>rvm</h3>
-
-<ul>
-<li><a href="http://mgleon08.github.io/blog/2016/02/15/rvm-and-gemsets/">RVM and Gemsets Ruby版本控制</a></li>
-<li><a href="https://ruby-china.org/wiki/rvm-guide">rvm 使用指南</a></li>
-</ul>
-
-
-<h3>rbenv</h3>
-
-<pre><code class="ruby">#安裝
-brew install rbenv ruby-build
-
-#將指令放到 ~/.zshrc or ~/.bashrc
-export PATH="$HOME/.rbenv/bin:$PATH"
-eval "$(rbenv init -)"
-
-#列出所有 ruby 版本
-rbenv install --list
-
-#列出安装的版本
-rbenv versions               
-
-#列出正在使用的版本
-rbenv version    
-
-#安裝 ruby (請依照當下最新的版本)
-rbenv install 2.3.1
-
-#設定預設版本
-rbenv global 2.3.1
-
-#確定目前使用的 ruby 是透過 rbenv 而不是內建的(記得重開視窗)
-which ruby
-#=&gt; 確保有 .rbenv/shims/ruby
-
-#project 加上 .ruby-version 檔案裡面寫 ruby 版本 才能加入控管
-2.3.1
-
-#rbenv 指令
-Some useful rbenv commands are:
-   commands    List all available rbenv commands
-   local       Set or show the local application-specific Ruby version
-   global      Set or show the global Ruby version
-   shell       Set or show the shell-specific Ruby version
-   install     Install a Ruby version using ruby-build
-   uninstall   Uninstall a specific Ruby version
-   rehash      Rehash rbenv shims (run this after installing executables)
-   version     Show the current Ruby version and its origin
-   versions    List all Ruby versions available to rbenv
-   which       Display the full path to an executable
-   whence      List all Ruby versions that contain the given executable
-</code></pre>
-
-<p>rbenv-gemset</p>
-
-<pre><code class="ruby">#安裝 rbenv-gemset
-brew install rbenv-gemset
-
-#rbenv gemset 指令
-possible commands are:
-  active
-  create [version] [gemset]
-  delete [version] [gemset]
-  file
-  init [gemset]
-  list
-  version
-
-#使用方法
-將想要使用的 gemset 名稱，放到 .rbenv-gemsets 檔案即可，在該專案執行 bundle 就會對設定好的 gemset 進行操作
-若是沒有設定該檔案就會是 global 的 bundle
-</code></pre>
-
-<ul>
-<li><a href="https://ruby-china.org/wiki/rbenv-guide">rbenv 使用指南</a></li>
-<li><a href="https://github.com/jf/rbenv-gemset">rbenv-gemset</a></li>
-<li><a href="https://gist.github.com/MicahElliott/2407918">Setting up and installing rbenv, ruby-build, rubies, rbenv-gemset, and bundler</a></li>
-</ul>
-
-
-<h1><span id="rubygems">RubyGems</span></h1>
-
-<blockquote><p>RubyGems 是 Ruby 的套件管理系統，讓你輕易安裝及管理 Ruby 函式庫。</p></blockquote>
-
-<p><a href="https://rubygems.org/">RubyGems.org</a></p>
-
-<pre><code class="ruby">#RubyGems 的版本
-gem -v
-
-#升級RubyGems的版本
-gem update --system 
-
-#安裝某個套件(加上 --no-ri --no-rdoc 可以不要產生預設的 RDoc和ri文件)
-gem install gem_name --no-ri --no-rdoc
-
-#列出安裝的套件
-gem list 
-
-#更新最新版本
-gem update gem_name 
-
-#更新所有你安裝的Gems
-gem update 
-
-#安裝特定版本
-gem install -v x.x.x gemname
-
-#反安裝
-gem uninstall gem_name 
-
-#移除所有 gem
-gem uninstall -aIx
-
-#移除舊版本的 gem
-gem cleanup
-
-#顯示要移除的有哪些
-gem cleanup -d
-
-#移除特定 gem 舊版本
-gem cleanup rails
-</code></pre>
-
-<h1><span id="rails">Rails</span></h1>
-
-<pre><code class="ruby">#後面的參數是不下載文件，可以省很多安裝時間
-gem install rails --no-ri --no-rdoc
-</code></pre>
-
-<h1><span id="bundle">Bundle</span></h1>
-
-<blockquote><p>管理應用程式 Gem 依存性(dependencies)管理工具，它會根據 Gemfile 的設定自動下載及安裝 Gem 套件</p></blockquote>
-
-<pre><code class="ruby">gem install bundler
-
-#Cleans up unused gems in your bundler directory
-bundle clean [--force]
-#Options:
-#--force: forces clean even if --path is set
-</code></pre>
-
-<ul>
-<li><a href="http://bundler.io/">bundle</a></li>
-</ul>
-
-
-<h1><span id="nvm">NVM</span></h1>
-
-<blockquote><p>管理 npm 工具，類似 rvm</p></blockquote>
-
-<pre><code class="ruby">#根據當下最新版本
-curl -o- https://raw.githubusercontent.com/creationix/nvm/v0.31.4/install.sh | bash
-
-#將以下放到自己的 ~/.zshrc or ~/.bashrc or .bash_profile 下面（預設會自動放好，但還是去確定一下）
-export NVM_DIR="$HOME/.nvm"
-[ -s "$NVM_DIR/nvm.sh" ] &amp;&amp; . "$NVM_DIR/nvm.sh" # This loads nvm
-
-#重新載入 Shell
-. ~/.nvm/nvm.sh or source ~/.zshrc
-
-# 安裝穩定版本的 NodeJS
-nvm install stable 
-
-#顯示目前可以安裝的版本
-nvm ls-remote
-
-#安裝 NodeJS
-nvm install &lt;version&gt;
-
-#安裝穩定版本的 NodeJS
-nvm install stable 
-
-#使用版本，只有在當下，重新開新tab就會消失
-nvm use stable 
-
-#設定預設版本，永久
-nvm alias default stable
-
-#看目前安裝所有版本
-ls -a ~/.nvm/versions/node
-</code></pre>
-
-<pre><code class="ruby"># package.json 設定
-{ 
-  "engines" : { 
-    "node" : "&gt;=0.10.3 &lt;0.12" 
-  } 
-}
-</code></pre>
-
-<ul>
-<li><a href="https://segmentfault.com/a/1190000004404505">node版本管理工具nvm-Mac下安装及使用</a></li>
-<li><a href="https://tenten.co/blog/install-gulp-grunt-bower-sass-susy-on-mac-with-nvm-rvm/">在 Mac 上裝 NVM, RVM 等跑 Gulp, Grunt, Bower 環境</a></li>
-<li><a href="http://icarus4.logdown.com/posts/175092-nodejs-installation-guide">Node.js 安裝與版本切換教學 (for MAC)</a></li>
-<li><a href="http://javascript.ruanyifeng.com/nodejs/packagejson.html#toc6">package.json文件</a></li>
-<li><a href="https://medium.com/@toumasaya/node-js-%E7%92%B0%E5%A2%83%E8%A8%AD%E5%AE%9A-for-mac-a2628836feaf">Node.js 環境設定-for mac</a></li>
-</ul>
-
-
-<h1><span id="npm">NPM</span></h1>
-
-<blockquote><p>套件管理</p></blockquote>
-
-<p><a href="https://www.npmjs.com/">npm</a></p>
-
-<p>資料夾一定會有 package.json</p>
-
-<pre><code class="ruby">#搜尋 npm 套件，但建議去網站上比較快
-npm search
-
-#本地安裝，會安裝在當前專案的 node_modules 目錄下
-npm install &lt;package name&gt;
-
-#全域安裝，會將套件安裝在統一的 npm 目錄底下
-npm install -g &lt;package name&gt;
-
-#列出專案使用套件
-npm ls (-g 全域套件)
-
-#更新專案套件
-npm update (-g 全域套件)
-
-#移除專案套件
-npm uninstall &lt;package name&gt; (-g 全域套件)
-
-#清快取
-npm cache clean
-
-#查詢 npm 儲存路徑
-npm config get prefix
-
-#自動安裝 package.json 套件定義檔中定義的所有套件
-npm install
-
-#安裝套件並儲存在 package.json 中
-npm install &lt;package name&gt; --save #用於上線時必要的套件(react, bootstrap…)，會更新到package.json裡的Dependencies(上線依賴)
-npm install &lt;package name&gt; --save-dev #用來安裝開發時用的工具(ex babel, webpack, webpack-dev-server…)，會更新到package.json裡的devDependencies(開發依賴)
-</code></pre>
-
-<h3>package.json</h3>
-
-<pre><code class="ruby">#自動產生 package.json
-npm init
-
-{
-  "name": "leon",
-  "version": "1.0.0",
-  "description": "",
-  "main": "index.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" &amp;&amp; exit 1"
-  },
-  "author": "",
-  "license": "ISC",
-  "dependencies":{#套件相依
-  },
-  "devDependencies": {#開發套件相依
-    "lodash": "^4.15.0" #示範加上去的
-  }
-}
-</code></pre>
-
-<ul>
-<li><a href="http://www.slideshare.net/wantingj/npm-46801372">Npm 套件管理 &amp; 常用開發工具介紹</a></li>
-<li><a href="https://docs.npmjs.com/cli/access">Npm All cli</a></li>
-</ul>
-
-
-<h1><span id="yarn"> Yarn </span></h1>
-
-<p>Facebook 開源的 Yarn，這是針對存儲在 npm 或 Bower 註冊表中的 JavaScript 模組的一個代理包管理器。</p>
-
-<pre><code class="ruby">brew install yarn
-
-# -g 為 global 的意思，沒有加的話，會裝在當下的
-yarn global add vue-cli
-
-# 安裝指定套件 (會自動 save 到 package.json)
-yarn add sass sass-loader node-sass
-
-# 安裝 package.json 內其它套件
-yarn install
-
-# run project
-yarn run start
-</code></pre>
-
-<ul>
-<li><a href="https://yarnpkg.com/en/">yarn</a></li>
-<li><a href="https://github.com/yarnpkg/yarn">yarn github</a></li>
-<li><a href="https://yarnpkg.com/en/docs/migrating-from-npm">yarn migrating from npm</a></li>
-<li><a href="https://github.com/cssmagic/blog/issues/67">[譯] Yarn 官方介紹: 一款新的 JavaScript 包管理器</a></li>
-<li><a href="https://sheerdevelopment.com/posts/facebook-js-5">Facebook 新發佈的 Yarn JS 包管理器的 5 大功能</a></li>
-</ul>
-
-
-<h1><span id="sublime">Sublime Text</span></h1>
-
-<blockquote><p>編輯器</p></blockquote>
-
-<p>安裝好用的套件管理 <a href="https://packagecontrol.io/installation">package control</a></p>
-
-<pre><code class="ruby">All Autocomplete
-AutoFileName
-Alignment
-Babel
-Color Highlighter
-CovertToUTF8
-Emmet
-GitGutter
-SideBarEnhancement
-BracketHighlighter
-SublimeCodeIntel
-BeautifyRuby
-PrettyRuby
-PrettyJson
-PrettyYaml
-AdvancedNewFile
-View In Browser
-Browser Refresh
-JSHint
-
-#theme
-Spacegray
-Material
-</code></pre>
-
-<ul>
-<li><a href="https://github.com/kkga/spacegray">Spacegray</a></li>
-<li><a href="https://github.com/equinusocio/material-theme">Material</a></li>
-</ul>
-
-
-<p>Prefrences > Setting-User</p>
+<h3>1. Header 頭部</h3>
 
 <pre><code class="ruby">{
-    "bold_folder_labels": true,
-    "caret_style": "phase",
-    "color_scheme": "Packages/Theme - Spacegray/base16-eighties.dark.tmTheme",
-    "fade_fold_buttons": false,
-    "font_size": 20,
-    "highlight_line": true,
-    "ignored_packages":
-    [
-        "Vintage"
-    ],
-    "line_padding_bottom": 1,
-    "line_padding_top": 1,
-    "spacegray_fileicons": true,
-    "tab_size": 2,
-    "theme": "Spacegray Eighties.sublime-theme",
-    "translate_tabs_to_spaces": true,
-    "trim_trailing_white_space_on_save": true,
-    "word_wrap": true
-}
-
-
-#theme setting
-"theme": "Spacegray Eighties.sublime-theme",
-"spacegray_fileicons": true
-</code></pre>
-
-<p>建立快速鍵</p>
-
-<pre><code class="ruby">[
-  { "keys": ["super+shift+k", ], "command": "pretty_ruby_format" },
-  { "keys": ["super+shift+h"], "command": "htmlprettify" },
-  { "keys": ["ctrl+super+k"],  "command": "beautify_ruby" }
-]
-</code></pre>
-
-<p>設定快速command <code>subl .</code>
-<a href="https://www.sublimetext.com/docs/2/osx_command_line.html">OS X Command Line</a></p>
-
-<pre><code class="ruby">#建立 bin 資料夾，建立軟連結到指定的檔案
-mkdir ~/bin 
-ln -s "/Applications/Sublime Text.app/Contents/SharedSupport/bin/subl" ~/bin/subl
-
-#若是 echo $PATH 沒有相對應的路徑，可以在 .zshrc 加上
-export PATH="$HOME/bin:$PATH"
-</code></pre>
-
-<ul>
-<li><a href="https://packagecontrol.io/installation">package control</a></li>
-<li><a href="https://www.sublimetext.com/">Sublime Text</a></li>
-<li><a href="https://scotch.io/bar-talk/best-sublime-text-3-themes-of-2015-and-2016">Best Sublime Text 3 Themes of 2015 and 2016</a></li>
-</ul>
-
-
-<h1><span id="vscode"> Visual Studio Code </span></h1>
-
-<h3>套件安裝</h3>
-
-<p>找尋套件 <code>Command</code> + <code>Shift</code> + <code>P</code></p>
-
-<pre><code class="js">// 在 terminal 直接開啟 vscode，一開始畫面就會問要不要設定了
-code
-</code></pre>
-
-<h3>推薦套件</h3>
-
-<pre><code class="js">// Other
-ESLint // 如果你有用程式碼規範的話
-Prettier - code formatter // alt + shift + f
-vscodeicon
-CSScomb
-// 其他可以看上面推薦的安裝
-</code></pre>
-
-<h3>Setting</h3>
-
-<pre><code class="js">{
-  "window.zoomLevel": 1, // 調整視窗的縮放比例。原始大小為 0
-  "editor.fontSize": 12, // 字型大小
-  "editor.renderControlCharacters": true, // 顯示控制字元
-  "editor.renderWhitespace": "all", // 顯示空白字元
-  "editor.tabSize": 2, // 預設縮排
-  "editor.minimap.enabled": true, // 顯示 MiniMap
-  "editor.minimap.renderCharacters": false, // MiniMap 不渲染實際字元
-  "editor.formatOnSave": false, // 存擋時不進行排版
-  "[go]": {
-    "editor.tabSize": 4 // golang 縮排 4 格
-  },
-  "editor.renderIndentGuides": true, // 顯示縮排線
-  "editor.wordWrap": "off", // 文字過長換行
-  "files.trimTrailingWhitespace": true, // 檔案最後面留空格
-  "breadcrumbs.enabled": true, // 顯示麵包屑
-  "prettier.semi": false, // 結束是否加分號
-  "prettier.singleQuote": true, // 單引號
-  "prettier.trailingComma": "none",  // 屬性後新增逗號
-  "prettier.printWidth": 120, // 行寬
-  "vetur.format.defaultFormatter.html": "prettyhtml",
-  "explorer.openEditors.visible": 1 // 設定已開啟的頁面是否顯示於左側
+  'typ': 'JWT', # 聲明類型
+  'alg': 'HS256' # 加密的方法: HMAC、SHA256、RSA 進行 Base64 編碼
 }
 </code></pre>
 
-<ul>
-<li><a href="http://www.52cik.com/2018/02/20/vscode-vue.html">在 vscode 中統一 vue 編碼風格</a></li>
-</ul>
+<p>進行 base64 加密（該加密是可以對稱解密的)</p>
 
-
-<h3>command line</h3>
-
-<pre><code class="js">// 隱藏側邊欄
-command + B
-// 隱藏下邊欄
-command + J
-// Undo
-command + Z
-// Redo
-command + shift + z
-// New File
-command + N
-// New Window
-command + shift + N
-// Replace In Files
-command + shift + H
-// Replace
-command + option + F
-// Copy Line
-option + shift + ↑↓
-// Move Line
-option + ↑↓
-// Add cursor
-command + option + ↑↓
-// Comment One Line
-command + K + C
-// Remove Comment One Line
-command + K + U
-// Select All Occurrences of Find Match
-command + shift + L
-// open terminal
-control + `
+<pre><code class="ruby">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9
 </code></pre>
 
-<p>官方文件:</p>
+<h3>2. Payload 載荷</h3>
+
+<p>這裡放聲明內容，可以說就是存放溝通訊息的地方，在定義上有 3 種聲明 (Claims)</p>
 
 <ul>
-<li><a href="https://code.visualstudio.com/">visualstudio</a></li>
+<li>Reserved (註冊聲明)</li>
+<li>Public (公開聲明)</li>
+<li>Private (私有聲明)</li>
 </ul>
 
 
-<h1><span id="vim">Vim</span></h1>
+<p>註冊聲明參數 (建議但不強制使用)</p>
 
-<p>介面優化，新增 <code>.vimrc</code> 檔案</p>
+<ul>
+<li>iss (Issuer) - jwt簽發者</li>
+<li>sub (Subject) -  jwt所面向的用戶</li>
+<li>aud (Audience) - 接收jwt的一方</li>
+<li>exp (Expiration Time) - jwt的過期時間，這個過期時間必須要大於簽發時間</li>
+<li>nbf (Not Before) - 定義在什麼時間之前，該jwt都是不可用的</li>
+<li>iat (Issued At) - jwt的簽發時間</li>
+<li>jti (JWT ID) - jwt的唯一身份標識，主要用來作為一次性token,從而迴避重放攻擊</li>
+</ul>
 
-<pre><code class="ruby">#顯示行號：對於 debug 相當有幫助! (加上 run 數字會跟著跑)
-:set nu rnu
-#自動對齊縮排：如果上一行有兩個 tab 的寬度，按 enter 繼續編輯下一行時會自動保留兩個 tab 鍵的寬度。
-:set ai
-#光標底線：光標所在的那一行會有底線，幫助尋找光標位置
-:set cursorline
-#上色模式-針對亮背景上色，預設為亮背景(白色等)上色，但是終端機的初始背景色為深紫色，會出現文字失蹤 ( 例如註解為深藍色 ) 的情況。將這一行換成 :set bg=dark 即可。
-:set bg=light
-#縮排間隔數 ( 預設為 8 個空白對齊 )，也就是說按一次 tab 鍵，游標會自動跳 4 格空白字元的寬度。雖有多個空格但實際上只有一個 tab 字元。注意：也就是說，在其他環境下，看到 tab 字元，依舊是 8 個空白寬
-:set tabstop=4
-#自動縮排對齊間隔數：向右或向左一個縮排的寬度
-:set shiftwidth=4
-#vim底下有一個視窗，用以顯示狀態
-:set laststatus=2
+
+<pre><code class="ruby">{
+  "sub": "1234567890",
+  "name": "John Doe",
+  "iat": 1516239022
+}
 </code></pre>
 
-<ul>
-<li><a href="http://wiki.csie.ncku.edu.tw/vim/vimrc">vimrc設定教學</a></li>
-<li><a href="http://www2.nsysu.edu.tw/csmlab/unix/vi_command.htm">vi指令說明(完整版)</a></li>
-</ul>
+<p>進行 base64 加密（該加密是可以對稱解密的)</p>
 
-
-<h1><span id="linux">Linux 常用指令</span></h1>
-
-<ul>
-<li><a href="http://jdev.tw/blog/3599/linux-terminal-commands-and-shortcuts">Linux常用Terminal命令與快捷鍵參考</a></li>
-</ul>
-
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="https://github.com/yuyueugene84/ntu_ror_training_course/blob/master/installation_mac.md">Ruby on Rails Mac 安裝教學</a></li>
-<li><a href="https://ihower.tw/rails4/installation.html">安裝 Rails 開發環境</a></li>
-<li><a href="https://tenten.co/blog/install-gulp-grunt-bower-sass-susy-on-mac-with-nvm-rvm/">在 Mac 上裝 NVM, RVM 等跑 Gulp, Grunt, Bower 環境</a></li>
-<li><a href="https://segmentfault.com/a/1190000004404505">node版本管理工具nvm-Mac下安装及使用</a></li>
-<li><a href="http://railsbook.tw/chapters/02-environment-setup.html">為你自己學 Ruby on Rails 環境設定</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Coding Principle 程式設計原則 SOLID]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/05/29/coding-principle/"/>
-    <updated>2016-05-29T20:27:06+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/05/29/coding-principle</id>
-    <content type="html"><![CDATA[<p>在 Coding 的世界中，有許多重要的 Principle 值得我們去遵循</p>
-
-<!-- more -->
-
-
-<h1>SOLID</h1>
-
-<h1>Single Responsibility Principle(單一責任原則SRP)</h1>
-
-<h3>定義：</h3>
-
-<ul>
-<li>對一個類別而言，應該僅有一個引起它變化的原因（職責）</li>
-<li>降低單一類別被「改變」所影響的機會</li>
-<li>只有一個理由需要更改這個class，如果有一個以上的理由就表示：這個class負責超過一個以上的責任</li>
-</ul>
-
-
-<h3>說明：</h3>
-
-<ul>
-<li>若一個類別有多重職責，職責之間會互相耦合，一個職責的變化可能會影響該類別完成其他職責的能力。</li>
-</ul>
-
-
-<p><a href="http://ithelp.ithome.com.tw/articles/10100557">軟體路上不孤單Day10-物件導向原則介紹3[SRP]</a></p>
-
-<h1>Open/Close Principle (開放關閉原則OCP)</h1>
-
-<h3>定義：</h3>
-
-<ul>
-<li>軟體模組（class, method, module）應該對擴展開放，對修改關閉</li>
-<li>讓模組容易增加(擴展)功能，而不必去修改原有程式碼</li>
-<li>讓主要類別不會因為新增需求而改變</li>
-</ul>
-
-
-<h3>說明：</h3>
-
-<ul>
-<li>對有相似行為類別的建立抽象層，如 abstract class, 或是 interface。</li>
-<li>將公共屬性或方法提取到抽象層中，當需要擴展行為（新增）時只需要建立新的子類別並繼承抽象層，不必修改原有的行為。</li>
-</ul>
-
-
-<blockquote><p>注意：實作 OCP 抽象層需要花費時間和精力，也可能會造成複雜度的上升，OCP 應該只運用在程序中頻繁發生的變化上。</p></blockquote>
-
-<p><a href="http://ithelp.ithome.com.tw/articles/10100008">軟體路上不孤單Day08-物件導向原則介紹1[OCP]</a></p>
-
-<h1>Liskov Substitution Principle (Liskov替換原則LSP)</h1>
-
-<h3>定義：</h3>
-
-<ul>
-<li>子類別(Sub Type)必須能夠替換成他們的基本類別(Base Type)</li>
-<li>子類別應該可以替換任何基本類別出現的位置，且程序還能正常工作</li>
-<li>避免繼承時子類別所造成的「行為改變」</li>
-</ul>
-
-
-<h3>說明：</h3>
-
-<ol>
-<li>不能僅用 is-a 的關係就建立繼承，必須考慮是否在基本類別中有些方法對子類別而言是不需要或是無意義的。</li>
-</ol>
-
-
-<p>這些沒有意義的方法會造成不可預期的結果。</p>
-
-<ol>
-<li>建立一個抽象層並提取公共方法，並讓子類別派生抽象層。</li>
-</ol>
-
-
-<blockquote><p>注意：必須要有繼承關係才需要考慮 LSP ，而 LSP 是讓設計達到 OCP 的規則之一 。</p></blockquote>
-
-<p><a href="http://ithelp.ithome.com.tw/articles/10100827">軟體路上不孤單Day11-物件導向原則介紹4[LSP]</a></p>
-
-<h1>Law of Demeter(迪米特原則LOD, LKD)</h1>
-
-<h3>定義：</h3>
-
-<ul>
-<li>也稱最少知識原則(Principle of Least Knowledge)</li>
-<li>避免曝露過多資訊造成用戶端因流程調整而改變</li>
-<li>模組應該儘可能的減少其他模組交互，目的在於降低彼此之間的依賴。</li>
-</ul>
-
-
-<h3>說明：</h3>
-
-<p>以下為必須遵循 LOD 的條件</p>
-
-<p>類別 O 的任何方法 m 只能呼叫屬於以下情況的方法</p>
-
-<ol>
-<li>類別 O 本身的方法</li>
-<li>傳入 m 的參數的方法</li>
-<li>在 m 中建立對象的方法</li>
-<li>任何直接持有的對象方法</li>
-</ol>
-
-
-<p><a href="http://ithelp.ithome.com.tw/articles/10101265">軟體路上不孤單Day13-物件導向原則介紹6[LoD]</a></p>
-
-<h1>Interface Segregation Principle(介面隔離ISP)</h1>
-
-<h3>定義：</h3>
-
-<ul>
-<li>使用單純簡單的 interface , 比使用一個複雜過大的 interface 來的好。</li>
-<li>用戶不應該被迫相依於他們用不到的函示</li>
-<li>降低用戶端因為不相關介面而被改變</li>
-</ul>
-
-
-<h3>說明：</h3>
-
-<p>一個過大的 interface ，通常代表其中有某些功能是客戶端不需要的，如果客戶端實作了不需要的功能 ，這些功能會造成不必要的耦合。</p>
-
-<p>我們可以把過大的 interface 分離，將其中某些功能拆離到另一個 interface 中。</p>
-
-<p><a href="http://ithelp.ithome.com.tw/articles/10101106">軟體路上不孤單Day12-物件導向原則介紹5[ISP]</a></p>
-
-<h1>Dependency Inversion Principle (相依性反轉DIP)</h1>
-
-<h3>定義：</h3>
-
-<ul>
-<li>高層模組不應該相依於低層模組，兩者都應該相依於抽象</li>
-<li>避免高階程式因為低階程式改變而被迫改變</li>
-<li>抽象不應該相依於具體，具體應該相依於抽象。</li>
-</ul>
-
-
-<h3>說明：</h3>
-
-<p>對象的引用盡量是抽象型態而不是具體型態。</p>
-
-<blockquote><p>注意：若是具體型態已經相當穩定，不太會變化，依賴於該具體類別也是無妨。</p></blockquote>
-
-<p><a href="http://ithelp.ithome.com.tw/articles/10101486">軟體路上不孤單Day14-物件導向原則介紹7[DIP]</a></p>
-
-<hr />
-
-<h1>Do not repeat yourself(DRY)</h1>
-
-<h3>定義：</h3>
-
-<ul>
-<li>當有相同的 code 時，應該整合成一個，不該重複出現</li>
-</ul>
-
-
-<p><a href="http://ithelp.ithome.com.tw/articles/10100309">軟體路上不孤單Day09-物件導向原則介紹2[DRY]</a></p>
-
-<h1>duck type(鴨子類型)</h1>
-
-<h3>定義：</h3>
-
-<ul>
-<li>當我看到一隻鳥，它走路像鴨子，游泳像鴨子，叫聲像鴨子，我就稱其為鴨子</li>
-</ul>
-
-
-<h3>說明：</h3>
-
-<pre><code class="ruby">def hello(x)
-    x.hi
-end
+<pre><code class="ruby">eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiYWRtaW4iOnRydWV9
 </code></pre>
 
-<p>因此只要 x 將帶有 <code>hi</code> 的方法都可以使用，不管是人或是動物</p>
+<h3>3. Signature</h3>
 
-<p><a href="http://www.ithome.com.tw/voice/88063">進一步思考Duck typing</a></p>
-
-<p>參考文件：</p>
+<p>由三個部分組成</p>
 
 <ul>
-<li><a href="http://rockssdlog.blogspot.tw/2012/03/oo-solid.html">白話- OO設計原則 (SOLID原則) - 附生活實例</a></li>
-<li><a href="http://ithelp.ithome.com.tw/search?tab=article&amp;search=%E8%BB%9F%E9%AB%94%E8%B7%AF%E4%B8%8A%E4%B8%8D%E5%AD%A4%E5%96%AE&amp;page=1">軟體路上不孤單</a></li>
-<li><a href="http://122.146.238.121/wordpress/?cat=95">Design Principle</a></li>
-<li><a href="http://slides.com/jaceju/design-patterns-by-examples/#/">從實例學設計模式</a></li>
-<li><a href="https://blog.jason.party/">Bassist 中勝</a></li>
+<li>header (base64後的)</li>
+<li>payload (base64後的)</li>
+<li>secret</li>
+</ul>
+
+
+<pre><code class="ruby">HMACSHA256(base64UrlEncode(header) + "." + base64UrlEncode(payload), 'secret')
+</code></pre>
+
+<blockquote><p>secret 要保存在 server 端，jwt 的 簽發驗證都必須使用這個 secret，當其他人得知這個 secret，那就意味著客戶端是可以自我簽發 jwt ，因此在任何場景都不應該外流</p></blockquote>
+
+<p>進行 base64 加密</p>
+
+<pre><code class="ruby">SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+</code></pre>
+
+<p>最後由三個部分由 <code>.</code> 組成</p>
+
+<pre><code class="ruby">eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIxMjM0NTY3ODkwIiwibmFtZSI6IkpvaG4gRG9lIiwiaWF0IjoxNTE2MjM5MDIyfQ.SflKxwRJSMeKKF2QT4fwpMeJf36POk6yJV_adQssw5c
+</code></pre>
+
+<h1>使用方法</h1>
+
+<p>在發 request 的時候在 header 加入 <code>Authorization: Bearer &lt;token&gt;</code></p>
+
+<pre><code class="ruby">post('api/user/1', {
+  headers: {
+    'Authorization': 'Bearer ' + token
+  }
+})
+</code></pre>
+
+<p><img src="https://cdn.auth0.com/content/jwt/jwt-diagram.png" alt="" /></p>
+
+<h1>優點</h1>
+
+<ul>
+<li>跨語言，因為 json 格式大部分語言都可使用</li>
+<li>可儲存一些簡單但非敏感的商業邏輯 - role ..</li>
+<li>構成內容簡單，佔用 Size 小方便傳輸</li>
+<li>不需在 server 保存 session，所以它易於應用的擴展</li>
+</ul>
+
+
+<h1>安全相關 Security</h1>
+
+<ul>
+<li>Base64 是可逆的加密方式，不適合存放敏感訊息，因為該部分是客戶端可解密的部分</li>
+<li>用來加密的 Secret 要保護好，存在 server 端</li>
+<li>使用 Https 協議 - 避免敏感訊息被嗅探</li>
+<li>使用 HttpOnly 來防止 Cookie 被 JavaScript 讀取，從而避免跨站腳本攻擊（XSS攻擊）</li>
+</ul>
+
+
+<h1>JWT的適用場景</h1>
+
+<ul>
+<li>一次性驗證  ex: 信件中的連結</li>
+<li>restful api 的無狀態認證</li>
+<li>單點登錄+會話管理(不推薦，絕大多數情況下，傳統的 cookie-session 機制工作得更好)</li>
+</ul>
+
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="https://jwt.io/">JWT</a></li>
+<li><a href="https://www.jianshu.com/p/576dbf44b2ae">什麼是 JWT &ndash; JSON WEB TOKEN</a></li>
+<li><a href="https://hk.saowen.com/a/e86e2d932aa9b5dc3d11d639e9940eb55812f030029fac54245f6d1f9eef6f23">不要用JWT替代session管理（上）：全面瞭解Token,JWT,OAuth,SAML,SSO</a></li>
+<li><a href="https://blog.leapoahead.com/2015/09/06/understanding-jwt/">JSON Web Token - 在Web應用間安全地傳遞訊息</a></li>
+<li><a href="http://blog.leapoahead.com/2015/09/07/user-authentication-with-jwt/">八幅漫畫理解使用JSON Web Token設計單點登錄系統</a></li>
+<li><a href="https://hk.saowen.com/a/afdc2b0fb445a973bed63330596f8588ad8f86da0faf6b5af5211ff3e29c2da8">理解JWT的使用場景和優劣</a></li>
 </ul>
 
 ]]></content>
