@@ -45,9 +45,9 @@ GOPATH 就是 golang 的 Workspace
 設定在`.bashrc` or `.zshrc`
 
 ```go
-// 預設會在 user 底下的 go，可以不用另外設定 GOPATH 
+// 預設會在 user 底下的 go，可以不用另外設定 GOPATH
 export GOPATH="$HOME/Golang"
-export GOBIN="$GOPATH/bin" 
+export GOBIN="$GOPATH/bin"
 export PATH="$PATH:$GOBIN"
 ```
 
@@ -108,9 +108,9 @@ func main() {
 ```
 
  `go run main.go` 就可以直接執行
- 
+
  另外也可以先 `build` 產生執行檔於當前目錄
- 
+
  在該目錄跑 `go build main.go` 後執行 `./main`
 
 ### package
@@ -125,7 +125,7 @@ package test
 而 go 又分兩種專案
 
 * 執行檔 (executable)
-	* created for running 
+	* created for running
 	* name should be main
 	* always `func main`
 * 函式庫 (library)
@@ -223,8 +223,9 @@ go help clean
 5. 沒用到的參數可用 blank identifier (_) 來代替
 ```
 
-### 單引號 / 雙引號 / 反引號
+* [What's in a name?](https://talks.golang.org/2014/names.slide#1)
 
+### 單引號 / 雙引號 / 反引號
 
 * 雙引號
 
@@ -253,22 +254,22 @@ fmt.Printf(`\u65e5\u672c\u8a9e`) // \u65e5\u672c\u8a9e
 
 ```go
 // = 使用必須使用先var聲明
-var a 
+var a
 // 不定型別的變數
-var a int 
+var a int
 // 宣告成 int
-var a int = 10 
+var a int = 10
 // 初始化同時宣告
-var a, b int 
+var a, b int
 // a 跟 b 都是 int，沒有給值 int 預設是 0
-var a, b int = 100, 50 
+var a, b int = 100, 50
 // 同時宣告一樣 type 並給值
-var a = 10 
+var a = 10
 // 自動推斷型別
 var a, b = 0, "test"
 // 同時宣告自動判斷 type (必須是同時給值)
 var (
-   a bool = false 
+   a bool = false
    b int
    c = "hello"
 )
@@ -303,6 +304,24 @@ age = "naveen" // golang 是強型別，一但定義就無法轉換成其他型�
 // cannot use "test" (type string) as type int in assignment
 
 sum := float64(0) // 宣告並給值
+```
+
+### redeclaration
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	a, b := 1, 2
+	// 同時進行 declare + assign
+	// 一定要有一個 new declare 否則會 no new variables on left side of :=
+	a, c := 3, 4
+	fmt.Println(a, b, c)
+}
 ```
 
 # <span id="constants"> 常數 Constants </span>
@@ -340,7 +359,7 @@ func main() {
 ```go
 package main
 
-func main() {  
+func main() {
     const a = 55 //allowed
     a = 89 //reassignment not allowed
 }
@@ -384,9 +403,9 @@ func main() {
 	fmt.Println("intVar", intVar, "\nint32Var", int32Var, "\nfloat64Var", float64Var, "\ncomplex64Var", complex64Var)
 }
 
-// intVar 5 
-// int32Var 5 
-// float64Var 5 
+// intVar 5
+// int32Var 5
+// float64Var 5
 // complex64Var (5+0i)
 ```
 
@@ -420,6 +439,42 @@ func main() {
 * [fmt](https://golang.org/pkg/fmt/)
 * [Unicode Character Set and UTF-8, UTF-16, UTF-32 Encoding](https://naveenr.net/unicode-character-set-and-utf-8-utf-16-utf-32-encoding/)
 * [UTF-8 encoder/decoder](https://mothereff.in/utf-8#%C3%B1)
+
+
+```go
+Type(value)
+```
+
+```go
+package main
+
+import "fmt"
+
+func main(){
+	a, b := 100, 2.5
+	// float64 轉 int 會有小數點不見得問題
+	a = a * int(b)
+	fmt.Println(a)
+
+	a, b = 100, 2.5
+	// 因為 a type 是 int 所以最後必須再轉回 int
+	a = int(float64(a) * b)
+	fmt.Println(a)
+}
+```
+
+造成第一個是 `3.5` 第二個是 `3` 原因是在於
+
+```go
+// 如果左側運算子類型確定，則右側轉為左側類型再運算
+var num1 int = 7
+fmt.Println(num1 / 2)
+fmt.Println(num1 / 2.0)
+
+// 如果左側類型不確定，則根據右側類型推導左側類型
+fmt.Println(7 / 2)
+fmt.Println(7 / 2.0)
+```
 
 ### Basic Types
 
@@ -559,15 +614,15 @@ func main() {
 
 /**
 6
-e5 93 88 e5 9b 89 
-哈 囉 
+e5 93 88 e5 9b 89
+哈 囉
 哈 starts at byte 0
 囉 starts at byte 3
 
 
 6
-53 65 c3 b1 6f 72 
-S e ñ o r 
+53 65 c3 b1 6f 72
+S e ñ o r
 S starts at byte 0
 e starts at byte 1
 ñ starts at byte 2
@@ -635,11 +690,11 @@ func main() {
 ```go
 package main
 
-import (  
+import (
     "fmt"
 )
 
-func main() {  
+func main() {
     c1 := complex(5, 7)
     c2 := 8 + 27i
     cadd := c1 + c2
@@ -673,19 +728,6 @@ func main() {
 // 3
 ```
 
-造成第一個是 `3.5` 第二個是 `3` 原因是在於
-
-```go
-// 如果左側運算子類型確定，則右側轉為左側類型再運算
-var num1 int = 7
-fmt.Println(num1 / 2)
-fmt.Println(num1 / 2.0)
-
-// 如果左側類型不確定，則根據右側類型推導左側類型
-fmt.Println(7 / 2)
-fmt.Println(7 / 2.0)
-```
-
 * [Conversions](https://golang.org/ref/spec#Conversions)
 * [go：整數除以浮點數的問題](https://segmentfault.com/q/1010000011519048)
 
@@ -696,14 +738,14 @@ fmt.Println(7 / 2.0)
 ```go
 fmt.Println("Hello") // Hello
 
-A := "Hello"  
+A := "Hello"
 fmt.Println(A) // Hello
 
-B := "Hello"  
+B := "Hello"
 fmt.Printf("%s, world!", B) // Hello, world!
 
-C := []int{1, 2, 3}  
-fmt.Println(C) // [1 2 3]  
+C := []int{1, 2, 3}
+fmt.Println(C) // [1 2 3]
 
 var Foo bool = false
 fmt.Printf("Type: %T Value: %v\n", Foo, Foo) // Type: bool Value: false
@@ -721,7 +763,7 @@ fmt.Printf("%T %T %T %T\n", i, f, b, s) // int float64 bool string
 // "" (the empty string) for string
 ```
 
-參考文件: 
+參考文件:
 
 * [[golangbot.com] learn-golang-series](https://golangbot.com/learn-golang-series/)
 * [strconv pkg](https://golang.org/pkg/strconv/)

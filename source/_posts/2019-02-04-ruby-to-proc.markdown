@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Ruby - &: with to_proc"
+title: "Ruby - &: and &method with to_proc"
 date: 2019-02-04 17:58:51 +0800
 comments: true
 categories: ruby
@@ -59,9 +59,21 @@ p = Proc.new{ |n| n ** 2 }
 [1, 2, 3].inject('+') # => 6
 ```
 
+# &method
+
+> Looks up the named method as a receiver in obj, returning a Method object (or raising NameError). The Method object acts as a closure in obj's object instance, so instance variables and the value of self remain available.
+
+如果要將原本的值變成參數，就要改用 `&method`
+
+```ruby
+[1, 2, 3].map { |num| puts(num) }
+[1, 2, 3].map(&method(:puts))
+```
+
 參考文件
 
 * [Ruby 魔法之 Symbol#to_proc() 方法](https://www.jianshu.com/p/4fa98d829fc9)
 * [How Does Symbol#to_proc Work?](http://benjamintan.io/blog/2015/03/16/how-does-symbol-to_proc-work/)
 * [What are :+ and &:+ in Ruby?](https://stackoverflow.com/questions/2697024/what-are-and-in-ruby/51572627)
 * [What does map(&:name) mean in Ruby?](https://stackoverflow.com/questions/1217088/what-does-mapname-mean-in-ruby)
+* [method](https://ruby-doc.org/core-2.6.1/Object.html#method-i-method)
