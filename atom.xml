@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-11T20:48:23+08:00</updated>
+  <updated>2019-02-12T21:22:21+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,362 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby - New Features in Ruby 2.6]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/12/new-features-in-ruby-2-6/"/>
+    <updated>2019-02-12T21:13:17+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/12/new-features-in-ruby-2-6</id>
+    <content type="html"><![CDATA[<p>ruby 2.6 多了一些有趣的新特性和功能，來了解一下</p>
+
+<!-- more -->
+
+
+<h1>Endless ranges</h1>
+
+<p>利用 <code>..</code> 代表無窮的範圍</p>
+
+<blockquote><p>早期的寫法 <code>100..Float::INFINITY</code></p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">n</span> <span class="o">=</span> <span class="mi">123</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">case</span> <span class="n">n</span>
+</span><span class='line'><span class="k">when</span> <span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">9</span> <span class="k">then</span> <span class="s1">&#39;Single digit&#39;</span>
+</span><span class='line'><span class="k">when</span> <span class="mi">10</span><span class="o">.</span><span class="n">.</span><span class="mi">99</span> <span class="k">then</span> <span class="s1">&#39;Two digit&#39;</span>
+</span><span class='line'><span class="k">when</span> <span class="mi">100</span><span class="o">.</span><span class="n">.</span> <span class="k">then</span> <span class="s1">&#39;Three or more&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># =&gt; &quot;Three or more&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>但也要小心，會一直跑下去</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="p">{</span><span class="o">|</span><span class="n">index</span><span class="o">|</span> <span class="nb">puts</span> <span class="n">index</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Kernel#then (Kernel#yield_self alias)</h1>
+
+<p>新增一個 <code>yield_self</code> 新的 alias <code>then</code></p>
+
+<p>主要跟 <code>tap</code> 相反，<code>tap</code> 最後是返回原本的 <code>object</code>，<code>then</code> 則是返回 <code>block</code></p>
+
+<p>大概是下面這樣的差別</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Object</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">tap</span>
+</span><span class='line'>    <span class="k">yield</span> <span class="nb">self</span>
+</span><span class='line'>    <span class="nb">self</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>   <span class="k">def</span> <span class="nf">yield_self</span>
+</span><span class='line'>    <span class="k">yield</span><span class="p">(</span><span class="nb">self</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>範例</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="mi">3</span><span class="o">.</span><span class="n">next</span><span class="o">.</span><span class="n">then</span> <span class="p">{</span><span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span><span class="o">**</span><span class="n">x</span> <span class="p">}</span><span class="o">.</span><span class="n">to_s</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;256&quot;</span>
+</span><span class='line'><span class="s2">&quot;my string&quot;</span><span class="o">.</span><span class="n">yield_self</span> <span class="p">{</span><span class="o">|</span><span class="n">s</span><span class="o">|</span> <span class="n">s</span><span class="o">.</span><span class="n">upcase</span> <span class="p">}</span>
+</span><span class='line'><span class="c1">#=&gt; &quot;MY STRING&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cisbn</span> <span class="o">=</span> <span class="s1">&#39;978-1-93778-549-9&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">isbn</span><span class="o">.</span><span class="n">gsub</span><span class="p">(</span><span class="s1">&#39;-&#39;</span><span class="p">,</span> <span class="s1">&#39;&#39;</span><span class="p">)</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">then</span> <span class="p">{</span> <span class="o">|</span><span class="n">isbn</span><span class="o">|</span> <span class="no">URI</span><span class="p">(</span><span class="s2">&quot;</span><span class="si">#{</span><span class="no">API_URL</span><span class="si">}</span><span class="s2">?q=isbn:</span><span class="si">#{</span><span class="n">isbn</span><span class="si">}</span><span class="s2">&quot;</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">then</span> <span class="p">{</span> <span class="o">|</span><span class="n">uri</span><span class="o">|</span> <span class="ss">Net</span><span class="p">:</span><span class="no">HTTP</span><span class="o">.</span><span class="n">get</span><span class="p">(</span><span class="n">uri</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">then</span> <span class="p">{</span> <span class="o">|</span><span class="n">json_response</span><span class="o">|</span> <span class="no">JSON</span><span class="o">.</span><span class="n">parse</span><span class="p">(</span><span class="n">json_response</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>  <span class="o">.</span><span class="n">then</span> <span class="p">{</span> <span class="o">|</span><span class="n">response</span><span class="o">|</span> <span class="n">response</span><span class="o">.</span><span class="n">dig</span><span class="p">(</span><span class="s1">&#39;items&#39;</span><span class="p">,</span> <span class="s1">&#39;volumeInfo&#39;</span><span class="p">)</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6.1/Object.html#method-i-yield_self">yield_self</a></li>
+</ul>
+
+
+<h1>Enumerable#chain and Enumerator#+</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">chain</span><span class="p">((</span><span class="mi">5</span><span class="o">.</span><span class="n">.</span><span class="mi">7</span><span class="p">),</span> <span class="o">[</span><span class="mi">9</span><span class="p">,</span> <span class="mi">10</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">to_a</span>
+</span><span class='line'><span class="c1"># =&gt; [1, 2, 3, 5, 6, 7, 9, 10]</span>
+</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">3</span><span class="p">)</span><span class="o">.</span><span class="n">each</span> <span class="o">+</span> <span class="p">(</span><span class="mi">5</span><span class="o">.</span><span class="n">.</span><span class="mi">7</span><span class="p">)</span> <span class="o">+</span> <span class="p">(</span><span class="mi">9</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">to_a</span>
+</span><span class='line'><span class="c1"># =&gt; [1, 2, 3, 5, 6, 7, 9, 10]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Composition operators &lt;&lt; and >> to Proc and Method</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">f</span> <span class="o">=</span> <span class="nb">proc</span><span class="p">{</span><span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">2</span><span class="p">}</span>
+</span><span class='line'><span class="n">g</span> <span class="o">=</span> <span class="nb">proc</span><span class="p">{</span><span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span> <span class="o">*</span> <span class="mi">3</span><span class="p">}</span>
+</span><span class='line'><span class="p">(</span><span class="n">f</span> <span class="o">&lt;&lt;</span> <span class="n">g</span><span class="p">)</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># -&gt; 11; identical to f(g(3))</span>
+</span><span class='line'><span class="p">(</span><span class="n">f</span> <span class="o">&gt;&gt;</span> <span class="n">g</span><span class="p">)</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">3</span><span class="p">)</span> <span class="c1"># -&gt; 15; identical to g(f(3))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Array#union and Array#difference</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span>
+</span><span class='line'><span class="n">b</span> <span class="o">=</span> <span class="o">[</span><span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="o">]</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">union</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="c1"># =&gt; [1, 2, 3, 4]</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">difference</span><span class="p">(</span><span class="n">b</span><span class="p">)</span> <span class="c1"># =&gt; [1]</span>
+</span><span class='line'><span class="n">a</span> <span class="o">|</span> <span class="n">b</span> <span class="c1"># =&gt; [1, 2, 3, 4]</span>
+</span><span class='line'><span class="n">a</span> <span class="o">&amp;</span> <span class="n">b</span> <span class="c1"># =&gt; [2, 3]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6/Array.html#method-i-union">union</a></li>
+<li><a href="https://ruby-doc.org/core-2.6/Array.html#method-i-difference">difference</a></li>
+</ul>
+
+
+<h1>Array#filter (Array#select alias)</h1>
+
+<p>主要是其他語言 <code>Javascript, PHP, Haskell, Java 8, Scala, R</code> 等等都是用 <code>fliter</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="ss">:foo</span><span class="p">,</span> <span class="ss">:bar</span><span class="o">].</span><span class="n">filter</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="o">|</span> <span class="n">x</span> <span class="o">==</span> <span class="ss">:foo</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Enumerable#to_h with block</h1>
+
+<p><code>to_h</code> 支援 block，就可以直接作轉換 <code>key</code>, <code>value</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">hash</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">foo</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">bar</span><span class="p">:</span> <span class="mi">3</span> <span class="p">}</span>
+</span><span class='line'><span class="nb">hash</span><span class="o">.</span><span class="n">to_h</span> <span class="p">{</span> <span class="o">|</span><span class="n">k</span><span class="p">,</span> <span class="n">v</span><span class="o">|</span> <span class="o">[</span><span class="n">k</span><span class="o">.</span><span class="n">upcase</span><span class="p">,</span> <span class="n">v</span><span class="o">*</span><span class="n">v</span><span class="o">]</span> <span class="p">}</span> <span class="c1">#=&gt; { FOO: 4, BAR: 9 }</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ruby 2.5:</span>
+</span><span class='line'><span class="c1"># hash.map { |k, v| [k.upcase, v*v] }.to_h</span>
+</span><span class='line'><span class="c1"># hash.reduce({}) { |result, (k, v)| result.merge(k.upcase =&gt; v*v) }</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Enumerator::ArithmeticSequence</h1>
+
+<p>之前無法用 <code>first</code> 和 <code>last</code></p>
+
+<ul>
+<li><code>Range#step</code></li>
+<li><code>Numeric#step</code></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">last</span>
+</span><span class='line'><span class="c1"># 9</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">last</span>
+</span><span class='line'><span class="c1"># ruby 2.5:</span>
+</span><span class='line'><span class="c1"># NoMethodError: undefined method `last&#39; for #&lt;Enumerator: 1..10:step(2)&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>%</code> is <code>step</code> alias</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">((</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span> <span class="o">%</span> <span class="mi">2</span><span class="p">)</span><span class="o">.</span><span class="n">to_a</span>
+</span><span class='line'><span class="c1">#  =&gt; [1, 3, 5, 7, 9]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>另一個改變</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># false - Ruby 2.5 (and older)</span>
+</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="o">==</span> <span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">10</span><span class="p">)</span><span class="o">.</span><span class="n">step</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># true - Ruby 2.6</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Merge multiple hashes</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">a</span><span class="p">:</span> <span class="mi">1</span> <span class="p">}</span>
+</span><span class='line'><span class="n">b</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">b</span><span class="p">:</span> <span class="mi">2</span> <span class="p">}</span>
+</span><span class='line'><span class="n">c</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">c</span><span class="p">:</span> <span class="mi">3</span> <span class="p">}</span>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">b</span><span class="p">,</span> <span class="n">c</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># {:a=&gt;1, :b=&gt;2, :c=&gt;3}</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">b</span><span class="p">)</span><span class="o">.</span><span class="n">merge</span><span class="p">(</span><span class="n">c</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># ruby 2.5:</span>
+</span><span class='line'><span class="c1"># {:a=&gt;1, :b=&gt;2, :c=&gt;3}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Random.bytes</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Random</span><span class="o">.</span><span class="n">bytes</span><span class="p">(</span><span class="mi">8</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; &quot;\xA4\xFB\xC4\x94\xC5U\xA0\x1A&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># ruby 2.5</span>
+</span><span class='line'><span class="no">Random</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">bytes</span><span class="p">(</span><span class="mi">10</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; &quot;\xCEn@\xFA\x93\xB3\xB9\x80p\xA9&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Range#=== now uses uses #cover? instead of #include?</h1>
+
+<p><code>===</code>: <code>case equality</code>，原本是用 <code>include?</code> 的方式，改為用 <code>cover?</code></p>
+
+<ul>
+<li>include? 會將所有值一一拿出來做比對，因此效率較差</li>
+<li>cover?   只會取出開頭和結尾，去比對，值 => 開頭 &amp;&amp; 值 &lt;= 結尾，效能比較好</li>
+</ul>
+
+
+<blockquote><p>cover?</p>
+
+<p>Returns true if obj is between the begin and end of the range.</p>
+
+<p>This tests begin &lt;= obj &lt;= end when exclude_end? is false and begin &lt;= obj &lt; end when exclude_end? is true.</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="o">.</span><span class="n">.</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cover?</span><span class="p">(</span><span class="s2">&quot;c&quot;</span><span class="p">)</span>  <span class="c1">#=&gt; true</span>
+</span><span class='line'><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="o">.</span><span class="n">.</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cover?</span><span class="p">(</span><span class="s2">&quot;5&quot;</span><span class="p">)</span>  <span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="o">.</span><span class="n">.</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">cover?</span><span class="p">(</span><span class="s2">&quot;cc&quot;</span><span class="p">)</span> <span class="c1">#=&gt; true</span>
+</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">cover?</span><span class="p">(</span><span class="mi">2</span><span class="o">.</span><span class="n">.</span><span class="mi">3</span><span class="p">)</span>     <span class="c1">#=&gt; true</span>
+</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">cover?</span><span class="p">(</span><span class="mi">0</span><span class="o">.</span><span class="n">.</span><span class="mi">6</span><span class="p">)</span>     <span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">5</span><span class="p">)</span><span class="o">.</span><span class="n">cover?</span><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="o">.</span><span class="mi">6</span><span class="p">)</span>    <span class="c1">#=&gt; true</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="o">.</span><span class="n">.</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s2">&quot;g&quot;</span><span class="p">)</span>   <span class="c1">#=&gt; true</span>
+</span><span class='line'><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="o">.</span><span class="n">.</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s2">&quot;A&quot;</span><span class="p">)</span>   <span class="c1">#=&gt; false</span>
+</span><span class='line'><span class="p">(</span><span class="s2">&quot;a&quot;</span><span class="o">.</span><span class="n">.</span><span class="s2">&quot;z&quot;</span><span class="p">)</span><span class="o">.</span><span class="n">include?</span><span class="p">(</span><span class="s2">&quot;cc&quot;</span><span class="p">)</span>  <span class="c1">#=&gt; false</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;date&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">case</span> <span class="no">DateTime</span><span class="o">.</span><span class="n">now</span>
+</span><span class='line'><span class="k">when</span> <span class="no">Date</span><span class="o">.</span><span class="n">today</span><span class="o">.</span><span class="n">.</span><span class="no">Date</span><span class="o">.</span><span class="n">today</span><span class="o">+</span><span class="mi">1</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s1">&#39;matched&#39;</span>
+</span><span class='line'><span class="k">else</span>
+</span><span class='line'>  <span class="nb">puts</span> <span class="s1">&#39;not matched&#39;</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6.1/Range.html#method-i-cover-3F">cover?</a></li>
+<li><a href="https://ruby-doc.org/core-2.6.1/Range.html#method-i-include-3F">include?</a></li>
+</ul>
+
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://github.com/ruby/ruby/blob/trunk/doc/NEWS-2.6.0">NEWS-2.6.0</a></li>
+<li><a href="https://nithinbekal.com/posts/ruby-2-6/">What&rsquo;s new in Ruby 2.6</a></li>
+<li><a href="https://medium.com/tailor-tech/whats-new-in-ruby-2-6-a4774f3631c1">What’s new in Ruby 2.6?</a></li>
+<li><a href="https://www.rubyguides.com/2018/11/ruby-2-6-new-features/">9 New Features in Ruby 2.6</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Golang - Maps in Action]]></title>
@@ -645,9 +1001,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Super vs Super()]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-super/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-super/"/>
     <updated>2019-02-04T18:19:10+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-super</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-super</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -742,9 +1098,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - A::B vs Module a; Class B]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-scope/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-scope/"/>
     <updated>2019-02-04T18:18:05+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-scope</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-scope</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -866,9 +1222,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Singleton Method vs Singleton Class vs Singleton Module]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-singleton/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-singleton/"/>
     <updated>2019-02-04T18:15:16+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-singleton</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-singleton</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1251,9 +1607,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Hash With Default Values]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-hash-default-value/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-hash-default-value/"/>
     <updated>2019-02-04T18:12:51+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-hash-default-value</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-hash-default-value</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1408,9 +1764,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Array With Default Value]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-array-default-value/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-array-default-value/"/>
     <updated>2019-02-04T18:10:41+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-array-default-value</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-array-default-value</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1457,9 +1813,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Regular Expressions Security]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-regular-expressions-security/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-regular-expressions-security/"/>
     <updated>2019-02-04T18:10:36+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-regular-expressions-security</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-regular-expressions-security</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1507,10 +1863,10 @@
   </entry>
   
   <entry>
-    <title type="html"><![CDATA[Ruby - &: With To_proc]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-to-proc/"/>
+    <title type="html"><![CDATA[Ruby - &: And &method With To_proc]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-to-proc/"/>
     <updated>2019-02-04T17:58:51+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-to-proc</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-to-proc</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1594,6 +1950,19 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>&amp;method</h1>
+
+<blockquote><p>Looks up the named method as a receiver in obj, returning a Method object (or raising NameError). The Method object acts as a closure in obj&rsquo;s object instance, so instance variables and the value of self remain available.</p></blockquote>
+
+<p>如果要將原本的值變成參數，就要改用 <code>&amp;method</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">num</span><span class="o">|</span> <span class="nb">puts</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="nb">method</span><span class="p">(</span><span class="ss">:puts</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <p>參考文件</p>
 
 <ul>
@@ -1601,6 +1970,7 @@
 <li><a href="http://benjamintan.io/blog/2015/03/16/how-does-symbol-to_proc-work/">How Does Symbol#to_proc Work?</a></li>
 <li><a href="https://stackoverflow.com/questions/2697024/what-are-and-in-ruby/51572627">What are :+ and &amp;:+ in Ruby?</a></li>
 <li><a href="https://stackoverflow.com/questions/1217088/what-does-mapname-mean-in-ruby">What does map(&amp;:name) mean in Ruby?</a></li>
+<li><a href="https://ruby-doc.org/core-2.6.1/Object.html#method-i-method">method</a></li>
 </ul>
 
 ]]></content>
@@ -1608,9 +1978,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Instance_eval vs Class_eval vs Module_eval]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-eval/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-eval/"/>
     <updated>2019-02-04T17:54:57+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-eval</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-eval</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1726,9 +2096,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - %Q, %q, %W, %w, %r, %s, %I, %i]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-percent/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-percent/"/>
     <updated>2019-02-04T17:51:40+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-percent</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-percent</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1804,9 +2174,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Dry Your Code With Tap]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-tap/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tap/"/>
     <updated>2019-02-04T17:46:18+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-tap</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tap</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1921,9 +2291,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Precedence With Block( {} vs do..end ) and Operator( && vs and, || vs or )]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-precedence/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-precedence/"/>
     <updated>2019-02-04T17:45:07+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-precedence</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-precedence</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2003,9 +2373,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Multiline]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-multiline/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-multiline/"/>
     <updated>2019-02-04T17:43:18+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-multiline</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-multiline</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2117,9 +2487,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Attr_accessor vs Attr_writer vs Attr_reader]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-attr/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-attr/"/>
     <updated>2019-02-04T17:40:29+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-attr</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-attr</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2210,9 +2580,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Alias vs Alias Method]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-alias/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-alias/"/>
     <updated>2019-02-04T17:38:58+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-alias</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-alias</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2424,9 +2794,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - ||= (Or-equals) Mean?]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-or-equals/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-or-equals/"/>
     <updated>2019-02-04T17:28:16+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-or-equals</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-or-equals</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2513,9 +2883,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - String vs Symbol]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-string-vs-symbol/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-string-vs-symbol/"/>
     <updated>2019-02-04T17:27:08+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-string-vs-symbol</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-string-vs-symbol</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2559,9 +2929,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - == vs === vs Eql? Vs Equal?]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-equal/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-equal/"/>
     <updated>2019-02-04T17:25:33+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-equal</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-equal</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2676,9 +3046,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Extend vs Include (Mixin)]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-extend-vs-include/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-extend-vs-include/"/>
     <updated>2019-02-04T17:23:28+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-extend-vs-include</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-extend-vs-include</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2765,128 +3135,6 @@
 
 <ul>
 <li><a href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/">Ruby 中的 Include Extend Require Load</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby - Proc vs Lambda]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-proc-vs-lambda/"/>
-    <updated>2019-02-04T17:17:43+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-proc-vs-lambda</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<ul>
-<li>lambda 會檢查參數的個數</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">args</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span><span class="p">)</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 也可以寫 proc { |x, y, z| x + y + z }</span>
-</span><span class='line'><span class="nb">proc</span> <span class="o">=</span> <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">|</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span> <span class="p">}</span>
-</span><span class='line'><span class="nb">lambda</span> <span class="o">=</span> <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">,</span> <span class="n">z</span><span class="o">|</span> <span class="n">x</span> <span class="o">+</span> <span class="n">y</span> <span class="o">+</span> <span class="n">z</span> <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">args</span><span class="p">(</span><span class="nb">proc</span><span class="p">)</span>
-</span><span class='line'><span class="c1"># =&gt; 6</span>
-</span><span class='line'><span class="n">args</span><span class="p">(</span><span class="nb">lambda</span><span class="p">)</span>
-</span><span class='line'><span class="c1">#ArgumentError: wrong number of arguments (4 for 3)</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<ul>
-<li>lambda 的 return 會繼續執行，proc 則會直接終止</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">proc_return</span>
-</span><span class='line'>  <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="k">return</span> <span class="s2">&quot;Proc.new&quot;</span> <span class="p">}</span><span class="o">.</span><span class="n">call</span>
-</span><span class='line'>  <span class="k">return</span> <span class="s2">&quot;proc_return method finished&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">def</span> <span class="nf">lambda_return</span>
-</span><span class='line'>  <span class="c1"># 也可以寫成 lambda { return &quot;lambda&quot; }</span>
-</span><span class='line'>  <span class="o">-&gt;</span> <span class="p">{</span> <span class="k">return</span> <span class="s2">&quot;lambda&quot;</span> <span class="p">}</span><span class="o">.</span><span class="n">call</span>
-</span><span class='line'>  <span class="k">return</span> <span class="s2">&quot;lambda_return method finished&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">proc_return</span>
-</span><span class='line'><span class="c1"># =&gt; &quot;Proc.new&quot;</span>
-</span><span class='line'><span class="n">lambda_return</span>
-</span><span class='line'><span class="c1"># =&gt; &quot;lambda_return method finished&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">generic_return</span><span class="p">(</span><span class="n">code</span><span class="p">)</span>
-</span><span class='line'>  <span class="n">one</span><span class="p">,</span> <span class="n">two</span>    <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
-</span><span class='line'>  <span class="n">three</span><span class="p">,</span> <span class="n">four</span> <span class="o">=</span> <span class="n">code</span><span class="o">.</span><span class="n">call</span><span class="p">(</span><span class="n">one</span><span class="p">,</span> <span class="n">two</span><span class="p">)</span>
-</span><span class='line'>  <span class="s2">&quot;</span><span class="si">#{</span><span class="n">three</span><span class="si">}</span><span class="s2"> and </span><span class="si">#{</span><span class="n">four</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">generic_return</span><span class="p">(</span><span class="o">-&gt;</span> <span class="p">(</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="p">){</span> <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">})</span>
-</span><span class='line'><span class="c1"># 也可以寫成 lambda { |x, y| return x + 1, y + 2 }</span>
-</span><span class='line'><span class="c1">#  =&gt; &quot;2 and 4&quot;</span>
-</span><span class='line'><span class="n">generic_return</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="k">return</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">})</span>
-</span><span class='line'><span class="c1"># LocalJumpError: unexpected return</span>
-</span><span class='line'><span class="n">generic_return</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">;</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span> <span class="p">})</span>
-</span><span class='line'><span class="c1">#  =&gt; &quot;4 and &quot;</span>
-</span><span class='line'><span class="n">generic_return</span><span class="p">(</span><span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">x</span><span class="p">,</span> <span class="n">y</span><span class="o">|</span> <span class="o">[</span><span class="n">x</span> <span class="o">+</span> <span class="mi">1</span><span class="p">,</span> <span class="n">y</span> <span class="o">+</span> <span class="mi">2</span><span class="o">]</span> <span class="p">})</span>
-</span><span class='line'><span class="c1">#  =&gt; &quot;2 and 4&quot;</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="http://mgleon08.github.com/blog/2016/02/06/block-yield-proc-lambda/">Ruby 中的 Block &amp; Yield &amp; Proc &amp; Lambda &amp; Method</a></li>
 </ul>
 
 ]]></content>

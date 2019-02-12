@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-11T20:48:23+08:00</updated>
+  <updated>2019-02-12T21:22:21+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -14,10 +14,248 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Ruby - New Features in Ruby 2.6]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/12/new-features-in-ruby-2-6/"/>
+    <updated>2019-02-12T21:13:17+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/12/new-features-in-ruby-2-6</id>
+    <content type="html"><![CDATA[<p>ruby 2.6 多了一些有趣的新特性和功能，來了解一下</p>
+
+<!-- more -->
+
+
+<h1>Endless ranges</h1>
+
+<p>利用 <code>..</code> 代表無窮的範圍</p>
+
+<blockquote><p>早期的寫法 <code>100..Float::INFINITY</code></p></blockquote>
+
+<pre><code class="ruby">n = 123
+
+case n
+when 1..9 then 'Single digit'
+when 10..99 then 'Two digit'
+when 100.. then 'Three or more'
+end
+
+# =&gt; "Three or more"
+</code></pre>
+
+<p>但也要小心，會一直跑下去</p>
+
+<pre><code class="ruby">(1..).each {|index| puts index }  
+</code></pre>
+
+<h1>Kernel#then (Kernel#yield_self alias)</h1>
+
+<p>新增一個 <code>yield_self</code> 新的 alias <code>then</code></p>
+
+<p>主要跟 <code>tap</code> 相反，<code>tap</code> 最後是返回原本的 <code>object</code>，<code>then</code> 則是返回 <code>block</code></p>
+
+<p>大概是下面這樣的差別</p>
+
+<pre><code class="ruby">class Object
+  def tap
+    yield self
+    self
+  end
+
+   def yield_self
+    yield(self)
+  end
+end
+</code></pre>
+
+<p>範例</p>
+
+<pre><code class="ruby">3.next.then {|x| x**x }.to_s             
+#=&gt; "256"
+"my string".yield_self {|s| s.upcase }   
+#=&gt; "MY STRING"
+</code></pre>
+
+<pre><code class="ruby">cisbn = '978-1-93778-549-9'
+
+isbn.gsub('-', '')
+  .then { |isbn| URI("#{API_URL}?q=isbn:#{isbn}") }
+  .then { |uri| Net:HTTP.get(uri) }
+  .then { |json_response| JSON.parse(json_response) }
+  .then { |response| response.dig('items', 'volumeInfo') }
+</code></pre>
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6.1/Object.html#method-i-yield_self">yield_self</a></li>
+</ul>
+
+
+<h1>Enumerable#chain and Enumerator#+</h1>
+
+<pre><code class="ruby">(1..3).chain((5..7), [9, 10]).to_a 
+# =&gt; [1, 2, 3, 5, 6, 7, 9, 10]
+(1..3).each + (5..7) + (9..10).to_a
+# =&gt; [1, 2, 3, 5, 6, 7, 9, 10]
+</code></pre>
+
+<h1>Composition operators &lt;&lt; and >> to Proc and Method</h1>
+
+<pre><code class="ruby">f = proc{|x| x + 2}
+g = proc{|x| x * 3}
+(f &lt;&lt; g).call(3) # -&gt; 11; identical to f(g(3))
+(f &gt;&gt; g).call(3) # -&gt; 15; identical to g(f(3))
+</code></pre>
+
+<h1>Array#union and Array#difference</h1>
+
+<pre><code class="ruby">a = [1, 2, 3]
+b = [2, 3, 4]
+
+a.union(b) # =&gt; [1, 2, 3, 4]
+a.difference(b) # =&gt; [1]
+a | b # =&gt; [1, 2, 3, 4]
+a &amp; b # =&gt; [2, 3]
+</code></pre>
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6/Array.html#method-i-union">union</a></li>
+<li><a href="https://ruby-doc.org/core-2.6/Array.html#method-i-difference">difference</a></li>
+</ul>
+
+
+<h1>Array#filter (Array#select alias)</h1>
+
+<p>主要是其他語言 <code>Javascript, PHP, Haskell, Java 8, Scala, R</code> 等等都是用 <code>fliter</code></p>
+
+<pre><code class="ruby">[:foo, :bar].filter { |x| x == :foo }
+</code></pre>
+
+<h1>Enumerable#to_h with block</h1>
+
+<p><code>to_h</code> 支援 block，就可以直接作轉換 <code>key</code>, <code>value</code></p>
+
+<pre><code class="ruby">hash = { foo: 2, bar: 3 }
+hash.to_h { |k, v| [k.upcase, v*v] } #=&gt; { FOO: 4, BAR: 9 }
+
+# ruby 2.5:
+# hash.map { |k, v| [k.upcase, v*v] }.to_h
+# hash.reduce({}) { |result, (k, v)| result.merge(k.upcase =&gt; v*v) }
+</code></pre>
+
+<h1>Enumerator::ArithmeticSequence</h1>
+
+<p>之前無法用 <code>first</code> 和 <code>last</code></p>
+
+<ul>
+<li><code>Range#step</code></li>
+<li><code>Numeric#step</code></li>
+</ul>
+
+
+<pre><code class="ruby">(1..10).step(2).last
+# 9
+
+(1..10).step(2).last
+# ruby 2.5:
+# NoMethodError: undefined method `last' for #&lt;Enumerator: 1..10:step(2)&gt;
+</code></pre>
+
+<p><code>%</code> is <code>step</code> alias</p>
+
+<pre><code class="ruby">((1..10) % 2).to_a
+#  =&gt; [1, 3, 5, 7, 9]
+</code></pre>
+
+<p>另一個改變</p>
+
+<pre><code class="ruby">(1..10).step(2) == (1..10).step(2)
+# false - Ruby 2.5 (and older)
+(1..10).step(2) == (1..10).step(2)
+# true - Ruby 2.6
+</code></pre>
+
+<h1>Merge multiple hashes</h1>
+
+<pre><code class="ruby">a = { a: 1 }
+b = { b: 2 }
+c = { c: 3 }
+a.merge(b, c)
+# {:a=&gt;1, :b=&gt;2, :c=&gt;3}
+
+
+a.merge(b).merge(c)
+# ruby 2.5:
+# {:a=&gt;1, :b=&gt;2, :c=&gt;3}
+</code></pre>
+
+<h1>Random.bytes</h1>
+
+<pre><code class="ruby">Random.bytes(8)
+# =&gt; "\xA4\xFB\xC4\x94\xC5U\xA0\x1A"
+
+# ruby 2.5
+Random.new.bytes(10)
+# =&gt; "\xCEn@\xFA\x93\xB3\xB9\x80p\xA9"
+</code></pre>
+
+<h1>Range#=== now uses uses #cover? instead of #include?</h1>
+
+<p><code>===</code>: <code>case equality</code>，原本是用 <code>include?</code> 的方式，改為用 <code>cover?</code></p>
+
+<ul>
+<li>include? 會將所有值一一拿出來做比對，因此效率較差</li>
+<li>cover?   只會取出開頭和結尾，去比對，值 => 開頭 &amp;&amp; 值 &lt;= 結尾，效能比較好</li>
+</ul>
+
+
+<blockquote><p>cover?</p>
+
+<p>Returns true if obj is between the begin and end of the range.</p>
+
+<p>This tests begin &lt;= obj &lt;= end when exclude_end? is false and begin &lt;= obj &lt; end when exclude_end? is true.</p></blockquote>
+
+<pre><code class="ruby">("a".."z").cover?("c")  #=&gt; true
+("a".."z").cover?("5")  #=&gt; false
+("a".."z").cover?("cc") #=&gt; true
+(1..5).cover?(2..3)     #=&gt; true
+(1..5).cover?(0..6)     #=&gt; false
+(1..5).cover?(1...6)    #=&gt; true
+
+("a".."z").include?("g")   #=&gt; true
+("a".."z").include?("A")   #=&gt; false
+("a".."z").include?("cc")  #=&gt; false
+</code></pre>
+
+<pre><code class="ruby">require 'date'
+
+case DateTime.now
+when Date.today..Date.today+1
+  puts 'matched'
+else
+  puts 'not matched'
+end
+</code></pre>
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6.1/Range.html#method-i-cover-3F">cover?</a></li>
+<li><a href="https://ruby-doc.org/core-2.6.1/Range.html#method-i-include-3F">include?</a></li>
+</ul>
+
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://github.com/ruby/ruby/blob/trunk/doc/NEWS-2.6.0">NEWS-2.6.0</a></li>
+<li><a href="https://nithinbekal.com/posts/ruby-2-6/">What&rsquo;s new in Ruby 2.6</a></li>
+<li><a href="https://medium.com/tailor-tech/whats-new-in-ruby-2-6-a4774f3631c1">What’s new in Ruby 2.6?</a></li>
+<li><a href="https://www.rubyguides.com/2018/11/ruby-2-6-new-features/">9 New Features in Ruby 2.6</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Ruby - Super vs Super()]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-super/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-super/"/>
     <updated>2019-02-04T18:19:10+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-super</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-super</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -79,9 +317,9 @@ Dog.new.say('Woo')
   
   <entry>
     <title type="html"><![CDATA[Ruby - A::B vs Module a; Class B]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-scope/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-scope/"/>
     <updated>2019-02-04T18:18:05+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-scope</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-scope</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -161,9 +399,9 @@ A::B.new.scope2 # =&gt; "A::B"
   
   <entry>
     <title type="html"><![CDATA[Ruby - Singleton Method vs Singleton Class vs Singleton Module]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-singleton/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-singleton/"/>
     <updated>2019-02-04T18:15:16+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-singleton</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-singleton</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -401,9 +639,9 @@ worker.dup # =&gt; TypeError: can't dup instance of singleton Worker
   
   <entry>
     <title type="html"><![CDATA[Ruby - Hash With Default Values]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-hash-default-value/"/>
+    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-hash-default-value/"/>
     <updated>2019-02-04T18:12:51+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-hash-default-value</id>
+    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-hash-default-value</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -495,43 +733,6 @@ hash # =&gt; {:a=&gt;{:b=&gt;{:c=&gt;{:d=&gt;"hi"}}}}
 <li><a href="https://ruby-doc.org/core-2.6/Hash.html">Hash</a></li>
 <li><a href="https://stackoverflow.com/questions/2698460/strange-unexpected-behavior-disappearing-changing-values-when-using-hash-defa">Strange, unexpected behavior (disappearing/changing values) when using Hash default value, e.g. Hash.new([])</a></li>
 <li><a href="https://keepthecodesimple.com/ruby-hashes-default-values/">Ruby Hashes and Default Values</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby - Array With Default Value]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-tips-array-default-value/"/>
-    <updated>2019-02-04T18:10:41+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-tips-array-default-value</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<p><code>Array.new</code> 可以建立一個長度的 <code>default value</code></p>
-
-<p>這樣建立的話會對應到一樣的 <code>object</code></p>
-
-<pre><code class="ruby">a = Array.new(2, Hash.new) # =&gt; [{}, {}]
-
-a[0]['animal'] = 'dog' # =&gt; "dog"
-a # =&gt; [{"animal"=&gt;"dog"}, {"animal"=&gt;"dog"}]
-
-a[1]['animal'] = 'cat' # =&gt; "cat"
-a # =&gt; [{"animal"=&gt;"cat"}, {"animal"=&gt;"cat"}]
-</code></pre>
-
-<p>必須給 <code>block</code> 每個 <code>object</code> 才會是獨立的</p>
-
-<pre><code class="ruby">a = Array.new(2) { Hash.new } # =&gt; [{}, {}]
-a[0]['animal'] = 'dog' # =&gt; "dog"
-a # =&gt; [{"animal"=&gt;"dog"}, {}]
-</code></pre>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://ruby-doc.org/core-2.6.1/Array.html#method-c-new">Array new</a></li>
 </ul>
 
 ]]></content>
