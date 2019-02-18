@@ -3,7 +3,7 @@ layout: post
 title: "Nothing is Something by Sandi Metz"
 date: 2018-07-26 21:36:02 +0800
 comments: true
-categories: rails
+categories: ruby
 ---
 
 這是 Sandi Metz 2015 的演講，雖然有點舊，但還是很不錯，來紀錄一下

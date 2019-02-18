@@ -106,3 +106,4 @@ require 'rack'cookie = "BAh7CUkiD3Nlc3Npb25faWQGOgZFRkkiJ(...)"Rack::Session::
 * [讓我們來談談 CSRF](http://blog.techbridge.cc/2017/02/25/csrf-introduction/)
 * [[不是工程師] Cookie 是文件還是餅乾？簡述HTTP網頁紀錄會員資訊的一大功臣。](https://progressbar.tw/posts/91)
 * [[不是工程師] 會員系統用Session還是Cookie? 你知道其實他們常常混在一起嗎？](https://progressbar.tw/posts/92)
+* [Day11-Cookie & 登入 I（原理篇）](https://ithelp.ithome.com.tw/articles/10205307)

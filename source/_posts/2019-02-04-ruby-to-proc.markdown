@@ -23,7 +23,7 @@ categories: ruby
 class Symbol
   def to_proc
     puts "self is #{self}"
-    Proc.new { |obj, *args| obj.send(self, *args) }
+    Proc.new { |*args| args.shift.__send__(self, *args) }
   end
 end
 
@@ -68,6 +68,30 @@ p = Proc.new{ |n| n ** 2 }
 ```ruby
 [1, 2, 3].map { |num| puts(num) }
 [1, 2, 3].map(&method(:puts))
+```
+
+# to_proc 特殊用法
+
+> ruby 2.6.0
+
+```ruby
+h = { a: 1, b: 2, c: 3, d: 4 }
+[ :a, :c, :d, :b ].map(&h)
+# => [1, 3, 4, 2]
+
+# like
+[ :a, :c, :d, :b ].map { |a| h[a] }
+```
+
+實現的 code 像這樣
+
+```ruby
+class Hash
+  def to_proc
+  	puts self
+    lambda { |v| self[v] }
+  end
+end
 ```
 
 參考文件

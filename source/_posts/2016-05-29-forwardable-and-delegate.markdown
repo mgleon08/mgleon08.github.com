@@ -10,7 +10,7 @@ categories: ruby
 
 <!-- more -->
 
-#Forwardable
+# Forwardable
 
 顧名思義，將訊息 `轉發` 給別的物件。
 
@@ -83,7 +83,7 @@ puts user.full_name
 #=>foo bar
 ```
 
-###def_delegator(accessor, method, ali = method)
+### def_delegator(accessor, method, ali = method)
 
  一次只能 '轉發' 一個方法，第三個參數是（可選的）別名。
 
@@ -98,14 +98,14 @@ class MyQueue
   def_delegator :@queue, :push, :mypush
 end
 
-q = MyQueue.new
-q.mypush 42
-q.queue    #=> [42]
-q.push 23  #=> NoMethodError
+# q = MyQueue.new
+# q.mypush 42
+# q.queue    #=> [42]
+# q.push 23  #=> NoMethodError
  ```
 
 
-###def_delegators(accessor, *methods)
+### def_delegators(accessor, *methods)
 
 一次可以 '轉發' 多個方法。
 
@@ -113,7 +113,7 @@ q.push 23  #=> NoMethodError
 def_delegators :@account, :first_name, :last_name
 ```
 
-###delegate [method, method, ...] => accessor
+### delegate [method, method, ...] => accessor
 
 接受Hash
 
@@ -183,7 +183,7 @@ class Part
   end
 end
 
-chain     = Part.new(name: 'chain',     description: '10-speed')
+chain     = Part.new(name: 'chain',     dsescription: '10-speed')
 tire_size = Part.new(name: 'tire_size', description: '23')
 tap_color = Part.new(name: 'tap_color', description: 'red')
 
@@ -208,13 +208,16 @@ puts '*'*10
 
 
 官方文件：
-[instance_delegate](http://apidock.com/ruby/Forwardable/instance_delegate)
-[def_instance_delegator](http://apidock.com/ruby/Forwardable/def_instance_delegator)
-[def_instance_delegators](http://apidock.com/ruby/Forwardable/def_instance_delegators)
-[Forwardable](http://apidock.com/ruby/Forwardable)
-[Forwardable](http://ruby-doc.org/stdlib-2.0.0/libdoc/forwardable/rdoc/Forwardable.html)
+
+* [instance_delegate](http://apidock.com/ruby/Forwardable/instance_delegate)
+* [def_instance_delegator](http://apidock.com/ruby/Forwardable/def_instance_delegator)
+* [def_instance_delegators](http://apidock.com/ruby/Forwardable/def_instance_delegators)
+* [Forwardable](http://apidock.com/ruby/Forwardable)
+* [Forwardable](http://ruby-doc.org/stdlib-2.0.0/libdoc/forwardable/rdoc/Forwardable.html)
 
 參考文件：
-[Ruby 標準函式庫 Forwardable](http://juanitofatas.com/2014/06/30/ruby-stdlib-forwardable/)
-[深入理解和学习Ruby的Forwardable](http://qiita.com/xiangzhuyuan/items/409c87da8cc4a882419b)
-[Delegating All of the Things With Ruby Forwardable](http://vaidehijoshi.github.io/blog/2015/03/31/delegating-all-of-the-things-with-ruby-forwardable/)
+
+* [Ruby 標準函式庫 Forwardable](http://juanitofatas.com/2014/06/30/ruby-stdlib-forwardable/)
+* [深入理解和学习Ruby的Forwardable](http://qiita.com/xiangzhuyuan/items/409c87da8cc4a882419b)
+* [Delegating All of the Things With Ruby Forwardable](http://vaidehijoshi.github.io/blog/2015/03/31/delegating-all-of-the-things-with-ruby-forwardable/)
+* [Make Delegated Methods Private in Rails](https://nithinbekal.com/posts/rails-delegate/)

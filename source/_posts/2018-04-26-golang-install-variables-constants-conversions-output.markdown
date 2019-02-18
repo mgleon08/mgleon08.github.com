@@ -187,6 +187,24 @@ import(
 )
 ```
 
+### 輸出 print
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	fmt.Printf("%s, %s and %[2]v, %[1]v\n", "Hello", "world")
+	fmt.Printf("%f, %.[1]f, %.2[1]f", 123.123)
+}
+
+// Hello, world and world, Hello
+// 123.123000, 123, 123.12
+```
+
 ### command
 
 * [go clean](https://golang.org/pkg/cmd/go/internal/clean/)

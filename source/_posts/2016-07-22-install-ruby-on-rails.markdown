@@ -669,7 +669,8 @@ CSScomb
   "prettier.trailingComma": "none",  // 屬性後新增逗號
   "prettier.printWidth": 120, // 行寬
   "vetur.format.defaultFormatter.html": "prettyhtml",
-  "explorer.openEditors.visible": 1 // 設定已開啟的頁面是否顯示於左側
+  "explorer.openEditors.visible": 1 // 設定已開啟的頁面是否顯示於左側,
+  "go.gopath": "GOPATH" // 設定 gopath
 }
 ```
 
