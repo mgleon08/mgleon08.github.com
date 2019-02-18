@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Golang | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/golang/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-12T21:22:21+08:00</updated>
+  <updated>2019-02-18T22:50:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,413 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - JSON and Go]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/17/golang-json-and-go/"/>
+    <updated>2019-02-17T22:40:16+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/17/golang-json-and-go</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<h1>Encoding - Marshal 序列化</h1>
+
+<p>在 Go 中並不是所有的類型都能進行序列化：</p>
+
+<ul>
+<li>必須是 struct 中支援外部引用的 field 才能夠序列化 (集開頭字母大寫的 field)</li>
+<li>JSON object key 只支援 string</li>
+<li>Channel、complex、function 等 type 無法進行序列化</li>
+<li>不支援循環數據結構，因為序列化時會進行無限迴圈</li>
+<li><code>Pointer</code> 序列化之後是其指向的值或者是 <code>nil</code></li>
+</ul>
+
+
+<pre><code class="go">func Marshal(v interface{}) ([]byte, error
+</code></pre>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type UserInfo struct {
+    Name string
+    Say  string
+    Age int64 
+}
+
+func main() {
+    m := UserInfo{"Leon", "Hello", 18}
+    b, _ := json.Marshal(m)
+    fmt.Println(string(b))
+}
+
+// {"Name":"Leon","Say":"Hello","Age":18}
+</code></pre>
+
+<h1>指定 JSON filed name</h1>
+
+<h3>Struct Tag</h3>
+
+<p><code>Struct tag</code> 可以決定 <code>Marshal</code> 和 <code>Unmarshal</code> 函式如何序列化和反序列化數據。</p>
+
+<ul>
+<li>一般 <code>json</code> 都是小寫，但因為 golang 序列化時，struct 必須是大寫，因此透過 <code>Struct Tag</code> 改成小寫</li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type UserInfo struct {
+    Name string `json:"name"`
+    Say  string `json:"say"`
+    Age int64   `json:"age"`
+}
+
+func main() {
+    m := UserInfo{"Leon", "Hello", 18}
+    b, _ := json.Marshal(m)
+    fmt.Println(string(b))
+}
+
+// {"name":"Leon","say":"Hello","age":18}
+</code></pre>
+
+<h1>指定 field 的行為</h1>
+
+<h3>omitempty</h3>
+
+<p>透過 <code>omitempty</code> 如果 field 的值是對應類型的 <code>zero-value</code>，序列化之後的 <code>JSON object</code> 中不包含此 <code>field</code></p>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type UserInfo struct {
+    Name string `json:"name"`
+    Say  string `json:"say"`
+    Age int64   `json:"age,omitempty"`
+}
+
+func main() {
+    m := UserInfo{}
+    b, _ := json.Marshal(m)
+    fmt.Println(string(b))
+}
+
+// {"name":"","say":""}
+</code></pre>
+
+<h3>-</h3>
+
+<p>透過 <code>-</code> 可以忽略掉該 field</p>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type UserInfo struct {
+    Name string `json:"name"`
+    Say  string `json:"-"`
+    Age int64   `json:"age,omitempty"`
+}
+
+func main() {
+    m := UserInfo{"Leon", "Hello", 18}
+    b, _ := json.Marshal(m)
+    fmt.Println(string(b))
+}
+
+// {"name":"Leon","age":18}
+</code></pre>
+
+<h1>Decoding - Unmarshal 反序列化</h1>
+
+<p>預設的 JSON 支援以下幾種 Go 類型：</p>
+
+<pre><code class="go">bool for JSON booleans
+float64 for JSON numbers
+string for JSON strings
+nil for JSON null
+</code></pre>
+
+<h3>知道類型的反序列化</h3>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type UserInfo struct {
+    Name string `json:"name"`
+    Say string  `json:"say"`
+    Age int64   `json:"age"`
+}
+
+func main() {
+    var jsonString string
+    jsonString = `{"name":"Leon","say":"hello","age":18}`
+
+    //把 json unmarshal 進去 struct
+    u := &amp;UserInfo{}
+    err := json.Unmarshal([]byte(jsonString), u)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Println(u)
+    fmt.Printf("%T\n", u)
+    fmt.Printf("name:%s, say:%s, age:%d\n", u.Name, u.Say, u.Age)
+}
+
+// &amp;{Leon hello 18}
+// *main.UserInfo
+// name:Leon, say:hello, age:18
+</code></pre>
+
+<h3>不知道類型的反序列化</h3>
+
+<p>如果不知道類型可以用 <code>interface{}</code></p>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+func main() {
+    var jsonString string
+    jsonString = `{"name":"Leon","age":18,"cars":["Maserati","BMW"]}`
+
+    //把 json unmarshal 進去 struct
+    var u interface{}
+    err := json.Unmarshal([]byte(jsonString), &amp;u)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Println(u)
+    fmt.Printf("%T\n", u)
+}
+
+// map[cars:[Maserati BMW] name:Leon age:18]
+// map[string]interface {}
+</code></pre>
+
+<p>回傳的格式如</p>
+
+<pre><code class="go">map[string]interface{}{
+    "Name": "Leon",
+    "age":  18,
+    "cars": []interface{}{
+        "Maserati",
+        "BMW",
+    },
+}
+</code></pre>
+
+<p>key 是 <code>string</code>，value 是 <code>interface{}</code>，必須透過 <code>type assertion</code> 和 <code>range</code> 取得所有的 key</p>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+func showInfo(u interface{}){
+    m := u.(map[string]interface{})
+    for k, v := range m {
+        switch vv := v.(type) {
+        case string:
+            fmt.Println(k, "is string", vv)
+        case float64:
+            fmt.Println(k, "is float64", vv)
+        case []interface{}:
+            fmt.Println(k, "is an array:")
+            for i, u := range vv {
+                fmt.Println(i, u)
+            }
+        default:
+            fmt.Println(k, "is of a type I don't know how to handle")
+        }
+    }
+}
+
+func main() {
+    var jsonString string
+    jsonString = `{"name":"Leon","age":18,"cars":["Maserati","BMW"]}`
+
+    //把 json unmarshal 進去 struct
+    var u interface{}
+    err := json.Unmarshal([]byte(jsonString), &amp;u)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    showInfo(u)
+}
+
+// name is string Leon
+// age is float64 18
+// cars is an array:
+// 0 Maserati
+// 1 BMW
+</code></pre>
+
+<h1>Reference Types - 反序列化對 slice、map、pointer 的處理</h1>
+
+<p>struct 中包含一個 <code>slice Cars</code> ，slice 預設是 <code>nil</code>，之所以反序列化可以正常進行就是因為 Unmarshal 在序列化時進行了對 <code>slice Cars</code> 做了初始化，同理，對 <code>map</code> 和 <code>pointer</code> 都會做類似的工作</p>
+
+<blockquote><p>比如序列化如果 Pointer 不是 nil 首先進行 dereference 獲得其指向的值，然後再進行序列化，反序列化時首先對 nil pointer 進行初始化</p></blockquote>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type UserInfo struct {
+    Name string 
+    Age  int64  
+    Cars []string
+}
+
+func main() {
+    var jsonString string
+    jsonString = `{"name":"Leon","age":18,"cars":["Maserati","BMW"]}`
+
+    //把 json unmarshal 進去 struct
+    u := &amp;UserInfo{}
+    err := json.Unmarshal([]byte(jsonString), u)
+    if err != nil {
+        fmt.Println(err)
+        return
+    }
+    fmt.Println(u)
+    fmt.Printf("%T\n", u)
+    fmt.Printf("name:%s, age:%d, cars:%s\n", u.Name, u.Age, u.Cars)
+}
+
+// &amp;{Leon 18 [Maserati BMW]}
+// *main.UserInfo
+// name:Leon, age:18, cars:[Maserati BMW]
+</code></pre>
+
+<h1>nested struct 的序列化</h1>
+
+<p>Go 支援對 <code>nested struct</code> 進行序列化和反序列化:</p>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+)
+
+type App struct {
+    Id string `json:"id"`
+}
+
+type Org struct {
+    Name string `json:"name"`
+}
+
+type AppWithOrg struct {
+    App
+    Org
+}
+
+func main() {
+    data := []byte(`{ "id": "123", "name": "My Awesome Org" }`)
+    var b AppWithOrg
+    json.Unmarshal(data, &amp;b)
+    fmt.Printf("%#v\n\n", b)
+
+    a := AppWithOrg{
+        App: App{ Id: "321" },
+        Org: Org{ Name: "My Awesome Org"},
+    }
+    data, _ = json.Marshal(a)
+    fmt.Println(string(data))
+}
+
+// main.AppWithOrg{App:main.App{Id:"123"}, Org:main.Org{Name:"My Awesome Org"}}
+// {"id":"321","name":"My Awesome Org"}
+</code></pre>
+
+<h1>Stream JSON</h1>
+
+<p>Golang 提供 <code>Decoder</code> 和 <code>Encoder</code> 對 stream JSON 進行處理，常見 request 中的 Body、文件等</p>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+    "io"
+    "log"
+    "strings"
+)
+
+func main() {
+    const jsonStream = `
+    {"Name": "Ed", "Text": "Knock knock."}
+    {"Name": "Sam", "Text": "Who's there?"}
+    {"Name": "Ed", "Text": "Go fmt."}
+    {"Name": "Sam", "Text": "Go fmt who?"}
+    {"Name": "Ed", "Text": "Go fmt yourself!"}
+`
+    type Message struct {
+        Name, Text string
+    }
+    dec := json.NewDecoder(strings.NewReader(jsonStream))
+    for {
+        var m Message
+        if err := dec.Decode(&amp;m); err == io.EOF {
+            break
+        } else if err != nil {
+            log.Fatal(err)
+        }
+        fmt.Printf("%s: %s\n", m.Name, m.Text)
+    }
+}
+
+// Ed: Knock knock.
+// Sam: Who's there?
+// Ed: Go fmt.
+// Sam: Go fmt who?
+// Ed: Go fmt yourself!
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://golang.org/pkg/encoding/json/#Marshal">json</a></li>
+<li><a href="https://sanyuesha.com/2018/05/07/go-json/">理解 Go 中的 JSON</a></li>
+<li><a href="https://blog.golang.org/json-and-go">JSON and Go</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Golang - Maps in Action]]></title>
@@ -1233,286 +1640,6 @@ func main() {
 
 <ul>
 <li><a href="https://golangbot.com/write-files/">golangbot - Writing Files</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang - Reading Files]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/11/06/golang-reading-files/"/>
-    <updated>2018-11-06T15:16:53+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/11/06/golang-reading-files</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<ul>
-<li><a href="#entire">Reading an entire file into memory </a></li>
-<li><a href="#chunk">Reading a file in small chunks</a></li>
-<li><a href="#line">Reading a file line by line</a></li>
-</ul>
-
-
-<h1><span id="entire"> Reading an entire file into memory </span></h1>
-
-<p>Use <a href="https://golang.org/pkg/io/ioutil/">ioutil</a> package</p>
-
-<ul>
-<li><a href="https://golang.org/pkg/io/ioutil/#ReadFile">ReadFile</a></li>
-</ul>
-
-
-<pre><code class="go">// 先建立檔案
-
-filehandling
-├── filehandling.go
-└── test.txt
-</code></pre>
-
-<pre><code class="go">// filehandling.go
-package main
-
-import (
-    "fmt"
-    "io/ioutil"
-)
-
-func main() {
-    data, err := ioutil.ReadFile("test.txt")
-    if err != nil {
-        // 當找不到 test file 時，會顯示此訊息
-        fmt.Println("File reading error", err)
-        return
-    }
-    // return data 是 slice 透過 string 轉
-    // 或是改用 fmt.Printf("Contents of file: %s", data)
-    fmt.Println("Contents of file:", string(data))
-}
-</code></pre>
-
-<p>當你用 <code>go install</code> or <code>go build</code> 出 binary 的 file，但 file 移到不同位置就會找不到檔案，有幾種方式可以解決</p>
-
-<h3>1. 用絕對路徑</h3>
-
-<pre><code class="go">package main
-
-import (
-    "fmt"
-    "io/ioutil"
-)
-
-func main() {
-    // $GOPATH 要換成自己電腦的路徑
-    data, err := ioutil.ReadFile("$GOPATH/src/filehandling/test.txt")
-    if err != nil {
-        fmt.Println("File reading error", err)
-        return
-    }
-    fmt.Println("Contents of file:", string(data))
-}
-</code></pre>
-
-<h3>2. 把路徑當參數，在執行檔案時傳入</h3>
-
-<p>必須用到 <a href="https://golang.org/pkg/flag/">flag</a> package</p>
-
-<pre><code class="go">// flag.go
-package main
-
-import (
-    "flag"
-    "fmt"
-)
-
-func main() {
-    // 第一個參數 flag name, 第二個 default value, 第三個 flag description
-    fptr := flag.String("fpath", "test.txt", "file path to read from")
-    // 必須先執行，parse flag
-    flag.Parse()
-    fmt.Println("value of fpath is", *fptr)
-}
-</code></pre>
-
-<pre><code class="go">go run flag.go -fpath=/path-of-file/test.txt
-</code></pre>
-
-<p>將之前的 <code>test.txt</code> 加上 <code>flag</code> 後</p>
-
-<pre><code class="go">package main
-
-import (
-    "flag"
-    "fmt"
-    "io/ioutil"
-)
-
-func main() {
-    fptr := flag.String("fpath", "test.txt", "file path to read from")
-    flag.Parse()
-    data, err := ioutil.ReadFile(*fptr)
-    if err != nil {
-        fmt.Println("File reading error", err)
-        return
-    }
-    fmt.Println("Contents of file:", string(data))
-}
-</code></pre>
-
-<pre><code class="go">go run flag.go -fpath=$GOPATH/src/filehandling/test.txt
-</code></pre>
-
-<p>執行 binary 的檔案時就可以加上 -fpath</p>
-
-<pre><code class="go">filehandling -fpath=$GOPATH/src/filehandling/test.txt
-</code></pre>
-
-<h3>3. 在編譯的時候把檔案一起編譯進去</h3>
-
-<p>可以透過 <a href="https://github.com/gobuffalo/packr">packr</a> package 來實現</p>
-
-<pre><code class="go">package main
-
-import (
-    "fmt"
-
-    "github.com/gobuffalo/packr"
-)
-
-func main() {
-    box := packr.NewBox("../filehandling")
-    data, err := box.FindString("test.txt")
-    if err != nil {
-        fmt.Println(err)
-    } else {
-        fmt.Println("Contents of file:", data)
-    }
-}
-</code></pre>
-
-<pre><code class="go">// 用 go 安裝，編譯成絕對路徑，因此任何地方都可以執行 filehandling
-// 但是只要將 test.txt 刪除或改名，就會找不到
-go install -v
-
-// 用 packr 安裝，則是連 file 也編譯進去，因此即使把檔案刪除也可以執行
-packr install -v filehandling
-
-/*
-building box ../filehandling
-packing file filehandling.go
-packed file filehandling.go
-packing file test.txt
-packed file test.txt
-built box ../filehandling with ["filehandling.go" "test.txt"]
-filehandling
-*/
-</code></pre>
-
-<h1><span id="chunk"> Reading a file in small chunks </span></h1>
-
-<p>前面都是透過 memory 來一次讀取 file，但檔案太大，或是 memory 不夠的時候，就會導致錯誤，因此可以透過另一種方式來執行 <a href="https://golang.org/pkg/bufio/">bufio</a> 將檔案內容做分割</p>
-
-<pre><code class="go">package main
-
-import (
-    "bufio"
-    "flag"
-    "fmt"
-    "log"
-    "os"
-)
-
-func main() {
-  // 先透過 flag 讀取參數
-    fptr := flag.String("fpath", "test.txt", "file path to read from")
-  // 解析參數
-    flag.Parse()
-
-  // 打開檔案
-    f, err := os.Open(*fptr)
-    if err != nil {
-        log.Fatal(err)
-    }
-  // function 結束前關閉 file
-    defer func() {
-        if err = f.Close(); err != nil {
-            log.Fatal(err)
-        }
-    }()
-  // returns a new Reader whose buffer has the default size.
-    r := bufio.NewReader(f)
-  // 建立 byte slice，容量 3，用來一次讀取 3 個
-    b := make([]byte, 3)
-    for {
-        _, err := r.Read(b)
-        if err != nil {
-            fmt.Println("Error reading file:", err)
-            break
-        }
-        fmt.Println(string(b))
-    }
-}
-</code></pre>
-
-<pre><code class="go">go run filehandling.go -fpath=$GOPATH/src/filehandling/test.txt
-</code></pre>
-
-<h1><span id="line"> Reading a file line by line </span></h1>
-
-<p>上面是一次要讀取多少個字元，這次改用一行一行去做讀取，一樣用 <a href="https://golang.org/pkg/bufio/">bufio</a></p>
-
-<ol>
-<li>Open the file</li>
-<li>Create a new scanner from the file</li>
-<li>Scan the file and read it line by line.</li>
-</ol>
-
-
-<pre><code class="go">package main
-
-import (
-    "bufio"
-    "flag"
-    "fmt"
-    "log"
-    "os"
-)
-
-func main() {
-    // 先透過 flag 讀取參數
-    fptr := flag.String("fpath", "test.txt", "file path to read from")
-    // 解析參數
-    flag.Parse()
-
-    // 打開檔案
-    f, err := os.Open(*fptr)
-    if err != nil {
-        log.Fatal(err)
-    }
-    // function 結束前關閉 file
-    defer func() {
-        if err = f.Close(); err != nil {
-            log.Fatal(err)
-        }
-    }()
-    // 透過 Scanner 將一行一行印出
-    s := bufio.NewScanner(f)
-    for s.Scan() {
-        fmt.Println(s.Text())
-    }
-    err = s.Err()
-    if err != nil {
-        log.Fatal(err)
-    }
-}
-</code></pre>
-
-<pre><code class="go">go run filehandling.go -fpath=$GOPATH/src/filehandling/test.txt
-</code></pre>
-
-<p>參考文件:</p>
-
-<ul>
-<li><a href="https://golangbot.com/read-files/">golangbot - Reading Files</a></li>
 </ul>
 
 ]]></content>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-12T21:22:21+08:00</updated>
+  <updated>2019-02-18T22:50:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,114 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby - (&.) the Safe Navigation Operator Like Rails Try!]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/15/ruby-the-safe-navigation-operator/"/>
+    <updated>2019-02-15T20:46:20+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/15/ruby-the-safe-navigation-operator</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p><code>ruby 2.3.0</code> 之後有提供一個方法 <code>&amp;.</code> 跟 rails 的 try! 一樣（是有 <code>!</code> 驚嘆號的）</p>
+
+<p><code>try!</code> 跟 <code>try</code> 比起來比較嚴謹，會去 check receiver 是否為 <code>nil</code>，如果都用只用 <code>try</code>，反而會導致都回傳 <code>nil</code> 而發生錯誤時也不知道在哪</p>
+
+<pre><code class="ruby">def try(*a, &amp;b)
+  if a.empty? &amp;&amp; block_given?
+    yield self
+  else
+    __send__(*a, &amp;b)
+  end
+end
+</code></pre>
+
+<pre><code class="ruby">def try!(*a, &amp;b)
+  if a.empty? &amp;&amp; block_given?
+    yield self
+  else
+    public_send(*a, &amp;b)
+  end
+end
+</code></pre>
+
+<h1>nil</h1>
+
+<pre><code class="ruby">class Account
+  attr_reader :owner
+  def initialize(owner)
+    @owner = owner
+  end
+end
+
+user = Account.new(nil)
+user.owner.address
+# NoMethodError (undefined method `address' for nil:NilClass)
+user &amp;&amp; user.owner &amp;&amp; user.owner.address
+# =&gt; nil
+user.try(:owner).try(:address)
+# =&gt; nil
+user.try!(:owner).try!(:address)
+# =&gt; nil
+user&amp;.owner&amp;.address
+# =&gt; nil
+</code></pre>
+
+<h1>false</h1>
+
+<pre><code class="ruby">class Account
+  attr_reader :owner
+  def initialize(owner)
+    @owner = owner
+  end
+end
+
+
+user = Account.new(false)
+user.owner.address
+# NoMethodError (undefined method `address' for false:FalseClass)
+user &amp;&amp; user.owner &amp;&amp; user.owner.address
+# =&gt; false
+user.try(:owner).try(:address)
+# =&gt; nil
+user.try!(:owner).try!(:address)
+# NoMethodError (undefined method `address' for false:FalseClass)
+user&amp;.owner&amp;.address
+# NoMethodError (undefined method `address' for false:FalseClass)
+</code></pre>
+
+<h1>Object.new</h1>
+
+<pre><code class="ruby">class Account
+  attr_reader :owner
+  def initialize(owner)
+    @owner = owner
+  end
+end
+
+user = Account.new(Object.new)
+user.owner.address
+# NoMethodError (undefined method `address' for #&lt;Object:0x00007fcb887785e8&gt;)
+user &amp;&amp; user.owner &amp;&amp; user.owner.address
+# NoMethodError (undefined method `address' for #&lt;Object:0x00007fcb887785e8&gt;)
+user.try(:owner).try(:address)
+# =&gt; nil
+user.try!(:owner).try!(:address)
+# NoMethodError (undefined method `address' for #&lt;Object:0x00007fcb887785e8&gt;)
+user&amp;.owner&amp;.address
+# NoMethodError (undefined method `address' for #&lt;Object:0x00007fcb887785e8&gt;)
+</code></pre>
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/">The Safe Navigation Operator (&amp;.) in Ruby</a></li>
+<li><a href="https://apidock.com/rails/v3.2.1/Object/try">try</a></li>
+<li><a href="https://apidock.com/rails/v4.0.2/Object/try%21">try!</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby - New Features in Ruby 2.6]]></title>
@@ -632,107 +740,6 @@ worker.dup # =&gt; TypeError: can't dup instance of singleton Worker
 <li><a href="https://ruby-china.org/topics/31734">求解 singleton_class, singleton_methods 的深入問題</a></li>
 <li><a href="https://medium.com/rubycademy/the-singleton-module-in-ruby-part-i-7a26de39319d">The Singleton module in Ruby - Part I</a></li>
 <li><a href="https://medium.com/rubycademy/the-singleton-module-in-ruby-part-ii-91b74366dd00">The Singleton module in Ruby - Part II</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby - Hash With Default Values]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-hash-default-value/"/>
-    <updated>2019-02-04T18:12:51+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-hash-default-value</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<p><code>hash</code> 若沒給值，預設任何一個 key 都是 <code>nil</code></p>
-
-<pre><code class="ruby">hash = {} # =&gt; {}
-hash[:a]  # =&gt; nil
-</code></pre>
-
-<p>也可以給定 default value</p>
-
-<pre><code class="ruby">hash = Hash.new('hi') # =&gt; {}
-hash[:a] # =&gt; "hi"
-
-# or use default=
-hash = Hash.new # =&gt; {}
-hash.default = 'h1' # =&gt; "hi"
-hash[:a] # =&gt; "hi"
-</code></pre>
-
-<p>但有時候會用到比較複雜的，<code>key -&gt; array</code></p>
-
-<p>會發現如果用 <code>Hash.new([])</code> 實際上會回傳同樣的 <code>object_id</code>，因此每個 <code>key</code> 操作的 <code>object</code> 都會是同一個</p>
-
-<pre><code class="ruby">hash = Hash.new([]) # =&gt; {}
-hash[:a] # =&gt; []
-hash[:a] &lt;&lt; 1 # =&gt; [1]
-hash[:a] # =&gt; [1]
-
-# 發現 a 的 1 也在
-hash[:b] &lt;&lt; 2 # =&gt; [1, 2]
-hash[:b] # =&gt; [1, 2]
-
-# 連 object_id 也是一樣
-hash[:b].object_id == hash[:b].object_id # =&gt; true
-
-# 最後 hash 其實都是空的
-hash # =&gt; {}
-
-# 必須用 &lt;&lt;= 相當於 += 才會存在 hash，但還是共用同一個 arry
-hash[:c] &lt;&lt;= 3 # =&gt; [1, 2, 3]
-hash # =&gt; {:c=&gt;[1, 2, 3]}
-hash[:d] = hash[:d] &lt;&lt; 4 # =&gt; [1, 2, 3, 4]
-hash # =&gt; {:c=&gt;[1, 2, 3, 4], :d=&gt;[1, 2, 3, 4]}
-</code></pre>
-
-<h3>why</h3>
-
-<p>那為什麼會這樣? 實際上是 <code>&lt;&lt;</code> 的問題，在之前的文章有提到 <code>&lt;&lt;</code> 每次都是回傳相同的 <code>object_id</code> 這就是造成的問題，因此可以改用 <code>+=</code> 每次都回傳不同的 <code>object_id</code></p>
-
-<pre><code class="ruby">hash = Hash.new([]) # =&gt; {}
-hash[:a] += [1] # =&gt; [1]
-hash # =&gt; {:a=&gt;[1]}
-hash[:b] += [2] # =&gt; [2]
-hash # =&gt; {:a=&gt;[1], :b=&gt;[2]}
-</code></pre>
-
-<h3>default_proc</h3>
-
-<p>另一個方式是使用 <code>block</code>，每次就會分配不同的 <code>object</code></p>
-
-<blockquote><p><a href="http://ruby-doc.org/core-2.5.1/Hash.html#method-c-new">Hash new</a> If a block is specified, it will be called with the hash object and the key, and should return the default value. It is the block&rsquo;s responsibility to store the value in the hash if required.</p></blockquote>
-
-<pre><code class="ruby">hash = Hash.new { |h, k| h[k] = [] } # =&gt; {}
-hash[:a].object_id # =&gt; 70228210560820
-hash[:a] &lt;&lt; 1 # =&gt; [1]
-hash # =&gt; {:a=&gt;[1]}
-hash[:b] &lt;&lt; 2 # =&gt; [2]
-hash[:b].object_id # =&gt; 70228210545760
-hash # =&gt; {:a=&gt;[1], :b=&gt;[2]}
-
-# or
-hash = Hash.new
-hash.default_proc = Proc.new{ |h, k| h[k] = [] }
-</code></pre>
-
-<p>也可以透過遞迴 <code>default_proc</code> 建立一個動態深度的 hash</p>
-
-<pre><code class="ruby">hash = Hash.new { |hash, key| hash[key] = Hash.new(&amp;hash.default_proc) }
-# =&gt; {}
-
-hash[:a][:b][:c][:d] = 'hi' # =&gt; "hi"
-hash # =&gt; {:a=&gt;{:b=&gt;{:c=&gt;{:d=&gt;"hi"}}}}
-</code></pre>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://ruby-doc.org/core-2.6/Hash.html">Hash</a></li>
-<li><a href="https://stackoverflow.com/questions/2698460/strange-unexpected-behavior-disappearing-changing-values-when-using-hash-defa">Strange, unexpected behavior (disappearing/changing values) when using Hash default value, e.g. Hash.new([])</a></li>
-<li><a href="https://keepthecodesimple.com/ruby-hashes-default-values/">Ruby Hashes and Default Values</a></li>
 </ul>
 
 ]]></content>

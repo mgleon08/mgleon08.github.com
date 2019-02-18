@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-12T21:22:21+08:00</updated>
+  <updated>2019-02-18T22:50:14+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,912 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - JSON and Go]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/17/golang-json-and-go/"/>
+    <updated>2019-02-17T22:40:16+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/17/golang-json-and-go</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<h1>Encoding - Marshal 序列化</h1>
+
+<p>在 Go 中並不是所有的類型都能進行序列化：</p>
+
+<ul>
+<li>必須是 struct 中支援外部引用的 field 才能夠序列化 (集開頭字母大寫的 field)</li>
+<li>JSON object key 只支援 string</li>
+<li>Channel、complex、function 等 type 無法進行序列化</li>
+<li>不支援循環數據結構，因為序列化時會進行無限迴圈</li>
+<li><code>Pointer</code> 序列化之後是其指向的值或者是 <code>nil</code></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">func</span> <span class="nx">Marshal</span><span class="p">(</span><span class="nx">v</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">([]</span><span class="kt">byte</span><span class="p">,</span> <span class="kt">error</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">UserInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">Say</span>  <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">Age</span> <span class="kt">int64</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">m</span> <span class="o">:=</span> <span class="nx">UserInfo</span><span class="p">{</span><span class="s">&quot;Leon&quot;</span><span class="p">,</span> <span class="s">&quot;Hello&quot;</span><span class="p">,</span> <span class="mi">18</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">b</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// {&quot;Name&quot;:&quot;Leon&quot;,&quot;Say&quot;:&quot;Hello&quot;,&quot;Age&quot;:18}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>指定 JSON filed name</h1>
+
+<h3>Struct Tag</h3>
+
+<p><code>Struct tag</code> 可以決定 <code>Marshal</code> 和 <code>Unmarshal</code> 函式如何序列化和反序列化數據。</p>
+
+<ul>
+<li>一般 <code>json</code> 都是小寫，但因為 golang 序列化時，struct 必須是大寫，因此透過 <code>Struct Tag</code> 改成小寫</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">UserInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:&quot;name&quot;`</span>
+</span><span class='line'>  <span class="nx">Say</span>  <span class="kt">string</span> <span class="s">`json:&quot;say&quot;`</span>
+</span><span class='line'>  <span class="nx">Age</span> <span class="kt">int64</span>   <span class="s">`json:&quot;age&quot;`</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">m</span> <span class="o">:=</span> <span class="nx">UserInfo</span><span class="p">{</span><span class="s">&quot;Leon&quot;</span><span class="p">,</span> <span class="s">&quot;Hello&quot;</span><span class="p">,</span> <span class="mi">18</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">b</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// {&quot;name&quot;:&quot;Leon&quot;,&quot;say&quot;:&quot;Hello&quot;,&quot;age&quot;:18}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>指定 field 的行為</h1>
+
+<h3>omitempty</h3>
+
+<p>透過 <code>omitempty</code> 如果 field 的值是對應類型的 <code>zero-value</code>，序列化之後的 <code>JSON object</code> 中不包含此 <code>field</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">UserInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:&quot;name&quot;`</span>
+</span><span class='line'>  <span class="nx">Say</span>  <span class="kt">string</span> <span class="s">`json:&quot;say&quot;`</span>
+</span><span class='line'>  <span class="nx">Age</span> <span class="kt">int64</span>   <span class="s">`json:&quot;age,omitempty&quot;`</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">m</span> <span class="o">:=</span> <span class="nx">UserInfo</span><span class="p">{}</span>
+</span><span class='line'>  <span class="nx">b</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// {&quot;name&quot;:&quot;&quot;,&quot;say&quot;:&quot;&quot;}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>-</h3>
+
+<p>透過 <code>-</code> 可以忽略掉該 field</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">UserInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:&quot;name&quot;`</span>
+</span><span class='line'>  <span class="nx">Say</span>  <span class="kt">string</span> <span class="s">`json:&quot;-&quot;`</span>
+</span><span class='line'>  <span class="nx">Age</span> <span class="kt">int64</span>   <span class="s">`json:&quot;age,omitempty&quot;`</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">m</span> <span class="o">:=</span> <span class="nx">UserInfo</span><span class="p">{</span><span class="s">&quot;Leon&quot;</span><span class="p">,</span> <span class="s">&quot;Hello&quot;</span><span class="p">,</span> <span class="mi">18</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">b</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">m</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">b</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// {&quot;name&quot;:&quot;Leon&quot;,&quot;age&quot;:18}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Decoding - Unmarshal 反序列化</h1>
+
+<p>預設的 JSON 支援以下幾種 Go 類型：</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kt">bool</span> <span class="k">for</span> <span class="nx">JSON</span> <span class="nx">booleans</span>
+</span><span class='line'><span class="kt">float64</span> <span class="k">for</span> <span class="nx">JSON</span> <span class="nx">numbers</span>
+</span><span class='line'><span class="kt">string</span> <span class="k">for</span> <span class="nx">JSON</span> <span class="nx">strings</span>
+</span><span class='line'><span class="kc">nil</span> <span class="k">for</span> <span class="nx">JSON</span> <span class="nx">null</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>知道類型的反序列化</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">UserInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:&quot;name&quot;`</span>
+</span><span class='line'>  <span class="nx">Say</span> <span class="kt">string</span>  <span class="s">`json:&quot;say&quot;`</span>
+</span><span class='line'>  <span class="nx">Age</span> <span class="kt">int64</span>   <span class="s">`json:&quot;age&quot;`</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">jsonString</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">jsonString</span> <span class="p">=</span> <span class="s">`{&quot;name&quot;:&quot;Leon&quot;,&quot;say&quot;:&quot;hello&quot;,&quot;age&quot;:18}`</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">//把 json unmarshal 進去 struct</span>
+</span><span class='line'>  <span class="nx">u</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">UserInfo</span><span class="p">{}</span>
+</span><span class='line'>  <span class="nx">err</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="nx">jsonString</span><span class="p">),</span> <span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">return</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%T\n&quot;</span><span class="p">,</span> <span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;name:%s, say:%s, age:%d\n&quot;</span><span class="p">,</span> <span class="nx">u</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">u</span><span class="p">.</span><span class="nx">Say</span><span class="p">,</span> <span class="nx">u</span><span class="p">.</span><span class="nx">Age</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// &amp;{Leon hello 18}</span>
+</span><span class='line'><span class="c1">// *main.UserInfo</span>
+</span><span class='line'><span class="c1">// name:Leon, say:hello, age:18</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>不知道類型的反序列化</h3>
+
+<p>如果不知道類型可以用 <code>interface{}</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">jsonString</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">jsonString</span> <span class="p">=</span> <span class="s">`{&quot;name&quot;:&quot;Leon&quot;,&quot;age&quot;:18,&quot;cars&quot;:[&quot;Maserati&quot;,&quot;BMW&quot;]}`</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="c1">//把 json unmarshal 進去 struct</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">u</span> <span class="kd">interface</span><span class="p">{}</span>
+</span><span class='line'>  <span class="nx">err</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="nx">jsonString</span><span class="p">),</span> <span class="o">&amp;</span><span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">return</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%T\n&quot;</span><span class="p">,</span> <span class="nx">u</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// map[cars:[Maserati BMW] name:Leon age:18]</span>
+</span><span class='line'><span class="c1">// map[string]interface {}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>回傳的格式如</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{}{</span>
+</span><span class='line'>    <span class="s">&quot;Name&quot;</span><span class="p">:</span> <span class="s">&quot;Leon&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;age&quot;</span><span class="p">:</span>  <span class="mi">18</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;cars&quot;</span><span class="p">:</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{}{</span>
+</span><span class='line'>        <span class="s">&quot;Maserati&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;BMW&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>key 是 <code>string</code>，value 是 <code>interface{}</code>，必須透過 <code>type assertion</code> 和 <code>range</code> 取得所有的 key</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">showInfo</span><span class="p">(</span><span class="nx">u</span> <span class="kd">interface</span><span class="p">{}){</span>
+</span><span class='line'>  <span class="nx">m</span> <span class="o">:=</span> <span class="nx">u</span><span class="p">.(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kd">interface</span><span class="p">{})</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">m</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">switch</span> <span class="nx">vv</span> <span class="o">:=</span> <span class="nx">v</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">case</span> <span class="kt">string</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="s">&quot;is string&quot;</span><span class="p">,</span> <span class="nx">vv</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">case</span> <span class="kt">float64</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="s">&quot;is float64&quot;</span><span class="p">,</span> <span class="nx">vv</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">case</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{}:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="s">&quot;is an array:&quot;</span><span class="p">)</span>
+</span><span class='line'>          <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">u</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">vv</span> <span class="p">{</span>
+</span><span class='line'>              <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">,</span> <span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>      <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="s">&quot;is of a type I don&#39;t know how to handle&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">jsonString</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">jsonString</span> <span class="p">=</span> <span class="s">`{&quot;name&quot;:&quot;Leon&quot;,&quot;age&quot;:18,&quot;cars&quot;:[&quot;Maserati&quot;,&quot;BMW&quot;]}`</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">//把 json unmarshal 進去 struct</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">u</span> <span class="kd">interface</span><span class="p">{}</span>
+</span><span class='line'>  <span class="nx">err</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="nx">jsonString</span><span class="p">),</span> <span class="o">&amp;</span><span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">return</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">showInfo</span><span class="p">(</span><span class="nx">u</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// name is string Leon</span>
+</span><span class='line'><span class="c1">// age is float64 18</span>
+</span><span class='line'><span class="c1">// cars is an array:</span>
+</span><span class='line'><span class="c1">// 0 Maserati</span>
+</span><span class='line'><span class="c1">// 1 BMW</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Reference Types - 反序列化對 slice、map、pointer 的處理</h1>
+
+<p>struct 中包含一個 <code>slice Cars</code> ，slice 預設是 <code>nil</code>，之所以反序列化可以正常進行就是因為 Unmarshal 在序列化時進行了對 <code>slice Cars</code> 做了初始化，同理，對 <code>map</code> 和 <code>pointer</code> 都會做類似的工作</p>
+
+<blockquote><p>比如序列化如果 Pointer 不是 nil 首先進行 dereference 獲得其指向的值，然後再進行序列化，反序列化時首先對 nil pointer 進行初始化</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">UserInfo</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">Name</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">Age</span>  <span class="kt">int64</span>
+</span><span class='line'>    <span class="nx">Cars</span> <span class="p">[]</span><span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">jsonString</span> <span class="kt">string</span>
+</span><span class='line'>    <span class="nx">jsonString</span> <span class="p">=</span> <span class="s">`{&quot;name&quot;:&quot;Leon&quot;,&quot;age&quot;:18,&quot;cars&quot;:[&quot;Maserati&quot;,&quot;BMW&quot;]}`</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">//把 json unmarshal 進去 struct</span>
+</span><span class='line'>    <span class="nx">u</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">UserInfo</span><span class="p">{}</span>
+</span><span class='line'>    <span class="nx">err</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">([]</span><span class="nb">byte</span><span class="p">(</span><span class="nx">jsonString</span><span class="p">),</span> <span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>        <span class="k">return</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%T\n&quot;</span><span class="p">,</span> <span class="nx">u</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;name:%s, age:%d, cars:%s\n&quot;</span><span class="p">,</span> <span class="nx">u</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">u</span><span class="p">.</span><span class="nx">Age</span><span class="p">,</span> <span class="nx">u</span><span class="p">.</span><span class="nx">Cars</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// &amp;{Leon 18 [Maserati BMW]}</span>
+</span><span class='line'><span class="c1">// *main.UserInfo</span>
+</span><span class='line'><span class="c1">// name:Leon, age:18, cars:[Maserati BMW]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>nested struct 的序列化</h1>
+
+<p>Go 支援對 <code>nested struct</code> 進行序列化和反序列化:</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">App</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Id</span> <span class="kt">string</span> <span class="s">`json:&quot;id&quot;`</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Org</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span> <span class="s">`json:&quot;name&quot;`</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">AppWithOrg</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">App</span>
+</span><span class='line'>  <span class="nx">Org</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">data</span> <span class="o">:=</span> <span class="p">[]</span><span class="nb">byte</span><span class="p">(</span><span class="s">`{ &quot;id&quot;: &quot;123&quot;, &quot;name&quot;: &quot;My Awesome Org&quot; }`</span><span class="p">)</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">b</span> <span class="nx">AppWithOrg</span>
+</span><span class='line'>  <span class="nx">json</span><span class="p">.</span><span class="nx">Unmarshal</span><span class="p">(</span><span class="nx">data</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">b</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%#v\n\n&quot;</span><span class="p">,</span> <span class="nx">b</span><span class="p">)</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="nx">AppWithOrg</span><span class="p">{</span>
+</span><span class='line'>      <span class="nx">App</span><span class="p">:</span> <span class="nx">App</span><span class="p">{</span> <span class="nx">Id</span><span class="p">:</span> <span class="s">&quot;321&quot;</span> <span class="p">},</span>
+</span><span class='line'>      <span class="nx">Org</span><span class="p">:</span> <span class="nx">Org</span><span class="p">{</span> <span class="nx">Name</span><span class="p">:</span> <span class="s">&quot;My Awesome Org&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">data</span><span class="p">,</span> <span class="nx">_</span> <span class="p">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">Marshal</span><span class="p">(</span><span class="nx">a</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nb">string</span><span class="p">(</span><span class="nx">data</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// main.AppWithOrg{App:main.App{Id:&quot;123&quot;}, Org:main.Org{Name:&quot;My Awesome Org&quot;}}</span>
+</span><span class='line'><span class="c1">// {&quot;id&quot;:&quot;321&quot;,&quot;name&quot;:&quot;My Awesome Org&quot;}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Stream JSON</h1>
+
+<p>Golang 提供 <code>Decoder</code> 和 <code>Encoder</code> 對 stream JSON 進行處理，常見 request 中的 Body、文件等</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;encoding/json&quot;</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;io&quot;</span>
+</span><span class='line'>  <span class="s">&quot;log&quot;</span>
+</span><span class='line'>  <span class="s">&quot;strings&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">const</span> <span class="nx">jsonStream</span> <span class="p">=</span> <span class="s">`</span>
+</span><span class='line'><span class="s">  {&quot;Name&quot;: &quot;Ed&quot;, &quot;Text&quot;: &quot;Knock knock.&quot;}</span>
+</span><span class='line'><span class="s">  {&quot;Name&quot;: &quot;Sam&quot;, &quot;Text&quot;: &quot;Who&#39;s there?&quot;}</span>
+</span><span class='line'><span class="s">  {&quot;Name&quot;: &quot;Ed&quot;, &quot;Text&quot;: &quot;Go fmt.&quot;}</span>
+</span><span class='line'><span class="s">  {&quot;Name&quot;: &quot;Sam&quot;, &quot;Text&quot;: &quot;Go fmt who?&quot;}</span>
+</span><span class='line'><span class="s">  {&quot;Name&quot;: &quot;Ed&quot;, &quot;Text&quot;: &quot;Go fmt yourself!&quot;}</span>
+</span><span class='line'><span class="s">`</span>
+</span><span class='line'>  <span class="kd">type</span> <span class="nx">Message</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">Name</span><span class="p">,</span> <span class="nx">Text</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">dec</span> <span class="o">:=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">NewDecoder</span><span class="p">(</span><span class="nx">strings</span><span class="p">.</span><span class="nx">NewReader</span><span class="p">(</span><span class="nx">jsonStream</span><span class="p">))</span>
+</span><span class='line'>  <span class="k">for</span> <span class="p">{</span>
+</span><span class='line'>      <span class="kd">var</span> <span class="nx">m</span> <span class="nx">Message</span>
+</span><span class='line'>      <span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">dec</span><span class="p">.</span><span class="nx">Decode</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">m</span><span class="p">);</span> <span class="nx">err</span> <span class="o">==</span> <span class="nx">io</span><span class="p">.</span><span class="nx">EOF</span> <span class="p">{</span>
+</span><span class='line'>          <span class="k">break</span>
+</span><span class='line'>      <span class="p">}</span> <span class="k">else</span> <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%s: %s\n&quot;</span><span class="p">,</span> <span class="nx">m</span><span class="p">.</span><span class="nx">Name</span><span class="p">,</span> <span class="nx">m</span><span class="p">.</span><span class="nx">Text</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Ed: Knock knock.</span>
+</span><span class='line'><span class="c1">// Sam: Who&#39;s there?</span>
+</span><span class='line'><span class="c1">// Ed: Go fmt.</span>
+</span><span class='line'><span class="c1">// Sam: Go fmt who?</span>
+</span><span class='line'><span class="c1">// Ed: Go fmt yourself!</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://golang.org/pkg/encoding/json/#Marshal">json</a></li>
+<li><a href="https://sanyuesha.com/2018/05/07/go-json/">理解 Go 中的 JSON</a></li>
+<li><a href="https://blog.golang.org/json-and-go">JSON and Go</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby - (&.) the Safe Navigation Operator Like Rails Try!]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/02/15/ruby-the-safe-navigation-operator/"/>
+    <updated>2019-02-15T20:46:20+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/02/15/ruby-the-safe-navigation-operator</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p><code>ruby 2.3.0</code> 之後有提供一個方法 <code>&amp;.</code> 跟 rails 的 try! 一樣（是有 <code>!</code> 驚嘆號的）</p>
+
+<p><code>try!</code> 跟 <code>try</code> 比起來比較嚴謹，會去 check receiver 是否為 <code>nil</code>，如果都用只用 <code>try</code>，反而會導致都回傳 <code>nil</code> 而發生錯誤時也不知道在哪</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">try</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">empty?</span> <span class="o">&amp;&amp;</span> <span class="nb">block_given?</span>
+</span><span class='line'>    <span class="k">yield</span> <span class="nb">self</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="nb">__send__</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">def</span> <span class="nf">try!</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">if</span> <span class="n">a</span><span class="o">.</span><span class="n">empty?</span> <span class="o">&amp;&amp;</span> <span class="nb">block_given?</span>
+</span><span class='line'>    <span class="k">yield</span> <span class="nb">self</span>
+</span><span class='line'>  <span class="k">else</span>
+</span><span class='line'>    <span class="n">public_send</span><span class="p">(</span><span class="o">*</span><span class="n">a</span><span class="p">,</span> <span class="o">&amp;</span><span class="n">b</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>nil</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:owner</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@owner</span> <span class="o">=</span> <span class="n">owner</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="kp">nil</span><span class="p">)</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">address</span>
+</span><span class='line'><span class="c1"># NoMethodError (undefined method `address&#39; for nil:NilClass)</span>
+</span><span class='line'><span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">owner</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">address</span>
+</span><span class='line'><span class="c1"># =&gt; nil</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:owner</span><span class="p">)</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:address</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; nil</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">try!</span><span class="p">(</span><span class="ss">:owner</span><span class="p">)</span><span class="o">.</span><span class="n">try!</span><span class="p">(</span><span class="ss">:address</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; nil</span>
+</span><span class='line'><span class="n">user</span><span class="o">&amp;.</span><span class="n">owner</span><span class="o">&amp;.</span><span class="n">address</span>
+</span><span class='line'><span class="c1"># =&gt; nil</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>false</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:owner</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@owner</span> <span class="o">=</span> <span class="n">owner</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="kp">false</span><span class="p">)</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">address</span>
+</span><span class='line'><span class="c1"># NoMethodError (undefined method `address&#39; for false:FalseClass)</span>
+</span><span class='line'><span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">owner</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">address</span>
+</span><span class='line'><span class="c1"># =&gt; false</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:owner</span><span class="p">)</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:address</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; nil</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">try!</span><span class="p">(</span><span class="ss">:owner</span><span class="p">)</span><span class="o">.</span><span class="n">try!</span><span class="p">(</span><span class="ss">:address</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># NoMethodError (undefined method `address&#39; for false:FalseClass)</span>
+</span><span class='line'><span class="n">user</span><span class="o">&amp;.</span><span class="n">owner</span><span class="o">&amp;.</span><span class="n">address</span>
+</span><span class='line'><span class="c1"># NoMethodError (undefined method `address&#39; for false:FalseClass)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Object.new</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Account</span>
+</span><span class='line'>  <span class="kp">attr_reader</span> <span class="ss">:owner</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span><span class="p">(</span><span class="n">owner</span><span class="p">)</span>
+</span><span class='line'>    <span class="vi">@owner</span> <span class="o">=</span> <span class="n">owner</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">user</span> <span class="o">=</span> <span class="no">Account</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="no">Object</span><span class="o">.</span><span class="n">new</span><span class="p">)</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">address</span>
+</span><span class='line'><span class="c1"># NoMethodError (undefined method `address&#39; for #&lt;Object:0x00007fcb887785e8&gt;)</span>
+</span><span class='line'><span class="n">user</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">owner</span> <span class="o">&amp;&amp;</span> <span class="n">user</span><span class="o">.</span><span class="n">owner</span><span class="o">.</span><span class="n">address</span>
+</span><span class='line'><span class="c1"># NoMethodError (undefined method `address&#39; for #&lt;Object:0x00007fcb887785e8&gt;)</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:owner</span><span class="p">)</span><span class="o">.</span><span class="n">try</span><span class="p">(</span><span class="ss">:address</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; nil</span>
+</span><span class='line'><span class="n">user</span><span class="o">.</span><span class="n">try!</span><span class="p">(</span><span class="ss">:owner</span><span class="p">)</span><span class="o">.</span><span class="n">try!</span><span class="p">(</span><span class="ss">:address</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># NoMethodError (undefined method `address&#39; for #&lt;Object:0x00007fcb887785e8&gt;)</span>
+</span><span class='line'><span class="n">user</span><span class="o">&amp;.</span><span class="n">owner</span><span class="o">&amp;.</span><span class="n">address</span>
+</span><span class='line'><span class="c1"># NoMethodError (undefined method `address&#39; for #&lt;Object:0x00007fcb887785e8&gt;)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件:</p>
+
+<ul>
+<li><a href="http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/">The Safe Navigation Operator (&amp;.) in Ruby</a></li>
+<li><a href="https://apidock.com/rails/v3.2.1/Object/try">try</a></li>
+<li><a href="https://apidock.com/rails/v4.0.2/Object/try%21">try!</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby - New Features in Ruby 2.6]]></title>
@@ -1896,7 +2802,7 @@
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Symbol</span>
 </span><span class='line'>  <span class="k">def</span> <span class="nf">to_proc</span>
 </span><span class='line'>    <span class="nb">puts</span> <span class="s2">&quot;self is </span><span class="si">#{</span><span class="nb">self</span><span class="si">}</span><span class="s2">&quot;</span>
-</span><span class='line'>    <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|</span><span class="n">obj</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="o">|</span> <span class="n">obj</span><span class="o">.</span><span class="n">send</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="p">}</span>
+</span><span class='line'>    <span class="no">Proc</span><span class="o">.</span><span class="n">new</span> <span class="p">{</span> <span class="o">|*</span><span class="n">args</span><span class="o">|</span> <span class="n">args</span><span class="o">.</span><span class="n">shift</span><span class="o">.</span><span class="n">__send__</span><span class="p">(</span><span class="nb">self</span><span class="p">,</span> <span class="o">*</span><span class="n">args</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'>  <span class="k">end</span>
 </span><span class='line'><span class="k">end</span>
 </span><span class='line'>
@@ -1960,6 +2866,42 @@
 <span class='line-number'>2</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">num</span><span class="o">|</span> <span class="nb">puts</span><span class="p">(</span><span class="n">num</span><span class="p">)</span> <span class="p">}</span>
 </span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">].</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="nb">method</span><span class="p">(</span><span class="ss">:puts</span><span class="p">))</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>to_proc 特殊用法</h1>
+
+<blockquote><p>ruby 2.6.0</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">h</span> <span class="o">=</span> <span class="p">{</span> <span class="ss">a</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="ss">b</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="ss">c</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span> <span class="ss">d</span><span class="p">:</span> <span class="mi">4</span> <span class="p">}</span>
+</span><span class='line'><span class="o">[</span> <span class="ss">:a</span><span class="p">,</span> <span class="ss">:c</span><span class="p">,</span> <span class="ss">:d</span><span class="p">,</span> <span class="ss">:b</span> <span class="o">].</span><span class="n">map</span><span class="p">(</span><span class="o">&amp;</span><span class="n">h</span><span class="p">)</span>
+</span><span class='line'><span class="c1"># =&gt; [1, 3, 4, 2]</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># like</span>
+</span><span class='line'><span class="o">[</span> <span class="ss">:a</span><span class="p">,</span> <span class="ss">:c</span><span class="p">,</span> <span class="ss">:d</span><span class="p">,</span> <span class="ss">:b</span> <span class="o">].</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">a</span><span class="o">|</span> <span class="n">h</span><span class="o">[</span><span class="n">a</span><span class="o">]</span> <span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>實現的 code 像這樣</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Hash</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">to_proc</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="nb">self</span>
+</span><span class='line'>    <span class="nb">lambda</span> <span class="p">{</span> <span class="o">|</span><span class="n">v</span><span class="o">|</span> <span class="nb">self</span><span class="o">[</span><span class="n">v</span><span class="o">]</span> <span class="p">}</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -2800,7 +3742,7 @@
     <content type="html"><![CDATA[<!-- more -->
 
 
-<p><code>a ||= a</code> 等於 <code>a || a = b</code> 但不等於 <code>a = a || b</code>，意思上不一樣，但出來的結果會是一樣的</p>
+<p><code>a ||= b</code> 等於 <code>a || a = b</code> 但不等於 <code>a = a || b</code>，意思上不一樣，但出來的結果會是一樣的</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -2922,219 +3864,6 @@
 
 <ul>
 <li><a href="https://kaochenlong.com/2016/04/25/string-and-symbol/">Ruby 語法放大鏡之「有的變數變前面有一個冒號(例如 :name)，是什麼意思?」</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby - == vs === vs Eql? Vs Equal?]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-equal/"/>
-    <updated>2019-02-04T17:25:33+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-equal</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<ul>
-<li><code>==</code>: 比較兩邊的 <code>value</code></li>
-<li><code>eql?</code>: 比較兩邊的 <code>value</code> + <code>class type</code></li>
-<li><code>equal?</code>: 比較兩邊的 <code>object_id</code></li>
-<li><code>===</code>: case equality ，比較像是 <code>A 描述了一個集合，B 屬於 A 嗎?</code></li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span>
-</span><span class='line'><span class="n">a</span> <span class="o">==</span> <span class="n">b</span>     <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="n">a</span> <span class="o">===</span> <span class="n">b</span>    <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">eql?</span> <span class="n">b</span>   <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">equal?</span> <span class="n">b</span> <span class="c1"># =&gt; true</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">1</span><span class="o">.</span><span class="mi">0</span>
-</span><span class='line'><span class="n">a</span> <span class="o">==</span> <span class="n">b</span>     <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="n">a</span> <span class="o">===</span> <span class="n">b</span>    <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">eql?</span> <span class="n">b</span>   <span class="c1"># =&gt; false</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">equal?</span> <span class="n">b</span> <span class="c1"># =&gt; false</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">a</span><span class="p">,</span> <span class="n">b</span> <span class="o">=</span> <span class="mi">1</span><span class="p">,</span> <span class="s2">&quot;1&quot;</span>
-</span><span class='line'><span class="n">a</span> <span class="o">==</span> <span class="n">b</span>     <span class="c1"># =&gt; false</span>
-</span><span class='line'><span class="n">a</span> <span class="o">===</span> <span class="n">b</span>    <span class="c1"># =&gt; false</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">eql?</span> <span class="n">b</span>   <span class="c1"># =&gt; false</span>
-</span><span class='line'><span class="n">a</span><span class="o">.</span><span class="n">equal?</span> <span class="n">b</span> <span class="c1"># =&gt; false</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="no">Class</span>  <span class="o">===</span> <span class="no">Class</span>  <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="no">Object</span> <span class="o">===</span> <span class="no">Object</span> <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="no">Class</span>  <span class="o">===</span> <span class="no">Object</span> <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="no">Object</span> <span class="o">===</span> <span class="no">Class</span>  <span class="c1"># =&gt; true</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># 就 Ruby Gotchas 解釋比較像是 Fixnum 有包含 1，1 卻不包含 Fixnum</span>
-</span><span class='line'><span class="mi">1</span> <span class="o">===</span> <span class="mi">1</span>            <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="no">Fixnum</span> <span class="o">===</span> <span class="mi">1</span>       <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="mi">1</span> <span class="o">===</span> <span class="no">Fixnum</span>       <span class="c1"># =&gt; false</span>
-</span><span class='line'><span class="no">Fixnum</span> <span class="o">===</span> <span class="no">Fixnum</span>  <span class="c1"># =&gt; false</span>
-</span><span class='line'>
-</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">5</span><span class="p">)</span> <span class="o">===</span> <span class="mi">3</span>           <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="p">(</span><span class="mi">1</span><span class="o">.</span><span class="n">.</span><span class="mi">5</span><span class="p">)</span> <span class="o">===</span> <span class="mi">6</span>           <span class="c1"># =&gt; false</span>
-</span><span class='line'>
-</span><span class='line'><span class="nb">Integer</span> <span class="o">===</span> <span class="mi">42</span>          <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="nb">Integer</span> <span class="o">===</span> <span class="s1">&#39;fourtytwo&#39;</span> <span class="c1"># =&gt; false</span>
-</span><span class='line'>
-</span><span class='line'><span class="sr">/ell/</span> <span class="o">===</span> <span class="s1">&#39;Hello&#39;</span>     <span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="sr">/ell/</span> <span class="o">===</span> <span class="s1">&#39;Foobar&#39;</span>    <span class="c1"># =&gt; false</span>
-</span><span class='line'>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">===</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span>
-</span><span class='line'><span class="c1"># =&gt; true</span>
-</span><span class='line'><span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="o">]</span> <span class="o">===</span> <span class="o">[</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="o">]</span>
-</span><span class='line'><span class="c1"># =&gt; false</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://docs.google.com/presentation/d/1cqdp89_kolr4q1YAQaB-6i5GXip8MHyve8MvQ_1r6_s/edit#slide=id.g2fa7c811_0_12">Ruby Gotchas</a></li>
-<li><a href="https://stackoverflow.com/questions/4467538/what-does-the-operator-do-in-ruby">What does the “===” operator do in Ruby? [duplicate]</a></li>
-<li><a href="http://lazybios.com/2017/01/ruby-triple-equals-operator/">關於===你應該知道的幾件事兒 | Ruby</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby - Extend vs Include (Mixin)]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-extend-vs-include/"/>
-    <updated>2019-02-04T17:23:28+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-extend-vs-include</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<ul>
-<li><code>extend</code>: 讓 module 內定義的 method 成為 instance method</li>
-<li><code>include</code>: 讓 module 內定義的 method 成為 class method</li>
-</ul>
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">module</span> <span class="nn">Animal</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">say</span>
-</span><span class='line'>    <span class="s1">&#39;hi&#39;</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Dog</span>
-</span><span class='line'>  <span class="kp">include</span> <span class="no">Animal</span>
-</span><span class='line'>  <span class="k">def</span> <span class="nf">initialize</span>
-</span><span class='line'>  <span class="k">end</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Dog</span><span class="o">.</span><span class="n">say</span>
-</span><span class='line'><span class="c1">#NoMethodError: undefined method `say&#39; for Dog:Class</span>
-</span><span class='line'><span class="no">Dog</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">say</span>
-</span><span class='line'><span class="c1"># =&gt; &quot;hi&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="k">class</span> <span class="nc">Cat</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">Animal</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Cat</span><span class="o">.</span><span class="n">say</span>
-</span><span class='line'><span class="c1"># =&gt; &quot;hi&quot;</span>
-</span><span class='line'><span class="no">Cat</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">say</span>
-</span><span class='line'><span class="c1">#NoMethodError: undefined method `say&#39; for #&lt;Cat:0x007fc7e781efa0&gt;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1"># module 本身也是 class (module.class) 因此可以透過 extend 來延展</span>
-</span><span class='line'><span class="k">module</span> <span class="nn">Pig</span>
-</span><span class='line'>  <span class="kp">extend</span> <span class="no">Animal</span>
-</span><span class='line'><span class="k">end</span>
-</span><span class='line'>
-</span><span class='line'><span class="no">Pig</span><span class="o">.</span><span class="n">say</span>
-</span><span class='line'><span class="c1"># =&gt; &quot;hi&quot;</span>
-</span><span class='line'><span class="no">Pig</span><span class="o">.</span><span class="n">new</span><span class="o">.</span><span class="n">say</span>
-</span><span class='line'><span class="c1"># NoMethodError: undefined method `new&#39; for Pig:Module</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="http://mgleon08.github.com/blog/2016/02/24/include-extend-require/">Ruby 中的 Include Extend Require Load</a></li>
 </ul>
 
 ]]></content>
