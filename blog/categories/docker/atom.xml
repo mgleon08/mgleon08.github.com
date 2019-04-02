@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Docker | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/docker/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-18T22:50:14+08:00</updated>
+  <updated>2019-04-02T09:56:32+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -55,6 +55,12 @@
 </code></pre>
 
 <h3>docker/app/Dockerfile</h3>
+
+<p><code>--path vendor/bundle</code></p>
+
+<p><a href="https://chengl.com/using-docker-for-rails-development/">Using Docker for Rails Development</a></p>
+
+<blockquote><p>We want to install gems in ./vendor/bundle because the gems will persist in ./vendor/bundle regardless of the lifecyle of the container. When we update the Gemfile and do bundle install again, it will only install the newly added gems, not everything again.</p></blockquote>
 
 <pre><code class="ruby"># Base image
 FROM ruby:2.5.1
@@ -238,6 +244,8 @@ FLUSH PRIVILEGES;
 
 <h3>docker-compose.yml</h3>
 
+<blockquote><p>.env 的變數，可以用 <code>${MYSQL_USER}</code> 使用在 docker-compose 中</p></blockquote>
+
 <pre><code class="ruby">version: '3'
 services:
   app:
@@ -366,6 +374,42 @@ COPY . $APP/
 
 CMD ["bundle", "exec", "rails", "server", "-p", "3000", "-b", "0.0.0.0"]
 </code></pre>
+
+<p>README</p>
+
+<pre><code class="ruby"># build image
+docker-compose build
+
+# bundle
+docker-compose run -u root backend bundle
+
+# create database
+docker-compose run backend bundle exec rails db:create db:migrate db:seed
+
+# start
+docker-compose up
+</code></pre>
+
+<p>New project need to add <code>db (docker-compose.yml mysql name)</code> to <code>database.yml</code></p>
+
+<pre><code class="ruby">default: &amp;default
+  adapter: mysql2
+  encoding: utf8
+  pool: &lt;%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %&gt;
+  host: db
+  port: 3306
+  username: root
+  password: password
+  socket: /tmp/mysql.sock
+</code></pre>
+
+<h1>Sample</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/product_system_production">product_system_production</a></li>
+<li><a href="https://github.com/mgleon08/product_system_develop">product_system_develop</a></li>
+</ul>
+
 
 <p>參考文件:</p>
 
@@ -798,6 +842,885 @@ docker service rm my_nginx
   </entry>
   
   <entry>
+    <title type="html"><![CDATA[Rails API + Nuxt.js + Devise-JWT]]></title>
+    <link href="http://mgleon08.github.com/blog/2018/07/17/rails-nuxt-jwt/"/>
+    <updated>2018-07-17T17:39:32+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2018/07/17/rails-nuxt-jwt</id>
+    <content type="html"><![CDATA[<p>在網路上發現這篇文章，覺得寫得很不錯，所以這次就跟著這篇一起做一遍~</p>
+
+<!-- more-->
+
+
+<p><a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></p>
+
+<p>來學習，<code>Rails API / Nuxt.js / JWT / Docker</code></p>
+
+<ul>
+<li><a href="#part1">Part 1: Creating a development environment</a></li>
+<li><a href="#part2">Part 2: Getting them talking to each other</a></li>
+<li><a href="#part3">Part 3: Authentication with Devise-JWT</a></li>
+</ul>
+
+
+<h1><span id="part1">Part 1: Creating a development environment</span></h1>
+
+<pre><code class="ruby"># backend
+mkdir autheg
+cd autheg
+rails new autheg-backend -T --skip-spring -C -B -d postgresql --api
+# -T = skip test
+# -C = skip action cable
+# -B = skip bundle 主要是作者要跑在 docker 裡面
+# --api = 沒有任何 view 純 API server
+
+#frontend
+vue init nuxt-community/starter-template autheg-frontend
+cd autheg-frontend
+yarn generate-lock-entry &gt; yarn.lock
+# 跟 -B 類似，為了不 install
+</code></pre>
+
+<h3>backend</h3>
+
+<pre><code class="ruby"># autheg/autheg-backend/Dockerfile
+FROM ruby:2.5
+
+ARG UID
+RUN adduser rails --uid $UID --disabled-password --gecos ""
+# 可以透過 $UID 給予不同的 user ID，並且進到任何的 container 都可以用相同的 user ID
+# --disabled-password - 讓 rails 無法用密碼登入
+# --gecos 用戶的詳細訊息（如姓名，年齡，電話等），因為 adduser 會提示你輸入用戶的密碼和相關的finger訊息，但是這個可以用選項--gecos來覆蓋。
+
+ENV APP /usr/src/app
+RUN mkdir $APP
+WORKDIR $APP
+
+COPY Gemfile* $APP/
+RUN bundle install -j3 --path vendor/bundle
+# Gems and yarn packages are installed into the mounted volumes.
+# This will stop you from needing to rebuild the whole Docker image every time you change the Gemfile or package.json.
+
+COPY . $APP/
+
+CMD ["bin/rails", "server", "-p", "8080", "-b", "0.0.0.0"]
+# 這裡原本是 rails，但實際在 run 的時候會有 error，因此改為 bin/rails
+</code></pre>
+
+<p><code>.dockerignore</code> 避免 Docker 在 build 的時候，一併複製過去</p>
+
+<pre><code class="ruby"># autheg/autheg-backend/.dockerignore
+/vendor/bundle
+/log
+/tmp
+</code></pre>
+
+<pre><code class="ruby"># autheg/autheg-backend/.gitignore
+/vendor/bundle/
+</code></pre>
+
+<h3>frontend</h3>
+
+<pre><code class="ruby"># autheg/autheg-frontend/Dockerfile
+
+FROM node:9
+
+ARG UID
+RUN adduser frontend --uid $UID --disabled-password --gecos ""
+
+ENV APP /usr/src/app
+RUN mkdir $APP
+WORKDIR $APP
+
+COPY package.json yarn.lock $APP/
+RUN yarn
+# Gems and yarn packages are installed into the mounted volumes.
+# This will stop you from needing to rebuild the whole Docker image every time you change the Gemfile or package.json.
+
+COPY . $APP/
+
+CMD ["yarn", "run", "dev"]
+</code></pre>
+
+<p><code>.dockerignore</code> 避免 Docker 在 build 的時候，一併複製過去</p>
+
+<pre><code class="ruby"># autheg/autheg-frontend/.dockerignore
+/node_modules/
+</code></pre>
+
+<h3>all</h3>
+
+<pre><code class="ruby"># autheg/docker-compose.yml
+
+version: '3' # dockerfile 版本
+services:
+  db: # 對應 rails database.yml 的 host
+    image: postgres
+    ports:
+      - "5432"
+  backend: # 會變成 REPOSITORY name autheg_backend
+    build:
+      context: autheg-backend # 要 build 的資料夾位置
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./autheg-backend:/usr/src/app
+      # 放哪裡沒有一定 /var/www/html,  /usr/src/app,  /home 都有人放
+    ports:
+      - "8080:8080"
+    depends_on:
+      - db
+    user: rails # 對應到 adduser 的名稱
+  frontend: # 會變成 REPOSITORY name autheg_frontend
+    build:
+      context: autheg-frontend
+      args:
+        UID: ${UID:-1001}
+    volumes:
+      - ./autheg-frontend:/usr/src/app
+    ports:
+      - "3000:3000"
+    user: frontend # 對應到 adduser 的名稱
+</code></pre>
+
+<p>接下來執行</p>
+
+<pre><code>docker-compose build
+</code></pre>
+
+<pre><code class="ruby"># docker images
+REPOSITORY          TAG                 IMAGE ID            CREATED              SIZE
+autheg_frontend     latest              18b1178326a7        About a minute ago   890MB
+autheg_backend      latest              528bfe5bf6d6        2 minutes ago        1.03GB
+</code></pre>
+
+<pre><code>docker-compose run -u root backend bundle
+</code></pre>
+
+<pre><code class="ruby"># docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS                          PORTS                     NAMES
+a11609898c96        autheg_backend      "bundle"                 About a minute ago   Exited (0) About a minute ago                             autheg_backend_run_1
+f088297e9b9b        postgres            "docker-entrypoint.s…"   About a minute ago   Up About a minute               0.0.0.0:32783-&gt;5432/tcp   autheg_db_1
+
+docker volume ls
+# DRIVER              VOLUME NAME
+# local               64117d4ab46a1d0575cc7136e745cc70bf568cfb3e200c80c69ae035cde89085
+</code></pre>
+
+<pre><code>docker-compose run frontend yarn
+</code></pre>
+
+<pre><code class="ruby"># docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED                  STATUS                     PORTS                     NAMES
+d51e53bd1370        autheg_frontend     "yarn"                   Less than a second ago   Exited (0) 3 seconds ago                             autheg_frontend_run_1
+a11609898c96        autheg_backend      "bundle"                 3 minutes ago            Exited (0) 3 minutes ago                             autheg_backend_run_1
+f088297e9b9b        postgres            "docker-entrypoint.s…"   3 minutes ago            Up 3 minutes               0.0.0.0:32783-&gt;5432/tcp   autheg_db_1
+</code></pre>
+
+<p>要再跑 bundle &amp; yarn 是因為有做 volumes，因此利用 docker 所建立的環境，跑 host 的 bundle &amp; yarn，讓兩邊一致</p>
+
+<blockquote><p>The reason you need to run bundle and yarn after building is because your docker-compose file mounts your host volumes into the containers so you need to install the packages into the host volumes as well as the images that are used to create the containers</p></blockquote>
+
+<h3>編輯 database.yml &amp; package.json</h3>
+
+<pre><code class="diff"> default: &amp;default
+   adapter: postgresql
+   encoding: unicode
++  host: db
++  username: postgres
+</code></pre>
+
+<pre><code class="diff">   "private": true,
+   "scripts": {
+-    "dev": "nuxt",
++    "dev": "HOST=0.0.0.0 nuxt",
+     "build": "nuxt build",
+     "start": "nuxt start",
+     "generate": "nuxt generate",
+</code></pre>
+
+<p><code>HOST=0.0.0.0 nuxt</code> so it’s visible on your host machine</p>
+
+<p>再啟動一個 container 用來建立新資料庫</p>
+
+<pre><code>docker-compose run backend bin/rails db:create
+</code></pre>
+
+<p>此時 db 會 create 在，一開始設定的 db container <code>autheg_db_1</code> 裡面，可以</p>
+
+<pre><code class="ruby">docker exec -it autheg_db_1 bash
+su - postgres
+psql -ls
+# 就會看到 create 好的 database
+</code></pre>
+
+<p>看一下目前產生的 container</p>
+
+<pre><code class="ruby"># docker ps -a
+CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                     PORTS                     NAMES
+85d3ec81e943        autheg_backend      "bin/rails db:create"    6 minutes ago       Exited (0) 6 minutes ago                             autheg_backend_run_2
+6e1f7b406a70        autheg_frontend     "yarn"                   7 minutes ago       Exited (0) 7 minutes ago                             autheg_frontend_run_1
+55ff63bb46e9        autheg_backend      "bundle"                 25 minutes ago      Exited (0) 8 minutes ago                             autheg_backend_run_1
+e889c2e713d0        postgres            "docker-entrypoint.s…"   25 minutes ago      Up 25 minutes              0.0.0.0:32770-&gt;5432/tcp   autheg_db_1
+</code></pre>
+
+<p>將所有 container 啟動</p>
+
+<pre><code class="ruby">docker-compose up
+# docker-compose stop
+# docker-compose down
+</code></pre>
+
+<p>就能看到</p>
+
+<ul>
+<li>rails : <code>http://localhost:8080/</code></li>
+<li>nuxt : <code>http://localhost:3000/</code></li>
+</ul>
+
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*hoai7Zion_e9-0uZQGr1Sw.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<h1><span id="part2">Part 2: Getting them talking to each other</span></h1>
+
+<p>新增 table, model, controller</p>
+
+<pre><code class="ruby">docker-compose run backend bash
+&gt; bin/rails g resource example name:string colour:string
+&gt; bin/rails db:migrate
+&gt; bin/rails c
+&gt; &gt; {"foo" =&gt; "green", "bar" =&gt; "red", "baz" =&gt; "purple"}.each {|n,c| Example.create!(name: n, colour: c)}
+</code></pre>
+
+<p>編輯 controller</p>
+
+<pre><code class="ruby"># autheg-backend/app/controllers/examples_controller.rb
+class ExamplesController &lt; ApplicationController
+  def index
+    examples = Example.all.select(:id, :name, :colour)
+    render json: examples
+  end
+end
+</code></pre>
+
+<pre><code class="ruby"># autheg-backend/config/routes.rb
+Rails.application.routes.draw do
+  scope :api, defaults: { format: :json } do
+    resources :examples
+  end
+end
+</code></pre>
+
+<p>這個步驟目前先不做，要等後面安裝 <code>devise</code> 才需要</p>
+
+<pre><code class="ruby"># autheg-backend/app/controllers/application_controller.rb
+class ApplicationController &lt; ActionController::API
+  include ActionController::MimeResponds
+  respond_to :json
+end
+</code></pre>
+
+<p>現在打 <code>http://localhost:8080/api/examples</code> 就會看到</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*76hf6XcYJM_xLdpbd0jZGw.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<p>接著安裝 <a href="https://github.com/axios/axios">axios</a> &amp; <a href="https://vuetifyjs.com/en/">vuetify</a></p>
+
+<pre><code class="ruby">docker-compose run frontend yarn add @nuxtjs/axios @nuxtjs/vuetify
+</code></pre>
+
+<p>這邊是 hardcode 在上面，正式機不應該這樣寫</p>
+
+<pre><code class="js">// autheg-frontend/nuxt.config.js
+  modules: [
+    '@nuxtjs/vuetify',
+    '@nuxtjs/axios'
+  ],
+  axios: {
+    host: 'localhost',
+    port: 8080,
+    prefix: '/api'
+  }
+</code></pre>
+
+<p>更改畫面</p>
+
+<p>The <code>nuxt</code> option to the link tells it to use Nuxt’s router to handle the link, rather than doing it in the browser.</p>
+
+<pre><code class="js">// autheg-frontend/layouts/default.vue
+&lt;template&gt;
+  &lt;div id="app"&gt;
+    &lt;v-app&gt;
+      &lt;v-toolbar app dark&gt;
+        &lt;v-toolbar-title&gt;Auth example&lt;/v-toolbar-title&gt;
+        &lt;v-spacer /&gt;
+        &lt;v-btn icon nuxt href="http://mgleon08.github.com/"&gt;&lt;v-icon&gt;home&lt;/v-icon&gt;&lt;/v-btn&gt;
+      &lt;/v-toolbar&gt;
+      &lt;v-content&gt;
+        &lt;v-container fluid&gt;
+          &lt;nuxt/&gt;
+        &lt;/v-container&gt;
+      &lt;/v-content&gt;
+    &lt;/v-app&gt;
+  &lt;/div&gt;
+&lt;/template&gt;
+</code></pre>
+
+<p><code>mounted()</code> 會在 template 初始化的時候呼叫，並且會 call <code>updateExamples()</code> method，去 call <code>/examples</code> API 拿資料回來</p>
+
+<p>```js
+// autheg-frontend/pages/index.vue
+<template>
+  <v-layout>
+    <v-flex>
+      <v-list>
+        <v-list-tile v-for="example in examples" :key="example.id" :class="example.colour">
+          <v-list-tile-content></v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-flex>
+  </v-layout>
+</template></p>
+
+<script>
+export default {
+  data () {
+    return {
+      examples: []
+    }
+  },
+  methods: {
+    async updateExamples() {
+      this.examples = await this.$axios.$get('/examples')
+    }
+  },
+  mounted () {
+    this.updateExamples()
+  }
+}
+</script>
+
+
+<pre><code>
+接著會看到 browser console 會 error，主要是因為 [CROS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) 的原因
+
+&gt; JavaScript isn’t allowed to query endpoints on other domains unless those domains set the CORS headers appropriately
+
+![](https://cdn-images-1.medium.com/max/1600/1*5PhACGlQd7cfjiA-DqksuA.png)
+*from [How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT](https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16)*
+
+接著要去 `backend` 新增 `cros` 的設定，讓 `frontend` 可以 call
+
+先將 Gemfile 的 comment 打開
+</code></pre>
+
+<h1>autheg-backend/Gemfile</h1>
+
+<p>gem &lsquo;rack-cors&rsquo;</p>
+
+<h1>autheg-backend/config/initializers/cors.rb</h1>
+
+<p>Rails.application.config.middleware.insert_before 0, Rack::Cors do
+  allow do
+    origins &lsquo;localhost:3000&rsquo; # 也可以 * 就是所有 domain 都可以打進來</p>
+
+<pre><code>resource '*',
+  headers: :any,
+  methods: [:get, :post, :put, :patch, :delete, :options, :head]
+</code></pre>
+
+<p>  end
+end
+```</p>
+
+<p>接著跑</p>
+
+<pre><code>docker-compose run -u root backend bundle
+</code></pre>
+
+<p>然後重新起動 container</p>
+
+<pre><code>ctrl + c
+docker-compose up
+</code></pre>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*LUreZEc1i0c5WfhoDCLxSQ.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<h1><span id="part3">Part 3: Authentication with Devise-JWT</span></h1>
+
+<p>這次要加上 devise 加上 JWT</p>
+
+<ul>
+<li><a href="https://jwt.io/">JWT</a></li>
+<li><a href="https://github.com/plataformatec/devise">devise</a></li>
+<li><a href="https://github.com/waiting-for-dev/devise-jwt">devise-jwt</a></li>
+</ul>
+
+
+<p>先在 Gemfile 新增</p>
+
+<pre><code class="ruby"># autheg-backend/Gemfile
+gem 'devise'
+gem 'devise-jwt'
+</code></pre>
+
+<p>bundle</p>
+
+<pre><code class="ruby">docker-compose run -u root backend bundle
+</code></pre>
+
+<p>接著先安裝 devise 參考 <a href="https://github.com/plataformatec/devise#getting-started">getting-started</a></p>
+
+<pre><code class="ruby"># 開新的 container 安裝 devise
+docker-compose run backend bash
+bin/rails g devise:install
+bin/rails g devise user
+bin/rails db:migrate
+</code></pre>
+
+<p>到這個步驟都還沒用到 <a href="https://jwt.io/">JWT</a>，接下來要要決定如何使令牌無效，原文選擇用 <code>黑名單</code> 的方式</p>
+
+<pre><code class="ruby">bin/rails g model jwt_blacklist jti:string:index exp:datetime
+</code></pre>
+
+<p>並將欄位加上 <code>null: false</code> 和移除 <code>t.timestamps</code></p>
+
+<pre><code class="ruby">def change
+  create_table :jwt_blacklists do |t|
+    t.string :jti, null: false
+    t.datetime :exp, null: false
+  end
+  add_index :jwt_blacklists, :jti
+end
+</code></pre>
+
+<p>在 model 加上 <code>include Devise::JWT::RevocationStrategies::Blacklist</code></p>
+
+<pre><code class="ruby"># autheg-backend/app/models/jwt_blacklist.rb
+class JwtBlacklist &lt; ApplicationRecord
+  include Devise::JWT::RevocationStrategies::Blacklist
+end
+</code></pre>
+
+<h3>secret setting</h3>
+
+<blockquote><p>在這裡遇到個問題 <a href="https://github.com/waiting-for-dev/devise-jwt/issues/56">No implicit conversion of nil into String</a>，主要是用的 rails 版本，與原文章的 ralis(5.1) 不同，導致遇到在 5.2 版本時已經沒有 <code>secrets.yml</code>&hellip; 轉而改用 <code>credentials.yml.enc</code>，所以在這裡記錄一下兩個版本的設定</p></blockquote>
+
+<h3>Before rails 5.2</h3>
+
+<p>接著產生一組 secret，做設定</p>
+
+<pre><code class="ruby">bin/rails secret
+# 9dd044df628a496e83c668f..
+</code></pre>
+
+<pre><code class="ruby"># autheg-backend/config/secrets.yml
+development:
+  secret_key_base: xxx
+  jwt_secret: 9dd044df628a496e83c668f..
+
+test:
+  secret_key_base: xxx
+  jwt_secret: 9dd044df628a496e83c668f..
+
+production:
+  secret_key_base: &lt;%= ENV["SECRET_KEY_BASE"] %&gt;
+  jwt_secret: &lt;%= ENV["JWT_SECRET"] %&gt;
+</code></pre>
+
+<pre><code class="ruby"># autheg-backend/config/initializers/devise.rb
+config.jwt do |jwt|
+  jwt.secret = Rails.application.secrets.jwt_secret
+end
+</code></pre>
+
+<h3>After rails 5.2</h3>
+
+<ul>
+<li><a href="https://medium.com/cedarcode/rails-5-2-credentials-9b3324851336">Rails 5.2 credentials</a></li>
+<li><a href="https://www.viget.com/articles/storing-secret-credentials-in-rails-5-2-and-up/">Storing Secret Credentials in Rails 5.2 and Up</a></li>
+<li><a href="https://keithpblog.org/post/encrypted-secrets/">Rails 5.2: encrypted secrets</a></li>
+</ul>
+
+
+<pre><code class="ruby">bin/rails secret
+# 9dd044df628a496e83c668f..
+</code></pre>
+
+<p>這時必須在 console執行 <code>EDITOR="vim" rails credentials:edit</code>，但是在 container 並沒有 <code>vim</code> 和 <code>sudo</code> 這個指令，因此要先切換成 root 去安裝 <code>vim</code> 才有辦法執行</p>
+
+<blockquote><p>如果無法順利執行的話可以刪掉 <code>config/credentials.yml.enc</code> 在執行 <code>EDITOR="vim" rails credentials:edit</code> 一次</p></blockquote>
+
+<pre><code class="ruby">docker-compose run -u root backend bash
+apt-get update
+apt-get install vim -y # 安裝 vim
+EDITOR="vim" bin/rails credentials:edit
+
+# 接著編輯
+secret_key_base: xxx
+jwt_secret: 9dd044df628a496e83c668f..
+</code></pre>
+
+<pre><code class="ruby"># autheg-backend/config/initializers/devise.rb
+config.jwt do |jwt|
+  jwt.secret = Rails.application.credentials[:jwt_secret]
+end
+</code></pre>
+
+<p>上面 secret 設定好就可以繼續</p>
+
+<p>設定 <code>response format</code></p>
+
+<pre><code class="ruby"># autheg-backend/app/controllers/application_controller.rb
+class ApplicationController &lt; ActionController::API
+  include ActionController::MimeResponds
+  respond_to :json
+end
+</code></pre>
+
+<pre><code class="ruby"># autheg-backend/app/models/user.rb
+class User &lt; ApplicationRecord
+  # Include default devise modules. Others available are:
+  # :confirmable, :lockable, :timeoutable and :omniauthable
+  devise :database_authenticatable, :registerable,
+         :recoverable, :rememberable, :trackable, :validatable,
+         :jwt_authenticatable, jwt_revocation_strategy: JwtBlacklist
+end
+</code></pre>
+
+<p>設定好跑</p>
+
+<pre><code class="ruby">bin/rails db:migrate
+</code></pre>
+
+<p>將 router 的 <code>devise_scope :user</code> 移到 api scope 裡面</p>
+
+<pre><code class="ruby">Rails.application.routes.draw do
+  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
+  scope :api, defaults: { format: :json } do
+    resources :examples
+    devise_for :users
+  end
+end
+</code></pre>
+
+<p>restart containers</p>
+
+<pre><code>ctrl + c
+docker-compose up
+</code></pre>
+
+<p>console 新增一個 User</p>
+
+<pre><code class="ruby">bin/rails c
+User.create!(email: 'test@example.com', password: 'password')
+</code></pre>
+
+<p>接下來就可以來測試 <code>user login</code> 原文推薦使用 <a href="http://yet-another-rest-client.com/">YARC</a> 不過個人偏好 <a href="https://www.getpostman.com/">Postman</a>，都可以</p>
+
+<pre><code class="ruby">POST /api/users/sign_in
+
+{
+   "user":{
+      "email":"test@example.com",
+      "password":"password"
+   }
+}
+</code></pre>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*2cTvgN1s2-6VkCLknzuwXQ.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<p>這裡可以看到 Response Headers 多了一個欄位</p>
+
+<pre><code class="ruby"># 原本
+
+{
+  "x-runtime": "0.496080",
+  "etag": "W/\"9a9c93785c7d5e5890c3189efa33ca10\"",
+  "vary": "Origin",
+  "content-type": "application/json; charset=utf-8",
+  "location": "/",
+  "cache-control": "max-age=0, private, must-revalidate",
+  "transfer-encoding": "chunked",
+  "x-request-id": "c6a59d67-2551-496f-8f99-f69c5b79bd75",
+  "status": 201
+}
+
+# 加上 jwt
+
+{
+  "x-runtime": "0.998534",
+  "etag": "W/\"d2403cf91d814bea7a094efecd1e0ae9\"",
+  "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwic2NwIjoidXNlciIsImF1ZCI6bnVsbCwiaWF0IjoxNTMxNjY2NjA0LCJleHAiOjE1MzE2NzAyMDQsImp0aSI6ImYzMjkxMWViLTY0ZDEtNDU0NS1iNGJjLTQ5MjE2NjQwMDc1OCJ9.nP5vGhbiPfC5acnQOusY_bEZCAWF2TZ29vq28SMUX2U",
+  "vary": "Origin",
+  "content-type": "application/json; charset=utf-8",
+  "location": "/",
+  "cache-control": "max-age=0, private, must-revalidate",
+  "transfer-encoding": "chunked",
+  "x-request-id": "4eec0e2f-5cb5-4c4d-9ed9-be9385c79a5d",
+  "status": 201
+}
+</code></pre>
+
+<p>接著要來覆蓋掉 devise 原本的 session controller，讓我們可以將 jwt 加進去</p>
+
+<p>先 generate devise 內建的 sessino controller</p>
+
+<pre><code class="ruby">bin/rails generate devise:controllers users -c=sessions
+</code></pre>
+
+<p>並且新增一個 router，已便可以拿到 user 的 detail 資訊</p>
+
+<blockquote><p>這裡跟原文章不太一樣，這邊是藉由 devise 內建的 generate 產生 session controller file，是放在 app/controller/users/sessions_controller.rb，原文章應該是自行建立的檔案放在 app/controller/sessions_controller.rb，因此底下的 router 設定也會有稍微不同</p></blockquote>
+
+<pre><code class="ruby"># autheg-backend/config/routes.rb
+Rails.application.routes.draw do
+  scope :api, defaults: { format: :json } do
+    resources :examples
+    devise_for :users, controllers: { sessions: 'users/sessions' }
+    devise_scope :user do
+      get 'users/current', to: 'users/sessions#show'
+    end
+  end
+end
+</code></pre>
+
+<p>將 Gemfile 裡的 <code>jbuilder</code> gem 打開</p>
+
+<pre><code class="ruby"># Gemfile
+gem 'jbuilder', '~&gt; 2.5'
+</code></pre>
+
+<pre><code class="ruby">docker-compose run -u root backend bundle
+# restart containers
+docker-compose up
+</code></pre>
+
+<pre><code class="ruby"># autheg-backend/app/controllers/users/sessions_controller.rb
+class Users::SessionsController &lt; Devise::SessionsController
+  def create
+    super { @token = current_token }
+  end
+
+  def show
+  end
+
+  private
+
+  def current_token
+    request.env['warden-jwt_auth.token']
+  end
+end
+</code></pre>
+
+<pre><code class="ruby"># autheg-backend/app/views/users/create.json.jbuilder
+json.token @token
+</code></pre>
+
+<pre><code class="ruby"># autheg-backend/app/views/users/show.json.jbuilder
+if user_signed_in?
+  json.user do
+    json.(current_user, :id, :email)
+  end
+end
+</code></pre>
+
+<p>接下來可以測試 login 了</p>
+
+<pre><code class="ruby"># 登入拿 token
+POST /api/users/sign_in
+
+{
+   "user":{
+      "email":"test@example.com",
+      "password":"password"
+   }
+}
+
+# 在 Header 加上剛剛登入拿到的 token
+# "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdW ..."
+GET /api/users/current
+
+# 登出，記得也要帶 token 才知道誰要登出
+# "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdW ..."
+DELETE /api/users/sign_out
+</code></pre>
+
+<p>測試 ok 後，接下來在 <code>ExamplesController</code> 加上 <code>authentication</code></p>
+
+<pre><code class="ruby"># autheg-backend/app/controllers/examples_controller.rb
+class ExamplesController &lt; ApplicationController
+  before_action :authenticate_user!
+
+  def index
+    examples = Example.all.select(:id, :name, :colour)
+    render json: examples
+  end
+end
+</code></pre>
+
+<p>這時 <code>GET /api/examples</code> 就必須帶 <code>token</code> 否則會 <code>error</code></p>
+
+<pre><code class="ruby">GET /api/examples
+
+{
+  "error": "You need to sign in or sign up before continuing."
+}
+</code></pre>
+
+<p>接下來回到 frontend，會發現 <code>401 Unauthorized error</code> 所以要在 frontend 加上 <code>authentication</code></p>
+
+<p>新增後端 <code>sign_in</code> <code>sign_out</code> <code>detail</code> API &amp; <code>@nuxtjs/auth</code></p>
+
+<pre><code>docker-compose run frontend yarn add @nuxtjs/auth
+</code></pre>
+
+<pre><code class="js">// autheg-frontend/nuxt.config.js
+modules: [
+  '@nuxtjs/vuetify',
+  '@nuxtjs/axios',
+  '@nuxtjs/auth'
+],
+auth: {
+  endpoints: {
+    login:  { url: '/users/sign_in' },
+    logout: { url: '/users/sign_out', method: 'delete' },
+    user:   { url: '/users/current' }
+  }
+}
+</code></pre>
+
+<pre><code class="js">// autheg-frontend/store/index.js
+export default {
+  state: () =&gt; ({
+  })
+}
+</code></pre>
+
+<p>restart container 讓 frontend 吃到剛剛的設定</p>
+
+<p>```js
+// autheg-frontend/pages/login.vue</p>
+
+<p><template>
+  <v-layout>
+    <v-flex>
+      <v-card v-if="$auth.state.loggedIn">
+        <v-alert type="error" :value="error"></v-alert>
+        <v-card-text>
+          Logged in as 
+        </v-card-text>
+        <v-card-actions>
+          <v-btn @click="logout">Log out</v-btn>
+        </v-card-actions>
+      </v-card>
+      <v-card v-else>
+        <v-alert type="error" :value="error"></v-alert>
+        <v-card-text>
+          <v-form>
+            <v-text-field v-model="email" label="Email" />
+            <v-text-field v-model="password" label="Password" type="password" />
+          </v-form>
+          <v-card-actions>
+            <v-btn @click="login">Log in</v-btn>
+          </v-card-actions>
+        </v-card-text>
+      </v-card>
+    </v-flex>
+  </v-layout>
+</template></p>
+
+<script>
+export default {
+  data () {
+    return {
+      email: '',
+      password: '',
+      error: null
+    }
+  },
+  methods: {
+    login: function () {
+      this.$auth.login({
+        data: {
+          user: {
+            email: this.email,
+            password: this.password
+          }
+        }
+      }).catch(e => {this.error = e + ''})
+    },
+    logout: function () {
+      this.$auth.logout().catch(e => {this.error = e + ''})
+    }
+  }
+}
+</script>
+
+
+<pre><code>
+現在可以到 `/login` 試試看登入了
+
+如果想要讓 user 沒有 login 的狀態下都 redirect 到 `login page` 就加上
+</code></pre>
+
+<p>// autheg-frontend/pages/index.vue
+<template>
+  <v-layout>
+    <v-flex>
+      <v-list>
+        <v-list-tile v-for="example in examples" :key="example.id" :class="example.colour">
+          <v-list-tile-content></v-list-tile-content>
+        </v-list-tile>
+      </v-list>
+    </v-flex>
+  </v-layout>
+</template></p>
+
+<script>
+export default {
+  middleware: ['auth'],
+  data () {
+    return {
+      examples: []
+    }
+  },
+  methods: {
+    async updateExamples() {
+      this.examples = await this.$axios.$get('/examples')
+    }
+  },
+  mounted () {
+    this.updateExamples()
+  }
+}
+</script>
+
+
+<p>```</p>
+
+<p>現在可以 try 一下</p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*012-LUDxJttnF6Jtn0Cm7A.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<p><img src="https://cdn-images-1.medium.com/max/1600/1*X7EYUzlYqfSEDGUlTaK7vQ.png" alt="" />
+<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></li>
+<li><a href="https://medium.com/@fishpercolator/deploying-your-nuxt-rails-api-app-to-production-with-heroku-54efd09eec22">Deploying your Nuxt+Rails API app to production with Heroku</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Docker - Docker Volumn]]></title>
     <link href="http://mgleon08.github.com/blog/2016/11/27/docker-volumn/"/>
     <updated>2016-11-27T16:28:35+08:00</updated>
@@ -980,119 +1903,6 @@ docker volume inspect --format '' volumeName
 <li><a href="https://ruby-china.org/topics/32459">部署 長文慎入：將 Rails 程序部署到 Docker 容器中</a></li>
 <li><a href="https://5xruby.tw/en/posts/rails-docker-image">2018 年的 Rails 應用 Docker Image 包裝範例</a></li>
 <li><a href="https://forums.docker.com/t/host-path-of-volume/12277">Host path of volume</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Docker - Docker Compose]]></title>
-    <link href="http://mgleon08.github.com/blog/2016/11/26/docker-compose/"/>
-    <updated>2016-11-26T16:28:35+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2016/11/26/docker-compose</id>
-    <content type="html"><![CDATA[<p>Docker Compose 是一個工具，用來定義與執行多個 container 組成的 Docker Applications。你可以使用 Compose 檔案來組態設定你的應用服務。然後使用單一命令，透過你的組態設定來建立與啟動你的服務。</p>
-
-<!-- more -->
-
-
-<p>Docker Compose 適合用來開發、測試、與建立 staging 環境，如同 CI workflows。</p>
-
-<p>使用 Compose 有基本的三個處理步驟：</p>
-
-<ol>
-<li>使用 Dockerfile 定義你的 app 環境，讓它可以在任何地方都能複製(reproduced)。</li>
-<li>使用 docker-compose.yml 定義你的服務，讓他們可以在獨立環境內一起執行。</li>
-<li>最後，執行 docker-compose up，Compose 將會開始與執行你所有的 app。</li>
-</ol>
-
-
-<pre><code class="ruby"># docker-compose.yml
-version: '1' # dockerfile 版本  
-services:
-    web:
-       container_name: exmple-web # Container 名稱
-        images:"mmumshad/simple-webapp" # 使用的 Image
-        ports:
-            - "80:5000" # 將 container 的 port 映射到 80
-    detabase:
-        container_name: exmple-detabase # Container 名稱
-        images:"mysql"
-        volumes::
-            - /opt/data:/var/lib/mysql
-</code></pre>
-
-<p><img src="https://i.imgur.com/2Z22ghU.png" alt="" /></p>
-
-<pre><code class="ruby">docker-compose build # 透過 docker-compose 建立好所有的 image
-docker-compose up
-docker-compose stop
-docker-compose down
-</code></pre>
-
-<h3>Example</h3>
-
-<pre><code class="ruby">version: '3'
-services:
-  db:
-    image: postgres
-    ports:
-      - "5432"
-  backend:
-    build:
-      context: test-backend
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./test-backend:/usr/src/app
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    user: rails
-  frontend:
-    build:
-      context: test-frontend
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./test-frontend:/usr/src/app
-    ports:
-      - "3000:3000"
-    user: frontend
-</code></pre>
-
-<h3>.env file</h3>
-
-<ul>
-<li><a href="https://docs.docker.com/compose/environment-variables/">Environment variables in Compose</a></li>
-</ul>
-
-
-<p>官方文件：</p>
-
-<ul>
-<li><a href="https://docs.docker.com/docker-for-mac/">Get started with Docker for Mac</a></li>
-<li><a href="https://docs.docker.com/engine/reference/builder/">Docker Docs</a></li>
-<li><a href="https://docs.docker.com/compose/">Docker Compose</a></li>
-<li><a href="https://docs.docker.com/compose/compose-file/">Compose file version 3 reference</a></li>
-</ul>
-
-
-<p>參考文件：</p>
-
-<ul>
-<li><a href="https://philipzheng.gitbooks.io/docker_practice/content/index.html">Docker —— 從入門到實踐</a></li>
-<li><a href="http://www.cc.ntu.edu.tw/chinese/epaper/0036/20160321_3611.html">淺談輕量化的虛擬技術 - Docker容器</a></li>
-<li><a href="http://bonze.tw/%E4%BC%BA%E6%9C%8D%E5%99%A8%E7%A0%94%E7%A9%B6%E5%AE%A4/dockerfile%E7%B0%A1%E5%96%AE%E4%BB%8B%E7%B4%B9">Dockerfile簡單介紹</a></li>
-<li><a href="http://blog.maxkit.com.tw/2017/03/docker-compose.html">Docker Compose 初步閱讀與學習記錄</a></li>
-<li><a href="https://medium.com/@DcardLab/dcard-%E5%AF%A6%E7%BF%92%E7%94%9F%E6%B4%BB%E6%97%A5%E8%A8%98-%E5%B0%8F%E9%AF%A8%E9%AD%9A-docker-%E4%BB%8B%E7%B4%B9-a574b28feae4">Dcard 實習生活日記：小鯨魚（Docker）介紹</a></li>
-<li><a href="https://segmentfault.com/q/1010000000417103">Dockerfile裡指定執行命令用ENTRYPOING和用CMD有何不同？</a></li>
-<li><a href="https://beginor.github.io/2017/10/21/dockerfile-cmd-and-entripoint.html">Dockerfile 的 ENTRYPOINT 與 CMD</a></li>
-<li><a href="https://5xruby.tw/posts/rails-docker-image">2018 年的 Rails 應用 Docker Image 包裝範例</a></li>
-<li><a href="https://larrylu.blog/step-by-step-dockerize-your-app-ecd8940696f4">Docker 實戰系列（一）：一步一步帶你 dockerize 你的應用</a></li>
-<li><a href="https://blog.csdn.net/qq_36148847/article/details/79427878">docker-compose.yml 配置文件編寫詳解</a></li>
-<li><a href="https://ithelp.ithome.com.tw/users/20103456/ironman/1320">用30天來介紹和使用 Docker</a></li>
-<li><a href="http://www.ityouknow.com/docker/2018/03/22/docker-compose.html">Docker(四)：Docker 三劍客之 Docker Compose</a></li>
 </ul>
 
 ]]></content>

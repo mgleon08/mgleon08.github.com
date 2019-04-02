@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Rails | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/rails/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-18T22:50:14+08:00</updated>
+  <updated>2019-04-02T09:56:32+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,574 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Rails With Active Storage]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/03/27/rails-active-storage/"/>
+    <updated>2019-03-27T09:33:19+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/03/27/rails-active-storage</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p><code>Active Storage</code> 是 rails 後來出的新功能，可以簡單的做到上傳檔案，雲端整合(<a href="https://aws.amazon.com/tw/s3/">Amazon S3</a>, <a href="https://cloud.google.com/storage/docs/">Google Cloud Storage</a>)，<code>MiniMagick</code> 影像操作等等，就像是 <a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a>, <a href="https://github.com/thoughtbot/paperclip">paperclip</a> 等比較常用到的套件</p>
+
+<p>跟以往用 carrierwave 或是 paperclip 不太一樣，不需要在現有的 model 新增欄位，而是透過 <code>polymorphic</code> 的方式，將檔案存在兩張獨立的 table， <code>active_storage_blobs</code>, <code>active_storage_attachments</code></p>
+
+<h1>Init Project</h1>
+
+<pre><code class="ruby">rails new active_storage_demo --webpack=stimulus --skip-coffee --skip-test -d=mysql
+</code></pre>
+
+<h1>Install active_storage</h1>
+
+<p>透過 <code>rails active_storage:install</code> 建立 active_storage 所需要的兩張 table，包括 <code>active_storage_blobs</code>, <code>active_storage_attachments</code></p>
+
+<ul>
+<li><code>active_storage_attachments</code>: 用來存跟 model 相關的資訊</li>
+<li><code>active_storage_blobs</code>: 用來存詳細檔案的資訊(裡面包含了 <code>checksum</code> 將檔案做 hash 可以知道是否為同一個檔案)</li>
+</ul>
+
+
+<p>接著跑 <code>rake db:create db:migrate</code></p>
+
+<pre><code class="ruby"># This migration comes from active_storage (originally 20170806125915)
+class CreateActiveStorageTables &lt; ActiveRecord::Migration[5.2]
+  def change
+    create_table :active_storage_blobs do |t|
+      t.string   :key,        null: false
+      t.string   :filename,   null: false
+      t.string   :content_type
+      t.text     :metadata
+      t.bigint   :byte_size,  null: false
+      t.string   :checksum,   null: false
+      t.datetime :created_at, null: false
+
+      t.index [ :key ], unique: true
+    end
+
+    create_table :active_storage_attachments do |t|
+      t.string     :name,     null: false
+      t.references :record,   null: false, polymorphic: true, index: false
+      t.references :blob,     null: false
+
+      t.datetime :created_at, null: false
+
+      t.index [ :record_type, :record_id, :name, :blob_id ], name: "index_active_storage_attachments_uniqueness", unique: true
+      t.foreign_key :active_storage_blobs, column: :blob_id
+    end
+  end
+end
+</code></pre>
+
+<p>預設檔案存在 local(也可以改成 s3 或 GCS)</p>
+
+<pre><code class="ruby"># config/environments/development.rb
+config.active_storage.service = :local
+
+# config/storage.yml
+test:
+  service: Disk
+  root: &lt;%= Rails.root.join("tmp/storage") %&gt;
+
+local:
+  service: Disk
+  root: &lt;%= Rails.root.join("storage") %&gt;
+</code></pre>
+
+<p>建立 user moblie</p>
+
+<pre><code class="ruby">rails g scaffold User name
+rake db:migrate
+</code></pre>
+
+<p>在 user model 設定可以上傳的檔案有哪些</p>
+
+<pre><code class="ruby"># models/user.rb
+class User &lt; ApplicationRecord
+  has_one_attached :avatar
+  has_many_attached :documents
+end
+</code></pre>
+
+<p>在 view 上面新增畫面，如果是要多個檔案，要加上 <code>multiple: true</code></p>
+
+<p>```ruby</p>
+
+<h1>views/users/_form.html.erb</h1>
+
+<div class="field">
+  <%= form.label :avatar %>
+  <%= form.file_field :avatar %>
+</div>
+
+
+
+
+<div class="field">
+  <%= form.label :documents %>
+  <%= form.file_field :documents, multiple: true %>
+</div>
+
+
+<pre><code>
+* `image_tag(@user.avatar)` 顯示圖片
+* `rails_blob_path(doc, disposition: "attachment"))` 附件
+</code></pre>
+
+<h1>views/users/show.html.erb</h1>
+
+<h2>avatar</h2>
+
+
+<p>&lt;% if @user.avatar.attached? %>
+  &lt;%= image_tag(@user.avatar) %>
+&lt;% end %></p>
+
+<p></p></p>
+
+<p>&lt;% if @user.documents.attached? %>
+  <p>
+  <h2>Download Documents</h2>
+  &lt;% @user.documents.each_with_index do |doc, i| %>
+    <p>
+    &lt;%= link_to(&ldquo;Document #{i}&rdquo;, rails_blob_path(doc, disposition: &ldquo;attachment&rdquo;)) %>
+    </p>
+  &lt;% end %>
+  </p>
+&lt;% end %>
+```</p>
+
+<p>並在 controller 新增 permit，因為 documents 是多個檔案，所以給 Array</p>
+
+<pre><code class="ruby"># controllers/users_controller.rb
+def user_params
+  params.require(:user).permit(:name, :avatar, documents: [])
+end
+</code></pre>
+
+<p>接著就可以 <code>rails s</code> 來新增 user 測試看看了</p>
+
+<h1>刪除檔案</h1>
+
+<pre><code class="ruby"># 同步刪除頭像和實際資源檔案。
+@user.avatar.purge
+
+# 透過 Active Job 非同步刪除相關模型和實際資源檔案。
+@user.avatar.purge_later
+</code></pre>
+
+<h1>調整圖片尺寸</h1>
+
+<p>不同尺寸可以透過 <a href="https://github.com/minimagick/minimagick">minimagick</a> 做轉換</p>
+
+<pre><code class="ruby"># Gemfile
+gem 'mini_magick'
+
+# views/users/show.html.erb
+&lt;%= image_tag @user.avatar.variant(resize: "100x100") %&gt;
+</code></pre>
+
+<h1>Direct Upload</h1>
+
+<pre><code class="ruby">yarn add activestorage
+</code></pre>
+
+<pre><code class="ruby"># javascript/packs/direct_upload.js
+
+import * as ActiveStorage from 'activestorage';
+ActiveStorage.start();
+</code></pre>
+
+<h1>other</h1>
+
+<pre><code class="ruby"># url
+url_for(@user.avatar)
+
+# download link
+rails_blob_path(user.avatar, disposition: "attachment")
+
+Rails.application.routes.url_helpers.rails_blob_url(@user.avatar, only_path: true)
+</code></pre>
+
+<h1>後續</h1>
+
+<p>接著看一下 source code，可以發現到 blob 可以有多個 attachments。</p>
+
+<p>代表 blob 是可以重複利用，但是必須在 <code>has_one/many_attached</code> 後面加上 <code>dependent: false</code> 才不會刪除了一個 attachment 就將 blob 刪除，導致其他 attachment 關聯不到</p>
+
+<p>另外 <a href="https://www.rubydoc.info/github/rails/rails/Module:delegate_missing_to">delegate_missing_to</a> 則是類似 delegate 的加強版，讓 user 可以直接 call <code>user.filename</code></p>
+
+<blockquote><p><a href="https://ruby-china.org/topics/33119">Rails 5.1 add delegate_missing_to</a></p></blockquote>
+
+<p><code>belongs_to :record</code> 則是透過 <code>polymorphic</code> 的方式來存取是由哪個 model 的資料</p>
+
+<pre><code class="ruby"># rails/activestorage/app/models/active_storage/blob.rb
+class ActiveStorage::Blob &lt; ActiveRecord::Base
+  # ...
+  self.table_name = "active_storage_blobs"
+  has_many :attachments
+  # ...
+ end
+</code></pre>
+
+<pre><code class="ruby"># rails/activestorage/app/models/active_storage/attachment.rb
+class ActiveStorage::Attachment &lt; ActiveRecord::Base
+  self.table_name = "active_storage_attachments"
+  belongs_to :record, polymorphic: true, touch: true
+  belongs_to :blob, class_name: "ActiveStorage::Blob"
+  delegate_missing_to :blob
+end
+</code></pre>
+
+<h1>缺點</h1>
+
+<ul>
+<li>有人提到 Active Storage 目前不適合用在 production <a href="https://ruby-china.org/topics/37717">Active Storage 的正確使用姿勢</a></li>
+<li>也有人提到，容易造成 N+1，永久網址難以 cache，redirect 效能問題，routing 衝突等等 <a href="https://5xruby.tw/posts/active-storage-review/">Active Storage 開箱文</a></li>
+</ul>
+
+
+<h1>demo</h1>
+
+<p><a href="https://github.com/mgleon08/active_storage_demo">active_storage_demo</a></p>
+
+<p>Reference:</p>
+
+<ul>
+<li><a href="https://guides.rubyonrails.org/active_storage_overview.html">Active Storage Overview</a></li>
+<li><a href="https://github.com/rails/rails/tree/master/activestorage">activestorage</a></li>
+<li><a href="https://medium.com/@ebifurai_tsn/active-storage-after-rails-5-2-26ad89c93b57">Active Storage after Rails 5.2</a></li>
+<li><a href="https://andyyou.github.io/2018/06/26/using-active-storage/">手把手學習使用 Rails 5.2 ActiveStorage (DirectUpload + ProgressBar)</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rails With Grape]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/03/15/rails-with-grape/"/>
+    <updated>2019-03-15T23:04:35+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/03/15/rails-with-grape</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>Grape 是一個用來建立 API 的 framework，不過在 rails5 之後就有支援 <code>API mode</code>，不過還是來了解一下，實際上來用應該還是用 rails 內建的 <code>API mode</code></p>
+
+<blockquote><p>An opinionated framework for creating REST-like APIs in Ruby.</p></blockquote>
+
+<p>好處</p>
+
+<ul>
+<li>採用獨特的 DSL 來簡化建立API的流程</li>
+<li>支援 swagger 文件自動生成</li>
+</ul>
+
+
+<h1>Create Project</h1>
+
+<pre><code class="ruby">rails new demo_rails_grape -T -d mysql
+</code></pre>
+
+<pre><code class="ruby">rails g model User name:string email:string tel:string
+</code></pre>
+
+<h3>rails c</h3>
+
+<pre><code class="ruby">User.create(name: "user1", email: "text1@gmail.com", tel: 111)
+User.create(name: "user2", email: "text2@gmail.com", tel: 222)
+</code></pre>
+
+<p>or</p>
+
+<h3>seed</h3>
+
+<pre><code class="ruby">rake db:seed
+</code></pre>
+
+<h1>Grape</h1>
+
+<p>grape 設定</p>
+
+<pre><code class="ruby"># Gemfile
+gem "grape", "~&gt; 1.1.0"
+</code></pre>
+
+<pre><code class="ruby"># routes
+Rails.application.routes.draw do
+    mount APIBase =&gt; "/api"
+end
+</code></pre>
+
+<pre><code class="ruby"># /api/api_base.rb
+class APIBase &lt; Grape::API
+  # general settings
+  format :json
+  content_type :json, "application/json"
+  default_error_status 400
+
+  mount V1::Base
+end
+</code></pre>
+
+<pre><code class="ruby"># /api/v1/base.rb
+module V1
+  class Base &lt; APIBase
+    version "v1", using: :path
+    mount User
+  end
+end
+</code></pre>
+
+<pre><code class="ruby"># /api/v1/base/user
+module V1
+  class User &lt; Base
+    get :user do
+      present :users, "leon"
+    end
+  end
+end
+</code></pre>
+
+<pre><code class="ruby"># rs -p 4321
+http://localhost:4321/api/v1/user
+</code></pre>
+
+<h1>Grape Swagger</h1>
+
+<pre><code class="ruby"># Gemfile
+gem 'grape-swagger'
+gem 'grape-swagger-rails'
+</code></pre>
+
+<pre><code class="ruby"># routes
+if Rails.env.development?
+  mount GrapeSwaggerRails::Engine =&gt; '/apidoc'
+end
+</code></pre>
+
+<pre><code class="ruby"># config/initializers/grape_swagger.rb
+if Rails.env.development?
+  GrapeSwaggerRails.options.app_url = '/api/v1/'
+  GrapeSwaggerRails.options.url = 'swagger_doc.json'
+  GrapeSwaggerRails.options.app_name = 'RailsGrape Swagger'
+  # Set docExpansion with "none" or "list" or "full", default is "none".
+  GrapeSwaggerRails.options.doc_expansion = "list"
+  GrapeSwaggerRails.options.supported_submit_methods = ['get']
+end
+</code></pre>
+
+<pre><code class="ruby"># api/v1/base/user
+module V1
+  class User &lt; Base
+    get :user do
+      users = ::User.all
+      present :users, users
+    end
+  end
+end
+</code></pre>
+
+<pre><code class="ruby"># /api/v1/base.rb
+module V1
+  class Base &lt; APIBase
+    version 'v1', using: :path
+
+    mount User
+
+    if Rails.env.development?
+      add_swagger_documentation(
+        api_version: 'v1',
+        mount_path: 'swagger_doc',
+        hide_format: true,
+        hide_documentation_path: true,
+        info: {
+          title: 'API Doc',
+          description: '基本使用規則'
+        }
+      )
+    end
+  end
+end
+</code></pre>
+
+<pre><code class="ruby"># rails s -p 4321
+http://localhost:4321/apidoc
+# json
+http://localhost:4321/api/v1/swagger_doc.json
+</code></pre>
+
+<h1>grape-entity</h1>
+
+<p>JSON 的 field 內容就會是對應 entity 中配置的欄位，能方便的配置需要返回什麼欄位</p>
+
+<blockquote><p>An API focused facade that sits on top of an object model.</p></blockquote>
+
+<p>新增 Gem</p>
+
+<pre><code class="ruby"># Gemfile
+gem "grape-entity", "~&gt; 0.7.1"
+gem "grape-swagger-entity", "~&gt; 0.3.0"
+</code></pre>
+
+<p>新增 entities</p>
+
+<pre><code class="ruby"># /api/v1/entities/user_result.rb
+module V1::Entities
+  class UserResult &lt; Grape::Entity
+    expose :name, documentation: { required: true, type: 'String', desc: '錯誤訊息' }
+  end
+end
+</code></pre>
+
+<p>在 swagger 新增資訊，加上 entity</p>
+
+<pre><code class="ruby"># /api/v1/user.rb
+module V1
+  class User &lt; Base
+    # users
+    desc "`回傳所有 User 資訊`" do
+      failure [
+        [400, "`找不到任何 user`"],
+        [500, "`unknown`"],
+      ]
+    end
+
+    get :users do
+      users = ::User.all
+      present :users, users, with: V1::Entities::UserResult
+    end
+
+    # user
+    desc "`帶 name 回傳該 User 資訊`" do
+      success model: V1::Entities::UserResult, examples: {
+        'application/json': {
+          name: 'user1'
+        },
+      }
+      failure [
+        [400, "`找不到任何 user`"],
+        [500, "`unknown`"],
+      ]
+    end
+
+    params do
+      optional :name, type: String, allow_blank: false, documentation: {
+        description: "name",
+        example: "user1"
+      }
+      at_least_one_of :name
+    end
+
+    get :user do
+      user = ::User.find_by(name: params["name"]) || "Can't find #{params["name"]}"
+      present :user, user
+    end
+  end
+end
+</code></pre>
+
+<h1>Demo</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/demo_rails_grape">demo_rails_grape</a></li>
+</ul>
+
+
+<p>Reference</p>
+
+<ul>
+<li><a href="https://github.com/ruby-grape/grape">grape</a></li>
+<li><a href="https://github.com/ruby-grape/grape-swagger">grape-swagger</a></li>
+<li><a href="https://github.com/ruby-grape/grape-swagger-rails">grape-swagger-rails</a></li>
+<li><a href="https://pathbox.github.io/2016/05/28/rails-grape-api/">rails + grape 快速API簡單搭建</a></li>
+<li><a href="https://sibevin.github.io/posts/2015-10-01-165320-create-api-with-grape-in-rails">在rails中使用grape來建立API</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Rails With mongoDB]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/03/15/rails-with-mongodb/"/>
+    <updated>2019-03-15T23:01:55+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/03/15/rails-with-mongodb</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<blockquote><p>Version: Ruby 2.5.3, Rails 5.2.2</p></blockquote>
+
+<h1>Generate new project</h1>
+
+<pre><code class="ruby">rails new demo_rails_mongodb --skip-active-record --api -C
+</code></pre>
+
+<h1>Add mongoid gem</h1>
+
+<ul>
+<li><a href="https://github.com/mongodb/mongoid">mongoid</a></li>
+</ul>
+
+
+<pre><code class="ruby">gem 'mongoid', '~&gt; 7.0.2'
+</code></pre>
+
+<p>create <code>config/mongoid.yml</code></p>
+
+<pre><code class="ruby">rails g mongoid:config
+</code></pre>
+
+<h1>Add docker-compose</h1>
+
+<pre><code class="ruby"># docker-compose.yml
+version: '3'
+services:
+  mongo:
+    image: mongo:4.1
+    container_name: mongo4
+    restart: always
+    ports:
+      - '27017:27017'
+    volumes:
+      - ./tmp/data/mongo/data:/data/db
+</code></pre>
+
+<pre><code class="ruby">docker-compose up
+</code></pre>
+
+<h1>Create model &amp; data</h1>
+
+<h3>Scaffold</h3>
+
+<pre><code class="ruby">rails generate scaffold book title:string author:string pages:integer
+</code></pre>
+
+<pre><code class="ruby"># rails c
+Book.create(title: "First", pages:20, author:"leon")
+</code></pre>
+
+<h1>View</h1>
+
+<pre><code class="ruby"># rails s -p 4321
+http://localhost:4321/books
+</code></pre>
+
+<h1>Demo</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/demo_rails_mongodb">demo_rails_mongodb</a></li>
+</ul>
+
+
+<p>Reference</p>
+
+<ul>
+<li><a href="https://docs.mongodb.com/mongoid/current/">Mongoid</a></li>
+<li><a href="https://mongoid.github.io/old/en/mongoid/index.html">old mongoid doc</a></li>
+<li><a href="https://blog.gtwang.org/programming/getting-started-with-mongodb-shell-1/">MongoDB 基礎入門教學：MongoDB Shell 篇</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Rails + Puma + Nginx + MySQL With Docker]]></title>
@@ -55,6 +623,12 @@
 </code></pre>
 
 <h3>docker/app/Dockerfile</h3>
+
+<p><code>--path vendor/bundle</code></p>
+
+<p><a href="https://chengl.com/using-docker-for-rails-development/">Using Docker for Rails Development</a></p>
+
+<blockquote><p>We want to install gems in ./vendor/bundle because the gems will persist in ./vendor/bundle regardless of the lifecyle of the container. When we update the Gemfile and do bundle install again, it will only install the newly added gems, not everything again.</p></blockquote>
 
 <pre><code class="ruby"># Base image
 FROM ruby:2.5.1
@@ -238,6 +812,8 @@ FLUSH PRIVILEGES;
 
 <h3>docker-compose.yml</h3>
 
+<blockquote><p>.env 的變數，可以用 <code>${MYSQL_USER}</code> 使用在 docker-compose 中</p></blockquote>
+
 <pre><code class="ruby">version: '3'
 services:
   app:
@@ -367,6 +943,42 @@ COPY . $APP/
 CMD ["bundle", "exec", "rails", "server", "-p", "3000", "-b", "0.0.0.0"]
 </code></pre>
 
+<p>README</p>
+
+<pre><code class="ruby"># build image
+docker-compose build
+
+# bundle
+docker-compose run -u root backend bundle
+
+# create database
+docker-compose run backend bundle exec rails db:create db:migrate db:seed
+
+# start
+docker-compose up
+</code></pre>
+
+<p>New project need to add <code>db (docker-compose.yml mysql name)</code> to <code>database.yml</code></p>
+
+<pre><code class="ruby">default: &amp;default
+  adapter: mysql2
+  encoding: utf8
+  pool: &lt;%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %&gt;
+  host: db
+  port: 3306
+  username: root
+  password: password
+  socket: /tmp/mysql.sock
+</code></pre>
+
+<h1>Sample</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/product_system_production">product_system_production</a></li>
+<li><a href="https://github.com/mgleon08/product_system_develop">product_system_develop</a></li>
+</ul>
+
+
 <p>參考文件:</p>
 
 <ul>
@@ -459,1168 +1071,6 @@ end
 <li><a href="http://tzoyiing.pixnet.net/blog/post/29821245-%5B%E8%BD%89%E8%B2%BC%5D-%E8%BA%AB%E4%BB%BD%E8%A8%BC%E5%AD%97%E8%99%9F%E7%B7%A8%E7%A2%BC%E5%85%AC%E5%BC%8F%E8%AA%AA%E6%98%8E~%E6%95%99%E4%BD%A0%E5%A6%82%E4%BD%95%E9%A9%97">[轉貼] 身份證字號編碼公式說明~教你如何驗證</a></li>
 <li><a href="https://tonytonyjan.net/2015/04/15/national-identification-card-validator-of-taiwan/">台灣身份證字號驗證器</a></li>
 <li><a href="https://github.com/wayne5540/taiwanese_id_builder">taiwanese_id_builder</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Environment Banner]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/07/23/environment-banner/"/>
-    <updated>2018-07-23T21:35:24+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/07/23/environment-banner</id>
-    <content type="html"><![CDATA[<p>可以很快速的知道目前環境上的版本是什麼</p>
-
-<!-- more -->
-
-
-<p>公司因為多台機器不同環境，因此有同事做了一個 <code>Environment banner</code>，可以很方便地知道目前是哪一個 branch 哪一個 版本，這邊就來記錄一下</p>
-
-<pre><code class="ruby"># app/helpers/environment_banner_helper.rb
-module EnvironmentBannerHelper
-  RELEASE_INFO_PATH = Rails.public_path.join('release_info')
-
-  def current_branch
-    if git_available?
-      # 讀取當前 HEAD 所在的 branch 名稱
-      `git rev-parse --abbrev-ref HEAD`.chomp
-    else
-      # 當在 deploy 的時候，無法用 git (除非另外裝)，因此可以先將資訊存放在某的檔案，或是環境變數
-      git_info[:branch] # 檔案
-      # ENV.fetch("CURRENT_BRANCH", "--branch-not-found--") # ENV
-    end
-  end
-
-  def current_sha
-    if git_available?
-      # 讀取當前的 log 最新一行
-      `git log --oneline -1`
-    else
-      # 當在 deploy 的時候，無法用 git (除非另外裝)，因此可以先將資訊存放在某的檔案，或是環境變數
-      git_info[:sha] # 檔案
-      # ENV.fetch("CURRENT_SHA", "--sha-not-found--") # ENV
-    end
-  end
-
-  # 確認當前環境有沒有 git
-  def git_available?
-    to_dev_null = "&gt; /dev/null 2&gt;&amp;1"
-    system("which git #{to_dev_null} &amp;&amp; git rev-parse --git-dir #{to_dev_null}")
-  end
-
-  # 主要是為了 capistrano 上面會有不同的 release 資料夾
-  def release_number
-    return unless check_release_info &amp;&amp; IO.readlines(RELEASE_INFO_PATH)[0]
-    IO.readlines(RELEASE_INFO_PATH)[0].gsub(/\D/, '').prepend('#')
-  end
-
-  def git_info
-    return { sha: "N/A", branch: "N/A"} unless check_release_info &amp;&amp; IO.readlines(RELEASE_INFO_PATH)[1]
-    line = IO.readlines(RELEASE_INFO_PATH)[1].split(/\s+/)
-    {
-      sha:    line[0][0..6],
-      branch: line[1].gsub(/refs\/heads\//, '')
-    }
-  end
-
-  def check_release_info
-    File.exist? RELEASE_INFO_PATH
-  end
-end
-</code></pre>
-
-<pre><code class="ruby"># app/views/layouts/application.html.erb
-&lt;% unless Rails.env.production? %&gt;
-  &lt;div class="environment-banner &lt;%= Rails.env %&gt;"&gt;
-    &lt;%= Rails.env %&gt; | &lt;%= "#{current_branch} @ #{current_sha} #{release_number}" %&gt;
-  &lt;/div&gt;
-&lt;% end %&gt;
-</code></pre>
-
-<pre><code class="css">/* app/assets/stylesheets/application.scss */
-.environment-banner.development {
-  background: $green;
-  color: $white;
-}
-</code></pre>
-
-<p>capistrano deploy 時新增 <code>release_info</code> 檔案方式</p>
-
-<pre><code class="ruby">set :repo_url, 'git@github.com:xxx/xxx.git'
-ask :branch, `git rev-parse --abbrev-ref HEAD`.chomp
-
-# 將所有 git 撞況寫到一個 file 上，再透過該 file 來顯示
-# readlink 可以找到實際檔案位置，awk 分析出路徑上最後的 release 資料夾名稱
-execute("echo current_release: `readlink -f #{release_path} | awk -F'/' '{print $NF}'` &gt; #{shared_path.join('public/release_info')}")
-# header
-execute("git ls-remote -h #{fetch(:repo_url)} #{fetch(:branch)} &gt;&gt; #{shared_path.join('public/release_info')}")
-# tag
-execute("git ls-remote -t #{fetch(:repo_url)} | tail -n 1 &gt;&gt; #{shared_path.join('public/release_info')}")
-</code></pre>
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Deploying Rails API + Nuxt.js + Devise-JWT API App to Production With Heroku]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/07/22/deploying-rails-nuxt-jwt-to-production-with-heroku/"/>
-    <updated>2018-07-22T23:12:48+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/07/22/deploying-rails-nuxt-jwt-to-production-with-heroku</id>
-    <content type="html"><![CDATA[<p>接著來把做好的 <code>Rails API + Nuxt.js + Devise-JWT</code> deploy 到 heroku</p>
-
-<!-- more -->
-
-
-<ul>
-<li><a href="https://medium.com/@fishpercolator/deploying-your-nuxt-rails-api-app-to-production-with-heroku-54efd09eec22">Deploying your Nuxt+Rails API app to production with Heroku</a></li>
-</ul>
-
-
-<p>由於一開始我們希望用 docker-compose 來 build 環境，因此將前後端都 commit 在一起，但在部屬的時候希望將兩個分開，這時就可以用到 <code>git subtree</code></p>
-
-<p><a href="https://heroku.com"><img src="https://www.herokucdn.com/deploy/button.svg" alt="Deploy" /></a></p>
-
-<h1>Backend</h1>
-
-<p>Rails5.2 必須先將 <code>production</code> 的 <code>config.require_master_key</code> 打開</p>
-
-<pre><code class="ruby"># autheg-backend/config/environments/production.rb
-config.require_master_key = true
-</code></pre>
-
-<p>記得要把 <code>cors.rb</code> 設定成 herokuapp 的 domain (根據前端專案的名稱)</p>
-
-<pre><code class="ruby"># autheg-backend/config/initializers/cors.rb
-origins 'localhost:3000', 'autheg-frontend-demo.herokuapp.com'
-# or
-origins '*'
-</code></pre>
-
-<p>安裝 <a href="https://devcenter.heroku.com/articles/heroku-cli">heroku-cli</a></p>
-
-<pre><code class="ruby">brew install heroku/brew/heroku
-</code></pre>
-
-<p>create backend 的 heroku 專案</p>
-
-<pre><code class="ruby"># 先到最上層的資料夾
-cd autheg
-# 如果看到這個 "Name is already taken"，就換一個名字即可
-heroku apps:create autheg-backend-demo
-</code></pre>
-
-<p>預設 remote name 會是 heroku，因為等下要在 create frontend remote，因此先改名</p>
-
-<pre><code class="ruby"># 更改 local 的 remote name
-git remote rename heroku backend
-</code></pre>
-
-<p>將後端 autheg-backend push 上去</p>
-
-<pre><code class="ruby"># 透過 subtree 先將後端 autheg-backend push 上去
-git subtree push --prefix autheg-backend backend master
-</code></pre>
-
-<p>建立環境變數</p>
-
-<pre><code class="ruby">heroku config:set -a autheg-backend-demo RAILS_MASTER_KEY=(local 裡面的 config.master.key)
-
-heroku config:set -a autheg-backend-demo JWT_SECRET=$(heroku run -a autheg-backend-demo rails secret)
-</code></pre>
-
-<p>建立 table data</p>
-
-<pre><code class="ruby">heroku run -a autheg-backend-demo rails db:schema:load
-</code></pre>
-
-<p>新增 db 資料</p>
-
-<pre><code class="ruby">heroku run -a autheg-backend-demo rails console
-
-# user
-User.create! email: "test@example.com", password: "password"
-
-# example
-{"foo" =&gt; "green", "bar" =&gt; "red", "baz" =&gt; "purple"}.each {|n,c| Example.create!(name: n, colour: c)}
-</code></pre>
-
-<p>接下來就可以透過 <a href="http://yet-another-rest-client.com/">YARC</a> or <a href="https://www.getpostman.com/">Postman</a> 來測試有沒有成功!</p>
-
-<pre><code class="ruby">POST https://autheg-backend-demo.herokuapp.com/api/users/sign_in
-
-{
-   "user":{
-      "email":"test@example.com",
-      "password":"password"
-   }
-}
-</code></pre>
-
-<h1>Frontend</h1>
-
-<p><a href="https://github.com/nuxt/docs/blob/master/en/faq/heroku-deployment.md">nuxt heroku-deployment</a></p>
-
-<p>create frontend 的 heroku 專案</p>
-
-<pre><code class="ruby"># 先到最上層的資料夾
-cd autheg
-# 如果看到這個 "Name is already taken"，就換一個名字即可
-heroku apps:create autheg-frontend-demo
-</code></pre>
-
-<p>rename remote name</p>
-
-<pre><code class="ruby">git remote rename heroku frontend
-</code></pre>
-
-<p>設定環境變數，要跑在 production 模式，因此要將之前安裝在 dev 環境中的套件，安裝上去</p>
-
-<blockquote><p>The following command tells your app to run in production mode and on all interfaces (0.0.0.0) but tells yarn/npm to run in development mode, so that all the dev packages are installed as part of the build process.</p></blockquote>
-
-<pre><code class="ruby">heroku config:set -a autheg-frontend-demo NODE_ENV=production HOST=0.0.0.0 NPM_CONFIG_PRODUCTION=false
-</code></pre>
-
-<p>改一下 <code>package.json</code>，讓 heroku deploy 之後可以 build 檔案出來</p>
-
-<pre><code class="ruby">"heroku-postbuild": "npm run build"
-</code></pre>
-
-<p>設定 backend 的 API 路徑</p>
-
-<pre><code class="ruby">heroku config:set -a autheg-frontend-demo API_URL=https://autheg-backend-demo.herokuapp.com/api
-</code></pre>
-
-<p>接著就可以到首頁上去測試了</p>
-
-<pre><code class="ruby">https://autheg-frontend-demo.herokuapp.com/
-# email: test@example.com
-# password: password
-</code></pre>
-
-<h1>Heroku</h1>
-
-<p>其他 heroku 功能</p>
-
-<pre><code class="ruby"># create new heroku project
-heroku create
-
-# push heroku
-git push heroku master
-
-# env config remove
-heroku config:remove TOKEN
-
-# log
-heroku logs --tail
-
-# scale
-heroku ps:scale web=2
-
-# ssh
-heroku run -a autheg-backend bash
-
-# run 指令
-heroku run -a autheg-backend-demo rails console
-</code></pre>
-
-<h1>git subtree</h1>
-
-<p>git subtree 本身不支援 force push，因此要透過其他方式來達成</p>
-
-<ul>
-<li><a href="https://gist.github.com/tduarte/eac064b4778711b116bb827f8c9bef7b">publish-ghpages.md</a></li>
-</ul>
-
-
-<pre><code class="ruby">git checkout master # you can avoid this line if you are in master...
-git subtree split --prefix dist -b gh-pages # create a local gh-pages branch containing the splitted output folder
-git push -f origin gh-pages:gh-pages # force the push of the gh-pages branch to the remote gh-pages branch at origin
-git branch -D gh-pages # delete the local gh-pages because you will need it: ref
-</code></pre>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://medium.com/@fishpercolator/deploying-your-nuxt-rails-api-app-to-production-with-heroku-54efd09eec22">Deploying your Nuxt+Rails API app to production with Heroku</a></li>
-<li><a href="https://hexo.crboy.net/2016/09/amazing-git-subtree/">神奇的 Git Subtree</a></li>
-<li><a href="http://yutin.logdown.com/posts/188306-git-subtree-total-addendum-library">Git SubTree 共編 Library</a></li>
-<li><a href="http://erning.net/blog/2012/05/09/the-twelve-factor-app/">The Twelve-Factor App</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Rails API + Nuxt.js + Devise-JWT]]></title>
-    <link href="http://mgleon08.github.com/blog/2018/07/17/rails-nuxt-jwt/"/>
-    <updated>2018-07-17T17:39:32+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2018/07/17/rails-nuxt-jwt</id>
-    <content type="html"><![CDATA[<p>在網路上發現這篇文章，覺得寫得很不錯，所以這次就跟著這篇一起做一遍~</p>
-
-<!-- more-->
-
-
-<p><a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></p>
-
-<p>來學習，<code>Rails API / Nuxt.js / JWT / Docker</code></p>
-
-<ul>
-<li><a href="#part1">Part 1: Creating a development environment</a></li>
-<li><a href="#part2">Part 2: Getting them talking to each other</a></li>
-<li><a href="#part3">Part 3: Authentication with Devise-JWT</a></li>
-</ul>
-
-
-<h1><span id="part1">Part 1: Creating a development environment</span></h1>
-
-<pre><code class="ruby"># backend
-mkdir autheg
-cd autheg
-rails new autheg-backend -T --skip-spring -C -B -d postgresql --api
-# -T = skip test
-# -C = skip action cable
-# -B = skip bundle 主要是作者要跑在 docker 裡面
-# --api = 沒有任何 view 純 API server
-
-#frontend
-vue init nuxt-community/starter-template autheg-frontend
-cd autheg-frontend
-yarn generate-lock-entry &gt; yarn.lock
-# 跟 -B 類似，為了不 install
-</code></pre>
-
-<h3>backend</h3>
-
-<pre><code class="ruby"># autheg/autheg-backend/Dockerfile
-FROM ruby:2.5
-
-ARG UID 
-RUN adduser rails --uid $UID --disabled-password --gecos ""
-# 可以透過 $UID 給予不同的 user ID，並且進到任何的 container 都可以用相同的 user ID
-# --disabled-password - 讓 rails 無法用密碼登入
-# --gecos 用戶的詳細訊息（如姓名，年齡，電話等），因為 adduser 會提示你輸入用戶的密碼和相關的finger訊息，但是這個可以用選項--gecos來覆蓋。
-
-ENV APP /usr/src/app
-RUN mkdir $APP
-WORKDIR $APP
-
-COPY Gemfile* $APP/
-RUN bundle install -j3 --path vendor/bundle
-# Gems and yarn packages are installed into the mounted volumes. 
-# This will stop you from needing to rebuild the whole Docker image every time you change the Gemfile or package.json.
-
-COPY . $APP/
-
-CMD ["bin/rails", "server", "-p", "8080", "-b", "0.0.0.0"]
-# 這裡原本是 rails，但實際在 run 的時候會有 error，因此改為 bin/rails
-</code></pre>
-
-<p><code>.dockerignore</code> 避免 Docker 在 build 的時候，一併複製過去</p>
-
-<pre><code class="ruby"># autheg/autheg-backend/.dockerignore
-/vendor/bundle
-/log
-/tmp
-</code></pre>
-
-<pre><code class="ruby"># autheg/autheg-backend/.gitignore
-/vendor/bundle/
-</code></pre>
-
-<h3>frontend</h3>
-
-<pre><code class="ruby"># autheg/autheg-frontend/Dockerfile
-
-FROM node:9
-
-ARG UID
-RUN adduser frontend --uid $UID --disabled-password --gecos ""
-
-ENV APP /usr/src/app
-RUN mkdir $APP
-WORKDIR $APP
-
-COPY package.json yarn.lock $APP/
-RUN yarn
-# Gems and yarn packages are installed into the mounted volumes. 
-# This will stop you from needing to rebuild the whole Docker image every time you change the Gemfile or package.json.
-
-COPY . $APP/
-
-CMD ["yarn", "run", "dev"]
-</code></pre>
-
-<p><code>.dockerignore</code> 避免 Docker 在 build 的時候，一併複製過去</p>
-
-<pre><code class="ruby"># autheg/autheg-frontend/.dockerignore
-/node_modules/
-</code></pre>
-
-<h3>all</h3>
-
-<pre><code class="ruby"># autheg/docker-compose.yml
-
-version: '3' # dockerfile 版本 
-services:
-  db: # 對應 rails database.yml 的 host
-    image: postgres
-    ports:
-      - "5432"
-  backend: # 會變成 REPOSITORY name autheg_backend
-    build:
-      context: autheg-backend # 要 build 的資料夾位置
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./autheg-backend:/usr/src/app
-      # 放哪裡沒有一定 /var/www/html,  /usr/src/app,  /home 都有人放
-    ports:
-      - "8080:8080"
-    depends_on:
-      - db
-    user: rails # 對應到 adduser 的名稱
-  frontend: # 會變成 REPOSITORY name autheg_frontend
-    build:
-      context: autheg-frontend
-      args:
-        UID: ${UID:-1001}
-    volumes:
-      - ./autheg-frontend:/usr/src/app
-    ports:
-      - "3000:3000"
-    user: frontend # 對應到 adduser 的名稱
-</code></pre>
-
-<p>接下來執行</p>
-
-<pre><code>docker-compose build
-</code></pre>
-
-<pre><code class="ruby"># docker images
-REPOSITORY          TAG                 IMAGE ID            CREATED              SIZE
-autheg_frontend     latest              18b1178326a7        About a minute ago   890MB
-autheg_backend      latest              528bfe5bf6d6        2 minutes ago        1.03GB
-</code></pre>
-
-<pre><code>docker-compose run -u root backend bundle
-</code></pre>
-
-<pre><code class="ruby"># docker ps -a
-CONTAINER ID        IMAGE               COMMAND                  CREATED              STATUS                          PORTS                     NAMES
-a11609898c96        autheg_backend      "bundle"                 About a minute ago   Exited (0) About a minute ago                             autheg_backend_run_1
-f088297e9b9b        postgres            "docker-entrypoint.s…"   About a minute ago   Up About a minute               0.0.0.0:32783-&gt;5432/tcp   autheg_db_1
-
-docker volume ls
-# DRIVER              VOLUME NAME
-# local               64117d4ab46a1d0575cc7136e745cc70bf568cfb3e200c80c69ae035cde89085
-</code></pre>
-
-<pre><code>docker-compose run frontend yarn
-</code></pre>
-
-<pre><code class="ruby"># docker ps -a
-CONTAINER ID        IMAGE               COMMAND                  CREATED                  STATUS                     PORTS                     NAMES
-d51e53bd1370        autheg_frontend     "yarn"                   Less than a second ago   Exited (0) 3 seconds ago                             autheg_frontend_run_1
-a11609898c96        autheg_backend      "bundle"                 3 minutes ago            Exited (0) 3 minutes ago                             autheg_backend_run_1
-f088297e9b9b        postgres            "docker-entrypoint.s…"   3 minutes ago            Up 3 minutes               0.0.0.0:32783-&gt;5432/tcp   autheg_db_1
-</code></pre>
-
-<p>要再跑 bundle &amp; yarn 是因為有做 volumes，因此利用 docker 所建立的環境，跑 host 的 bundle &amp; yarn，讓兩邊一致</p>
-
-<blockquote><p>The reason you need to run bundle and yarn after building is because your docker-compose file mounts your host volumes into the containers so you need to install the packages into the host volumes as well as the images that are used to create the containers</p></blockquote>
-
-<h3>編輯 database.yml &amp; package.json</h3>
-
-<pre><code class="diff"> default: &amp;default
-   adapter: postgresql
-   encoding: unicode
-+  host: db
-+  username: postgres
-</code></pre>
-
-<pre><code class="diff">   "private": true,
-   "scripts": {
--    "dev": "nuxt",
-+    "dev": "HOST=0.0.0.0 nuxt",
-     "build": "nuxt build",
-     "start": "nuxt start",
-     "generate": "nuxt generate",
-</code></pre>
-
-<p><code>HOST=0.0.0.0 nuxt</code> so it’s visible on your host machine</p>
-
-<p>再啟動一個 container 用來建立新資料庫</p>
-
-<pre><code>docker-compose run backend bin/rails db:create
-</code></pre>
-
-<p>此時 db 會 create 在，一開始設定的 db container <code>autheg_db_1</code> 裡面，可以</p>
-
-<pre><code class="ruby">docker exec -it autheg_db_1 bash
-su - postgres
-psql -ls
-# 就會看到 create 好的 database
-</code></pre>
-
-<p>看一下目前產生的 container</p>
-
-<pre><code class="ruby"># docker ps -a
-CONTAINER ID        IMAGE               COMMAND                  CREATED             STATUS                     PORTS                     NAMES
-85d3ec81e943        autheg_backend      "bin/rails db:create"    6 minutes ago       Exited (0) 6 minutes ago                             autheg_backend_run_2
-6e1f7b406a70        autheg_frontend     "yarn"                   7 minutes ago       Exited (0) 7 minutes ago                             autheg_frontend_run_1
-55ff63bb46e9        autheg_backend      "bundle"                 25 minutes ago      Exited (0) 8 minutes ago                             autheg_backend_run_1
-e889c2e713d0        postgres            "docker-entrypoint.s…"   25 minutes ago      Up 25 minutes              0.0.0.0:32770-&gt;5432/tcp   autheg_db_1
-</code></pre>
-
-<p>將所有 container 啟動</p>
-
-<pre><code class="ruby">docker-compose up
-# docker-compose stop
-# docker-compose down
-</code></pre>
-
-<p>就能看到</p>
-
-<ul>
-<li>rails : <code>http://localhost:8080/</code></li>
-<li>nuxt : <code>http://localhost:3000/</code></li>
-</ul>
-
-
-<p><img src="https://cdn-images-1.medium.com/max/1600/1*hoai7Zion_e9-0uZQGr1Sw.png" alt="" />
-<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
-
-<h1><span id="part2">Part 2: Getting them talking to each other</span></h1>
-
-<p>新增 table, model, controller</p>
-
-<pre><code class="ruby">docker-compose run backend bash
-&gt; bin/rails g resource example name:string colour:string
-&gt; bin/rails db:migrate
-&gt; bin/rails c
-&gt; &gt; {"foo" =&gt; "green", "bar" =&gt; "red", "baz" =&gt; "purple"}.each {|n,c| Example.create!(name: n, colour: c)}
-</code></pre>
-
-<p>編輯 controller</p>
-
-<pre><code class="ruby"># autheg-backend/app/controllers/examples_controller.rb
-class ExamplesController &lt; ApplicationController
-  def index
-    examples = Example.all.select(:id, :name, :colour)
-    render json: examples
-  end
-end
-</code></pre>
-
-<pre><code class="ruby"># autheg-backend/config/routes.rb
-Rails.application.routes.draw do
-  scope :api, defaults: { format: :json } do
-    resources :examples
-  end
-end
-</code></pre>
-
-<p>這個步驟目前先不做，要等後面安裝 <code>devise</code> 才需要</p>
-
-<pre><code class="ruby"># autheg-backend/app/controllers/application_controller.rb
-class ApplicationController &lt; ActionController::API
-  include ActionController::MimeResponds
-  respond_to :json
-end
-</code></pre>
-
-<p>現在打 <code>http://localhost:8080/api/examples</code> 就會看到</p>
-
-<p><img src="https://cdn-images-1.medium.com/max/1600/1*76hf6XcYJM_xLdpbd0jZGw.png" alt="" />
-<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
-
-<p>接著安裝 <a href="https://github.com/axios/axios">axios</a> &amp; <a href="https://vuetifyjs.com/en/">vuetify</a></p>
-
-<pre><code class="ruby">docker-compose run frontend yarn add @nuxtjs/axios @nuxtjs/vuetify
-</code></pre>
-
-<p>這邊是 hardcode 在上面，正式機不應該這樣寫</p>
-
-<pre><code class="js">// autheg-frontend/nuxt.config.js
-  modules: [
-    '@nuxtjs/vuetify',
-    '@nuxtjs/axios'
-  ],
-  axios: {
-    host: 'localhost',
-    port: 8080,
-    prefix: '/api'
-  }
-</code></pre>
-
-<p>更改畫面</p>
-
-<p>The <code>nuxt</code> option to the link tells it to use Nuxt’s router to handle the link, rather than doing it in the browser.</p>
-
-<pre><code class="js">// autheg-frontend/layouts/default.vue
-&lt;template&gt;
-  &lt;div id="app"&gt;
-    &lt;v-app&gt;
-      &lt;v-toolbar app dark&gt;
-        &lt;v-toolbar-title&gt;Auth example&lt;/v-toolbar-title&gt;
-        &lt;v-spacer /&gt;
-        &lt;v-btn icon nuxt href="http://mgleon08.github.com/"&gt;&lt;v-icon&gt;home&lt;/v-icon&gt;&lt;/v-btn&gt;
-      &lt;/v-toolbar&gt;
-      &lt;v-content&gt;
-        &lt;v-container fluid&gt;
-          &lt;nuxt/&gt;
-        &lt;/v-container&gt;
-      &lt;/v-content&gt;
-    &lt;/v-app&gt;
-  &lt;/div&gt;
-&lt;/template&gt;
-</code></pre>
-
-<p><code>mounted()</code> 會在 template 初始化的時候呼叫，並且會 call <code>updateExamples()</code> method，去 call <code>/examples</code> API 拿資料回來</p>
-
-<p>```js
-// autheg-frontend/pages/index.vue
-<template>
-  <v-layout>
-    <v-flex>
-      <v-list>
-        <v-list-tile v-for="example in examples" :key="example.id" :class="example.colour">
-          <v-list-tile-content></v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-flex>
-  </v-layout>
-</template></p>
-
-<script>
-export default {
-  data () {
-    return {
-      examples: []
-    }
-  },
-  methods: {
-    async updateExamples() {
-      this.examples = await this.$axios.$get('/examples')
-    }
-  },
-  mounted () {
-    this.updateExamples()
-  }
-}
-</script>
-
-
-<pre><code>
-接著會看到 browser console 會 error，主要是因為 [CROS](https://en.wikipedia.org/wiki/Cross-origin_resource_sharing) 的原因
-
-&gt; JavaScript isn’t allowed to query endpoints on other domains unless those domains set the CORS headers appropriately
-
-![](https://cdn-images-1.medium.com/max/1600/1*5PhACGlQd7cfjiA-DqksuA.png)
-*from [How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT](https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16)*
-
-接著要去 `backend` 新增 `cros` 的設定，讓 `frontend` 可以 call
-
-先將 Gemfile 的 comment 打開
-</code></pre>
-
-<h1>autheg-backend/Gemfile</h1>
-
-<p>gem &lsquo;rack-cors&rsquo;</p>
-
-<h1>autheg-backend/config/initializers/cors.rb</h1>
-
-<p>Rails.application.config.middleware.insert_before 0, Rack::Cors do
-  allow do
-    origins &lsquo;localhost:3000&rsquo; # 也可以 * 就是所有 domain 都可以打進來</p>
-
-<pre><code>resource '*',
-  headers: :any,
-  methods: [:get, :post, :put, :patch, :delete, :options, :head]
-</code></pre>
-
-<p>  end
-end
-```</p>
-
-<p>接著跑</p>
-
-<pre><code>docker-compose run -u root backend bundle
-</code></pre>
-
-<p>然後重新起動 container</p>
-
-<pre><code>ctrl + c
-docker-compose up
-</code></pre>
-
-<p><img src="https://cdn-images-1.medium.com/max/1600/1*LUreZEc1i0c5WfhoDCLxSQ.png" alt="" />
-<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
-
-<h1><span id="part3">Part 3: Authentication with Devise-JWT</span></h1>
-
-<p>這次要加上 devise 加上 JWT</p>
-
-<ul>
-<li><a href="https://jwt.io/">JWT</a></li>
-<li><a href="https://github.com/plataformatec/devise">devise</a></li>
-<li><a href="https://github.com/waiting-for-dev/devise-jwt">devise-jwt</a></li>
-</ul>
-
-
-<p>先在 Gemfile 新增</p>
-
-<pre><code class="ruby"># autheg-backend/Gemfile
-gem 'devise'
-gem 'devise-jwt'
-</code></pre>
-
-<p>bundle</p>
-
-<pre><code class="ruby">docker-compose run -u root backend bundle
-</code></pre>
-
-<p>接著先安裝 devise 參考 <a href="https://github.com/plataformatec/devise#getting-started">getting-started</a></p>
-
-<pre><code class="ruby"># 開新的 container 安裝 devise
-docker-compose run backend bash
-bin/rails g devise:install
-bin/rails g devise user
-bin/rails db:migrate
-</code></pre>
-
-<p>到這個步驟都還沒用到 <a href="https://jwt.io/">JWT</a>，接下來要要決定如何使令牌無效，原文選擇用 <code>黑名單</code> 的方式</p>
-
-<pre><code class="ruby">bin/rails g model jwt_blacklist jti:string:index exp:datetime
-</code></pre>
-
-<p>並將欄位加上 <code>null: false</code> 和移除 <code>t.timestamps</code></p>
-
-<pre><code class="ruby">def change
-  create_table :jwt_blacklists do |t|
-    t.string :jti, null: false
-    t.datetime :exp, null: false
-  end
-  add_index :jwt_blacklists, :jti
-end
-</code></pre>
-
-<p>在 model 加上 <code>include Devise::JWT::RevocationStrategies::Blacklist</code></p>
-
-<pre><code class="ruby"># autheg-backend/app/models/jwt_blacklist.rb
-class JwtBlacklist &lt; ApplicationRecord
-  include Devise::JWT::RevocationStrategies::Blacklist
-end
-</code></pre>
-
-<h3>secret setting</h3>
-
-<blockquote><p>在這裡遇到個問題 <a href="https://github.com/waiting-for-dev/devise-jwt/issues/56">No implicit conversion of nil into String</a>，主要是用的 rails 版本，與原文章的 ralis(5.1) 不同，導致遇到在 5.2 版本時已經沒有 <code>secrets.yml</code>&hellip; 轉而改用 <code>credentials.yml.enc</code>，所以在這裡記錄一下兩個版本的設定</p></blockquote>
-
-<h3>Before rails 5.2</h3>
-
-<p>接著產生一組 secret，做設定</p>
-
-<pre><code class="ruby">bin/rails secret
-# 9dd044df628a496e83c668f..
-</code></pre>
-
-<pre><code class="ruby"># autheg-backend/config/secrets.yml
-development:
-  secret_key_base: xxx
-  jwt_secret: 9dd044df628a496e83c668f..
-
-test:
-  secret_key_base: xxx
-  jwt_secret: 9dd044df628a496e83c668f..
-
-production:
-  secret_key_base: &lt;%= ENV["SECRET_KEY_BASE"] %&gt;
-  jwt_secret: &lt;%= ENV["JWT_SECRET"] %&gt;
-</code></pre>
-
-<pre><code class="ruby"># autheg-backend/config/initializers/devise.rb
-config.jwt do |jwt|
-  jwt.secret = Rails.application.secrets.jwt_secret
-end
-</code></pre>
-
-<h3>After rails 5.2</h3>
-
-<ul>
-<li><a href="https://medium.com/cedarcode/rails-5-2-credentials-9b3324851336">Rails 5.2 credentials</a></li>
-<li><a href="https://www.viget.com/articles/storing-secret-credentials-in-rails-5-2-and-up/">Storing Secret Credentials in Rails 5.2 and Up</a></li>
-<li><a href="https://keithpblog.org/post/encrypted-secrets/">Rails 5.2: encrypted secrets</a></li>
-</ul>
-
-
-<pre><code class="ruby">bin/rails secret
-# 9dd044df628a496e83c668f..
-</code></pre>
-
-<p>這時必須在 console執行 <code>EDITOR="vim" rails credentials:edit</code>，但是在 container 並沒有 <code>vim</code> 和 <code>sudo</code> 這個指令，因此要先切換成 root 去安裝 <code>vim</code> 才有辦法執行</p>
-
-<pre><code class="ruby">docker-compose run -u root backend bash
-apt-get update
-apt-get install vim -y # 安裝 vim 
-EDITOR="vim" bin/rails credentials:edit
-
-# 接著編輯
-secret_key_base: xxx
-jwt_secret: 9dd044df628a496e83c668f..
-</code></pre>
-
-<pre><code class="ruby"># autheg-backend/config/initializers/devise.rb
-config.jwt do |jwt|
-  jwt.secret = Rails.application.credentials[:jwt_secret]
-end
-</code></pre>
-
-<p>上面 secret 設定好就可以繼續</p>
-
-<p>設定 <code>response format</code></p>
-
-<pre><code class="ruby"># autheg-backend/app/controllers/application_controller.rb
-class ApplicationController &lt; ActionController::API
-  include ActionController::MimeResponds
-  respond_to :json
-end
-</code></pre>
-
-<pre><code class="ruby"># autheg-backend/app/models/user.rb
-class User &lt; ApplicationRecord
-  # Include default devise modules. Others available are:
-  # :confirmable, :lockable, :timeoutable and :omniauthable
-  devise :database_authenticatable, :registerable,
-         :recoverable, :rememberable, :trackable, :validatable,
-         :jwt_authenticatable, jwt_revocation_strategy: JwtBlacklist
-end
-</code></pre>
-
-<p>設定好跑</p>
-
-<pre><code class="ruby">bin/rails db:migrate
-</code></pre>
-
-<p>將 router 的 <code>devise_scope :user</code> 移到 api scope 裡面</p>
-
-<pre><code class="ruby">Rails.application.routes.draw do
-  # For details on the DSL available within this file, see http://guides.rubyonrails.org/routing.html
-  scope :api, defaults: { format: :json } do
-    resources :examples
-    devise_for :users
-  end
-end
-</code></pre>
-
-<p>restart containers</p>
-
-<pre><code>ctrl + c
-docker-compose up
-</code></pre>
-
-<p>console 新增一個 User</p>
-
-<pre><code class="ruby">bin/rails c
-User.create!(email: 'test@example.com', password: 'password')
-</code></pre>
-
-<p>接下來就可以來測試 <code>user login</code> 原文推薦使用 <a href="http://yet-another-rest-client.com/">YARC</a> 不過個人偏好 <a href="https://www.getpostman.com/">Postman</a>，都可以</p>
-
-<pre><code class="ruby">POST /api/users/sign_in
-
-{  
-   "user":{  
-      "email":"test@example.com",
-      "password":"password"
-   }
-}
-</code></pre>
-
-<p><img src="https://cdn-images-1.medium.com/max/1600/1*2cTvgN1s2-6VkCLknzuwXQ.png" alt="" />
-<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
-
-<p>這裡可以看到 Response Headers 多了一個欄位</p>
-
-<pre><code class="ruby"># 原本
-
-{
-  "x-runtime": "0.496080",
-  "etag": "W/\"9a9c93785c7d5e5890c3189efa33ca10\"",
-  "vary": "Origin",
-  "content-type": "application/json; charset=utf-8",
-  "location": "/",
-  "cache-control": "max-age=0, private, must-revalidate",
-  "transfer-encoding": "chunked",
-  "x-request-id": "c6a59d67-2551-496f-8f99-f69c5b79bd75",
-  "status": 201
-}
-
-# 加上 jwt
-
-{
-  "x-runtime": "0.998534",
-  "etag": "W/\"d2403cf91d814bea7a094efecd1e0ae9\"",
-  "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdWIiOiIxIiwic2NwIjoidXNlciIsImF1ZCI6bnVsbCwiaWF0IjoxNTMxNjY2NjA0LCJleHAiOjE1MzE2NzAyMDQsImp0aSI6ImYzMjkxMWViLTY0ZDEtNDU0NS1iNGJjLTQ5MjE2NjQwMDc1OCJ9.nP5vGhbiPfC5acnQOusY_bEZCAWF2TZ29vq28SMUX2U",
-  "vary": "Origin",
-  "content-type": "application/json; charset=utf-8",
-  "location": "/",
-  "cache-control": "max-age=0, private, must-revalidate",
-  "transfer-encoding": "chunked",
-  "x-request-id": "4eec0e2f-5cb5-4c4d-9ed9-be9385c79a5d",
-  "status": 201
-}
-</code></pre>
-
-<p>接著要來覆蓋掉 devise 原本的 session controller，讓我們可以將 jwt 加進去</p>
-
-<p>先 generate devise 內建的 sessino controller</p>
-
-<pre><code class="ruby">bin/rails generate devise:controllers users -c=sessions
-</code></pre>
-
-<p>並且新增一個 router，已便可以拿到 user 的 detail 資訊</p>
-
-<blockquote><p>這裡跟原文章不太一樣，這邊是藉由 devise 內建的 generate 產生 session controller file，是放在 app/controller/users/sessions_controller.rb，原文章應該是自行建立的檔案放在 app/controller/sessions_controller.rb，因此底下的 router 設定也會有稍微不同</p></blockquote>
-
-<pre><code class="ruby"># autheg-backend/config/routes.rb
-Rails.application.routes.draw do
-  scope :api, defaults: { format: :json } do
-    resources :examples
-    devise_for :users, controllers: { sessions: 'users/sessions' }
-    devise_scope :user do
-      get 'users/current', to: 'users/sessions#show'
-    end
-  end
-end
-</code></pre>
-
-<p>將 Gemfile 裡的 <code>jbuilder</code> gem 打開</p>
-
-<pre><code class="ruby"># Gemfile
-gem 'jbuilder', '~&gt; 2.5'
-</code></pre>
-
-<pre><code class="ruby">docker-compose run -u root backend bundle
-# restart containers
-docker-compose up
-</code></pre>
-
-<pre><code class="ruby"># autheg-backend/app/controllers/users/sessions_controller.rb
-class Users::SessionsController &lt; Devise::SessionsController
-  def create
-    super { @token = current_token }
-  end
-
-  def show
-  end
-
-  private
-
-  def current_token
-    request.env['warden-jwt_auth.token']
-  end
-end
-</code></pre>
-
-<pre><code class="ruby"># autheg-backend/app/views/users/create.json.jbuilder
-json.token @token
-</code></pre>
-
-<pre><code class="ruby"># autheg-backend/app/views/users/show.json.jbuilder
-if user_signed_in?
-  json.user do
-    json.(current_user, :id, :email)
-  end
-end
-</code></pre>
-
-<p>接下來可以測試 login 了</p>
-
-<pre><code class="ruby"># 登入拿 token
-POST /api/users/sign_in
-
-{  
-   "user":{  
-      "email":"test@example.com",
-      "password":"password"
-   }
-}
-
-# 在 Header 加上剛剛登入拿到的 token
-# "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdW ..."
-GET /api/users/current
-
-# 登出，記得也要帶 token 才知道誰要登出
-# "authorization": "Bearer eyJhbGciOiJIUzI1NiJ9.eyJzdW ..."
-DELETE /api/users/sign_out
-</code></pre>
-
-<p>測試 ok 後，接下來在 <code>ExamplesController</code> 加上 <code>authentication</code></p>
-
-<pre><code class="ruby"># autheg-backend/app/controllers/examples_controller.rb
-class ExamplesController &lt; ApplicationController
-  before_action :authenticate_user!
-
-  def index
-    examples = Example.all.select(:id, :name, :colour)
-    render json: examples
-  end
-end
-</code></pre>
-
-<p>這時 <code>GET /api/examples</code> 就必須帶 <code>token</code> 否則會 <code>error</code></p>
-
-<pre><code class="ruby">GET /api/examples
-
-{
-  "error": "You need to sign in or sign up before continuing."
-}
-</code></pre>
-
-<p>接下來回到 frontend，會發現 <code>401 Unauthorized error</code> 所以要在 frontend 加上 <code>authentication</code></p>
-
-<p>新增後端 <code>sign_in</code> <code>sign_out</code> <code>detail</code> API &amp; <code>@nuxtjs/auth</code></p>
-
-<pre><code>docker-compose run frontend yarn add @nuxtjs/auth
-</code></pre>
-
-<pre><code class="js">// autheg-frontend/nuxt.config.js
-modules: [
-  '@nuxtjs/vuetify',
-  '@nuxtjs/axios',
-  '@nuxtjs/auth'
-],
-auth: {
-  endpoints: {
-    login:  { url: '/users/sign_in' },
-    logout: { url: '/users/sign_out', method: 'delete' },
-    user:   { url: '/users/current' }
-  }
-}
-</code></pre>
-
-<pre><code class="js">// autheg-frontend/store/index.js
-export default {
-  state: () =&gt; ({
-  })
-}
-</code></pre>
-
-<p>restart container 讓 frontend 吃到剛剛的設定</p>
-
-<p>```js
-// autheg-frontend/pages/login.vue</p>
-
-<p><template>
-  <v-layout>
-    <v-flex>
-      <v-card v-if="$auth.state.loggedIn">
-        <v-alert type="error" :value="error"></v-alert>
-        <v-card-text>
-          Logged in as 
-        </v-card-text>
-        <v-card-actions>
-          <v-btn @click="logout">Log out</v-btn>
-        </v-card-actions>
-      </v-card>
-      <v-card v-else>
-        <v-alert type="error" :value="error"></v-alert>
-        <v-card-text>
-          <v-form>
-            <v-text-field v-model="email" label="Email" />
-            <v-text-field v-model="password" label="Password" type="password" />
-          </v-form>
-          <v-card-actions>
-            <v-btn @click="login">Log in</v-btn>
-          </v-card-actions>
-        </v-card-text>
-      </v-card>
-    </v-flex>
-  </v-layout>
-</template></p>
-
-<script>
-export default {
-  data () {
-    return {
-      email: '',
-      password: '',
-      error: null
-    }
-  },
-  methods: {
-    login: function () {
-      this.$auth.login({
-        data: {
-          user: {
-            email: this.email,
-            password: this.password
-          }
-        }
-      }).catch(e => {this.error = e + ''})
-    },
-    logout: function () {
-      this.$auth.logout().catch(e => {this.error = e + ''})
-    }
-  }
-}
-</script>
-
-
-<pre><code>
-現在可以到 `/login` 試試看登入了
-
-如果想要讓 user 沒有 login 的狀態下都 redirect 到 `login page` 就加上
-</code></pre>
-
-<p>// autheg-frontend/pages/index.vue
-<template>
-  <v-layout>
-    <v-flex>
-      <v-list>
-        <v-list-tile v-for="example in examples" :key="example.id" :class="example.colour">
-          <v-list-tile-content></v-list-tile-content>
-        </v-list-tile>
-      </v-list>
-    </v-flex>
-  </v-layout>
-</template></p>
-
-<script>
-export default {
-  middleware: ['auth'],
-  data () {
-    return {
-      examples: []
-    }
-  },
-  methods: {
-    async updateExamples() {
-      this.examples = await this.$axios.$get('/examples')
-    }
-  },
-  mounted () {
-    this.updateExamples()
-  }
-}
-</script>
-
-
-<p>```</p>
-
-<p>現在可以 try 一下</p>
-
-<p><img src="https://cdn-images-1.medium.com/max/1600/1*012-LUDxJttnF6Jtn0Cm7A.png" alt="" />
-<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
-
-<p><img src="https://cdn-images-1.medium.com/max/1600/1*X7EYUzlYqfSEDGUlTaK7vQ.png" alt="" />
-<em>from <a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></em></p>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16">How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT</a></li>
-<li><a href="https://medium.com/@fishpercolator/deploying-your-nuxt-rails-api-app-to-production-with-heroku-54efd09eec22">Deploying your Nuxt+Rails API app to production with Heroku</a></li>
 </ul>
 
 ]]></content>

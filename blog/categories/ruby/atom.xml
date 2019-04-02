@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-18T22:50:14+08:00</updated>
+  <updated>2019-04-02T09:56:32+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,93 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby - Unary Operator]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/03/15/ruby-unary-operator/"/>
+    <updated>2019-03-15T23:11:38+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/03/15/ruby-unary-operator</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<blockquote><p>In Ruby, a unary operator is an operator which only takes a single &lsquo;argument&rsquo; in the form of a receiver.</p></blockquote>
+
+<p><code>unary operator</code> likes <code>+</code> <code>-</code> <code>!</code> <code>~</code> <code>&amp;</code> <code>*</code>..</p>
+
+<pre><code class="ruby">-8
+# =&gt; -8
+
+# 2.2.3 Ruby
+-'test'
+# NoMethodError: private method `-@' called for "test":String
+
+# 2.4.1 之後似乎就不會有 error
+-'test'
+# =&gt; "test"
+</code></pre>
+
+<p>Add <code>-@</code> method to String class</p>
+
+<pre><code class="ruby">class String
+  def -@
+     self + " hello"
+    end
+end
+# =&gt; :-@
+
+-'test'
+# =&gt; "test hello"
+</code></pre>
+
+<h3>Full Example</h3>
+
+<pre><code class="ruby">class MagicString &lt; String
+  def +@
+    upcase
+  end
+
+  def -@
+    downcase
+  end
+
+  def ~
+    # Do a ROT13 transformation - http://en.wikipedia.org/wiki/ROT13
+    tr 'A-Za-z', 'N-ZA-Mn-za-m'
+  end
+
+  def to_proc
+    Proc.new { self + " hello" }
+  end
+
+  def to_a
+    [self.reverse]
+  end
+
+ def !
+   swapcase
+ end
+end
+
+str = MagicString.new("This is my string!")
+p +str                   # =&gt; "THIS IS MY STRING!"
+p ~str                   # =&gt; "Guvf vf zl fgevat!"
+p +~str                  # =&gt; "GUVF VF ZL FGEVAT!"
+p %w(a b).map(&amp;str)      # =&gt; ["This is my string! hello", "This is my string! hello"]
+p *str                   # =&gt; "!gnirts ym si sihT"
+
+p !str                   # =&gt; "tHIS IS MY STRING!"
+p (not str)              # =&gt; "tHIS IS MY STRING!"
+p !(~str)                # =&gt; "gUVF VF ZL FGEVAT!"
+</code></pre>
+
+<p>Reference</p>
+
+<ul>
+<li><a href="http://www.rubyinside.com/rubys-unary-operators-and-how-to-redefine-their-functionality-5610.html">Ruby’s Unary Operators and How to Redefine Their Functionality</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Ruby - (&.) the Safe Navigation Operator Like Rails Try!]]></title>
@@ -500,246 +587,6 @@ A::B.new.scope2 # =&gt; "A::B"
 <ul>
 <li><a href="https://kaochenlong.com/2015/04/19/namespace/">Ruby 語法放大鏡之「有時候會看到有兩個冒號寫法是什麼意思?」</a></li>
 <li><a href="https://stackoverflow.com/questions/15119724/ruby-lexical-scope-vs-inheritance">Ruby - Lexical scope vs Inheritance</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby - Singleton Method vs Singleton Class vs Singleton Module]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-singleton/"/>
-    <updated>2019-02-04T18:15:16+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-singleton</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<ul>
-<li><a href="#method">singleton method</a></li>
-<li><a href="#class">singleton class</a></li>
-<li><a href="#module">singleton module</a></li>
-</ul>
-
-
-<h1><span id="method"> singleton method </span></h1>
-
-<ul>
-<li><code>singleton method</code>: 屬於某一個 object 的方法，也代表只屬於該 object，儘管有相同的 class 也無法使用別人的 <code>singleton method</code> (但 <code>extend</code> 可以)</li>
-</ul>
-
-
-<pre><code class="ruby">class User
-  def self.class_hi
-    'class_hi'
-  end
-
-  class &lt;&lt; self
-    def class_hi_2
-      'class_hi_2'
-    end
-  end
-
-  def instance_hi
-    'instance_hi'
-  end
-end
-
-def User.class_hi_3
-  'class_hi_3'
-end
-</code></pre>
-
-<p>因為 <code>User class</code> 所定義的 <code>class_method</code> 都屬於 <code>User class</code> object</p>
-
-<pre><code class="ruby">User.singleton_methods # =&gt; [:class_hi, :class_hi_2, :class_hi_3]
-</code></pre>
-
-<p>每次 new 的 instance 都會有 instance_hi 所以不算是 singleton_method，並沒有屬於哪一個 object</p>
-
-<pre><code class="ruby">User.new.singleton_methods # =&gt; []
-leon = User.new
-leon.singleton_methods # =&gt; []
-</code></pre>
-
-<p>建立專屬於 leon object 的 method</p>
-
-<pre><code class="ruby">def leon.hello
-  'hello'
-end
-
-class &lt;&lt; leon
-  def foo
-    "Hello World!"
-  end
-end
-
-leon.singleton_methods # =&gt; [:hello, : foo]
-</code></pre>
-
-<p>leon object 所定義的 method 並不存在於 <code>User class</code>，而是在 leon object 後面的 <code>singleton_class</code></p>
-
-<pre><code class="ruby">User.method_defined?(:instance_hi) # =&gt; true
-User.method_defined?(:hello) # =&gt; false
-leon.singleton_class.method_defined?(:instance_hi) # =&gt; true
-leon.singleton_class.method_defined?(:hello) # =&gt; true
-User.new.singleton_class.method_defined?(:instance_hi) # =&gt; true
-User.new.singleton_class.method_defined?(:hello) #=&gt; false
-</code></pre>
-
-<p>覆蓋原本 instance 的 method</p>
-
-<pre><code class="ruby">leon.instance_hi # =&gt; "instance_hi"
-
-def leon.instance_hi
-  'singleton_hi'
-end
-
-leon.instance_hi # =&gt; "singleton_hi"
-</code></pre>
-
-<p>instance_eval 是所有 instance 都會有，所以也不是 singleton_method</p>
-
-<pre><code class="ruby">User.instance_eval do
-   def test
-     'instance_eval'
-   end
-end
-
-User.new.singleton_methods # =&gt; []
-</code></pre>
-
-<p>透過 <code>singleton_method</code> 取得 proc 在用 call 呼叫</p>
-
-<pre><code class="ruby">hi = leon.singleton_method(:instance_hi)
-hi.call
-</code></pre>
-
-<h1><span id="class"> singleton class </span></h1>
-
-<ul>
-<li><code>singleton class</code>: 一個隱藏在物件（不管是普通物件還是類）後面的一個特殊類，它只有一個實例（就是它自己）</li>
-</ul>
-
-
-<p><img src="https://www.devalot.com/assets/articles/2008/09/ruby-singleton/singleton-array.jpg" alt="" /></p>
-
-<blockquote><p>When you add a method to a specific object Ruby inserts a new anonymous class into the inheritance hierarchy as a container to hold these types of methods.</p></blockquote>
-
-<pre><code class="ruby">leon.singleton_class
-# =&gt; #&lt;Class:#&lt;User:0x007fa99c887c58&gt;&gt;
-User.singleton_class
-# =&gt; #&lt;Class:User&gt;
-
-# #&lt;Class: 開頭的都是 singleton_class
-User.singleton_class.ancestors
-# =&gt; [#&lt;Class:User&gt;, #&lt;Class:Object&gt;, #&lt;Class:BasicObject&gt;, Class, Module, Object, Kernel, BasicObject]
-leon.singleton_class.singleton_methods
-# =&gt; [:class_hi, :class_hi_2, :class_hi_3]
-User.singleton_class?
-# =&gt; false
-User.singleton_class.singleton_class?
-# =&gt; true
-</code></pre>
-
-<h1><span id="module"> singleton module </span></h1>
-
-<p>先來說一下 <code>singleton pattern</code></p>
-
-<p>在 <code>class</code> 當中，可以一直建立 <code>instance (object_id 都不同)</code>，每個 <code>instance</code> 都會佔用 memory，但有時候只需要建立一個，但為了避免建立多個，而造成 memory 的浪費，於是就有了 <code>singleton module</code></p>
-
-<p>在 ruby 當中不是 core library 所以必須引入 <code>singleton</code>，可以發現當 <code>include Singleton</code> 後 <code>User.new</code> 就不能使用了</p>
-
-<pre><code class="ruby">require 'singleton'
-
-class User
-  include Singleton
-
-  attr_accessor :name, :phone
-end
-
-User.instance # =&gt; #&lt;User:0x007f951a821ed0&gt;
-User.new # =&gt; NoMethodError: private method `new' called for User:Class
-</code></pre>
-
-<p>可以發現，每次的 <code>instance</code> 其實都是同一個 object(這樣就不會浪費 memory)</p>
-
-<pre><code class="ruby">User.instance.object_id
-# =&gt; 70139185794920
-User.instance.object_id
-# =&gt; 70139185794920
-User.instance.object_id
-# =&gt; 70139185794920
-</code></pre>
-
-<p>原本的 <code>new</code> 則是變成了 <code>private method</code>，而不是不見了</p>
-
-<pre><code class="ruby"> User.send(:new).object_id
-# =&gt; 70139173678780
-User.send(:new).object_id
-# =&gt; 70139173207900
-User.send(:new).object_id
-# =&gt; 70139177568960
-</code></pre>
-
-<p>透過 <a href="https://ruby-doc.org/core-2.2.0/ObjectSpace.html#method-c-each_object">ObjectSpace</a> 來看一下所有存在的 object</p>
-
-<blockquote><p>The ObjectSpace module contains a number of routines that interact with the garbage collection facility and allow you to traverse all living objects with an iterator.</p></blockquote>
-
-<pre><code class="ruby">require 'singleton'
-
-class User
-  include Singleton
-
-  attr_accessor :name, :phone
-end
-
-ObjectSpace.each_object(User){} # =&gt; 0
-User.instance # =&gt; #&lt;User:0x007fa18f02e008&gt;
-ObjectSpace.each_object(User){} # =&gt; 1
-User.instance # =&gt; #&lt;User:0x007fa18f02e008&gt;
-ObjectSpace.each_object(User){} # =&gt; 1
-User.send(:new) #&lt;User:0x007fa18f185cd0&gt;
-ObjectSpace.each_object(User){} # =&gt; 2
-</code></pre>
-
-<p>singleton 行為一樣會繼承 <a href="https://gist.github.com/mehdi-farsi/135d516254ae690335da0b14c13ed83b#file-singleton2_03-rb">使用範例</a></p>
-
-<pre><code class="ruby">require 'singleton'
-
-class User
-  include Singleton
-
-  attr_accessor :name, :phone
-end
-
-class Worker &lt; User
-end
-
-Worker.new # =&gt; NoMethodError: private method `new' called for Worker:Class
-worker = Worker.instance # =&gt; #&lt;Worker:0x007fb663837158&gt;
-worker.name = 'name' # =&gt; "name"
-worker.phone = 'phone' # =&gt; "phone"
-
-user = User.instance # =&gt; #&lt;User:0x007fa673119790&gt;
-user.name # =&gt; nil
-user.phone # =&gt; nil
-</code></pre>
-
-<pre><code class="ruby">worker.clone # =&gt; TypeError: can't clone instance of singleton Worker
-worker.dup # =&gt; TypeError: can't dup instance of singleton Worker
-</code></pre>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://ruby-doc.org/stdlib-2.5.1/libdoc/singleton/rdoc/Singleton.html">Singleton</a></li>
-<li><a href="https://ruby-doc.org/core-2.5.1/Object.html#method-i-singleton_method">singleton_method</a></li>
-<li><a href="https://bparanj.gitbooks.io/ruby-basics/content/sixth_chapter.html">Ruby-Basics Singleton Methods</a></li>
-<li><a href="https://medium.com/@zneuray/ruby%E7%9A%84class%E8%88%87eigenclass-f994aa2b988f">Ruby的Class與Eigenclass</a></li>
-<li><a href="https://stackoverflow.com/questions/212407/what-exactly-is-the-singleton-class-in-ruby">What exactly is the singleton class in ruby?</a></li>
-<li><a href="https://www.devalot.com/articles/2008/09/ruby-singleton">Understanding Ruby Singleton Classes</a></li>
-<li><a href="https://ruby-china.org/topics/31734">求解 singleton_class, singleton_methods 的深入問題</a></li>
-<li><a href="https://medium.com/rubycademy/the-singleton-module-in-ruby-part-i-7a26de39319d">The Singleton module in Ruby - Part I</a></li>
-<li><a href="https://medium.com/rubycademy/the-singleton-module-in-ruby-part-ii-91b74366dd00">The Singleton module in Ruby - Part II</a></li>
 </ul>
 
 ]]></content>

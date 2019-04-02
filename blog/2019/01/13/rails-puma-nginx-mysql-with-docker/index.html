@@ -176,6 +176,12 @@ Puma 位於 Nginx 於 Rails 程序之間， &hellip;">
 
 <h3>docker/app/Dockerfile</h3>
 
+<p><code>--path vendor/bundle</code></p>
+
+<p><a href="https://chengl.com/using-docker-for-rails-development/">Using Docker for Rails Development</a></p>
+
+<blockquote><p>We want to install gems in ./vendor/bundle because the gems will persist in ./vendor/bundle regardless of the lifecyle of the container. When we update the Gemfile and do bundle install again, it will only install the newly added gems, not everything again.</p></blockquote>
+
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -521,6 +527,8 @@ Puma 位於 Nginx 於 Rails 程序之間， &hellip;">
 
 <h3>docker-compose.yml</h3>
 
+<blockquote><p>.env 的變數，可以用 <code>${MYSQL_USER}</code> 使用在 docker-compose 中</p></blockquote>
+
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -754,6 +762,64 @@ Puma 位於 Nginx 於 Rails 程序之間， &hellip;">
 </span><span class='line'>
 </span><span class='line'><span class="no">CMD</span> <span class="o">[</span><span class="s2">&quot;bundle&quot;</span><span class="p">,</span> <span class="s2">&quot;exec&quot;</span><span class="p">,</span> <span class="s2">&quot;rails&quot;</span><span class="p">,</span> <span class="s2">&quot;server&quot;</span><span class="p">,</span> <span class="s2">&quot;-p&quot;</span><span class="p">,</span> <span class="s2">&quot;3000&quot;</span><span class="p">,</span> <span class="s2">&quot;-b&quot;</span><span class="p">,</span> <span class="s2">&quot;0.0.0.0&quot;</span><span class="o">]</span>
 </span></code></pre></td></tr></table></div></figure>
+
+
+<p>README</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># build image</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">build</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># bundle</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="o">-</span><span class="n">u</span> <span class="n">root</span> <span class="n">backend</span> <span class="n">bundle</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># create database</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">run</span> <span class="n">backend</span> <span class="n">bundle</span> <span class="nb">exec</span> <span class="n">rails</span> <span class="ss">db</span><span class="p">:</span><span class="n">create</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span> <span class="ss">db</span><span class="p">:</span><span class="n">seed</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># start</span>
+</span><span class='line'><span class="n">docker</span><span class="o">-</span><span class="n">compose</span> <span class="n">up</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>New project need to add <code>db (docker-compose.yml mysql name)</code> to <code>database.yml</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">default</span><span class="p">:</span> <span class="o">&amp;</span><span class="n">default</span>
+</span><span class='line'>  <span class="ss">adapter</span><span class="p">:</span> <span class="n">mysql2</span>
+</span><span class='line'>  <span class="ss">encoding</span><span class="p">:</span> <span class="n">utf8</span>
+</span><span class='line'>  <span class="ss">pool</span><span class="p">:</span> <span class="o">&lt;%=</span> <span class="no">ENV</span><span class="o">.</span><span class="n">fetch</span><span class="p">(</span><span class="s2">&quot;RAILS_MAX_THREADS&quot;</span><span class="p">)</span> <span class="p">{</span> <span class="mi">5</span> <span class="p">}</span> <span class="o">%&gt;</span>
+</span><span class='line'>  <span class="ss">host</span><span class="p">:</span> <span class="n">db</span>
+</span><span class='line'>  <span class="ss">port</span><span class="p">:</span> <span class="mi">3306</span>
+</span><span class='line'>  <span class="ss">username</span><span class="p">:</span> <span class="n">root</span>
+</span><span class='line'>  <span class="ss">password</span><span class="p">:</span> <span class="n">password</span>
+</span><span class='line'>  <span class="ss">socket</span><span class="p">:</span> <span class="sr">/tmp/m</span><span class="n">ysql</span><span class="o">.</span><span class="n">sock</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Sample</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/product_system_production">product_system_production</a></li>
+<li><a href="https://github.com/mgleon08/product_system_develop">product_system_develop</a></li>
+</ul>
 
 
 <p>參考文件:</p>

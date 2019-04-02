@@ -226,6 +226,46 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<h1>rails5</h1>
+
+<p>在 rails 5 中，要用 <code>accepts_nested_attributes_for</code> 必須在 <code>belongs_to</code> 加上 <code>options: true</code> 或是 <code>required: false</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">Item</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:item_options</span>
+</span><span class='line'>  <span class="n">accepts_nested_attributes_for</span> <span class="ss">:item_options</span><span class="p">,</span> <span class="ss">allow_destroy</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'><span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">class</span> <span class="nc">ItemOption</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:items</span><span class="p">,</span> <span class="ss">required</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>必須有 <code>:id</code> 才能夠 update，再加上 <code>:_destroy</code> 就能夠在參數加上 <code>_destroy:1 (or true)</code> 去做刪除 (model 必須要 <code>allow_destroy: true</code>)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="k">class</span> <span class="nc">ItemsController</span> <span class="o">&lt;</span> <span class="no">ApplicationController</span>
+</span><span class='line'>  <span class="kp">private</span>
+</span><span class='line'>    <span class="k">def</span> <span class="nf">item_params</span>
+</span><span class='line'>      <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:item</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">item_options_attributes</span><span class="p">:</span> <span class="o">[</span><span class="ss">:id</span><span class="p">,</span> <span class="ss">:value</span><span class="p">,</span> <span class="ss">:position</span><span class="p">,</span> <span class="ss">:_destroy</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>通常會搭配 fields_for 來嵌入到同一個表單</h1>
 
 <h3>One-to-one</h3>
@@ -333,11 +373,17 @@ one-to-one 和 one-to-many 都要</p>
 </span></code></pre></td></tr></table></div></figure>
 
 
-<p>官方文件：
-<a href="http://guides.rubyonrails.org/form_helpers.html#building-complex-forms">Guides</a>
-<a href="http://rails.ruby.tw/form_helpers.html#%E6%89%93%E9%80%A0%E8%A4%87%E9%9B%9C%E8%A1%A8%E5%96%AE">Guides 中文</a>
-<a href="http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html">accepts_nested_attributes_for </a>
-<a href="http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for">fields_for</a></p>
+<p>官方文件：</p>
+
+<ul>
+<li><a href="http://guides.rubyonrails.org/form_helpers.html#building-complex-forms">Guides</a></li>
+<li><a href="http://rails.ruby.tw/form_helpers.html#%E6%89%93%E9%80%A0%E8%A4%87%E9%9B%9C%E8%A1%A8%E5%96%AE">Guides 中文</a></li>
+<li><a href="https://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html">accepts_nested_attributes_for </a></li>
+<li><a href="http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for">fields_for</a></li>
+<li><a href="https://github.com/rails/rails/issues/18233">belongs_to should default to required: true</a></li>
+<li><a href="https://stackoverflow.com/questions/35942464/trouble-with-accepts-nested-attributes-for-in-rails-5-0-0-beta3-api-option">Trouble with accepts_nested_attributes_for in Rails 5.0.0.beta3, -api option</a></li>
+</ul>
+
 </div>
 
 

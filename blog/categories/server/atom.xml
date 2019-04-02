@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Server | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/server/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-02-18T22:50:14+08:00</updated>
+  <updated>2019-04-02T09:56:32+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -55,6 +55,12 @@
 </code></pre>
 
 <h3>docker/app/Dockerfile</h3>
+
+<p><code>--path vendor/bundle</code></p>
+
+<p><a href="https://chengl.com/using-docker-for-rails-development/">Using Docker for Rails Development</a></p>
+
+<blockquote><p>We want to install gems in ./vendor/bundle because the gems will persist in ./vendor/bundle regardless of the lifecyle of the container. When we update the Gemfile and do bundle install again, it will only install the newly added gems, not everything again.</p></blockquote>
 
 <pre><code class="ruby"># Base image
 FROM ruby:2.5.1
@@ -238,6 +244,8 @@ FLUSH PRIVILEGES;
 
 <h3>docker-compose.yml</h3>
 
+<blockquote><p>.env 的變數，可以用 <code>${MYSQL_USER}</code> 使用在 docker-compose 中</p></blockquote>
+
 <pre><code class="ruby">version: '3'
 services:
   app:
@@ -366,6 +374,42 @@ COPY . $APP/
 
 CMD ["bundle", "exec", "rails", "server", "-p", "3000", "-b", "0.0.0.0"]
 </code></pre>
+
+<p>README</p>
+
+<pre><code class="ruby"># build image
+docker-compose build
+
+# bundle
+docker-compose run -u root backend bundle
+
+# create database
+docker-compose run backend bundle exec rails db:create db:migrate db:seed
+
+# start
+docker-compose up
+</code></pre>
+
+<p>New project need to add <code>db (docker-compose.yml mysql name)</code> to <code>database.yml</code></p>
+
+<pre><code class="ruby">default: &amp;default
+  adapter: mysql2
+  encoding: utf8
+  pool: &lt;%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %&gt;
+  host: db
+  port: 3306
+  username: root
+  password: password
+  socket: /tmp/mysql.sock
+</code></pre>
+
+<h1>Sample</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/product_system_production">product_system_production</a></li>
+<li><a href="https://github.com/mgleon08/product_system_develop">product_system_develop</a></li>
+</ul>
+
 
 <p>參考文件:</p>
 

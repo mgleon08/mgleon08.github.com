@@ -1,0 +1,614 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Rails With Active Storage - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="Active Storage 是 rails 後來出的新功能，可以簡單的做到上傳檔案，雲端整合(Amazon S3, Google Cloud Storage)，MiniMagick 影像操作等等，就像是 carrierwave, paperclip 等比較常用到的套件 跟以往用 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2019/03/27/rails-active-storage">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby/">Ruby</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Rails With Active Storage</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-03-27T09:33:19+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>9:33 am</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!-- more -->
+
+
+<p><code>Active Storage</code> 是 rails 後來出的新功能，可以簡單的做到上傳檔案，雲端整合(<a href="https://aws.amazon.com/tw/s3/">Amazon S3</a>, <a href="https://cloud.google.com/storage/docs/">Google Cloud Storage</a>)，<code>MiniMagick</code> 影像操作等等，就像是 <a href="https://github.com/carrierwaveuploader/carrierwave">carrierwave</a>, <a href="https://github.com/thoughtbot/paperclip">paperclip</a> 等比較常用到的套件</p>
+
+<p>跟以往用 carrierwave 或是 paperclip 不太一樣，不需要在現有的 model 新增欄位，而是透過 <code>polymorphic</code> 的方式，將檔案存在兩張獨立的 table， <code>active_storage_blobs</code>, <code>active_storage_attachments</code></p>
+
+<h1>Init Project</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="kp">new</span> <span class="n">active_storage_demo</span> <span class="o">--</span><span class="n">webpack</span><span class="o">=</span><span class="n">stimulus</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="n">coffee</span> <span class="o">--</span><span class="n">skip</span><span class="o">-</span><span class="nb">test</span> <span class="o">-</span><span class="n">d</span><span class="o">=</span><span class="n">mysql</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Install active_storage</h1>
+
+<p>透過 <code>rails active_storage:install</code> 建立 active_storage 所需要的兩張 table，包括 <code>active_storage_blobs</code>, <code>active_storage_attachments</code></p>
+
+<ul>
+<li><code>active_storage_attachments</code>: 用來存跟 model 相關的資訊</li>
+<li><code>active_storage_blobs</code>: 用來存詳細檔案的資訊(裡面包含了 <code>checksum</code> 將檔案做 hash 可以知道是否為同一個檔案)</li>
+</ul>
+
+
+<p>接著跑 <code>rake db:create db:migrate</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># This migration comes from active_storage (originally 20170806125915)</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">CreateActiveStorageTables</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Migration</span><span class="o">[</span><span class="mi">5</span><span class="o">.</span><span class="mi">2</span><span class="o">]</span>
+</span><span class='line'>  <span class="k">def</span> <span class="nf">change</span>
+</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:active_storage_blobs</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="ss">:key</span><span class="p">,</span>        <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="ss">:filename</span><span class="p">,</span>   <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="ss">:content_type</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">text</span>     <span class="ss">:metadata</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">bigint</span>   <span class="ss">:byte_size</span><span class="p">,</span>  <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span>   <span class="ss">:checksum</span><span class="p">,</span>   <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">datetime</span> <span class="ss">:created_at</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">index</span> <span class="o">[</span> <span class="ss">:key</span> <span class="o">]</span><span class="p">,</span> <span class="ss">unique</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="n">create_table</span> <span class="ss">:active_storage_attachments</span> <span class="k">do</span> <span class="o">|</span><span class="n">t</span><span class="o">|</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">string</span>     <span class="ss">:name</span><span class="p">,</span>     <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">references</span> <span class="ss">:record</span><span class="p">,</span>   <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span><span class="p">,</span> <span class="ss">polymorphic</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">index</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">references</span> <span class="ss">:blob</span><span class="p">,</span>     <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">datetime</span> <span class="ss">:created_at</span><span class="p">,</span> <span class="ss">null</span><span class="p">:</span> <span class="kp">false</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">index</span> <span class="o">[</span> <span class="ss">:record_type</span><span class="p">,</span> <span class="ss">:record_id</span><span class="p">,</span> <span class="ss">:name</span><span class="p">,</span> <span class="ss">:blob_id</span> <span class="o">]</span><span class="p">,</span> <span class="nb">name</span><span class="p">:</span> <span class="s2">&quot;index_active_storage_attachments_uniqueness&quot;</span><span class="p">,</span> <span class="ss">unique</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>      <span class="n">t</span><span class="o">.</span><span class="n">foreign_key</span> <span class="ss">:active_storage_blobs</span><span class="p">,</span> <span class="ss">column</span><span class="p">:</span> <span class="ss">:blob_id</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>預設檔案存在 local(也可以改成 s3 或 GCS)</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># config/environments/development.rb</span>
+</span><span class='line'><span class="n">config</span><span class="o">.</span><span class="n">active_storage</span><span class="o">.</span><span class="n">service</span> <span class="o">=</span> <span class="ss">:local</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># config/storage.yml</span>
+</span><span class='line'><span class="nb">test</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">service</span><span class="p">:</span> <span class="no">Disk</span>
+</span><span class='line'>  <span class="ss">root</span><span class="p">:</span> <span class="o">&lt;</span><span class="sx">%= Rails.root.join(&quot;tmp/storage&quot;) %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sx">local:</span>
+</span><span class='line'><span class="sx">  service: Disk</span>
+</span><span class='line'><span class="sx">  root: &lt;%=</span> <span class="no">Rails</span><span class="o">.</span><span class="n">root</span><span class="o">.</span><span class="n">join</span><span class="p">(</span><span class="s2">&quot;storage&quot;</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>建立 user moblie</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">rails</span> <span class="n">g</span> <span class="n">scaffold</span> <span class="no">User</span> <span class="nb">name</span>
+</span><span class='line'><span class="n">rake</span> <span class="ss">db</span><span class="p">:</span><span class="n">migrate</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 user model 設定可以上傳的檔案有哪些</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># models/user.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">User</span> <span class="o">&lt;</span> <span class="no">ApplicationRecord</span>
+</span><span class='line'>  <span class="n">has_one_attached</span> <span class="ss">:avatar</span>
+</span><span class='line'>  <span class="n">has_many_attached</span> <span class="ss">:documents</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>在 view 上面新增畫面，如果是要多個檔案，要加上 <code>multiple: true</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># views/users/_form.html.erb</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;field&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sx">%= form.label :avatar %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">form</span><span class="o">.</span><span class="n">file_field</span> <span class="ss">:avatar</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;/div&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="n">div</span> <span class="n">class</span><span class="o">=</span><span class="s2">&quot;field&quot;</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sx">%= form.label :documents %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;%=</span> <span class="n">form</span><span class="o">.</span><span class="n">file_field</span> <span class="ss">:documents</span><span class="p">,</span> <span class="ss">multiple</span><span class="p">:</span> <span class="kp">true</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">&lt;/div&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>image_tag(@user.avatar)</code> 顯示圖片</li>
+<li><code>rails_blob_path(doc, disposition: "attachment"))</code> 附件</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># views/users/show.html.erb</span>
+</span><span class='line'><span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;</span><span class="n">avatar</span><span class="o">&lt;</span><span class="sr">/h2&gt;</span>
+</span><span class='line'><span class="sr">&lt;% if @user.avatar.attached? %&gt;</span>
+</span><span class='line'><span class="sr">  &lt;%= image_tag(@user.avatar) %&gt;</span>
+</span><span class='line'><span class="sr">&lt;% end %&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="sr">&lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% if </span><span class="vi">@user</span><span class="o">.</span><span class="n">documents</span><span class="o">.</span><span class="n">attached?</span> <span class="sx">%&gt;</span>
+</span><span class='line'><span class="sx">  &lt;p&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="n">h2</span><span class="o">&gt;</span><span class="no">Download</span> <span class="no">Documents</span><span class="o">&lt;</span><span class="sr">/h2&gt;</span>
+</span><span class='line'><span class="sr">  &lt;% @user.documents.each_with_index do |doc, i| %&gt;</span>
+</span><span class='line'><span class="sr">    &lt;p&gt;</span>
+</span><span class='line'><span class="sr">    &lt;%= link_to(&quot;Document </span><span class="si">#{</span><span class="n">i</span><span class="si">}</span><span class="sr">&quot;, rails_blob_path(doc, disposition: &quot;attachment&quot;)) %&gt;</span>
+</span><span class='line'><span class="sr">    &lt;/</span><span class="nb">p</span><span class="o">&gt;</span>
+</span><span class='line'>  <span class="o">&lt;</span><span class="sx">% end %&gt;</span>
+</span><span class='line'><span class="sx">  &lt;/p&gt;</span>
+</span><span class='line'><span class="o">&lt;</span><span class="sx">% end </span><span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>並在 controller 新增 permit，因為 documents 是多個檔案，所以給 Array</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># controllers/users_controller.rb</span>
+</span><span class='line'><span class="k">def</span> <span class="nf">user_params</span>
+</span><span class='line'>  <span class="n">params</span><span class="o">.</span><span class="n">require</span><span class="p">(</span><span class="ss">:user</span><span class="p">)</span><span class="o">.</span><span class="n">permit</span><span class="p">(</span><span class="ss">:name</span><span class="p">,</span> <span class="ss">:avatar</span><span class="p">,</span> <span class="ss">documents</span><span class="p">:</span> <span class="o">[]</span><span class="p">)</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>接著就可以 <code>rails s</code> 來新增 user 測試看看了</p>
+
+<h1>刪除檔案</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 同步刪除頭像和實際資源檔案。</span>
+</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">purge</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 透過 Active Job 非同步刪除相關模型和實際資源檔案。</span>
+</span><span class='line'><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">purge_later</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>調整圖片尺寸</h1>
+
+<p>不同尺寸可以透過 <a href="https://github.com/minimagick/minimagick">minimagick</a> 做轉換</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># Gemfile</span>
+</span><span class='line'><span class="n">gem</span> <span class="s1">&#39;mini_magick&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># views/users/show.html.erb</span>
+</span><span class='line'><span class="o">&lt;%=</span> <span class="n">image_tag</span> <span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="o">.</span><span class="n">variant</span><span class="p">(</span><span class="ss">resize</span><span class="p">:</span> <span class="s2">&quot;100x100&quot;</span><span class="p">)</span> <span class="o">%&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Direct Upload</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">yarn</span> <span class="n">add</span> <span class="n">activestorage</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># javascript/packs/direct_upload.js</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">import</span> <span class="o">*</span> <span class="n">as</span> <span class="no">ActiveStorage</span> <span class="n">from</span> <span class="s1">&#39;activestorage&#39;</span><span class="p">;</span>
+</span><span class='line'><span class="no">ActiveStorage</span><span class="o">.</span><span class="n">start</span><span class="p">();</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>other</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># url</span>
+</span><span class='line'><span class="n">url_for</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># download link</span>
+</span><span class='line'><span class="n">rails_blob_path</span><span class="p">(</span><span class="n">user</span><span class="o">.</span><span class="n">avatar</span><span class="p">,</span> <span class="ss">disposition</span><span class="p">:</span> <span class="s2">&quot;attachment&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="no">Rails</span><span class="o">.</span><span class="n">application</span><span class="o">.</span><span class="n">routes</span><span class="o">.</span><span class="n">url_helpers</span><span class="o">.</span><span class="n">rails_blob_url</span><span class="p">(</span><span class="vi">@user</span><span class="o">.</span><span class="n">avatar</span><span class="p">,</span> <span class="ss">only_path</span><span class="p">:</span> <span class="kp">true</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>後續</h1>
+
+<p>接著看一下 source code，可以發現到 blob 可以有多個 attachments。</p>
+
+<p>代表 blob 是可以重複利用，但是必須在 <code>has_one/many_attached</code> 後面加上 <code>dependent: false</code> 才不會刪除了一個 attachment 就將 blob 刪除，導致其他 attachment 關聯不到</p>
+
+<p>另外 <a href="https://www.rubydoc.info/github/rails/rails/Module:delegate_missing_to">delegate_missing_to</a> 則是類似 delegate 的加強版，讓 user 可以直接 call <code>user.filename</code></p>
+
+<blockquote><p><a href="https://ruby-china.org/topics/33119">Rails 5.1 add delegate_missing_to</a></p></blockquote>
+
+<p><code>belongs_to :record</code> 則是透過 <code>polymorphic</code> 的方式來存取是由哪個 model 的資料</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># rails/activestorage/app/models/active_storage/blob.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">ActiveStorage</span><span class="o">::</span><span class="no">Blob</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="s2">&quot;active_storage_blobs&quot;</span>
+</span><span class='line'>  <span class="n">has_many</span> <span class="ss">:attachments</span>
+</span><span class='line'>  <span class="c1"># ...</span>
+</span><span class='line'> <span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># rails/activestorage/app/models/active_storage/attachment.rb</span>
+</span><span class='line'><span class="k">class</span> <span class="nc">ActiveStorage</span><span class="o">::</span><span class="no">Attachment</span> <span class="o">&lt;</span> <span class="no">ActiveRecord</span><span class="o">::</span><span class="no">Base</span>
+</span><span class='line'>  <span class="nb">self</span><span class="o">.</span><span class="n">table_name</span> <span class="o">=</span> <span class="s2">&quot;active_storage_attachments&quot;</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:record</span><span class="p">,</span> <span class="ss">polymorphic</span><span class="p">:</span> <span class="kp">true</span><span class="p">,</span> <span class="ss">touch</span><span class="p">:</span> <span class="kp">true</span>
+</span><span class='line'>  <span class="n">belongs_to</span> <span class="ss">:blob</span><span class="p">,</span> <span class="ss">class_name</span><span class="p">:</span> <span class="s2">&quot;ActiveStorage::Blob&quot;</span>
+</span><span class='line'>  <span class="n">delegate_missing_to</span> <span class="ss">:blob</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>缺點</h1>
+
+<ul>
+<li>有人提到 Active Storage 目前不適合用在 production <a href="https://ruby-china.org/topics/37717">Active Storage 的正確使用姿勢</a></li>
+<li>也有人提到，容易造成 N+1，永久網址難以 cache，redirect 效能問題，routing 衝突等等 <a href="https://5xruby.tw/posts/active-storage-review/">Active Storage 開箱文</a></li>
+</ul>
+
+
+<h1>demo</h1>
+
+<p><a href="https://github.com/mgleon08/active_storage_demo">active_storage_demo</a></p>
+
+<p>Reference:</p>
+
+<ul>
+<li><a href="https://guides.rubyonrails.org/active_storage_overview.html">Active Storage Overview</a></li>
+<li><a href="https://github.com/rails/rails/tree/master/activestorage">activestorage</a></li>
+<li><a href="https://medium.com/@ebifurai_tsn/active-storage-after-rails-5-2-26ad89c93b57">Active Storage after Rails 5.2</a></li>
+<li><a href="https://andyyou.github.io/2018/06/26/using-active-storage/">手把手學習使用 Rails 5.2 ActiveStorage (DirectUpload + ProgressBar)</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-03-27T09:33:19+08:00'><span class='date'><span class='date-month'>Mar</span> <span class='date-day'>27</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>9:33 am</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/rails/'>rails</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2019/03/27/rails-active-storage/" data-via="" data-counturl="http://mgleon08.github.com/blog/2019/03/27/rails-active-storage/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/03/15/ruby-unary-operator/" title="Previous Post: Ruby - unary operator">&laquo; Ruby - unary operator</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2019/03/28/golang-testing/" title="Next Post: Golang - testing">Golang - testing &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2019/03/27/rails-active-storage/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2019/03/27/rails-active-storage/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
