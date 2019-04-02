@@ -8,6 +8,13 @@ categories: ruby
 
 <!-- more -->
 
+# Diff
+
+* alias 可以重命名全局變數 alias_method 不可以
+* 關鍵字與方法的不同
+* 參數不同
+* 作用域不同
+
 # alias
 
 * 建立 method 的別名
@@ -15,6 +22,10 @@ categories: ruby
 * 在 `libdoc` 之下的 `RDoc` 裡的關鍵字
 * 可使用 `method name` 或 `symbol`
 * scope 只在其關鍵字存在的scope
+
+```ruby
+alias new old
+```
 
 ```ruby
 class User
@@ -72,6 +83,10 @@ Dog.new.hi # => "hi"
 * scope 可以到父類別繼承下來的 method
 
 ```ruby
+alias_method new old
+```
+
+```ruby
 class User
   def hi
     'hi'
@@ -123,8 +138,67 @@ end
 Dog.new.hi # => "hello"
 ```
 
+# Sorting, the JavaScript way
+
+在 js 當中，sort 會先轉成 string 在做排序
+
+```js
+[-2, -1, 0, 1, 2].sort()
+// [-1, -2, 0, 1, 2]
+```
+
+ruby 則是
+
+```ruby
+[-2, -1, 0, 1, 2].sort
+# [-2, -1, 0, 1, 2]
+```
+
+利用 `alias_method` 讓 ruby 排序跟 js 一樣
+
+```ruby
+module JSSort
+  def self.included(base)
+    base.alias_method :old_sort, :sort
+  end
+
+  def sort
+    self.map(&:to_s).old_sort.map(&:to_i)
+  end
+end
+```
+
+```ruby
+Array.include(JSSort)
+[-2, -1, 0, 1, 2].sort
+
+Range.include(JSSort)
+(-2..2).sort
+```
+
+# Example
+
+```ruby
+module TestJson
+  def self.included(base)
+    base.alias_method :old_to_json, :to_json
+  end
+
+  def to_json
+    puts 'hiiii'
+  end
+end
+
+class Test
+end
+
+Test.include(TestJson)
+Test.new.to_json
+```
+
 參考文件
 
 * [alias](http://ruby-doc.org/stdlib-2.5.1/libdoc/rdoc/rdoc/RDoc/Alias.html)
 * [alias_method](https://ruby-doc.org/core-2.2.2/Module.html#method-i-alias_method)
 * [ruby 中 alias vs alias_method](https://www.jianshu.com/p/cebbdf6d5672)
+* [ruby-trickery](https://ryanbigg.com/2019/03/ruby-trickery)

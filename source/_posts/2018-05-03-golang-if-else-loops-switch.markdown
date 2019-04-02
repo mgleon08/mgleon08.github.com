@@ -346,6 +346,10 @@ func main() {
 // 75 is lesser than 200
 ```
 
+```go
+
+```
+
 參考文件:
 
 * [golangbot.com](https://golangbot.com/learn-golang-series/)

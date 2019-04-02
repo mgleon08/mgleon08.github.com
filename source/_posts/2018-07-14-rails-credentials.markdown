@@ -12,6 +12,10 @@ rails5.2 開始 `config/secrets.yml` 已經被移除了，取而代之的是 `cr
 
 rails5.2 會新增兩個檔案
 
+預設會有 `config/credentials.yml.enc` 執行 `EDITOR="vim" rails credentials:edit` 就會產生 `config/master.key`
+ 
+> 如果無法順利執行的話可以刪掉 `config/credentials.yml.enc` 在執行 `EDITOR="vim" rails credentials:edit` 一次
+
 * `config/credentials.yml.enc` is an encrypted file that will contain all your secret credentials，因為加密過可以很放心的推到 github
 
 * `config/master.key` is a file containing your encryption key
@@ -98,6 +102,12 @@ Rails.application.credentials[Rails.env.to_sym][:aws][:access_key_id]
 ...
 config.require_master_key = true
 ...
+```
+
+### 在 docker 中 create
+
+```ruby
+docker-compose run --rm -e RAILS_ENV=development -e EDITOR=vim backend bin/rails credentials:edit
 ```
 
 參考文件

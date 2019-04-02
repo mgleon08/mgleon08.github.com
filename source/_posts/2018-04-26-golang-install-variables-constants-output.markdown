@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Golang - install, variables, constants, conversions And output"
+title: "Golang - install, variables, constants, and output"
 date: 2018-04-26 22:38:09 +0800
 comments: true
 categories: golang
@@ -11,7 +11,6 @@ categories: golang
 * [安裝 Golang install](#install)
 * [變數 variables](#variables)
 * [常數 Constants](#constants)
-* [轉型 conversions](#conversions)
 * [輸出 output](#output)
 
 # Golang 介紹
@@ -205,6 +204,32 @@ func main() {
 // 123.123000, 123, 123.12
 ```
 
+### 特殊關鍵字 && 內建類別 && 內建函示
+
+```go
+// 特殊關鍵字
+break	default	func	interface	select
+case	defer	go	map	struct
+chan	else	goto	package	switch
+const	fallthrough	if	range	type
+continue	for	import	return	var
+
+// 內建類別
+- *string
+- *bool
+- Numeric Types
+  - *int  int8  int16  *int32(rune)  int64
+  - uint *uint8(byte) uint16 uint32 uint64
+  - float32 *float64
+  - complex64 complex128
+  - byte // alias for uint8
+  - rune // alias for int32，represents a Unicode code point
+
+// 內建函示
+make len cap new append copy close delete
+complex real imag panic recover
+```
+
 ### command
 
 * [go clean](https://golang.org/pkg/cmd/go/internal/clean/)
@@ -253,7 +278,7 @@ go help clean
 fmt.Printf("\u65e5\u672c\u8a9e") // 日本語
 ```
 
-* 反引號
+* 反引號 Raw string literal
 
 用來建立原生的字串字面量，這些字串可能由多行組成(不支援任何轉義序列)，原生的字串字面量多用於書寫多行訊息、HTML以及正則表達式
 
@@ -344,7 +369,7 @@ func main() {
 
 # <span id="constants"> 常數 Constants </span>
 
-constants 常用於用固定常數
+constants 常用於用固定常數，必須一開始就 initialized
 
 ```go
 package main
@@ -372,7 +397,9 @@ func main() {
 // 2
 ```
 
-### constants 宣告後就不能重複 asssign
+### constants 宣告後就不能重複 asssign (immutable)
+
+> You cannot change constant values (immutable)
 
 ```go
 package main
@@ -384,6 +411,8 @@ func main() {
 ```
 
 ### constants 在編譯的時候就要定義，不能在執行時才給值
+
+> You cannot initialize constant to a runtime value
 
 ```go
 package main
@@ -397,13 +426,23 @@ func main() {
     fmt.Println("Hello, playground")
     var a = math.Sqrt(4) //allowed
     // 因為 math.Sqrt(4) 是在 runtime 才會知道值，所以會 error
-    const b = math.Sqrt(4) //not allowed
+    const b = math.Sqrt(4) // not allowed
+    
+    c := 2
+    const d = c // not allowed
+    
+    const e = len("abc") // ok，因為在 compile time 就可以知道值，而不是 runtime
+    fmt.Println(e)
+    
+    const f = 123 // compile time 就可以知道
+    const g = f
+    fmt.Println(g)
 }
 ```
 
-### const 沒有特別聲明是哪種型態時，是屬於 untyped
+### const 沒有特別聲明是哪種型態時，是屬於 typeless
 
-當 const assign 給任意 type 的值時，會由 untyped 會自動轉變為該 type，而 var 一開始就會給定 type，因此會 error
+當 const assign 給任意 type 的值時，會由 typeless 會自動轉變為該 type，而 var 一開始就會給定 type，因此會 error
 
 ```go
 package main
@@ -427,10 +466,116 @@ func main() {
 // complex64Var (5+0i)
 ```
 
+透過 typeless 的特性，可以在 compiler 的時候變成多重的 type
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	const min = 43 // typeless
+	
+	var a int = min // min's type = int, 相當於 var a = int(min)
+	var b float64 = min // min's type = float64, 相當於 var a = float64(min)
+	var c byte = min // min's type = byte, 相當於 var a = byte(min)
+	var d rune = min // min's type = rune, 相當於 var a = rune(min)
+	
+	fmt.Println(a, b, c, d)
+}
+```
+
+### 多重宣告 const，後面沒有給值，會跟前面的一樣
+
+> Constants get their types and expressions from the previous constant
+
+```go
+package main
+
+import (
+    "fmt"
+
+)
+
+func main() {
+	const (
+		max int = 123
+		min // it repeats the previous constant's type and/or expression
+	)
+	fmt.Println(max, min)
+}
+
+// 123 123
+```
+
 ### 也可以宣告 const 時，就定義 type
 
 ```go
 const typedhello string = "Hello World"
+```
+
+### IOTA
+
+常量的計數器 const number generator
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	const (
+		a = iota
+		b
+		_
+		c
+		d
+	)
+	fmt.Println(a, b, c, d)
+}
+// 0 1 3 4
+```
+
+### Detect
+
+> Go can't detect runtime errors at the compile-time
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	max, min := 5, 0
+
+	fmt.Println(max / min)
+}
+// panic: runtime error: integer divide by zero
+```
+
+> Go can detect the error at the compile-time
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	const (
+		max int = 5
+		min int = 0
+	)
+	fmt.Println(max / min)
+}
+// prog.go:12:18: division by zero
 ```
 
 ### 在 golang 當中，不允許不同 type 的 assign
@@ -451,303 +596,6 @@ func main() {
 // cannot use defaultName (type string) as type myString in assignment
 // myString 是新建立的 type，相當於 string 的 alias，但因為是不同的 type，因此不能夠直接 assign
 ```
-
-# <span id="conversions"> 轉型 conversions  </span>
-
-* [fmt](https://golang.org/pkg/fmt/)
-* [Unicode Character Set and UTF-8, UTF-16, UTF-32 Encoding](https://naveenr.net/unicode-character-set-and-utf-8-utf-16-utf-32-encoding/)
-* [UTF-8 encoder/decoder](https://mothereff.in/utf-8#%C3%B1)
-
-
-```go
-Type(value)
-```
-
-```go
-package main
-
-import "fmt"
-
-func main(){
-	a, b := 100, 2.5
-	// float64 轉 int 會有小數點不見得問題
-	a = a * int(b)
-	fmt.Println(a)
-
-	a, b = 100, 2.5
-	// 因為 a type 是 int 所以最後必須再轉回 int
-	a = int(float64(a) * b)
-	fmt.Println(a)
-}
-```
-
-造成第一個是 `3.5` 第二個是 `3` 原因是在於
-
-```go
-// 如果左側運算子類型確定，則右側轉為左側類型再運算
-var num1 int = 7
-fmt.Println(num1 / 2)
-fmt.Println(num1 / 2.0)
-
-// 如果左側類型不確定，則根據右側類型推導左側類型
-fmt.Println(7 / 2)
-fmt.Println(7 / 2.0)
-```
-
-### Basic Types
-
-```go
-- string
-- bool
-- Numeric Types
-  - int  int8  int16  int32  int64
-  - uint uint8 uint16 uint32 uint64
-  - float32 float64
-  - complex64 complex128
-  - byte // alias for uint8
-  - rune // alias for int32，represents a Unicode code point
-```
-
-```go
-package main
-
-import (
-	"fmt"
-	"strconv"
-)
-
-func main() {
-	i := 123
-	i64 := int64(i)                               // int to int64
-	f64 := float64(i)                             // int to float64
-	is := strconv.Itoa(i)                         // int to string
-	i64s := strconv.FormatInt(i64, 10)            //int64 to string 10 進位
-	f64s := strconv.FormatFloat(f64, 'f', -1, 64) // float64 to string
-	f64i64 := int64(f64)                          // float64 to int64
-	letter := "abc"                               // string to byte
-	si, sierr := strconv.Atoi(is)                 // string to int
-	si64, si64err := strconv.ParseInt(is, 10, 64) // string to int64 [func ParseInt(s string, base int, bitSize int) (i int64, err error)]
-	sf64, sf64err := strconv.ParseFloat(is, 64)   //  string to float64 [func ParseFloat(s string, bitSize int) (f float64, err error)]
-	sb, sberr := strconv.ParseBool("true")        // string to bool [func ParseBool(str string) (value bool, err error)]
-
-	fmt.Printf("i      Type: %T, Value: %v\n", i, i)
-	fmt.Printf("i64    Type: %T, Value: %v\n", i64, i64)
-	fmt.Printf("f64    Type: %T, Value: %v\n", f64, f64)
-	fmt.Printf("is     Type: %T, Value: %v\n", is, is)
-	fmt.Printf("i64s   Type: %T, Value: %v\n", i64s, i64s)
-	fmt.Printf("f64s   Type: %T, Value: %v\n", f64s, f64s)
-	fmt.Printf("f64i64 Type: %T, Value: %v\n", f64i64, f64i64)
-	fmt.Printf("letter Type: %T, Value: %v\n", []byte(letter), []byte(letter))
-	fmt.Printf("si     Type: %T, Value: %v Err: %v\n", si, si, sierr)
-	fmt.Printf("si64   Type: %T, Value: %v Err: %v\n", si64, si64, si64err)
-	fmt.Printf("sf64   Type: %T, Value: %v Err: %v\n", sf64, sf64, sf64err)
-	fmt.Printf("sb     Type: %T, Value: %v Err: %v\n", sb, sb, sberr)
-
-}
-
-/*
-i      Type: int, Value: 123
-i64    Type: int64, Value: 123
-f64    Type: float64, Value: 123
-is     Type: string, Value: 123
-i64s   Type: string, Value: 123
-f64s   Type: string, Value: 123
-f64i64 Type: int64, Value: 123
-letter Type: []uint8, Value: [97 98 99]
-si     Type: int, Value: 123 Err: <nil>
-si64   Type: int64, Value: 123 Err: <nil>
-sf64   Type: float64, Value: 123 Err: <nil>
-sb     Type: bool, Value: true Err: <nil>
-*/
-```
-
-### String
-
-> Since a string is a slice of bytes, its possible to access each byte of a string
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func printBytes(s string) {
-	for i := 0; i < len(s); i++ {
-		// %x base 16, lower-case, two characters per byte
-		fmt.Printf("%x ", s[i])
-	}
-}
-
-func printChars(s string) {
-	// 這裡需要用 rune(int32)，因為有些字像中文會佔據 UTF-8 3個 byte，無法直接用 %c 對應到相對應的字，必須要一個 byte 才可以對應
-	runes := []rune(s)
-	// 這邊可以改用 range，range 會直接轉成 rune 就不需要另外轉
-	for i := 0; i < len(runes); i++ {
-		// %c the character represented by the corresponding Unicode code point
-		fmt.Printf("%c ", runes[i])
-	}
-}
-
-func printCharsAndBytes(s string) {
-	for index, rune := range s {
-		fmt.Printf("%c starts at byte %d\n", rune, index)
-	}
-}
-
-func main() {
-	name := "哈囉"
-	fmt.Println(len(name)) // 6，中文字串是用3個位元組存的
-	printBytes(name)
-	fmt.Printf("\n")
-	printChars(name)
-	fmt.Printf("\n")
-	printCharsAndBytes(name)
-
-	fmt.Printf("\n\n")
-
-	name = "Señor"
-	fmt.Println(len(name))
-	printBytes(name)
-	fmt.Printf("\n")
-	printChars(name)
-	fmt.Printf("\n")
-	printCharsAndBytes(name)
-
-	fmt.Printf("\n")
-
-	// Constructing string from slice of bytes
-	byteSlice := []byte{0x43, 0x61, 0x66, 0xC3, 0xA9}ㄋ
-	// 也可以改用 10 進位 []byte{67, 97, 102, 195, 169} 結果一樣
-	str := string(byteSlice)
-	fmt.Println(str)
-
-	fmt.Printf("\n")
-
-	// Constructing a string from slice of runes
-	runeSlice := []rune{0x0053, 0x0065, 0x00f1, 0x006f, 0x0072}
-	runestr := string(runeSlice)
-	fmt.Println(runestr)
-}
-
-/**
-6
-e5 93 88 e5 9b 89
-哈 囉
-哈 starts at byte 0
-囉 starts at byte 3
-
-
-6
-53 65 c3 b1 6f 72
-S e ñ o r
-S starts at byte 0
-e starts at byte 1
-ñ starts at byte 2
-o starts at byte 4
-r starts at byte 5
-
-Café
-
-Señor
-**/
-```
-
-### Length of the string
-
-必須用到 `utf8` package
-
-```go
-package main
-
-import (
-    "fmt"
-    "unicode/utf8"
-)
-
-
-
-func length(s string) {
-    fmt.Printf("length of %s is %d\n", s, utf8.RuneCountInString(s))
-}
-func main() {
-    word1 := "Señor"
-    length(word1)
-    word2 := "Pets"
-    length(word2)
-}
-```
-
-### Strings are immutable
-
-string 是不可變的
-
-```go
-package main
-
-import (
-    "fmt"
-)
-
-func mutate(s []rune) string {
-    s[0] = 'a' // 改變後
-    return string(s) // 在組成 string 傳回來
-}
-
-func main() {
-    h := "hello"
-    // mutate(h) 直接將 string 帶進去會出現 cannot assign to s[0]
-    fmt.Println(mutate([]rune(h))) // 必須先轉成 rune slice type
-}
-```
-
-* [[golangbot] strings](https://golangbot.com/strings/)
-
-### complex
-
-```go
-package main
-
-import (
-    "fmt"
-)
-
-func main() {
-    c1 := complex(5, 7)
-    c2 := 8 + 27i
-    cadd := c1 + c2
-    fmt.Println("sum:", cadd)
-    cmul := c1 * c2
-    fmt.Println("product:", cmul)
-}
-
-// sum: (13+34i)
-// product: (-149+191i)
-```
-
-
-### float
-
-```go
-package main
-
-import (
-	"fmt"
-)
-
-func main() {
-	// float/float
-	fmt.Println(7 / 2.0)
-	s := []byte("1234567")
-	// int/int
-	fmt.Println(len(s) / 2.0)
-}
-// 3.5
-// 3
-```
-
-* [Conversions](https://golang.org/ref/spec#Conversions)
-* [go：整數除以浮點數的問題](https://segmentfault.com/q/1010000011519048)
 
 # <span id="output"> 輸出 output </span>
 

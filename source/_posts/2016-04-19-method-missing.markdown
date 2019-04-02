@@ -19,7 +19,21 @@ class Post
   end
 end
 Post.new.submit(1, "Here's a post.")
+```
 
+```ruby
+class Something
+  def method_missing(method, *args, &block)
+    puts "You called: #{method}"
+    p args
+    block.call 7
+  end
+end
+
+s = Something.new
+s.call_method "boo", 5 do |x|
+  x.times{ puts "in block" }
+end
 ```
 
 用找不到 method 會 call `method_missing` 的特性，直接自己定義 method_missing 去定義呼叫其他的 method

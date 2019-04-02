@@ -12,7 +12,7 @@ categories: golang
 
 在 Go 中並不是所有的類型都能進行序列化：
 
-* 必須是 struct 中支援外部引用的 field 才能夠序列化 (集開頭字母大寫的 field)
+* 必須是 struct 中支援外部引用的 field 才能夠序列化 (即開頭字母大寫的 field)
 * JSON object key 只支援 string
 * Channel、complex、function 等 type 無法進行序列化
 * 不支援循環數據結構，因為序列化時會進行無限迴圈
@@ -20,7 +20,7 @@ categories: golang
 
 
 ```go
-func Marshal(v interface{}) ([]byte, error
+func Marshal(v interface{}) ([]byte, error)
 ```
 
 ```go

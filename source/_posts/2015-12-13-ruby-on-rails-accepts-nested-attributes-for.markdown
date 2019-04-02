@@ -15,7 +15,7 @@ categories: rails gem
 
 這裏有兩種情境
 
-#One-to-one
+# One-to-one
 
 ```ruby
 class Book < ActiveRecord::Base
@@ -51,7 +51,7 @@ accepts_nested_attributes_for :author, :allow_destroy => true, :reject_if => :al
 `:reject_if => :all_blank` 表示在什麼條件下就當作沒有要動作， all_blank 表示如果資料都是空的，就不執行
 
 
-#One-to-many
+# One-to-many
 
 ```ruby
 class Book < ActiveRecord::Base
@@ -74,9 +74,38 @@ book.pages.first.title # => 'Philosopher's Stone'
 book.pages.last.title # => 'Chamber of Secrets'
 ```
 
-#通常會搭配 fields_for 來嵌入到同一個表單
 
-###One-to-one
+# rails5
+
+在 rails 5 中，要用 `accepts_nested_attributes_for` 必須在 `belongs_to` 加上 `options: true` 或是 `required: false`
+
+
+```ruby
+class Item < ApplicationRecord
+  has_many :item_options
+  accepts_nested_attributes_for :item_options, allow_destroy: true
+end
+
+class ItemOption < ApplicationRecord
+  belongs_to :items, required: false
+end
+```
+
+必須有 `:id` 才能夠 update，再加上 `:_destroy` 就能夠在參數加上 `_destroy:1 (or true)` 去做刪除 (model 必須要 `allow_destroy: true`)
+
+```ruby
+class ItemsController < ApplicationController
+  private
+    def item_params
+      params.require(:item).permit(:name, item_options_attributes: [:id, :value, :position, :_destroy])
+    end
+end
+```
+
+ 
+# 通常會搭配 fields_for 來嵌入到同一個表單
+
+### One-to-one
 
 ```ruby
 <%= form_for @book do |b| %>
@@ -99,7 +128,7 @@ book.pages.last.title # => 'Chamber of Secrets'
 
 這樣就能夠透過原本是 @book 的表單，裡面再放入 author 的欄位進行更新。
 
-###One-to-many
+### One-to-many
 
 one-to-many 會比較麻煩，因為當新增的時候，並不知道要新增幾個，因此會動用到 jquery 的動態新增，就是可以在表單上面一直增加欄位。
 
@@ -109,7 +138,7 @@ one-to-many 會比較麻煩，因為當新增的時候，並不知道要新增�
 * [cocoon](https://github.com/nathanvda/cocoon)
 * [nested_form_fields](https://github.com/ncri/nested_form_fields)
 
-#strong parameter
+# strong parameter
 
 最後記得要加 strong parameter
 one-to-one 和 one-to-many 都要
@@ -122,7 +151,7 @@ end
 ```
 >每個 gem strong parameter 的方式都有點不太一樣，記得要看一下
 
-#helper
+# helper
 
 book_helper.rb
 
@@ -148,7 +177,10 @@ end
 ```
 
 官方文件：
-[Guides](http://guides.rubyonrails.org/form_helpers.html#building-complex-forms)
-[Guides 中文](http://rails.ruby.tw/form_helpers.html#%E6%89%93%E9%80%A0%E8%A4%87%E9%9B%9C%E8%A1%A8%E5%96%AE)
-[accepts_nested_attributes_for ](http://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html)
-[fields_for](http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for)
+
+* [Guides](http://guides.rubyonrails.org/form_helpers.html#building-complex-forms)
+* [Guides 中文](http://rails.ruby.tw/form_helpers.html#%E6%89%93%E9%80%A0%E8%A4%87%E9%9B%9C%E8%A1%A8%E5%96%AE)
+* [accepts_nested_attributes_for ](https://api.rubyonrails.org/classes/ActiveRecord/NestedAttributes/ClassMethods.html)
+* [fields_for](http://apidock.com/rails/ActionView/Helpers/FormHelper/fields_for)
+* [belongs_to should default to required: true](https://github.com/rails/rails/issues/18233)
+* [Trouble with accepts_nested_attributes_for in Rails 5.0.0.beta3, -api option](https://stackoverflow.com/questions/35942464/trouble-with-accepts-nested-attributes-for-in-rails-5-0-0-beta3-api-option)

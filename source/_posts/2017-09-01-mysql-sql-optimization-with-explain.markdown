@@ -56,13 +56,22 @@ explain SELECT * FROM user
 9. rows:返回的結果的行數
 10. Extra:其他說明
 
-# composite index
+# composite index & primary key
+
 另外有時候我們會做 composite index，但其實這種 index 是有順序的!
 
 例如:
 
+composite index
+
 ```ruby
 add_index :lookup, [:name, :email, :phone], name: "lookup_index", unique: true
+```
+
+composite primary
+
+```ruby
+ALTER TABLE table ADD PRIMARY KEY (phone, email)
 ```
 
 當在 `where` 的時候，就必須有順序 `name` `email` `phone` 這個 `index` 才會有效

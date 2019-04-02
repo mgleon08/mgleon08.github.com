@@ -3,14 +3,14 @@ layout: post
 title: "Rails API + Nuxt.js + Devise-JWT"
 date: 2018-07-17 17:39:32 +0800
 comments: true
-categories: rails
+categories: rails docker
 ---
 
 在網路上發現這篇文章，覺得寫得很不錯，所以這次就跟著這篇一起做一遍~
 
 <!-- more-->
 
-[How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT](https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16) 
+[How to separate frontend + backend with Rails API, Nuxt.js and Devise-JWT](https://medium.com/@fishpercolator/how-to-separate-frontend-backend-with-rails-api-nuxt-js-and-devise-jwt-cf7dd9da9d16)
 
 來學習，`Rails API / Nuxt.js / JWT / Docker`
 
@@ -44,7 +44,7 @@ yarn generate-lock-entry > yarn.lock
 # autheg/autheg-backend/Dockerfile
 FROM ruby:2.5
 
-ARG UID 
+ARG UID
 RUN adduser rails --uid $UID --disabled-password --gecos ""
 # 可以透過 $UID 給予不同的 user ID，並且進到任何的 container 都可以用相同的 user ID
 # --disabled-password - 讓 rails 無法用密碼登入
@@ -56,7 +56,7 @@ WORKDIR $APP
 
 COPY Gemfile* $APP/
 RUN bundle install -j3 --path vendor/bundle
-# Gems and yarn packages are installed into the mounted volumes. 
+# Gems and yarn packages are installed into the mounted volumes.
 # This will stop you from needing to rebuild the whole Docker image every time you change the Gemfile or package.json.
 
 COPY . $APP/
@@ -95,7 +95,7 @@ WORKDIR $APP
 
 COPY package.json yarn.lock $APP/
 RUN yarn
-# Gems and yarn packages are installed into the mounted volumes. 
+# Gems and yarn packages are installed into the mounted volumes.
 # This will stop you from needing to rebuild the whole Docker image every time you change the Gemfile or package.json.
 
 COPY . $APP/
@@ -115,7 +115,7 @@ CMD ["yarn", "run", "dev"]
 ```ruby
 # autheg/docker-compose.yml
 
-version: '3' # dockerfile 版本 
+version: '3' # dockerfile 版本
 services:
   db: # 對應 rails database.yml 的 host
     image: postgres
@@ -461,7 +461,7 @@ bin/rails db:migrate
 ```ruby
 bin/rails g model jwt_blacklist jti:string:index exp:datetime
 ```
-並將欄位加上 `null: false` 和移除 `t.timestamps` 
+並將欄位加上 `null: false` 和移除 `t.timestamps`
 
 ```ruby
 def change
@@ -529,12 +529,14 @@ bin/rails secret
 # 9dd044df628a496e83c668f..
 ```
 
-這時必須在 console執行 `EDITOR="vim" rails credentials:edit`，但是在 container 並沒有 `vim` 和 `sudo` 這個指令，因此要先切換成 root 去安裝 `vim` 才有辦法執行 
+這時必須在 console執行 `EDITOR="vim" rails credentials:edit`，但是在 container 並沒有 `vim` 和 `sudo` 這個指令，因此要先切換成 root 去安裝 `vim` 才有辦法執行
+
+> 如果無法順利執行的話可以刪掉 `config/credentials.yml.enc` 在執行 `EDITOR="vim" rails credentials:edit` 一次
 
 ```ruby
 docker-compose run -u root backend bash
 apt-get update
-apt-get install vim -y # 安裝 vim 
+apt-get install vim -y # 安裝 vim
 EDITOR="vim" bin/rails credentials:edit
 
 # 接著編輯
@@ -609,8 +611,8 @@ User.create!(email: 'test@example.com', password: 'password')
 ```ruby
 POST /api/users/sign_in
 
-{  
-   "user":{  
+{
+   "user":{
       "email":"test@example.com",
       "password":"password"
    }
@@ -730,8 +732,8 @@ end
 # 登入拿 token
 POST /api/users/sign_in
 
-{  
-   "user":{  
+{
+   "user":{
       "email":"test@example.com",
       "password":"password"
    }

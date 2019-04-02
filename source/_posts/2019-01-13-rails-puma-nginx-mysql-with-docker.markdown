@@ -39,6 +39,12 @@ rails_project
 
 ### docker/app/Dockerfile
 
+`--path vendor/bundle`
+
+[Using Docker for Rails Development](https://chengl.com/using-docker-for-rails-development/)
+
+> We want to install gems in ./vendor/bundle because the gems will persist in ./vendor/bundle regardless of the lifecyle of the container. When we update the Gemfile and do bundle install again, it will only install the newly added gems, not everything again.
+
 ```ruby
 # Base image
 FROM ruby:2.5.1
@@ -226,6 +232,8 @@ FLUSH PRIVILEGES;
 
 ### docker-compose.yml
 
+> .env 的變數，可以用 `${MYSQL_USER}` 使用在 docker-compose 中
+
 ```ruby
 version: '3'
 services:
@@ -356,6 +364,41 @@ COPY . $APP/
 
 CMD ["bundle", "exec", "rails", "server", "-p", "3000", "-b", "0.0.0.0"]
 ```
+
+README
+
+```ruby
+# build image
+docker-compose build
+
+# bundle
+docker-compose run -u root backend bundle
+
+# create database
+docker-compose run backend bundle exec rails db:create db:migrate db:seed
+
+# start
+docker-compose up
+```
+
+New project need to add `db (docker-compose.yml mysql name)` to `database.yml`
+
+```ruby
+default: &default
+  adapter: mysql2
+  encoding: utf8
+  pool: <%= ENV.fetch("RAILS_MAX_THREADS") { 5 } %>
+  host: db
+  port: 3306
+  username: root
+  password: password
+  socket: /tmp/mysql.sock
+```
+
+# Sample
+
+* [product_system_production](https://github.com/mgleon08/product_system_production)
+* [product_system_develop](https://github.com/mgleon08/product_system_develop)
 
 參考文件:
 

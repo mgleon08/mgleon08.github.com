@@ -18,10 +18,10 @@ categories: ruby
 %q(Now is #{Time.now}) # => "Now is \#{Time.now}"
 
 # 轉換成 array
-%W(#{Time.now} hello say\ hi) # => ["2019-02-01 23:01:22 +0800", "#hello", "say hi"]
+%W(#{Time.now} hello say\ hi) # => ["2019-02-01 23:01:22 +0800", "hello", "say hi"]
 
 # 轉換成 array，但無法轉換變數
-%w(#{Time.now} hello say\ hi) # => ["\#{Time.now}", "#hello", "say hi"]
+%w(#{Time.now} hello say\ hi) # => ["\#{Time.now}", "hello", "say hi"]
 
 # 執行 shell 指令，相當於 `$path`
 %x($path) # => ""

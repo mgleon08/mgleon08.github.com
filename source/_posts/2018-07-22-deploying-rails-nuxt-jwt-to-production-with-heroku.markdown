@@ -67,7 +67,7 @@ git subtree push --prefix autheg-backend backend master
 建立環境變數
 
 ```ruby
-heroku config:set -a autheg-backend-demo RAILS_MASTER_KEY=(local 裡面的 config.master.key)
+heroku config:set -a autheg-backend-demo RAILS_MASTER_KEY=(local 建立的 config/master.key)
 
 heroku config:set -a autheg-backend-demo JWT_SECRET=$(heroku run -a autheg-backend-demo rails secret)
 ```

@@ -104,12 +104,18 @@ go get -u github.com/kardianos/govendor
 
 golang 在版本1.11 新出的功能，初始化專案時必須加上 `export GO111MODULE=on` 原本預設是 `auto` 就是 disable
 
-在專案底下執行
+在原本有用 govendor 專案底下執行，就會自動複製產生
 
 ```go
 go mod init
 // go: creating new go.mod: module testgomod
 // go: copying requirements from vendor/vendor.json
+```
+
+如果是新專案則是
+
+```go
+go mod init <packname>
 ```
 
 多出一個 `go.mod`
@@ -119,10 +125,11 @@ go mod init
 // 記錄使用哪個套件，版本，sha1
 module testgomod
 
+// 新專案就不會有這條
 require github.com/appleboy/com v0.0.0-20180410030638-c0b5901f9622
 ```
 
-接著
+接著 import 的地方如果有需要下載的 package，執行以下指令就會自動去抓取
 
 ```go
 go mod download

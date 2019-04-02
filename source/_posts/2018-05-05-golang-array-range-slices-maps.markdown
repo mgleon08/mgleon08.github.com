@@ -201,6 +201,7 @@ unbuffered.
 a[low : high]
 
 []int{1, 2, 3} //creates and array and returns a slice reference
+[]int{3: 123, 4: 321, 5: 123456} // 指定 index，其餘的會是 0
 
 numa := [3]int{78, 79 ,80}
 nums1 := numa[:] //creates a slice which contains all elements of the array

@@ -30,6 +30,7 @@ categories: linux other
 * [> & >>](#arrow)
 * [envsubst](#envsubst)
 * [getent](#getent)
+* [nohub](#nohub)
 
 # <span id="permission"> permission - sudo, su, chown, chmod </span>
 
@@ -388,3 +389,22 @@ envsubst '$USER' < myconfig.conf > config.conf
 getent group
 ```
 * [getent命令](https://ywnz.com/linux/getent/)
+
+# <span id="nohub"> nohub </span>
+
+讓程式可以在離線或登出系統後繼續執行
+
+開頭 `nohup` 結尾 `&`
+
+```ruby
+# 讓程式登出後可繼續執行
+nohup /path/my_program &
+
+# 執行後會產生
+nohup.out
+
+# 可以使用 tail 看最新的輸出
+tail -f nohup.out
+```
+
+* [nohub](https://blog.gtwang.org/linux/linux-nohup-command-tutorial/)

@@ -321,11 +321,11 @@ git am *.patch
 * [【Git】使用 format-patch 將 commit 打包成檔案 Use format-patch to carry commit](http://chris800731.blogspot.tw/2013/08/git-format-patch-commit-use-format.html)
 * [5.3 分散式 Git - 專案的管理](https://git-scm.com/book/zh-tw/v1/%E5%88%86%E6%95%A3%E5%BC%8F-Git-%E5%B0%88%E6%A1%88%E7%9A%84%E7%AE%A1%E7%90%86)
 
-#其他
-###gitkeep
+# 其他
+### gitkeep
 * `.gitkeep` 空目錄不會被 commit，必要時在目錄裡放 `.gitkeep`。
 
-###.gitignore
+### .gitignore
 * `vi .gitignore` 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。
 
 [.gitignore ⼤集合](https://github.com/github/gitignore)
@@ -337,7 +337,7 @@ git add .
 git commit -m "fixed untracked files"
 ```
 
-###移除已經上 github 的敏感檔案
+### 移除已經上 github 的敏感檔案
 * [移除 git 上敏感檔案](https://help.github.com/articles/remove-sensitive-data/)
 
 ```ruby
@@ -348,14 +348,14 @@ git filter-branch --tree-filter "rm -f config/database.yml"
 # --tree-filter 這個 filter，它可以讓你在 Checkout 到每個 Commit 的時候執行你指定的指令，執行完後再自動幫你重新再 Commit
 ```
 
-###開乾淨的 branch
+### 開乾淨的 branch
 [How to create a new empty branch for a new project](http://stackoverflow.com/questions/13969050/how-to-create-a-new-empty-branch-for-a-new-project)
 
 ```ruby
 git checkout --orphan <branchname>
 ```
 
-###複製遠端的 branch 到本地新的 branch
+### 複製遠端的 branch 到本地新的 branch
 
 1. 先 `git checkout` 到遠端的 branch，在遠端的 branch `git checkout branch`複製切到本地
 
@@ -370,7 +370,7 @@ git checkout -b development
 git fetch origin <remote_branch_name>:<local_branch_name>
 ```
 
-###移除 untracked file
+### 移除 untracked file
 
 ```ruby
 #Show what will be deleted with the -n option
@@ -382,7 +382,7 @@ git clean -fX # 清除被忽略的檔案
 
 [How do I remove local (untracked) files from my current Git branch?](http://stackoverflow.com/questions/61212/how-do-i-remove-local-untracked-files-from-my-current-git-branch)
 
-###針對每個節點刪除特定檔案
+### 針對每個節點刪除特定檔案
 
 ```ruby
 git fliter-branch --tree--filter "rm -f config/password.txt"
@@ -443,6 +443,36 @@ git show <hash>
 ```ruby
 # 顯示特定遠端儲存庫的參照名稱。包含遠端分支與遠端標籤 -h 遠端 heads,  -t 顯示 tag 
 git ls-remote .
+```
+
+### 找出 log 裡面的關鍵字
+
+[How to search a Git repository by commit message?](https://stackoverflow.com/questions/7124914/how-to-search-a-git-repository-by-commit-message)
+
+```ruby
+# 所有 branch
+git log --all --grep='Build 0051'
+
+# 當前 branch
+git log --grep='Build 0051'
+
+# 找出所有 commit 內容裡的關鍵字
+git grep 'Build 0051' $(git rev-list --all)
+```
+
+### 同時開多個工作目錄
+
+[Git worktree: 同時開多個工作目錄](https://ihower.tw/blog/archives/8740?utm_campaign=CodeTengu&utm_medium=email&utm_source=CodeTengu_144)
+
+```ruby
+# 建立 linked working tree 
+git worktree git worktree add -b hotfix ../hotfix master 
+
+# 到該資料夾
+cd ../hotfix
+
+# 清除  linked working tree 
+git worktree prune
 ```
 
 # alias

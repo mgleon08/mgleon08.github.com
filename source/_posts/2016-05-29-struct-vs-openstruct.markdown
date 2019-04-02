@@ -150,10 +150,13 @@ expect(brewer.brew).to eq(true)
 ```
 
 官方文件：
-[Struct](http://ruby-doc.org/core-2.2.0/Struct.html)
-[OpenStruct](http://ruby-doc.org/stdlib-2.0.0/libdoc/ostruct/rdoc/OpenStruct.html)
+
+* [Struct](http://ruby-doc.org/core-2.2.0/Struct.html)
+* [OpenStruct](http://ruby-doc.org/stdlib-2.0.0/libdoc/ostruct/rdoc/OpenStruct.html)
 
 參考文件：
-[When should I use Struct vs. OpenStruct?](http://stackoverflow.com/questions/1177594/when-should-i-use-struct-vs-openstruct#answer-4459132)
-[The simple but powerful Ruby Struct](https://www.leighhalliday.com/ruby-struct)
-[模擬class物件：Ruby當中Struct及OpenStruct的使用](http://motion-express.com/blog/20150406-ruby-struct-and-ostruct)
+
+* [When should I use Struct vs. OpenStruct?](http://stackoverflow.com/questions/1177594/when-should-i-use-struct-vs-openstruct#answer-4459132)
+* [The simple but powerful Ruby Struct](https://www.leighhalliday.com/ruby-struct)
+* [模擬class物件：Ruby當中Struct及OpenStruct的使用](http://motion-express.com/blog/20150406-ruby-struct-and-ostruct)
+* [The Power of Ruby Structs](http://dustinzeisler.com/ruby/2019/02/20/ruby-struct.html)
