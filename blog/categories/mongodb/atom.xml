@@ -1,0 +1,303 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Mongodb | Leon's Blogging]]></title>
+  <link href="http://mgleon08.github.com/blog/categories/mongodb/atom.xml" rel="self"/>
+  <link href="http://mgleon08.github.com/"/>
+  <updated>2019-04-18T21:19:06+08:00</updated>
+  <id>http://mgleon08.github.com/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - MongoDB]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/04/10/golang-mongodb/"/>
+    <updated>2019-04-10T21:30:30+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/04/10/golang-mongodb</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<h1>Install the MongoDB Go Driver</h1>
+
+<pre><code class="go">go go get github.com/mongodb/mongo-go-driver
+</code></pre>
+
+<p>或使用 go module</p>
+
+<pre><code class="go">go mode init &lt;current package name&gt;
+</code></pre>
+
+<h1>Connect to MongoDB using the Go Driver</h1>
+
+<pre><code class="go">package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/mongodb/mongo-go-driver/mongo"
+    "go.mongodb.org/mongo-driver/mongo/options"
+)
+
+func main() {
+    client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Check the connection
+    err = client.Ping(context.Background(), nil)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println("Connected to MongoDB!")
+
+    // handle for the trainers collection in the test database
+    // collection := client.Database("test").Collection("trainers")
+
+    // Close the connection
+    err = client.Disconnect(context.TODO())
+
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Connection to MongoDB closed.")
+}
+</code></pre>
+
+<ul>
+<li><code>mongo.Connect</code> Connect</li>
+<li><code>client.Ping</code> Check the connection</li>
+<li><code>client.Disconnect</code> Close the connection</li>
+</ul>
+
+
+<h1>BSON (Binary Serialized Document Format, Binary-encoded JSON)</h1>
+
+<ul>
+<li>一種二進制形式的存儲格式，採用了類似於 C 語言結構體的名稱</li>
+<li>對表示方法支援內嵌的文件物件和陣列物件</li>
+<li>具有輕量性、可遍歷性、高效性的特點，可以有效描述非結構化數據和結構化數據</li>
+<li>schema-less的存儲形式</li>
+<li>優點是靈活性高，但它的缺點是空間利用率不是很理想</li>
+<li>不像一般 json 用簡單的 string 和 number，而是可以給予 type (int, long, date, floating point, and decimal128)，可以更方便的去做比較排許等等的</li>
+</ul>
+
+
+<h3>在 Go 中提供了兩種 BSON 的資料格式 <code>D types</code> the <code>Raw types</code></h3>
+
+<p><code>D type</code></p>
+
+<blockquote><p>The D family of types is used to concisely build BSON objects using native Go types. This can be particularly useful for constructing commands passed to MongoDB. The D family consists of four types:</p></blockquote>
+
+<ul>
+<li><code>D</code>: A BSON document. This type should be used in situations where order matters, such as MongoDB commands.</li>
+<li><code>M</code>: An unordered map. It is the same as D, except it does not preserve order.</li>
+<li><code>A</code>: A BSON array.</li>
+<li><code>E</code>: A single element inside a D.</li>
+</ul>
+
+
+<p>Example</p>
+
+<pre><code class="go">// D type filter to find where the name field matches either Alice or Bob 
+bson.D\{\{
+    "name", 
+    bson.D\{\{
+        "$in", 
+        bson.A{"Alice", "Bob"}
+    }}
+}}
+</code></pre>
+
+<p><code>Raw</code></p>
+
+<blockquote><p>The Raw family of types is used for validating a slice of bytes. You can also retrieve single elements from Raw types using a <a href="https://godoc.org/go.mongodb.org/mongo-driver/bson#Raw.Lookup">Lookup</a>. This is useful if you don&rsquo;t want the overhead of having to unmarshall the BSON into another type. This tutorial will just use the D family of types.</p></blockquote>
+
+<h1>CRUD Operations</h1>
+
+<pre><code class="go">type Trainer struct {
+    Name string
+    Age  int
+    City string
+}
+</code></pre>
+
+<h3>C - Insert documents</h3>
+
+<pre><code class="go">ash := Trainer{"Ash", 10, "Pallet Town"}
+misty := Trainer{"Misty", 10, "Cerulean City"}
+brock := Trainer{"Brock", 15, "Pewter City"}
+
+// insert one
+insertResult, err := collection.InsertOne(context.TODO(), ash)
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Println("Inserted a single document: ", insertResult.InsertedID)
+
+// insert many
+trainers := []interface{}{misty, brock}
+insertManyResult, err := collection.InsertMany(context.TODO(), trainers)
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs)
+</code></pre>
+
+<h3>U - Update documents</h3>
+
+<p>需要透過 <code>bson.D</code> types 去找到 match 的 data 再做更新</p>
+
+<ul>
+<li><a href="https://docs.mongodb.com/manual/reference/operator/update-field/">Field Update Operators</a></li>
+</ul>
+
+
+<pre><code class="go">// 找出 name ＝ "Ash"
+filter := bson.Dname
+
+// 將 age - 1
+update := bson.D{
+    {"$inc", bson.D{
+        {"age", 1},
+    }},
+}
+
+updateResult, err := collection.UpdateOne(context.TODO(), filter, update)
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+</code></pre>
+
+<ul>
+<li><code>$inc</code> - Increments the value of the field by the specified amount.</li>
+<li><code>updateResult.MatchedCount</code> - The number of documents that matched the filter.</li>
+<li><code>updateResult.ModifiedCount</code> - The number of documents that were modified.</li>
+</ul>
+
+
+<h3>R - Find documents</h3>
+
+<p><code>Find a document</code> use <code>collection.FindOne()</code></p>
+
+<blockquote><p>To find a document, you will need a filter document as well as a pointer to a value into which the result can be decoded</p></blockquote>
+
+<pre><code class="go">// create a value into which the result can be decoded
+var result Trainer
+
+// 取出的值必須要 Decode
+err = collection.FindOne(context.TODO(), filter).Decode(&amp;result)
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Found a single document: %+v\n", result)
+</code></pre>
+
+<p><code>Find multiple documents</code> use <code>collection.Find()</code></p>
+
+<blockquote><p>This method returns a Cursor. A Cursor provides a stream of documents through which you can iterate and decode one at a time. Once a Cursor has been exhausted, you should close the Cursor.</p>
+
+<p>Here you&rsquo;ll also set some options on the operation using the options package. Specifically, you&rsquo;ll set a limit so only 2 documents are returned.</p></blockquote>
+
+<pre><code class="go">// Pass these options to the Find method
+findOptions := options.Find()
+findOptions.SetLimit(2)
+
+// Here's an array in which you can store the decoded documents
+var results []*Trainer
+
+// Passing nil as the filter matches all documents in the collection
+// 範例原本寫 nil 但是有問題所以改成 bson.D{}
+cur, err := collection.Find(context.TODO(), bson.D{}, findOptions)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Finding multiple documents returns a cursor
+// Iterating through the cursor allows us to decode documents one at a time
+for cur.Next(context.TODO()) {
+
+    // create a value into which the single document can be decoded
+    var elem Trainer
+    err := cur.Decode(&amp;elem)
+    if err != nil {
+        log.Fatal(err)
+    }
+    results = append(results, &amp;elem)
+}
+
+if err := cur.Err(); err != nil {
+    log.Fatal(err)
+}
+
+// Close the cursor once finished
+cur.Close(context.TODO())
+
+fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
+
+for index, result := range results {
+    fmt.Printf("%d: %+v \n", index, result)
+}
+</code></pre>
+
+<h3>D - Delete Documents</h3>
+
+<blockquote><p>delete documents using <code>collection.DeleteOne()</code> or <code>collection.DeleteMany()</code>.</p>
+
+<p>Here you pass nil as the filter argument, which will match all documents in the collection. You could also use <a href="https://godoc.org/github.com/mongodb/mongo-go-driver/mongo#Collection.Drop">collection.Drop()</a> to delete an entire collection.</p></blockquote>
+
+<pre><code class="go">// DeleteOne
+deleteOneResult, err := collection.DeleteOne(context.TODO(), bson.M{})
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Printf("Deleted %v documents in the trainers collection\n", deleteOneResult.DeletedCount)
+
+// DeleteMany
+deleteResult, err := collection.DeleteMany(context.TODO(), bson.M{})
+// DELETA name = Misty &amp;&amp; age &gt; 10
+// deleteResult, err := collection.DeleteMany(context.TODO(), bson.M{"name": "Misty", "age": bson.M{"$gte": 10}})
+// deleteResult, err := collection.DeleteMany(context.TODO(), bson.D\{\{"name", "Misty"}, {"age", bson.M{"$gte": 10}}})
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Printf("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
+</code></pre>
+
+<h1>Example</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/go-packages/tree/master/017.mongodb">016.mongodb</a></li>
+</ul>
+
+
+<p>Reference</p>
+
+<ul>
+<li><a href="https://github.com/mongodb/mongo-go-driver/tree/master/examples/documentation_examples">documentation_examples</a></li>
+<li><a href="https://godoc.org/go.mongodb.org/mongo-driver">godoc mongo-driver</a></li>
+<li><a href="https://docs.mongodb.com/manual/reference/operator/">BSON Operators</a></li>
+<li><a href="http://bsonspec.org/">BSON</a></li>
+<li><a href="https://blog.csdn.net/m0_38110132/article/details/77716792">BSON的介紹及BSON與JSON的區別</a></li>
+<li><a href="https://www.mongodb.com/blog/post/mongodb-go-driver-tutorial">MongoDB Go Driver Tutorial</a></li>
+<li><a href="https://www.jianshu.com/p/0344a21e8040?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">mongodb官方的golang驅動基礎使用課程分享</a></li>
+<li><a href="https://zh.shellman.me/articles/mongo-go-driver-demo/">MongoDB官方推出的Go驅動庫“mongo-go-driver”快速課程</a></li>
+<li><a href="https://blog.gtwang.org/programming/getting-started-with-mongodb-shell-1/">MongoDB 基礎入門教學：MongoDB Shell 篇</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

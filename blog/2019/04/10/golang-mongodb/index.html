@@ -1,0 +1,696 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Golang - MongoDB - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="Install the MongoDB Go Driver 1
+go go get github.com/mongodb/mongo-go-driver 或使用 go module 1
+go mode init &lt;current package name&gt; Connect to &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="http://mgleon08.github.com/blog/2019/04/10/golang-mongodb">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.com" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby/">Ruby</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Golang - MongoDB</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-04-10T21:30:30+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>9:30 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!-- more -->
+
+
+<h1>Install the MongoDB Go Driver</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">go</span> <span class="k">go</span> <span class="nx">get</span> <span class="nx">github</span><span class="p">.</span><span class="nx">com</span><span class="o">/</span><span class="nx">mongodb</span><span class="o">/</span><span class="nx">mongo</span><span class="o">-</span><span class="k">go</span><span class="o">-</span><span class="nx">driver</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或使用 go module</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">go</span> <span class="nx">mode</span> <span class="nx">init</span> <span class="p">&lt;</span><span class="nx">current</span> <span class="kn">package</span> <span class="nx">name</span><span class="p">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Connect to MongoDB using the Go Driver</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;context&quot;</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;log&quot;</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="s">&quot;github.com/mongodb/mongo-go-driver/mongo&quot;</span>
+</span><span class='line'>  <span class="s">&quot;go.mongodb.org/mongo-driver/mongo/options&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">client</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">mongo</span><span class="p">.</span><span class="nx">Connect</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span> <span class="nx">options</span><span class="p">.</span><span class="nx">Client</span><span class="p">().</span><span class="nx">ApplyURI</span><span class="p">(</span><span class="s">&quot;mongodb://localhost:27017&quot;</span><span class="p">))</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// Check the connection</span>
+</span><span class='line'>  <span class="nx">err</span> <span class="p">=</span> <span class="nx">client</span><span class="p">.</span><span class="nx">Ping</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">Background</span><span class="p">(),</span> <span class="kc">nil</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Connected to MongoDB!&quot;</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// handle for the trainers collection in the test database</span>
+</span><span class='line'>  <span class="c1">// collection := client.Database(&quot;test&quot;).Collection(&quot;trainers&quot;)</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="c1">// Close the connection</span>
+</span><span class='line'>  <span class="nx">err</span> <span class="p">=</span> <span class="nx">client</span><span class="p">.</span><span class="nx">Disconnect</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">())</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Connection to MongoDB closed.&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>mongo.Connect</code> Connect</li>
+<li><code>client.Ping</code> Check the connection</li>
+<li><code>client.Disconnect</code> Close the connection</li>
+</ul>
+
+
+<h1>BSON (Binary Serialized Document Format, Binary-encoded JSON)</h1>
+
+<ul>
+<li>一種二進制形式的存儲格式，採用了類似於 C 語言結構體的名稱</li>
+<li>對表示方法支援內嵌的文件物件和陣列物件</li>
+<li>具有輕量性、可遍歷性、高效性的特點，可以有效描述非結構化數據和結構化數據</li>
+<li>schema-less的存儲形式</li>
+<li>優點是靈活性高，但它的缺點是空間利用率不是很理想</li>
+<li>不像一般 json 用簡單的 string 和 number，而是可以給予 type (int, long, date, floating point, and decimal128)，可以更方便的去做比較排許等等的</li>
+</ul>
+
+
+<h3>在 Go 中提供了兩種 BSON 的資料格式 <code>D types</code> the <code>Raw types</code></h3>
+
+<p><code>D type</code></p>
+
+<blockquote><p>The D family of types is used to concisely build BSON objects using native Go types. This can be particularly useful for constructing commands passed to MongoDB. The D family consists of four types:</p></blockquote>
+
+<ul>
+<li><code>D</code>: A BSON document. This type should be used in situations where order matters, such as MongoDB commands.</li>
+<li><code>M</code>: An unordered map. It is the same as D, except it does not preserve order.</li>
+<li><code>A</code>: A BSON array.</li>
+<li><code>E</code>: A single element inside a D.</li>
+</ul>
+
+
+<p>Example</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// D type filter to find where the name field matches either Alice or Bob </span>
+</span><span class='line'><span class="nx">bson</span><span class="p">.</span><span class="nx">D</span><span class="err">\</span><span class="p">{</span><span class="err">\</span><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;name&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="nx">bson</span><span class="p">.</span><span class="nx">D</span><span class="err">\</span><span class="p">{</span><span class="err">\</span><span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;$in&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="nx">bson</span><span class="p">.</span><span class="nx">A</span><span class="p">{</span><span class="s">&quot;Alice&quot;</span><span class="p">,</span> <span class="s">&quot;Bob&quot;</span><span class="p">}</span>
+</span><span class='line'>    <span class="p">}}</span>
+</span><span class='line'><span class="p">}}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Raw</code></p>
+
+<blockquote><p>The Raw family of types is used for validating a slice of bytes. You can also retrieve single elements from Raw types using a <a href="https://godoc.org/go.mongodb.org/mongo-driver/bson#Raw.Lookup">Lookup</a>. This is useful if you don&rsquo;t want the overhead of having to unmarshall the BSON into another type. This tutorial will just use the D family of types.</p></blockquote>
+
+<h1>CRUD Operations</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">type</span> <span class="nx">Trainer</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">Age</span>  <span class="kt">int</span>
+</span><span class='line'>  <span class="nx">City</span> <span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>C - Insert documents</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">ash</span> <span class="o">:=</span> <span class="nx">Trainer</span><span class="p">{</span><span class="s">&quot;Ash&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&quot;Pallet Town&quot;</span><span class="p">}</span>
+</span><span class='line'><span class="nx">misty</span> <span class="o">:=</span> <span class="nx">Trainer</span><span class="p">{</span><span class="s">&quot;Misty&quot;</span><span class="p">,</span> <span class="mi">10</span><span class="p">,</span> <span class="s">&quot;Cerulean City&quot;</span><span class="p">}</span>
+</span><span class='line'><span class="nx">brock</span> <span class="o">:=</span> <span class="nx">Trainer</span><span class="p">{</span><span class="s">&quot;Brock&quot;</span><span class="p">,</span> <span class="mi">15</span><span class="p">,</span> <span class="s">&quot;Pewter City&quot;</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// insert one</span>
+</span><span class='line'><span class="nx">insertResult</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">InsertOne</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">(),</span> <span class="nx">ash</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Inserted a single document: &quot;</span><span class="p">,</span> <span class="nx">insertResult</span><span class="p">.</span><span class="nx">InsertedID</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// insert many</span>
+</span><span class='line'><span class="nx">trainers</span> <span class="o">:=</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{}{</span><span class="nx">misty</span><span class="p">,</span> <span class="nx">brock</span><span class="p">}</span>
+</span><span class='line'><span class="nx">insertManyResult</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">InsertMany</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">(),</span> <span class="nx">trainers</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Inserted multiple documents: &quot;</span><span class="p">,</span> <span class="nx">insertManyResult</span><span class="p">.</span><span class="nx">InsertedIDs</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>U - Update documents</h3>
+
+<p>需要透過 <code>bson.D</code> types 去找到 match 的 data 再做更新</p>
+
+<ul>
+<li><a href="https://docs.mongodb.com/manual/reference/operator/update-field/">Field Update Operators</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// 找出 name ＝ &quot;Ash&quot;</span>
+</span><span class='line'><span class="nx">filter</span> <span class="o">:=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">D</span><span class="p"></span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 將 age - 1</span>
+</span><span class='line'><span class="nx">update</span> <span class="o">:=</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">D</span><span class="p">{</span>
+</span><span class='line'>    <span class="p">{</span><span class="s">&quot;$inc&quot;</span><span class="p">,</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">D</span><span class="p">{</span>
+</span><span class='line'>        <span class="p">{</span><span class="s">&quot;age&quot;</span><span class="p">,</span> <span class="mi">1</span><span class="p">},</span>
+</span><span class='line'>    <span class="p">}},</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">updateResult</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">UpdateOne</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">(),</span> <span class="nx">filter</span><span class="p">,</span> <span class="nx">update</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Matched %v documents and updated %v documents.\n&quot;</span><span class="p">,</span> <span class="nx">updateResult</span><span class="p">.</span><span class="nx">MatchedCount</span><span class="p">,</span> <span class="nx">updateResult</span><span class="p">.</span><span class="nx">ModifiedCount</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>$inc</code> - Increments the value of the field by the specified amount.</li>
+<li><code>updateResult.MatchedCount</code> - The number of documents that matched the filter.</li>
+<li><code>updateResult.ModifiedCount</code> - The number of documents that were modified.</li>
+</ul>
+
+
+<h3>R - Find documents</h3>
+
+<p><code>Find a document</code> use <code>collection.FindOne()</code></p>
+
+<blockquote><p>To find a document, you will need a filter document as well as a pointer to a value into which the result can be decoded</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// create a value into which the result can be decoded</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">result</span> <span class="nx">Trainer</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 取出的值必須要 Decode</span>
+</span><span class='line'><span class="nx">err</span> <span class="p">=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">FindOne</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">(),</span> <span class="nx">filter</span><span class="p">).</span><span class="nx">Decode</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">result</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Found a single document: %+v\n&quot;</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><code>Find multiple documents</code> use <code>collection.Find()</code></p>
+
+<blockquote><p>This method returns a Cursor. A Cursor provides a stream of documents through which you can iterate and decode one at a time. Once a Cursor has been exhausted, you should close the Cursor.</p>
+
+<p>Here you&rsquo;ll also set some options on the operation using the options package. Specifically, you&rsquo;ll set a limit so only 2 documents are returned.</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// Pass these options to the Find method</span>
+</span><span class='line'><span class="nx">findOptions</span> <span class="o">:=</span> <span class="nx">options</span><span class="p">.</span><span class="nx">Find</span><span class="p">()</span>
+</span><span class='line'><span class="nx">findOptions</span><span class="p">.</span><span class="nx">SetLimit</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Here&#39;s an array in which you can store the decoded documents</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">results</span> <span class="p">[]</span><span class="o">*</span><span class="nx">Trainer</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Passing nil as the filter matches all documents in the collection</span>
+</span><span class='line'><span class="c1">// 範例原本寫 nil 但是有問題所以改成 bson.D{}</span>
+</span><span class='line'><span class="nx">cur</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">Find</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">(),</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">D</span><span class="p">{},</span> <span class="nx">findOptions</span><span class="p">)</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Finding multiple documents returns a cursor</span>
+</span><span class='line'><span class="c1">// Iterating through the cursor allows us to decode documents one at a time</span>
+</span><span class='line'><span class="k">for</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">Next</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="c1">// create a value into which the single document can be decoded</span>
+</span><span class='line'>    <span class="kd">var</span> <span class="nx">elem</span> <span class="nx">Trainer</span>
+</span><span class='line'>    <span class="nx">err</span> <span class="o">:=</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">Decode</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">elem</span><span class="p">)</span>
+</span><span class='line'>    <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>        <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>    <span class="nx">results</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">results</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">elem</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">cur</span><span class="p">.</span><span class="nx">Err</span><span class="p">();</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// Close the cursor once finished</span>
+</span><span class='line'><span class="nx">cur</span><span class="p">.</span><span class="nx">Close</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">())</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Found multiple documents (array of pointers): %+v\n&quot;</span><span class="p">,</span> <span class="nx">results</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="k">for</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">result</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">results</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%d: %+v \n&quot;</span><span class="p">,</span> <span class="nx">index</span><span class="p">,</span> <span class="nx">result</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>D - Delete Documents</h3>
+
+<blockquote><p>delete documents using <code>collection.DeleteOne()</code> or <code>collection.DeleteMany()</code>.</p>
+
+<p>Here you pass nil as the filter argument, which will match all documents in the collection. You could also use <a href="https://godoc.org/github.com/mongodb/mongo-go-driver/mongo#Collection.Drop">collection.Drop()</a> to delete an entire collection.</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// DeleteOne</span>
+</span><span class='line'><span class="nx">deleteOneResult</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">DeleteOne</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">(),</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">M</span><span class="p">{})</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Deleted %v documents in the trainers collection\n&quot;</span><span class="p">,</span> <span class="nx">deleteOneResult</span><span class="p">.</span><span class="nx">DeletedCount</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// DeleteMany</span>
+</span><span class='line'><span class="nx">deleteResult</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">collection</span><span class="p">.</span><span class="nx">DeleteMany</span><span class="p">(</span><span class="nx">context</span><span class="p">.</span><span class="nx">TODO</span><span class="p">(),</span> <span class="nx">bson</span><span class="p">.</span><span class="nx">M</span><span class="p">{})</span>
+</span><span class='line'><span class="c1">// DELETA name = Misty &amp;&amp; age &gt; 10</span>
+</span><span class='line'><span class="c1">// deleteResult, err := collection.DeleteMany(context.TODO(), bson.M{&quot;name&quot;: &quot;Misty&quot;, &quot;age&quot;: bson.M{&quot;$gte&quot;: 10}})</span>
+</span><span class='line'><span class="c1">// deleteResult, err := collection.DeleteMany(context.TODO(), bson.D\{\{&quot;name&quot;, &quot;Misty&quot;}, {&quot;age&quot;, bson.M{&quot;$gte&quot;: 10}}})</span>
+</span><span class='line'><span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;Deleted %v documents in the trainers collection\n&quot;</span><span class="p">,</span> <span class="nx">deleteResult</span><span class="p">.</span><span class="nx">DeletedCount</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Example</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/go-packages/tree/master/017.mongodb">016.mongodb</a></li>
+</ul>
+
+
+<p>Reference</p>
+
+<ul>
+<li><a href="https://github.com/mongodb/mongo-go-driver/tree/master/examples/documentation_examples">documentation_examples</a></li>
+<li><a href="https://godoc.org/go.mongodb.org/mongo-driver">godoc mongo-driver</a></li>
+<li><a href="https://docs.mongodb.com/manual/reference/operator/">BSON Operators</a></li>
+<li><a href="http://bsonspec.org/">BSON</a></li>
+<li><a href="https://blog.csdn.net/m0_38110132/article/details/77716792">BSON的介紹及BSON與JSON的區別</a></li>
+<li><a href="https://www.mongodb.com/blog/post/mongodb-go-driver-tutorial">MongoDB Go Driver Tutorial</a></li>
+<li><a href="https://www.jianshu.com/p/0344a21e8040?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">mongodb官方的golang驅動基礎使用課程分享</a></li>
+<li><a href="https://zh.shellman.me/articles/mongo-go-driver-demo/">MongoDB官方推出的Go驅動庫“mongo-go-driver”快速課程</a></li>
+<li><a href="https://blog.gtwang.org/programming/getting-started-with-mongodb-shell-1/">MongoDB 基礎入門教學：MongoDB Shell 篇</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-04-10T21:30:30+08:00'><span class='date'><span class='date-month'>Apr</span> <span class='date-day'>10</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>9:30 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/golang/'>golang</a>, <a class='category' href='/blog/categories/mongodb/'>mongodb</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="http://mgleon08.github.com/blog/2019/04/10/golang-mongodb/" data-via="" data-counturl="http://mgleon08.github.com/blog/2019/04/10/golang-mongodb/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/04/10/golang-context/" title="Previous Post: Golang - context">&laquo; Golang - context</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2019/04/11/golang-simple-restful/" title="Next Post: Golang - Simple RESTful">Golang - Simple RESTful &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'http://mgleon08.github.com/blog/2019/04/10/golang-mongodb/';
+        var disqus_url = 'http://mgleon08.github.com/blog/2019/04/10/golang-mongodb/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

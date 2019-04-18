@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Golang | Leon's Blogging]]></title>
   <link href="http://mgleon08.github.com/blog/categories/golang/atom.xml" rel="self"/>
   <link href="http://mgleon08.github.com/"/>
-  <updated>2019-04-02T09:56:32+08:00</updated>
+  <updated>2019-04-18T21:19:06+08:00</updated>
   <id>http://mgleon08.github.com/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,703 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - Simple RESTful]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/04/11/golang-simple-restful/"/>
+    <updated>2019-04-11T16:27:10+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/04/11/golang-simple-restful</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>Practice RESTful with golang</p>
+
+<pre><code class="go">GetUsers     GET     /users
+GetUser      GET     /users/{id}
+CreateUser   POST    /users
+UpdateUser   UPDATE  /users/{id}
+DeleteUser   DELETE  /users/{id}
+</code></pre>
+
+<p>Use <a href="https://github.com/gorilla/mux">gorilla/mux</a> package</p>
+
+<pre><code class="go">package main
+
+import (
+    "encoding/json"
+    "fmt"
+    "log"
+    "net/http"
+    "strconv"
+
+    "github.com/gorilla/mux"
+)
+
+type User struct {
+    ID        int    `json:"id,omitempty"`
+    Firstname string `json:"firstname,omitempty"`
+    Lastname  string `json:"lastname,omitempty"`
+    Info      `json:"info,omitempty"`
+}
+type Info struct {
+    City  string `json:"city,omitempty"`
+    Phone int    `json:"phone,omitempty"`
+}
+
+var users []User
+
+func GetUsers(w http.ResponseWriter, r *http.Request) {
+    json.NewEncoder(w).Encode(users)
+}
+
+func GetUser(w http.ResponseWriter, r *http.Request) {
+    id := convertParams(r)
+    for _, u := range users {
+        if u.ID == id {
+            json.NewEncoder(w).Encode(u)
+            return
+        }
+    }
+    json.NewEncoder(w).Encode("User not found")
+}
+
+func CreateUser(w http.ResponseWriter, r *http.Request) {
+    var user User
+    _ = json.NewDecoder(r.Body).Decode(&amp;user)
+    users = append(users, user)
+    json.NewEncoder(w).Encode(user)
+}
+
+func UpdateUser(w http.ResponseWriter, r *http.Request) {
+    var user User
+    id := convertParams(r)
+    _ = json.NewDecoder(r.Body).Decode(&amp;user)
+    for i, u := range users {
+        if u.ID == id {
+            users[i] = user
+            json.NewEncoder(w).Encode(user)
+            break
+        }
+    }
+}
+
+func DeleteUser(w http.ResponseWriter, r *http.Request) {
+    id := convertParams(r)
+    for i, u := range users {
+        if u.ID == id {
+            copy(users[i:], users[i+1:])
+            users = users[:len(users)-1]
+            break
+        }
+    }
+    json.NewEncoder(w).Encode(users)
+}
+
+func convertParams(r *http.Request) int {
+    params := mux.Vars(r)
+    id, err := strconv.Atoi(params["id"])
+    if err != nil {
+        log.Fatalf("err: %v", err)
+    }
+    return id
+}
+
+func main() {
+    router := mux.NewRouter()
+    user1 := User{ID: 1, Firstname: "hello", Lastname: "World", Info: Info{City: "Taipei", Phone: 123}}
+    user2 := User{ID: 2, Firstname: "hello", Lastname: "World", Info: Info{City: "Taipei", Phone: 456}}
+    users = append(users, user1, user2)
+    router.HandleFunc("/users", GetUsers).Methods("GET")
+    router.HandleFunc("/users/{id}", GetUser).Methods("GET")
+    router.HandleFunc("/users", CreateUser).Methods("POST")
+    router.HandleFunc("/users/{id}", UpdateUser).Methods("PUT")
+    router.HandleFunc("/users/{id}", DeleteUser).Methods("DELETE")
+    fmt.Println("Starting server on port 3000...")
+    log.Fatal(http.ListenAndServe(":3000", router))
+}
+</code></pre>
+
+<p>params</p>
+
+<pre><code class="go">{
+  "id": 3,
+  "firstname": "hello",
+  "lastname": "World",
+  "info": {
+    "city": "Taipei",
+    "phone": 123
+  }
+}
+</code></pre>
+
+<p>run</p>
+
+<pre><code class="go">go run main.go
+// http://localhost:3000/users
+</code></pre>
+
+<h1>Code</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/go-packages/blob/master/018.simple_restful/main.go">simple_restful</a></li>
+</ul>
+
+
+<h1>With mongodb</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/go-packages/tree/master/019.restful_mongodb">restful_mongodb</a></li>
+</ul>
+
+
+<p>Reference</p>
+
+<ul>
+<li><a href="https://medium.com/@petrousov/how-to-build-a-restful-api-in-go-for-phonebook-app-d55f7234a10">How to build a RESTful API in Go for phonebook app</a></li>
+<li><a href="https://medium.com/@petrousov/implementing-crud-operations-with-go-and-mongodb-cf622f2379c4">Implementing CRUD operations with Go and MongoDB</a></li>
+<li><a href="https://github.com/gorilla/mux">gorilla/mux</a></li>
+<li><a href="https://yourbasic.org/golang/delete-element-slice/">2 ways to delete an element from a slice</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - MongoDB]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/04/10/golang-mongodb/"/>
+    <updated>2019-04-10T21:30:30+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/04/10/golang-mongodb</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<h1>Install the MongoDB Go Driver</h1>
+
+<pre><code class="go">go go get github.com/mongodb/mongo-go-driver
+</code></pre>
+
+<p>或使用 go module</p>
+
+<pre><code class="go">go mode init &lt;current package name&gt;
+</code></pre>
+
+<h1>Connect to MongoDB using the Go Driver</h1>
+
+<pre><code class="go">package main
+
+import (
+    "context"
+    "fmt"
+    "log"
+
+    "github.com/mongodb/mongo-go-driver/mongo"
+    "go.mongodb.org/mongo-driver/mongo/options"
+)
+
+func main() {
+    client, err := mongo.Connect(context.Background(), options.Client().ApplyURI("mongodb://localhost:27017"))
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    // Check the connection
+    err = client.Ping(context.Background(), nil)
+
+    if err != nil {
+        log.Fatal(err)
+    }
+
+    fmt.Println("Connected to MongoDB!")
+
+    // handle for the trainers collection in the test database
+    // collection := client.Database("test").Collection("trainers")
+
+    // Close the connection
+    err = client.Disconnect(context.TODO())
+
+    if err != nil {
+        log.Fatal(err)
+    }
+    fmt.Println("Connection to MongoDB closed.")
+}
+</code></pre>
+
+<ul>
+<li><code>mongo.Connect</code> Connect</li>
+<li><code>client.Ping</code> Check the connection</li>
+<li><code>client.Disconnect</code> Close the connection</li>
+</ul>
+
+
+<h1>BSON (Binary Serialized Document Format, Binary-encoded JSON)</h1>
+
+<ul>
+<li>一種二進制形式的存儲格式，採用了類似於 C 語言結構體的名稱</li>
+<li>對表示方法支援內嵌的文件物件和陣列物件</li>
+<li>具有輕量性、可遍歷性、高效性的特點，可以有效描述非結構化數據和結構化數據</li>
+<li>schema-less的存儲形式</li>
+<li>優點是靈活性高，但它的缺點是空間利用率不是很理想</li>
+<li>不像一般 json 用簡單的 string 和 number，而是可以給予 type (int, long, date, floating point, and decimal128)，可以更方便的去做比較排許等等的</li>
+</ul>
+
+
+<h3>在 Go 中提供了兩種 BSON 的資料格式 <code>D types</code> the <code>Raw types</code></h3>
+
+<p><code>D type</code></p>
+
+<blockquote><p>The D family of types is used to concisely build BSON objects using native Go types. This can be particularly useful for constructing commands passed to MongoDB. The D family consists of four types:</p></blockquote>
+
+<ul>
+<li><code>D</code>: A BSON document. This type should be used in situations where order matters, such as MongoDB commands.</li>
+<li><code>M</code>: An unordered map. It is the same as D, except it does not preserve order.</li>
+<li><code>A</code>: A BSON array.</li>
+<li><code>E</code>: A single element inside a D.</li>
+</ul>
+
+
+<p>Example</p>
+
+<pre><code class="go">// D type filter to find where the name field matches either Alice or Bob 
+bson.D\{\{
+    "name", 
+    bson.D\{\{
+        "$in", 
+        bson.A{"Alice", "Bob"}
+    }}
+}}
+</code></pre>
+
+<p><code>Raw</code></p>
+
+<blockquote><p>The Raw family of types is used for validating a slice of bytes. You can also retrieve single elements from Raw types using a <a href="https://godoc.org/go.mongodb.org/mongo-driver/bson#Raw.Lookup">Lookup</a>. This is useful if you don&rsquo;t want the overhead of having to unmarshall the BSON into another type. This tutorial will just use the D family of types.</p></blockquote>
+
+<h1>CRUD Operations</h1>
+
+<pre><code class="go">type Trainer struct {
+    Name string
+    Age  int
+    City string
+}
+</code></pre>
+
+<h3>C - Insert documents</h3>
+
+<pre><code class="go">ash := Trainer{"Ash", 10, "Pallet Town"}
+misty := Trainer{"Misty", 10, "Cerulean City"}
+brock := Trainer{"Brock", 15, "Pewter City"}
+
+// insert one
+insertResult, err := collection.InsertOne(context.TODO(), ash)
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Println("Inserted a single document: ", insertResult.InsertedID)
+
+// insert many
+trainers := []interface{}{misty, brock}
+insertManyResult, err := collection.InsertMany(context.TODO(), trainers)
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs)
+</code></pre>
+
+<h3>U - Update documents</h3>
+
+<p>需要透過 <code>bson.D</code> types 去找到 match 的 data 再做更新</p>
+
+<ul>
+<li><a href="https://docs.mongodb.com/manual/reference/operator/update-field/">Field Update Operators</a></li>
+</ul>
+
+
+<pre><code class="go">// 找出 name ＝ "Ash"
+filter := bson.Dname
+
+// 將 age - 1
+update := bson.D{
+    {"$inc", bson.D{
+        {"age", 1},
+    }},
+}
+
+updateResult, err := collection.UpdateOne(context.TODO(), filter, update)
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Matched %v documents and updated %v documents.\n", updateResult.MatchedCount, updateResult.ModifiedCount)
+</code></pre>
+
+<ul>
+<li><code>$inc</code> - Increments the value of the field by the specified amount.</li>
+<li><code>updateResult.MatchedCount</code> - The number of documents that matched the filter.</li>
+<li><code>updateResult.ModifiedCount</code> - The number of documents that were modified.</li>
+</ul>
+
+
+<h3>R - Find documents</h3>
+
+<p><code>Find a document</code> use <code>collection.FindOne()</code></p>
+
+<blockquote><p>To find a document, you will need a filter document as well as a pointer to a value into which the result can be decoded</p></blockquote>
+
+<pre><code class="go">// create a value into which the result can be decoded
+var result Trainer
+
+// 取出的值必須要 Decode
+err = collection.FindOne(context.TODO(), filter).Decode(&amp;result)
+if err != nil {
+    log.Fatal(err)
+}
+
+fmt.Printf("Found a single document: %+v\n", result)
+</code></pre>
+
+<p><code>Find multiple documents</code> use <code>collection.Find()</code></p>
+
+<blockquote><p>This method returns a Cursor. A Cursor provides a stream of documents through which you can iterate and decode one at a time. Once a Cursor has been exhausted, you should close the Cursor.</p>
+
+<p>Here you&rsquo;ll also set some options on the operation using the options package. Specifically, you&rsquo;ll set a limit so only 2 documents are returned.</p></blockquote>
+
+<pre><code class="go">// Pass these options to the Find method
+findOptions := options.Find()
+findOptions.SetLimit(2)
+
+// Here's an array in which you can store the decoded documents
+var results []*Trainer
+
+// Passing nil as the filter matches all documents in the collection
+// 範例原本寫 nil 但是有問題所以改成 bson.D{}
+cur, err := collection.Find(context.TODO(), bson.D{}, findOptions)
+if err != nil {
+    log.Fatal(err)
+}
+
+// Finding multiple documents returns a cursor
+// Iterating through the cursor allows us to decode documents one at a time
+for cur.Next(context.TODO()) {
+
+    // create a value into which the single document can be decoded
+    var elem Trainer
+    err := cur.Decode(&amp;elem)
+    if err != nil {
+        log.Fatal(err)
+    }
+    results = append(results, &amp;elem)
+}
+
+if err := cur.Err(); err != nil {
+    log.Fatal(err)
+}
+
+// Close the cursor once finished
+cur.Close(context.TODO())
+
+fmt.Printf("Found multiple documents (array of pointers): %+v\n", results)
+
+for index, result := range results {
+    fmt.Printf("%d: %+v \n", index, result)
+}
+</code></pre>
+
+<h3>D - Delete Documents</h3>
+
+<blockquote><p>delete documents using <code>collection.DeleteOne()</code> or <code>collection.DeleteMany()</code>.</p>
+
+<p>Here you pass nil as the filter argument, which will match all documents in the collection. You could also use <a href="https://godoc.org/github.com/mongodb/mongo-go-driver/mongo#Collection.Drop">collection.Drop()</a> to delete an entire collection.</p></blockquote>
+
+<pre><code class="go">// DeleteOne
+deleteOneResult, err := collection.DeleteOne(context.TODO(), bson.M{})
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Printf("Deleted %v documents in the trainers collection\n", deleteOneResult.DeletedCount)
+
+// DeleteMany
+deleteResult, err := collection.DeleteMany(context.TODO(), bson.M{})
+// DELETA name = Misty &amp;&amp; age &gt; 10
+// deleteResult, err := collection.DeleteMany(context.TODO(), bson.M{"name": "Misty", "age": bson.M{"$gte": 10}})
+// deleteResult, err := collection.DeleteMany(context.TODO(), bson.D\{\{"name", "Misty"}, {"age", bson.M{"$gte": 10}}})
+if err != nil {
+  log.Fatal(err)
+}
+fmt.Printf("Deleted %v documents in the trainers collection\n", deleteResult.DeletedCount)
+</code></pre>
+
+<h1>Example</h1>
+
+<ul>
+<li><a href="https://github.com/mgleon08/go-packages/tree/master/017.mongodb">016.mongodb</a></li>
+</ul>
+
+
+<p>Reference</p>
+
+<ul>
+<li><a href="https://github.com/mongodb/mongo-go-driver/tree/master/examples/documentation_examples">documentation_examples</a></li>
+<li><a href="https://godoc.org/go.mongodb.org/mongo-driver">godoc mongo-driver</a></li>
+<li><a href="https://docs.mongodb.com/manual/reference/operator/">BSON Operators</a></li>
+<li><a href="http://bsonspec.org/">BSON</a></li>
+<li><a href="https://blog.csdn.net/m0_38110132/article/details/77716792">BSON的介紹及BSON與JSON的區別</a></li>
+<li><a href="https://www.mongodb.com/blog/post/mongodb-go-driver-tutorial">MongoDB Go Driver Tutorial</a></li>
+<li><a href="https://www.jianshu.com/p/0344a21e8040?utm_campaign=maleskine&amp;utm_content=note&amp;utm_medium=seo_notes&amp;utm_source=recommendation">mongodb官方的golang驅動基礎使用課程分享</a></li>
+<li><a href="https://zh.shellman.me/articles/mongo-go-driver-demo/">MongoDB官方推出的Go驅動庫“mongo-go-driver”快速課程</a></li>
+<li><a href="https://blog.gtwang.org/programming/getting-started-with-mongodb-shell-1/">MongoDB 基礎入門教學：MongoDB Shell 篇</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - Context]]></title>
+    <link href="http://mgleon08.github.com/blog/2019/04/10/golang-context/"/>
+    <updated>2019-04-10T21:30:20+08:00</updated>
+    <id>http://mgleon08.github.com/blog/2019/04/10/golang-context</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p><code>context</code> 是控制並發的一個 package，之前在 <a href="https://mgleon08.github.io/blog/2018/05/17/golang-goroutine-channel-worker-pool-select-mutex/#worker_pool">Worker Pool</a> 也有提到過另一個 <code>WaitGroup</code>，那為什麼需要兩種，來了解一下</p>
+
+<h1>WaitGroup</h1>
+
+<p>當所有的 <code>goroutine</code> 都完成後，才算完成</p>
+
+<h3>實際場景</h3>
+
+<p>有個監控程式跑很多 <code>gorountine</code>，當要停止時，就必須通知每個 <code>gorountine</code> 並等待所有都完成，才算完成，否則會造成記憶體洩漏</p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "sync"
+    "time"
+)
+
+func process(i int, wg *sync.WaitGroup) {
+    fmt.Println("監控開始 ", i)
+    time.Sleep(2 * time.Second)
+    fmt.Printf("監控 %d 結束\n", i)
+    wg.Done() // 執行完一次就 -1
+}
+
+func main() {
+    no := 2
+    var wg sync.WaitGroup
+    for i := 0; i &lt; no; i++ {
+        wg.Add(1)          // 每次執行都 + 1
+        go process(i, &amp;wg) // wg 一定要用 pointer，否則每個 goroutine 都會有各自的 WaitGroup
+    }
+    wg.Wait() // 會 wait 到 0 才會繼續下一步
+    fmt.Println("所有監控完成")
+}
+</code></pre>
+
+<p>大部分的 <code>gorountine</code> 啟動後，就會一直跑，大部分情況是等待它自己結束，如果是不會結束的 <code>gorountine</code>，就會一直跑下去，比較笨的方式就是，用一個變數去判斷是否要結束，但這樣就必須一直去檢查這個變數</p>
+
+<p>因此可以改用 <code>chan + select</code> 來通知</p>
+
+<h1>chan + select</h1>
+
+<p>這方式很好的解決上述的問題，並且可以透過給予 <code>chan</code> 值來決定是否要停止，但還是有其他問題</p>
+
+<ul>
+<li>如果有很多 <code>goroutine</code> 都需要控制結束怎麼辦?</li>
+<li><code>goroutine</code> 又衍生了其它更多的goroutine怎麼?</li>
+</ul>
+
+
+<p>即使定義很多 <code>chan</code> 也很難解決這個問題，因為 <code>goroutine</code> 的關係鏈就導致了這種場景非常複雜，因此就有另一個方式 <code>context</code></p>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "time"
+)
+
+func process(stop chan bool) {
+    for {
+        select {
+        case &lt;-stop:
+            fmt.Println("監控退出，停止了...")
+            return
+        default:
+            fmt.Println("goroutine 監控中...")
+            time.Sleep(2 * time.Second)
+        }
+    }
+}
+
+func main() {
+    stop := make(chan bool)
+    go process(stop)
+    time.Sleep(5 * time.Second)
+    stop &lt;- true
+    fmt.Println("所有監控完成")
+}
+</code></pre>
+
+<h1>context</h1>
+
+<ul>
+<li><a href="https://golang.org/pkg/context/">context</a></li>
+</ul>
+
+
+<p>上面提到的情境是多層級的 <code>goroutine</code>，因此要控制就必須跟蹤 <code>groutine</code></p>
+
+<p>因此 golang 提供了 <code>context</code> 來控制，也就是 <code>groutine</code> 的上下文</p>
+
+<h3>Context 使用原則</h3>
+
+<ul>
+<li>不要把 Context 放在結構體中，要以參數的方式傳遞</li>
+<li>以 Context 作為參數的函式方法，應該把 Context 作為第一個參數，放在第一位。</li>
+<li>給一個函式方法傳遞 Context 的時候，不要傳遞 nil，如果不知道傳遞什麼，就使用 <code>context.TODO</code></li>
+<li>Context 的 Value 相關方法應該傳遞必須的數據，不要什麼數據都使用這個傳遞</li>
+<li>Context 是執行緒安全的，可以放心的在多個 goroutine 中傳遞</li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+)
+
+func process(ctx context.Context) {
+    for {
+        select {
+        case &lt;-ctx.Done():
+            fmt.Println("監控退出，停止了...")
+            return
+        default:
+            fmt.Println("goroutine監控中...")
+            time.Sleep(2 * time.Second)
+        }
+    }
+}
+
+func main() {
+    ctx, cancel := context.WithCancel(context.Background())
+
+    go process(ctx)
+    time.Sleep(5 * time.Second)
+    fmt.Println("通知監控停止")
+    cancel()
+    time.Sleep(5 * time.Second)
+    fmt.Println("所有監控完成")
+}
+</code></pre>
+
+<ul>
+<li><code>context.Background()</code> 回傳一個非 nil 的空 context，不會被取消也沒有值或時間，就是 context 的根節點</li>
+<li><code>context.WithCancel(parent)</code> 建立一個可取消的 <code>子 context</code> 當作參數來追蹤 <code>goroutine</code>，另外一個是 <code>cancle</code> 用於取消這個 <code>子 context</code></li>
+<li><code>ctx.Done</code> 判斷是否要結束，透過 <code>cancel()</code> 來取消</li>
+</ul>
+
+
+<p>目前為止似乎跟 <code>chan</code> 沒什麼兩樣?接著試著控制多個 goroutine</p>
+
+<pre><code class="go">package main
+
+import (
+    "context"
+    "fmt"
+    "time"
+)
+
+func process(ctx context.Context, n int) {
+    for {
+        select {
+        case &lt;-ctx.Done():
+            fmt.Println(n, "監控退出，停止了...")
+            return
+        default:
+            fmt.Printf("goroutine %v 監控中...\n", n)
+            time.Sleep(2 * time.Second)
+        }
+    }
+}
+
+func main() {
+    ctx, cancel := context.WithCancel(context.Background())
+    n := 3
+    for i := 0; i &lt; n; i++ {
+        go process(ctx, i)
+    }
+
+    time.Sleep(5 * time.Second)
+    fmt.Println("通知監控停止")
+    cancel()
+    time.Sleep(5 * time.Second)
+    fmt.Println("所有監控完成")
+}
+</code></pre>
+
+<p>可以看到，上面即使有多個 <code>goroutine</code> 依樣只要一個 <code>cancel()</code> 就全部都取消了</p>
+
+<p>如果是用之前 <code>chan</code>，變成只有一個 <code>true</code> 只能夠取消一個，就結束了，導致剩下的 memory 沒辦法釋放，或是一次放三個 <code>true</code> 去控制，但是當一多起來，就會變得很複雜</p>
+
+<h1>Context interface</h1>
+
+<pre><code class="go">type Context interface {
+    Deadline() (deadline time.Time, ok bool)
+
+    Done() &lt;-chan struct{}
+
+    Err() error
+
+    Value(key interface{}) interface{}
+}
+</code></pre>
+
+<ul>
+<li><code>Deadline()</code> 是獲取設定的截止時間的意思
+
+<ul>
+<li><code>deadline</code> 截止時間，到了這個時間點，Context 會自動發起取消請求</li>
+<li><code>ok</code> 如果是 false，表示沒有設定截止時間，如果需要取消的話，需要呼叫取消函式進行取消</li>
+</ul>
+</li>
+<li><code>Done</code> 返回一個 <code>只讀的 chan</code>，類型為 struct{}
+
+<ul>
+<li>如果可讀取，表示 <code>parent context</code> 已發起取消的請求(<code>cancel</code>)，收到信號時就會開始清理操作，然後退出 goroutine，釋放資源</li>
+</ul>
+</li>
+<li><code>Err</code> 返回取消的錯誤原因，因為什麼 Context 被取消</li>
+<li><code>Value</code> 獲取該 Context 上繫結的值，是一個鍵值對，所以要透過一個 Key 才可以獲取對應的值，這個值一般是執行緒安全的</li>
+</ul>
+
+
+<h1>Other</h1>
+
+<ul>
+<li><a href="https://golang.org/pkg/context/#example_WithCancel">WithCancel</a> 主動取消</li>
+<li><a href="https://golang.org/pkg/context/#example_WithDeadline">WithDeadline</a> 截止時間取消</li>
+<li><a href="https://golang.org/pkg/context/#example_WithTimeout">WithTimeout</a> 超時取消</li>
+<li><a href="https://golang.org/pkg/context/#example_WithValue">WithValue</a> 傳值</li>
+<li>也可以不包上面的 With，直接使用 <code>context.Background()</code>，可以看到上面的 With 最後回傳的也是 <code>context Context</code></li>
+</ul>
+
+
+<p>Reference</p>
+
+<ul>
+<li><a href="https://golang.org/pkg/context/">context</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/58967892">Go Context</a></li>
+<li><a href="https://deepzz.com/post/golang-context-package-notes.html">快速掌握 Golang context 包，簡單示例</a></li>
+<li><a href="https://segmentfault.com/a/1190000017394302">Golang Context 是好的設計嗎？</a></li>
+<li><a href="https://juejin.im/post/5a6873fef265da3e317e55b6">Golang Context深入理解</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Golang - Testing]]></title>
@@ -393,1087 +1090,6 @@ fmt.Println(res.LastInsertId())
 <li><a href="https://github.com/go-sql-driver/mysql">go-sql-driver/mysql</a></li>
 <li><a href="https://www.jianshu.com/p/ee87e989f149">Golang連接mysql數據庫</a></li>
 <li><a href="https://studygolang.com/articles/3022">golang學習之旅：使用go語言操作mysql數據庫</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang Implementation of gRPC]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/03/07/golang-grpc/"/>
-    <updated>2019-03-07T21:57:06+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/03/07/golang-grpc</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<p>最近剛好看到 gRPC 蠻好奇是什麼的，就來了解一下，並試著用 golang 去實現</p>
-
-<h1>What are protocol buffers?</h1>
-
-<blockquote><p>Protocol buffers are Google&rsquo;s language-neutral, platform-neutral, extensible mechanism for serializing structured data</p></blockquote>
-
-<ul>
-<li>簡單的來說，就是類似像 <code>JSON</code>，<code>XML</code> 的序列化結構資料格式，但是更小、更快，而且更簡潔</li>
-<li>目前支援多種語言 <code>Java</code>, <code>Python</code>, <code>Objective-C</code>, <code>C++</code>, <code>Go</code>, <code>Ruby</code>, and <code>C#</code></li>
-<li>只需要定義一次資料結構，就能自動生成符合你程式語言的檔案，讓你能夠直接在你的程式上使用。</li>
-<li>結構就是文件，不需額外撰寫 API 文件，<code>.proto</code> 檔本身就是一種「文件」。</li>
-</ul>
-
-
-<h1>What are gRPC?</h1>
-
-<ul>
-<li>Simple service definition - 透過 <code>Protocol Buffers</code> 定義 service，就是可以在 <code>.proto</code> 檔案就可以定義好 service 內容</li>
-<li>Works across languages and platforms - 自動生成支援客戶端的語言，由下圖解說就是，Server跟 Client 端都透過 <code>protocol buffers</code> 來做傳遞，但三個分別是 <code>ruby</code>, <code>java</code>, <code>c++</code></li>
-</ul>
-
-
-<p><img src="https://grpc.io/img/landing-2.svg" alt="" /></p>
-
-<ul>
-<li>Start quickly and scale</li>
-<li>Bi-directional streaming and integrated authBi-directional</li>
-</ul>
-
-
-<h1>Quick Start</h1>
-
-<ul>
-<li>各種語言都能夠設定，這裡主要先用 Golang <a href="https://grpc.io/docs/quickstart/go.html">quickstart</a></li>
-</ul>
-
-
-<blockquote><p>基本的開發步驟是定義 proto 文件， 定義請求 Request 和 響應 Response 的格式，然後定義一個服務 Service， Service可以包含多個方法。</p></blockquote>
-
-<h3>gRPC requires Go <code>1.6</code> or <code>higher</code>.</h3>
-
-<pre><code class="go">go version
-</code></pre>
-
-<h3>Install gRPC</h3>
-
-<pre><code>go get -u google.golang.org/grpc
-</code></pre>
-
-<h3>Install Protocol Buffers v3</h3>
-
-<p><a href="https://github.com/protocolbuffers/protobuf/releases">https://github.com/protocolbuffers/protobuf/releases</a></p>
-
-<ul>
-<li>根據自己用的 platform，下載編譯好的檔案，並解壓縮</li>
-<li>將 <code>bin/protoc</code> binary file 放置在 PATH 底下( ex. <code>$GOPATH/bin</code>)</li>
-</ul>
-
-
-<h3>install the protoc plugin for Go</h3>
-
-<pre><code class="go">go get -u github.com/golang/protobuf/protoc-gen-go
-</code></pre>
-
-<h1>Try it!</h1>
-
-<blockquote><p>gRPC services are defined in a <code>.proto</code> file, which is used to generate a corresponding <code>.pb.g</code> file.</p>
-
-<p>The <code>.pb.go</code> file is generated by compiling the <code>.proto</code> file using the protocol compiler: protoc.</p></blockquote>
-
-<p>下載 <code>grpc</code> 時會有一個範例</p>
-
-<pre><code class="go">cd $GOPATH/src/google.golang.org/grpc/examples/helloworld
-</code></pre>
-
-<p>體驗一下，先啟動 sever</p>
-
-<pre><code class="go">go run greeter_server/main.go
-</code></pre>
-
-<p>再跑 client 會發現 response 回來的資料</p>
-
-<pre><code class="go">go run greeter_client/main.go
-
-// Greeting: Hello world
-</code></pre>
-
-<h1>Example</h1>
-
-<p>建立資料夾</p>
-
-<pre><code class="go">.
-├── client   // gRPC 客戶端
-├── pb       // 擺放 Protobuf 文件
-└── server   // gRPC 伺服器
-</code></pre>
-
-<ul>
-<li><code>client</code>：gRPC client，用來和伺服器溝通的程式</li>
-<li><code>pb</code>: 定義的 Protobuf 文件，也會放置轉化後的 Protobuf 程式</li>
-<li><code>server</code>: gRPC server</li>
-</ul>
-
-
-<h3>proto</h3>
-
-<p>定義資料格式</p>
-
-<pre><code class="go">// 撰寫格式是 Proto v3。
-syntax = "proto3";
-// 生成的程式在 Golang 中將會屬於 `pb` 套件。
-package pb;
-
-// Calculator 定義了一個計算用的服務。
-service Calculator {
-    // Plus 會接收 CalcRequest 資料作加總，最終會回傳 CalcReply。
-    rpc Plus (CalcRequest) returns (CalcReply) {}
-}
-
-// CalcRequest 包含了兩個數字，將會傳送至計算服務並對兩個數字進行計算。
-message CalcRequest {
-// 後面的數字是 Protocol Buffers 編碼與解碼所會用到的編號，能夠移除其中一個欄位而不打亂整個資料結構的編碼與解碼(除非更改了數字編號)
-    int32 number_a = 1;
-    int32 number_b = 2;
-}
-
-// CalcReply 是計算結果，將會回傳給客戶端。
-message CalcReply {
-    int32 result = 1;
-}
-</code></pre>
-
-<p>透過 <code>protoc</code> 產生 <code>.pb.g</code></p>
-
-<pre><code class="go">protoc --go_out=plugins=grpc:. *.proto
-</code></pre>
-
-<ul>
-<li>Generated client and server code.</li>
-<li>Code for populating, serializing, and retrieving our <code>HelloRequest</code> and <code>HelloReply</code> message types.</li>
-</ul>
-
-
-<p>目前資料夾</p>
-
-<pre><code class="go">.
-├── client
-│   └── main.go
-├── pb
-│   ├── calc.pb.go
-│   └── calc.proto
-└── server
-    └── main.go
-</code></pre>
-
-<h3>server</h3>
-
-<pre><code class="go">// server/main.go
-package main
-
-import (
-    "context"
-    "log"
-    "net"
-
-    "google.golang.org/grpc"
-
-    "github.com/mgleon08/demo_proto/pb"
-)
-
-const (
-    port = ":50051"
-)
-
-// server 建構體會實作 Calculator 的 gRPC 伺服器。
-type server struct{}
-
-// Plus 會將傳入的數字加總。
-func (s *server) Plus(ctx context.Context, in *pb.CalcRequest) (*pb.CalcReply, error) {
-    // 計算傳入的數字。
-    result := in.NumberA + in.NumberB
-    // 包裝成 Protobuf 建構體並回傳。
-    return &amp;pb.CalcReply{Result: result}, nil
-}
-
-func main() {
-    // 監聽指定埠口，這樣服務才能在該埠口執行。
-    lis, err := net.Listen("tcp", port)
-    if err != nil {
-        log.Fatalf("無法監聽該 port: %v", err)
-    }
-
-    // 建立新 gRPC 伺服器並註冊 Calculator 服務。
-    s := grpc.NewServer()
-    // RegisterCalculatorServer 是透過 .proto 定義轉換而成
-    pb.RegisterCalculatorServer(s, &amp;server{})
-
-    // 開始在指定埠口中服務。
-    if err := s.Serve(lis); err != nil {
-        log.Fatalf("無法提供服務: %v", err)
-    }
-}
-</code></pre>
-
-<h3>client</h3>
-
-<pre><code class="go">// client/main.go
-package main
-
-import (
-    "context"
-    "log"
-
-    "google.golang.org/grpc"
-
-    "github.com/mgleon08/demo_proto/pb"
-)
-
-const (
-    address = "localhost:50051"
-)
-
-func main() {
-    // 建立連線到遠端 gRPC 伺服器。
-    conn, err := grpc.Dial(address, grpc.WithInsecure())
-    if err != nil {
-        log.Fatalf("無法連線: %v", err)
-    }
-    // 結束後要關閉
-    defer conn.Close()
-
-    // 建立新的 Calculator 客戶端，所以等一下就能夠使用 Calculator 的所有方法。
-    c := pb.NewCalculatorClient(conn)
-
-    // 傳送新請求到遠端 gRPC 伺服器 Calculator 中，並呼叫 Plus 函式，讓兩個數字相加。
-    r, err := c.Plus(context.Background(), &amp;pb.CalcRequest{NumberA: 32, NumberB: 32})
-    if err != nil {
-        log.Fatalf("無法執行 plus: %v", err)
-    }
-    log.Printf("回傳結果: %d", r.Result)
-}
-</code></pre>
-
-<h3>啟動</h3>
-
-<pre><code class="go">// 先啟動 server
-go run ./server/main.go  
-
-// 再啟動 client，就會有 response
-go run ./client/main.go  
-</code></pre>
-
-<h3>demo</h3>
-
-<p><a href="https://github.com/mgleon08/go-grpc-demo">go-grpc-demo</a></p>
-
-<p>Reference:</p>
-
-<ul>
-<li><a href="https://grpc.io/">gprc</a></li>
-<li><a href="https://developers.google.com/protocol-buffers/">Protocol Buffers</a></li>
-<li><a href="https://codinganimal.info/grpc-tutorial-for-python-2fa0fe2ff853">gRPC Tutorial for Python</a></li>
-<li><a href="https://yami.io/grpc/">API 文件就是你的伺服器，REST 的另一個選擇：gRPC</a></li>
-<li><a href="https://yami.io/protobuf/">比起 JSON 更方便、更快速、更簡短的 Protobuf 格式</a></li>
-<li><a href="https://www.youtube.com/watch?v=NoDRq6Twkts">Getting Started with Protocol Buffers in Go - Tutorial</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang - JSON and Go]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/17/golang-json-and-go/"/>
-    <updated>2019-02-17T22:40:16+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/17/golang-json-and-go</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<h1>Encoding - Marshal 序列化</h1>
-
-<p>在 Go 中並不是所有的類型都能進行序列化：</p>
-
-<ul>
-<li>必須是 struct 中支援外部引用的 field 才能夠序列化 (即開頭字母大寫的 field)</li>
-<li>JSON object key 只支援 string</li>
-<li>Channel、complex、function 等 type 無法進行序列化</li>
-<li>不支援循環數據結構，因為序列化時會進行無限迴圈</li>
-<li><code>Pointer</code> 序列化之後是其指向的值或者是 <code>nil</code></li>
-</ul>
-
-
-<pre><code class="go">func Marshal(v interface{}) ([]byte, error)
-</code></pre>
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-type UserInfo struct {
-    Name string
-    Say  string
-    Age int64 
-}
-
-func main() {
-    m := UserInfo{"Leon", "Hello", 18}
-    b, _ := json.Marshal(m)
-    fmt.Println(string(b))
-}
-
-// {"Name":"Leon","Say":"Hello","Age":18}
-</code></pre>
-
-<h1>指定 JSON filed name</h1>
-
-<h3>Struct Tag</h3>
-
-<p><code>Struct tag</code> 可以決定 <code>Marshal</code> 和 <code>Unmarshal</code> 函式如何序列化和反序列化數據。</p>
-
-<ul>
-<li>一般 <code>json</code> 都是小寫，但因為 golang 序列化時，struct 必須是大寫，因此透過 <code>Struct Tag</code> 改成小寫</li>
-</ul>
-
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-type UserInfo struct {
-    Name string `json:"name"`
-    Say  string `json:"say"`
-    Age int64   `json:"age"`
-}
-
-func main() {
-    m := UserInfo{"Leon", "Hello", 18}
-    b, _ := json.Marshal(m)
-    fmt.Println(string(b))
-}
-
-// {"name":"Leon","say":"Hello","age":18}
-</code></pre>
-
-<h1>指定 field 的行為</h1>
-
-<h3>omitempty</h3>
-
-<p>透過 <code>omitempty</code> 如果 field 的值是對應類型的 <code>zero-value</code>，序列化之後的 <code>JSON object</code> 中不包含此 <code>field</code></p>
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-type UserInfo struct {
-    Name string `json:"name"`
-    Say  string `json:"say"`
-    Age int64   `json:"age,omitempty"`
-}
-
-func main() {
-    m := UserInfo{}
-    b, _ := json.Marshal(m)
-    fmt.Println(string(b))
-}
-
-// {"name":"","say":""}
-</code></pre>
-
-<h3>-</h3>
-
-<p>透過 <code>-</code> 可以忽略掉該 field</p>
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-type UserInfo struct {
-    Name string `json:"name"`
-    Say  string `json:"-"`
-    Age int64   `json:"age,omitempty"`
-}
-
-func main() {
-    m := UserInfo{"Leon", "Hello", 18}
-    b, _ := json.Marshal(m)
-    fmt.Println(string(b))
-}
-
-// {"name":"Leon","age":18}
-</code></pre>
-
-<h1>Decoding - Unmarshal 反序列化</h1>
-
-<p>預設的 JSON 支援以下幾種 Go 類型：</p>
-
-<pre><code class="go">bool for JSON booleans
-float64 for JSON numbers
-string for JSON strings
-nil for JSON null
-</code></pre>
-
-<h3>知道類型的反序列化</h3>
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-type UserInfo struct {
-    Name string `json:"name"`
-    Say string  `json:"say"`
-    Age int64   `json:"age"`
-}
-
-func main() {
-    var jsonString string
-    jsonString = `{"name":"Leon","say":"hello","age":18}`
-
-    //把 json unmarshal 進去 struct
-    u := &amp;UserInfo{}
-    err := json.Unmarshal([]byte(jsonString), u)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-    fmt.Println(u)
-    fmt.Printf("%T\n", u)
-    fmt.Printf("name:%s, say:%s, age:%d\n", u.Name, u.Say, u.Age)
-}
-
-// &amp;{Leon hello 18}
-// *main.UserInfo
-// name:Leon, say:hello, age:18
-</code></pre>
-
-<h3>不知道類型的反序列化</h3>
-
-<p>如果不知道類型可以用 <code>interface{}</code></p>
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-func main() {
-    var jsonString string
-    jsonString = `{"name":"Leon","age":18,"cars":["Maserati","BMW"]}`
-
-    //把 json unmarshal 進去 struct
-    var u interface{}
-    err := json.Unmarshal([]byte(jsonString), &amp;u)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-    fmt.Println(u)
-    fmt.Printf("%T\n", u)
-}
-
-// map[cars:[Maserati BMW] name:Leon age:18]
-// map[string]interface {}
-</code></pre>
-
-<p>回傳的格式如</p>
-
-<pre><code class="go">map[string]interface{}{
-    "Name": "Leon",
-    "age":  18,
-    "cars": []interface{}{
-        "Maserati",
-        "BMW",
-    },
-}
-</code></pre>
-
-<p>key 是 <code>string</code>，value 是 <code>interface{}</code>，必須透過 <code>type assertion</code> 和 <code>range</code> 取得所有的 key</p>
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-func showInfo(u interface{}){
-    m := u.(map[string]interface{})
-    for k, v := range m {
-        switch vv := v.(type) {
-        case string:
-            fmt.Println(k, "is string", vv)
-        case float64:
-            fmt.Println(k, "is float64", vv)
-        case []interface{}:
-            fmt.Println(k, "is an array:")
-            for i, u := range vv {
-                fmt.Println(i, u)
-            }
-        default:
-            fmt.Println(k, "is of a type I don't know how to handle")
-        }
-    }
-}
-
-func main() {
-    var jsonString string
-    jsonString = `{"name":"Leon","age":18,"cars":["Maserati","BMW"]}`
-
-    //把 json unmarshal 進去 struct
-    var u interface{}
-    err := json.Unmarshal([]byte(jsonString), &amp;u)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-    showInfo(u)
-}
-
-// name is string Leon
-// age is float64 18
-// cars is an array:
-// 0 Maserati
-// 1 BMW
-</code></pre>
-
-<h1>Reference Types - 反序列化對 slice、map、pointer 的處理</h1>
-
-<p>struct 中包含一個 <code>slice Cars</code> ，slice 預設是 <code>nil</code>，之所以反序列化可以正常進行就是因為 Unmarshal 在序列化時進行了對 <code>slice Cars</code> 做了初始化，同理，對 <code>map</code> 和 <code>pointer</code> 都會做類似的工作</p>
-
-<blockquote><p>比如序列化如果 Pointer 不是 nil 首先進行 dereference 獲得其指向的值，然後再進行序列化，反序列化時首先對 nil pointer 進行初始化</p></blockquote>
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-type UserInfo struct {
-    Name string 
-    Age  int64  
-    Cars []string
-}
-
-func main() {
-    var jsonString string
-    jsonString = `{"name":"Leon","age":18,"cars":["Maserati","BMW"]}`
-
-    //把 json unmarshal 進去 struct
-    u := &amp;UserInfo{}
-    err := json.Unmarshal([]byte(jsonString), u)
-    if err != nil {
-        fmt.Println(err)
-        return
-    }
-    fmt.Println(u)
-    fmt.Printf("%T\n", u)
-    fmt.Printf("name:%s, age:%d, cars:%s\n", u.Name, u.Age, u.Cars)
-}
-
-// &amp;{Leon 18 [Maserati BMW]}
-// *main.UserInfo
-// name:Leon, age:18, cars:[Maserati BMW]
-</code></pre>
-
-<h1>nested struct 的序列化</h1>
-
-<p>Go 支援對 <code>nested struct</code> 進行序列化和反序列化:</p>
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-)
-
-type App struct {
-    Id string `json:"id"`
-}
-
-type Org struct {
-    Name string `json:"name"`
-}
-
-type AppWithOrg struct {
-    App
-    Org
-}
-
-func main() {
-    data := []byte(`{ "id": "123", "name": "My Awesome Org" }`)
-    var b AppWithOrg
-    json.Unmarshal(data, &amp;b)
-    fmt.Printf("%#v\n\n", b)
-
-    a := AppWithOrg{
-        App: App{ Id: "321" },
-        Org: Org{ Name: "My Awesome Org"},
-    }
-    data, _ = json.Marshal(a)
-    fmt.Println(string(data))
-}
-
-// main.AppWithOrg{App:main.App{Id:"123"}, Org:main.Org{Name:"My Awesome Org"}}
-// {"id":"321","name":"My Awesome Org"}
-</code></pre>
-
-<h1>Stream JSON</h1>
-
-<p>Golang 提供 <code>Decoder</code> 和 <code>Encoder</code> 對 stream JSON 進行處理，常見 request 中的 Body、文件等</p>
-
-<pre><code class="go">package main
-
-import (
-    "encoding/json"
-    "fmt"
-    "io"
-    "log"
-    "strings"
-)
-
-func main() {
-    const jsonStream = `
-    {"Name": "Ed", "Text": "Knock knock."}
-    {"Name": "Sam", "Text": "Who's there?"}
-    {"Name": "Ed", "Text": "Go fmt."}
-    {"Name": "Sam", "Text": "Go fmt who?"}
-    {"Name": "Ed", "Text": "Go fmt yourself!"}
-`
-    type Message struct {
-        Name, Text string
-    }
-    dec := json.NewDecoder(strings.NewReader(jsonStream))
-    for {
-        var m Message
-        if err := dec.Decode(&amp;m); err == io.EOF {
-            break
-        } else if err != nil {
-            log.Fatal(err)
-        }
-        fmt.Printf("%s: %s\n", m.Name, m.Text)
-    }
-}
-
-// Ed: Knock knock.
-// Sam: Who's there?
-// Ed: Go fmt.
-// Sam: Go fmt who?
-// Ed: Go fmt yourself!
-</code></pre>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://golang.org/pkg/encoding/json/#Marshal">json</a></li>
-<li><a href="https://sanyuesha.com/2018/05/07/go-json/">理解 Go 中的 JSON</a></li>
-<li><a href="https://blog.golang.org/json-and-go">JSON and Go</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang - Maps in Action]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/08/golang-maps-in-action/"/>
-    <updated>2019-02-08T10:55:15+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/08/golang-maps-in-action</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<h1>Introduction</h1>
-
-<p> <code>Hash Table</code> 是 Computer Science 中最有用的資料結構，提供了快速尋找，新增，刪除，Golang 透過 <code>map</code> type 來實踐。</p>
-
-<h1>Declaration and initialization</h1>
-
-<pre><code class="go">map[KeyType]ValueType
-</code></pre>
-
-<ul>
-<li>KeyType 是 type 可以是任意一個可比較的類型</li>
-<li>ValueType 也是可以任意的類型</li>
-<li>包括 map type 也可以</li>
-</ul>
-
-
-<p>下面的變數 <code>m</code> 是一個 <code>string keys</code> to <code>int values</code> 的 map</p>
-
-<pre><code class="go">var m map[string]int
-</code></pre>
-
-<p>Map 的類型是 <code>reference types</code>, 像是 <code>pointers</code> or <code>slices</code>，因此上面 <code>m</code> 的 value 是 nil</p>
-
-<p>當讀取時 <code>nil map</code> 行為類似空的 map，若嘗試寫入 <code>nil map</code> 則會造成 <code>runtime panic</code></p>
-
-<p>因此如果要初始化一個 map 可以用 <code>make</code> function</p>
-
-<pre><code class="go">m = make(map[string]int)
-</code></pre>
-
-<p><code>make</code> function 會分配並且初始化一個 <code>hash map data structure</code> 並返回指向它(<code>make</code>)的 map value</p>
-
-<h1>Working with maps</h1>
-
-<p>Set key <code>route</code> to <code>66</code></p>
-
-<pre><code class="go">m["route"] = 66
-</code></pre>
-
-<p>Assign <code>m["route"]</code> to variable <code>66</code></p>
-
-<pre><code class="go">i := m["route"]
-</code></pre>
-
-<p>value 是 <code>int</code>，因此如果 key 不存在，則會回傳 <code>0</code>，string 則是回傳空字串</p>
-
-<blockquote><p>前提是要用 make 來建立，否則會 panic</p></blockquote>
-
-<pre><code class="go">j := m["root"]
-// j == 0
-</code></pre>
-
-<p>回傳 map 的 item 長度</p>
-
-<pre><code class="go">n := len(m)
-</code></pre>
-
-<p><code>delete</code> function 根據 key 去做刪除，刪除不會回傳任何東西，如果 key 是不存在則不會做任何事</p>
-
-<pre><code class="go">delete(m, "route")
-</code></pre>
-
-<p>map 也可以用兩個變數來取</p>
-
-<ul>
-<li>第一個變數 <code>i</code> 是指 <code>m["route"]</code> 裡的值，如果沒有 <code>route</code> 就回傳 <code>0</code></li>
-<li>第二個變數 <code>ok</code> 則是用來判斷這個 key 存不存在，true 為存在，反之不存在</li>
-</ul>
-
-
-<pre><code class="go">i, ok := m["route"]
-</code></pre>
-
-<p>如果只是要判斷存不存在，並沒有要使用到 value 可以給一個 <code>_</code></p>
-
-<pre><code class="go">_, ok := m["route"]
-</code></pre>
-
-<p>要取出 map 的 key &amp; value 可以用 range</p>
-
-<pre><code class="go">for key, value := range m {
-    fmt.Println("Key:", key, "Value:", value)
-}
-</code></pre>
-
-<p>初始化並給值</p>
-
-<pre><code class="go">commits := map[string]int{
-    "rsc": 3711,
-    "r":   2138,
-    "gri": 1908,
-    "adg": 912,
-}
-</code></pre>
-
-<p>初始化並給空的值，效果跟用 <code>make</code> 一樣</p>
-
-<pre><code class="go">m = map[string]int{}
-</code></pre>
-
-<h1>Exploiting zero values</h1>
-
-<p>在 map 上利用 0(bool) 值</p>
-
-<h3>map 利用 bool 來作為一種數據結構的檢測，就不需要多一個變數來處理</h3>
-
-<pre><code class="go">package main
-
-import (
-    "fmt"
-)
-
-func main() {
-    // 建立一個 Node 的 struct
-    type Node struct {
-        Next  *Node
-        Value interface{}
-    }
-
-    second := &amp;Node{
-        Next:  nil,
-        Value: 2,
-    }
-
-    first := &amp;Node{
-        Next:  second,
-        Value: 1,
-    }
-    // 故意讓 first 重複，形成迴圈
-    second.Next = first
-    visited := make(map[*Node]bool)
-    for n := first; n != nil; n = n.Next {
-        // 如果遇到一個已經變成 true 代表重複了，就 break
-        if visited[n] {
-            fmt.Println("cycle detected")
-            break
-        }
-        // 只要有遍歷到就將 value 改成 true
-        visited[n] = true
-        fmt.Println(n.Value)
-    }
-
-}
-</code></pre>
-
-<h3>map of slices</h3>
-
-<p>不需要 check key 存不存在，因為 appending 一個 nil 的 slice, 會自動分配新的 slice</p>
-
-<pre><code class="go">package main
-
-import (
-    "fmt"
-)
-
-func main() {
-    type Person struct {
-        Name  string
-        Likes []string
-    }
-
-    var people []*Person
-    people = append(people, &amp;Person{"Leon", []string{"cheese", "bacon"}})
-    // 也可以 people := []*Person{&amp;Person{"Leon", []string{"cheese", "bacon"}}}
-
-    likes := make(map[string][]*Person)
-
-    // 取出所有 people
-    for _, p := range people {
-        // 取出每個 person 喜歡的東西
-        for _, l := range p.Likes {
-            // 列出喜歡這個東西的人
-            likes[l] = append(likes[l], p)
-        }
-    }
-    // 列出喜歡起司的人
-    for _, p := range likes["cheese"] {
-        fmt.Println(p.Name, "likes cheese.")
-    }
-
-    // 列出喜歡培根的人數
-    fmt.Println(len(likes["bacon"]), "people like bacon.")
-}
-</code></pre>
-
-<p>由於 range 和 len 都將 nil slice 視為零長度的 slice，所以沒有 data 也不會有問題</p>
-
-<pre><code class="go">package main
-
-import "fmt"
-
-type ListNode struct {
-    Val  int
-    Next *ListNode
-}
-
-func main() {
-    mapp := make(map[string]ListNode)
-    mapp["a"] = ListNode{Val: 1}
-    mapp["b"] = ListNode{Val: 2}
-    mapp["a"].Next = mapp["b"]
-    fmt.Println(mapp["a"].Val)
-}
-</code></pre>
-
-<h1>Key types</h1>
-
-<p>先前提到 key 可以是任何可以比較的類型(<code>boolean</code>, <code>numeric</code>, <code>string</code>, <code>pointer</code>, <code>channel</code>, and <code>interface types</code>, and <code>structs</code> or <code>arrays</code>)</p>
-
-<p>注意到這列表上不包括(<code>slices</code>, <code>maps</code>, and <code>functions</code>) 這些類型不能做比較，所以也不能當作 map 的 key</p>
-
-<p>另外 struct key 是比較特別的，因為 struct 的 data 是多維度的面相(可以描述一個 data 的結構)</p>
-
-<p>舉例來說下面是一個 map 包著一個 map，用於統計國家/地區的網頁造訪次數</p>
-
-<pre><code class="go">// 外面 map 的 key 是網頁的路徑 path，裡面的 map 的 key 則是 國家的代碼
-hits := make(map[string]map[string]int)
-</code></pre>
-
-<p>澳洲(Australian) 的 documentation page 點擊次數</p>
-
-<pre><code class="go">n := hits["/doc/"]["au"]
-</code></pre>
-
-<p>但這種方法，再新增新的 data 時，會不太好處理，因為每次給外部 map key 時，就必須再檢查裡面的 map 是否存在，不存在在建立</p>
-
-<pre><code class="go">func add(m map[string]map[string]int, path, country string) {
-    // 先確認 value 在不在
-    mm, ok := m[path]
-    // 如果 value 不存在，就建立新的 inner map，每次都要檢查
-    if !ok {
-        mm = make(map[string]int)
-        m[path] = mm
-    }
-    // 
-    mm[country]++
-}
-add(hits, "/doc/", "au")
-</code></pre>
-
-<p>利用 struct 可以減少上面的複雜性</p>
-
-<pre><code class="go">type Key struct {
-    Path, Country string
-}
-hits := make(map[Key]int)
-</code></pre>
-
-<p>當越南人(Vietnamese) 造訪頁面，增加(或建立新的) 可以用一行就解決</p>
-
-<pre><code class="go">hits[Key{"/", "vn"}]++
-</code></pre>
-
-<p>要看到瑞士(Swiss)有多少人看到 <code>/ref/spec</code> 也很簡單</p>
-
-<pre><code class="go">n := hits[Key{"/ref/spec", "ch"}]
-</code></pre>
-
-<h1>Concurrency</h1>
-
-<p><a href="https://golang.org/doc/faq#atomic_maps">Maps are not safe for concurrent use</a></p>
-
-<p>並發訪問map是不安全的，會出現未定義行為</p>
-
-<p>如果希望多併發讀取 map，必須提供某種同步機制，可以用 <a href="https://golang.org/pkg/sync/#RWMutex">sync.RWMutex</a> 讀寫鎖，確保同步機制(synchronization mechanism)</p>
-
-<p>但是透過讀寫鎖控制 map 的並發訪問時，會導致一定的性能問題，不過能保證程序的安全運行。</p>
-
-<pre><code class="go">package main
-
-import (
-    "fmt"
-    "sync"
-)
-
-func main() {
-    var counter = struct {
-        sync.RWMutex
-        m map[string]int
-    }{m: make(map[string]int)}
-
-    // To read from the counter, take the read lock:
-    counter.RLock()
-    n := counter.m["some_key"]
-    counter.RUnlock()
-    fmt.Println("some_key:", n)
-
-    // To write to the counter, take the write lock:
-    counter.Lock()
-    counter.m["some_key"]++
-    counter.Unlock()
-    fmt.Println("some_key:", counter.m["some_key"])
-}
-</code></pre>
-
-<ul>
-<li><a href="https://colobu.com/2017/07/11/dive-into-sync-Map/">Go 1.9 sync.Map揭秘</a></li>
-<li><a href="https://www.jianshu.com/p/10a998089486">go語言坑之並發訪問map</a></li>
-</ul>
-
-
-<h1>Iteration order</h1>
-
-<p>用 <code>range</code> 迭代 map 時，並沒有指定每次的順序一樣，也沒有保證下一次的順序會跟上一次的順序一樣，每次都是隨機的</p>
-
-<p>如果希望能夠每次迭代的順序都一樣的話，必須先將 key 單獨分開來做排序，在迭代排序好的 key mapping 回 map</p>
-
-<pre><code class="go">package main
-
-import (
-    "fmt"
-    "sort"
-)
-
-func main() {
-
-    m := map[int]string{
-        1: "A",
-        2: "B",
-        3: "C",
-    }
-    // 先將 key 取出來排序
-    var keys []int
-    for k := range m {
-        keys = append(keys, k)
-    }
-    sort.Ints(keys)
-    // 改成以下方法，就會倒過來
-    // sort.Sort(sort.Reverse(sort.IntSlice(keys)))
-
-    // 迭代排序好的 slice，並指定 map 的 key
-    for _, k := range keys {
-        fmt.Println("Key:", k, "Value:", m[k])
-    }
-}
-</code></pre>
-
-<h1>cannot assign to struct field XXX in map</h1>
-
-<p>當 struct 作為 map 裡面的值時，不能透過 map[key].xx = &ldquo;xx&rdquo; 這種賦值，會出現 <code>cannot assign to struct field XXX in map</code> 不予許修改 map 裡的值</p>
-
-<pre><code class="go">package main
-
-import (
-    "fmt"
-)
-
-type test struct {
-    name string
-}
-
-func main() {
-    a := test{"hello"}
-    mapp := make(map[string]test)
-    mapp["hey"] = a
-
-    // 因為 map 的 value 是不可尋址的，因此會報錯
-    // cannot assign to struct field mapp["test"].name in map
-    mapp["hey"].name = "hi"
-
-    // if v, ok := mapp["hey"]; ok {
-    // 雖然這樣不會有 error，但實際上 v 是 copy 的值，因此也不會改到原本的 value，所以還是 hello
-    //  v.name = "hi"
-    // }
-
-    fmt.Println(mapp["hey"].name)
-
-}
-</code></pre>
-
-<h3>原因:</h3>
-
-<p>map 的 value 是不可尋址的(<a href="https://golang.org/ref/spec#Address_operators">addressable</a>)，因為 map 中的值會在記憶體中行動，舊的指針地址在 map 改變時會變得無效。</p>
-
-<p>另外 map 是會自動擴容，因此原來存值是 A 地址，擴容後 A 地址就不是原來的值了，因此如果需要改值，必須改用 <code>make(map[string]*test)</code></p>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://blog.golang.org/go-maps-in-action">Go maps in action</a></li>
-<li><a href="https://stackoverflow.com/questions/32751537/why-do-i-get-a-cannot-assign-error-when-setting-value-to-a-struct-as-a-value-i">Why do I get a “cannot assign” error when setting value to a struct as a value in a map? [duplicate]</a></li>
-<li><a href="https://gocn.vip/question/1714">問一個問題。為啥結構體作為map的值，不能透過map[key].成員屬性 = &ldquo;Xxx&rdquo; 這種賦值</a></li>
-<li><a href="https://studygolang.com/articles/12714">Golang面試題解析（四）</a></li>
 </ul>
 
 ]]></content>
