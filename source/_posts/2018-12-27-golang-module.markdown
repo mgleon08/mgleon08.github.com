@@ -112,7 +112,7 @@ go mod init
 // go: copying requirements from vendor/vendor.json
 ```
 
-如果是新專案則是
+如果是`新專案`則是
 
 ```go
 go mod init <packname>
@@ -184,6 +184,14 @@ go build -v -o main .
 
 * 不需在 $GOPATH 底下才能建立專案
 * 可以切換不同版本
+
+### 清除
+
+清除 pkg 底下內容
+
+```go
+go clean -i -x -modcache
+```
 
 ### 指令
 

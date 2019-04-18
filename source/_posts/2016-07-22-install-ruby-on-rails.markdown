@@ -720,6 +720,9 @@ control + `
 介面優化，新增 `.vimrc` 檔案
 
 ```ruby
+colorscheme desert
+syntax on
+
 #顯示行號：對於 debug 相當有幫助! (加上 run 數字會跟著跑)
 :set nu rnu
 #自動對齊縮排：如果上一行有兩個 tab 的寬度，按 enter 繼續編輯下一行時會自動保留兩個 tab 鍵的寬度。
@@ -734,6 +737,9 @@ control + `
 :set shiftwidth=4
 #vim底下有一個視窗，用以顯示狀態
 :set laststatus=2
+# 設定底下狀態條
+:set statusline=%<%F\ %m%=\ %h%r\ %-19([%p%%]\ %3l,%02c%03V%)%y
+hi StatusLine cterm=bold,reverse ctermbg=250 ctermfg=24
 ```
 
 * [vimrc設定教學](http://wiki.csie.ncku.edu.tw/vim/vimrc)

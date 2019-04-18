@@ -48,6 +48,7 @@ footer: true
 * [z](https://github.com/rupa/z) - jump around
 * [autojump](https://github.com/wting/autojump) - A cd command that learns - easily navigate directories from the command line (跟 z 類似)
 * [peco](https://github.com/peco/peco) - 可以將一些指令變成互動式的指令 e.g. git checkout
+* [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) - 提示之前輸入的 command
 
 # <span id="ui-framework"> UI Framework </span>
 

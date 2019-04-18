@@ -59,6 +59,17 @@ rails generate scaffold book title:string author:string pages:integer
 ```
 
 ```ruby
+# app/models/book.rb
+class Book
+  include Mongoid::Document
+  field :title, type: String
+  field :pages, type: Integer
+  field :author, type: String
+  validates_presence_of :author
+end
+```
+
+```ruby
 # rails c
 Book.create(title: "First", pages:20, author:"leon")
 ```

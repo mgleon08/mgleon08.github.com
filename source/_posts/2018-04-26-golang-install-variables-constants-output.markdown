@@ -44,8 +44,7 @@ GOPATH 就是 golang 的 Workspace
 設定在`.bashrc` or `.zshrc`
 
 ```go
-// 預設會在 user 底下的 go，可以不用另外設定 GOPATH
-export GOPATH="$HOME/Golang"
+export GOPATH="$HOME/go"
 export GOBIN="$GOPATH/bin"
 export PATH="$PATH:$GOBIN"
 ```

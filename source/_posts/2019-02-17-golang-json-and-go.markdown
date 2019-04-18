@@ -53,6 +53,7 @@ func main() {
 `Struct tag` 可以決定 `Marshal` 和 `Unmarshal` 函式如何序列化和反序列化數據。
 
 * 一般 `json` 都是小寫，但因為 golang 序列化時，struct 必須是大寫，因此透過 `Struct Tag` 改成小寫
+* mongodb 則是使用 `bson`，可以在 struct 加上 `json:"name,omitempty" bson:"name,omitempty"`
 
 ```go
 package main
