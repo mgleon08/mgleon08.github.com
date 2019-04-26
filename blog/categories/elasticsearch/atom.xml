@@ -1,0 +1,554 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Elasticsearch | Leon's Blogging]]></title>
+  <link href="https://mgleon08.github.io/blog/categories/elasticsearch/atom.xml" rel="self"/>
+  <link href="https://mgleon08.github.io/"/>
+  <updated>2019-04-26T23:50:23+08:00</updated>
+  <id>https://mgleon08.github.io/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Getting Started With the ElasticSearch]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/04/26/elasticsearch/"/>
+    <updated>2019-04-26T23:36:58+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/04/26/elasticsearch</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>Elasticsearch is a distributed, RESTful search and analytics engine capable of solving a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected.</p>
+
+<h2>Elasticsearch vs RDBMS</h2>
+
+<ul>
+<li>Node - Server</li>
+<li>Indices - Databases</li>
+<li>Types - Tables</li>
+<li>Documents - Rows</li>
+<li>Fields - Columns</li>
+</ul>
+
+
+<blockquote><p>After 6.0 version need add <code>-H 'Content-Type:application/json'</code></p></blockquote>
+
+<h2>Install</h2>
+
+<p>java</p>
+
+<pre><code class="go">brew cask install java
+brew cask install homebrew/cask-versions/java8
+</code></pre>
+
+<p>elasticsearch</p>
+
+<pre><code class="go">brew install elasticsearch24
+</code></pre>
+
+<h2>Check</h2>
+
+<pre><code class="go">curl localhost:9200
+</code></pre>
+
+<pre><code class="go">{
+  "name" : "Crimson Daffodil",
+  "cluster_name" : "elasticsearch",
+  "cluster_uuid" : "_1W7Qb8WSByw_AoBtx3V9g",
+  "version" : {
+    "number" : "2.4.6",
+    "build_hash" : "5376dca9f70f3abef96a77f4bb22720ace8240fd",
+    "build_timestamp" : "2017-07-18T12:17:44Z",
+    "build_snapshot" : false,
+    "lucene_version" : "5.5.4"
+  },
+  "tagline" : "You Know, for Search"
+}
+</code></pre>
+
+<h3>health</h3>
+
+<pre><code class="go">curl localhost:9200/_cluster/health?pretty=true
+</code></pre>
+
+<pre><code class="go">{
+  "cluster_name" : "elasticsearch_leon",
+  "status" : "yellow",
+  "timed_out" : false,
+  "number_of_nodes" : 1,
+  "number_of_data_nodes" : 1,
+  "active_primary_shards" : 10,
+  "active_shards" : 10,
+  "relocating_shards" : 0,
+  "initializing_shards" : 0,
+  "unassigned_shards" : 10,
+  "delayed_unassigned_shards" : 0,
+  "number_of_pending_tasks" : 0,
+  "number_of_in_flight_fetch" : 0,
+  "task_max_waiting_in_queue_millis" : 0,
+  "active_shards_percent_as_number" : 50.0
+}
+</code></pre>
+
+<h2>Count</h2>
+
+<pre><code class="go">curl -X GET 'http://localhost:9200/_count?pretty' -d '
+{
+    "query": {
+        "match_all": {}
+    }
+}
+'
+</code></pre>
+
+<pre><code class="go">{
+  "count" : 0,
+  "_shards" : {
+    "total" : 5,
+    "successful" : 5,
+    "failed" : 0
+  }
+}
+</code></pre>
+
+<h2>Show all Index</h2>
+
+<pre><code class="go">curl -X GET 'http://localhost:9200/_cat/indices?v'
+</code></pre>
+
+<pre><code class="go">health status index    pri rep docs.count docs.deleted store.size pri.store.size 
+yellow open   accounts   5   1          1            0      4.1kb          4.1kb 
+</code></pre>
+
+<h2>Show all Index mapping type</h2>
+
+<pre><code class="go">curl 'localhost:9200/_mapping?pretty=true'
+</code></pre>
+
+<pre><code class="go">{
+  "accounts" : {
+    "mappings" : {
+      "person" : {
+        "properties" : {
+          "desc" : {
+            "type" : "string"
+          },
+          "title" : {
+            "type" : "string"
+          },
+          "user" : {
+            "type" : "string"
+          }
+        }
+      }
+    }
+  }
+}
+</code></pre>
+
+<h2>Create Index</h2>
+
+<pre><code class="go">curl -X PUT 'localhost:9200/weather'
+</code></pre>
+
+<pre><code class="go">{
+  "acknowledged":true
+}
+</code></pre>
+
+<h2>Delete Index</h2>
+
+<pre><code class="go">curl -X DELETE 'localhost:9200/weather'
+</code></pre>
+
+<pre><code class="go">{
+  "acknowledged":true
+}
+</code></pre>
+
+<h2>Setting Analyzer</h2>
+
+<p><a href="https://github.com/medcl/elasticsearch-analysis-ik/">elasticsearch-analysis-ik</a></p>
+
+<pre><code class="go">$ curl -X PUT 'localhost:9200/accounts' -d '
+{
+  "mappings": {
+    "person": {
+      "properties": {
+        "user": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "title": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "desc": {
+          "type": "text",
+          "analyzer": "ik_max_word",
+          "search_analyzer": "ik_max_word"
+        },
+        "categories": {
+           "type": "nested",
+           "properties": {
+              "name": {
+                "type": "string"
+              }
+           }
+        }
+      }
+    }
+  }
+}'
+</code></pre>
+
+<h2>Create Document</h2>
+
+<p>with id, also can string</p>
+
+<pre><code class="go">// can replace 1 to first
+curl -X PUT 'localhost:9200/accounts/person/1' -d '
+{
+  "user": "leon",
+  "title": "工程師",
+  "desc": "數據庫管理",
+  "age": 18
+}' 
+</code></pre>
+
+<pre><code class="go">{
+  "_index": "accounts",
+  "_type": "person",
+  "_id": "1",
+  "_version": 1,
+  "_score": 1,
+  "_source": {
+    "user": "leon",
+    "title": "工程師",
+    "desc": "數據庫管理",
+    "age": 18
+  }
+}
+</code></pre>
+
+<p>without id will auto create random uuid</p>
+
+<pre><code class="go">curl -X POST 'localhost:9200/accounts/person' -d '
+{
+  "user": "mark",
+  "title": "工程師",
+  "desc": "系統管理",
+  "age": 28
+}'
+</code></pre>
+
+<h2>Show</h2>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/1?pretty=true'
+
+// _source without other data
+curl 'localhost:9200/accounts/person/1/_source?pretty=true'
+</code></pre>
+
+<pre><code class="go">{
+  "_index": "accounts",
+  "_type": "person",
+  "_id": "AWpP4wxUKXQ2yoYJjuiA",
+  "_version": 1,
+  "found": true,
+    "_source": {
+      "user": "leon",
+      "title": "工程師",
+      "desc": "數據庫管理",
+      "age": 20
+    }
+}
+</code></pre>
+
+<p>not found</p>
+
+<pre><code class="go">curl 'localhost:9200/weather/beijing/abc?pretty=true'
+</code></pre>
+
+<pre><code class="go">{
+  "_index" : "weather",
+  "_type" : "beijing",
+  "_id" : "abc",
+  "found" : false
+}
+</code></pre>
+
+<h2>Delete</h2>
+
+<pre><code class="go">curl -X DELETE 'localhost:9200/accounts/person/1'
+</code></pre>
+
+<h2>Reindex (not Update)</h2>
+
+<p>elastic can&rsquo;t update, only create new, and increase the version number</p>
+
+<pre><code class="go">curl -X PUT 'localhost:9200/accounts/person/1' -d '
+{
+    "user" : "leon",
+    "title" : "工程師",
+    "desc" : "數據庫管理，軟件開發",
+    "age": 20
+}' 
+</code></pre>
+
+<p>version was change to 2</p>
+
+<pre><code class="go">{
+  "_index": "accounts",
+  "_type": "person",
+  "_id": "1",
+  "_version": 2,
+  "_shards": {
+    "total": 2,
+    "successful": 1,
+    "failed": 0
+  },
+  "created": false
+}
+</code></pre>
+
+<h2>Show all documents (empty search)</h2>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'
+</code></pre>
+
+<ul>
+<li>took - search time</li>
+<li>hits - hit how many record</li>
+<li>_score - match score</li>
+</ul>
+
+
+<pre><code class="go">{
+  "took" : 50,
+  "timed_out" : false,
+  "_shards" : {
+    "total" : 5,
+    "successful" : 5,
+    "failed" : 0
+  },
+  "hits" : {
+    "total" : 2,
+    "max_score" : 1.0,
+    "hits" : [ {
+      "_index" : "accounts",
+      "_type" : "person",
+      "_id" : "2",
+      "_score" : 1.0,
+      "_source" : {
+        "user" : "leon",
+        "title" : "工程師",
+        "desc" : "數據庫管理",
+        "age": 20
+      }
+    }, {
+      "_index" : "accounts",
+      "_type" : "person",
+      "_id" : "1",
+      "_score" : 1.0,
+      "_source" : {
+        "user" : "mark",
+        "title" : "工程師",
+        "desc" : "數據庫管理，軟件開發",
+        "age": 28
+      }
+    } ]
+  }
+}
+</code></pre>
+
+<h2><code>filtered</code> Search</h2>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "filtered" : {
+            "filter" : {
+                "range" : {
+                    "age" : { "gt" : 25 }
+                }
+            },
+            "query" : {
+                "match" : {
+                    "user" : "leon"
+                }
+            }
+        }
+    }
+}'
+</code></pre>
+
+<h2>Global search</h2>
+
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-match-query.html">Match Query</a></p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+  "query" : { "match" : { "desc" : "軟件" }}
+}'
+</code></pre>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true&amp;q=user:leon'
+</code></pre>
+
+<h3><code>size</code> to limit response record</h3>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+  "query" : { "match" : { "desc" : "管理" }},
+  "size": 1
+}'
+</code></pre>
+
+<h3><code>from</code> to shift start index</h3>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+  "query" : { "match" : { "desc" : "管理" }},
+  "from": 1,
+  "size": 1
+}'
+</code></pre>
+
+<h3><code>or</code> Search</h3>
+
+<p>&ldquo;軟件 系統&rdquo; -> &ldquo;軟件&rdquo; or &ldquo;系統&rdquo;</p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+  "query" : { "match" : { "desc" : "軟件 系統" }}
+}'
+</code></pre>
+
+<h3><code>and</code> Search</h3>
+
+<p>should use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-bool-query.html">Bool Query</a></p>
+
+<p>must have"軟件" AND &ldquo;系統&rdquo;</p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+  "query": {
+    "bool": {
+      "must": [
+        { "match": { "desc": "軟件" } },
+        { "match": { "desc": "系統" } }
+      ]
+    }
+  }
+}'
+</code></pre>
+
+<h3><code>phrases</code> Search</h3>
+
+<p>must be &ldquo;軟件 系統&rdquo;</p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "match_phrase" : {
+            "desc" : "軟件 系統"
+        }
+    }
+}'
+</code></pre>
+
+<h3><code>aggregations</code> Search</h3>
+
+<p>count each user</p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+  "aggs": {
+    "all_user": {
+      "terms": { "field": "user" }
+    }
+  }
+}'
+</code></pre>
+
+<pre><code class="go">//...
+"aggregations" : {
+    "all_user" : {
+      "doc_count_error_upper_bound" : 0,
+      "sum_other_doc_count" : 0,
+      "buckets" : [ {
+        "key" : "leon",
+        "doc_count" : 2
+      }, {
+        "key" : "mark",
+        "doc_count" : 1
+      } ]
+    }
+  }
+//...
+</code></pre>
+
+<p>count each user + avg age</p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "aggs" : {
+        "all_user" : {
+            "terms" : { "field" : "user" },
+            "aggs" : {
+                "avg_age" : {
+                    "avg" : { "field" : "age" }
+                }
+            }
+        }
+    }
+}'
+</code></pre>
+
+<pre><code class="go">// ...
+  "aggregations" : {
+    "all_user" : {
+      "doc_count_error_upper_bound" : 0,
+      "sum_other_doc_count" : 0,
+      "buckets" : [ {
+        "key" : "leon",
+        "doc_count" : 2,
+        "avg_age" : {
+          "value" : 28.0
+        }
+      }, {
+        "key" : "leo2222n",
+        "doc_count" : 1,
+        "avg_age" : {
+          "value" : 38.0
+        }
+      }, {
+        "key" : "mark",
+        "doc_count" : 1,
+        "avg_age" : {
+          "value" : 28.0
+        }
+      } ]
+    }
+  }
+// ...
+</code></pre>
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://github.com/elastic/elasticsearch">elasticsearch</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2017/08/elasticsearch.html">全文搜索引擎 Elasticsearch 入門課程</a></li>
+<li><a href="https://es.xiaoleilu.com/010_Intro/00_README.html">Elasticsearch 權威指南</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

@@ -2,10 +2,10 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
 
   <title><![CDATA[Leon's Blogging]]></title>
-  <link href="http://mgleon08.github.com/atom.xml" rel="self"/>
-  <link href="http://mgleon08.github.com/"/>
-  <updated>2019-04-18T21:19:06+08:00</updated>
-  <id>http://mgleon08.github.com/</id>
+  <link href="https://mgleon08.github.io/atom.xml" rel="self"/>
+  <link href="https://mgleon08.github.io/"/>
+  <updated>2019-04-26T23:50:23+08:00</updated>
+  <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
     
@@ -14,10 +14,956 @@
 
   
   <entry>
+    <title type="html"><![CDATA[Getting Started With the ElasticSearch]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/04/26/elasticsearch/"/>
+    <updated>2019-04-26T23:36:58+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/04/26/elasticsearch</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>Elasticsearch is a distributed, RESTful search and analytics engine capable of solving a growing number of use cases. As the heart of the Elastic Stack, it centrally stores your data so you can discover the expected and uncover the unexpected.</p>
+
+<h2>Elasticsearch vs RDBMS</h2>
+
+<ul>
+<li>Node - Server</li>
+<li>Indices - Databases</li>
+<li>Types - Tables</li>
+<li>Documents - Rows</li>
+<li>Fields - Columns</li>
+</ul>
+
+
+<blockquote><p>After 6.0 version need add <code>-H 'Content-Type:application/json'</code></p></blockquote>
+
+<h2>Install</h2>
+
+<p>java</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">brew</span> <span class="nx">cask</span> <span class="nx">install</span> <span class="nx">java</span>
+</span><span class='line'><span class="nx">brew</span> <span class="nx">cask</span> <span class="nx">install</span> <span class="nx">homebrew</span><span class="o">/</span><span class="nx">cask</span><span class="o">-</span><span class="nx">versions</span><span class="o">/</span><span class="nx">java8</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>elasticsearch</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">brew</span> <span class="nx">install</span> <span class="nx">elasticsearch24</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Check</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;name&quot;</span> <span class="p">:</span> <span class="s">&quot;Crimson Daffodil&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;cluster_name&quot;</span> <span class="p">:</span> <span class="s">&quot;elasticsearch&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;cluster_uuid&quot;</span> <span class="p">:</span> <span class="s">&quot;_1W7Qb8WSByw_AoBtx3V9g&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;version&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;number&quot;</span> <span class="p">:</span> <span class="s">&quot;2.4.6&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;build_hash&quot;</span> <span class="p">:</span> <span class="s">&quot;5376dca9f70f3abef96a77f4bb22720ace8240fd&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;build_timestamp&quot;</span> <span class="p">:</span> <span class="s">&quot;2017-07-18T12:17:44Z&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;build_snapshot&quot;</span> <span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;lucene_version&quot;</span> <span class="p">:</span> <span class="s">&quot;5.5.4&quot;</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="s">&quot;tagline&quot;</span> <span class="p">:</span> <span class="s">&quot;You Know, for Search&quot;</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>health</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">_cluster</span><span class="o">/</span><span class="nx">health</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;cluster_name&quot;</span> <span class="p">:</span> <span class="s">&quot;elasticsearch_leon&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;status&quot;</span> <span class="p">:</span> <span class="s">&quot;yellow&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;timed_out&quot;</span> <span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;number_of_nodes&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;number_of_data_nodes&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;active_primary_shards&quot;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;active_shards&quot;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;relocating_shards&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;initializing_shards&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;unassigned_shards&quot;</span> <span class="p">:</span> <span class="mi">10</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;delayed_unassigned_shards&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;number_of_pending_tasks&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;number_of_in_flight_fetch&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;task_max_waiting_in_queue_millis&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;active_shards_percent_as_number&quot;</span> <span class="p">:</span> <span class="mf">50.0</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Count</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">GET</span> <span class="err">&#39;</span><span class="nx">http</span><span class="p">:</span><span class="c1">//localhost:9200/_count?pretty&#39; -d &#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;match_all&quot;</span><span class="p">:</span> <span class="p">{}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;count&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_shards&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;total&quot;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;successful&quot;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;failed&quot;</span> <span class="p">:</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Show all Index</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">GET</span> <span class="err">&#39;</span><span class="nx">http</span><span class="p">:</span><span class="c1">//localhost:9200/_cat/indices?v&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">health</span> <span class="nx">status</span> <span class="nx">index</span>    <span class="nx">pri</span> <span class="nx">rep</span> <span class="nx">docs</span><span class="p">.</span><span class="nx">count</span> <span class="nx">docs</span><span class="p">.</span><span class="nx">deleted</span> <span class="nx">store</span><span class="p">.</span><span class="nx">size</span> <span class="nx">pri</span><span class="p">.</span><span class="nx">store</span><span class="p">.</span><span class="nx">size</span>
+</span><span class='line'><span class="nx">yellow</span> <span class="nx">open</span>   <span class="nx">accounts</span>   <span class="mi">5</span>   <span class="mi">1</span>          <span class="mi">1</span>            <span class="mi">0</span>      <span class="mf">4.1</span><span class="nx">kb</span>          <span class="mf">4.1</span><span class="nx">kb</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Show all Index mapping type</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">_mapping</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;accounts&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;mappings&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;person&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;properties&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="s">&quot;desc&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;type&quot;</span> <span class="p">:</span> <span class="s">&quot;string&quot;</span>
+</span><span class='line'>          <span class="p">},</span>
+</span><span class='line'>          <span class="s">&quot;title&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;type&quot;</span> <span class="p">:</span> <span class="s">&quot;string&quot;</span>
+</span><span class='line'>          <span class="p">},</span>
+</span><span class='line'>          <span class="s">&quot;user&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;type&quot;</span> <span class="p">:</span> <span class="s">&quot;string&quot;</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Create Index</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">PUT</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">weather</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;acknowledged&quot;</span><span class="p">:</span><span class="kc">true</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Delete Index</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">DELETE</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">weather</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;acknowledged&quot;</span><span class="p">:</span><span class="kc">true</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Setting Analyzer</h2>
+
+<p><a href="https://github.com/medcl/elasticsearch-analysis-ik/">elasticsearch-analysis-ik</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="err">$</span> <span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">PUT</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="err">&#39;</span> <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;mappings&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;person&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;text&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s">&quot;analyzer&quot;</span><span class="p">:</span> <span class="s">&quot;ik_max_word&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s">&quot;search_analyzer&quot;</span><span class="p">:</span> <span class="s">&quot;ik_max_word&quot;</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;text&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s">&quot;analyzer&quot;</span><span class="p">:</span> <span class="s">&quot;ik_max_word&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s">&quot;search_analyzer&quot;</span><span class="p">:</span> <span class="s">&quot;ik_max_word&quot;</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;text&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s">&quot;analyzer&quot;</span><span class="p">:</span> <span class="s">&quot;ik_max_word&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s">&quot;search_analyzer&quot;</span><span class="p">:</span> <span class="s">&quot;ik_max_word&quot;</span>
+</span><span class='line'>        <span class="p">},</span>
+</span><span class='line'>        <span class="s">&quot;categories&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>           <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;nested&quot;</span><span class="p">,</span>
+</span><span class='line'>           <span class="s">&quot;properties&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>              <span class="s">&quot;name&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s">&quot;type&quot;</span><span class="p">:</span> <span class="s">&quot;string&quot;</span>
+</span><span class='line'>              <span class="p">}</span>
+</span><span class='line'>           <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Create Document</h2>
+
+<p>with id, also can string</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// can replace 1 to first</span>
+</span><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">PUT</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="mi">1</span><span class="err">&#39;</span> <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="s">&quot;數據庫管理&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">18</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;_index&quot;</span><span class="p">:</span> <span class="s">&quot;accounts&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_type&quot;</span><span class="p">:</span> <span class="s">&quot;person&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_id&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_score&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_source&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="s">&quot;數據庫管理&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">18</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>without id will auto create random uuid</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">POST</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="err">&#39;</span> <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="s">&quot;mark&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="s">&quot;系統管理&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">28</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Show</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="mi">1</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// _source without other data</span>
+</span><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="mi">1</span><span class="o">/</span><span class="nx">_source</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;_index&quot;</span><span class="p">:</span> <span class="s">&quot;accounts&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_type&quot;</span><span class="p">:</span> <span class="s">&quot;person&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_id&quot;</span><span class="p">:</span> <span class="s">&quot;AWpP4wxUKXQ2yoYJjuiA&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_version&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;found&quot;</span><span class="p">:</span> <span class="kc">true</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;_source&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="s">&quot;數據庫管理&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">20</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>not found</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">weather</span><span class="o">/</span><span class="nx">beijing</span><span class="o">/</span><span class="nx">abc</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;_index&quot;</span> <span class="p">:</span> <span class="s">&quot;weather&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_type&quot;</span> <span class="p">:</span> <span class="s">&quot;beijing&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_id&quot;</span> <span class="p">:</span> <span class="s">&quot;abc&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;found&quot;</span> <span class="p">:</span> <span class="kc">false</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Delete</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">DELETE</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="mi">1</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Reindex (not Update)</h2>
+
+<p>elastic can&rsquo;t update, only create new, and increase the version number</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">PUT</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="mi">1</span><span class="err">&#39;</span> <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;user&quot;</span> <span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;title&quot;</span> <span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;desc&quot;</span> <span class="p">:</span> <span class="s">&quot;數據庫管理，軟件開發&quot;</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">20</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>version was change to 2</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;_index&quot;</span><span class="p">:</span> <span class="s">&quot;accounts&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_type&quot;</span><span class="p">:</span> <span class="s">&quot;person&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_id&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_version&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_shards&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;total&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;successful&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;failed&quot;</span><span class="p">:</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="s">&quot;created&quot;</span><span class="p">:</span> <span class="kc">false</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Show all documents (empty search)</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>took - search time</li>
+<li>hits - hit how many record</li>
+<li>_score - match score</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;took&quot;</span> <span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;timed_out&quot;</span> <span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;_shards&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;total&quot;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;successful&quot;</span> <span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;failed&quot;</span> <span class="p">:</span> <span class="mi">0</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>  <span class="s">&quot;hits&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;total&quot;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;max_score&quot;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;hits&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;_index&quot;</span> <span class="p">:</span> <span class="s">&quot;accounts&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;_type&quot;</span> <span class="p">:</span> <span class="s">&quot;person&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;_id&quot;</span> <span class="p">:</span> <span class="s">&quot;2&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;_score&quot;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;_source&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;user&quot;</span> <span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;title&quot;</span> <span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;desc&quot;</span> <span class="p">:</span> <span class="s">&quot;數據庫管理&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">20</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">},</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;_index&quot;</span> <span class="p">:</span> <span class="s">&quot;accounts&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;_type&quot;</span> <span class="p">:</span> <span class="s">&quot;person&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;_id&quot;</span> <span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;_score&quot;</span> <span class="p">:</span> <span class="mf">1.0</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;_source&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;user&quot;</span> <span class="p">:</span> <span class="s">&quot;mark&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;title&quot;</span> <span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;desc&quot;</span> <span class="p">:</span> <span class="s">&quot;數據庫管理，軟件開發&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">28</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span> <span class="p">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2><code>filtered</code> Search</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;filtered&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;filter&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s">&quot;range&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s">&quot;age&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;gt&quot;</span> <span class="p">:</span> <span class="mi">25</span> <span class="p">}</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s">&quot;match&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s">&quot;user&quot;</span> <span class="p">:</span> <span class="s">&quot;leon&quot;</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Global search</h2>
+
+<p><a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-match-query.html">Match Query</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;match&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;desc&quot;</span> <span class="p">:</span> <span class="s">&quot;軟件&quot;</span> <span class="p">}}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="o">&amp;</span><span class="nx">q</span><span class="p">=</span><span class="nx">user</span><span class="p">:</span><span class="nx">leon</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>size</code> to limit response record</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;match&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;desc&quot;</span> <span class="p">:</span> <span class="s">&quot;管理&quot;</span> <span class="p">}},</span>
+</span><span class='line'>  <span class="s">&quot;size&quot;</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>from</code> to shift start index</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;match&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;desc&quot;</span> <span class="p">:</span> <span class="s">&quot;管理&quot;</span> <span class="p">}},</span>
+</span><span class='line'>  <span class="s">&quot;from&quot;</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;size&quot;</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>or</code> Search</h3>
+
+<p>&ldquo;軟件 系統&rdquo; -> &ldquo;軟件&rdquo; or &ldquo;系統&rdquo;</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;match&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;desc&quot;</span> <span class="p">:</span> <span class="s">&quot;軟件 系統&quot;</span> <span class="p">}}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>and</code> Search</h3>
+
+<p>should use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-bool-query.html">Bool Query</a></p>
+
+<p>must have"軟件" AND &ldquo;系統&rdquo;</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;must&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>        <span class="p">{</span> <span class="s">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="s">&quot;軟件&quot;</span> <span class="p">}</span> <span class="p">},</span>
+</span><span class='line'>        <span class="p">{</span> <span class="s">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="s">&quot;系統&quot;</span> <span class="p">}</span> <span class="p">}</span>
+</span><span class='line'>      <span class="p">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>phrases</code> Search</h3>
+
+<p>must be &ldquo;軟件 系統&rdquo;</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;match_phrase&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;desc&quot;</span> <span class="p">:</span> <span class="s">&quot;軟件 系統&quot;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>aggregations</code> Search</h3>
+
+<p>count each user</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;aggs&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;all_user&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;terms&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;field&quot;</span><span class="p">:</span> <span class="s">&quot;user&quot;</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">//...</span>
+</span><span class='line'><span class="s">&quot;aggregations&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;all_user&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;doc_count_error_upper_bound&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;sum_other_doc_count&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;buckets&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;key&quot;</span> <span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;doc_count&quot;</span> <span class="p">:</span> <span class="mi">2</span>
+</span><span class='line'>      <span class="p">},</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;key&quot;</span> <span class="p">:</span> <span class="s">&quot;mark&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;doc_count&quot;</span> <span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'>      <span class="p">}</span> <span class="p">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="c1">//...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>count each user + avg age</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;aggs&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;all_user&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;terms&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;field&quot;</span> <span class="p">:</span> <span class="s">&quot;user&quot;</span> <span class="p">},</span>
+</span><span class='line'>            <span class="s">&quot;aggs&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s">&quot;avg_age&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s">&quot;avg&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;field&quot;</span> <span class="p">:</span> <span class="s">&quot;age&quot;</span> <span class="p">}</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// ...</span>
+</span><span class='line'>  <span class="s">&quot;aggregations&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;all_user&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;doc_count_error_upper_bound&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;sum_other_doc_count&quot;</span> <span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;buckets&quot;</span> <span class="p">:</span> <span class="p">[</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;key&quot;</span> <span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;doc_count&quot;</span> <span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;avg_age&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="s">&quot;value&quot;</span> <span class="p">:</span> <span class="mf">28.0</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">},</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;key&quot;</span> <span class="p">:</span> <span class="s">&quot;leo2222n&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;doc_count&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;avg_age&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="s">&quot;value&quot;</span> <span class="p">:</span> <span class="mf">38.0</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">},</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;key&quot;</span> <span class="p">:</span> <span class="s">&quot;mark&quot;</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;doc_count&quot;</span> <span class="p">:</span> <span class="mi">1</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;avg_age&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="s">&quot;value&quot;</span> <span class="p">:</span> <span class="mf">28.0</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>      <span class="p">}</span> <span class="p">]</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="c1">// ...</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://github.com/elastic/elasticsearch">elasticsearch</a></li>
+<li><a href="http://www.ruanyifeng.com/blog/2017/08/elasticsearch.html">全文搜索引擎 Elasticsearch 入門課程</a></li>
+<li><a href="https://es.xiaoleilu.com/010_Intro/00_README.html">Elasticsearch 權威指南</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
     <title type="html"><![CDATA[Golang - Simple RESTful]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/04/11/golang-simple-restful/"/>
+    <link href="https://mgleon08.github.io/blog/2019/04/11/golang-simple-restful/"/>
     <updated>2019-04-11T16:27:10+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/04/11/golang-simple-restful</id>
+    <id>https://mgleon08.github.io/blog/2019/04/11/golang-simple-restful</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -289,9 +1235,9 @@
   
   <entry>
     <title type="html"><![CDATA[Golang - MongoDB]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/04/10/golang-mongodb/"/>
+    <link href="https://mgleon08.github.io/blog/2019/04/10/golang-mongodb/"/>
     <updated>2019-04-10T21:30:30+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/04/10/golang-mongodb</id>
+    <id>https://mgleon08.github.io/blog/2019/04/10/golang-mongodb</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -738,9 +1684,9 @@
   
   <entry>
     <title type="html"><![CDATA[Golang - Context]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/04/10/golang-context/"/>
+    <link href="https://mgleon08.github.io/blog/2019/04/10/golang-context/"/>
     <updated>2019-04-10T21:30:20+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/04/10/golang-context</id>
+    <id>https://mgleon08.github.io/blog/2019/04/10/golang-context</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1119,9 +2065,9 @@
   
   <entry>
     <title type="html"><![CDATA[Golang - Testing]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/03/28/golang-testing/"/>
+    <link href="https://mgleon08.github.io/blog/2019/03/28/golang-testing/"/>
     <updated>2019-03-28T18:24:12+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/03/28/golang-testing</id>
+    <id>https://mgleon08.github.io/blog/2019/03/28/golang-testing</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1469,9 +2415,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails With Active Storage]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/03/27/rails-active-storage/"/>
+    <link href="https://mgleon08.github.io/blog/2019/03/27/rails-active-storage/"/>
     <updated>2019-03-27T09:33:19+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/03/27/rails-active-storage</id>
+    <id>https://mgleon08.github.io/blog/2019/03/27/rails-active-storage</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1838,9 +2784,9 @@
   
   <entry>
     <title type="html"><![CDATA[Ruby - Unary Operator]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/03/15/ruby-unary-operator/"/>
+    <link href="https://mgleon08.github.io/blog/2019/03/15/ruby-unary-operator/"/>
     <updated>2019-03-15T23:11:38+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/03/15/ruby-unary-operator</id>
+    <id>https://mgleon08.github.io/blog/2019/03/15/ruby-unary-operator</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -1984,9 +2930,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails With Grape]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/03/15/rails-with-grape/"/>
+    <link href="https://mgleon08.github.io/blog/2019/03/15/rails-with-grape/"/>
     <updated>2019-03-15T23:04:35+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/03/15/rails-with-grape</id>
+    <id>https://mgleon08.github.io/blog/2019/03/15/rails-with-grape</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2407,9 +3353,9 @@
   
   <entry>
     <title type="html"><![CDATA[Rails With mongoDB]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/03/15/rails-with-mongodb/"/>
+    <link href="https://mgleon08.github.io/blog/2019/03/15/rails-with-mongodb/"/>
     <updated>2019-03-15T23:01:55+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/03/15/rails-with-mongodb</id>
+    <id>https://mgleon08.github.io/blog/2019/03/15/rails-with-mongodb</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2543,9 +3489,9 @@
   
   <entry>
     <title type="html"><![CDATA[Golang - MySQL]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/03/11/golang-mysql/"/>
+    <link href="https://mgleon08.github.io/blog/2019/03/11/golang-mysql/"/>
     <updated>2019-03-11T23:13:41+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/03/11/golang-mysql</id>
+    <id>https://mgleon08.github.io/blog/2019/03/11/golang-mysql</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -2834,9 +3780,9 @@
   
   <entry>
     <title type="html"><![CDATA[Golang Implementation of gRPC]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/03/07/golang-grpc/"/>
+    <link href="https://mgleon08.github.io/blog/2019/03/07/golang-grpc/"/>
     <updated>2019-03-07T21:57:06+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/03/07/golang-grpc</id>
+    <id>https://mgleon08.github.io/blog/2019/03/07/golang-grpc</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -3253,9 +4199,9 @@
   
   <entry>
     <title type="html"><![CDATA[Scrum 簡單介紹]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/03/07/scrum/"/>
+    <link href="https://mgleon08.github.io/blog/2019/03/07/scrum/"/>
     <updated>2019-03-07T21:51:10+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/03/07/scrum</id>
+    <id>https://mgleon08.github.io/blog/2019/03/07/scrum</id>
     <content type="html"><![CDATA[<p>最近想在團隊中試著導入 scrum，因此先來瞭解一下 scrum 的概念</p>
 
 <!-- more -->
@@ -3515,9 +4461,9 @@ Spring n 個禮拜，所有活動抓 n 小時</p></blockquote>
   
   <entry>
     <title type="html"><![CDATA[Golang - JSON and Go]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/17/golang-json-and-go/"/>
+    <link href="https://mgleon08.github.io/blog/2019/02/17/golang-json-and-go/"/>
     <updated>2019-02-17T22:40:16+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/17/golang-json-and-go</id>
+    <id>https://mgleon08.github.io/blog/2019/02/17/golang-json-and-go</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -4238,9 +5184,9 @@ Spring n 個禮拜，所有活動抓 n 小時</p></blockquote>
   
   <entry>
     <title type="html"><![CDATA[Ruby - (&.) the Safe Navigation Operator Like Rails Try!]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/15/ruby-the-safe-navigation-operator/"/>
+    <link href="https://mgleon08.github.io/blog/2019/02/15/ruby-the-safe-navigation-operator/"/>
     <updated>2019-02-15T20:46:20+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/15/ruby-the-safe-navigation-operator</id>
+    <id>https://mgleon08.github.io/blog/2019/02/15/ruby-the-safe-navigation-operator</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -4422,9 +5368,9 @@ Spring n 個禮拜，所有活動抓 n 小時</p></blockquote>
   
   <entry>
     <title type="html"><![CDATA[Ruby - New Features in Ruby 2.6]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/12/new-features-in-ruby-2-6/"/>
+    <link href="https://mgleon08.github.io/blog/2019/02/12/new-features-in-ruby-2-6/"/>
     <updated>2019-02-12T21:13:17+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/12/new-features-in-ruby-2-6</id>
+    <id>https://mgleon08.github.io/blog/2019/02/12/new-features-in-ruby-2-6</id>
     <content type="html"><![CDATA[<p>ruby 2.6 多了一些有趣的新特性和功能，來了解一下</p>
 
 <!-- more -->
@@ -4778,9 +5724,9 @@ Spring n 個禮拜，所有活動抓 n 小時</p></blockquote>
   
   <entry>
     <title type="html"><![CDATA[Golang - Maps in Action]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/08/golang-maps-in-action/"/>
+    <link href="https://mgleon08.github.io/blog/2019/02/08/golang-maps-in-action/"/>
     <updated>2019-02-08T10:55:15+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/08/golang-maps-in-action</id>
+    <id>https://mgleon08.github.io/blog/2019/02/08/golang-maps-in-action</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -5408,9 +6354,9 @@ Spring n 個禮拜，所有活動抓 n 小時</p></blockquote>
   
   <entry>
     <title type="html"><![CDATA[Ruby - Super vs Super()]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-super/"/>
+    <link href="https://mgleon08.github.io/blog/2019/02/04/ruby-super/"/>
     <updated>2019-02-04T18:19:10+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-super</id>
+    <id>https://mgleon08.github.io/blog/2019/02/04/ruby-super</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -5505,9 +6451,9 @@ Spring n 個禮拜，所有活動抓 n 小時</p></blockquote>
   
   <entry>
     <title type="html"><![CDATA[Ruby - A::B vs Module a; Class B]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-scope/"/>
+    <link href="https://mgleon08.github.io/blog/2019/02/04/ruby-scope/"/>
     <updated>2019-02-04T18:18:05+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-scope</id>
+    <id>https://mgleon08.github.io/blog/2019/02/04/ruby-scope</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -5629,9 +6575,9 @@ Spring n 個禮拜，所有活動抓 n 小時</p></blockquote>
   
   <entry>
     <title type="html"><![CDATA[Ruby - Singleton Method vs Singleton Class vs Singleton Module]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-singleton/"/>
+    <link href="https://mgleon08.github.io/blog/2019/02/04/ruby-singleton/"/>
     <updated>2019-02-04T18:15:16+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-singleton</id>
+    <id>https://mgleon08.github.io/blog/2019/02/04/ruby-singleton</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -6014,9 +6960,9 @@ Spring n 個禮拜，所有活動抓 n 小時</p></blockquote>
   
   <entry>
     <title type="html"><![CDATA[Ruby - Hash With Default Values]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-hash-default-value/"/>
+    <link href="https://mgleon08.github.io/blog/2019/02/04/ruby-hash-default-value/"/>
     <updated>2019-02-04T18:12:51+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-hash-default-value</id>
+    <id>https://mgleon08.github.io/blog/2019/02/04/ruby-hash-default-value</id>
     <content type="html"><![CDATA[<!-- more -->
 
 
@@ -6164,55 +7110,6 @@ Spring n 個禮拜，所有活動抓 n 小時</p></blockquote>
 <li><a href="https://ruby-doc.org/core-2.6/Hash.html">Hash</a></li>
 <li><a href="https://stackoverflow.com/questions/2698460/strange-unexpected-behavior-disappearing-changing-values-when-using-hash-defa">Strange, unexpected behavior (disappearing/changing values) when using Hash default value, e.g. Hash.new([])</a></li>
 <li><a href="https://keepthecodesimple.com/ruby-hashes-default-values/">Ruby Hashes and Default Values</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby - Array With Default Value]]></title>
-    <link href="http://mgleon08.github.com/blog/2019/02/04/ruby-array-default-value/"/>
-    <updated>2019-02-04T18:10:41+08:00</updated>
-    <id>http://mgleon08.github.com/blog/2019/02/04/ruby-array-default-value</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<p><code>Array.new</code> 可以建立一個長度的 <code>default value</code></p>
-
-<p>這樣建立的話會對應到一樣的 <code>object</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="nb">Array</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">2</span><span class="p">,</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span><span class="p">)</span> <span class="c1"># =&gt; [{}, {}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">a</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="s1">&#39;animal&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="s1">&#39;dog&#39;</span> <span class="c1"># =&gt; &quot;dog&quot;</span>
-</span><span class='line'><span class="n">a</span> <span class="c1"># =&gt; [{&quot;animal&quot;=&gt;&quot;dog&quot;}, {&quot;animal&quot;=&gt;&quot;dog&quot;}]</span>
-</span><span class='line'>
-</span><span class='line'><span class="n">a</span><span class="o">[</span><span class="mi">1</span><span class="o">][</span><span class="s1">&#39;animal&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="s1">&#39;cat&#39;</span> <span class="c1"># =&gt; &quot;cat&quot;</span>
-</span><span class='line'><span class="n">a</span> <span class="c1"># =&gt; [{&quot;animal&quot;=&gt;&quot;cat&quot;}, {&quot;animal&quot;=&gt;&quot;cat&quot;}]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>必須給 <code>block</code> 每個 <code>object</code> 才會是獨立的</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">a</span> <span class="o">=</span> <span class="nb">Array</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="mi">2</span><span class="p">)</span> <span class="p">{</span> <span class="no">Hash</span><span class="o">.</span><span class="n">new</span> <span class="p">}</span> <span class="c1"># =&gt; [{}, {}]</span>
-</span><span class='line'><span class="n">a</span><span class="o">[</span><span class="mi">0</span><span class="o">][</span><span class="s1">&#39;animal&#39;</span><span class="o">]</span> <span class="o">=</span> <span class="s1">&#39;dog&#39;</span> <span class="c1"># =&gt; &quot;dog&quot;</span>
-</span><span class='line'><span class="n">a</span> <span class="c1"># =&gt; [{&quot;animal&quot;=&gt;&quot;dog&quot;}, {}]</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://ruby-doc.org/core-2.6.1/Array.html#method-c-new">Array new</a></li>
 </ul>
 
 ]]></content>
