@@ -51,6 +51,26 @@ s := [6]struct {
     {11, false},
     {13, true},
   }
+  
+// 透過 1: 2: 可指定 value 要塞的位置
+b := [3]int{
+	0:111,
+	1:222,
+	2:333,
+}
+// [111 222 333]
+
+b := [...]int{
+	3:333,
+}
+// [0 0 0 333]
+
+b := [...]int{
+	5:111,
+	222,
+	0:333,
+}
+// [333 0 0 0 0 111 222]
 ```
 
 ```go
@@ -179,6 +199,33 @@ func main() {
 > * slice 的零值是 nil，一個 nil 的 slice 的長度和容量是 0，使用 make 就不會是 nil
 > * Slice 是用 reference
 
+* nil slice 和 empty slice 是不一樣的，但 length 都一樣是 0
+* slice 只能跟 nil 去做比較，兩個 slice 要比較，必須要用 loop 去一個一個比對
+
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	var slice1 []string
+	slice2 := []string{}
+
+	fmt.Printf("%#v, %#v\n", slice1, slice2)
+	fmt.Printf("%t\n", len(slice1) == len(slice2))
+	fmt.Printf("%t\n", slice1 == nil)
+	fmt.Printf("%t\n", slice2 == nil)
+}
+
+
+// []string(nil), []string{}
+// true
+// true
+// false
+```
+
 * [make](https://golang.org/pkg/builtin/#make)
 
 > * Slice: The size specifies the length. The capacity of the slice is
@@ -199,6 +246,9 @@ unbuffered.
 ```go
 // 範圍 low ~ hight -1
 a[low : high]
+
+// 也可以在加上 cap
+a[low : high : cap]
 
 []int{1, 2, 3} //creates and array and returns a slice reference
 []int{3: 123, 4: 321, 5: 123456} // 指定 index，其餘的會是 0
@@ -505,6 +555,35 @@ func main() {
 ```
 
 * [copy](https://golang.org/pkg/builtin/#copy)
+
+也可以用 `[]int(nil) + append` 的方式來 copy, 因為 nil 的 slice 沒有 reference 任何 array，寫法也比較簡潔
+
+> nil is typeless value, so use []int() to convert nil value to slice value
+
+```go
+package main
+
+import (
+	"fmt"
+	
+)
+
+func main() {
+	evens := []int{2, 4}
+	fmt.Printf("evens: = %v, %[1]p, %d, %d\n", evens, len(evens), cap(evens))
+	
+	test := make([]int, len(evens))
+	copy(test, evens)
+	fmt.Printf("test: = %v, %[1]p, %d, %d\n", test, len(test), cap(test))
+	
+	test2 := append([]int(nil), evens...)
+	fmt.Printf("test: = %v, %[1]p, %d, %d\n", test2, len(test2), cap(test2))
+}
+
+// evens: = [2 4], 0x414020, 2, 2
+// test: = [2 4], 0x414048, 2, 2
+// test: = [2 4], 0x414060, 2, 2
+```
 
 # <span id="maps"> Maps </span>
 

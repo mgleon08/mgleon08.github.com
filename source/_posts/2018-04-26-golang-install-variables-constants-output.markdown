@@ -539,6 +539,26 @@ func main() {
 // 0 1 3 4
 ```
 
+```go
+package main
+
+import (
+	"fmt"
+)
+
+func main() {
+	const (
+		a = 9 - iota
+		b
+		_
+		c
+		d
+	)
+	fmt.Println(a, b, c, d)
+}
+// 9 8 6 5
+```
+
 ### Detect
 
 > Go can't detect runtime errors at the compile-time

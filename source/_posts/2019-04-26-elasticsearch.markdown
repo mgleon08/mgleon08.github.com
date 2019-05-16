@@ -173,6 +173,12 @@ curl -X DELETE 'localhost:9200/weather'
 
 [elasticsearch-analysis-ik](https://github.com/medcl/elasticsearch-analysis-ik/)
 
+### index type
+* `analyzed` - analyzed string and index it
+* `not_analyzed` - index it but not not analyzed
+* `no` - not index and analyzed
+
+
 ```go
 $ curl -X PUT 'localhost:9200/accounts' -d '
 {
@@ -205,6 +211,36 @@ $ curl -X PUT 'localhost:9200/accounts' -d '
       }
     }
   }
+}'
+```
+
+update analyzer
+
+```go
+$ curl -X PUT 'localhost:9200/accounts/_mapping/person' -d '
+{
+  "properties" : {
+    "tag" : {
+      "type" :    "string",
+      "index":    "not_analyzed"
+    }
+  }
+}'
+```
+
+show mapping
+
+```go
+$ curl 'localhost:9200/accounts/_mapping/person'
+```
+
+understand elastic how to analyze text
+
+```go
+curl /_analyze 'localhost:9200' -d '
+{
+  "analyzer": "standard",
+  "text": "Text to analyze"
 }'
 ```
 
@@ -329,10 +365,27 @@ version was change to 2
 }
 ```
 
-## Show all documents (empty search)
+## Search all documents (empty search)
+
+* `/_search` - all index, all type
+* `/gb/_search` - gb index, all type
+* `/gb,us/_search` - gb and us index, all type
+* `/g*,u*/_search` - g* and u* start index, all type
+* `/gb/user/_search` - gb index, user type
+* `/gb,us/user,tweet/_search` - gb or us index, user and tweet type
+* `/_all/user,tweet/_search` - all index, user and tweet type
 
 ```go
 curl 'localhost:9200/accounts/person/_search?pretty=true'
+
+
+// empty body like use
+
+{
+    "query": {
+        "match_all": {}
+    }
+}
 ```
 
 * took - search time
@@ -378,7 +431,39 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'
 }
 ```
 
-## `filtered` Search
+## `match` & `multi_match` Search
+
+analyzer text and search each keyword
+
+```go
+curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "match" : {
+            "user" : "leon"
+        }
+    }
+}'
+```
+
+```go
+curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "multi_match" : {
+           "query":    "數據庫",
+        	"fields":   [ "title", "desc" ]
+        }
+    }
+}'
+```
+
+## `filtered` & `range ` Search
+
+* `gt` - `>`
+* `gte` - `>=`
+* `lt` - `<`
+* `lte` -`<=`
 
 ```go
 curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
@@ -395,6 +480,47 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
                     "user" : "leon"
                 }
             }
+        }
+    }
+}'
+```
+
+## `term` & `terms` Search
+
+Exact match not to analyzer
+
+```go
+curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "term" : {
+            "user": "leon"
+        }
+    }
+}'
+```
+
+```go
+curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "terms" : {
+            "user": ["leon", "mark"]
+        }
+    }
+}'
+```
+
+## `exists` & `missing` Search
+
+Search field `IS NUll` or `IS NOT NULL`
+
+```go
+curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "exists" : {
+            "field": "title"
         }
     }
 }'
@@ -447,7 +573,7 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
 }'
 ```
 
-###  `and` Search
+###  `Bool` Search (`and`)
 
 should use [Bool Query](https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-bool-query.html) 
 
@@ -467,7 +593,7 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
 }'
 ```
 
-### `phrases` Search
+### `match_phrase` Search
 
 must be "軟件 系統"
 
@@ -482,7 +608,48 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
 }'
 ```
 
-### `aggregations` Search
+### `highlight` Search
+
+returm search result include highlight `<em></em>`
+
+```go
+curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+  "query":  {
+        "match_phrase" : {
+            "user" : "leon"
+        }
+    },
+    "highlight": {
+        "fields" : {
+            "user" : {}
+        }
+    }
+}
+'
+```
+
+```go
+{
+ "_index": "accounts",
+ "_type": "person",
+ "_id": "1",
+ "_score": 0.30685282,
+ "_source": {
+   "user": "leon",
+   "title": "工程師",
+   "desc": "數據庫管理，軟件開發",
+   "age": 18
+ },
+ "highlight": {
+    "user": [
+      "<em>leon</em>"
+    ]
+  }
+}
+```
+
+### `aggregations` Search like SQL `GROUP BY`
 
 count each user
 
@@ -563,8 +730,91 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
 // ...
 ```
 
+mix query
+
+```go
+curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+	"query": {
+    	"match": {
+    		"user": "leon"
+    	}
+	},
+    "aggs" : {
+        "all_user" : {
+            "terms" : { "field" : "user" },
+            "aggs" : {
+                "avg_age" : {
+                    "avg" : { "field" : "age" }
+                }
+            }
+        }
+    }
+}'
+```
+
+```go
+{
+    "took": 50,
+    "timed_out": false,
+    "_shards": {
+        "total": 5,
+        "successful": 5,
+        "failed": 0
+    },
+    "hits": {
+        "total": 2,
+        "max_score": 1.4054651,
+        "hits": [
+            {
+                "_index": "accounts",
+                "_type": "person",
+                "_id": "8",
+                "_score": 1.4054651,
+                "_source": {
+                    "user": "leon",
+                    "title": "工程師",
+                    "desc": "數據庫管理",
+                    "age": 38
+                }
+            },
+            {
+                "_index": "accounts",
+                "_type": "person",
+                "_id": "1",
+                "_score": 0.30685282,
+                "_source": {
+                    "user": "leon",
+                    "title": "工程師",
+                    "desc": "數據庫管理，軟件開發",
+                    "age": 18
+                }
+            }
+        ]
+    },
+    "aggregations": {
+        "all_user": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+                {
+                    "key": "leon",
+                    "doc_count": 2,
+                    "avg_age": {
+                        "value": 28
+                    }
+                }
+            ]
+        }
+    }
+}
+```
+
 # Reference
 
 * [elasticsearch](https://github.com/elastic/elasticsearch)
 * [全文搜索引擎 Elasticsearch 入門課程](http://www.ruanyifeng.com/blog/2017/08/elasticsearch.html)
 * [Elasticsearch 權威指南](https://es.xiaoleilu.com/010_Intro/00_README.html)
+* [elasticsearch 查詢（match和term）](https://www.cnblogs.com/yjf512/p/4897294.html)
+* [ElasticSearch in action - Thijs Feryn(video)](https://www.youtube.com/watch?v=oPObRc8tHgQ)
+* [ElasticSearch各種查詢關鍵字的區別（重要）](https://my.oschina.net/weiweiblog/blog/1574020)

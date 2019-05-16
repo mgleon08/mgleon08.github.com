@@ -50,6 +50,15 @@ footer: true
 * [peco](https://github.com/peco/peco) - 可以將一些指令變成互動式的指令 e.g. git checkout
 * [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) - 提示之前輸入的 command
 
+# <span id="chorm_tool"> Chorm Tool </span>
+
+* [新同文堂 New Tong Wen Tang](https://chrome.google.com/webstore/detail/new-tong-wen-tang/ldmgbgaoglmaiblpnphffibpbfchjaeg?hl=zh-TW) - 簡轉繁 [config](https://gist.github.com/mgleon08/03cd8a14855b16077acec1cc1e1b2b5e)
+* [OneTab](https://chrome.google.com/webstore/detail/onetab/chphlpgkkbolifaimnlloiipkdnihall?hl=zh-TW)
+* [Octotree](https://chrome.google.com/webstore/detail/octotree/bkhaagjahfmjljalopjnoealnfndnagc?hl=zh-TW) 
+* [Wappalyzer](https://chrome.google.com/webstore/detail/wappalyzer/gppongmhjkpfnbhagpmjfkannfbllamg?hl=zh-TW)
+* [JSON Formatter](https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=zh-TW)
+
+
 # <span id="ui-framework"> UI Framework </span>
 
 * [normalize.css](https://necolas.github.io/normalize.css/) - 將一般常用的 css 先處理好
