@@ -391,6 +391,15 @@
 
 <p><a href="https://github.com/medcl/elasticsearch-analysis-ik/">elasticsearch-analysis-ik</a></p>
 
+<h3>index type</h3>
+
+<ul>
+<li><code>analyzed</code> - analyzed string and index it</li>
+<li><code>not_analyzed</code> - index it but not not analyzed</li>
+<li><code>no</code> - not index and analyzed</li>
+</ul>
+
+
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
 <span class='line-number'>3</span>
@@ -454,6 +463,51 @@
 </span><span class='line'>      <span class="p">}</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>update analyzer</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="err">$</span> <span class="nx">curl</span> <span class="o">-</span><span class="nx">X</span> <span class="nx">PUT</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">_mapping</span><span class="o">/</span><span class="nx">person</span><span class="err">&#39;</span> <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;properties&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;tag&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;type&quot;</span> <span class="p">:</span>    <span class="s">&quot;string&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="s">&quot;index&quot;</span><span class="p">:</span>    <span class="s">&quot;not_analyzed&quot;</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>show mapping</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="err">$</span> <span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">_mapping</span><span class="o">/</span><span class="nx">person</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>understand elastic how to analyze text</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="o">/</span><span class="nx">_analyze</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="err">&#39;</span> <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;analyzer&quot;</span><span class="p">:</span> <span class="s">&quot;standard&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="s">&quot;text&quot;</span><span class="p">:</span> <span class="s">&quot;Text to analyze&quot;</span>
 </span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
 </span></code></pre></td></tr></table></div></figure>
 
@@ -656,10 +710,39 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2>Show all documents (empty search)</h2>
+<h2>Search all documents (empty search)</h2>
+
+<ul>
+<li><code>/_search</code> - all index, all type</li>
+<li><code>/gb/_search</code> - gb index, all type</li>
+<li><code>/gb,us/_search</code> - gb and us index, all type</li>
+<li><code>/g*,u*/_search</code> - g<em> and u</em> start index, all type</li>
+<li><code>/gb/user/_search</code> - gb index, user type</li>
+<li><code>/gb,us/user,tweet/_search</code> - gb or us index, user and tweet type</li>
+<li><code>/_all/user,tweet/_search</code> - all index, user and tweet type</li>
+</ul>
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
 </pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>
+</span><span class='line'>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// empty body like use</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;match_all&quot;</span><span class="p">:</span> <span class="p">{}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -745,7 +828,61 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h2><code>filtered</code> Search</h2>
+<h2><code>match</code> &amp; <code>multi_match</code> Search</h2>
+
+<p>analyzer text and search each keyword</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;match&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;user&quot;</span> <span class="p">:</span> <span class="s">&quot;leon&quot;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;multi_match&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>           <span class="s">&quot;query&quot;</span><span class="p">:</span>    <span class="s">&quot;數據庫&quot;</span><span class="p">,</span>
+</span><span class='line'>          <span class="s">&quot;fields&quot;</span><span class="p">:</span>   <span class="p">[</span> <span class="s">&quot;title&quot;</span><span class="p">,</span> <span class="s">&quot;desc&quot;</span> <span class="p">]</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2><code>filtered</code> &amp; <code>range</code> Search</h2>
+
+<ul>
+<li><code>gt</code> - <code>&gt;</code></li>
+<li><code>gte</code> - <code>&gt;=</code></li>
+<li><code>lt</code> - <code>&lt;</code></li>
+<li><code>lte</code> -<code>&lt;=</code></li>
+</ul>
+
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -778,6 +915,73 @@
 </span><span class='line'>                    <span class="s">&quot;user&quot;</span> <span class="p">:</span> <span class="s">&quot;leon&quot;</span>
 </span><span class='line'>                <span class="p">}</span>
 </span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2><code>term</code> &amp; <code>terms</code> Search</h2>
+
+<p>Exact match not to analyzer</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;term&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="s">&quot;leon&quot;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;terms&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="p">[</span><span class="s">&quot;leon&quot;</span><span class="p">,</span> <span class="s">&quot;mark&quot;</span><span class="p">]</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2><code>exists</code> &amp; <code>missing</code> Search</h2>
+
+<p>Search field <code>IS NUll</code> or <code>IS NOT NULL</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;query&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;exists&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;field&quot;</span><span class="p">:</span> <span class="s">&quot;title&quot;</span>
 </span><span class='line'>        <span class="p">}</span>
 </span><span class='line'>    <span class="p">}</span>
 </span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
@@ -853,7 +1057,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3><code>and</code> Search</h3>
+<h3><code>Bool</code> Search (<code>and</code>)</h3>
 
 <p>should use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-bool-query.html">Bool Query</a></p>
 
@@ -884,7 +1088,7 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3><code>phrases</code> Search</h3>
+<h3><code>match_phrase</code> Search</h3>
 
 <p>must be &ldquo;軟件 系統&rdquo;</p>
 
@@ -907,7 +1111,81 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
-<h3><code>aggregations</code> Search</h3>
+<h3><code>highlight</code> Search</h3>
+
+<p>returm search result include highlight <code>&lt;em&gt;&lt;/em&gt;</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;query&quot;</span><span class="p">:</span>  <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;match_phrase&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;user&quot;</span> <span class="p">:</span> <span class="s">&quot;leon&quot;</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="s">&quot;highlight&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;fields&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;user&quot;</span> <span class="p">:</span> <span class="p">{}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'> <span class="s">&quot;_index&quot;</span><span class="p">:</span> <span class="s">&quot;accounts&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="s">&quot;_type&quot;</span><span class="p">:</span> <span class="s">&quot;person&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="s">&quot;_id&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'> <span class="s">&quot;_score&quot;</span><span class="p">:</span> <span class="mf">0.30685282</span><span class="p">,</span>
+</span><span class='line'> <span class="s">&quot;_source&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>   <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>   <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>   <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="s">&quot;數據庫管理，軟件開發&quot;</span><span class="p">,</span>
+</span><span class='line'>   <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">18</span>
+</span><span class='line'> <span class="p">},</span>
+</span><span class='line'> <span class="s">&quot;highlight&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>      <span class="s">&quot;&lt;em&gt;leon&lt;/em&gt;&quot;</span>
+</span><span class='line'>    <span class="p">]</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3><code>aggregations</code> Search like SQL <code>GROUP BY</code></h3>
 
 <p>count each user</p>
 
@@ -1055,12 +1333,169 @@
 </span></code></pre></td></tr></table></div></figure>
 
 
+<p>mix query</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">curl</span> <span class="err">&#39;</span><span class="nx">localhost</span><span class="p">:</span><span class="mi">9200</span><span class="o">/</span><span class="nx">accounts</span><span class="o">/</span><span class="nx">person</span><span class="o">/</span><span class="nx">_search</span><span class="err">?</span><span class="nx">pretty</span><span class="p">=</span><span class="kc">true</span><span class="err">&#39;</span>  <span class="o">-</span><span class="nx">d</span> <span class="err">&#39;</span>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;query&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;match&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>          <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="s">&quot;leon&quot;</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>  <span class="p">},</span>
+</span><span class='line'>    <span class="s">&quot;aggs&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;all_user&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;terms&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;field&quot;</span> <span class="p">:</span> <span class="s">&quot;user&quot;</span> <span class="p">},</span>
+</span><span class='line'>            <span class="s">&quot;aggs&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                <span class="s">&quot;avg_age&quot;</span> <span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s">&quot;avg&quot;</span> <span class="p">:</span> <span class="p">{</span> <span class="s">&quot;field&quot;</span> <span class="p">:</span> <span class="s">&quot;age&quot;</span> <span class="p">}</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span><span class="err">&#39;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+<span class='line-number'>39</span>
+<span class='line-number'>40</span>
+<span class='line-number'>41</span>
+<span class='line-number'>42</span>
+<span class='line-number'>43</span>
+<span class='line-number'>44</span>
+<span class='line-number'>45</span>
+<span class='line-number'>46</span>
+<span class='line-number'>47</span>
+<span class='line-number'>48</span>
+<span class='line-number'>49</span>
+<span class='line-number'>50</span>
+<span class='line-number'>51</span>
+<span class='line-number'>52</span>
+<span class='line-number'>53</span>
+<span class='line-number'>54</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>    <span class="s">&quot;took&quot;</span><span class="p">:</span> <span class="mi">50</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;timed_out&quot;</span><span class="p">:</span> <span class="kc">false</span><span class="p">,</span>
+</span><span class='line'>    <span class="s">&quot;_shards&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;total&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;successful&quot;</span><span class="p">:</span> <span class="mi">5</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;failed&quot;</span><span class="p">:</span> <span class="mi">0</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="s">&quot;hits&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;total&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;max_score&quot;</span><span class="p">:</span> <span class="mf">1.4054651</span><span class="p">,</span>
+</span><span class='line'>        <span class="s">&quot;hits&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="s">&quot;_index&quot;</span><span class="p">:</span> <span class="s">&quot;accounts&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&quot;_type&quot;</span><span class="p">:</span> <span class="s">&quot;person&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&quot;_id&quot;</span><span class="p">:</span> <span class="s">&quot;8&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&quot;_score&quot;</span><span class="p">:</span> <span class="mf">1.4054651</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&quot;_source&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="s">&quot;數據庫管理&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">38</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">},</span>
+</span><span class='line'>            <span class="p">{</span>
+</span><span class='line'>                <span class="s">&quot;_index&quot;</span><span class="p">:</span> <span class="s">&quot;accounts&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&quot;_type&quot;</span><span class="p">:</span> <span class="s">&quot;person&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&quot;_id&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&quot;_score&quot;</span><span class="p">:</span> <span class="mf">0.30685282</span><span class="p">,</span>
+</span><span class='line'>                <span class="s">&quot;_source&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                    <span class="s">&quot;user&quot;</span><span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s">&quot;title&quot;</span><span class="p">:</span> <span class="s">&quot;工程師&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s">&quot;desc&quot;</span><span class="p">:</span> <span class="s">&quot;數據庫管理，軟件開發&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="mi">18</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>        <span class="p">]</span>
+</span><span class='line'>    <span class="p">},</span>
+</span><span class='line'>    <span class="s">&quot;aggregations&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;all_user&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>            <span class="s">&quot;doc_count_error_upper_bound&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&quot;sum_other_doc_count&quot;</span><span class="p">:</span> <span class="mi">0</span><span class="p">,</span>
+</span><span class='line'>            <span class="s">&quot;buckets&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>                <span class="p">{</span>
+</span><span class='line'>                    <span class="s">&quot;key&quot;</span><span class="p">:</span> <span class="s">&quot;leon&quot;</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s">&quot;doc_count&quot;</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span>
+</span><span class='line'>                    <span class="s">&quot;avg_age&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>                        <span class="s">&quot;value&quot;</span><span class="p">:</span> <span class="mi">28</span>
+</span><span class='line'>                    <span class="p">}</span>
+</span><span class='line'>                <span class="p">}</span>
+</span><span class='line'>            <span class="p">]</span>
+</span><span class='line'>        <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
 <h1>Reference</h1>
 
 <ul>
 <li><a href="https://github.com/elastic/elasticsearch">elasticsearch</a></li>
 <li><a href="http://www.ruanyifeng.com/blog/2017/08/elasticsearch.html">全文搜索引擎 Elasticsearch 入門課程</a></li>
 <li><a href="https://es.xiaoleilu.com/010_Intro/00_README.html">Elasticsearch 權威指南</a></li>
+<li><a href="https://www.cnblogs.com/yjf512/p/4897294.html">elasticsearch 查詢（match和term）</a></li>
+<li><a href="https://www.youtube.com/watch?v=oPObRc8tHgQ">ElasticSearch in action - Thijs Feryn(video)</a></li>
+<li><a href="https://my.oschina.net/weiweiblog/blog/1574020">ElasticSearch各種查詢關鍵字的區別（重要）</a></li>
 </ul>
 
 </div>

@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Elasticsearch | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/elasticsearch/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2019-04-26T23:50:23+08:00</updated>
+  <updated>2019-05-16T23:05:21+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -173,6 +173,15 @@ yellow open   accounts   5   1          1            0      4.1kb          4.1kb
 
 <p><a href="https://github.com/medcl/elasticsearch-analysis-ik/">elasticsearch-analysis-ik</a></p>
 
+<h3>index type</h3>
+
+<ul>
+<li><code>analyzed</code> - analyzed string and index it</li>
+<li><code>not_analyzed</code> - index it but not not analyzed</li>
+<li><code>no</code> - not index and analyzed</li>
+</ul>
+
+
 <pre><code class="go">$ curl -X PUT 'localhost:9200/accounts' -d '
 {
   "mappings": {
@@ -204,6 +213,33 @@ yellow open   accounts   5   1          1            0      4.1kb          4.1kb
       }
     }
   }
+}'
+</code></pre>
+
+<p>update analyzer</p>
+
+<pre><code class="go">$ curl -X PUT 'localhost:9200/accounts/_mapping/person' -d '
+{
+  "properties" : {
+    "tag" : {
+      "type" :    "string",
+      "index":    "not_analyzed"
+    }
+  }
+}'
+</code></pre>
+
+<p>show mapping</p>
+
+<pre><code class="go">$ curl 'localhost:9200/accounts/_mapping/person'
+</code></pre>
+
+<p>understand elastic how to analyze text</p>
+
+<pre><code class="go">curl /_analyze 'localhost:9200' -d '
+{
+  "analyzer": "standard",
+  "text": "Text to analyze"
 }'
 </code></pre>
 
@@ -317,9 +353,29 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }
 </code></pre>
 
-<h2>Show all documents (empty search)</h2>
+<h2>Search all documents (empty search)</h2>
+
+<ul>
+<li><code>/_search</code> - all index, all type</li>
+<li><code>/gb/_search</code> - gb index, all type</li>
+<li><code>/gb,us/_search</code> - gb and us index, all type</li>
+<li><code>/g*,u*/_search</code> - g<em> and u</em> start index, all type</li>
+<li><code>/gb/user/_search</code> - gb index, user type</li>
+<li><code>/gb,us/user,tweet/_search</code> - gb or us index, user and tweet type</li>
+<li><code>/_all/user,tweet/_search</code> - all index, user and tweet type</li>
+</ul>
+
 
 <pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'
+
+
+// empty body like use
+
+{
+    "query": {
+        "match_all": {}
+    }
+}
 </code></pre>
 
 <ul>
@@ -367,7 +423,40 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }
 </code></pre>
 
-<h2><code>filtered</code> Search</h2>
+<h2><code>match</code> &amp; <code>multi_match</code> Search</h2>
+
+<p>analyzer text and search each keyword</p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "match" : {
+            "user" : "leon"
+        }
+    }
+}'
+</code></pre>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "multi_match" : {
+           "query":    "數據庫",
+            "fields":   [ "title", "desc" ]
+        }
+    }
+}'
+</code></pre>
+
+<h2><code>filtered</code> &amp; <code>range</code> Search</h2>
+
+<ul>
+<li><code>gt</code> - <code>&gt;</code></li>
+<li><code>gte</code> - <code>&gt;=</code></li>
+<li><code>lt</code> - <code>&lt;</code></li>
+<li><code>lte</code> -<code>&lt;=</code></li>
+</ul>
+
 
 <pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
 {
@@ -383,6 +472,44 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
                     "user" : "leon"
                 }
             }
+        }
+    }
+}'
+</code></pre>
+
+<h2><code>term</code> &amp; <code>terms</code> Search</h2>
+
+<p>Exact match not to analyzer</p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "term" : {
+            "user": "leon"
+        }
+    }
+}'
+</code></pre>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "terms" : {
+            "user": ["leon", "mark"]
+        }
+    }
+}'
+</code></pre>
+
+<h2><code>exists</code> &amp; <code>missing</code> Search</h2>
+
+<p>Search field <code>IS NUll</code> or <code>IS NOT NULL</code></p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "exists" : {
+            "field": "title"
         }
     }
 }'
@@ -430,7 +557,7 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }'
 </code></pre>
 
-<h3><code>and</code> Search</h3>
+<h3><code>Bool</code> Search (<code>and</code>)</h3>
 
 <p>should use <a href="https://www.elastic.co/guide/en/elasticsearch/reference/7.0/query-dsl-bool-query.html">Bool Query</a></p>
 
@@ -449,7 +576,7 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }'
 </code></pre>
 
-<h3><code>phrases</code> Search</h3>
+<h3><code>match_phrase</code> Search</h3>
 
 <p>must be &ldquo;軟件 系統&rdquo;</p>
 
@@ -463,7 +590,46 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }'
 </code></pre>
 
-<h3><code>aggregations</code> Search</h3>
+<h3><code>highlight</code> Search</h3>
+
+<p>returm search result include highlight <code>&lt;em&gt;&lt;/em&gt;</code></p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+  "query":  {
+        "match_phrase" : {
+            "user" : "leon"
+        }
+    },
+    "highlight": {
+        "fields" : {
+            "user" : {}
+        }
+    }
+}
+'
+</code></pre>
+
+<pre><code class="go">{
+ "_index": "accounts",
+ "_type": "person",
+ "_id": "1",
+ "_score": 0.30685282,
+ "_source": {
+   "user": "leon",
+   "title": "工程師",
+   "desc": "數據庫管理，軟件開發",
+   "age": 18
+ },
+ "highlight": {
+    "user": [
+      "&lt;em&gt;leon&lt;/em&gt;"
+    ]
+  }
+}
+</code></pre>
+
+<h3><code>aggregations</code> Search like SQL <code>GROUP BY</code></h3>
 
 <p>count each user</p>
 
@@ -540,12 +706,93 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 // ...
 </code></pre>
 
+<p>mix query</p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query": {
+        "match": {
+            "user": "leon"
+        }
+    },
+    "aggs" : {
+        "all_user" : {
+            "terms" : { "field" : "user" },
+            "aggs" : {
+                "avg_age" : {
+                    "avg" : { "field" : "age" }
+                }
+            }
+        }
+    }
+}'
+</code></pre>
+
+<pre><code class="go">{
+    "took": 50,
+    "timed_out": false,
+    "_shards": {
+        "total": 5,
+        "successful": 5,
+        "failed": 0
+    },
+    "hits": {
+        "total": 2,
+        "max_score": 1.4054651,
+        "hits": [
+            {
+                "_index": "accounts",
+                "_type": "person",
+                "_id": "8",
+                "_score": 1.4054651,
+                "_source": {
+                    "user": "leon",
+                    "title": "工程師",
+                    "desc": "數據庫管理",
+                    "age": 38
+                }
+            },
+            {
+                "_index": "accounts",
+                "_type": "person",
+                "_id": "1",
+                "_score": 0.30685282,
+                "_source": {
+                    "user": "leon",
+                    "title": "工程師",
+                    "desc": "數據庫管理，軟件開發",
+                    "age": 18
+                }
+            }
+        ]
+    },
+    "aggregations": {
+        "all_user": {
+            "doc_count_error_upper_bound": 0,
+            "sum_other_doc_count": 0,
+            "buckets": [
+                {
+                    "key": "leon",
+                    "doc_count": 2,
+                    "avg_age": {
+                        "value": 28
+                    }
+                }
+            ]
+        }
+    }
+}
+</code></pre>
+
 <h1>Reference</h1>
 
 <ul>
 <li><a href="https://github.com/elastic/elasticsearch">elasticsearch</a></li>
 <li><a href="http://www.ruanyifeng.com/blog/2017/08/elasticsearch.html">全文搜索引擎 Elasticsearch 入門課程</a></li>
 <li><a href="https://es.xiaoleilu.com/010_Intro/00_README.html">Elasticsearch 權威指南</a></li>
+<li><a href="https://www.cnblogs.com/yjf512/p/4897294.html">elasticsearch 查詢（match和term）</a></li>
+<li><a href="https://www.youtube.com/watch?v=oPObRc8tHgQ">ElasticSearch in action - Thijs Feryn(video)</a></li>
+<li><a href="https://my.oschina.net/weiweiblog/blog/1574020">ElasticSearch各種查詢關鍵字的區別（重要）</a></li>
 </ul>
 
 ]]></content>
