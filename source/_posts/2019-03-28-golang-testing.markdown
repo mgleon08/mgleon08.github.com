@@ -52,7 +52,7 @@ import (
 )
 
 func Test_division_1(t *testing.T) {
-	if i, e := division(6, 2); i != 3 || e != nil {
+	if i, e := Division(6, 2); i != 3 || e != nil {
 		t.Error("失敗")
 	} else {
 		t.Log("成功")
@@ -75,7 +75,7 @@ func Test_division_table(t *testing.T) {
 	}
 
 	for _, table := range tables {
-		if i, e := division(table.x, table.y); i != 3 || e != nil {
+		if i, e := Division(table.x, table.y); i != 3 || e != nil {
 			t.Error("失敗")
 		} else {
 			t.Log("成功")
@@ -195,6 +195,90 @@ func ExampleDivision2() {
 	// Output:
 	// 3
 	// 4
+}
+```
+
+# Use assert package
+
+```go
+// main.go
+package main
+
+import (
+	"errors"
+	"fmt"
+)
+
+type numbers struct {
+	A float64
+	B float64
+}
+
+func Division(number numbers) (float64, error) {
+	if number.B == 0 {
+		return 0, errors.New("b can not be 0")
+	}
+	return number.A / number.B, nil
+}
+
+func main() {
+	number := numbers{ 60, 2 }
+	fmt.Println(Division(number))
+}
+```
+
+```go
+// main_test.go
+package main
+
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
+
+func Test_Division(t *testing.T) {
+	// Arrange
+	testCases := []struct {
+		name     string
+		p        numbers
+		expected float64
+	}{
+		{
+			name: "9/3 = 3",
+			p: numbers{
+				A: 9,
+				B: 3,
+			},
+			expected: 3,
+		},
+		{
+			name: "6/3 = 2",
+			p: numbers{
+				A: 6,
+				B: 3,
+			},
+			expected: 2,
+		},
+		{
+			name: "3/3 = 1",
+			p: numbers{
+				A: 3,
+				B: 3,
+			},
+			expected: 1,
+		},
+	}
+
+	for _, c := range testCases {
+		t.Run(c.name, func(t *testing.T) {
+			// Act
+			r, _ := Division(c.p)
+
+			// Assert
+			assert.Equal(t, r, c.expected)
+		})
+	}
 }
 ```
 

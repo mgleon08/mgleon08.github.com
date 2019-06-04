@@ -83,6 +83,14 @@ curl localhost:9200/_cluster/health?pretty=true
 }
 ```
 
+### explain
+
+know how to get this result
+
+```go
+localhost:9200/_search?explain
+```
+
 ## Count
 
 ```go
@@ -161,6 +169,10 @@ curl -X PUT 'localhost:9200/weather'
 
 ```go
 curl -X DELETE 'localhost:9200/weather'
+curl -X DELETE 'localhost:9200/_all'
+curl -X DELETE 'localhost:9200/*'
+curl -X DELETE 'localhost:9200/index_*'
+curl -X DELETE 'localhost:9200/A,B'
 ```
 
 ```go
@@ -365,7 +377,10 @@ version was change to 2
 }
 ```
 
-## Search all documents (empty search)
+
+## Search keyword
+
+### Search all documents (empty search)
 
 * `/_search` - all index, all type
 * `/gb/_search` - gb index, all type
@@ -431,7 +446,7 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'
 }
 ```
 
-## `match` & `multi_match` Search
+### `match` & `multi_match` Search
 
 analyzer text and search each keyword
 
@@ -458,7 +473,9 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
 }'
 ```
 
-## `filtered` & `range ` Search
+### `filtered` & `range ` Search
+
+> filtered replaced by the bool
 
 * `gt` - `>`
 * `gte` - `>=`
@@ -485,7 +502,7 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
 }'
 ```
 
-## `term` & `terms` Search
+### `term` & `terms` Search
 
 Exact match not to analyzer
 
@@ -511,7 +528,7 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
 }'
 ```
 
-## `exists` & `missing` Search
+### `exists` & `missing` Search
 
 Search field `IS NUll` or `IS NOT NULL`
 
@@ -808,6 +825,76 @@ curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
         }
     }
 }
+```
+
+
+## Sort
+
+* ASC
+* DESC
+
+```go
+curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "match" : {
+            "user" : "leon"
+        }
+    },
+    "sort": { 
+   		"age": { 
+   			"order": "asc" 
+   		}
+   	}
+}'
+```
+
+`max_score` & `_score` is null, because not use to sort
+
+```go
+// ...
+"hits": {
+  "total": 2,
+  "max_score": null,
+  "hits": [
+      {
+          "_index": "accounts",
+          "_type": "person",
+          "_id": "1",
+          "_score": null,
+          "_source": {
+              "user": "leon",
+              "title": "工程師",
+              "desc": "數據庫管理，軟件開發",
+              "age": 18
+          },
+          "sort": [
+              18
+          ]
+      }
+      // ...
+  ]
+}
+// ...
+```
+
+### mutiple sort
+
+Use level 2 sort if level 1 sort result have same age
+
+```go
+curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "match" : {
+            "user" : "leon"
+        }
+    },
+    "sort": [
+        { "age":   { "order": "asc" }},
+        { "_score": { "order": "desc" }}
+    ]
+}'
 ```
 
 # Reference
