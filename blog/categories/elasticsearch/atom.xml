@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Elasticsearch | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/elasticsearch/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2019-05-16T23:05:21+08:00</updated>
+  <updated>2019-06-04T19:08:23+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,448 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Advance ElasticSearch]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/05/18/advanced-elasticsearch/"/>
+    <updated>2019-05-18T08:55:02+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/05/18/advanced-elasticsearch</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<h1>Bool Query</h1>
+
+<ul>
+<li><code>must</code> - 查詢必須匹配的字，並計算 <code>_score</code> (與 AND 等價)</li>
+<li><code>filter</code> - 查詢必須匹配的字，不計算 <code>_score</code> (代表對評分沒有任何貢獻，只是用來過濾)</li>
+<li><code>should</code> - 滿足任一匹配的字，將增加 <code>_score</code> ，否則，無任何影響，如果一個 query 中沒有 <code>must</code> 和 <code>filter</code> 則必須匹配一個或以上的 <code>should</code> (與 OR 等價)</li>
+<li><code>must_not</code> - 查詢排除的字 (與 NOT 等價)</li>
+<li><code>boost</code> - 權重</li>
+<li><code>minimum_should_match</code> - 設定 <code>should</code> 至少要匹配幾個句子</li>
+</ul>
+
+
+<h2>Example 1:</h2>
+
+<p>user 必須是 kimchy，並且過濾出 tag 是 &ldquo;tech&rdquo; (匹配多寡並不影響 <em>score)，age 範圍排除 10 ~ 20，如果 tag 有 <code>wow</code> 或是 <code>elasticsearch</code> 則 </em>score 比較高，兩個都有則更高</p>
+
+<pre><code class="go">{
+    "bool" : {
+        "must" : {
+            "term" : { "user" : "kimchy" }
+        },
+        "filter": {
+            "term" : { "tag" : "tech" }
+        },
+        "must_not" : {
+            "range" : {
+                "age" : { "from" : 10, "to" : 20 }
+            }
+        },
+        "should" : [
+            {
+                "term" : { "tag" : "wow" }
+            },
+            {
+                "term" : { "tag" : "elasticsearch" }
+            }
+        ],
+        "minimum_should_match" : 1,
+        "boost" : 1.0
+    }
+}
+</code></pre>
+
+<h2>Example 2:</h2>
+
+<blockquote><p>將 bool 帶入 filter 一樣可以不計算分數</p></blockquote>
+
+<p>查找 <code>title</code> 字段匹配 <code>how to make millions</code> 並且不被 <code>tag</code> 為 <code>spam</code> 的文件。那些被 <code>tag</code> 為 <code>starred</code> 或在2014之後的文件，將比另外那些文件擁有更高的排名。如果 <em>兩者</em> 都滿足，那麼它排名將更高，並過濾出 <code>price</code> 必須小於等於 29.99，且 <code>category</code> 不能是 <code>ebooks</code> 這兩個條件則不影響排名</p>
+
+<pre><code class="go">{
+    "bool": {
+        "must":     { "match": { "title": "how to make millions" }},
+        "must_not": { "match": { "tag":   "spam" }},
+        "should": [
+            { "match": { "tag": "starred" }},
+            { "range": { "date": { "gte": "2014-01-01" }}}
+        ],
+        "filter": {
+          "bool": { 
+              "must": [
+                  { "range": { "price": { "lte": 29.99 }}}
+              ],
+              "must_not": [
+                  { "term": { "category": "ebooks" }}
+              ]
+          }
+        }
+    }
+}
+</code></pre>
+
+<h2>Example3: constant_score</h2>
+
+<p>它將一個不變的常量評分應用於所有匹配的文件，比較簡潔用來取代只有一個 filter 的 bool</p>
+
+<pre><code class="go">{
+    "constant_score":   {
+        "filter": {
+            "term": { "category": "ebooks" } 
+        }
+    }
+}
+</code></pre>
+
+<h2>Example4: boost 權重</h2>
+
+<p>預設為 1</p>
+
+<pre><code class="go">{
+    "query": {
+        "bool": {
+            "must": {
+                "match": {  
+                    "content": {
+                        "query":    "full text search",
+                        "operator": "and"
+                    }
+                }
+            },
+            "should": [
+                { "match": {
+                    "content": {
+                        "query": "Elasticsearch",
+                        "boost": 3 
+                    }
+                }},
+                { "match": {
+                    "content": {
+                        "query": "Lucene",
+                        "boost": 2 
+                    }
+                }}
+            ]
+        }
+    }
+}
+</code></pre>
+
+<h2>Example5: equle to match</h2>
+
+<h3>OR</h3>
+
+<p>下面兩個相等</p>
+
+<pre><code class="go">{
+    "match": { "title": "brown fox"}
+}
+</code></pre>
+
+<pre><code class="go">{
+  "bool": {
+    "should": [
+      { "term": { "title": "brown" }},
+      { "term": { "title": "fox"   }}
+    ]
+  }
+}
+</code></pre>
+
+<h3>AND</h3>
+
+<p>下面兩個相等</p>
+
+<pre><code class="go">{
+    "match": {
+        "title": {
+            "query":    "brown fox",
+            "operator": "and"
+        }
+    }
+}
+</code></pre>
+
+<pre><code class="go">{
+  "bool": {
+    "must": [
+      { "term": { "title": "brown" }},
+      { "term": { "title": "fox"   }}
+    ]
+  }
+}
+</code></pre>
+
+<h3>minimum_should_match</h3>
+
+<p>下面兩個相等</p>
+
+<pre><code class="go">{
+    "match": {
+        "title": {
+            "query":                "quick brown fox",
+            "minimum_should_match": "75%"
+        }
+    }
+}
+</code></pre>
+
+<pre><code class="go">{
+  "bool": {
+    "should": [
+      { "term": { "title": "brown" }},
+      { "term": { "title": "fox"   }},
+      { "term": { "title": "quick" }}
+    ],
+    "minimum_should_match": 2 
+  }
+}
+</code></pre>
+
+<h1>Exact Values Search</h1>
+
+<h3>數字查詢</h3>
+
+<pre><code class="sql">SELECT document
+FROM   products
+WHERE  price = 20
+</code></pre>
+
+<p>通常精準的字查詢，就不需要計算分數，因此加上 <code>constant_score</code></p>
+
+<pre><code class="go">{
+    "query" : {
+        "constant_score" : { 
+            "filter" : {
+                "term" : { 
+                    "price" : 20
+                }
+            }
+        }
+    }
+}
+</code></pre>
+
+<h3>text 查詢</h3>
+
+<pre><code class="sql">SELECT product
+FROM   products
+WHERE  productID = "XHDK-A-1293-#fJ3"
+</code></pre>
+
+<p>這裡會有個問題，分析器會解析 <code>XHDK-A-1293-#fJ3</code> -> <code>XHDK</code> <code>A</code> <code>1293</code> <code>#fJ3</code>，因此查詢時會有問題</p>
+
+<pre><code class="go">GET /my_store/products/_search
+{
+    "query" : {
+        "constant_score" : {
+            "filter" : {
+                "term" : {
+                    "productID" : "XHDK-A-1293-#fJ3"
+                }
+            }
+        }
+    }
+}
+</code></pre>
+
+<p>必須重新針對 productID 設定不要分析，重新設定前記得先刪除原本的 index</p>
+
+<pre><code class="go">{
+    "mappings" : {
+        "products" : {
+            "properties" : {
+                "productID" : {
+                    "type" : "string",
+                    "index" : "not_analyzed" 
+                }
+            }
+        }
+    }
+
+}
+</code></pre>
+
+<h1>Combining Filters</h1>
+
+<p>Example1</p>
+
+<pre><code class="sql">SELECT product
+FROM   products
+WHERE  (price = 20 OR productID = "XHDK-A-1293-#fJ3")
+  AND  (price != 30)
+</code></pre>
+
+<pre><code class="go">{
+   "query" : {
+      "bool" : { 
+         "filter" : {
+            "bool" : {
+              "should" : [
+                 { "term" : {"price" : 20}}, 
+                 { "term" : {"productID" : "XHDK-A-1293-#fJ3"}} 
+              ],
+              "must_not" : {
+                 "term" : {"price" : 30} 
+              }
+           }
+         }
+      }
+   }
+}
+</code></pre>
+
+<p>Example2</p>
+
+<pre><code class="sql">SELECT document
+FROM   products
+WHERE  productID      = "KDKE-B-9947-#kL5"
+  OR (     productID = "JODL-X-1937-#pV7"
+       AND price     = 30 )
+</code></pre>
+
+<pre><code class="go">{
+   "query" : {
+      "bool" : {
+         "filter" : {
+            "bool" : {
+              "should" : [
+                { "term" : {"productID" : "KDKE-B-9947-#kL5"}}, 
+                { "bool" : { 
+                  "must" : [
+                    { "term" : {"productID" : "JODL-X-1937-#pV7"}}, 
+                    { "term" : {"price" : 30}} 
+                  ]
+                }}
+              ]
+           }
+         }
+      }
+   }
+}
+</code></pre>
+
+<p>Example3</p>
+
+<ul>
+<li>在收件箱中，且沒有被讀過的</li>
+<li>不在 收件箱中，但被標註重要的</li>
+</ul>
+
+
+<pre><code class="go">{
+  "query": {
+      "constant_score": {
+          "filter": {
+              "bool": {
+                 "should": [
+                    { "bool": {
+                          "must": [
+                             { "term": { "folder": "inbox" }}, 
+                             { "term": { "read": false }}
+                          ]
+                    }},
+                    { "bool": {
+                          "must_not": {
+                             "term": { "folder": "inbox" } 
+                          },
+                          "must": {
+                             "term": { "important": true }
+                          }
+                    }}
+                 ]
+              }
+            }
+        }
+    }
+}
+</code></pre>
+
+<h1>Disjunction Max Query 最佳字段</h1>
+
+<p>給予兩個字段</p>
+
+<pre><code class="go">PUT /my_index/my_type/1
+{
+    "title": "Quick brown rabbits",
+    "body":  "Brown rabbits are commonly seen."
+}
+
+PUT /my_index/my_type/2
+{
+    "title": "Keeping pets healthy",
+    "body":  "My quick brown fox eats rabbits on a regular basis."
+}
+</code></pre>
+
+<h3>bool</h3>
+
+<p>使用一般的 bool，會發現 1 的分數會比較高，主要在於 1 的兩個句字都有包含到 <code>Brown</code>，但我們希望的是比較準確的 2，因為 body 就包含了 <code>Brown fox</code></p>
+
+<pre><code class="go">{
+    "query": {
+        "bool": {
+            "should": [
+                { "match": { "title": "Brown fox" }},
+                { "match": { "body":  "Brown fox" }}
+            ]
+        }
+    }
+}
+</code></pre>
+
+<h3>dis_max</h3>
+
+<p>將任何與任一查詢匹配的文件作為結果返回，但只將最佳匹配的評分作為查詢的評分結果返回</p>
+
+<pre><code class="go">{
+    "query": {
+        "dis_max": {
+            "queries": [
+                { "match": { "title": "Brown fox" }},
+                { "match": { "body":  "Brown fox" }}
+            ]
+        }
+    }
+}
+</code></pre>
+
+<p>如果用 dis_max 查出的兩個最佳匹配分數一樣，可以加上 tie_breaker 調優，將其他匹配的語句一起做計算並乘個比例，範圍在 0~1</p>
+
+<blockquote><p>tie_breaker 可以是 0 到 1 之間的浮點數，其中 0 代表使用 dis_max 最佳匹配語句的普通邏輯， 1 表示所有匹配語句同等重要。最佳的精確值需要根據數據與查詢調試得出，但是合理值應該與零接近（處於 0.1 - 0.4 之間），這樣就不會顛覆 dis_max 最佳匹配性質的根本。</p></blockquote>
+
+<pre><code class="go">{
+    "query": {
+        "dis_max": {
+            "queries": [
+                { "match": { "title": "Quick pets" }},
+                { "match": { "body":  "Quick pets" }}
+            ],
+            "tie_breaker": 0.3
+        }
+    }
+}
+</code></pre>
+
+<h1>Function Score Query</h1>
+
+<ul>
+<li><a href="https://www.scienjus.com/elasticsearch-function-score-query/">透過Function Score Query優化Elasticsearch搜索結果</a></li>
+<li><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/cn/boosting-by-popularity.html">按受歡迎度提升權重</a></li>
+<li><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/cn/function-score-filters.html">過濾集提升權重</a></li>
+</ul>
+
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/index.html">Elasticsearch: 權威指南 | Elastic</a></li>
+<li><a href="https://blog.csdn.net/dm_vincent/article/details/41743955">[Elasticsearch] 全文搜索 (三) - match查询和bool查询的关系，提升查询子句 - dm_vincent的专栏 - CSDN博客</a></li>
+<li><a href="https://cloud.tencent.com/developer/article/1113818">Elasticsearch DSL 常用語法介紹</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Getting Started With the ElasticSearch]]></title>
@@ -93,6 +535,13 @@ brew cask install homebrew/cask-versions/java8
 }
 </code></pre>
 
+<h3>explain</h3>
+
+<p>know how to get this result</p>
+
+<pre><code class="go">localhost:9200/_search?explain
+</code></pre>
+
 <h2>Count</h2>
 
 <pre><code class="go">curl -X GET 'http://localhost:9200/_count?pretty' -d '
@@ -162,6 +611,10 @@ yellow open   accounts   5   1          1            0      4.1kb          4.1kb
 <h2>Delete Index</h2>
 
 <pre><code class="go">curl -X DELETE 'localhost:9200/weather'
+curl -X DELETE 'localhost:9200/_all'
+curl -X DELETE 'localhost:9200/*'
+curl -X DELETE 'localhost:9200/index_*'
+curl -X DELETE 'localhost:9200/A,B'
 </code></pre>
 
 <pre><code class="go">{
@@ -353,7 +806,9 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }
 </code></pre>
 
-<h2>Search all documents (empty search)</h2>
+<h2>Search keyword</h2>
+
+<h3>Search all documents (empty search)</h3>
 
 <ul>
 <li><code>/_search</code> - all index, all type</li>
@@ -423,7 +878,7 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }
 </code></pre>
 
-<h2><code>match</code> &amp; <code>multi_match</code> Search</h2>
+<h3><code>match</code> &amp; <code>multi_match</code> Search</h3>
 
 <p>analyzer text and search each keyword</p>
 
@@ -448,7 +903,9 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }'
 </code></pre>
 
-<h2><code>filtered</code> &amp; <code>range</code> Search</h2>
+<h3><code>filtered</code> &amp; <code>range</code> Search</h3>
+
+<blockquote><p>filtered replaced by the bool</p></blockquote>
 
 <ul>
 <li><code>gt</code> - <code>&gt;</code></li>
@@ -477,7 +934,7 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }'
 </code></pre>
 
-<h2><code>term</code> &amp; <code>terms</code> Search</h2>
+<h3><code>term</code> &amp; <code>terms</code> Search</h3>
 
 <p>Exact match not to analyzer</p>
 
@@ -501,7 +958,7 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
 }'
 </code></pre>
 
-<h2><code>exists</code> &amp; <code>missing</code> Search</h2>
+<h3><code>exists</code> &amp; <code>missing</code> Search</h3>
 
 <p>Search field <code>IS NUll</code> or <code>IS NOT NULL</code></p>
 
@@ -782,6 +1239,75 @@ curl 'localhost:9200/accounts/person/1/_source?pretty=true'
         }
     }
 }
+</code></pre>
+
+<h2>Sort</h2>
+
+<ul>
+<li>ASC</li>
+<li>DESC</li>
+</ul>
+
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "match" : {
+            "user" : "leon"
+        }
+    },
+    "sort": { 
+        "age": { 
+            "order": "asc" 
+        }
+    }
+}'
+</code></pre>
+
+<p><code>max_score</code> &amp; <code>_score</code> is null, because not use to sort</p>
+
+<pre><code class="go">// ...
+"hits": {
+  "total": 2,
+  "max_score": null,
+  "hits": [
+      {
+          "_index": "accounts",
+          "_type": "person",
+          "_id": "1",
+          "_score": null,
+          "_source": {
+              "user": "leon",
+              "title": "工程師",
+              "desc": "數據庫管理，軟件開發",
+              "age": 18
+          },
+          "sort": [
+              18
+          ]
+      }
+      // ...
+  ]
+}
+// ...
+</code></pre>
+
+<h3>mutiple sort</h3>
+
+<p>Use level 2 sort if level 1 sort result have same age</p>
+
+<pre><code class="go">curl 'localhost:9200/accounts/person/_search?pretty=true'  -d '
+{
+    "query" : {
+        "match" : {
+            "user" : "leon"
+        }
+    },
+    "sort": [
+        { "age":   { "order": "asc" }},
+        { "_score": { "order": "desc" }}
+    ]
+}'
 </code></pre>
 
 <h1>Reference</h1>

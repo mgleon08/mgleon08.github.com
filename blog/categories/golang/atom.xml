@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Golang | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/golang/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2019-05-16T23:05:21+08:00</updated>
+  <updated>2019-06-04T19:08:23+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,209 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Golang - GraphQL With Gqlgen]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/06/04/golang-graphql-with-gqlgen/"/>
+    <updated>2019-06-04T18:50:50+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/06/04/golang-graphql-with-gqlgen</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<h2>Setup Project</h2>
+
+<p>使用 Go Module  記得先執行 <code>export GO111MODULE=on</code></p>
+
+<pre><code class="go">mkdir gqlgen-todos
+cd gqlgen-todos
+go mod init github.com/[username]/gqlgen-todos
+</code></pre>
+
+<h2>Define the schema</h2>
+
+<p>新增 <code>schema.graphql</code> 定義 <a href="https://graphql.org/learn/queries/">graphql 結構</a></p>
+
+<pre><code class="go">type Todo {
+  id: ID!
+  text: String!
+  done: Boolean!
+  user: User!
+}
+
+type User {
+  id: ID!
+  name: String!
+}
+
+type Query {
+  todos: [Todo!]!
+}
+
+input NewTodo {
+  text: String!
+  userId: String!
+}
+
+type Mutation {
+  createTodo(input: NewTodo!): Todo!
+}
+</code></pre>
+
+<h2>Create the project skeleton</h2>
+
+<p>透過 <code>gglgen</code> 建立 graphql 的專案初始化</p>
+
+<pre><code class="go">go run github.com/99designs/gqlgen init
+</code></pre>
+
+<ul>
+<li><code>gqlgen.yml</code> — The gqlgen config file, knobs for controlling the generated code.</li>
+<li><code>generated.go</code> — The GraphQL execution runtime, the bulk of the generated code.</li>
+<li><code>models_gen.go</code> — Generated models required to build the graph. Often you will override these with your own models. Still very useful for input types.</li>
+<li><code>resolver.go</code> — This is where your application code lives. generated.go will call into this to get the data the user has requested.</li>
+<li><code>server/server.go</code> — This is a minimal entry point that sets up an http.Handler to the generated GraphQL server.</li>
+</ul>
+
+
+<h2>Create the database models</h2>
+
+<p>自動生成的 Todo model 不是正確的，因為 Todo 裡面還嵌入了 User，我們希望是在使用者要求時才給予，因此要另外建立 <code>todo.go</code></p>
+
+<pre><code class="go">// todo.go
+package gqlgen_todos
+
+type Todo struct {
+    ID     string
+    Text   string
+    Done   bool
+    UserID string
+}
+</code></pre>
+
+<p>將新的 struct 路徑加到 <code>gqlgen.yml</code></p>
+
+<pre><code class="go">// Todo 對應到 todo.go 裡的 struct name
+models:
+  Todo:
+    model: github.com/[username]/gqlgen-todos.Todo
+</code></pre>
+
+<p>重新生成檔案</p>
+
+<pre><code class="go">go run github.com/99designs/gqlgen
+</code></pre>
+
+<h2>Implement the resolvers</h2>
+
+<p>在 <code>generated.go</code> 產生了很多個 resolvers interface，接著就要實作這些，但 <code>resolver.go</code> 這個檔案，再新增新的 method 時，要重新再產生一份</p>
+
+<pre><code class="go">rm resolver.go
+go run github.com/99designs/gqlgen
+</code></pre>
+
+<p>實作 <code>resolver.go</code></p>
+
+<pre><code class="go">package gqlgen_todos
+
+import (
+    context "context"
+    "fmt"
+    "math/rand"
+)
+
+type Resolver struct {
+    todos []Todo
+}
+
+func (r *Resolver) Mutation() MutationResolver {
+    return &amp;mutationResolver{r}
+}
+func (r *Resolver) Query() QueryResolver {
+    return &amp;queryResolver{r}
+}
+func (r *Resolver) Todo() TodoResolver {
+    return &amp;todoResolver{r}
+}
+
+type mutationResolver struct{ *Resolver }
+
+func (r *mutationResolver) CreateTodo(ctx context.Context, input NewTodo) (*Todo, error) {
+    todo := &amp;Todo{
+        Text:   input.Text,
+        ID:     fmt.Sprintf("T%d", rand.Int()),
+        UserID: input.UserID,
+    }
+    r.todos = append(r.todos, *todo)
+    return todo, nil
+}
+
+type queryResolver struct{ *Resolver }
+
+func (r *queryResolver) Todos(ctx context.Context) ([]Todo, error) {
+    return r.todos, nil
+}
+
+type todoResolver struct{ *Resolver }
+
+func (r *todoResolver) User(ctx context.Context, obj *Todo) (*User, error) {
+    return &amp;User{ID: obj.UserID, Name: "user " + obj.UserID}, nil
+}
+</code></pre>
+
+<h1>Query</h1>
+
+<pre><code class="go">// open http://localhost:8080
+go run server/server.go
+</code></pre>
+
+<pre><code class="go">// create
+mutation createTodo {
+  createTodo(input:{text:"todo", userId:"1"}) {
+    user {
+      id
+    }
+    text
+    done
+  }
+}
+
+// show
+query findTodos {
+    todos {
+      text
+      done
+      user {
+        name
+      }
+    }
+}
+</code></pre>
+
+<h2>Finishing touches</h2>
+
+<p>At the top of our resolver.go add the following line:</p>
+
+<pre><code class="go">//go:generate go run github.com/99designs/gqlgen
+</code></pre>
+
+<p>This magic comment tells go generate what command to run when we want to regenerate our code</p>
+
+<h2>Example</h2>
+
+<ul>
+<li><a href="https://github.com/mgleon08/go-packages/tree/master/020.gqlgen-todos">gqlgen-todos</a></li>
+</ul>
+
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://gqlgen.com/getting-started/">gqlgen getting-started</a></li>
+<li><a href="https://graphql.org/">Graphql</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Golang - Simple RESTful]]></title>
@@ -762,7 +965,7 @@ import (
 )
 
 func Test_division_1(t *testing.T) {
-    if i, e := division(6, 2); i != 3 || e != nil {
+    if i, e := Division(6, 2); i != 3 || e != nil {
         t.Error("失敗")
     } else {
         t.Log("成功")
@@ -785,7 +988,7 @@ func Test_division_table(t *testing.T) {
     }
 
     for _, table := range tables {
-        if i, e := division(table.x, table.y); i != 3 || e != nil {
+        if i, e := Division(table.x, table.y); i != 3 || e != nil {
             t.Error("失敗")
         } else {
             t.Log("成功")
@@ -912,6 +1115,88 @@ func ExampleDivision2() {
 }
 </code></pre>
 
+<h1>Use assert package</h1>
+
+<pre><code class="go">// main.go
+package main
+
+import (
+    "errors"
+    "fmt"
+)
+
+type numbers struct {
+    A float64
+    B float64
+}
+
+func Division(number numbers) (float64, error) {
+    if number.B == 0 {
+        return 0, errors.New("b can not be 0")
+    }
+    return number.A / number.B, nil
+}
+
+func main() {
+    number := numbers{ 60, 2 }
+    fmt.Println(Division(number))
+}
+</code></pre>
+
+<pre><code class="go">// main_test.go
+package main
+
+import (
+    "testing"
+
+    "github.com/stretchr/testify/assert"
+)
+
+func Test_Division(t *testing.T) {
+    // Arrange
+    testCases := []struct {
+        name     string
+        p        numbers
+        expected float64
+    }{
+        {
+            name: "9/3 = 3",
+            p: numbers{
+                A: 9,
+                B: 3,
+            },
+            expected: 3,
+        },
+        {
+            name: "6/3 = 2",
+            p: numbers{
+                A: 6,
+                B: 3,
+            },
+            expected: 2,
+        },
+        {
+            name: "3/3 = 1",
+            p: numbers{
+                A: 3,
+                B: 3,
+            },
+            expected: 1,
+        },
+    }
+
+    for _, c := range testCases {
+        t.Run(c.name, func(t *testing.T) {
+            // Act
+            r, _ := Division(c.p)
+
+            // Assert
+            assert.Equal(t, r, c.expected)
+        })
+    }
+}
+</code></pre>
+
 <p>Reference</p>
 
 <ul>
@@ -919,177 +1204,6 @@ func ExampleDivision2() {
 <li><a href="https://blog.wu-boy.com/2018/05/how-to-write-testing-in-golang/">如何在 Go 專案內寫測試</a></li>
 <li><a href="https://blog.wu-boy.com/2018/06/how-to-write-benchmark-in-go/">如何在 Go 語言內寫效能測試</a></li>
 <li><a href="https://ithelp.ithome.com.tw/articles/10206088">Example 示例函式</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang - MySQL]]></title>
-    <link href="https://mgleon08.github.io/blog/2019/03/11/golang-mysql/"/>
-    <updated>2019-03-11T23:13:41+08:00</updated>
-    <id>https://mgleon08.github.io/blog/2019/03/11/golang-mysql</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<p>golang 在 database 上的存取，建立了一個 sql 抽象介面 <a href="https://golang.org/pkg/database/sql/">database/sql</a>，接著大家就可以透過這個 interface 去實作裡面相對應的 driver</p>
-
-<p>目前看到比較多人使用的是 <a href="https://github.com/go-sql-driver/mysql">go-sql-driver/mysql</a></p>
-
-<h1>install</h1>
-
-<pre><code class="go">go get github.com/go-sql-driver/mysql
-</code></pre>
-
-<h1>connect to database</h1>
-
-<pre><code class="go">package main
-
-import (
-    "database/sql"
-    "fmt"
-    "strings"
-
-    _ "github.com/go-sql-driver/mysql"
-)
-
-// db 設定
-const (
-    userName = "root"
-    password = ""
-    host     = "127.0.0.1"
-    port     = "3306"
-    dbName   = "dbName"
-)
-
-func initDB() {
-    // [username[:password]@][protocol[(address)]]/dbname[?param1=value1&amp;...&amp;paramN=valueN]
-    // "username:password@tcp(host:port)/數據庫?charset=utf8"
-    path := strings.Join([]string{userName, ":", password, "@tcp(", host, ":", port, ")/", dbName, "?charset=utf8"}, "")
-    fmt.Println(path)
-
-    // 第一個是 driverName 第二個則是 database 的設定 path
-    // 也可以用 var DB *sql.DB
-    DB, _ := sql.Open("mysql", path)
-
-    // 設定 database 最大連接數
-    DB.SetConnMaxLifetime(100)
-
-    //設定上 database 最大閒置連接數
-    DB.SetMaxIdleConns(10)
-
-    // 驗證是否連上 db
-    if err := DB.Ping(); err != nil {
-        fmt.Println("opon database fail:", err)
-        return
-    }
-    fmt.Println("connnect success")
-}
-
-func main() {
-    initDB()
-}
-</code></pre>
-
-<h1>query</h1>
-
-<h3>Exec</h3>
-
-<pre><code class="go">result, err := db.Exec(
-    "INSERT INTO users (name) VALUES (?)",
-    "leon",
-)
-</code></pre>
-
-<h3>QueryRow</h3>
-
-<pre><code class="go">var id int64
-row := DB.QueryRow("SELECT id FROM users WHERE name = ?", "leon")
-err := row.Scan(&amp;id)
-if err != nil {
-    log.Fatal(err)
-}
-fmt.Println(id)
-</code></pre>
-
-<h3>Query</h3>
-
-<pre><code class="go">rows, err := DB.Query("SELECT * FROM banner")
-if err != nil {
-  log.Fatal(err)
-}
-
-// 記得要 close
-defer rows.Close()
-for rows.Next() {
-  var id, width, height int64
-  if err := rows.Scan(&amp;id, &amp;width, &amp;height); err != nil {
-    log.Fatal(err)
-  }
-  fmt.Printf("id: %v, width: %v, height: %v\n", id, width, height)
-}
-if err := rows.Err(); err != nil {
-  log.Fatal(err)
-}
-</code></pre>
-
-<h3>Prepare</h3>
-
-<pre><code class="go">width := 640
-stmt, err := DB.Prepare("SELECT id FROM banner WHERE width = ?")
-if err != nil {
-  log.Fatal(err)
-}
-rows, err := stmt.Query(width)
-
-// 記得要 close
-defer rows.Close()
-for rows.Next() {
-  var id int64
-  if err := rows.Scan(&amp;id); err != nil {
-    log.Fatal(err)
-  }
-  fmt.Printf("id: %v\n", id)
-}
-</code></pre>
-
-<h3>Begin (transcation)</h3>
-
-<pre><code class="go">// 開啟 transaction
-tx, err := DB.Begin()
-if err != nil {
-  fmt.Println("tx fail")
-  return
-}
-// 準備 sql 語句
-stmt, err := tx.Prepare("INSERT INTO banner (`id`, `width`, `height`) VALUES (?, ?, ?)")
-if err != nil {
-  fmt.Println("Prepare fail")
-  return
-}
-// 設定參數以及執行 sql 語句
-res, err := stmt.Exec(100, 200, 300)
-if err != nil {
-  fmt.Println("Exec fail")
-  return
-}
-// 提交 transaction
-tx.Commit()
-// 取得最後一個 insert 的 id
-fmt.Println(res.LastInsertId())
-</code></pre>
-
-<h1>各種方式效率分析</h1>
-
-<p>先參照 <a href="https://studygolang.com/articles/3022">golang學習之旅：使用go語言操作mysql數據庫</a> 之後有用到再來研究</p>
-
-<p>Reference:</p>
-
-<ul>
-<li><a href="https://golang.org/pkg/database/sql/">database/sql</a></li>
-<li><a href="https://github.com/go-sql-driver/mysql">go-sql-driver/mysql</a></li>
-<li><a href="https://www.jianshu.com/p/ee87e989f149">Golang連接mysql數據庫</a></li>
-<li><a href="https://studygolang.com/articles/3022">golang學習之旅：使用go語言操作mysql數據庫</a></li>
 </ul>
 
 ]]></content>
