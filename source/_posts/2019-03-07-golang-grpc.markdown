@@ -133,7 +133,7 @@ message CalcReply {
 }
 ```
 
-透過 `protoc` 產生 `.pb.g`
+透過 `protoc` 產生 `.pb.go`
 
 ```go
 protoc --go_out=plugins=grpc:. *.proto

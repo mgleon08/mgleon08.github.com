@@ -1,3 +1,4 @@
+
 ---
 layout: post
 title: "Postgres"
@@ -57,10 +58,23 @@ psql
 \c <dbname>
 ```
 
+## Show
+
+```sql
+\l -- List databases
+\dt *.* -- List tables from all schemas
+\dt -- List current path tables
+\dn -- List Schema
+\di -- List Index
+\dt+ -- List Table
+\d+ <tablename> -- List Column
+SELECT * FROM <tablename> -- List Record
+```
+
 ## Dump db
 
 ```sql
-pg_dump <dbname> > <filename>
+pg_dump <dbname> <filename>
 ```
 
 ## Import db
@@ -83,40 +97,22 @@ createuser testuser
 -- or
 
 --show users
-/du+
+\du+
 
 CREATE USER <username>;
 GRANT ALL PRIVILEGES ON DATABASE <dbname> TO <username>;
+GRANT ALL PRIVILEGES ON TABLE <tablename> TO <username>;
+-- Allow user1 to set role as user2
+GRANT <username2> to <username1>; 
 ```
-
-## Show Table
-
-```sql
-\dt+
-
--- or
-
-SELECT * FROM pg_catalog.pg_tables;
-```
-
-## Show column
-
-```sql
-\d+ <tablename>
-
--- or
-
-SELECT
- COLUMN_NAME
-FROM
- information_schema.COLUMNS
-WHERE
- TABLE_NAME = '<tablename>';
- ```
  
 ## other
- 
- [syntax - What does :: do in PostgreSQL? - Stack Overflow](https://stackoverflow.com/questions/15537709/what-does-do-in-postgresql)
+
+* [syntax - What does :: do in PostgreSQL? - Stack Overflow](https://stackoverflow.com/questions/15537709/what-does-do-in-postgresql) - A type cast specifies a conversion from one data type to another.
+
+```sql
+SELECT * FROM trends WHERE  user_id = ANY('{1, 2, 3}'::text[]) ORDER BY array_position('{1, 2}'::text[], user_id), updated_at DESC, metric_value DESC LIMIT 30
+```
 
 ## Tool
 

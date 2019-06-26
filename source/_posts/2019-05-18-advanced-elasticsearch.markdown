@@ -444,6 +444,35 @@ PUT /my_index/my_type/2
 }
 ```
 
+# post_filter
+
+[post_filter](https://www.elastic.co/guide/cn/elasticsearch/guide/current/_post_filter.html)
+
+後過濾器，可以針對 query 完後的結果，做最後的 filter，並且不影響 aggregation
+
+> 使用場景，像是用 agg 列出 category list，當點選某一個 category 時，並不希望影響到 category list，而只針對結果進行 filter
+
+```go
+{
+    "size" : 0,
+    "query": {
+        "match": {
+            "make": "ford"
+        }
+    },
+    "post_filter": {    
+        "term" : {
+            "color" : "green"
+        }
+    },
+    "aggs" : {
+        "all_colors": {
+            "terms" : { "field" : "color" }
+        }
+    }
+}
+```
+
 # Function Score Query
 
 * [透過Function Score Query優化Elasticsearch搜索結果](https://www.scienjus.com/elasticsearch-function-score-query/)

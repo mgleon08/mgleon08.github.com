@@ -24,19 +24,36 @@ footer: true
 * [OmniDiskSweeper](https://www.omnigroup.com/more/) - 清除檔案
 * [f.lux](https://justgetflux.com/) - 眼睛保護
 * [Owly](https://itunes.apple.com/us/app/owly-prevent-display-sleep/id882812218?mt=12) - 停止螢幕關閉
+* [Amphetamine](https://apps.apple.com/tw/app/amphetamine/id937984704?mt=12) - 可以讓特地 App 不進入休眠，也可以讓螢幕不要自動關閉，類似 Owly
 * [Gas Mask](https://www.macupdate.com/app/mac/29949/gas-mask) - host 管理
 * [Alfrd](https://www.alfredapp.com/) - 快速搜尋
 * [Macs Fans Control](https://www.crystalidea.com/macs-fan-control) - mac 風扇控制
 * [Sip](https://sipapp.io/) - color
 * [MacDown](http://macdown.uranusjr.com/) - markdown editor
-* [Sequel Pro](http://www.sequelpro.com/) - mysql
+* [boostnote](https://boostnote.io/) - markdown 筆記
+* [Sequel Pro](http://www.sequelpro.com/) - mysql GUI
 * [Postico](https://eggerapps.at/postico/) - postgresql
 * [SqliteBrower](https://sqlitebrowser.org/) - sqlite
+* [Robo 3T](https://robomongo.org/download) - mogodb GUI
 * [Welly](https://github.com/clyang/welly) - PTT
 * [Magnet](http://magnet.crowdcafe.com/) - 視窗分割
 * [AppCleaner](https://freemacsoft.net/appcleaner/) - 深度清除 APP
 * [Trailer.app](http://ptsochantaris.github.io/trailer/) - Accelerate your GitHub workflow. Never miss a comment again.
 * [getbitbar](https://getbitbar.com/) - Put anything in your Mac OS X menu bar
+* [iina](https://iina.io/) - 影音播放
+* [droplr](https://droplr.com/) - 螢幕截圖，並產生短網址
+* [Dash](https://kapeli.com/dash) - 離線 document
+* [GIF Brewery 3 by Gfycat](https://apps.apple.com/cn/app/gif-brewery-3-video-to-gif/id1081413713?l=en&mt=12) - 影片轉成 gif
+* [notion](https://www.notion.so/) - 多功能筆記
+* [rocket](https://matthewpalmer.net/rocket/) - 快速輸入 emoji
+* [headsetapp](https://headsetapp.co/) - youtube 音樂播放器
+* [Aware](https://apps.apple.com/us/app/aware/id1082170746?mt=12) - 久坐提醒器
+* [Bartender 3](https://www.macbartender.com/) - How to hide menu bar icons on Mac
+* [daisydiskapp](https://daisydiskapp.com/) - Analyze disk usage and free up disk space on Mac
+* [Be Focused - Focus Timer](https://apps.apple.com/tw/app/be-focused-focus-timer/id973134470?mt=12&ign-mpt=uo%3D4) - Pomodoro timer for your Mac that boosts focus & productivity.
+* [CheatSheet](https://mediaatelier.com/CheatSheet/) - 快速顯示所有熱鍵
+* [Dozer](https://dozermac.com/) - Hide menu bar icons on macOS
+
 
 # <span id="terminal_tool"> Terminal Tool </span>
 
@@ -55,6 +72,7 @@ footer: true
 
 * [新同文堂 New Tong Wen Tang](https://chrome.google.com/webstore/detail/new-tong-wen-tang/ldmgbgaoglmaiblpnphffibpbfchjaeg?hl=zh-TW) - 簡轉繁 [config](https://gist.github.com/mgleon08/03cd8a14855b16077acec1cc1e1b2b5e)
 * [OneTab](https://chrome.google.com/webstore/detail/onetab/chphlpgkkbolifaimnlloiipkdnihall?hl=zh-TW)
+* [toby](https://chrome.google.com/webstore/detail/toby-for-chrome/hddnkoipeenegfoeaoibdmnaalmgkpip)
 * [Octotree](https://chrome.google.com/webstore/detail/octotree/bkhaagjahfmjljalopjnoealnfndnagc?hl=zh-TW) 
 * [Wappalyzer](https://chrome.google.com/webstore/detail/wappalyzer/gppongmhjkpfnbhagpmjfkannfbllamg?hl=zh-TW)
 * [JSON Formatter](https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=zh-TW)
