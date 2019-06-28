@@ -12,8 +12,7 @@ categories: rails deploy
 <!-- more -->
 
 ###新增environments/staging.rb
-新增 `config/environments/staging.rb` 環境設定
-內容同 `config/environments/production.rb`
+新增 `config/environments/staging.rb` 環境設定內容同 `config/environments/production.rb`
 
 ###新增deploy/staging.rb
 新增   `config/deploy/staging.rb`

@@ -23,7 +23,7 @@ categories: ruby
 class Symbol
   def to_proc
     puts "self is #{self}"
-    Proc.new { |*args| args.shift.__send__(self, *args) }
+    Proc.new { |args| args.__send__(self) }
   end
 end
 

@@ -67,7 +67,7 @@ end
 ```ruby
 cisbn = '978-1-93778-549-9'
 
-isbn.gsub('-', '')
+cisbn.gsub('-', '')
   .then { |isbn| URI("#{API_URL}?q=isbn:#{isbn}") }
   .then { |uri| Net:HTTP.get(uri) }
   .then { |json_response| JSON.parse(json_response) }
@@ -106,6 +106,9 @@ a.union(b) # => [1, 2, 3, 4]
 a.difference(b) # => [1]
 a | b # => [1, 2, 3, 4]
 a & b # => [2, 3]
+a - b # => [1]
+a && b # => [2, 3, 4]
+a || b # => [1, 2, 3]
 ```
 
 * [union](https://ruby-doc.org/core-2.6/Array.html#method-i-union)

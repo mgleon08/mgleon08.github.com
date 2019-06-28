@@ -14,12 +14,18 @@ categories: ruby
 
 在 `module A` 和 `class B` 中間宣告的變數，會變成屬於 `A module` 的 scope，而 `class B` 也包在 `module A` 底下，因此可以訪問到 parent 的變數
 
-1. `class B` 會 search 有沒有 `SCOPE`?
-2. 沒有就往上層找 `module A` 有沒有 `SCOPE`?
-
 # A::B
 
 而在 `A::B` 裡面宣告是屬於 `A::B` 的 scope (也就是 `class B`)
+
+# Example
+
+### module A; class B
+
+1. `class B` 會 search 有沒有 `SCOPE`?
+2. 沒有就往上層找 `module A` 有沒有 `SCOPE`?
+
+### A::B
 
 1. `class A::B` search 有沒有 `SCOPE`?
 2. 沒有往上層，就到了 global，並沒有 `module A` 這層
@@ -45,6 +51,15 @@ end
 A::B.new.scope1 # => "module A"
 A::B.new.scope2 # => "global"
 ```
+
+### module A; class B
+
+1. `class B` 會 search 有沒有 `SCOPE`? 在 `class A::B` 已經有設定 scope 因此取得
+
+### A::B
+
+1. `class A::B` search 有沒有 `SCOPE`?
+
 
 ```ruby
 SCOPE = 'global'

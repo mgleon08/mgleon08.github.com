@@ -34,6 +34,31 @@ end
 
 # nil
 
+rails 5.2.3
+
+```ruby
+class Account
+  attr_reader :owner
+  def initialize(owner)
+    @owner = owner
+  end
+end
+
+user = Account.new(nil)
+user.owner.address
+#NoMethodError (undefined method `address' for nil:NilClass)
+user && user.owner && user.owner.address
+# => nil
+user.try(:owner).try(:address)
+# => nil
+user.try!(:owner).try!(:address)
+# => nil
+user&.owner&.address
+# => nil
+```
+
+ruby 2.6.1
+
 ```ruby
 class Account
   attr_reader :owner
@@ -48,14 +73,16 @@ user.owner.address
 user && user.owner && user.owner.address
 # => nil
 user.try(:owner).try(:address)
-# => nil
+# => undefined method `try' for #<Account:0x00007fa43d0e25e8 @owner=nil>
 user.try!(:owner).try!(:address)
-# => nil
+# => NoMethodError (undefined method `try!' for #<Account:0x00007fa43d0e25e8 @owner=nil>)
 user&.owner&.address
 # => nil
 ```
 
 # false
+
+rails 5.2.3
 
 ```ruby
 class Account
@@ -64,7 +91,6 @@ class Account
     @owner = owner
   end
 end
-
 
 user = Account.new(false)
 user.owner.address
@@ -79,7 +105,32 @@ user&.owner&.address
 # NoMethodError (undefined method `address' for false:FalseClass)
 ```
 
+ruby 2.6.1
+
+```ruby
+class Account
+  attr_reader :owner
+  def initialize(owner)
+    @owner = owner
+  end
+end
+
+user = Account.new(false)
+user.owner.address
+# NoMethodError (undefined method `address' for false:FalseClass)
+user && user.owner && user.owner.address
+# => false
+user.try(:owner).try(:address)
+# => NoMethodError (undefined method `try' for #<Account:0x00007fd8c78c9b08 @owner=false>)
+user.try!(:owner).try!(:address)
+# NoMethodError (undefined method `address' for false:FalseClass)
+user&.owner&.address
+# NoMethodError (undefined method `address' for false:FalseClass)
+```
+
 # Object.new
+
+rails 5.2.3
 
 ```ruby
 class Account
@@ -97,13 +148,36 @@ user && user.owner && user.owner.address
 user.try(:owner).try(:address)
 # => nil
 user.try!(:owner).try!(:address)
-# NoMethodError (undefined method `address' for #<Object:0x00007fcb887785e8>)
+# NoMethodError (undefined method `try!' for #<Account:0x00007fd8c7893800 @owner=#<Object:0x00007fd8c7893828>>)
 user&.owner&.address
+# NoMethodError (undefined method `address' for #<Object:0x00007fd8c7893828>)
+```
+
+ruby 2.6.1
+
+```ruby
+class Account
+  attr_reader :owner
+  def initialize(owner)
+    @owner = owner
+  end
+end
+
+user = Account.new(Object.new)
+user.owner.address
 # NoMethodError (undefined method `address' for #<Object:0x00007fcb887785e8>)
+user && user.owner && user.owner.address
+# NoMethodError (undefined method `address' for #<Object:0x00007fcb887785e8>)
+user.try(:owner).try(:address)
+# => NoMethodError (undefined method `try' for #<Account:0x00007fd8c7893800 @owner=#<Object:0x00007fd8c7893828>>)
+user.try!(:owner).try!(:address)
+# NoMethodError (undefined method `try!' for #<Account:0x00007fd8c7893800 @owner=#<Object:0x00007fd8c7893828>>)
+user&.owner&.address
+# NoMethodError (undefined method `address' for #<Object:0x00007fd8c7893828>)
 ```
 
 參考文件:
 
 * [The Safe Navigation Operator (&.) in Ruby](http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/)
-* [try](https://apidock.com/rails/v3.2.1/Object/try)
-* [try!](https://apidock.com/rails/v4.0.2/Object/try%21)
+* [try](https://apidock.com/rails/v5.2.3/Object/try)
+* [try!](https://apidock.com/rails/v5.2.3/Object/try%21)

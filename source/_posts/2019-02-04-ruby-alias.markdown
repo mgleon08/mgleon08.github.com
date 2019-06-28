@@ -170,8 +170,6 @@ end
 
 ```ruby
 Array.include(JSSort)
-[-2, -1, 0, 1, 2].sort
-
 Range.include(JSSort)
 (-2..2).sort
 ```

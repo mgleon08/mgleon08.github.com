@@ -8,8 +8,8 @@ categories: ruby
 
 <!-- more -->
 
-* `extend`: 讓 module 內定義的 method 成為 instance method
-* `include`: 讓 module 內定義的 method 成為 class method
+* `extend`: 讓 module 內定義的 method 成為 class method
+* `include`: 讓 module 內定義的 method 成為 instance method
 
 ```ruby
 module Animal

@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Ruby - multiline (<<, <<-, <<~)"
+title: "Ruby - heredoc (<<, <<-, <<~)"
 date: 2019-02-04 17:43:18 +0800
 comments: true
 categories: ruby

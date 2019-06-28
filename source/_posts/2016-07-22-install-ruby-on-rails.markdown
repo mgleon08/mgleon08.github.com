@@ -642,6 +642,7 @@ ESLint // 如果你有用程式碼規範的話
 Prettier - code formatter // alt + shift + f
 vscodeicon
 CSScomb
+Code Spell Checker
 // 其他可以看上面推薦的安裝
 ```
 
@@ -669,8 +670,52 @@ CSScomb
   "prettier.trailingComma": "none",  // 屬性後新增逗號
   "prettier.printWidth": 120, // 行寬
   "vetur.format.defaultFormatter.html": "prettyhtml",
-  "explorer.openEditors.visible": 1 // 設定已開啟的頁面是否顯示於左側,
-  "go.gopath": "GOPATH" // 設定 gopath
+  "explorer.openEditors.visible": 1, // 設定已開啟的頁面是否顯示於左側
+  "go.gopath": "GOPATH", // 設定 gopath
+  "ruby.intellisense": "rubyLocate",
+  "ruby.locate": {
+    "exclude": "{**/@(test|spec|tmp|.*),**/@(test|spec|tmp|.*)/**,**/*_spec.rb}",
+    "include": "**/*.rb"
+  },
+  "cSpell.language": "en",  // 檢查拼字
+  "cSpell.enabledLanguageIds": [
+        "asciidoc",
+        "c",
+        "cpp",
+        "csharp",
+        "css",
+        "go",
+        "handlebars",
+        "html",
+        "jade",
+        "javascript",
+        "javascriptreact",
+        "json",
+        "latex",
+        "less",
+        "markdown",
+        "php",
+        "plaintext",
+        "pub",
+        "python",
+        "restructuredtext",
+        "ruby",
+        "rust",
+        "scss",
+        "text",
+        "typescript",
+        "typescriptreact",
+        "yml"
+    ],
+    "cSpell.userWords": [
+        "elasticsearch",
+        "kubectl",
+        "kuma",
+        "preload",
+        "serializable",
+        "serializer",
+        "unscoped"
+    ],
 }
 ```
 
