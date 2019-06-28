@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Elasticsearch | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/elasticsearch/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2019-06-04T19:08:23+08:00</updated>
+  <updated>2019-06-28T22:13:42+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -430,6 +430,34 @@ PUT /my_index/my_type/2
                 { "match": { "body":  "Quick pets" }}
             ],
             "tie_breaker": 0.3
+        }
+    }
+}
+</code></pre>
+
+<h1>post_filter</h1>
+
+<p><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/_post_filter.html">post_filter</a></p>
+
+<p>後過濾器，可以針對 query 完後的結果，做最後的 filter，並且不影響 aggregation</p>
+
+<blockquote><p>使用場景，像是用 agg 列出 category list，當點選某一個 category 時，並不希望影響到 category list，而只針對結果進行 filter</p></blockquote>
+
+<pre><code class="go">{
+    "size" : 0,
+    "query": {
+        "match": {
+            "make": "ford"
+        }
+    },
+    "post_filter": {    
+        "term" : {
+            "color" : "green"
+        }
+    },
+    "aggs" : {
+        "all_colors": {
+            "terms" : { "field" : "color" }
         }
     }
 }

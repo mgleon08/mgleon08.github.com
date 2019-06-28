@@ -1,0 +1,1011 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Kubernetes | Leon's Blogging]]></title>
+  <link href="https://mgleon08.github.io/blog/categories/kubernetes/atom.xml" rel="self"/>
+  <link href="https://mgleon08.github.io/"/>
+  <updated>2019-06-28T22:13:42+08:00</updated>
+  <id>https://mgleon08.github.io/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[體驗 Kubernetes]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/06/12/try-kubernetes/"/>
+    <updated>2019-06-12T10:48:25+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/06/12/try-kubernetes</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<blockquote><p>minikube 只提供 signle-node Kubernetes Cluster，本身並不支援 HA (High availability) 因此不推薦實際應用上運行</p></blockquote>
+
+<p>Minikube 是 Kubernetes 輕量化的實作，會在本機的 VM 內建立並且執行一個單一節點的 Kubernetes Cluster。</p>
+
+<blockquote><p>本機端操作，只有一個 Node 就是 minikube</p></blockquote>
+
+<h1>(目前 docker 有支援 Kubernetes，可以直接使用)</h1>
+
+<h1>安裝 virtualbox</h1>
+
+<p>minikube 會在本機端跑起一個 vm，因此要先安裝 <a href="https://www.virtualbox.org/">virtualbox</a></p>
+
+<pre><code class="ruby">brew cask install virtualbox
+</code></pre>
+
+<h1>安裝 kuberctl (Kubernetes command-line tool)</h1>
+
+<p>可以透過此工具來部署管理 Kubernetes <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Install and Set Up kubectl</a></p>
+
+<pre><code class="ruby"># kubectl
+brew install kubernetes-cli
+</code></pre>
+
+<p>也可以透過 curl 來安裝 kubectl 的 binary 執行檔</p>
+
+<pre><code class="ruby"># 下載套件( for MacOS )
+curl -LO https://storage.googleapis.com/kubernetes-release/release/$(curl -s https://storage.googleapis.com/kubernetes-release/release/stable.txt)/bin/darwin/amd64/kubectl
+
+# 給予執行權限
+chmod +x ./kubectl
+
+# 將kubectl移到PATH下
+sudo mv ./kubectl /usr/local/bin/kubectl
+</code></pre>
+
+<h1>安裝 minikube</h1>
+
+<p><a href="https://github.com/kubernetes/minikube">minikube</a></p>
+
+<pre><code>brew cask install minikube
+</code></pre>
+
+<p>啟動 minkkube</p>
+
+<blockquote><p>第一次啟動會自動建立下載映像檔來建立 VM 所以會比較久</p></blockquote>
+
+<pre><code class="ruby"># 啟用 minkkube 叢集
+minikube start
+
+# 停用 minkkube 叢集
+minikube stop
+
+# 查看狀態
+minikube status
+
+# 啟用 GUI dashboard
+minikube dashboard
+
+where minikube
+# /usr/local/bin/minikube
+
+minikube version
+# minikube version: v0.32.0
+</code></pre>
+
+<p>啟動 minikube 之後，HOME 目錄會多一個 <code>.kube</code> 的資料夾，而 kubectl 就是透過該資料夾底下的 configuration 與 minikube 溝通</p>
+
+<pre><code class="ruby">cat ~/.kube/config
+
+apiVersion: v1
+clusters:
+- cluster:
+    certificate-authority: /Users/[username]/.minikube/ca.crt
+    server: https://192.168.99.100:8443
+  name: minikube
+contexts:
+- context:
+    cluster: minikube
+    user: minikube
+  name: minikube
+current-context: minikube
+kind: Config
+preferences: {}
+users:
+- name: minikube
+  user:
+    client-certificate: /Users/[username]/.minikube/client.crt
+    client-key: /Users/[username]/.minikube/client.key
+</code></pre>
+
+<h1>執行 hello-minikube</h1>
+
+<pre><code class="ruby">kubectl run hello-minikube --image=gcr.io/google_containers/echoserver:1.8 --port=8080
+# deployment "hello-minikube" created
+
+kubectl expose deployment hello-minikube --type=NodePort
+# service "hello-minikube" exposed
+
+# 得到 server 的 url，每次產生的 url 是系統決定的
+minikube service hello-minikube --url
+# http://192.168.99.100:32023
+
+# 列出所有 services 資源
+kubectl get services
+
+# 顯示關於資源的詳細資料
+kubectl describe services
+
+# 從 Pod 列印日誌
+kubectl logs
+
+# 從 Pod 執行命令
+kubectl exec
+
+# 查看 cluster 狀態
+kubectl cluster-info
+</code></pre>
+
+<ul>
+<li><code>run</code>：建立一個 Deployment 或是 Job 來管理被建立的 Container</li>
+<li><code>--image</code>：Image 的來源，這裡是用 gcp 提供的 image</li>
+<li><code>--port</code>：指定埠號</li>
+<li><code>expose</code>：讓存取 hello-minikube 服務可以被存取</li>
+</ul>
+
+
+<h1>執行自己的 container</h1>
+
+<h3>啟動 Pod</h3>
+
+<ul>
+<li><code>--port</code>: container 對應到 pod 的 port</li>
+</ul>
+
+
+<pre><code class="ruby"># --image: 指定 docker images 位置和版本
+# port: container 對外 port
+kubectl run docker-golang-demo --image=docker.io/mgleon08/docker-golang-demo:v1.0.0 --port 8080
+# deployment.apps "docker-golang-demo" created
+</code></pre>
+
+<h3>查看 node 裡面的 pod</h3>
+
+<pre><code class="ruby"># 可以查看 pods / services / deployments
+kubectl get pod
+# NAME                                 READY     STATUS    RESTARTS   AGE
+# docker-golang-demo-d8c764787-fxs4v   1/1       Running   0          7m
+</code></pre>
+
+<h3>expose service 讓外部訪問</h3>
+
+<p>default Pod 只允許 cluster 內部訪問，因此透過 expose 將 container 的 port 對應到 Node 的 port</p>
+
+<ul>
+<li><code>expose</code>: 把 deployment expose 成對外 service</li>
+<li><code>--type=NodePort</code>: 把 Deployment 透過 Kubernetes Cluster 的 port 讓 Cluster 外部可以訪問</li>
+</ul>
+
+
+<p>service 將 <code>docker-golang-demo</code> 的 <code>8080</code> port 與 minikube 上的 <code>31754</code> port 做 mapping</p>
+
+<pre><code class="ruby">kubectl expose deployment/docker-golang-demo --type=NodePort --port 8080
+# service "docker-golang-demo" exposed
+
+# 隨機分發 port 31754
+kubectl get services
+# NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+# docker-golang-demo   NodePort    10.103.48.219   &lt;none&gt;        8080:31754/TCP   1m
+</code></pre>
+
+<h3>取得外部 url</h3>
+
+<pre><code class="ruby">minikube service docker-golang-demo --url
+# http://192.168.99.100:31754
+</code></pre>
+
+<h3>scale pod</h3>
+
+<pre><code class="ruby">#  default 只有一個 一個副本 replication
+kubectl get deployments
+# NAME                 DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+# docker-golang-demo   1         1         1            1           7m
+
+# scale 3 個副本
+kubectl scale deployments/docker-golang-demo --replicas=3
+# deployment.extensions "docker-golang-demo" scaled
+
+# deployment 設定變成 3 個
+kubectl get deployment
+# NAME                 DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+# docker-golang-demo   3         3         3            3           31m
+
+# 檢查副本
+kubectl get replicasets
+
+# 可以看到 pod scale 成 3 個
+kubectl get pod
+# NAME                                 READY     STATUS    RESTARTS   AGE
+# docker-golang-demo-d8c764787-4shjd   1/1       Running   0          11s
+# docker-golang-demo-d8c764787-fxs4v   1/1       Running   0          30m
+# docker-golang-demo-d8c764787-v9lq6   1/1       Running   0          11s
+</code></pre>
+
+<h3>Update Container</h3>
+
+<p>將 container update 成 v2 版本</p>
+
+<pre><code class="ruby">kubectl set image deployments/docker-golang-demo docker-golang-demo=docker.io/mgleon08/docker-golang-demo:v2.0.0
+</code></pre>
+
+<p>或是編輯 deployment 更改成 v2，儲存後會自動 update</p>
+
+<pre><code class="ruby">kubectl edit deployment [deploymentName]
+</code></pre>
+
+<p>打開一樣的網址 <code>http://192.168.99.100:31754</code> 會發現頁面變成 v2 了</p>
+
+<h3>Rollout Container</h3>
+
+<p>將 container rollout 成 v1 版本</p>
+
+<pre><code class="ruby">kubectl rollout undo deployments/docker-golang-demo
+
+# check rollout 狀態
+kubectl rollout status deployments/docker-golang-demo
+
+# 萬一有問題可以暫停
+kubectl rollout pause deployments/docker-golang-demo
+
+# 歷史紀錄
+kubectl rollout history deployments/docker-golang-demo
+</code></pre>
+
+<h3>將服務刪除</h3>
+
+<pre><code class="ruby"># 只刪除 pod，會馬上自動在 create 新的
+kubectl delete pod [name]
+# 其他兩個還是會在
+kubectl delete service [name]
+# 刪除 deployment, service 還會留著
+kubectl delete deployment [name]
+</code></pre>
+
+<h1>透過 yaml 執行 pod</h1>
+
+<p>demo-pod.yaml</p>
+
+<pre><code class="ruby">apiVersion: v1
+kind: Pod
+metadata:
+  name: demo-pod
+  labels:
+    app: webserver
+spec:
+  containers:
+  - name: docker-golang-demo-pod
+    image: mgleon08/docker-golang-demo:v1.0.0
+    ports:
+    - containerPort: 8080
+</code></pre>
+
+<ul>
+<li><code>apiVersion</code>: Kubernetes 版本號</li>
+<li><code>kind</code>：說明 Kubernetes Object 是什麼類別</li>
+<li><code>metadata</code>
+
+<ul>
+<li><code>name</code>: 指定 pod 的名稱</li>
+<li><code>labels</code>: 透過 Label Selector 將Pod分群管理</li>
+<li><code>annotations</code>    : 相較於labels，annotations 通常是使用者任意自定義的附加資訊，提供外部進行查詢使用，像是版本號，發佈日期等等</li>
+</ul>
+</li>
+<li><code>spec</code>
+
+<ul>
+<li><code>container.name</code>: container 的名稱</li>
+<li><code>container.image</code>: 根據 Docker Registry 提供的可下載路徑</li>
+<li><code>container.ports</code>: 該 container 有哪些 port number 是允許外部資源存取</li>
+</ul>
+</li>
+</ul>
+
+
+<pre><code class="ruby">kubectl create -f demo-pod.yaml
+# 或 kubectl apply -f demo-pod.yaml
+kubectl pod
+
+# 看更多資訊
+kubectl describe pods my-pod
+</code></pre>
+
+<h3>如何與 Pod 中的 container 互動</h3>
+
+<ul>
+<li>透過 kubectl port-forward</li>
+</ul>
+
+
+<pre><code class="ruby"># port-forward 能將 pod 中的某個 port number，與本機端的 port 做 mapping
+# 本機 3000 對應到 8080
+kubectl port-forward demo-pod 3000:8080
+</code></pre>
+
+<ul>
+<li>建立一個 Service</li>
+</ul>
+
+
+<blockquote><p>Kubernetes Cluster 內部會有一套網路系統，會替每個 Pod 建立一個內部隨機產生的 Cluster IP。這個 Cluster IP 只有Cluster內部資源可以使用；外部資源是無法透過 Cluster IP 與 Pods 互動，所以我們需要再建立一個 Service 元件作為一個橋樑，讓 Cluster 以外的服務也可以與 Pod 做互動。</p></blockquote>
+
+<pre><code class="ruby">kubectl expose pod demo-pod --type=NodePort --name=demo-pod-service
+kubectl get services
+
+# 8080 對應到 minukube vm 的 31956 port
+# NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE
+# demo-pod-service   NodePort    10.97.180.196   &lt;none&gt;        8080:31956/TCP   28s
+</code></pre>
+
+<p>取得 url</p>
+
+<pre><code class="ruby">minikube service demo-pod-service --url
+# http://192.168.99.100:31956
+</code></pre>
+
+<h3>使用 alpine 查看 cluster 狀況</h3>
+
+<p>alpine 提供非常輕量級的 Docker Image，藉由 Kubernetes Cluster 中，會給每個 Pod 一個 Cluster IP 且只有在 Cluster 裡才可以存取的特性，透過 alpine 來訪問其他 pod</p>
+
+<pre><code class="ruby"># 先取得 IP 172.17.0.5
+kubectl describe pod demo-pod
+# 建立 alpine
+kubectl run -i --tty alpine --image=alpine --restart=Never -- sh
+# 安裝 curl
+apk add --no-cache curl
+# 發 request
+curl http://172.17.0.5:8080
+</code></pre>
+
+<h3>Pod 相關指令</h3>
+
+<pre><code class="ruby"># 取得目前所有的 pod
+kubectl get pods
+
+# 顯示全部的 pod
+kubectl get pods --show-all
+
+# pod 詳細資料
+kubectl describe pod &lt;pod&gt;
+
+# 將 Pod 中指定的 port number expose 出來讓外部服務存取(建立一個新的 Service 物件)
+kubectl expose pod &lt;pod&gt; --port=&lt;port&gt; --name=&lt;service-name&gt;
+
+# 將 Pod 中指定的 port number mapping 到本機端的某一特定 port number
+kubectl port-forward &lt;pod&gt; &lt;external-port&gt;:&lt;pod-port&gt;
+
+# 進到 container 裡面
+kubectl attach &lt;pod&gt; -i
+
+# 對 pod 下指令
+kubectl exec &lt;pod&gt; -- &lt;command&gt;
+
+# 新增 Pod 的 Labels
+kubectl label pods demo-pod version=latest
+
+# 顯示所有 labels
+kubectl get pods  --show-labels
+</code></pre>
+
+<h1>Deployment</h1>
+
+<ul>
+<li><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/deployments/auth.yaml">Deployment Example</a></li>
+</ul>
+
+
+<blockquote><p>管理 containers 橫向擴展(Horizontal scaling)，透過增加更多的機器節點，獲取更多資源</p></blockquote>
+
+<ul>
+<li>管理 Pod 的 replicas（副本) 和狀態維持在使用者所定義的副本數</li>
+<li>Replication Controller 都有屬於自己的 yaml 檔</li>
+<li>在Replication Controller設定檔中可以指定同時有多少個相同的 Pods</li>
+<li>當 Pod 發生 crash, failed，而無法提供服務時，Replication Controller 會自動的砍掉無法正常執行的 Pod，並且重新建立一個新的 Pod 來維持 replicas 的數量</li>
+<li>當機器重新開啟時，之前在機器上運行的 Replication Controller 會自動被建立，確保 pod 隨時都在運行。</li>
+<li>ReplicaSet 和 Replication Controller 本質上是相同的，差別在於 ReplicaSet 支援集合式的 selector，而 Replication Controller 只支援等式的 selector</li>
+</ul>
+
+
+<pre><code class="ruby">apiVersion: v1
+kind: Deployment
+metadata:
+  name: demo-pod-replication
+spec:
+  replicas: 3
+  selector:
+    app: docker-golang-demo-pod
+  template:
+    metadata:
+      labels:
+        app: docker-golang-demo-pod
+    spec:
+      containers:
+      - name: docker-golang-demo-pod
+        image: mgleon08/docker-golang-demo:v1.0.0
+        ports:
+        - containerPort: 8080
+</code></pre>
+
+<ul>
+<li><code>spec.replicas</code>: pod 副本的數量</li>
+<li><code>spec.selector</code>: 指定選擇 Pod 的條件(labels)</li>
+<li><code>spec.template</code>: 定義pod的資訊，包含Pod的labels以及Pod中要運行的container</li>
+<li><code>spec.template.metadata</code>: Pod 的 labels，<code>metadata.labels</code> 必須被包含在select中，否則在建立Replication Controller物件時，會發生error。</li>
+</ul>
+
+
+<h1>Service</h1>
+
+<ul>
+<li><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/services/auth.yaml">Service example</a></li>
+</ul>
+
+
+<h1><span id="hellokube"> Hello Node Kubernetes <span></h1>
+
+<h2>Create your Node.js application</h2>
+
+<p>建立小型 server.js</p>
+
+<p>server.js</p>
+
+<pre><code class="go">var http = require('http');
+var handleRequest = function(request, response) {
+  response.writeHead(200);
+  response.end("Hello World!");
+}
+var www = http.createServer(handleRequest);
+www.listen(8080);
+</code></pre>
+
+<p>建立 Dockfile</p>
+
+<pre><code class="go">FROM node:6.9.2
+EXPOSE 8080
+COPY server.js .
+CMD node server.js
+</code></pre>
+
+<p>Build image &amp; push image</p>
+
+<pre><code class="go">docker build -t gcr.io/PROJECT_ID/hello-node:v1 .
+docker push gcr.io/PROJECT_ID/hello-node:v1
+</code></pre>
+
+<p>Create clusters</p>
+
+<pre><code class="go">gcloud config set project PROJECT_ID
+gcloud container clusters create hello-world \
+                --num-nodes 2 \
+                --machine-type n1-standard-1 \
+                --zone us-central1-a
+</code></pre>
+
+<h2>Create your pod</h2>
+
+<p>Run Kubernetes</p>
+
+<pre><code class="go">kubectl run hello-node \
+    --image=gcr.io/PROJECT_ID/hello-node:v1 \
+    --port=8080
+</code></pre>
+
+<p>kubectl info</p>
+
+<pre><code>kubectl cluster-info
+kubectl config view
+</code></pre>
+
+<p>troubleshooting</p>
+
+<pre><code class="go">kubectl get events
+kubectl logs &lt;pod-name&gt;
+</code></pre>
+
+<h2>Allow external traffic</h2>
+
+<pre><code class="go">kubectl expose deployment hello-node --type="LoadBalancer"
+</code></pre>
+
+<ul>
+<li><code>CLUSTER-IP</code> is the internal IP that is only visible inside your cloud virtual network</li>
+<li><code>EXTERNAL-IP</code> is the external load-balanced IP.</li>
+</ul>
+
+
+<pre><code class="go">kubectl get services
+// NAME         TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)          AGE
+// hello-node   LoadBalancer   10.31.250.28   35.193.18.36   8080:32123/TCP   90s
+// kubernetes   ClusterIP      10.31.240.1    &lt;none&gt;         443/TCP          14m
+
+curl http://&lt;EXTERNAL_IP&gt;:8080
+</code></pre>
+
+<h2>Scale up your service</h2>
+
+<p><img src="https://cdn.qwiklabs.com/xcK5q7mZsGBWS%2BPbytdmF0W%2BdsZxvNXdOIEPBXX13X4%3D" alt="" /></p>
+
+<pre><code class="go">kubectl get deployment
+// NAME         DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+// hello-node   1         1         1            1           8m35s
+
+kubectl scale deployment hello-node --replicas=4
+
+kubectl get deployment
+// NAME         DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+// hello-node   4         4         4            4           8m45s
+</code></pre>
+
+<pre><code class="go">kubectl get pods
+// NAME                          READY   STATUS    RESTARTS   AGE
+// hello-node-85558f76d7-5cm57   1/1     Running   0          52s
+// hello-node-85558f76d7-fqrfs   1/1     Running   0          52s
+// hello-node-85558f76d7-gh6r7   1/1     Running   0          52s
+// hello-node-85558f76d7-n8dg7   1/1     Running   0          9m34s
+</code></pre>
+
+<h2>Roll out an upgrade to your service</h2>
+
+<ul>
+<li><a href="https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/">Performing a Rolling Update</a></li>
+</ul>
+
+
+<p>Edit <code>server.js</code></p>
+
+<pre><code class="go">var http = require('http');
+var handleRequest = function(request, response) {
+  response.writeHead(200);
+  response.end("Hello Kubernetes World!");
+}
+var www = http.createServer(handleRequest);
+www.listen(8080);
+</code></pre>
+
+<pre><code class="go">docker build -t gcr.io/PROJECT_ID/hello-node:v2 .
+docker push gcr.io/PROJECT_ID/hello-node:v2
+</code></pre>
+
+<p>更改 deployment</p>
+
+<pre><code class="go">kubectl edit deployment hello-node
+
+// gcr.io/PROJECT_ID/hello-node:v1 to gcr.io/PROJECT_ID/hello-node:v2.
+</code></pre>
+
+<p>更改完後 pod 也會自動重新跑新的 image</p>
+
+<pre><code class="go">kubectl get pods
+</code></pre>
+
+<p>重新 <code>curl http://&lt;EXTERNAL_IP&gt;:8080</code> 會發現字就變了</p>
+
+<h1><span id='kubegoogle'> Kubernetes in the Google Cloud </span></h1>
+
+<h2>Example</h2>
+
+<pre><code class="go">kubectl run nginx --image=nginx:1.10.0
+kubectl get pods
+// NAME                     READY   STATUS    RESTARTS   AGE
+// nginx-5fc69dfb5d-sql2p   1/1     Running   0          26s
+
+kubectl get deployments
+// Kubernetes has created a deployment
+// NAME    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE
+// nginx   1         1         1            1           40s
+
+kubectl get services
+// NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE
+// kubernetes   ClusterIP   10.7.240.1   &lt;none&gt;        443/TCP   2m40s
+</code></pre>
+
+<p>Expose it outside use loadbalancer</p>
+
+<pre><code class="go">kubectl expose deployment nginx --port 80 --type LoadBalancer
+kubectl get services
+// NAME         TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)        AGE
+// kubernetes   ClusterIP      10.7.240.1     &lt;none&gt;           443/TCP        5m46s
+// nginx        LoadBalancer   10.7.254.135   35.225.252.109   80:30560/TCP   76s
+</code></pre>
+
+<p>Curl</p>
+
+<p><code>curl http://35.225.252.109:80</code></p>
+
+<h2>Pods</h2>
+
+<p><img src="https://cdn.qwiklabs.com/tzvM5wFnfARnONAXX96nz8OgqOa1ihx6kCk%2BelMakfw%3D" alt="" /></p>
+
+<p>Logical Application</p>
+
+<ul>
+<li>One or More containers and volumes</li>
+<li>Shared namespaces</li>
+<li>One IP per pod</li>
+</ul>
+
+
+<p><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/pods/monolith.yaml">pods/monolith.yaml</a></p>
+
+<pre><code class="go">// create pod
+kubectl create -f pods/monolith.yaml
+
+kubectl get pods
+// NAME                     READY   STATUS    RESTARTS   AGE
+// monolith                 1/1     Running   0          58s
+// nginx-5fc69dfb5d-sql2p   1/1     Running   0          10m
+
+// get more detail with pod
+kubectl describe pods monolith
+</code></pre>
+
+<h2>Interacting with Pods</h2>
+
+<pre><code class="go">// local 10080 to pod 80
+kubectl port-forward monolith 10080:80
+
+// with secure api，password "password" 
+TOKEN=$(curl http://127.0.0.1:10080/login -u user|jq -r '.token')
+curl -H "Authorization: Bearer $TOKEN" http://127.0.0.1:10080/secure
+
+// log
+kubectl logs monolith
+kubectl logs -f monolith
+</code></pre>
+
+<p>Curl</p>
+
+<p><code>curl http://127.0.0.1:10080</code></p>
+
+<h1>Run an interactive shell</h1>
+
+<pre><code class="go">kubectl exec monolith --stdin --tty -c monolith /bin/sh
+ping -c 3 google.com
+exit
+</code></pre>
+
+<h2>Services</h2>
+
+<p><img src="https://cdn.qwiklabs.com/Jg0T%2F326ASwqeD1vAUPBWH5w1D%2F0oZn6z5mQ5MubwL8%3D" alt="" /></p>
+
+<p>Persistent Endpoint for pods</p>
+
+<ul>
+<li>Uses labels to select pod</li>
+<li>Internal or External IPs</li>
+</ul>
+
+
+<p>Type</p>
+
+<ul>
+<li><code>ClusterIP (internal)</code> &ndash; the default type means that this Service is only visible inside of the cluster,</li>
+<li><code>NodePort</code> gives each node in the cluster an externally accessible IP</li>
+<li><code>LoadBalancer</code> adds a load balancer from the cloud provider which forwards traffic from the service to Nodes within it.</li>
+</ul>
+
+
+<p><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/pods/secure-monolith.yaml">pods/secure-monolith.yaml</a></p>
+
+<p>create pod</p>
+
+<pre><code class="go">kubectl create secret generic tls-certs --from-file tls/
+kubectl create configmap nginx-proxy-conf --from-file nginx/proxy.conf
+kubectl create -f pods/secure-monolith.yaml
+
+kubectl get pods
+// NAME                     READY   STATUS    RESTARTS   AGE
+// monolith                 1/1     Running   0          20m
+// nginx-5fc69dfb5d-sql2p   1/1     Running   0          29m
+// secure-monolith          2/2     Running   0          20s
+</code></pre>
+
+<h3>Explore the monolith service</h3>
+
+<p><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/services/monolith.yaml">services/monolith.yaml</a></p>
+
+<p>create service</p>
+
+<pre><code class="go">kubectl create -f services/monolith.yaml
+kubectl get services
+// NAME         TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)         AGE
+// kubernetes   ClusterIP      10.7.240.1     &lt;none&gt;           443/TCP         34m
+// monolith     NodePort       10.7.247.31    &lt;none&gt;           443:31000/TCP   8s
+// nginx        LoadBalancer   10.7.254.135   35.225.252.109   80:30560/TCP    30m
+</code></pre>
+
+<p>but now can&rsquo;t access because not have labels</p>
+
+<pre><code class="go">kubectl describe services monolith
+// Name:                     monolith
+// Namespace:                default
+// Labels:                   &lt;none&gt;
+// Annotations:              &lt;none&gt;
+// Selector:                 app=monolith,secure=enabled
+// Type:                     NodePort
+// IP:                       10.7.247.31
+// Port:                     &lt;unset&gt;  443/TCP
+// TargetPort:               443/TCP
+// NodePort:                 &lt;unset&gt;  31000/TCP
+// Endpoints:                &lt;none&gt;
+// Session Affinity:         None
+// External Traffic Policy:  Cluster
+// Events:                   &lt;none&gt;
+</code></pre>
+
+<h2>Adding Labels to Pods</h2>
+
+<pre><code class="go">// show label app=monolith pods
+kubectl get pods -l "app=monolith"
+// NAME              READY   STATUS    RESTARTS   AGE
+// monolith          1/1     Running   0          29m
+// secure-monolith   2/2     Running   0          9m38s
+
+// show label app=monolith &amp; secure=enabled pods
+kubectl get pods -l "app=monolith,secure=enabled"
+
+kubectl get pods --show-labels
+// NAME                     READY   STATUS    RESTARTS   AGE   LABELS
+// monolith                 1/1     Running   0          31m   app=monolith
+// nginx-5fc69dfb5d-sql2p   1/1     Running   0          41m   pod-template-hash=5fc69dfb5d,run=nginx
+// secure-monolith          2/2     Running   0          12m   app=monolith,secure=enabled
+</code></pre>
+
+<p>get Endpoints</p>
+
+<pre><code class="go">kubectl describe services monolith | grep Endpoints
+gcloud compute instances list
+curl -k https://&lt;EXTERNAL_IP&gt;:31000
+</code></pre>
+
+<h2>Deployments</h2>
+
+<p>Drive current state towards desired state</p>
+
+<p><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/tree/master/kubernetes/deployments">orchestrate-with-kubernetes/kubernetes/deployments/</a></p>
+
+<pre><code class="go">kubectl create -f deployments/auth.yaml
+kubectl create -f services/auth.yaml
+
+kubectl create -f deployments/hello.yaml
+kubectl create -f services/hello.yaml
+
+kubectl create configmap nginx-frontend-conf --from-file=nginx/frontend.conf
+kubectl create -f deployments/frontend.yaml
+kubectl create -f services/frontend.yaml
+
+kubectl get services frontend
+curl -k https://&lt;EXTERNAL-IP&gt;
+</code></pre>
+
+<h1><span id="tool"> Tool <span></h1>
+
+<ul>
+<li><a href="https://github.com/ahmetb/kubectx">kubectx</a></li>
+<li><a href="https://github.com/junegunn/fzf">fzf</a></li>
+</ul>
+
+
+<p>Config setting</p>
+
+<p><a href="https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#set-the-kubeconfig-environment-variable">Configure Access to Multiple Clusters - Kubernetes</a></p>
+
+<pre><code>export KUBECONFIG=$HOME/.kube/config:$HOME/.kube/staging-1a:$HOME/.kube/staging-1b:$HOME/.kube/prod-1a:$HOME/.kube/prod-1b
+</code></pre>
+
+<h3>change kube staging, production</h3>
+
+<pre><code class="go">kubectx 
+</code></pre>
+
+<p>try connect</p>
+
+<pre><code class="go">kubectl get pods
+</code></pre>
+
+<p>namespace</p>
+
+<pre><code class="go">kubectl get pods --namespace search
+kubectl get pods --n search
+</code></pre>
+
+<p>current namespace</p>
+
+<pre><code class="go">kubectl config view | grep namespace:
+</code></pre>
+
+<p>entry another namespace pod</p>
+
+<pre><code class="go">kubectl -n search exec -it [pod name] sh
+</code></pre>
+
+<p>entry container</p>
+
+<pre><code>kubectl exec -it [pod name] sh
+</code></pre>
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://neighborhood999.github.io/2018/08/27/learing-k8s-by-minikube/">Kubernetes 初體驗 By minikube</a></li>
+<li><a href="https://ithelp.ithome.com.tw/users/20103753/ironman/1590">Kubernetes 30天學習筆記</a></li>
+<li><a href="https://blog.techbridge.cc/2018/12/01/kubernetes101-introduction-tutorial/">Kubernetes 與 minikube 入門教學</a></li>
+<li><a href="https://blog.gcp.expert/kubernetes-gke-introduction/">GKE 系列文章(一) – 為什麼使用 Kubernetes</a></li>
+<li><a href="https://google.qwiklabs.com/focuses/564?parent=catalog">Hello Node Kubernetes</a></li>
+<li><a href="https://www.qwiklabs.com/focuses/557?parent=catalog">Orchestrating the Cloud with Kubernetes</a></li>
+<li><a href="https://kubernetes.io/docs/reference/kubectl/overview/">Overview of kubectl</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Kubernetes - 認識 Kubernetes]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/06/11/start-kubernetes/"/>
+    <updated>2019-06-11T10:47:15+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/06/11/start-kubernetes</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<h1>微服務架構的形成</h1>
+
+<h3>傳統單體架構(Monolithic Architecture)的服務會造成巨大的不便。</h3>
+
+<ol>
+<li><code>龐大且複雜的程式碼</code>: 除錯、新增功能與測試都包在一起，變得十分複雜</li>
+<li><code>容易以低效率的開發方式進行</code>: 利用新語言和新框架將更為困難，因為搬移或更動將耗費巨大成本</li>
+<li><code>不利於敏捷開發</code>: 現今的服務幾乎是每天更新，單體架構會讓這件事變得很耗時間</li>
+<li><code>可靠性低</code>: 單體架構是將所有的模組均建構在一個程序(process)內，當其中一環有bug時，容易牽一髮動全身</li>
+</ol>
+
+
+<p><img src="https://blog.gcp.expert/material/2017/02/monolithic-service.png" alt="monolithic-service" /></p>
+
+<h3>微服務(microservices) 則將每一個具有商業邏輯的服務獨立出來。</h3>
+
+<ol>
+<li>將龐大的專案拆成幾個不同面向的小專案，當程式碼夠小、容易理解、開發效率能被提高</li>
+<li>每個服務也可以依照自己的需求，選擇在不同機器上部署</li>
+<li>各團隊可以依照自己的需求使用適合自己的語言、資料庫開發</li>
+<li>各個服務之間也可獨立部署，不因一個服務癱瘓而癱瘓整個系統</li>
+</ol>
+
+
+<p><img src="https://blog.gcp.expert/material/2017/02/microservices-768x784.png" alt="microservices" /></p>
+
+<h1>Kubernetes 好處</h1>
+
+<blockquote><p>協助自動化部署（automating deployment)、自動擴展（scaling)、管理容器應用程式（containerized applications)、指揮調度（Orchestration）</p></blockquote>
+
+<ul>
+<li>同時部署多個 containers 到一台機器上，甚至多台機器。</li>
+<li>可以很容易更新容器版本並 rollback 回之前版本</li>
+<li>當定義好部屬服務需求，很容易因應流量進行 Auto Scaling，可以從一台機器，延展到多台機器共同運行。</li>
+<li>自動分配容器相對應的 IP 位址，透過 Service cluster 達到 load balancing 效果</li>
+<li>管理各個 container 的狀態，當 Container Application 出現 crash 時，可以根據部屬定義的需求，自動偵測重啟服務</li>
+</ul>
+
+
+<h1>Kubernetes 架構介紹</h1>
+
+<p><img src="https://1.bp.blogspot.com/-VMBcuIeUCx0/W26-OBALRvI/AAAAAAAABho/ayhh3n6DgHYl_SY9CLece-B-JQs1fTq3QCLcBGAs/s1600/kubernetes%2Barchitecture%2Bexplained.jpg" alt="" /></p>
+
+<h3>Master Node</h3>
+
+<ol>
+<li>大總管，可做為主節點</li>
+<li>主要負責管理叢集，協調所有在叢集的活動，像是調度應用程式、保持應用程式的狀態，擴展應用程式，以及滾動更新。</li>
+<li>包含 Etcd, API Server, Controller Manager Server</li>
+</ol>
+
+
+<h3>Node - Worker Machine</h3>
+
+<ol>
+<li>主要工作的節點，上面運行了許多容器</li>
+<li>一個 Node 是一個 VM 或一個實體的主機</li>
+<li>一台虛擬機，K8S可操控高達1,000個nodes以上</li>
+<li>包含 Kubelet, Proxy, Pod, Container</li>
+<li><p>一個 Node 可能有一個或者是多個 Pod</p></li>
+<li><p>每個 Node 都會執行一個 Container 的 Runtime，主要是拉取 Image 並執行 Container</p></li>
+</ol>
+
+
+<blockquote><p>masters和nodes組成叢集(Clusters)</p></blockquote>
+
+<h3>iptables</h3>
+
+<ol>
+<li>每個 Node 都有屬於它自己的 iptables，iptables 是 Linux 上的防火牆(firewall)，不只限制哪些連線可以連進來，也會管理網路連線，決定收到的 request 要交給哪個 Pod</li>
+</ol>
+
+
+<h3>Kubelet</h3>
+
+<ol>
+<li>Node 上都會有 kubelet，用於管理該 Node 上的所有 pods 以及與 master node 即時溝通</li>
+</ol>
+
+
+<h3>Kube-proxy</h3>
+
+<ol>
+<li>kube-proxy 會將目前該 Node 上所有 Pods 的資訊傳給 iptables，讓 iptables 即時獲得在該 Node 上所有 Pod 的最新狀態</li>
+<li>舉例當一個 Pod 物件被建立時，kube-proxy 會通知 iptables，以確保該 Pod 可以被 Kubernetes Cluster 中的其他物件存取。</li>
+</ol>
+
+
+<p><img src="https://github.com/zxcvbnius/k8s-30-day-sharing/blob/master/Day06/kubernetes-orverview.png?raw=true" alt="" /></p>
+
+<h3>Pod</h3>
+
+<blockquote><p>容器是位於 pod 內部，一個 pod 包覆著一個以上的 Container，這造成 K8S 與一般容器不同的操作概念。在Docker裡，Docker container 是最小單位。</p></blockquote>
+
+<ol>
+<li>Pod 是 Kubernetes 裡面最小的單位</li>
+<li>在 Pod 裡面可以有一個或多個 container，並共享相同資源，Volume、Storage、Network 資源以及配置設定</li>
+<li>Pod 採取shared IP，內部所有的 container 皆使用同一個Pod IP，因此可以互相溝通，這也與Docker不同</li>
+<li>Pod 內的 container 就像是生命共同體，一旦 Pod 被調度，所有 Pod 內的 container 也會一起被調度</li>
+<li>一個給定的 Pod（UID 被定義）不會被調度到新的 Node 上，而是由一個全新相同而且帶著不同的 UID Pod 取代</li>
+<li>Pod 在建立後，會擁有一個 Unique ID</li>
+<li>Pod 擁有不確定的 <a href="https://kubernetes.io/docs/concepts/workloads/pods/pod-lifecycle/">Pod Lifecycle</a>，這意味著您不曉得任一pod是否會永久保留</li>
+</ol>
+
+
+<h3>Service</h3>
+
+<blockquote><p>Service 元件作為一個橋樑，讓 Cluster 以外的服務也可以與 Pod 做互動。</p></blockquote>
+
+<ol>
+<li>每個Service包含著一個以上的pod</li>
+<li>每個Service有個獨立且固定的IP地址 – Cluster IP，不會因為 Pod 關閉重啟而喪失原來的 IP 位置。</li>
+<li>客戶端訪問Service時，會經由上述提過的proxy來達到負載平衡、與各pod連結的結果</li>
+<li>利用標籤選擇器(Label Selector)，聰明地選擇那些已貼上標籤的pod</li>
+</ol>
+
+
+<h3>Deployments (舊版為 Replication Controller)</h3>
+
+<blockquote><p>Deployments顧名思義掌控了部署Kubernetes服務的一切。它主要掌管了Replica Set的個數，而Replica Set的組成就是一個以上的Pod。</p></blockquote>
+
+<ol>
+<li>Deployments 的設定檔(底下以YAML格式為例)，可以指定replica，並保證在該replica的數量運作</li>
+<li>Deployments 會檢查pod的狀態</li>
+<li>Deployments 下可執行滾動更新或者回滾</li>
+<li>Deployment 為管理 Pod 的 Controller，可視一組 Deployment 為一組應用服務</li>
+</ol>
+
+
+<pre><code class="yml">apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: nginx-deployment
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+      - name: nginx
+        image: nginx:1.7.9
+        ports:
+        - containerPort: 80
+</code></pre>
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://neighborhood999.github.io/2018/08/27/learing-k8s-by-minikube/">Kubernetes 初體驗 By minikube</a></li>
+<li><a href="https://ithelp.ithome.com.tw/users/20103753/ironman/1590">Kubernetes 30天學習筆記</a></li>
+<li><a href="https://blog.techbridge.cc/2018/12/01/kubernetes101-introduction-tutorial/">Kubernetes 與 minikube 入門教學</a></li>
+<li><a href="https://blog.gcp.expert/kubernetes-gke-introduction/">GKE 系列文章(一) – 為什麼使用 Kubernetes</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>

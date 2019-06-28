@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2019-06-04T19:08:23+08:00</updated>
+  <updated>2019-06-28T22:13:42+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -132,6 +132,30 @@ end
 
 <h1>nil</h1>
 
+<p>rails 5.2.3</p>
+
+<pre><code class="ruby">class Account
+  attr_reader :owner
+  def initialize(owner)
+    @owner = owner
+  end
+end
+
+user = Account.new(nil)
+user.owner.address
+#NoMethodError (undefined method `address' for nil:NilClass)
+user &amp;&amp; user.owner &amp;&amp; user.owner.address
+# =&gt; nil
+user.try(:owner).try(:address)
+# =&gt; nil
+user.try!(:owner).try!(:address)
+# =&gt; nil
+user&amp;.owner&amp;.address
+# =&gt; nil
+</code></pre>
+
+<p>ruby 2.6.1</p>
+
 <pre><code class="ruby">class Account
   attr_reader :owner
   def initialize(owner)
@@ -145,14 +169,16 @@ user.owner.address
 user &amp;&amp; user.owner &amp;&amp; user.owner.address
 # =&gt; nil
 user.try(:owner).try(:address)
-# =&gt; nil
+# =&gt; undefined method `try' for #&lt;Account:0x00007fa43d0e25e8 @owner=nil&gt;
 user.try!(:owner).try!(:address)
-# =&gt; nil
+# =&gt; NoMethodError (undefined method `try!' for #&lt;Account:0x00007fa43d0e25e8 @owner=nil&gt;)
 user&amp;.owner&amp;.address
 # =&gt; nil
 </code></pre>
 
 <h1>false</h1>
+
+<p>rails 5.2.3</p>
 
 <pre><code class="ruby">class Account
   attr_reader :owner
@@ -160,7 +186,6 @@ user&amp;.owner&amp;.address
     @owner = owner
   end
 end
-
 
 user = Account.new(false)
 user.owner.address
@@ -175,7 +200,31 @@ user&amp;.owner&amp;.address
 # NoMethodError (undefined method `address' for false:FalseClass)
 </code></pre>
 
+<p>ruby 2.6.1</p>
+
+<pre><code class="ruby">class Account
+  attr_reader :owner
+  def initialize(owner)
+    @owner = owner
+  end
+end
+
+user = Account.new(false)
+user.owner.address
+# NoMethodError (undefined method `address' for false:FalseClass)
+user &amp;&amp; user.owner &amp;&amp; user.owner.address
+# =&gt; false
+user.try(:owner).try(:address)
+# =&gt; NoMethodError (undefined method `try' for #&lt;Account:0x00007fd8c78c9b08 @owner=false&gt;)
+user.try!(:owner).try!(:address)
+# NoMethodError (undefined method `address' for false:FalseClass)
+user&amp;.owner&amp;.address
+# NoMethodError (undefined method `address' for false:FalseClass)
+</code></pre>
+
 <h1>Object.new</h1>
+
+<p>rails 5.2.3</p>
 
 <pre><code class="ruby">class Account
   attr_reader :owner
@@ -192,17 +241,39 @@ user &amp;&amp; user.owner &amp;&amp; user.owner.address
 user.try(:owner).try(:address)
 # =&gt; nil
 user.try!(:owner).try!(:address)
-# NoMethodError (undefined method `address' for #&lt;Object:0x00007fcb887785e8&gt;)
+# NoMethodError (undefined method `try!' for #&lt;Account:0x00007fd8c7893800 @owner=#&lt;Object:0x00007fd8c7893828&gt;&gt;)
 user&amp;.owner&amp;.address
+# NoMethodError (undefined method `address' for #&lt;Object:0x00007fd8c7893828&gt;)
+</code></pre>
+
+<p>ruby 2.6.1</p>
+
+<pre><code class="ruby">class Account
+  attr_reader :owner
+  def initialize(owner)
+    @owner = owner
+  end
+end
+
+user = Account.new(Object.new)
+user.owner.address
 # NoMethodError (undefined method `address' for #&lt;Object:0x00007fcb887785e8&gt;)
+user &amp;&amp; user.owner &amp;&amp; user.owner.address
+# NoMethodError (undefined method `address' for #&lt;Object:0x00007fcb887785e8&gt;)
+user.try(:owner).try(:address)
+# =&gt; NoMethodError (undefined method `try' for #&lt;Account:0x00007fd8c7893800 @owner=#&lt;Object:0x00007fd8c7893828&gt;&gt;)
+user.try!(:owner).try!(:address)
+# NoMethodError (undefined method `try!' for #&lt;Account:0x00007fd8c7893800 @owner=#&lt;Object:0x00007fd8c7893828&gt;&gt;)
+user&amp;.owner&amp;.address
+# NoMethodError (undefined method `address' for #&lt;Object:0x00007fd8c7893828&gt;)
 </code></pre>
 
 <p>參考文件:</p>
 
 <ul>
 <li><a href="http://mitrev.net/ruby/2015/11/13/the-operator-in-ruby/">The Safe Navigation Operator (&amp;.) in Ruby</a></li>
-<li><a href="https://apidock.com/rails/v3.2.1/Object/try">try</a></li>
-<li><a href="https://apidock.com/rails/v4.0.2/Object/try%21">try!</a></li>
+<li><a href="https://apidock.com/rails/v5.2.3/Object/try">try</a></li>
+<li><a href="https://apidock.com/rails/v5.2.3/Object/try%21">try!</a></li>
 </ul>
 
 ]]></content>
@@ -270,7 +341,7 @@ end
 
 <pre><code class="ruby">cisbn = '978-1-93778-549-9'
 
-isbn.gsub('-', '')
+cisbn.gsub('-', '')
   .then { |isbn| URI("#{API_URL}?q=isbn:#{isbn}") }
   .then { |uri| Net:HTTP.get(uri) }
   .then { |json_response| JSON.parse(json_response) }
@@ -307,6 +378,9 @@ a.union(b) # =&gt; [1, 2, 3, 4]
 a.difference(b) # =&gt; [1]
 a | b # =&gt; [1, 2, 3, 4]
 a &amp; b # =&gt; [2, 3]
+a - b # =&gt; [1]
+a &amp;&amp; b # =&gt; [2, 3, 4]
+a || b # =&gt; [1, 2, 3]
 </code></pre>
 
 <ul>
@@ -524,15 +598,21 @@ Dog.new.say('Woo')
 
 <p>在 <code>module A</code> 和 <code>class B</code> 中間宣告的變數，會變成屬於 <code>A module</code> 的 scope，而 <code>class B</code> 也包在 <code>module A</code> 底下，因此可以訪問到 parent 的變數</p>
 
+<h1>A::B</h1>
+
+<p>而在 <code>A::B</code> 裡面宣告是屬於 <code>A::B</code> 的 scope (也就是 <code>class B</code>)</p>
+
+<h1>Example</h1>
+
+<h3>module A; class B</h3>
+
 <ol>
 <li><code>class B</code> 會 search 有沒有 <code>SCOPE</code>?</li>
 <li>沒有就往上層找 <code>module A</code> 有沒有 <code>SCOPE</code>?</li>
 </ol>
 
 
-<h1>A::B</h1>
-
-<p>而在 <code>A::B</code> 裡面宣告是屬於 <code>A::B</code> 的 scope (也就是 <code>class B</code>)</p>
+<h3>A::B</h3>
 
 <ol>
 <li><code>class A::B</code> search 有沒有 <code>SCOPE</code>?</li>
@@ -560,6 +640,20 @@ end
 A::B.new.scope1 # =&gt; "module A"
 A::B.new.scope2 # =&gt; "global"
 </code></pre>
+
+<h3>module A; class B</h3>
+
+<ol>
+<li><code>class B</code> 會 search 有沒有 <code>SCOPE</code>? 在 <code>class A::B</code> 已經有設定 scope 因此取得</li>
+</ol>
+
+
+<h3>A::B</h3>
+
+<ol>
+<li><code>class A::B</code> search 有沒有 <code>SCOPE</code>?</li>
+</ol>
+
 
 <pre><code class="ruby">SCOPE = 'global'
 

@@ -1,0 +1,1513 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>體驗 Kubernetes - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="minikube 只提供 signle-node Kubernetes Cluster，本身並不支援 HA (High availability) 因此不推薦實際應用上運行 Minikube 是 Kubernetes 輕量化的實作，會在本機的 VM 內建立並且執行一個單一節點的 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="https://mgleon08.github.io/blog/2019/06/12/try-kubernetes">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>Coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.io" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/">Blog</a></li>
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby/">Ruby</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">體驗 Kubernetes</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-06-12T10:48:25+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>10:48 am</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!-- more -->
+
+
+<blockquote><p>minikube 只提供 signle-node Kubernetes Cluster，本身並不支援 HA (High availability) 因此不推薦實際應用上運行</p></blockquote>
+
+<p>Minikube 是 Kubernetes 輕量化的實作，會在本機的 VM 內建立並且執行一個單一節點的 Kubernetes Cluster。</p>
+
+<blockquote><p>本機端操作，只有一個 Node 就是 minikube</p></blockquote>
+
+<h1>(目前 docker 有支援 Kubernetes，可以直接使用)</h1>
+
+<h1>安裝 virtualbox</h1>
+
+<p>minikube 會在本機端跑起一個 vm，因此要先安裝 <a href="https://www.virtualbox.org/">virtualbox</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">brew</span> <span class="n">cask</span> <span class="n">install</span> <span class="n">virtualbox</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>安裝 kuberctl (Kubernetes command-line tool)</h1>
+
+<p>可以透過此工具來部署管理 Kubernetes <a href="https://kubernetes.io/docs/tasks/tools/install-kubectl/">Install and Set Up kubectl</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># kubectl</span>
+</span><span class='line'><span class="n">brew</span> <span class="n">install</span> <span class="n">kubernetes</span><span class="o">-</span><span class="n">cli</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>也可以透過 curl 來安裝 kubectl 的 binary 執行檔</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 下載套件( for MacOS )</span>
+</span><span class='line'><span class="n">curl</span> <span class="o">-</span><span class="no">LO</span> <span class="ss">https</span><span class="p">:</span><span class="sr">//s</span><span class="n">torage</span><span class="o">.</span><span class="n">googleapis</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">release</span><span class="o">/</span><span class="n">release</span><span class="o">/</span><span class="err">$</span><span class="p">(</span><span class="n">curl</span> <span class="o">-</span><span class="n">s</span> <span class="ss">https</span><span class="p">:</span><span class="sr">//s</span><span class="n">torage</span><span class="o">.</span><span class="n">googleapis</span><span class="o">.</span><span class="n">com</span><span class="o">/</span><span class="n">kubernetes</span><span class="o">-</span><span class="n">release</span><span class="o">/</span><span class="n">release</span><span class="o">/</span><span class="n">stable</span><span class="o">.</span><span class="n">txt</span><span class="p">)</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">darwin</span><span class="o">/</span><span class="n">amd64</span><span class="o">/</span><span class="n">kubectl</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 給予執行權限</span>
+</span><span class='line'><span class="n">chmod</span> <span class="o">+</span><span class="n">x</span> <span class="o">.</span><span class="n">/kubectl</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 將kubectl移到PATH下</span>
+</span><span class='line'><span class="n">sudo</span> <span class="n">mv</span> <span class="o">.</span><span class="n">/kubectl</span> <span class="sr">/usr/</span><span class="n">local</span><span class="o">/</span><span class="n">bin</span><span class="o">/</span><span class="n">kubectl</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>安裝 minikube</h1>
+
+<p><a href="https://github.com/kubernetes/minikube">minikube</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">brew</span> <span class="n">cask</span> <span class="n">install</span> <span class="n">minikube</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>啟動 minkkube</p>
+
+<blockquote><p>第一次啟動會自動建立下載映像檔來建立 VM 所以會比較久</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 啟用 minkkube 叢集</span>
+</span><span class='line'><span class="n">minikube</span> <span class="n">start</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 停用 minkkube 叢集</span>
+</span><span class='line'><span class="n">minikube</span> <span class="n">stop</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 查看狀態</span>
+</span><span class='line'><span class="n">minikube</span> <span class="n">status</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 啟用 GUI dashboard</span>
+</span><span class='line'><span class="n">minikube</span> <span class="n">dashboard</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">where</span> <span class="n">minikube</span>
+</span><span class='line'><span class="c1"># /usr/local/bin/minikube</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">minikube</span> <span class="n">version</span>
+</span><span class='line'><span class="c1"># minikube version: v0.32.0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>啟動 minikube 之後，HOME 目錄會多一個 <code>.kube</code> 的資料夾，而 kubectl 就是透過該資料夾底下的 configuration 與 minikube 溝通</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">cat</span> <span class="o">~</span><span class="sr">/.kube/</span><span class="n">config</span>
+</span><span class='line'>
+</span><span class='line'><span class="ss">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+</span><span class='line'><span class="ss">clusters</span><span class="p">:</span>
+</span><span class='line'><span class="o">-</span> <span class="ss">cluster</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">certificate</span><span class="o">-</span><span class="ss">authority</span><span class="p">:</span> <span class="sr">/Users/</span><span class="o">[</span><span class="n">username</span><span class="o">]/.</span><span class="n">minikube</span><span class="o">/</span><span class="n">ca</span><span class="o">.</span><span class="n">crt</span>
+</span><span class='line'>    <span class="ss">server</span><span class="p">:</span> <span class="ss">https</span><span class="p">:</span><span class="sr">//</span><span class="mi">192</span><span class="o">.</span><span class="mi">168</span><span class="o">.</span><span class="mi">99</span><span class="o">.</span><span class="mi">100</span><span class="p">:</span><span class="mi">8443</span>
+</span><span class='line'>  <span class="nb">name</span><span class="p">:</span> <span class="n">minikube</span>
+</span><span class='line'><span class="ss">contexts</span><span class="p">:</span>
+</span><span class='line'><span class="o">-</span> <span class="ss">context</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">cluster</span><span class="p">:</span> <span class="n">minikube</span>
+</span><span class='line'>    <span class="ss">user</span><span class="p">:</span> <span class="n">minikube</span>
+</span><span class='line'>  <span class="nb">name</span><span class="p">:</span> <span class="n">minikube</span>
+</span><span class='line'><span class="n">current</span><span class="o">-</span><span class="ss">context</span><span class="p">:</span> <span class="n">minikube</span>
+</span><span class='line'><span class="ss">kind</span><span class="p">:</span> <span class="no">Config</span>
+</span><span class='line'><span class="ss">preferences</span><span class="p">:</span> <span class="p">{}</span>
+</span><span class='line'><span class="ss">users</span><span class="p">:</span>
+</span><span class='line'><span class="o">-</span> <span class="nb">name</span><span class="p">:</span> <span class="n">minikube</span>
+</span><span class='line'>  <span class="ss">user</span><span class="p">:</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">-</span><span class="ss">certificate</span><span class="p">:</span> <span class="sr">/Users/</span><span class="o">[</span><span class="n">username</span><span class="o">]/.</span><span class="n">minikube</span><span class="o">/</span><span class="n">client</span><span class="o">.</span><span class="n">crt</span>
+</span><span class='line'>    <span class="n">client</span><span class="o">-</span><span class="ss">key</span><span class="p">:</span> <span class="sr">/Users/</span><span class="o">[</span><span class="n">username</span><span class="o">]/.</span><span class="n">minikube</span><span class="o">/</span><span class="n">client</span><span class="o">.</span><span class="n">key</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>執行 hello-minikube</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">kubectl</span> <span class="n">run</span> <span class="n">hello</span><span class="o">-</span><span class="n">minikube</span> <span class="o">--</span><span class="n">image</span><span class="o">=</span><span class="n">gcr</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">google_containers</span><span class="o">/</span><span class="ss">echoserver</span><span class="p">:</span><span class="mi">1</span><span class="o">.</span><span class="mi">8</span> <span class="o">--</span><span class="n">port</span><span class="o">=</span><span class="mi">8080</span>
+</span><span class='line'><span class="c1"># deployment &quot;hello-minikube&quot; created</span>
+</span><span class='line'>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployment</span> <span class="n">hello</span><span class="o">-</span><span class="n">minikube</span> <span class="o">--</span><span class="n">type</span><span class="o">=</span><span class="no">NodePort</span>
+</span><span class='line'><span class="c1"># service &quot;hello-minikube&quot; exposed</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 得到 server 的 url，每次產生的 url 是系統決定的</span>
+</span><span class='line'><span class="n">minikube</span> <span class="n">service</span> <span class="n">hello</span><span class="o">-</span><span class="n">minikube</span> <span class="o">--</span><span class="n">url</span>
+</span><span class='line'><span class="c1"># http://192.168.99.100:32023</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 列出所有 services 資源</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">services</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 顯示關於資源的詳細資料</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">services</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 從 Pod 列印日誌</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">logs</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 從 Pod 執行命令</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="nb">exec</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 查看 cluster 狀態</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">cluster</span><span class="o">-</span><span class="n">info</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>run</code>：建立一個 Deployment 或是 Job 來管理被建立的 Container</li>
+<li><code>--image</code>：Image 的來源，這裡是用 gcp 提供的 image</li>
+<li><code>--port</code>：指定埠號</li>
+<li><code>expose</code>：讓存取 hello-minikube 服務可以被存取</li>
+</ul>
+
+
+<h1>執行自己的 container</h1>
+
+<h3>啟動 Pod</h3>
+
+<ul>
+<li><code>--port</code>: container 對應到 pod 的 port</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># --image: 指定 docker images 位置和版本</span>
+</span><span class='line'><span class="c1"># port: container 對外 port</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">run</span> <span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span> <span class="o">--</span><span class="n">image</span><span class="o">=</span><span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">mgleon08</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="ss">demo</span><span class="p">:</span><span class="n">v1</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span> <span class="o">--</span><span class="n">port</span> <span class="mi">8080</span>
+</span><span class='line'><span class="c1"># deployment.apps &quot;docker-golang-demo&quot; created</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>查看 node 裡面的 pod</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 可以查看 pods / services / deployments</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pod</span>
+</span><span class='line'><span class="c1"># NAME                                 READY     STATUS    RESTARTS   AGE</span>
+</span><span class='line'><span class="c1"># docker-golang-demo-d8c764787-fxs4v   1/1       Running   0          7m</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>expose service 讓外部訪問</h3>
+
+<p>default Pod 只允許 cluster 內部訪問，因此透過 expose 將 container 的 port 對應到 Node 的 port</p>
+
+<ul>
+<li><code>expose</code>: 把 deployment expose 成對外 service</li>
+<li><code>--type=NodePort</code>: 把 Deployment 透過 Kubernetes Cluster 的 port 讓 Cluster 外部可以訪問</li>
+</ul>
+
+
+<p>service 將 <code>docker-golang-demo</code> 的 <code>8080</code> port 與 minikube 上的 <code>31754</code> port 做 mapping</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">deployment</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span> <span class="o">--</span><span class="n">type</span><span class="o">=</span><span class="no">NodePort</span> <span class="o">--</span><span class="n">port</span> <span class="mi">8080</span>
+</span><span class='line'><span class="c1"># service &quot;docker-golang-demo&quot; exposed</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 隨機分發 port 31754</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">services</span>
+</span><span class='line'><span class="c1"># NAME                 TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE</span>
+</span><span class='line'><span class="c1"># docker-golang-demo   NodePort    10.103.48.219   &lt;none&gt;        8080:31754/TCP   1m</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>取得外部 url</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">minikube</span> <span class="n">service</span> <span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span> <span class="o">--</span><span class="n">url</span>
+</span><span class='line'><span class="c1"># http://192.168.99.100:31754</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>scale pod</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1">#  default 只有一個 一個副本 replication</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">deployments</span>
+</span><span class='line'><span class="c1"># NAME                 DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span>
+</span><span class='line'><span class="c1"># docker-golang-demo   1         1         1            1           7m</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># scale 3 個副本</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">scale</span> <span class="n">deployments</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span> <span class="o">--</span><span class="n">replicas</span><span class="o">=</span><span class="mi">3</span>
+</span><span class='line'><span class="c1"># deployment.extensions &quot;docker-golang-demo&quot; scaled</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># deployment 設定變成 3 個</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">deployment</span>
+</span><span class='line'><span class="c1"># NAME                 DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span>
+</span><span class='line'><span class="c1"># docker-golang-demo   3         3         3            3           31m</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 檢查副本</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">replicasets</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 可以看到 pod scale 成 3 個</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pod</span>
+</span><span class='line'><span class="c1"># NAME                                 READY     STATUS    RESTARTS   AGE</span>
+</span><span class='line'><span class="c1"># docker-golang-demo-d8c764787-4shjd   1/1       Running   0          11s</span>
+</span><span class='line'><span class="c1"># docker-golang-demo-d8c764787-fxs4v   1/1       Running   0          30m</span>
+</span><span class='line'><span class="c1"># docker-golang-demo-d8c764787-v9lq6   1/1       Running   0          11s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Update Container</h3>
+
+<p>將 container update 成 v2 版本</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">kubectl</span> <span class="n">set</span> <span class="n">image</span> <span class="n">deployments</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span> <span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span><span class="o">=</span><span class="n">docker</span><span class="o">.</span><span class="n">io</span><span class="o">/</span><span class="n">mgleon08</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="ss">demo</span><span class="p">:</span><span class="n">v2</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是編輯 deployment 更改成 v2，儲存後會自動 update</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">kubectl</span> <span class="n">edit</span> <span class="n">deployment</span> <span class="o">[</span><span class="n">deploymentName</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>打開一樣的網址 <code>http://192.168.99.100:31754</code> 會發現頁面變成 v2 了</p>
+
+<h3>Rollout Container</h3>
+
+<p>將 container rollout 成 v1 版本</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">kubectl</span> <span class="n">rollout</span> <span class="n">undo</span> <span class="n">deployments</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># check rollout 狀態</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">rollout</span> <span class="n">status</span> <span class="n">deployments</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 萬一有問題可以暫停</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">rollout</span> <span class="n">pause</span> <span class="n">deployments</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 歷史紀錄</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">rollout</span> <span class="n">history</span> <span class="n">deployments</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>將服務刪除</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 只刪除 pod，會馬上自動在 create 新的</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">delete</span> <span class="n">pod</span> <span class="o">[</span><span class="nb">name</span><span class="o">]</span>
+</span><span class='line'><span class="c1"># 其他兩個還是會在</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">delete</span> <span class="n">service</span> <span class="o">[</span><span class="nb">name</span><span class="o">]</span>
+</span><span class='line'><span class="c1"># 刪除 deployment, service 還會留著</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">delete</span> <span class="n">deployment</span> <span class="o">[</span><span class="nb">name</span><span class="o">]</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>透過 yaml 執行 pod</h1>
+
+<p>demo-pod.yaml</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+</span><span class='line'><span class="ss">kind</span><span class="p">:</span> <span class="no">Pod</span>
+</span><span class='line'><span class="ss">metadata</span><span class="p">:</span>
+</span><span class='line'>  <span class="nb">name</span><span class="p">:</span> <span class="n">demo</span><span class="o">-</span><span class="n">pod</span>
+</span><span class='line'>  <span class="ss">labels</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">app</span><span class="p">:</span> <span class="n">webserver</span>
+</span><span class='line'><span class="ss">spec</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">containers</span><span class="p">:</span>
+</span><span class='line'>  <span class="o">-</span> <span class="nb">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span><span class="o">-</span><span class="n">pod</span>
+</span><span class='line'>    <span class="ss">image</span><span class="p">:</span> <span class="n">mgleon08</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="ss">demo</span><span class="p">:</span><span class="n">v1</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'>    <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>    <span class="o">-</span> <span class="ss">containerPort</span><span class="p">:</span> <span class="mi">8080</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>apiVersion</code>: Kubernetes 版本號</li>
+<li><code>kind</code>：說明 Kubernetes Object 是什麼類別</li>
+<li><code>metadata</code>
+
+<ul>
+<li><code>name</code>: 指定 pod 的名稱</li>
+<li><code>labels</code>: 透過 Label Selector 將Pod分群管理</li>
+<li><code>annotations</code>    : 相較於labels，annotations 通常是使用者任意自定義的附加資訊，提供外部進行查詢使用，像是版本號，發佈日期等等</li>
+</ul>
+</li>
+<li><code>spec</code>
+
+<ul>
+<li><code>container.name</code>: container 的名稱</li>
+<li><code>container.image</code>: 根據 Docker Registry 提供的可下載路徑</li>
+<li><code>container.ports</code>: 該 container 有哪些 port number 是允許外部資源存取</li>
+</ul>
+</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">kubectl</span> <span class="n">create</span> <span class="o">-</span><span class="n">f</span> <span class="n">demo</span><span class="o">-</span><span class="n">pod</span><span class="o">.</span><span class="n">yaml</span>
+</span><span class='line'><span class="c1"># 或 kubectl apply -f demo-pod.yaml</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">pod</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 看更多資訊</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">pods</span> <span class="n">my</span><span class="o">-</span><span class="n">pod</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>如何與 Pod 中的 container 互動</h3>
+
+<ul>
+<li>透過 kubectl port-forward</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># port-forward 能將 pod 中的某個 port number，與本機端的 port 做 mapping</span>
+</span><span class='line'><span class="c1"># 本機 3000 對應到 8080</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">port</span><span class="o">-</span><span class="n">forward</span> <span class="n">demo</span><span class="o">-</span><span class="n">pod</span> <span class="mi">3000</span><span class="p">:</span><span class="mi">8080</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li>建立一個 Service</li>
+</ul>
+
+
+<blockquote><p>Kubernetes Cluster 內部會有一套網路系統，會替每個 Pod 建立一個內部隨機產生的 Cluster IP。這個 Cluster IP 只有Cluster內部資源可以使用；外部資源是無法透過 Cluster IP 與 Pods 互動，所以我們需要再建立一個 Service 元件作為一個橋樑，讓 Cluster 以外的服務也可以與 Pod 做互動。</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">pod</span> <span class="n">demo</span><span class="o">-</span><span class="n">pod</span> <span class="o">--</span><span class="n">type</span><span class="o">=</span><span class="no">NodePort</span> <span class="o">--</span><span class="nb">name</span><span class="o">=</span><span class="n">demo</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">service</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">services</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 8080 對應到 minukube vm 的 31956 port</span>
+</span><span class='line'><span class="c1"># NAME               TYPE        CLUSTER-IP      EXTERNAL-IP   PORT(S)          AGE</span>
+</span><span class='line'><span class="c1"># demo-pod-service   NodePort    10.97.180.196   &lt;none&gt;        8080:31956/TCP   28s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>取得 url</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="n">minikube</span> <span class="n">service</span> <span class="n">demo</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">service</span> <span class="o">--</span><span class="n">url</span>
+</span><span class='line'><span class="c1"># http://192.168.99.100:31956</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>使用 alpine 查看 cluster 狀況</h3>
+
+<p>alpine 提供非常輕量級的 Docker Image，藉由 Kubernetes Cluster 中，會給每個 Pod 一個 Cluster IP 且只有在 Cluster 裡才可以存取的特性，透過 alpine 來訪問其他 pod</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 先取得 IP 172.17.0.5</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">pod</span> <span class="n">demo</span><span class="o">-</span><span class="n">pod</span>
+</span><span class='line'><span class="c1"># 建立 alpine</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">run</span> <span class="o">-</span><span class="n">i</span> <span class="o">--</span><span class="n">tty</span> <span class="n">alpine</span> <span class="o">--</span><span class="n">image</span><span class="o">=</span><span class="n">alpine</span> <span class="o">--</span><span class="n">restart</span><span class="o">=</span><span class="no">Never</span> <span class="o">--</span> <span class="n">sh</span>
+</span><span class='line'><span class="c1"># 安裝 curl</span>
+</span><span class='line'><span class="n">apk</span> <span class="n">add</span> <span class="o">--</span><span class="n">no</span><span class="o">-</span><span class="n">cache</span> <span class="n">curl</span>
+</span><span class='line'><span class="c1"># 發 request</span>
+</span><span class='line'><span class="n">curl</span> <span class="ss">http</span><span class="p">:</span><span class="sr">//</span><span class="mi">172</span><span class="o">.</span><span class="mi">17</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">5</span><span class="p">:</span><span class="mi">8080</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Pod 相關指令</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 取得目前所有的 pod</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 顯示全部的 pod</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span> <span class="o">--</span><span class="n">show</span><span class="o">-</span><span class="n">all</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># pod 詳細資料</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">describe</span> <span class="n">pod</span> <span class="o">&lt;</span><span class="n">pod</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 將 Pod 中指定的 port number expose 出來讓外部服務存取(建立一個新的 Service 物件)</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">expose</span> <span class="n">pod</span> <span class="o">&lt;</span><span class="n">pod</span><span class="o">&gt;</span> <span class="o">--</span><span class="n">port</span><span class="o">=&lt;</span><span class="n">port</span><span class="o">&gt;</span> <span class="o">--</span><span class="nb">name</span><span class="o">=&lt;</span><span class="n">service</span><span class="o">-</span><span class="nb">name</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 將 Pod 中指定的 port number mapping 到本機端的某一特定 port number</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">port</span><span class="o">-</span><span class="n">forward</span> <span class="o">&lt;</span><span class="n">pod</span><span class="o">&gt;</span> <span class="o">&lt;</span><span class="n">external</span><span class="o">-</span><span class="n">port</span><span class="o">&gt;</span><span class="p">:</span><span class="o">&lt;</span><span class="n">pod</span><span class="o">-</span><span class="n">port</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 進到 container 裡面</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">attach</span> <span class="o">&lt;</span><span class="n">pod</span><span class="o">&gt;</span> <span class="o">-</span><span class="n">i</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 對 pod 下指令</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="nb">exec</span> <span class="o">&lt;</span><span class="n">pod</span><span class="o">&gt;</span> <span class="o">--</span> <span class="o">&lt;</span><span class="n">command</span><span class="o">&gt;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 新增 Pod 的 Labels</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">label</span> <span class="n">pods</span> <span class="n">demo</span><span class="o">-</span><span class="n">pod</span> <span class="n">version</span><span class="o">=</span><span class="n">latest</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1"># 顯示所有 labels</span>
+</span><span class='line'><span class="n">kubectl</span> <span class="n">get</span> <span class="n">pods</span>  <span class="o">--</span><span class="n">show</span><span class="o">-</span><span class="n">labels</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Deployment</h1>
+
+<ul>
+<li><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/deployments/auth.yaml">Deployment Example</a></li>
+</ul>
+
+
+<blockquote><p>管理 containers 橫向擴展(Horizontal scaling)，透過增加更多的機器節點，獲取更多資源</p></blockquote>
+
+<ul>
+<li>管理 Pod 的 replicas（副本) 和狀態維持在使用者所定義的副本數</li>
+<li>Replication Controller 都有屬於自己的 yaml 檔</li>
+<li>在Replication Controller設定檔中可以指定同時有多少個相同的 Pods</li>
+<li>當 Pod 發生 crash, failed，而無法提供服務時，Replication Controller 會自動的砍掉無法正常執行的 Pod，並且重新建立一個新的 Pod 來維持 replicas 的數量</li>
+<li>當機器重新開啟時，之前在機器上運行的 Replication Controller 會自動被建立，確保 pod 隨時都在運行。</li>
+<li>ReplicaSet 和 Replication Controller 本質上是相同的，差別在於 ReplicaSet 支援集合式的 selector，而 Replication Controller 只支援等式的 selector</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="ss">apiVersion</span><span class="p">:</span> <span class="n">v1</span>
+</span><span class='line'><span class="ss">kind</span><span class="p">:</span> <span class="no">Deployment</span>
+</span><span class='line'><span class="ss">metadata</span><span class="p">:</span>
+</span><span class='line'>  <span class="nb">name</span><span class="p">:</span> <span class="n">demo</span><span class="o">-</span><span class="n">pod</span><span class="o">-</span><span class="n">replication</span>
+</span><span class='line'><span class="ss">spec</span><span class="p">:</span>
+</span><span class='line'>  <span class="ss">replicas</span><span class="p">:</span> <span class="mi">3</span>
+</span><span class='line'>  <span class="ss">selector</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">app</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span><span class="o">-</span><span class="n">pod</span>
+</span><span class='line'>  <span class="ss">template</span><span class="p">:</span>
+</span><span class='line'>    <span class="ss">metadata</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">labels</span><span class="p">:</span>
+</span><span class='line'>        <span class="ss">app</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span><span class="o">-</span><span class="n">pod</span>
+</span><span class='line'>    <span class="ss">spec</span><span class="p">:</span>
+</span><span class='line'>      <span class="ss">containers</span><span class="p">:</span>
+</span><span class='line'>      <span class="o">-</span> <span class="nb">name</span><span class="p">:</span> <span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="n">demo</span><span class="o">-</span><span class="n">pod</span>
+</span><span class='line'>        <span class="ss">image</span><span class="p">:</span> <span class="n">mgleon08</span><span class="o">/</span><span class="n">docker</span><span class="o">-</span><span class="n">golang</span><span class="o">-</span><span class="ss">demo</span><span class="p">:</span><span class="n">v1</span><span class="o">.</span><span class="mi">0</span><span class="o">.</span><span class="mi">0</span>
+</span><span class='line'>        <span class="ss">ports</span><span class="p">:</span>
+</span><span class='line'>        <span class="o">-</span> <span class="ss">containerPort</span><span class="p">:</span> <span class="mi">8080</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>spec.replicas</code>: pod 副本的數量</li>
+<li><code>spec.selector</code>: 指定選擇 Pod 的條件(labels)</li>
+<li><code>spec.template</code>: 定義pod的資訊，包含Pod的labels以及Pod中要運行的container</li>
+<li><code>spec.template.metadata</code>: Pod 的 labels，<code>metadata.labels</code> 必須被包含在select中，否則在建立Replication Controller物件時，會發生error。</li>
+</ul>
+
+
+<h1>Service</h1>
+
+<ul>
+<li><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/services/auth.yaml">Service example</a></li>
+</ul>
+
+
+<h1><span id="hellokube"> Hello Node Kubernetes <span></h1>
+
+<h2>Create your Node.js application</h2>
+
+<p>建立小型 server.js</p>
+
+<p>server.js</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">var</span> <span class="nx">http</span> <span class="p">=</span> <span class="nx">require</span><span class="p">(</span><span class="err">&#39;</span><span class="nx">http</span><span class="err">&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">handleRequest</span> <span class="p">=</span> <span class="nx">function</span><span class="p">(</span><span class="nx">request</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">response</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+</span><span class='line'>  <span class="nx">response</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s">&quot;Hello World!&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">www</span> <span class="p">=</span> <span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="nx">handleRequest</span><span class="p">);</span>
+</span><span class='line'><span class="nx">www</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>建立 Dockfile</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">FROM</span> <span class="nx">node</span><span class="p">:</span><span class="mf">6.9.2</span>
+</span><span class='line'><span class="nx">EXPOSE</span> <span class="mi">8080</span>
+</span><span class='line'><span class="nx">COPY</span> <span class="nx">server</span><span class="p">.</span><span class="nx">js</span> <span class="p">.</span>
+</span><span class='line'><span class="nx">CMD</span> <span class="nx">node</span> <span class="nx">server</span><span class="p">.</span><span class="nx">js</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Build image &amp; push image</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">docker</span> <span class="nx">build</span> <span class="o">-</span><span class="nx">t</span> <span class="nx">gcr</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">PROJECT_ID</span><span class="o">/</span><span class="nx">hello</span><span class="o">-</span><span class="nx">node</span><span class="p">:</span><span class="nx">v1</span> <span class="p">.</span>
+</span><span class='line'><span class="nx">docker</span> <span class="nx">push</span> <span class="nx">gcr</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">PROJECT_ID</span><span class="o">/</span><span class="nx">hello</span><span class="o">-</span><span class="nx">node</span><span class="p">:</span><span class="nx">v1</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Create clusters</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">gcloud</span> <span class="nx">config</span> <span class="nx">set</span> <span class="nx">project</span> <span class="nx">PROJECT_ID</span>
+</span><span class='line'><span class="nx">gcloud</span> <span class="nx">container</span> <span class="nx">clusters</span> <span class="nx">create</span> <span class="nx">hello</span><span class="o">-</span><span class="nx">world</span> \
+</span><span class='line'>                <span class="o">--</span><span class="nx">num</span><span class="o">-</span><span class="nx">nodes</span> <span class="mi">2</span> \
+</span><span class='line'>                <span class="o">--</span><span class="nx">machine</span><span class="o">-</span><span class="kd">type</span> <span class="nx">n1</span><span class="o">-</span><span class="nx">standard</span><span class="o">-</span><span class="mi">1</span> \
+</span><span class='line'>                <span class="o">--</span><span class="nx">zone</span> <span class="nx">us</span><span class="o">-</span><span class="nx">central1</span><span class="o">-</span><span class="nx">a</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Create your pod</h2>
+
+<p>Run Kubernetes</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">run</span> <span class="nx">hello</span><span class="o">-</span><span class="nx">node</span> \
+</span><span class='line'>    <span class="o">--</span><span class="nx">image</span><span class="p">=</span><span class="nx">gcr</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">PROJECT_ID</span><span class="o">/</span><span class="nx">hello</span><span class="o">-</span><span class="nx">node</span><span class="p">:</span><span class="nx">v1</span> \
+</span><span class='line'>    <span class="o">--</span><span class="nx">port</span><span class="p">=</span><span class="mi">8080</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>kubectl info</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">cluster</span><span class="o">-</span><span class="nx">info</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">config</span> <span class="nx">view</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>troubleshooting</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">events</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">logs</span> <span class="p">&lt;</span><span class="nx">pod</span><span class="o">-</span><span class="nx">name</span><span class="p">&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Allow external traffic</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">expose</span> <span class="nx">deployment</span> <span class="nx">hello</span><span class="o">-</span><span class="nx">node</span> <span class="o">--</span><span class="kd">type</span><span class="p">=</span><span class="s">&quot;LoadBalancer&quot;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><code>CLUSTER-IP</code> is the internal IP that is only visible inside your cloud virtual network</li>
+<li><code>EXTERNAL-IP</code> is the external load-balanced IP.</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">services</span>
+</span><span class='line'><span class="c1">// NAME         TYPE           CLUSTER-IP     EXTERNAL-IP    PORT(S)          AGE</span>
+</span><span class='line'><span class="c1">// hello-node   LoadBalancer   10.31.250.28   35.193.18.36   8080:32123/TCP   90s</span>
+</span><span class='line'><span class="c1">// kubernetes   ClusterIP      10.31.240.1    &lt;none&gt;         443/TCP          14m</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">curl</span> <span class="nx">http</span><span class="p">:</span><span class="c1">//&lt;EXTERNAL_IP&gt;:8080</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Scale up your service</h2>
+
+<p><img src="https://cdn.qwiklabs.com/xcK5q7mZsGBWS%2BPbytdmF0W%2BdsZxvNXdOIEPBXX13X4%3D" alt="" /></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">deployment</span>
+</span><span class='line'><span class="c1">// NAME         DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span>
+</span><span class='line'><span class="c1">// hello-node   1         1         1            1           8m35s</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">scale</span> <span class="nx">deployment</span> <span class="nx">hello</span><span class="o">-</span><span class="nx">node</span> <span class="o">--</span><span class="nx">replicas</span><span class="p">=</span><span class="mi">4</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">deployment</span>
+</span><span class='line'><span class="c1">// NAME         DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span>
+</span><span class='line'><span class="c1">// hello-node   4         4         4            4           8m45s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span>
+</span><span class='line'><span class="c1">// NAME                          READY   STATUS    RESTARTS   AGE</span>
+</span><span class='line'><span class="c1">// hello-node-85558f76d7-5cm57   1/1     Running   0          52s</span>
+</span><span class='line'><span class="c1">// hello-node-85558f76d7-fqrfs   1/1     Running   0          52s</span>
+</span><span class='line'><span class="c1">// hello-node-85558f76d7-gh6r7   1/1     Running   0          52s</span>
+</span><span class='line'><span class="c1">// hello-node-85558f76d7-n8dg7   1/1     Running   0          9m34s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Roll out an upgrade to your service</h2>
+
+<ul>
+<li><a href="https://kubernetes.io/docs/tutorials/kubernetes-basics/update/update-intro/">Performing a Rolling Update</a></li>
+</ul>
+
+
+<p>Edit <code>server.js</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kd">var</span> <span class="nx">http</span> <span class="p">=</span> <span class="nx">require</span><span class="p">(</span><span class="err">&#39;</span><span class="nx">http</span><span class="err">&#39;</span><span class="p">);</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">handleRequest</span> <span class="p">=</span> <span class="nx">function</span><span class="p">(</span><span class="nx">request</span><span class="p">,</span> <span class="nx">response</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">response</span><span class="p">.</span><span class="nx">writeHead</span><span class="p">(</span><span class="mi">200</span><span class="p">);</span>
+</span><span class='line'>  <span class="nx">response</span><span class="p">.</span><span class="nx">end</span><span class="p">(</span><span class="s">&quot;Hello Kubernetes World!&quot;</span><span class="p">);</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">www</span> <span class="p">=</span> <span class="nx">http</span><span class="p">.</span><span class="nx">createServer</span><span class="p">(</span><span class="nx">handleRequest</span><span class="p">);</span>
+</span><span class='line'><span class="nx">www</span><span class="p">.</span><span class="nx">listen</span><span class="p">(</span><span class="mi">8080</span><span class="p">);</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">docker</span> <span class="nx">build</span> <span class="o">-</span><span class="nx">t</span> <span class="nx">gcr</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">PROJECT_ID</span><span class="o">/</span><span class="nx">hello</span><span class="o">-</span><span class="nx">node</span><span class="p">:</span><span class="nx">v2</span> <span class="p">.</span>
+</span><span class='line'><span class="nx">docker</span> <span class="nx">push</span> <span class="nx">gcr</span><span class="p">.</span><span class="nx">io</span><span class="o">/</span><span class="nx">PROJECT_ID</span><span class="o">/</span><span class="nx">hello</span><span class="o">-</span><span class="nx">node</span><span class="p">:</span><span class="nx">v2</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更改 deployment</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">edit</span> <span class="nx">deployment</span> <span class="nx">hello</span><span class="o">-</span><span class="nx">node</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// gcr.io/PROJECT_ID/hello-node:v1 to gcr.io/PROJECT_ID/hello-node:v2.</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>更改完後 pod 也會自動重新跑新的 image</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>重新 <code>curl http://&lt;EXTERNAL_IP&gt;:8080</code> 會發現字就變了</p>
+
+<h1><span id='kubegoogle'> Kubernetes in the Google Cloud </span></h1>
+
+<h2>Example</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">run</span> <span class="nx">nginx</span> <span class="o">--</span><span class="nx">image</span><span class="p">=</span><span class="nx">nginx</span><span class="p">:</span><span class="mf">1.10.0</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span>
+</span><span class='line'><span class="c1">// NAME                     READY   STATUS    RESTARTS   AGE</span>
+</span><span class='line'><span class="c1">// nginx-5fc69dfb5d-sql2p   1/1     Running   0          26s</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">deployments</span>
+</span><span class='line'><span class="c1">// Kubernetes has created a deployment</span>
+</span><span class='line'><span class="c1">// NAME    DESIRED   CURRENT   UP-TO-DATE   AVAILABLE   AGE</span>
+</span><span class='line'><span class="c1">// nginx   1         1         1            1           40s</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">services</span>
+</span><span class='line'><span class="c1">// NAME         TYPE        CLUSTER-IP   EXTERNAL-IP   PORT(S)   AGE</span>
+</span><span class='line'><span class="c1">// kubernetes   ClusterIP   10.7.240.1   &lt;none&gt;        443/TCP   2m40s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Expose it outside use loadbalancer</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">expose</span> <span class="nx">deployment</span> <span class="nx">nginx</span> <span class="o">--</span><span class="nx">port</span> <span class="mi">80</span> <span class="o">--</span><span class="kd">type</span> <span class="nx">LoadBalancer</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">services</span>
+</span><span class='line'><span class="c1">// NAME         TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)        AGE</span>
+</span><span class='line'><span class="c1">// kubernetes   ClusterIP      10.7.240.1     &lt;none&gt;           443/TCP        5m46s</span>
+</span><span class='line'><span class="c1">// nginx        LoadBalancer   10.7.254.135   35.225.252.109   80:30560/TCP   76s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Curl</p>
+
+<p><code>curl http://35.225.252.109:80</code></p>
+
+<h2>Pods</h2>
+
+<p><img src="https://cdn.qwiklabs.com/tzvM5wFnfARnONAXX96nz8OgqOa1ihx6kCk%2BelMakfw%3D" alt="" /></p>
+
+<p>Logical Application</p>
+
+<ul>
+<li>One or More containers and volumes</li>
+<li>Shared namespaces</li>
+<li>One IP per pod</li>
+</ul>
+
+
+<p><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/pods/monolith.yaml">pods/monolith.yaml</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// create pod</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">pods</span><span class="o">/</span><span class="nx">monolith</span><span class="p">.</span><span class="nx">yaml</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span>
+</span><span class='line'><span class="c1">// NAME                     READY   STATUS    RESTARTS   AGE</span>
+</span><span class='line'><span class="c1">// monolith                 1/1     Running   0          58s</span>
+</span><span class='line'><span class="c1">// nginx-5fc69dfb5d-sql2p   1/1     Running   0          10m</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// get more detail with pod</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">describe</span> <span class="nx">pods</span> <span class="nx">monolith</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Interacting with Pods</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// local 10080 to pod 80</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">port</span><span class="o">-</span><span class="nx">forward</span> <span class="nx">monolith</span> <span class="mi">10080</span><span class="p">:</span><span class="mi">80</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// with secure api，password &quot;password&quot; </span>
+</span><span class='line'><span class="nx">TOKEN</span><span class="p">=</span><span class="err">$</span><span class="p">(</span><span class="nx">curl</span> <span class="nx">http</span><span class="p">:</span><span class="c1">//127.0.0.1:10080/login -u user|jq -r &#39;.token&#39;)</span>
+</span><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">H</span> <span class="s">&quot;Authorization: Bearer $TOKEN&quot;</span> <span class="nx">http</span><span class="p">:</span><span class="c1">//127.0.0.1:10080/secure</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// log</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">logs</span> <span class="nx">monolith</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">logs</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">monolith</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>Curl</p>
+
+<p><code>curl http://127.0.0.1:10080</code></p>
+
+<h1>Run an interactive shell</h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">exec</span> <span class="nx">monolith</span> <span class="o">--</span><span class="nx">stdin</span> <span class="o">--</span><span class="nx">tty</span> <span class="o">-</span><span class="nx">c</span> <span class="nx">monolith</span> <span class="o">/</span><span class="nx">bin</span><span class="o">/</span><span class="nx">sh</span>
+</span><span class='line'><span class="nx">ping</span> <span class="o">-</span><span class="nx">c</span> <span class="mi">3</span> <span class="nx">google</span><span class="p">.</span><span class="nx">com</span>
+</span><span class='line'><span class="nx">exit</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Services</h2>
+
+<p><img src="https://cdn.qwiklabs.com/Jg0T%2F326ASwqeD1vAUPBWH5w1D%2F0oZn6z5mQ5MubwL8%3D" alt="" /></p>
+
+<p>Persistent Endpoint for pods</p>
+
+<ul>
+<li>Uses labels to select pod</li>
+<li>Internal or External IPs</li>
+</ul>
+
+
+<p>Type</p>
+
+<ul>
+<li><code>ClusterIP (internal)</code> &ndash; the default type means that this Service is only visible inside of the cluster,</li>
+<li><code>NodePort</code> gives each node in the cluster an externally accessible IP</li>
+<li><code>LoadBalancer</code> adds a load balancer from the cloud provider which forwards traffic from the service to Nodes within it.</li>
+</ul>
+
+
+<p><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/pods/secure-monolith.yaml">pods/secure-monolith.yaml</a></p>
+
+<p>create pod</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="nx">secret</span> <span class="nx">generic</span> <span class="nx">tls</span><span class="o">-</span><span class="nx">certs</span> <span class="o">--</span><span class="nx">from</span><span class="o">-</span><span class="nx">file</span> <span class="nx">tls</span><span class="o">/</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="nx">configmap</span> <span class="nx">nginx</span><span class="o">-</span><span class="nx">proxy</span><span class="o">-</span><span class="nx">conf</span> <span class="o">--</span><span class="nx">from</span><span class="o">-</span><span class="nx">file</span> <span class="nx">nginx</span><span class="o">/</span><span class="nx">proxy</span><span class="p">.</span><span class="nx">conf</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">pods</span><span class="o">/</span><span class="nx">secure</span><span class="o">-</span><span class="nx">monolith</span><span class="p">.</span><span class="nx">yaml</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span>
+</span><span class='line'><span class="c1">// NAME                     READY   STATUS    RESTARTS   AGE</span>
+</span><span class='line'><span class="c1">// monolith                 1/1     Running   0          20m</span>
+</span><span class='line'><span class="c1">// nginx-5fc69dfb5d-sql2p   1/1     Running   0          29m</span>
+</span><span class='line'><span class="c1">// secure-monolith          2/2     Running   0          20s</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>Explore the monolith service</h3>
+
+<p><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/blob/master/kubernetes/services/monolith.yaml">services/monolith.yaml</a></p>
+
+<p>create service</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">services</span><span class="o">/</span><span class="nx">monolith</span><span class="p">.</span><span class="nx">yaml</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">services</span>
+</span><span class='line'><span class="c1">// NAME         TYPE           CLUSTER-IP     EXTERNAL-IP      PORT(S)         AGE</span>
+</span><span class='line'><span class="c1">// kubernetes   ClusterIP      10.7.240.1     &lt;none&gt;           443/TCP         34m</span>
+</span><span class='line'><span class="c1">// monolith     NodePort       10.7.247.31    &lt;none&gt;           443:31000/TCP   8s</span>
+</span><span class='line'><span class="c1">// nginx        LoadBalancer   10.7.254.135   35.225.252.109   80:30560/TCP    30m</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>but now can&rsquo;t access because not have labels</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">describe</span> <span class="nx">services</span> <span class="nx">monolith</span>
+</span><span class='line'><span class="c1">// Name:                     monolith</span>
+</span><span class='line'><span class="c1">// Namespace:                default</span>
+</span><span class='line'><span class="c1">// Labels:                   &lt;none&gt;</span>
+</span><span class='line'><span class="c1">// Annotations:              &lt;none&gt;</span>
+</span><span class='line'><span class="c1">// Selector:                 app=monolith,secure=enabled</span>
+</span><span class='line'><span class="c1">// Type:                     NodePort</span>
+</span><span class='line'><span class="c1">// IP:                       10.7.247.31</span>
+</span><span class='line'><span class="c1">// Port:                     &lt;unset&gt;  443/TCP</span>
+</span><span class='line'><span class="c1">// TargetPort:               443/TCP</span>
+</span><span class='line'><span class="c1">// NodePort:                 &lt;unset&gt;  31000/TCP</span>
+</span><span class='line'><span class="c1">// Endpoints:                &lt;none&gt;</span>
+</span><span class='line'><span class="c1">// Session Affinity:         None</span>
+</span><span class='line'><span class="c1">// External Traffic Policy:  Cluster</span>
+</span><span class='line'><span class="c1">// Events:                   &lt;none&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Adding Labels to Pods</h2>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// show label app=monolith pods</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span> <span class="o">-</span><span class="nx">l</span> <span class="s">&quot;app=monolith&quot;</span>
+</span><span class='line'><span class="c1">// NAME              READY   STATUS    RESTARTS   AGE</span>
+</span><span class='line'><span class="c1">// monolith          1/1     Running   0          29m</span>
+</span><span class='line'><span class="c1">// secure-monolith   2/2     Running   0          9m38s</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// show label app=monolith &amp; secure=enabled pods</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span> <span class="o">-</span><span class="nx">l</span> <span class="s">&quot;app=monolith,secure=enabled&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span> <span class="o">--</span><span class="nx">show</span><span class="o">-</span><span class="nx">labels</span>
+</span><span class='line'><span class="c1">// NAME                     READY   STATUS    RESTARTS   AGE   LABELS</span>
+</span><span class='line'><span class="c1">// monolith                 1/1     Running   0          31m   app=monolith</span>
+</span><span class='line'><span class="c1">// nginx-5fc69dfb5d-sql2p   1/1     Running   0          41m   pod-template-hash=5fc69dfb5d,run=nginx</span>
+</span><span class='line'><span class="c1">// secure-monolith          2/2     Running   0          12m   app=monolith,secure=enabled</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>get Endpoints</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">describe</span> <span class="nx">services</span> <span class="nx">monolith</span> <span class="p">|</span> <span class="nx">grep</span> <span class="nx">Endpoints</span>
+</span><span class='line'><span class="nx">gcloud</span> <span class="nx">compute</span> <span class="nx">instances</span> <span class="nx">list</span>
+</span><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">k</span> <span class="nx">https</span><span class="p">:</span><span class="c1">//&lt;EXTERNAL_IP&gt;:31000</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h2>Deployments</h2>
+
+<p>Drive current state towards desired state</p>
+
+<p><a href="https://github.com/googlecodelabs/orchestrate-with-kubernetes/tree/master/kubernetes/deployments">orchestrate-with-kubernetes/kubernetes/deployments/</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">deployments</span><span class="o">/</span><span class="nx">auth</span><span class="p">.</span><span class="nx">yaml</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">services</span><span class="o">/</span><span class="nx">auth</span><span class="p">.</span><span class="nx">yaml</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">deployments</span><span class="o">/</span><span class="nx">hello</span><span class="p">.</span><span class="nx">yaml</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">services</span><span class="o">/</span><span class="nx">hello</span><span class="p">.</span><span class="nx">yaml</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="nx">configmap</span> <span class="nx">nginx</span><span class="o">-</span><span class="nx">frontend</span><span class="o">-</span><span class="nx">conf</span> <span class="o">--</span><span class="nx">from</span><span class="o">-</span><span class="nx">file</span><span class="p">=</span><span class="nx">nginx</span><span class="o">/</span><span class="nx">frontend</span><span class="p">.</span><span class="nx">conf</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">deployments</span><span class="o">/</span><span class="nx">frontend</span><span class="p">.</span><span class="nx">yaml</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">create</span> <span class="o">-</span><span class="nx">f</span> <span class="nx">services</span><span class="o">/</span><span class="nx">frontend</span><span class="p">.</span><span class="nx">yaml</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">services</span> <span class="nx">frontend</span>
+</span><span class='line'><span class="nx">curl</span> <span class="o">-</span><span class="nx">k</span> <span class="nx">https</span><span class="p">:</span><span class="c1">//&lt;EXTERNAL-IP&gt;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1><span id="tool"> Tool <span></h1>
+
+<ul>
+<li><a href="https://github.com/ahmetb/kubectx">kubectx</a></li>
+<li><a href="https://github.com/junegunn/fzf">fzf</a></li>
+</ul>
+
+
+<p>Config setting</p>
+
+<p><a href="https://kubernetes.io/docs/tasks/access-application-cluster/configure-access-multiple-clusters/#set-the-kubeconfig-environment-variable">Configure Access to Multiple Clusters - Kubernetes</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">export</span> <span class="nx">KUBECONFIG</span><span class="p">=</span><span class="err">$</span><span class="nx">HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span><span class="o">/</span><span class="nx">config</span><span class="p">:</span><span class="err">$</span><span class="nx">HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span><span class="o">/</span><span class="nx">staging</span><span class="o">-</span><span class="mi">1</span><span class="nx">a</span><span class="p">:</span><span class="err">$</span><span class="nx">HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span><span class="o">/</span><span class="nx">staging</span><span class="o">-</span><span class="mi">1</span><span class="nx">b</span><span class="p">:</span><span class="err">$</span><span class="nx">HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span><span class="o">/</span><span class="nx">prod</span><span class="o">-</span><span class="mi">1</span><span class="nx">a</span><span class="p">:</span><span class="err">$</span><span class="nx">HOME</span><span class="o">/</span><span class="p">.</span><span class="nx">kube</span><span class="o">/</span><span class="nx">prod</span><span class="o">-</span><span class="mi">1</span><span class="nx">b</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>change kube staging, production</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectx</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>try connect</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>namespace</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span> <span class="o">--</span><span class="nx">namespace</span> <span class="nx">search</span>
+</span><span class='line'><span class="nx">kubectl</span> <span class="nx">get</span> <span class="nx">pods</span> <span class="o">--</span><span class="nx">n</span> <span class="nx">search</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>current namespace</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">config</span> <span class="nx">view</span> <span class="p">|</span> <span class="nx">grep</span> <span class="nx">namespace</span><span class="p">:</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>entry another namespace pod</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="o">-</span><span class="nx">n</span> <span class="nx">search</span> <span class="nx">exec</span> <span class="o">-</span><span class="nx">it</span> <span class="p">[</span><span class="nx">pod</span> <span class="nx">name</span><span class="p">]</span> <span class="nx">sh</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>entry container</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">kubectl</span> <span class="nx">exec</span> <span class="o">-</span><span class="nx">it</span> <span class="p">[</span><span class="nx">pod</span> <span class="nx">name</span><span class="p">]</span> <span class="nx">sh</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>參考文件</p>
+
+<ul>
+<li><a href="https://neighborhood999.github.io/2018/08/27/learing-k8s-by-minikube/">Kubernetes 初體驗 By minikube</a></li>
+<li><a href="https://ithelp.ithome.com.tw/users/20103753/ironman/1590">Kubernetes 30天學習筆記</a></li>
+<li><a href="https://blog.techbridge.cc/2018/12/01/kubernetes101-introduction-tutorial/">Kubernetes 與 minikube 入門教學</a></li>
+<li><a href="https://blog.gcp.expert/kubernetes-gke-introduction/">GKE 系列文章(一) – 為什麼使用 Kubernetes</a></li>
+<li><a href="https://google.qwiklabs.com/focuses/564?parent=catalog">Hello Node Kubernetes</a></li>
+<li><a href="https://www.qwiklabs.com/focuses/557?parent=catalog">Orchestrating the Cloud with Kubernetes</a></li>
+<li><a href="https://kubernetes.io/docs/reference/kubectl/overview/">Overview of kubectl</a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-06-12T10:48:25+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>12</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>10:48 am</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/kubernetes/'>kubernetes</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="https://mgleon08.github.io/blog/2019/06/12/try-kubernetes/" data-via="" data-counturl="https://mgleon08.github.io/blog/2019/06/12/try-kubernetes/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/06/11/start-kubernetes/" title="Previous Post: Kubernetes - 認識 Kubernetes">&laquo; Kubernetes - 認識 Kubernetes</a>
+      
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'https://mgleon08.github.io/blog/2019/06/12/try-kubernetes/';
+        var disqus_url = 'https://mgleon08.github.io/blog/2019/06/12/try-kubernetes/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>
