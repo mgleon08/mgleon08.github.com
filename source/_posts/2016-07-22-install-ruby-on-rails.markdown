@@ -658,6 +658,11 @@ Code Spell Checker
   "editor.minimap.enabled": true, // 顯示 MiniMap
   "editor.minimap.renderCharacters": false, // MiniMap 不渲染實際字元
   "editor.formatOnSave": false, // 存擋時不進行排版
+  "ruby.format": "rubocop",
+  "[ruby]": {
+    "editor.formatOnSave": true,
+    "editor.tabSize": 2
+  },
   "[go]": {
     "editor.tabSize": 4 // golang 縮排 4 格
   },
@@ -671,7 +676,7 @@ Code Spell Checker
   "prettier.printWidth": 120, // 行寬
   "vetur.format.defaultFormatter.html": "prettyhtml",
   "explorer.openEditors.visible": 1, // 設定已開啟的頁面是否顯示於左側
-  "go.gopath": "GOPATH", // 設定 gopath
+  "go.gopath": "/Users/leon/go", // 設定 gopath
   "ruby.intellisense": "rubyLocate",
   "ruby.locate": {
     "exclude": "{**/@(test|spec|tmp|.*),**/@(test|spec|tmp|.*)/**,**/*_spec.rb}",

@@ -265,7 +265,7 @@ puts who_am_i {}
 跟 `block` 不同的地方是，`proc` 是可保存的
 
 ```ruby
-pro = Proc.new {|a|  puts a}
+pro = Proc.new { |a| puts a }
 #=> <Proc:0x007fcb23ad2640@(irb):1>
 
 pro = Proc.new do |a|
@@ -276,13 +276,12 @@ pro.call(123)
 123
 #=>nil
 
-pro.(123) #非正規用法
-123
-#=>nil
-
+#非正規用法
+pro.(123)
 pro(123)
-123
-#=> 123
+pro.yield(123)
+pro[123]
+pro === 123
 ```
 
 此時就會被 `pro` 存起來，因此引用時就不需加上 `&`

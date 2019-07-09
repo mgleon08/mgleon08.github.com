@@ -49,7 +49,7 @@ class Object
     self
   end
   
-   def yield_self
+  def then
     yield(self)
   end
 end

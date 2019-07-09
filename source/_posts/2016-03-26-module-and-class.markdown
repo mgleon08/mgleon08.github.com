@@ -56,7 +56,24 @@ p.hi #=> 'hi leon'
 p.yo #=> 'yo leon'
 ```
 
-用 Module 的話，就必須每次呼叫 `hi` `yo` method 時都要在傳入參數進去。
+```ruby
+class Test
+  class << self
+    def hello
+      "hello"
+    end
+  end
+
+  def here
+    "here"
+  end
+end
+
+puts Test.hello
+puts Test.new.here
+```
+
+Module
 
 ```ruby
 module Man
@@ -74,7 +91,7 @@ module Man
 end
 
 Man.hi('leon') #=> 'hi leon'
-Man.yo #=> 'yo Man'
+Man.yo #=> 'yo Man' name 應該是 keyword 顯示 module 名稱
 ```
 
 另外是當 Class include 很多 module 時，都會變成 Class 的 `class method` or `instance method`，這時就很難去分辨是從哪個 module 來的 method。

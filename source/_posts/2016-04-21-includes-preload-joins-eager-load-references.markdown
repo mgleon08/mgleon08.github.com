@@ -66,6 +66,8 @@ Blog.includes(:posts).where(posts: { title:"Post 1-1" } )
   SQL (0.2ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id" WHERE "posts"."title" = ?  [["title", "Post 1-1"]]
  => #<ActiveRecord::Relation [#<Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01">]>
 
+# 一樣
+Blog.eager_load(:posts).where(posts: { title:"Post 1-1" } )
 ```
 
 改用 SQL 寫法，如果用 SQL 寫法就必須搭配上 references，否則會找不到
@@ -116,6 +118,14 @@ we can preload our data whenever we want.
 ActiveRecord::Associations::Preloader.new.preload(@users, :address)
 ```
 
+### 希望能將 query 分開
+
+這邊如果將 `preload` 改成 `includes` 則會變成一個 `outer join` 的 query
+
+```ruby
+Blog.joins(:posts).where(posts: {id: [1, 2, 3]}).preload(:posts).map { |blog| blog.posts.size }
+```
+
 # eager_loading
 
 * One query `LEFT OUTER JOINed` in any query rather than loaded separately.
@@ -138,7 +148,7 @@ Blog.eager_load(:posts).where(name: 'Blog 1').where(posts: {title: 'Post 1-1'})
  => #<ActiveRecord::Relation [#<Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01">]>
 
 # includes + references 
-Blog.includes(:posts).where(name: 'Blog 1').where(posts: {title: 'Post 1-1'})
+Blog.includes(:posts).where(name: 'Blog 1').where(posts: {title: 'Post 1-1'}).references(:posts)
   SQL (0.2ms)  SELECT "blogs"."id" AS t0_r0, "blogs"."name" AS t0_r1, "blogs"."author" AS t0_r2, "blogs"."created_at" AS t0_r3, "blogs"."updated_at" AS t0_r4, "posts"."id" AS t1_r0, "posts"."title" AS t1_r1, "posts"."blog_id" AS t1_r2, "posts"."user_id" AS t1_r3, "posts"."created_at" AS t1_r4, "posts"."updated_at" AS t1_r5 FROM "blogs" LEFT OUTER JOIN "posts" ON "posts"."blog_id" = "blogs"."id" WHERE "blogs"."name" = ? AND "posts"."title" = ?  [["name", "Blog 1"], ["title", "Post 1-1"]]
  => #<ActiveRecord::Relation [#<Blog id: 1, name: "Blog 1", author: "someone", created_at: "2016-04-20 14:26:01", updated_at: "2016-04-20 14:26:01">]>
 ```
@@ -256,3 +266,5 @@ Blog.joins(:posts)
 * [Making sense of ActiveRecord joins, includes, preload, and eager_load](http://blog.scoutapp.com/articles/2017/01/24/activerecord-includes-vs-joins-vs-preload-vs-eager_load-when-and-where)
 * [Rails includes and joins](http://hwbnju.com/rails-includes-and-joins#eager_load-and-preload-is-what)
 * [Rails 3 種做到 eager loading 方法](https://blog.hothero.org/2015/07/16/rails-3-zhong-zuo-dao--eager-loading-fang-fa-/)
+* [Making sense of ActiveRecord joins, includes, preload, and eager_load](https://scoutapm.com/blog/activerecord-includes-vs-joins-vs-preload-vs-eager_load-when-and-where)
+* [Mysql: 圖解 inner join、left join、right join、full outer join、union、union all的區別](http://justcode.ikeepstudying.com/2016/08/mysql-%E5%9B%BE%E8%A7%A3-inner-join%E3%80%81left-join%E3%80%81right-join%E3%80%81full-outer-join%E3%80%81union%E3%80%81union-all%E7%9A%84%E5%8C%BA%E5%88%AB/)
