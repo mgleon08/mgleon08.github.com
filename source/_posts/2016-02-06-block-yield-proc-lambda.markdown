@@ -149,7 +149,8 @@ puts array.inspect
 
 #&
 
-[Ruby 魔法之 Symbol#to_proc() 方法](https://www.jianshu.com/p/4fa98d829fc9)
+* [Ruby 魔法之 Symbol#to_proc() 方法](https://www.jianshu.com/p/4fa98d829fc9)
+* [What does to_proc method mean?](https://stackoverflow.com/questions/14881125/what-does-to-proc-method-mean)
 
 & 實際上是會觸發物件的 `to_proc` 方法，並嘗試指定給 & 變數
 因此可以在物件上定義 `to_proc`，然後使用 & 來觸發
@@ -182,6 +183,8 @@ symbol 都有 `to_proc` 這個 method 因此可以改寫成
 
 :downcase.to_proc.call("ABC")
 #=> "abc"
+
+:foo.to_proc # => ->x{x.foo}
 ```
 
 ###proc into block

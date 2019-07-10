@@ -9,14 +9,14 @@ categories: rails
 
 <!--more-->
 
-#Hash
+# Hash
 
 ```ruby
 Hash["a", 100, "b", 200]             #=> {"a"=>100, "b"=>200}
 Hash[ [ ["a", 100], ["b", 200] ] ]   #=> {"a"=>100, "b"=>200}
 Hash["a" => 100, "b" => 200]         #=> {"a"=>100, "b"=>200}
 ```
-#merge & merge!
+# merge & merge!
 
 回傳新的 hash，後面一樣的 key 則會覆蓋前面的
 
@@ -42,7 +42,7 @@ h1
 #=> {"a"=>100, "b"=>254, "c"=>300}
 ```
 
-#reverse_merge & reverse_merge!
+# reverse_merge & reverse_merge!
 
 回傳新的 hash，前面一樣的 key 則會覆蓋後面的
 
@@ -60,7 +60,7 @@ h1.reverse_merge(h2)
 #=> {"b"=>200, "c"=>300, "a"=>100}
 ```
 
-#deep_merge & deep_merge!
+# deep_merge & deep_merge!
 
 在兩個hash的鍵值相同，而值也是個hash的情況下
 
@@ -74,7 +74,7 @@ h1.deep_merge(h2)
 #=> {:a=>{:b=>1, :c=>2}}
 ```
 
-#fetch
+# fetch
 
 即使是 nil, false 也會回傳，只有在空值的時候回傳預設值
 
@@ -128,7 +128,7 @@ batman.fetch(:powers, get_batman_powers) # get_batman_powers is an expensive cal
 batman.fetch(:powers) { get_batman_powers }
 ```
 
-#except & except!
+# except & except!
 
 通常用在確保某些欄位不要被傳進來的參數修改到
 
@@ -149,7 +149,7 @@ hash.symbolize_keys
 # => {:name=>"Rob", :age=>"28"}
 ```
 
-#stringify_keys & stringify_keys!
+# stringify_keys & stringify_keys!
 
 回傳新的 hash，key 值轉成 string
 
@@ -168,7 +168,7 @@ hash.stringify_keys
 #=> {"a"=>2}
 ```
 
-#slice & slice!
+# slice & slice!
 
 有 `!` 行為會不太一樣，要注意
 
@@ -186,7 +186,8 @@ h1
 #=> {"a"=>100}
 ```
 
-#extract!
+# extract!
+
 將需要的值提取出來，成為新的 hash
 
 ```ruby
@@ -197,7 +198,7 @@ h1
 #=> {"b"=>200}
 ```
 
-#to_query
+# to_query
 
 Alias for Hash#to_query
 
@@ -209,7 +210,7 @@ Alias for Hash#to_query
 # => "user%5Bname%5D=David&user%5Bnationality%5D=Danish"
 ```
 
-#values_at
+# values_at
 
 ```ruby
 # bad
@@ -220,9 +221,9 @@ nickname = data['nickname']
 email, username = data.values_at('email', 'nickname')
 ```
 
-#other
+# other
 
-###attributes
+### attributes
 將物件轉成 hash
 
 ```ruby
@@ -231,6 +232,37 @@ foo = Book.first
 
 foo.attributes
 #=> {"id"=>22, "name"=>"book", "desc"=>"desc", "star"=>1, "created_at"=>xxx, "updated_at"=>xxx}
+```
+
+### HashWithIndifferentAccess
+
+最後是在 rails 中有這個 method 可以很方便地讓你不管是用 string 或是 symbol 都可以拿到值，在 params 中也是因為這個方法，因此兩種都取得到
+
+```ruby
+a = Hash.new
+# => {}
+a['hi'] = 123
+# => 123
+a['hi']
+# => 123
+a[:hi]
+# => nil
+
+b = HashWithIndifferentAccess.new
+# => {}
+b['hello'] = 321
+# => 321
+ b['hello']
+#=> 321
+b[:hello]
+# => 321
+
+aa = a.with_indifferent_access
+# => {"hi"=>123}
+aa['hi']
+# => 123
+aa[:hi]
+# => 123
 ```
 
 官方文件：  

@@ -96,8 +96,40 @@ hash[:a][:b][:c][:d] = 'hi' # => "hi"
 hash # => {:a=>{:b=>{:c=>{:d=>"hi"}}}}
 ```
 
+# HashWithIndifferentAccess
+
+最後是在 rails 中有這個 method 可以很方便地讓你不管是用 string 或是 symbol 都可以拿到值，在 params 中也是因為這個方法，因此兩種都取得到
+
+```ruby
+a = Hash.new
+# => {}
+a['hi'] = 123
+# => 123
+a['hi']
+# => 123
+a[:hi]
+# => nil
+
+b = HashWithIndifferentAccess.new
+# => {}
+b['hello'] = 321
+# => 321
+ b['hello']
+#=> 321
+b[:hello]
+# => 321
+
+aa = a.with_indifferent_access
+# => {"hi"=>123}
+aa['hi']
+# => 123
+aa[:hi]
+# => 123
+```
+
 參考文件
 
 * [Hash](https://ruby-doc.org/core-2.6/Hash.html)
 * [Strange, unexpected behavior (disappearing/changing values) when using Hash default value, e.g. Hash.new([])](https://stackoverflow.com/questions/2698460/strange-unexpected-behavior-disappearing-changing-values-when-using-hash-defa)
 * [Ruby Hashes and Default Values](https://keepthecodesimple.com/ruby-hashes-default-values/)
+* [Ruby 語法放大鏡之「為什麼 Hash 好像有不同的寫法?」](https://kaochenlong.com/2016/04/23/different-hash-format/)

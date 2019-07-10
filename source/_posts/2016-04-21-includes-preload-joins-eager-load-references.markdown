@@ -122,6 +122,8 @@ ActiveRecord::Associations::Preloader.new.preload(@users, :address)
 
 這邊如果將 `preload` 改成 `includes` 則會變成一個 `outer join` 的 query
 
+底下是希望能取得 blog 底下 post id 是 1, 2, 3 的 blog，但是一樣要取出該 blog 所有的 posts
+
 ```ruby
 Blog.joins(:posts).where(posts: {id: [1, 2, 3]}).preload(:posts).map { |blog| blog.posts.size }
 ```
@@ -251,6 +253,15 @@ Blog.joins(:posts)
 
 ![](http://www.codeproject.com/KB/database/Visual_SQL_Joins/Visual_SQL_JOINS_orig.jpg)
 
+
+# Other
+
+use sql in rails
+
+```ruby
+ActiveRecord::Base.connection.execute(sql)
+```
+
 官方資料：  
 
 * [Active Record Query Interface](http://guides.rubyonrails.org/active_record_querying.html)  
@@ -262,9 +273,9 @@ Blog.joins(:posts)
 * [ActiveRecord - 資料表關聯](https://ihower.tw/rails4/activerecord-relationships.html)    
 * [preload, eager_load, includes, references, and joins in Rails](http://blog.ifyouseewendy.com/blog/2015/11/11/preload-eager_load-includes-references-joins/)  
 * [Preload, Eagerload, Includes and Joins](http://blog.bigbinary.com/2013/07/01/preload-vs-eager-load-vs-joins-vs-includes.html)  
-* [3 ways to do eager loading (preloading) in Rails 3 & 4](http://blog.arkency.com/2013/12/rails4-preloading/)  
 * [Making sense of ActiveRecord joins, includes, preload, and eager_load](http://blog.scoutapp.com/articles/2017/01/24/activerecord-includes-vs-joins-vs-preload-vs-eager_load-when-and-where)
-* [Rails includes and joins](http://hwbnju.com/rails-includes-and-joins#eager_load-and-preload-is-what)
-* [Rails 3 種做到 eager loading 方法](https://blog.hothero.org/2015/07/16/rails-3-zhong-zuo-dao--eager-loading-fang-fa-/)
 * [Making sense of ActiveRecord joins, includes, preload, and eager_load](https://scoutapm.com/blog/activerecord-includes-vs-joins-vs-preload-vs-eager_load-when-and-where)
 * [Mysql: 圖解 inner join、left join、right join、full outer join、union、union all的區別](http://justcode.ikeepstudying.com/2016/08/mysql-%E5%9B%BE%E8%A7%A3-inner-join%E3%80%81left-join%E3%80%81right-join%E3%80%81full-outer-join%E3%80%81union%E3%80%81union-all%E7%9A%84%E5%8C%BA%E5%88%AB/)
+* [Rails 3 種做到 eager loading 方法](https://blog.hothero.org/2015/07/16/rails-3-zhong-zuo-dao--eager-loading-fang-fa-/)
+* [Rails includes and joins](http://hwbnju.com/rails-includes-and-joins#eager_load-and-preload-is-what)
+* [3 ways to do eager loading (preloading) in Rails 3 & 4](https://blog.arkency.com/2013/12/rails4-preloading/) 
