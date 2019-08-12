@@ -341,6 +341,7 @@ echo a b c d e f | xargs -n 3
 ```
 
 * [Linux 系統 xargs 指令範例與教學](https://blog.gtwang.org/linux/xargs-command-examples-in-linux-unix/)
+* [xargs 命令教程 - 阮一峰的网络日志](http://www.ruanyifeng.com/blog/2019/08/xargs-tutorial.html)
 
 # <span id="arrow"> > & >> </span>
 

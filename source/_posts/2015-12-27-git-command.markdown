@@ -493,7 +493,7 @@ git worktree prune
 也可以建立新的檔案 `.aliases`, 並在 `.zshrc` 加上 `source ~/.aliases`
 
 ```ruby
-#base
+# base
 alias g='git'
 
 alias grs='git reset'
@@ -501,22 +501,22 @@ alias gst='git status'
 alias gd='git diff'
 alias gdca='git diff --cached'
 
-#git add
+# git add
 alias ga='git add'
 alias gaa='git add --all'
 alias gap='git add --patch'
 
-#git commit
+# git commit
 alias gc='git commit'
 alias gcm='git commit -m'
 alias gcm!='git commit --amend -m'
 alias gcam='git commit -a -m'
 
-#git merge
+# git merge
 alias gm='git merge'
 alias gmo='git merge origin'
 
-#branch
+# branch
 alias gb='git branch'
 alias gbd='git branch -d'
 alias gbr='git branch --remote'
@@ -526,7 +526,7 @@ alias gba='git branch -a'
 alias gbmd='git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d'
 alias gbrmd='git branch -r --merged | egrep -v "(^\*|master|dev)" | xargs git branch -r -d'
 
-#git push
+# git push
 alias gp='git push'
 alias gpo='git push origin'
 alias gcp='git cherry-pick'
@@ -536,22 +536,22 @@ compdef _git gpoat=git-push
 alias gpu='git push upstream'
 alias gpv='git push -v'
 
-#git pull
+# git pull
 alias gpl='git pull'
 alias gplo='git pull origin'
 alias gplrb='git pull --rebase'
 alias gplrbo='git pull --rebase origin'
 
-#git checkout
+# git checkout
 alias gco='git checkout'
 alias gcob='git checkout -b'
 alias gcom='git checkout master'
 
-#git fetch origin
+# git fetch origin
 alias gf='git fetch'
 alias gfo='git fetch origin'
 
-#git rebase
+# git rebase
 alias grb='git rebase'
 alias grba='git rebase --abort'
 alias grbc='git rebase --continue'
@@ -559,9 +559,10 @@ alias grbi='git rebase -i'
 alias grbm='git rebase master'
 alias grbs='git rebase --skip'
 
-#git stash
+# git stash
 alias gsta='git stash save'
 alias gstak='git stash save --keep-index'
+alias gstau='git stash save --include-untracked'
 alias gstaa='git stash apply'
 alias gstd='git stash drop'
 alias gstl='git stash list'
@@ -570,7 +571,7 @@ alias gsts='git stash show'
 alias gstc='git stash clear'
 alias gsts='git stash show --text'
 
-#git log
+# git log
 alias gl='git log'
 alias glg='git log --stat --color'
 alias glgp='git log --stat --color -p'
@@ -582,7 +583,7 @@ alias glol="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset
 alias glola="git log --graph --pretty=format:'%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset' --abbrev-commit --all"
 alias glog='git log --oneline --decorate --color --graph'
 
-#git peco
+# git peco
 # interactive checkout
 alias gcoi='git checkout $(git branch | cut -c 3- | peco)'
 # interactive merge

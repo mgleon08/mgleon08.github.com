@@ -135,3 +135,4 @@ Video：
 * [Ruby 的多執行緒應用伺服器介紹](https://ruby-china.org/topics/10832)
 * [大戰 Rails Connection Leak](http://blog.mz026.rocks/20160917/rails-connection-leak)
 * [Rails 部署工具，原來是這樣](https://5xruby.tw/posts/rails-deploy)
+* [What is a Reverse Proxy vs. Load Balancer?](https://www.nginx.com/resources/glossary/reverse-proxy-vs-load-balancer/)
