@@ -163,6 +163,9 @@ end
 ```
 
 ###Controller spec syntax
+
+`assigns` 可以直接取得 instance 去測試
+
 ```ruby
 RSpec.describe PostsController, type: :controller do
   expect(response).to render_template(:new)

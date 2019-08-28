@@ -643,6 +643,7 @@ Prettier - code formatter // alt + shift + f
 vscodeicon
 CSScomb
 Code Spell Checker
+Bracket Pair Colorizer
 // 其他可以看上面推薦的安裝
 ```
 
@@ -767,31 +768,7 @@ control + `
 
 # <span id="vim">Vim</span>
 
-介面優化，新增 `.vimrc` 檔案
-
-```ruby
-colorscheme desert
-syntax on
-
-#顯示行號：對於 debug 相當有幫助! (加上 run 數字會跟著跑)
-:set nu rnu
-#自動對齊縮排：如果上一行有兩個 tab 的寬度，按 enter 繼續編輯下一行時會自動保留兩個 tab 鍵的寬度。
-:set ai
-#光標底線：光標所在的那一行會有底線，幫助尋找光標位置
-:set cursorline
-#上色模式-針對亮背景上色，預設為亮背景(白色等)上色，但是終端機的初始背景色為深紫色，會出現文字失蹤 ( 例如註解為深藍色 ) 的情況。將這一行換成 :set bg=dark 即可。
-:set bg=light
-#縮排間隔數 ( 預設為 8 個空白對齊 )，也就是說按一次 tab 鍵，游標會自動跳 4 格空白字元的寬度。雖有多個空格但實際上只有一個 tab 字元。注意：也就是說，在其他環境下，看到 tab 字元，依舊是 8 個空白寬
-:set tabstop=4
-#自動縮排對齊間隔數：向右或向左一個縮排的寬度
-:set shiftwidth=4
-#vim底下有一個視窗，用以顯示狀態
-:set laststatus=2
-# 設定底下狀態條
-:set statusline=%<%F\ %m%=\ %h%r\ %-19([%p%%]\ %3l,%02c%03V%)%y
-hi StatusLine cterm=bold,reverse ctermbg=250 ctermfg=24
-```
-
+* <a href="{{ root_url }}/blog/2019/08/29/vim-basic/"> Vim Basic </a>
 * [vimrc設定教學](http://wiki.csie.ncku.edu.tw/vim/vimrc)
 * [vi指令說明(完整版)](http://www2.nsysu.edu.tw/csmlab/unix/vi_command.htm)
 

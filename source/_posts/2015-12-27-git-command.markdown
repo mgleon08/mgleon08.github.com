@@ -11,18 +11,21 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 
 <!-- more -->
 
-#區域
+# 區域
+
 1. 工作目錄 Working tree
 2. 暫存準備遞交區 Staging Area (index索引)
 3. 儲存庫 Repository
 
-#狀態
+# 狀態
+
 1. 沒有被追蹤的檔案 Untracked files
 2. 有修改、還沒準備要被遞交 Changes not staged for commit
 3. 有修改、準備要被遞交的檔案(在Staging Area) Changes to be committed
 4. 已經被遞交的檔案 Committed
 
-#符號
+# 符號
+
 1. HEAD
 	* 永遠會指向「工作目錄」中所設定的「分支」當中的「最新版」。
 	* 所以當你在這個分支執行 git commit 後，這個 HEAD 符號參照也會更新成該分支最新版的那個 commit 物件。
@@ -35,6 +38,7 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 	* 當你執行合併工作時 (關於合併的議題會在日後的文章中會提到)，「合併來源｣的 commit 物件絕對名稱會被記錄在 MERGE_HEAD 這個符號參照中。
 
 # 基本設定
+
 * `git config --global user.name "<使用者名字>"` (個別專案可用 --local)
 * `git config --global user.email "<電子信箱>"` (個別專案可用 --local)
 * `git config --list`　看 Git 設定內容
@@ -45,9 +49,10 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 
 以上皆可直接 `vim ~/.gitconfig` 去做修正
 
-#基本功能
+# 基本功能
 
-###basic
+### basic
+
 * `git --version` 查看目前版本。
 * `git help [指令]` 查詢完整的文件。
 * `git init` 建立 Repository。
@@ -55,7 +60,8 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 * `git mv [filename] [new filename]` 更改檔案名稱。(此更改檔案的動作會列入版本控制中)
 * `git show [SHA1]` 查出該版本的相關資訊。(可搭配 `git log` 找出有問題的版本)
 
-###add
+### add
+
 * `git add .` 將當前目錄`所有`檔案加入到 Staging Area。(雖然方便但很容易會不小心加入一些其他不必要的檔案)
 * `git add [filename]` 將檔案加入到 Staging Area。
 * `git add -u`，只註冊已提交過的檔案到索引。
@@ -80,11 +86,13 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 `e` manually edit the current hunk
 `?` print help
 ```
-###rm
+### rm
+
 * `git rm [filename]` 刪除檔案，包括實體檔案。(此刪除檔案的動作會列入版本控制中)
 * `git rm --cached a.txt` 只想刪除索引檔中的該檔，又要保留工作目錄下的實體檔案。
 
-###commit
+### commit
+
 * `git commit` 將 Staging Area 檔案 commit。
 * `git commit -m [commit 訊息]` 直接寫入 commit 訊息。
 * `git commit -am [commit 訊息]` 等於 `git add .` + `git commit -m`。
@@ -115,14 +123,16 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 
 >切換 working tree 的 branch 時,如果有檔案，在 staging area 或是 modified，會無法切換。可以先 commit，只要不 push 出去，再 `reset` 回來即可。或是用 `stash` 的方式
 
-#合併
-###merge
+# 合併
+
+### merge
+
 * `git merge [branch]` 將指定 branch 合併到目前的 branch
 * `git merge [branch] --no-ff` 不使用 fast-forward 合併。可以保留分支合併的紀錄。
 
-#修正
+# 修正
 
-###reset
+### reset
 
 * `git reset` 將所有檔案從 Staging Area 到 Working tree。
 * `git reset HEAD [filename]` 將檔案從 Staging Area 取消到 Working tree。
@@ -136,10 +146,12 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 
 * `git reset --hard ORIG_HEAD` 刪除最近一次的版本，但保留最後一次的變更。
 
-###revert
+### revert
+
 >revert是新增一個commit來做還原，`git revert` 會用一個新的 commit 來回復所有的變更。(適合已經push出去給別人的情境)
 
-###rebase
+### rebase
+
 * `git rebase` 重新修改特定分支的「基礎版本」，把另外一個分支的變更，當成這個分支的基礎。(如果接著直接 merge，則是會直接 fast-forward ，若想保留資訊則加上  `--no-ff`)
 * [Git-rebase 小筆記](https://blog.yorkxin.org/posts/2011/07/29/git-rebase/)
 * `git rebase -i [SHA1]` 可以只接更改某個 commit 之後所有的紀錄。
@@ -157,16 +169,20 @@ squash = 要這條 commit，但要跟前面那條合併，並保留這條的 mes
 fixup  = squash + 只使用前面那條 commit 的 message ，捨棄這條 message
 exec   = 執行一條指令
 ```
-###cherry-pick
+
+### cherry-pick
+
 * `git cherry-pick` 手動挑出其他 branch 中的 commit，合併進來。
 * `git cherry-pick [SHA1] -e` 建立版本前先編輯訊息。
 * `git cherry-pick [SHA1] -n` 不建立版本，僅套用其變更。
 
-###checkout
+### checkout
+
 * `git checkout [filename]` 取消 Working tree 檔案。
 * `git checkout master [filename]` 把 master 分支中最新版的檔案給還原。
 
-#暫存
+# 暫存
+
 * `git stash` 會將所有已列入追蹤(tracked)的檔案建立暫存版。
 * `git stash -u`　會包括所有已追蹤或未追蹤的檔案，全部都建立成暫存版。
 * `git stash list` 顯示出所有的暫存清單。
@@ -178,7 +194,8 @@ exec   = 執行一條指令
 
 >指定stash ID（如：stash@{1}），則可以復原特定的操作
 
-#遠端
+# 遠端
+
 * `git remote add origin [url]` 註冊遠端儲存庫。
 * `git clone [url]` 將遠端儲存庫複製到本地，並建立工作目錄與本地儲存庫。
 * `git push -u origin master` 將本地儲存庫中目前分支的所有相關物件推送到遠端儲存庫中。
@@ -194,7 +211,8 @@ exec   = 執行一條指令
 * [upstream](https://zlargon.gitbooks.io/git-tutorial/content/remote/upstream.html)
 * [Git 更安全的強制推送，--force-with-lease](https://walterlv.github.io/post/safe-push-using-force-with-lease.html)
 
-#差異
+# 差異
+
 * `git diff` 比對「Working tree」與「Staging Area」之間的差異。
 * `git diff commit` 比對「Working tree」與「指定 commit 物件裡的那個 tree 物件」之間的差異。
 * `git diff HEAD` 比對「Working tree」與「HEAD」之間的差異。
@@ -203,9 +221,10 @@ exec   = 執行一條指令
 * `git diff HEAD^ HEAD` 比較 HEAD 和 HEAD^ 差異。
 * `git diff BRANCH` 比較當下 branch 和指定 branch 的差異。
 
-#記錄
+# 記錄
 
-###log
+### log
+
 * `git log` 查詢歷史紀錄。
 * `git log -10` 限定輸出最近幾筆紀錄。
 * `git log --oneline --graph --all --decorate` 圖像化 log。
@@ -215,7 +234,7 @@ exec   = 執行一條指令
 * `git log --oneline --since="9am" --until="12am"` 今天早上 9 點到 12 點之間所有的 Commit
 * `git log --oneline --since="9am" --until="12am" --after="2017-01"`  2017 年 1 月之後，每天早上 9 點到 12 點的 Commit
 
-###reflog
+### reflog
 * `git reflog` 可列印出所有「歷史紀錄」的版本變化。
 * `git log -g` 顯示 reflog 的詳細版本記錄。
 * `git reflog delete HEAD@{1}` 刪除特定幾個版本的歷史紀錄。
@@ -236,7 +255,7 @@ exec   = 執行一條指令
 * `git rev-parse --abbrev-ref HEAD` 看 HEAD 的 sha1 對應的 branch 名稱 
 
 
-#標籤
+# 標籤
 
 * `git tag` 列出所有標籤。
 * `git tag -n` 顯示標籤的列表和註解。
@@ -253,19 +272,19 @@ exec   = 執行一條指令
 	* 可以添加註解
 	* 可以添加簽名
 
-###push 標籤
+### push 標籤
 
 * `git push origin v1.5` git push 並不會把標籤上傳到遠端，所以必須透過底下才行
 * `git push origin --tags` 用 –tags 一次上傳上去
 
-###刪除標籤
+### 刪除標籤
 
 * `git push origin :refs/tags/my_tag`
 * `git tag -d <tagname></tagname>`
 
 [[Git] 版本控制: 如何使用標籤(Tag)](https://blog.wu-boy.com/2010/11/git-%E7%89%88%E6%9C%AC%E6%8E%A7%E5%88%B6-%E5%A6%82%E4%BD%95%E4%BD%BF%E7%94%A8%E6%A8%99%E7%B1%A4tag/)
 
-#commit 順序
+# commit 順序
 
 ```
 schema
@@ -275,16 +294,17 @@ refactor new feature
 hotfix
 ```
 
-#Blame
+# Blame
+
 * `git blame [filename]` 可以看最後一個 commit 的人是誰
 * `git blame -L [開始行數],[結束行數] [filename]`
 
 
-#submodule
+# submodule
 [Git Submodule 用法筆記](http://blog.chh.tw/posts/git-submodule/)
 
 
-#git-bisect
+# git-bisect
 利用 git 的 二分找法，來找出當初錯誤的版本是從哪個開始
 
 ```ruby
@@ -302,30 +322,38 @@ git bisect reset #結束
 ```
 
 
-#git format-patch
+# git format-patch
 
 git 製作成 patch 檔 然後 merge
 
 ```ruby
-#最新的n個 commit
+# 最新的 n 個 commit
 git format-patch -n
 
-#清除之前的訊息
+# 清除之前的訊息
 git am --abort
 
-#上patch
+# 上patch
 git am xxx.patch
 git am *.patch
+
+# 保存 diff
+git diff file > mypatch.patch
+git apply mypatch.patch
 ```
 
 * [【Git】使用 format-patch 將 commit 打包成檔案 Use format-patch to carry commit](http://chris800731.blogspot.tw/2013/08/git-format-patch-commit-use-format.html)
 * [5.3 分散式 Git - 專案的管理](https://git-scm.com/book/zh-tw/v1/%E5%88%86%E6%95%A3%E5%BC%8F-Git-%E5%B0%88%E6%A1%88%E7%9A%84%E7%AE%A1%E7%90%86)
+* [Create patch or diff file from git repository and apply it to another different git repository](https://stackoverflow.com/questions/28192623/create-patch-or-diff-file-from-git-repository-and-apply-it-to-another-different)
 
 # 其他
+
 ### gitkeep
+
 * `.gitkeep` 空目錄不會被 commit，必要時在目錄裡放 `.gitkeep`。
 
 ### .gitignore
+
 * `vi .gitignore` 編輯不要 commit 的檔案 此檔案也要 commit，通常是比較敏感的檔案，像是密碼之類的。
 
 [.gitignore ⼤集合](https://github.com/github/gitignore)
@@ -338,6 +366,7 @@ git commit -m "fixed untracked files"
 ```
 
 ### 移除已經上 github 的敏感檔案
+
 * [移除 git 上敏感檔案](https://help.github.com/articles/remove-sensitive-data/)
 
 ```ruby
@@ -349,6 +378,7 @@ git filter-branch --tree-filter "rm -f config/database.yml"
 ```
 
 ### 開乾淨的 branch
+
 [How to create a new empty branch for a new project](http://stackoverflow.com/questions/13969050/how-to-create-a-new-empty-branch-for-a-new-project)
 
 ```ruby

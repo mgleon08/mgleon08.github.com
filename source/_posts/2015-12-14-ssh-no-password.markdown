@@ -133,7 +133,7 @@ ssh -T git@github.com
 
 ssh-add命令是把專用密鑰添加到ssh-agent的高速緩存中。該命令位置在 `/usr/bin/ssh-add`
 
-1. 把專用密鑰新增到 ssh-agent 的高速緩存中：`ssh-add ~/.ssh/id_rsa`
+1. 把專用密鑰新增到 ssh-agent 的高速緩存中：`ssh-add ~/.ssh/id_rsa (-K 加到 keychain)` 
 2. 從ssh-agent中刪除密鑰： `ssh-add -d ~/.ssh/id_xxx.pub`
 3. 查看ssh-agent中的密鑰： `ssh-add -l`
 
@@ -146,6 +146,10 @@ ssh-add命令是把專用密鑰添加到ssh-agent的高速緩存中。該命令�
 * [Using SSH agent forwarding](https://developer.github.com/guides/using-ssh-agent-forwarding/)
 * [SSH agent forwarding 的應用](https://ihower.tw/blog/archives/7837)
 * [SSH agent 轉發](http://wiki.jikexueyuan.com/project/github-developer-guides/using-ssh-agent.html)
+
+# 保持 SSH 連接
+
+* [保持 SSH 連接](http://einverne.github.io/post/2017/05/ssh-keep-alive.html)
 
 # 本地測試
 若是要本地自行測試的話，可以到 `/etc/hosts` 去設定網址對應 ip 位置，這樣之後連該網址就會連線到指定的 ip
