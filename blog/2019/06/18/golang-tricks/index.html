@@ -1,0 +1,1920 @@
+
+<!DOCTYPE html>
+<!--[if IEMobile 7 ]><html class="no-js iem7"><![endif]-->
+<!--[if lt IE 9]><html class="no-js lte-ie8"><![endif]-->
+<!--[if (gt IE 8)|(gt IEMobile 7)|!(IEMobile)|!(IE)]><!--><html class="no-js" lang="en"><!--<![endif]-->
+<head>
+  <meta charset="utf-8">
+  <title>Golang Tricks - Leon's Blogging</title>
+  <meta name="author" content="LeonJi">
+
+  
+  <meta name="description" content="Defer 執行順序
+Range &amp; Foreach
+golang 執行的隨機性和閉包
+golang 的組合繼承
+Select 隨機性
+Defer 執行順序
+make 預設值和 append
+map 執行緒安全
+chan緩存池
+interface 實作方式
+interface內部結構 &hellip;">
+  
+
+  <!-- http://t.co/dKP3o1e -->
+  <meta name="HandheldFriendly" content="True">
+  <meta name="MobileOptimized" content="320">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+
+  
+  <link rel="canonical" href="https://mgleon08.github.io/blog/2019/06/18/golang-tricks">
+  <link href="/favicon.png" rel="icon">
+  <link href="/stylesheets/screen.css" media="screen, projection" rel="stylesheet" type="text/css">
+  <link href="/atom.xml" rel="alternate" title="Leon's Blogging" type="application/atom+xml">
+  <script src="/javascripts/modernizr-2.0.js"></script>
+  <script src="//ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script>!window.jQuery && document.write(unescape('%3Cscript src="/javascripts/libs/jquery.min.js"%3E%3C/script%3E'))</script>
+  <script src="/javascripts/octopress.js" type="text/javascript"></script>
+  <!--Fonts from Google"s Web font directory at http://google.com/webfonts -->
+<link href="//fonts.googleapis.com/css?family=PT+Serif:regular,italic,bold,bolditalic" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Open+Sans" rel="stylesheet" type="text/css">
+<link href="//fonts.googleapis.com/css?family=Fjalla+One" rel="stylesheet" type="text/css">
+<!--- MathJax Configuration -->
+<script type="text/javascript" src="//cdn.mathjax.org/mathjax/latest/MathJax.js?config=TeX-AMS-MML_HTMLorMML"></script>
+  
+  <script>
+    (function(i,s,o,g,r,a,m){i['GoogleAnalyticsObject']=r;i[r]=i[r]||function(){
+    (i[r].q=i[r].q||[]).push(arguments)},i[r].l=1*new Date();a=s.createElement(o),
+    m=s.getElementsByTagName(o)[0];a.async=1;a.src=g;m.parentNode.insertBefore(a,m)
+    })(window,document,'script','//www.google-analytics.com/analytics.js','ga');
+
+    ga('create', 'UA-45177377-6', 'auto');
+    ga('send', 'pageview');
+
+  </script>
+
+
+
+</head>
+
+<body   class="collapse-sidebar sidebar-footer" >
+  <header role="banner"><hgroup>
+  <h1><a href="/">Leon's Blogging</a></h1>
+  
+    <h2>Coding blogging for hackers.</h2>
+  
+</hgroup>
+
+</header>
+  <nav role="navigation"><ul class="subscribe" data-subscription="rss">
+  <li><a href="/atom.xml" rel="subscribe-rss" title="subscribe via RSS" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 13.310204,73.332654 C 5.967347,73.332654 0,79.322448 0,86.621428 c 0,7.338776 5.967347,13.262246 13.310204,13.262246 7.370408,0 13.328572,-5.92245 13.328572,-13.262246 0,-7.29898 -5.958164,-13.288774 -13.328572,-13.288774 z M 0.01530612,33.978572 V 53.143878 C 12.493878,53.143878 24.229592,58.02347 33.068368,66.865306 41.894898,75.685714 46.767346,87.47449 46.767346,100 h 19.25 C 66.017346,63.592858 36.4,33.979592 0.01530612,33.978572 l 0,0 z M 0.03877552,0 V 19.17449 C 44.54796,19.17551 80.77551,55.437756 80.77551,100 H 100 C 100,44.87653 55.15102,0 0.03877552,0 z"></path></svg></a></li>
+  
+</ul>
+  
+  
+  
+  
+  
+<ul class="subscribe">
+  <li><a href="https://github.com/mgleon08" rel="subscribe-github" title="@mgleon08 on GitHub" target="_blank"><svg version="1.1" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="25" height="25" viewbox="0 0 100 100"><path class="social" d="M 50,0 C 22.385714,0 0,22.385714 0,50 0,77.614286 22.385714,100 50,100 77.614286,100 100,77.614286 100,50 100,22.385714 77.614286,0 50,0 z m 29.692858,79.692858 c -3.859184,3.859182 -8.351022,6.887754 -13.35,9.00306 -1.27041,0.536736 -2.560204,1.009184 -3.867348,1.415306 v -7.493878 c 0,-3.938774 -1.35102,-6.835714 -4.053062,-8.690816 1.692858,-0.163264 3.24694,-0.390816 4.663266,-0.683672 1.416326,-0.292858 2.913266,-0.716328 4.491838,-1.27041 1.57857,-0.55408 2.994896,-1.213264 4.247958,-1.97755 1.253062,-0.765306 2.458164,-1.758164 3.613266,-2.978572 1.155102,-1.220408 2.12449,-2.604082 2.905102,-4.15 0.780612,-1.545918 1.4,-3.40204 1.855102,-5.566326 0.455102,-2.164286 0.683674,-4.54898 0.683674,-7.153062 0,-5.045918 -1.643878,-9.341836 -4.931634,-12.890816 C 77.44796,33.35 77.285714,29.10204 75.463266,24.512244 l -1.22143,-0.145918 c -0.845918,-0.09796 -2.368366,0.260204 -4.565306,1.07449 -2.196938,0.814286 -4.663264,2.14796 -7.396938,4.004082 -3.87449,-1.07449 -7.893878,-1.611224 -12.061224,-1.611224 -4.19898,0 -8.203062,0.536734 -12.012246,1.611224 -1.72449,-1.17245 -3.361224,-2.139796 -4.907142,-2.905102 C 31.753062,25.77449 30.516326,25.254082 29.587756,24.97653 28.660204,24.7 27.79796,24.528572 27,24.463266 c -0.79796,-0.0653 -1.310204,-0.08062 -1.537756,-0.04898 -0.22755,0.03164 -0.390816,0.0653 -0.487754,0.09796 -1.82347,4.62245 -1.985714,8.87143 -0.487756,12.743878 -3.287754,3.54796 -4.931632,7.844898 -4.931632,12.890816 0,2.604082 0.227552,4.988776 0.683674,7.153062 0.456122,2.164286 1.07449,4.020408 1.855102,5.566326 0.780612,1.545918 1.75,2.929592 2.905102,4.15 1.155102,1.220408 2.360204,2.213266 3.613264,2.978572 1.253062,0.766326 2.669388,1.42449 4.24796,1.97755 1.578572,0.554082 3.07551,0.976532 4.491836,1.27041 1.416328,0.292856 2.970408,0.521428 4.663266,0.683672 -2.669388,1.82347 -4.004082,4.720408 -4.004082,8.690816 v 7.639796 C 36.536734,89.818368 35.083674,89.3 33.656122,88.695918 c -4.99898,-2.115306 -9.490816,-5.143878 -13.35,-9.00306 -3.859184,-3.859184 -6.887754,-8.351022 -9.00306,-13.35 C 9.1163263,61.171428 8.0071428,55.67347 8.0071428,50 c 0,-5.67347 1.1091835,-11.171428 3.2969392,-16.342858 2.115306,-4.998978 5.143878,-9.490816 9.00306,-13.35 3.859184,-3.859182 8.351022,-6.887754 13.35,-9.00306 C 38.828572,9.1163266 44.32653,8.0071428 50,8.0071428 c 5.67347,0 11.171428,1.1091838 16.342858,3.2969392 5,2.115306 9.490816,5.143878 13.35,9.00306 3.859182,3.859184 6.887754,8.351022 9.00306,13.35 2.186736,5.17245 3.295918,10.67041 3.295918,16.342858 0,5.672448 -1.109182,11.171428 -3.296938,16.342858 -2.115306,4.998978 -5.143878,9.490816 -9.00204,13.35 l 0,0 z"></path></svg></a></li>
+</ul>
+  
+  
+  
+  
+  
+  
+  
+  
+    
+      <form action="https://www.google.com/search" method="get">
+        <fieldset role="search">
+          <input type="hidden" name="sitesearch" value="mgleon08.github.io" />
+    
+          <input class="search" type="text" name="q" results="0" placeholder="Search"/>
+        </fieldset>
+      </form>
+  
+<ul class="main-navigation">
+  <li><a href="/blog/archives">Archives</a></li>
+  <li><a href="/blog/categories/ruby/">Ruby</a></li>
+  <li><a href="/blog/categories/rails/">Rails</a></li>
+  <li><a href="/blog/categories/golang/">Golang</a></li>
+  <li><a href="/blog/categories/javascript/">JavaScript</a></li>
+  <li><a href="/blog/categories/docker/">Docker</a></li>
+  <li><a href="/tool">Tool</a></li>
+  <li><a href="/about">About</a></li>
+</ul>
+
+</nav>
+  <div id="main">
+    <div id="content">
+      <div>
+<article class="hentry" role="article">
+  
+  <header>
+    
+      
+        <h1 class="entry-title">Golang Tricks</h1>
+      
+    
+    
+      <p class="meta">
+        
+
+
+
+
+<time class='entry-date' datetime='2019-06-18T22:11:30+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>10:11 pm</span></time>
+        
+         | <a href="#disqus_thread">Comments</a>
+        
+        
+      </p>
+    
+  </header>
+
+
+<div class="entry-content"><!-- more -->
+
+
+<ol>
+<li><a href="#defer1">Defer 執行順序</a></li>
+<li><a href="#range">Range &amp; Foreach</a></li>
+<li><a href="#closure">golang 執行的隨機性和閉包</a></li>
+<li><a href="#combination_inherit">golang 的組合繼承</a></li>
+<li><a href="#select">Select 隨機性</a></li>
+<li><a href="#defer2">Defer 執行順序</a></li>
+<li><a href="#make_append">make 預設值和 append</a></li>
+<li><a href="#map_concurrent">map 執行緒安全</a></li>
+<li><a href="#chan_buffer">chan緩存池</a></li>
+<li><a href="#interface_implement">interface 實作方式</a></li>
+<li><a href="#interface_internal">interface內部結構</a></li>
+<li><a href="#type_assertion">Type Assertion</a></li>
+<li><a href="#return_value_naming">Return Value Naming</a></li>
+<li><a href="#defer3">defer和函式返回值</a></li>
+<li><a href="#new_make">new &amp; make</a></li>
+<li><a href="#slice_append">slice append</a></li>
+<li><a href="#struct_compare">Struct Compare</a></li>
+<li><a href="#return_type">Return Type</a></li>
+<li><a href="#iota">iota</a></li>
+<li><a href="#short_variable_declarations">Short variable declarations</a></li>
+<li><a href="#const_address">Const Address</a></li>
+<li><a href="#goto">goto 位置</a></li>
+<li><a href="#type_alias">Type Alias</a></li>
+<li><a href="#variable_scope">if 變數作用域</a></li>
+</ol>
+
+
+<h1><span id='defer1'> Defer 執行順序 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>    <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="nx">defer_call</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">defer_call</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>    <span class="k">defer</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;1&quot;</span><span class="p">)</span> <span class="p">}()</span>
+</span><span class='line'>    <span class="k">defer</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;2&quot;</span><span class="p">)</span> <span class="p">}()</span>
+</span><span class='line'>    <span class="k">defer</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;3&quot;</span><span class="p">)</span> <span class="p">}()</span>
+</span><span class='line'>
+</span><span class='line'>    <span class="nb">panic</span><span class="p">(</span><span class="s">&quot;exception&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/Zpbiau9RuGm">https://play.golang.org/p/Zpbiau9RuGm</a></p>
+
+<ul>
+<li>defer 採用後進先出(Last In First Out (LIFO))</li>
+<li>panic 需等所有的 defer 結束後才會執行</li>
+</ul>
+
+
+<h1><span id='range'> Range &amp; Foreach </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">student</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Name</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="nx">Age</span>  <span class="kt">int</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">m</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="o">*</span><span class="nx">student</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">stus</span> <span class="o">:=</span> <span class="p">[]</span><span class="nx">student</span><span class="p">{</span>
+</span><span class='line'>      <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">&quot;zhou&quot;</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">24</span><span class="p">},</span>
+</span><span class='line'>      <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">&quot;li&quot;</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">23</span><span class="p">},</span>
+</span><span class='line'>      <span class="p">{</span><span class="nx">Name</span><span class="p">:</span> <span class="s">&quot;wang&quot;</span><span class="p">,</span> <span class="nx">Age</span><span class="p">:</span> <span class="mi">22</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">stu</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">stus</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">m</span><span class="p">[</span><span class="nx">stu</span><span class="p">.</span><span class="nx">Name</span><span class="p">]</span> <span class="p">=</span> <span class="o">&amp;</span><span class="nx">stu</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">v</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">m</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">k</span><span class="p">,</span> <span class="s">&quot;=&gt;&quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">.</span><span class="nx">Name</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/ocNj5lp0W0_4">https://play.golang.org/p/ocNj5lp0W0_4</a></p>
+
+<ul>
+<li>range 是用 copy 的方式，因此每個 key 都指向同一個 point，最後的值就會是最後一個指向的 value</li>
+<li><p>解決方式，改用 index 的方式</p>
+
+<pre><code class="go">for i := 0; i &lt; len(stus); i++ {
+  m[stus[i].Name] = &amp;stus[i]
+}
+
+for k, v := range m {
+  fmt.Println(k, "=&gt;", v.Name)
+}
+
+for i, _ := range stus {
+  m[stus[i].Name] = &amp;stus[i]
+}
+
+for k, v := range m {
+  fmt.Println(k, "=&gt;", v.Name)
+}
+</code></pre></li>
+</ul>
+
+
+<h1><span id='closure'> golang 執行的隨機性和閉包 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;runtime&quot;</span>
+</span><span class='line'>  <span class="s">&quot;sync&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">runtime</span><span class="p">.</span><span class="nx">GOMAXPROCS</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">wg</span> <span class="o">:=</span> <span class="nx">sync</span><span class="p">.</span><span class="nx">WaitGroup</span><span class="p">{}</span>
+</span><span class='line'>  <span class="nx">wg</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="mi">20</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">go</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;A address: %p, value: %v\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">i</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>          <span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+</span><span class='line'>      <span class="p">}()</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">go</span> <span class="kd">func</span><span class="p">(</span><span class="nx">i</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;B address: %p, value: %v\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">i</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>          <span class="nx">wg</span><span class="p">.</span><span class="nx">Done</span><span class="p">()</span>
+</span><span class='line'>      <span class="p">}(</span><span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">wg</span><span class="p">.</span><span class="nx">Wait</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/EzCWf8r1wnt">https://play.golang.org/p/EzCWf8r1wnt</a></p>
+
+<ul>
+<li>第一個 func 沒有將 i 帶入，取得的 i 是 for 外部的 i，並且 i 會一直加 1 直到 10，因此最後輸出的 A 全部都是 10</li>
+<li>第二個 func 則是每次都會帶入 i，每個 i 都會做 copy 帶入 func，因此外部的 ++ 不會影響到</li>
+</ul>
+
+
+<h1><span id='combination_inherit'> golang 的組合繼承 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">People</span> <span class="kd">struct</span><span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">People</span><span class="p">)</span> <span class="nx">ShowA</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;showA&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">p</span><span class="p">.</span><span class="nx">ShowB</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">p</span> <span class="o">*</span><span class="nx">People</span><span class="p">)</span> <span class="nx">ShowB</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;showB&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Teacher</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">People</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">Teacher</span><span class="p">)</span> <span class="nx">ShowB</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;teacher showB&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">t</span> <span class="o">:=</span> <span class="nx">Teacher</span><span class="p">{}</span>
+</span><span class='line'>  <span class="nx">t</span><span class="p">.</span><span class="nx">ShowA</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/eSGvASIBn5K">https://play.golang.org/p/eSGvASIBn5K</a></p>
+
+<ul>
+<li>透過組合的方式，來實現 OO 的繼承，當 struct 有 <code>anonymous struct field</code>，就會被當成 <code>promoted fields</code>，簡單的來說原本 people 的方法(必須是匿名)就可以直接被 teacher 給調用</li>
+<li>當呼叫了 showA() 裡面在 call showB() 時，此時 People 類型並不知道自己會被什麼類型組合，因此無法去使用未知的組合者 Teacher 類型的 func</li>
+</ul>
+
+
+<h1><span id='select'> Select隨機性 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;runtime&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">runtime</span><span class="p">.</span><span class="nx">GOMAXPROCS</span><span class="p">(</span><span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">int_chan</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">int</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">string_chan</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kt">string</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">int_chan</span> <span class="o">&lt;-</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="nx">string_chan</span> <span class="o">&lt;-</span> <span class="s">&quot;hello&quot;</span>
+</span><span class='line'>  <span class="k">select</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">case</span> <span class="nx">value</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">int_chan</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">case</span> <span class="nx">value</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">string_chan</span><span class="p">:</span>
+</span><span class='line'>      <span class="nb">panic</span><span class="p">(</span><span class="nx">value</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/ntESh6QYaYT">https://play.golang.org/p/ntESh6QYaYT</a></p>
+
+<ul>
+<li>select 擁有隨機性，因此都有可能觸發</li>
+<li>當只要有個 case 可以 return 就可以立即執行</li>
+<li>都能 return 則隨機</li>
+<li>都不行則跑 default</li>
+</ul>
+
+
+<h1><span id='defer2'> Defer 執行順序 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">calc</span><span class="p">(</span><span class="nx">index</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">a</span> <span class="o">+</span> <span class="nx">b</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">index</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">,</span> <span class="nx">ret</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">ret</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">a</span> <span class="o">:=</span> <span class="mi">1</span>
+</span><span class='line'>  <span class="nx">b</span> <span class="o">:=</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="k">defer</span> <span class="nx">calc</span><span class="p">(</span><span class="s">&quot;A&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">calc</span><span class="p">(</span><span class="s">&quot;C&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">))</span>
+</span><span class='line'>  <span class="nx">a</span> <span class="p">=</span> <span class="mi">3</span>
+</span><span class='line'>  <span class="k">defer</span> <span class="nx">calc</span><span class="p">(</span><span class="s">&quot;B&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">calc</span><span class="p">(</span><span class="s">&quot;D&quot;</span><span class="p">,</span> <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span><span class="p">))</span>
+</span><span class='line'>  <span class="nx">b</span> <span class="p">=</span> <span class="mi">4</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/BrhIs-_chN_y">https://play.golang.org/p/BrhIs-_chN_y</a></p>
+
+<ul>
+<li>defer 採用後進先出(Last In First Out (LIFO))</li>
+</ul>
+
+
+<h1><span id='make_append'> make 預設值和 append </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">s</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">([]</span><span class="kt">int</span><span class="p">,</span> <span class="mi">5</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">s</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">s</span><span class="p">,</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/7VHcPYjenWw">https://play.golang.org/p/7VHcPYjenWw</a></p>
+
+<ul>
+<li>make 初始化時，後面直有一個值的話，代表 len 和 cap，因此裡面預設就有 5 個 default 0，所以在 append 時，會再繼續加上去</li>
+</ul>
+
+
+<h1><span id='map_concurrent'> map 執行緒安全 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;sync&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">UserAges</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">ages</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span>
+</span><span class='line'>  <span class="nx">sync</span><span class="p">.</span><span class="nx">Mutex</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">ua</span> <span class="o">*</span><span class="nx">UserAges</span><span class="p">)</span> <span class="nx">Add</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">,</span> <span class="nx">age</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">ua</span><span class="p">.</span><span class="nx">Lock</span><span class="p">()</span>
+</span><span class='line'>  <span class="k">defer</span> <span class="nx">ua</span><span class="p">.</span><span class="nx">Unlock</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">ua</span><span class="p">.</span><span class="nx">ages</span><span class="p">[</span><span class="nx">name</span><span class="p">]</span> <span class="p">=</span> <span class="nx">age</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">ua</span> <span class="o">*</span><span class="nx">UserAges</span><span class="p">)</span> <span class="nx">Get</span><span class="p">(</span><span class="nx">name</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">age</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">ua</span><span class="p">.</span><span class="nx">ages</span><span class="p">[</span><span class="nx">name</span><span class="p">];</span> <span class="nx">ok</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="nx">age</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="o">-</span><span class="mi">1</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">userAge</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">UserAges</span><span class="p">{</span>
+</span><span class='line'>      <span class="nx">ages</span><span class="p">:</span> <span class="nb">make</span><span class="p">(</span><span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">int</span><span class="p">),</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">userAge</span><span class="p">.</span><span class="nx">Add</span><span class="p">(</span><span class="s">&quot;leon&quot;</span><span class="p">,</span> <span class="mi">28</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">age</span> <span class="o">:=</span> <span class="nx">userAge</span><span class="p">.</span><span class="nx">Get</span><span class="p">(</span><span class="s">&quot;leon&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">age</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/KwtbBryhP5x">https://play.golang.org/p/KwtbBryhP5x</a></p>
+
+<ul>
+<li>在讀(Get)的時候，沒有加上 Lock，可能會導致 <code>fatal error: concurrent map read and map write</code></li>
+<li>更改為
+<code>go
+func (ua *UserAges) Get(name string) int {
+  ua.Lock()
+  defer ua.Unlock()
+  if age, ok := ua.ages[name]; ok {
+      return age
+  }
+  return -1
+}
+</code></li>
+</ul>
+
+
+<h1><span id='chan_buffer'> chan緩存池 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>  <span class="s">&quot;sync&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">threadSafeSet</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">sync</span><span class="p">.</span><span class="nx">RWMutex</span>
+</span><span class='line'>  <span class="nx">s</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">set</span> <span class="o">*</span><span class="nx">threadSafeSet</span><span class="p">)</span> <span class="nx">Iter</span><span class="p">()</span> <span class="o">&lt;-</span><span class="kd">chan</span> <span class="kd">interface</span><span class="p">{}</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">ch</span> <span class="o">:=</span> <span class="nb">make</span><span class="p">(</span><span class="kd">chan</span> <span class="kd">interface</span><span class="p">{})</span>
+</span><span class='line'>  <span class="k">go</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">set</span><span class="p">.</span><span class="nx">RLock</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">elem</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">set</span><span class="p">.</span><span class="nx">s</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">ch</span> <span class="o">&lt;-</span> <span class="nx">elem</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Iter:&quot;</span><span class="p">,</span> <span class="nx">elem</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>      <span class="nb">close</span><span class="p">(</span><span class="nx">ch</span><span class="p">)</span>
+</span><span class='line'>      <span class="nx">set</span><span class="p">.</span><span class="nx">RUnlock</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="p">}()</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">ch</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">th</span> <span class="o">:=</span> <span class="nx">threadSafeSet</span><span class="p">{</span>
+</span><span class='line'>      <span class="nx">s</span><span class="p">:</span> <span class="p">[]</span><span class="kd">interface</span><span class="p">{}{</span><span class="s">&quot;1&quot;</span><span class="p">,</span> <span class="s">&quot;2&quot;</span><span class="p">},</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">v</span> <span class="o">:=</span> <span class="o">&lt;-</span><span class="nx">th</span><span class="p">.</span><span class="nx">Iter</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%s%v&quot;</span><span class="p">,</span> <span class="s">&quot;ch&quot;</span><span class="p">,</span> <span class="nx">v</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/2n2GBeo35Jo">https://play.golang.org/p/2n2GBeo35Jo</a></p>
+
+<ul>
+<li>chan 不是 buffer chan 因此，會造成阻塞，並且顯示不了所有的 value，當 range 將第一個 &ldquo;1&rdquo; 放進 chan 後，再跑第二次要放進 &ldquo;2&rdquo; 時，必須等待第一個值被取出來，因此會停在那邊，但是當取出來後，就會繼續進行下面，導致直接結束</li>
+<li>改用 buffer chan
+<code>go
+ch := make(chan interface{},len(set.s))
+</code></li>
+</ul>
+
+
+<h1><span id="interface_implement"> interface 實作方式 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">People</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Speak</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span> <span class="kt">string</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Stduent</span> <span class="kd">struct</span><span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">stu</span> <span class="o">*</span><span class="nx">Stduent</span><span class="p">)</span> <span class="nx">Speak</span><span class="p">(</span><span class="nx">think</span> <span class="kt">string</span><span class="p">)</span> <span class="p">(</span><span class="nx">talk</span> <span class="kt">string</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">think</span> <span class="o">==</span> <span class="s">&quot;say&quot;</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">talk</span> <span class="p">=</span> <span class="s">&quot;You are a good boy&quot;</span>
+</span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">talk</span> <span class="p">=</span> <span class="s">&quot;hi&quot;</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">peo</span> <span class="nx">People</span> <span class="p">=</span> <span class="nx">Stduent</span><span class="p">{}</span>
+</span><span class='line'>  <span class="nx">think</span> <span class="o">:=</span> <span class="s">&quot;say&quot;</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">peo</span><span class="p">.</span><span class="nx">Speak</span><span class="p">(</span><span class="nx">think</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/u1qbY4CbVNQ">https://play.golang.org/p/u1qbY4CbVNQ</a></p>
+
+<ul>
+<li>因為實作 interface 的是 pointer receiver，所以會造成 error
+<code>go
+var peo People = &amp;Stduent{}
+</code></li>
+</ul>
+
+
+<h1><span id="interface_internal"> interface內部結構 <span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">People</span> <span class="kd">interface</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">Show</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">Student</span> <span class="kd">struct</span><span class="p">{}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">stu</span> <span class="o">*</span><span class="nx">Student</span><span class="p">)</span> <span class="nx">Show</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">live</span><span class="p">()</span> <span class="nx">People</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">stu</span> <span class="o">*</span><span class="nx">Student</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">stu</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">live</span><span class="p">()</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;AAAAAAA&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;BBBBBBB&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/2nBU-dMwW6b">https://play.golang.org/p/2nBU-dMwW6b</a></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">Foo</span><span class="p">(</span><span class="nx">x</span> <span class="kd">interface</span><span class="p">{})</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">x</span> <span class="o">==</span> <span class="kc">nil</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;empty interface&quot;</span><span class="p">)</span>
+</span><span class='line'>      <span class="k">return</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;non-empty interface&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">x</span> <span class="o">*</span><span class="kt">int</span> <span class="p">=</span> <span class="kc">nil</span>
+</span><span class='line'>  <span class="nx">Foo</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/lx6W61O66P">https://play.golang.org/p/lx6W61O66P</a></p>
+
+<ul>
+<li>golang 中的 interface 分兩種，但底層結構稍微不同，因此 data 指向了 <code>nil</code> 並不代表 interface 是 <code>nil</code>
+
+<ul>
+<li><pre><code class="go">var in interface{}
+</code></pre></li>
+<li><pre><code class="go">type People interface {
+    Show()
+}
+</code></pre></li>
+</ul>
+</li>
+<li>第二個改成 <code>var x interface{}</code> 則為 <code>empty interface</code></li>
+<li><a href="https://i6448038.github.io/2018/10/01/Golang-interface/">Go語言interface底層實現</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/27055513">Go介面詳解</a></li>
+</ul>
+
+
+<h1><span id="type_assertion"> Type Assertion <span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">i</span> <span class="o">:=</span> <span class="nx">GetValue</span><span class="p">()</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">switch</span> <span class="nx">i</span><span class="p">.(</span><span class="kd">type</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">case</span> <span class="kt">int</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;int&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">case</span> <span class="kt">string</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;string&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">case</span> <span class="kd">interface</span><span class="p">{}:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;interface&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="k">default</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;unknown&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">GetValue</span><span class="p">()</span> <span class="kt">int</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">1</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/-OiFMCcYttw">https://play.golang.org/p/-OiFMCcYttw</a></p>
+
+<ul>
+<li>Type Assertion 只能用於 interface</li>
+</ul>
+
+
+<h1><span id="return_value_naming"> Return Value Naming <span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">i</span><span class="p">,</span> <span class="nx">_</span> <span class="o">:=</span> <span class="nx">funcMui</span><span class="p">(</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">funcMui</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span><span class="nx">y</span> <span class="kt">int</span><span class="p">)(</span><span class="nx">sum</span> <span class="kt">int</span><span class="p">,</span> <span class="kt">error</span><span class="p">){</span>
+</span><span class='line'>    <span class="k">return</span> <span class="nx">x</span><span class="o">+</span><span class="nx">y</span><span class="p">,</span><span class="kc">nil</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/nH6KTCel6ns">https://play.golang.org/p/nH6KTCel6ns</a></p>
+
+<ul>
+<li>只要有一個返回值有命名，全部就必須命名</li>
+<li>如果兩個 type 一樣，則可以只寫一個</li>
+</ul>
+
+
+<h1><span id="defer3"> defer和函式返回值 <span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nb">println</span><span class="p">(</span><span class="nx">DeferFunc1</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span><span class='line'>  <span class="nb">println</span><span class="p">(</span><span class="nx">DeferFunc2</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span><span class='line'>  <span class="nb">println</span><span class="p">(</span><span class="nx">DeferFunc3</span><span class="p">(</span><span class="mi">1</span><span class="p">))</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">DeferFunc1</span><span class="p">(</span><span class="nx">i</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="nx">t</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">t</span> <span class="p">=</span> <span class="nx">i</span>
+</span><span class='line'>  <span class="k">defer</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">t</span> <span class="o">+=</span> <span class="mi">3</span>
+</span><span class='line'>  <span class="p">}()</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">t</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">DeferFunc2</span><span class="p">(</span><span class="nx">i</span> <span class="kt">int</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">t</span> <span class="o">:=</span> <span class="nx">i</span>
+</span><span class='line'>  <span class="k">defer</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">t</span> <span class="o">+=</span> <span class="mi">3</span>
+</span><span class='line'>  <span class="p">}()</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">t</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">DeferFunc3</span><span class="p">(</span><span class="nx">i</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="nx">t</span> <span class="kt">int</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">defer</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">t</span> <span class="o">+=</span> <span class="nx">i</span>
+</span><span class='line'>  <span class="p">}()</span>
+</span><span class='line'>  <span class="k">return</span> <span class="mi">2</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/HpOb3huRV-0">https://play.golang.org/p/HpOb3huRV-0</a></p>
+
+<ul>
+<li>defer 需要在 func 結束前執行</li>
+<li>func return 名字會在函式起始處被初始化為對應類型的零值並且作用域為整個函式</li>
+<li>DeferFunc1 - t 作用域為整個 func，因此 return 前會將 t 更改</li>
+<li>DeferFunc2 - t 作用域為裡面的 func，因此不影響外面的 t</li>
+<li>DeferFunc3 - t 作用域為整個 func，跟 Func 1 一樣</li>
+</ul>
+
+
+<h1><span id="new_make"> new &amp; make <span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">list</span> <span class="o">:=</span> <span class="nb">new</span><span class="p">([]</span><span class="kt">int</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">list</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">list</span><span class="p">,</span> <span class="mi">1</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">list</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/CEwGhsmQfZx">https://play.golang.org/p/CEwGhsmQfZx</a></p>
+
+<ul>
+<li>new 可以用來初始化泛型，並且返回儲存位址</li>
+<li>new 會自動用 zeroed value 來初始化型別
+
+<ul>
+<li><code>string</code> => &ldquo;&rdquo;</li>
+<li><code>int</code>, <code>float</code> => 0</li>
+<li><code>channel</code>, <code>func</code>, <code>map</code>, <code>slice</code> => <code>nil</code></li>
+</ul>
+</li>
+<li>必須改用 make([]int, 0), 初始化 slice (make 不會回傳指標)</li>
+<li><a href="https://draveness.me/golang-make-and-new">Go 語言中的 make 和 new</a></li>
+<li><a href="https://medium.com/d-d-mag/golang-%E7%AD%86%E8%A8%98-make-%E8%88%87-new-%E7%9A%84%E5%B7%AE%E5%88%A5-68b05c7ce016">golang 筆記：make 與 new 的差別</a></li>
+<li><a href="https://golang.org/doc/effective_go.html#allocation_new">Allocation with new</a></li>
+<li><a href="https://golang.org/doc/effective_go.html#allocation_make">Allocation with make</a></li>
+</ul>
+
+
+<h1><span id="slice_append"> slice append <span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">s1</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">1</span><span class="p">,</span> <span class="mi">2</span><span class="p">,</span> <span class="mi">3</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">s2</span> <span class="o">:=</span> <span class="p">[]</span><span class="kt">int</span><span class="p">{</span><span class="mi">4</span><span class="p">,</span> <span class="mi">5</span><span class="p">}</span>
+</span><span class='line'>  <span class="nx">s1</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">s1</span><span class="p">,</span> <span class="nx">s2</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">s1</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/xOWsWj0Evni">https://play.golang.org/p/xOWsWj0Evni</a></p>
+
+<ul>
+<li>append slice 必須加上 <code>...</code> 展開 <code>s2...</code></li>
+</ul>
+
+
+<h1><span id="struct_compare"> Struct Compare <span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">sn1</span> <span class="o">:=</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">age</span>  <span class="kt">int</span>
+</span><span class='line'>      <span class="nx">name</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="p">}{</span><span class="nx">age</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="nx">name</span><span class="p">:</span> <span class="s">&quot;qq&quot;</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">sn2</span> <span class="o">:=</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">age</span>  <span class="kt">int</span>
+</span><span class='line'>      <span class="nx">name</span> <span class="kt">string</span>
+</span><span class='line'>  <span class="p">}{</span><span class="nx">age</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="nx">name</span><span class="p">:</span> <span class="s">&quot;qq&quot;</span><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">sn1</span> <span class="o">==</span> <span class="nx">sn2</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;sn1 == sn2&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">sm1</span> <span class="o">:=</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">age</span> <span class="kt">int</span>
+</span><span class='line'>      <span class="nx">m</span>   <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span>
+</span><span class='line'>  <span class="p">}{</span><span class="nx">age</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="nx">m</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;a&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">}}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">sm2</span> <span class="o">:=</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">age</span> <span class="kt">int</span>
+</span><span class='line'>      <span class="nx">m</span>   <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span>
+</span><span class='line'>  <span class="p">}{</span><span class="nx">age</span><span class="p">:</span> <span class="mi">11</span><span class="p">,</span> <span class="nx">m</span><span class="p">:</span> <span class="kd">map</span><span class="p">[</span><span class="kt">string</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span><span class="s">&quot;a&quot;</span><span class="p">:</span> <span class="s">&quot;1&quot;</span><span class="p">}}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">sm1</span> <span class="o">==</span> <span class="nx">sm2</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;sm1 == sm2&quot;</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/3cEX9aYtvsR">https://play.golang.org/p/3cEX9aYtvsR</a></p>
+
+<ul>
+<li>struct 只能在相同類型才能做比較，順序也會有差
+
+<ul>
+<li>這樣也不能做比較</li>
+<li><pre><code class="go">sn3 := struct {
+    age  int
+    name string
+  }{age: 11, name: "qq"}
+</code></pre></li>
+</ul>
+</li>
+<li>map 和 slice 則不可比較，如果要比較要用 <code>reflect.DeepEqual</code>
+
+<ul>
+<li><pre><code class="go">if reflect.DeepEqual(sm1, sm2) {
+      fmt.Println("sm1 == sm2")
+  }
+</code></pre></li>
+</ul>
+</li>
+</ul>
+
+
+<h1><span id="return_type"> Return Type <span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">GetValue</span><span class="p">(</span><span class="nx">m</span> <span class="kd">map</span><span class="p">[</span><span class="kt">int</span><span class="p">]</span><span class="kt">string</span><span class="p">,</span> <span class="nx">id</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="kt">string</span><span class="p">,</span> <span class="kt">bool</span><span class="p">)</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">if</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">exist</span> <span class="o">:=</span> <span class="nx">m</span><span class="p">[</span><span class="nx">id</span><span class="p">];</span> <span class="nx">exist</span> <span class="p">{</span>
+</span><span class='line'>      <span class="k">return</span> <span class="s">&quot;存在數據&quot;</span><span class="p">,</span> <span class="kc">true</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="kc">nil</span><span class="p">,</span> <span class="kc">false</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">intmap</span> <span class="o">:=</span> <span class="kd">map</span><span class="p">[</span><span class="kt">int</span><span class="p">]</span><span class="kt">string</span><span class="p">{</span>
+</span><span class='line'>      <span class="mi">1</span><span class="p">:</span> <span class="s">&quot;a&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="mi">2</span><span class="p">:</span> <span class="s">&quot;bb&quot;</span><span class="p">,</span>
+</span><span class='line'>      <span class="mi">3</span><span class="p">:</span> <span class="s">&quot;ccc&quot;</span><span class="p">,</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="nx">v</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">GetValue</span><span class="p">(</span><span class="nx">intmap</span><span class="p">,</span> <span class="mi">3</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">v</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/noHSLgTvdEq">https://play.golang.org/p/noHSLgTvdEq</a></p>
+
+<ul>
+<li><code>nil</code> 可以用作 <code>interface</code>、<code>function</code>、<code>pointer</code>、<code>map</code>、<code>slice</code> 和 <code>channel</code> 的"空值"。</li>
+</ul>
+
+
+<h1><span id="iota"> iota </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">const</span> <span class="p">(</span>
+</span><span class='line'>  <span class="nx">x</span> <span class="p">=</span> <span class="kc">iota</span>
+</span><span class='line'>  <span class="nx">y</span>
+</span><span class='line'>  <span class="nx">z</span> <span class="p">=</span> <span class="s">&quot;zz&quot;</span>
+</span><span class='line'>  <span class="nx">k</span>
+</span><span class='line'>  <span class="nx">p</span> <span class="p">=</span> <span class="kc">iota</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">x</span><span class="p">,</span> <span class="nx">y</span><span class="p">,</span> <span class="nx">z</span><span class="p">,</span> <span class="nx">k</span><span class="p">,</span> <span class="nx">p</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/XwtR_I0fQdp">https://play.golang.org/p/XwtR_I0fQdp</a></p>
+
+<h1><span id="short_variable_declarations"> Short variable declarations </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">var</span><span class="p">(</span>
+</span><span class='line'>    <span class="nx">size</span> <span class="o">:=</span> <span class="mi">1024</span>
+</span><span class='line'>    <span class="nx">max_size</span> <span class="p">=</span> <span class="nx">size</span><span class="o">*</span><span class="mi">2</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span>  <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">size</span><span class="p">,</span><span class="nx">max_size</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/AUfpBHZg-F4">https://play.golang.org/p/AUfpBHZg-F4</a></p>
+
+<ul>
+<li><code>:=</code> 是聲明並賦值，並且系統自動推斷類型，必須放在 main function 裡面</li>
+</ul>
+
+
+<h1><span id="const_address"> Const Address </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">const</span> <span class="nx">cl</span>  <span class="p">=</span> <span class="mi">100</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">bl</span>    <span class="p">=</span> <span class="mi">123</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span>  <span class="p">{</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">bl</span><span class="p">,</span><span class="nx">bl</span><span class="p">)</span>
+</span><span class='line'>    <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">cl</span><span class="p">,</span><span class="nx">cl</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/dbK6-maWceJ">https://play.golang.org/p/dbK6-maWceJ</a></p>
+
+<ul>
+<li>常量不同於變數的在運行期分配記憶體，常量通常會被編譯器在預處理階段直接展開，作為指令數據使用</li>
+<li><a href="https://stackoverflow.com/questions/35146286/find-address-of-constant-in-go">pointers - Find address of constant in go</a></li>
+</ul>
+
+
+<h1><span id="goto"> goto 位置 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">10</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">loop</span><span class="p">:</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">goto</span> <span class="nx">loop</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/-0KuesWC3kM">https://play.golang.org/p/-0KuesWC3kM</a></p>
+
+<ul>
+<li>goto 必須放在 func 裡面</li>
+</ul>
+
+
+<h1><span id="type_alias"> Type Alias </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">type</span> <span class="nx">MyInt1</span> <span class="kt">int</span>
+</span><span class='line'>  <span class="kd">type</span> <span class="nx">MyInt2</span> <span class="p">=</span> <span class="kt">int</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">i</span> <span class="kt">int</span> <span class="p">=</span> <span class="mi">9</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">i1</span> <span class="nx">MyInt1</span> <span class="p">=</span> <span class="nx">i</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">i2</span> <span class="nx">MyInt2</span> <span class="p">=</span> <span class="nx">i</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">i1</span><span class="p">,</span> <span class="nx">i2</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/ELp_QFf5-o2">https://play.golang.org/p/ELp_QFf5-o2</a></p>
+
+<ul>
+<li>基於一個類別型建立一個新類型，稱之為 defintion</li>
+<li>基於一個類別型建立一個別名，稱之為 alias</li>
+<li>MyInt1 為稱之為 defintion，雖然底層類型為 int 類型，但是不能直接賦值，需要強轉</li>
+<li>MyInt2 稱之為 alias，可以直接賦值</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">User</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">MyUser1</span> <span class="nx">User</span>
+</span><span class='line'><span class="kd">type</span> <span class="nx">MyUser2</span> <span class="p">=</span> <span class="nx">User</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">i</span> <span class="nx">MyUser1</span><span class="p">)</span> <span class="nx">m1</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;MyUser1.m1&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">i</span> <span class="nx">User</span><span class="p">)</span> <span class="nx">m2</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;User.m2&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">i1</span> <span class="nx">MyUser1</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">i2</span> <span class="nx">MyUser2</span>
+</span><span class='line'>  <span class="nx">i1</span><span class="p">.</span><span class="nx">m1</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">i2</span><span class="p">.</span><span class="nx">m2</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/2fsGAqTmUrH">https://play.golang.org/p/2fsGAqTmUrH</a></p>
+
+<ul>
+<li><code>i2.m1()</code> 會 error，因為 m1() 是 <code>MyUser1</code> 才有的 func，不是 User</li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">T1</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">t</span> <span class="nx">T1</span><span class="p">)</span> <span class="nx">m1</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;T1.m1&quot;</span><span class="p">)</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">T2</span> <span class="p">=</span> <span class="nx">T1</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">type</span> <span class="nx">MyStruct</span> <span class="kd">struct</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">T1</span>
+</span><span class='line'>  <span class="nx">T2</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">my</span> <span class="o">:=</span> <span class="nx">MyStruct</span><span class="p">{}</span>
+</span><span class='line'>  <span class="nx">my</span><span class="p">.</span><span class="nx">m1</span><span class="p">()</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/zwvjqUFLHax">https://play.golang.org/p/zwvjqUFLHax</a></p>
+
+<ul>
+<li>重複會不知道該 call 哪一個導致 error (<code>ambiguous selector my.m1</code>)，把其中一個拿掉就可以 work，或是改為 <code>my.T1.m1()</code> + <code>my.T2.m1()</code></li>
+</ul>
+
+
+<h1><span id="variable_scope"> if 變數作用域 </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="mi">1</span><span class="p">,</span> <span class="mi">2</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%p\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">a</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%p\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">b</span><span class="p">)</span>
+</span><span class='line'>  
+</span><span class='line'>  <span class="k">if</span> <span class="kc">true</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">b</span><span class="p">,</span> <span class="nx">c</span> <span class="o">:=</span> <span class="mi">3</span><span class="p">,</span> <span class="mi">4</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%p\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">b</span><span class="p">)</span>
+</span><span class='line'>      <span class="nx">fmt</span><span class="p">.</span><span class="nx">Printf</span><span class="p">(</span><span class="s">&quot;%p\n&quot;</span><span class="p">,</span> <span class="o">&amp;</span><span class="nx">c</span><span class="p">)</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/CvqxnzGSAG9">https://play.golang.org/p/CvqxnzGSAG9</a></p>
+
+<ul>
+<li>if 的變數會遮罩函式作用域內的變數，導致裡面的 b 是新的 address</li>
+</ul>
+
+
+<h1><span id="closure"> closure </span></h1>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">test</span><span class="p">()</span> <span class="p">[]</span><span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="kd">var</span> <span class="nx">funs</span> <span class="p">[]</span><span class="kd">func</span><span class="p">()</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span> <span class="o">:=</span> <span class="mi">0</span><span class="p">;</span> <span class="nx">i</span> <span class="p">&lt;</span> <span class="mi">2</span><span class="p">;</span> <span class="nx">i</span><span class="o">++</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">funs</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">funs</span><span class="p">,</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">i</span><span class="p">,</span> <span class="nx">i</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">})</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'>  <span class="k">return</span> <span class="nx">funs</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">funs</span> <span class="o">:=</span> <span class="nx">test</span><span class="p">()</span>
+</span><span class='line'>  <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">f</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">funs</span> <span class="p">{</span>
+</span><span class='line'>      <span class="nx">f</span><span class="p">()</span>
+</span><span class='line'>  <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/8RL7gO5_4EF">https://play.golang.org/p/8RL7gO5_4EF</a></p>
+
+<ul>
+<li><code>funx</code> 裡的 i 都是同一個，要不一樣要先 assign 到新的 value
+<code>go
+for i:=0;i&lt;2 ;i++  {
+      x:=i
+      funs = append(funs, func() {
+          println(&amp;x,x)
+      })
+}
+</code></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
+</span><span class='line'>
+</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
+</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
+</span><span class='line'><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">test</span><span class="p">(</span><span class="nx">x</span> <span class="kt">int</span><span class="p">)</span> <span class="p">(</span><span class="kd">func</span><span class="p">(),</span> <span class="kd">func</span><span class="p">())</span> <span class="p">{</span>
+</span><span class='line'>  <span class="k">return</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+</span><span class='line'>          <span class="nx">x</span> <span class="o">+=</span> <span class="mi">10</span>
+</span><span class='line'>      <span class="p">},</span> <span class="kd">func</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>          <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">x</span><span class="p">)</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
+</span><span class='line'>  <span class="nx">a</span><span class="p">,</span> <span class="nx">b</span> <span class="o">:=</span> <span class="nx">test</span><span class="p">(</span><span class="mi">100</span><span class="p">)</span>
+</span><span class='line'>  <span class="nx">a</span><span class="p">()</span>
+</span><span class='line'>  <span class="nx">b</span><span class="p">()</span>
+</span><span class='line'>  
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p><a href="https://play.golang.org/p/5ReC78kUM3c">https://play.golang.org/p/5ReC78kUM3c</a></p>
+
+<ul>
+<li>閉包引用相同變數</li>
+</ul>
+
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://my.oschina.net/qiangmzsx/blog/1478739">Golang面試題解析</a></li>
+<li><a href="https://bit.ly/2WSSgGe">Go面試題答案與解析</a></li>
+<li><a href="https://my.oschina.net/qiangmzsx/blog/1515173">Golang面試題解析（二）</a></li>
+<li><a href="https://my.oschina.net/qiangmzsx/blog/1533839">Golang面試題解析（三) </a></li>
+</ul>
+
+</div>
+
+
+  <footer>
+    <p class="meta">
+      
+  
+
+
+
+  <span class="byline author vcard">Authored by <span class="fn">
+  
+    LeonJi
+  
+  </span></span>
+
+
+      
+
+
+
+
+<time class='entry-date' datetime='2019-06-18T22:11:30+08:00'><span class='date'><span class='date-month'>Jun</span> <span class='date-day'>18</span><span class='date-suffix'>th</span>, <span class='date-year'>2019</span></span> <span class='time'>10:11 pm</span></time>
+      
+      
+
+<span class="categories">
+  
+    <a class='category' href='/blog/categories/golang/'>golang</a>
+  
+</span>
+
+
+    </p>
+    
+      <div class="sharing">
+  
+  <a href="//twitter.com/share" class="twitter-share-button" data-url="https://mgleon08.github.io/blog/2019/06/18/golang-tricks/" data-via="" data-counturl="https://mgleon08.github.io/blog/2019/06/18/golang-tricks/" >Tweet</a>
+  
+  
+  
+    <div class="fb-like" data-layout="button_count" data-send="false" data-width="300" data-show-faces="false"></div>
+  
+</div>
+
+    
+    <p class="meta">
+      
+        <a class="basic-alignment left" href="/blog/2019/06/12/try-kubernetes/" title="Previous Post: 體驗 Kubernetes">&laquo; 體驗 Kubernetes</a>
+      
+      
+        <a class="basic-alignment right" href="/blog/2019/07/26/functional-programming/" title="Next Post: Functional Programming 函式程式設計">Functional Programming 函式程式設計 &raquo;</a>
+      
+    </p>
+  </footer>
+</article>
+
+  <section>
+    <h1>Comments</h1>
+    <div id="disqus_thread" aria-live="polite"><noscript>Please enable JavaScript to view the <a href="http://disqus.com/?ref_noscript">comments powered by Disqus.</a></noscript>
+</div>
+  </section>
+
+
+</div>
+
+    </div>
+  </div>
+  <footer role="contentinfo"><p>
+  Copyright &copy; 2019 - LeonJi -
+  <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
+</p>
+
+</footer>
+  
+
+<script type="text/javascript">
+      var disqus_shortname = 'leonji';
+      
+        
+        // var disqus_developer = 1;
+        var disqus_identifier = 'https://mgleon08.github.io/blog/2019/06/18/golang-tricks/';
+        var disqus_url = 'https://mgleon08.github.io/blog/2019/06/18/golang-tricks/';
+        var disqus_script = 'embed.js';
+      
+    (function () {
+      var dsq = document.createElement('script'); dsq.type = 'text/javascript'; dsq.async = true;
+      dsq.src = '//' + disqus_shortname + '.disqus.com/' + disqus_script;
+      (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(dsq);
+    }());
+</script>
+
+
+
+
+
+
+<div id="fb-root"></div>
+<script>(function(d, s, id) {
+  var js, fjs = d.getElementsByTagName(s)[0];
+  if (d.getElementById(id)) {return;}
+  js = d.createElement(s); js.id = id; js.async = true;
+  js.src = "//connect.facebook.net/en_US/all.js#appId=212934732101925&xfbml=1";
+  fjs.parentNode.insertBefore(js, fjs);
+}(document, 'script', 'facebook-jssdk'));</script>
+
+
+
+
+
+  <script type="text/javascript">
+    (function(){
+      var twitterWidgets = document.createElement('script');
+      twitterWidgets.type = 'text/javascript';
+      twitterWidgets.async = true;
+      twitterWidgets.src = '//platform.twitter.com/widgets.js';
+      document.getElementsByTagName('head')[0].appendChild(twitterWidgets);
+    })();
+  </script>
+
+
+
+
+
+</body>
+</html>

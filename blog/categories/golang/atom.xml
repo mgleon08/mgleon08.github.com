@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Golang | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/golang/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2019-07-11T17:15:31+08:00</updated>
+  <updated>2019-08-29T00:37:57+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,1050 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Golang Tricks]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/06/18/golang-tricks/"/>
+    <updated>2019-06-18T22:11:30+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/06/18/golang-tricks</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<ol>
+<li><a href="#defer1">Defer 執行順序</a></li>
+<li><a href="#range">Range &amp; Foreach</a></li>
+<li><a href="#closure">golang 執行的隨機性和閉包</a></li>
+<li><a href="#combination_inherit">golang 的組合繼承</a></li>
+<li><a href="#select">Select 隨機性</a></li>
+<li><a href="#defer2">Defer 執行順序</a></li>
+<li><a href="#make_append">make 預設值和 append</a></li>
+<li><a href="#map_concurrent">map 執行緒安全</a></li>
+<li><a href="#chan_buffer">chan緩存池</a></li>
+<li><a href="#interface_implement">interface 實作方式</a></li>
+<li><a href="#interface_internal">interface內部結構</a></li>
+<li><a href="#type_assertion">Type Assertion</a></li>
+<li><a href="#return_value_naming">Return Value Naming</a></li>
+<li><a href="#defer3">defer和函式返回值</a></li>
+<li><a href="#new_make">new &amp; make</a></li>
+<li><a href="#slice_append">slice append</a></li>
+<li><a href="#struct_compare">Struct Compare</a></li>
+<li><a href="#return_type">Return Type</a></li>
+<li><a href="#iota">iota</a></li>
+<li><a href="#short_variable_declarations">Short variable declarations</a></li>
+<li><a href="#const_address">Const Address</a></li>
+<li><a href="#goto">goto 位置</a></li>
+<li><a href="#type_alias">Type Alias</a></li>
+<li><a href="#variable_scope">if 變數作用域</a></li>
+</ol>
+
+
+<h1><span id='defer1'> Defer 執行順序 </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    defer_call()
+}
+
+func defer_call() {
+    defer func() { fmt.Println("1") }()
+    defer func() { fmt.Println("2") }()
+    defer func() { fmt.Println("3") }()
+
+    panic("exception")
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/Zpbiau9RuGm">https://play.golang.org/p/Zpbiau9RuGm</a></p>
+
+<ul>
+<li>defer 採用後進先出(Last In First Out (LIFO))</li>
+<li>panic 需等所有的 defer 結束後才會執行</li>
+</ul>
+
+
+<h1><span id='range'> Range &amp; Foreach </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type student struct {
+    Name string
+    Age  int
+}
+
+func main() {
+    m := make(map[string]*student)
+    stus := []student{
+        {Name: "zhou", Age: 24},
+        {Name: "li", Age: 23},
+        {Name: "wang", Age: 22},
+    }
+    for _, stu := range stus {
+        m[stu.Name] = &amp;stu
+    }
+
+    for k, v := range m {
+        fmt.Println(k, "=&gt;", v.Name)
+    }
+
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/ocNj5lp0W0_4">https://play.golang.org/p/ocNj5lp0W0_4</a></p>
+
+<ul>
+<li>range 是用 copy 的方式，因此每個 key 都指向同一個 point，最後的值就會是最後一個指向的 value</li>
+<li><p>解決方式，改用 index 的方式</p>
+
+<pre><code class="go">for i := 0; i &lt; len(stus); i++ {
+  m[stus[i].Name] = &amp;stus[i]
+}
+
+for k, v := range m {
+  fmt.Println(k, "=&gt;", v.Name)
+}
+
+for i, _ := range stus {
+  m[stus[i].Name] = &amp;stus[i]
+}
+
+for k, v := range m {
+  fmt.Println(k, "=&gt;", v.Name)
+}
+</code></pre></li>
+</ul>
+
+
+<h1><span id='closure'> golang 執行的隨機性和閉包 </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "runtime"
+    "sync"
+)
+
+func main() {
+    runtime.GOMAXPROCS(1)
+    wg := sync.WaitGroup{}
+    wg.Add(20)
+    for i := 0; i &lt; 10; i++ {
+        go func() {
+            fmt.Printf("A address: %p, value: %v\n", &amp;i, i)
+            wg.Done()
+        }()
+    }
+    for i := 0; i &lt; 10; i++ {
+        go func(i int) {
+            fmt.Printf("B address: %p, value: %v\n", &amp;i, i)
+            wg.Done()
+        }(i)
+    }
+    wg.Wait()
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/EzCWf8r1wnt">https://play.golang.org/p/EzCWf8r1wnt</a></p>
+
+<ul>
+<li>第一個 func 沒有將 i 帶入，取得的 i 是 for 外部的 i，並且 i 會一直加 1 直到 10，因此最後輸出的 A 全部都是 10</li>
+<li>第二個 func 則是每次都會帶入 i，每個 i 都會做 copy 帶入 func，因此外部的 ++ 不會影響到</li>
+</ul>
+
+
+<h1><span id='combination_inherit'> golang 的組合繼承 </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type People struct{}
+
+func (p *People) ShowA() {
+    fmt.Println("showA")
+    p.ShowB()
+}
+func (p *People) ShowB() {
+    fmt.Println("showB")
+}
+
+type Teacher struct {
+    People
+}
+
+func (t *Teacher) ShowB() {
+    fmt.Println("teacher showB")
+}
+
+func main() {
+    t := Teacher{}
+    t.ShowA()
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/eSGvASIBn5K">https://play.golang.org/p/eSGvASIBn5K</a></p>
+
+<ul>
+<li>透過組合的方式，來實現 OO 的繼承，當 struct 有 <code>anonymous struct field</code>，就會被當成 <code>promoted fields</code>，簡單的來說原本 people 的方法(必須是匿名)就可以直接被 teacher 給調用</li>
+<li>當呼叫了 showA() 裡面在 call showB() 時，此時 People 類型並不知道自己會被什麼類型組合，因此無法去使用未知的組合者 Teacher 類型的 func</li>
+</ul>
+
+
+<h1><span id='select'> Select隨機性 </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "runtime"
+)
+
+func main() {
+    runtime.GOMAXPROCS(1)
+    int_chan := make(chan int, 1)
+    string_chan := make(chan string, 1)
+    int_chan &lt;- 1
+    string_chan &lt;- "hello"
+    select {
+    case value := &lt;-int_chan:
+        fmt.Println(value)
+    case value := &lt;-string_chan:
+        panic(value)
+    }
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/ntESh6QYaYT">https://play.golang.org/p/ntESh6QYaYT</a></p>
+
+<ul>
+<li>select 擁有隨機性，因此都有可能觸發</li>
+<li>當只要有個 case 可以 return 就可以立即執行</li>
+<li>都能 return 則隨機</li>
+<li>都不行則跑 default</li>
+</ul>
+
+
+<h1><span id='defer2'> Defer 執行順序 </span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func calc(index string, a, b int) int {
+    ret := a + b
+    fmt.Println(index, a, b, ret)
+    return ret
+}
+
+func main() {
+    a := 1
+    b := 2
+    defer calc("A", a, calc("C", a, b))
+    a = 3
+    defer calc("B", a, calc("D", a, b))
+    b = 4
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/BrhIs-_chN_y">https://play.golang.org/p/BrhIs-_chN_y</a></p>
+
+<ul>
+<li>defer 採用後進先出(Last In First Out (LIFO))</li>
+</ul>
+
+
+<h1><span id='make_append'> make 預設值和 append </span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    s := make([]int, 5)
+    s = append(s, 1, 2, 3)
+    fmt.Println(s)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/7VHcPYjenWw">https://play.golang.org/p/7VHcPYjenWw</a></p>
+
+<ul>
+<li>make 初始化時，後面直有一個值的話，代表 len 和 cap，因此裡面預設就有 5 個 default 0，所以在 append 時，會再繼續加上去</li>
+</ul>
+
+
+<h1><span id='map_concurrent'> map 執行緒安全 </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+type UserAges struct {
+    ages map[string]int
+    sync.Mutex
+}
+
+func (ua *UserAges) Add(name string, age int) {
+    ua.Lock()
+    defer ua.Unlock()
+    ua.ages[name] = age
+}
+
+func (ua *UserAges) Get(name string) int {
+    if age, ok := ua.ages[name]; ok {
+        return age
+    }
+    return -1
+}
+
+func main() {
+    userAge := &amp;UserAges{
+        ages: make(map[string]int),
+    }
+    userAge.Add("leon", 28)
+    age := userAge.Get("leon")
+    fmt.Println(age)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/KwtbBryhP5x">https://play.golang.org/p/KwtbBryhP5x</a></p>
+
+<ul>
+<li>在讀(Get)的時候，沒有加上 Lock，可能會導致 <code>fatal error: concurrent map read and map write</code></li>
+<li>更改為
+<code>go
+func (ua *UserAges) Get(name string) int {
+  ua.Lock()
+  defer ua.Unlock()
+  if age, ok := ua.ages[name]; ok {
+      return age
+  }
+  return -1
+}
+</code></li>
+</ul>
+
+
+<h1><span id='chan_buffer'> chan緩存池 </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+    "sync"
+)
+
+type threadSafeSet struct {
+    sync.RWMutex
+    s []interface{}
+}
+
+func (set *threadSafeSet) Iter() &lt;-chan interface{} {
+    ch := make(chan interface{})
+    go func() {
+        set.RLock()
+
+        for _, elem := range set.s {
+            ch &lt;- elem
+            fmt.Println("Iter:", elem)
+        }
+
+        close(ch)
+        set.RUnlock()
+
+    }()
+    return ch
+}
+
+func main() {
+
+    th := threadSafeSet{
+        s: []interface{}{"1", "2"},
+    }
+    v := &lt;-th.Iter()
+    fmt.Printf("%s%v", "ch", v)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/2n2GBeo35Jo">https://play.golang.org/p/2n2GBeo35Jo</a></p>
+
+<ul>
+<li>chan 不是 buffer chan 因此，會造成阻塞，並且顯示不了所有的 value，當 range 將第一個 &ldquo;1&rdquo; 放進 chan 後，再跑第二次要放進 &ldquo;2&rdquo; 時，必須等待第一個值被取出來，因此會停在那邊，但是當取出來後，就會繼續進行下面，導致直接結束</li>
+<li>改用 buffer chan
+<code>go
+ch := make(chan interface{},len(set.s))
+</code></li>
+</ul>
+
+
+<h1><span id="interface_implement"> interface 實作方式 </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type People interface {
+    Speak(string) string
+}
+
+type Stduent struct{}
+
+func (stu *Stduent) Speak(think string) (talk string) {
+    if think == "say" {
+        talk = "You are a good boy"
+    } else {
+        talk = "hi"
+    }
+    return
+}
+
+func main() {
+    var peo People = Stduent{}
+    think := "say"
+    fmt.Println(peo.Speak(think))
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/u1qbY4CbVNQ">https://play.golang.org/p/u1qbY4CbVNQ</a></p>
+
+<ul>
+<li>因為實作 interface 的是 pointer receiver，所以會造成 error
+<code>go
+var peo People = &amp;Stduent{}
+</code></li>
+</ul>
+
+
+<h1><span id="interface_internal"> interface內部結構 <span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+type People interface {
+    Show()
+}
+
+type Student struct{}
+
+func (stu *Student) Show() {
+
+}
+
+func live() People {
+    var stu *Student
+    return stu
+}
+
+func main() {
+    if live() == nil {
+        fmt.Println("AAAAAAA")
+    } else {
+        fmt.Println("BBBBBBB")
+    }
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/2nBU-dMwW6b">https://play.golang.org/p/2nBU-dMwW6b</a></p>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func Foo(x interface{}) {
+    if x == nil {
+        fmt.Println("empty interface")
+        return
+    }
+    fmt.Println("non-empty interface")
+}
+
+func main() {
+    var x *int = nil
+    Foo(x)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/lx6W61O66P">https://play.golang.org/p/lx6W61O66P</a></p>
+
+<ul>
+<li>golang 中的 interface 分兩種，但底層結構稍微不同，因此 data 指向了 <code>nil</code> 並不代表 interface 是 <code>nil</code>
+
+<ul>
+<li><pre><code class="go">var in interface{}
+</code></pre></li>
+<li><pre><code class="go">type People interface {
+    Show()
+}
+</code></pre></li>
+</ul>
+</li>
+<li>第二個改成 <code>var x interface{}</code> 則為 <code>empty interface</code></li>
+<li><a href="https://i6448038.github.io/2018/10/01/Golang-interface/">Go語言interface底層實現</a></li>
+<li><a href="https://zhuanlan.zhihu.com/p/27055513">Go介面詳解</a></li>
+</ul>
+
+
+<h1><span id="type_assertion"> Type Assertion <span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    i := GetValue()
+
+    switch i.(type) {
+    case int:
+        fmt.Println("int")
+    case string:
+        fmt.Println("string")
+    case interface{}:
+        fmt.Println("interface")
+    default:
+        fmt.Println("unknown")
+    }
+
+}
+
+func GetValue() int {
+    return 1
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/-OiFMCcYttw">https://play.golang.org/p/-OiFMCcYttw</a></p>
+
+<ul>
+<li>Type Assertion 只能用於 interface</li>
+</ul>
+
+
+<h1><span id="return_value_naming"> Return Value Naming <span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    i, _ := funcMui(1, 2)
+    fmt.Println(i)
+
+}
+
+func funcMui(x,y int)(sum int, error){
+    return x+y,nil
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/nH6KTCel6ns">https://play.golang.org/p/nH6KTCel6ns</a></p>
+
+<ul>
+<li>只要有一個返回值有命名，全部就必須命名</li>
+<li>如果兩個 type 一樣，則可以只寫一個</li>
+</ul>
+
+
+<h1><span id="defer3"> defer和函式返回值 <span></h1>
+
+<pre><code class="go">package main
+
+func main() {
+    println(DeferFunc1(1))
+    println(DeferFunc2(1))
+    println(DeferFunc3(1))
+}
+
+func DeferFunc1(i int) (t int) {
+    t = i
+    defer func() {
+        t += 3
+    }()
+    return t
+}
+
+func DeferFunc2(i int) int {
+    t := i
+    defer func() {
+        t += 3
+    }()
+    return t
+}
+
+func DeferFunc3(i int) (t int) {
+    defer func() {
+        t += i
+    }()
+    return 2
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/HpOb3huRV-0">https://play.golang.org/p/HpOb3huRV-0</a></p>
+
+<ul>
+<li>defer 需要在 func 結束前執行</li>
+<li>func return 名字會在函式起始處被初始化為對應類型的零值並且作用域為整個函式</li>
+<li>DeferFunc1 - t 作用域為整個 func，因此 return 前會將 t 更改</li>
+<li>DeferFunc2 - t 作用域為裡面的 func，因此不影響外面的 t</li>
+<li>DeferFunc3 - t 作用域為整個 func，跟 Func 1 一樣</li>
+</ul>
+
+
+<h1><span id="new_make"> new &amp; make <span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    list := new([]int)
+    list = append(list, 1)
+    fmt.Println(list)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/CEwGhsmQfZx">https://play.golang.org/p/CEwGhsmQfZx</a></p>
+
+<ul>
+<li>new 可以用來初始化泛型，並且返回儲存位址</li>
+<li>new 會自動用 zeroed value 來初始化型別
+
+<ul>
+<li><code>string</code> => &ldquo;&rdquo;</li>
+<li><code>int</code>, <code>float</code> => 0</li>
+<li><code>channel</code>, <code>func</code>, <code>map</code>, <code>slice</code> => <code>nil</code></li>
+</ul>
+</li>
+<li>必須改用 make([]int, 0), 初始化 slice (make 不會回傳指標)</li>
+<li><a href="https://draveness.me/golang-make-and-new">Go 語言中的 make 和 new</a></li>
+<li><a href="https://medium.com/d-d-mag/golang-%E7%AD%86%E8%A8%98-make-%E8%88%87-new-%E7%9A%84%E5%B7%AE%E5%88%A5-68b05c7ce016">golang 筆記：make 與 new 的差別</a></li>
+<li><a href="https://golang.org/doc/effective_go.html#allocation_new">Allocation with new</a></li>
+<li><a href="https://golang.org/doc/effective_go.html#allocation_make">Allocation with make</a></li>
+</ul>
+
+
+<h1><span id="slice_append"> slice append <span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    s1 := []int{1, 2, 3}
+    s2 := []int{4, 5}
+    s1 = append(s1, s2)
+    fmt.Println(s1)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/xOWsWj0Evni">https://play.golang.org/p/xOWsWj0Evni</a></p>
+
+<ul>
+<li>append slice 必須加上 <code>...</code> 展開 <code>s2...</code></li>
+</ul>
+
+
+<h1><span id="struct_compare"> Struct Compare <span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    sn1 := struct {
+        age  int
+        name string
+    }{age: 11, name: "qq"}
+
+    sn2 := struct {
+        age  int
+        name string
+    }{age: 11, name: "qq"}
+
+    if sn1 == sn2 {
+        fmt.Println("sn1 == sn2")
+    }
+
+    sm1 := struct {
+        age int
+        m   map[string]string
+    }{age: 11, m: map[string]string{"a": "1"}}
+
+    sm2 := struct {
+        age int
+        m   map[string]string
+    }{age: 11, m: map[string]string{"a": "1"}}
+
+    if sm1 == sm2 {
+        fmt.Println("sm1 == sm2")
+    }
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/3cEX9aYtvsR">https://play.golang.org/p/3cEX9aYtvsR</a></p>
+
+<ul>
+<li>struct 只能在相同類型才能做比較，順序也會有差
+
+<ul>
+<li>這樣也不能做比較</li>
+<li><pre><code class="go">sn3 := struct {
+    age  int
+    name string
+  }{age: 11, name: "qq"}
+</code></pre></li>
+</ul>
+</li>
+<li>map 和 slice 則不可比較，如果要比較要用 <code>reflect.DeepEqual</code>
+
+<ul>
+<li><pre><code class="go">if reflect.DeepEqual(sm1, sm2) {
+      fmt.Println("sm1 == sm2")
+  }
+</code></pre></li>
+</ul>
+</li>
+</ul>
+
+
+<h1><span id="return_type"> Return Type <span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func GetValue(m map[int]string, id int) (string, bool) {
+    if _, exist := m[id]; exist {
+        return "存在數據", true
+    }
+    return nil, false
+}
+
+func main() {
+    intmap := map[int]string{
+        1: "a",
+        2: "bb",
+        3: "ccc",
+    }
+
+    v, err := GetValue(intmap, 3)
+    fmt.Println(v, err)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/noHSLgTvdEq">https://play.golang.org/p/noHSLgTvdEq</a></p>
+
+<ul>
+<li><code>nil</code> 可以用作 <code>interface</code>、<code>function</code>、<code>pointer</code>、<code>map</code>、<code>slice</code> 和 <code>channel</code> 的"空值"。</li>
+</ul>
+
+
+<h1><span id="iota"> iota </span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+const (
+    x = iota
+    y
+    z = "zz"
+    k
+    p = iota
+)
+
+func main() {
+    fmt.Println(x, y, z, k, p)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/XwtR_I0fQdp">https://play.golang.org/p/XwtR_I0fQdp</a></p>
+
+<h1><span id="short_variable_declarations"> Short variable declarations </span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+var(
+    size := 1024
+    max_size = size*2
+)
+
+func main()  {
+    fmt.Println(size,max_size)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/AUfpBHZg-F4">https://play.golang.org/p/AUfpBHZg-F4</a></p>
+
+<ul>
+<li><code>:=</code> 是聲明並賦值，並且系統自動推斷類型，必須放在 main function 裡面</li>
+</ul>
+
+
+<h1><span id="const_address"> Const Address </span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+const cl  = 100
+var bl    = 123
+
+func main()  {
+    fmt.Println(&amp;bl,bl)
+    fmt.Println(&amp;cl,cl)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/dbK6-maWceJ">https://play.golang.org/p/dbK6-maWceJ</a></p>
+
+<ul>
+<li>常量不同於變數的在運行期分配記憶體，常量通常會被編譯器在預處理階段直接展開，作為指令數據使用</li>
+<li><a href="https://stackoverflow.com/questions/35146286/find-address-of-constant-in-go">pointers - Find address of constant in go</a></li>
+</ul>
+
+
+<h1><span id="goto"> goto 位置 </span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+
+    for i := 0; i &lt; 10; i++ {
+    loop:
+        fmt.Println(i)
+    }
+    goto loop
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/-0KuesWC3kM">https://play.golang.org/p/-0KuesWC3kM</a></p>
+
+<ul>
+<li>goto 必須放在 func 裡面</li>
+</ul>
+
+
+<h1><span id="type_alias"> Type Alias </span></h1>
+
+<pre><code class="go">package main
+
+import "fmt"
+
+func main() {
+    type MyInt1 int
+    type MyInt2 = int
+    var i int = 9
+    var i1 MyInt1 = i
+    var i2 MyInt2 = i
+    fmt.Println(i1, i2)
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/ELp_QFf5-o2">https://play.golang.org/p/ELp_QFf5-o2</a></p>
+
+<ul>
+<li>基於一個類別型建立一個新類型，稱之為 defintion</li>
+<li>基於一個類別型建立一個別名，稱之為 alias</li>
+<li>MyInt1 為稱之為 defintion，雖然底層類型為 int 類型，但是不能直接賦值，需要強轉</li>
+<li>MyInt2 稱之為 alias，可以直接賦值</li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import "fmt"
+
+type User struct {
+}
+
+type MyUser1 User
+type MyUser2 = User
+
+func (i MyUser1) m1() {
+    fmt.Println("MyUser1.m1")
+}
+func (i User) m2() {
+    fmt.Println("User.m2")
+}
+
+func main() {
+    var i1 MyUser1
+    var i2 MyUser2
+    i1.m1()
+    i2.m2()
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/2fsGAqTmUrH">https://play.golang.org/p/2fsGAqTmUrH</a></p>
+
+<ul>
+<li><code>i2.m1()</code> 會 error，因為 m1() 是 <code>MyUser1</code> 才有的 func，不是 User</li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import "fmt"
+
+type T1 struct {
+}
+
+func (t T1) m1() {
+    fmt.Println("T1.m1")
+}
+
+type T2 = T1
+
+type MyStruct struct {
+    T1
+    T2
+}
+
+func main() {
+    my := MyStruct{}
+    my.m1()
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/zwvjqUFLHax">https://play.golang.org/p/zwvjqUFLHax</a></p>
+
+<ul>
+<li>重複會不知道該 call 哪一個導致 error (<code>ambiguous selector my.m1</code>)，把其中一個拿掉就可以 work，或是改為 <code>my.T1.m1()</code> + <code>my.T2.m1()</code></li>
+</ul>
+
+
+<h1><span id="variable_scope"> if 變數作用域 </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func main() {
+    a, b := 1, 2
+    fmt.Printf("%p\n", &amp;a)
+    fmt.Printf("%p\n", &amp;b)
+
+    if true {
+        b, c := 3, 4
+        fmt.Printf("%p\n", &amp;b)
+        fmt.Printf("%p\n", &amp;c)
+    }
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/CvqxnzGSAG9">https://play.golang.org/p/CvqxnzGSAG9</a></p>
+
+<ul>
+<li>if 的變數會遮罩函式作用域內的變數，導致裡面的 b 是新的 address</li>
+</ul>
+
+
+<h1><span id="closure"> closure </span></h1>
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func test() []func() {
+    var funs []func()
+    for i := 0; i &lt; 2; i++ {
+        funs = append(funs, func() {
+            fmt.Println(&amp;i, i)
+        })
+    }
+    return funs
+}
+
+func main() {
+    funs := test()
+    for _, f := range funs {
+        f()
+    }
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/8RL7gO5_4EF">https://play.golang.org/p/8RL7gO5_4EF</a></p>
+
+<ul>
+<li><code>funx</code> 裡的 i 都是同一個，要不一樣要先 assign 到新的 value
+<code>go
+for i:=0;i&lt;2 ;i++  {
+      x:=i
+      funs = append(funs, func() {
+          println(&amp;x,x)
+      })
+}
+</code></li>
+</ul>
+
+
+<pre><code class="go">package main
+
+import (
+    "fmt"
+)
+
+func test(x int) (func(), func()) {
+    return func() {
+            fmt.Println(x)
+            x += 10
+        }, func() {
+            fmt.Println(x)
+        }
+}
+
+func main() {
+    a, b := test(100)
+    a()
+    b()
+
+}
+</code></pre>
+
+<p><a href="https://play.golang.org/p/5ReC78kUM3c">https://play.golang.org/p/5ReC78kUM3c</a></p>
+
+<ul>
+<li>閉包引用相同變數</li>
+</ul>
+
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://my.oschina.net/qiangmzsx/blog/1478739">Golang面試題解析</a></li>
+<li><a href="https://bit.ly/2WSSgGe">Go面試題答案與解析</a></li>
+<li><a href="https://my.oschina.net/qiangmzsx/blog/1515173">Golang面試題解析（二）</a></li>
+<li><a href="https://my.oschina.net/qiangmzsx/blog/1533839">Golang面試題解析（三) </a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Golang - GraphQL With Gqlgen]]></title>
@@ -526,7 +1570,7 @@ fmt.Println("Inserted multiple documents: ", insertManyResult.InsertedIDs)
 
 
 <pre><code class="go">// 找出 name ＝ "Ash"
-filter := bson.D{{"name", "Ash"}}
+filter := bson.Dname
 
 // 將 age - 1
 update := bson.D{
@@ -908,302 +1952,6 @@ func main() {
 <li><a href="https://deepzz.com/post/golang-context-package-notes.html">快速掌握 Golang context 包，簡單示例</a></li>
 <li><a href="https://segmentfault.com/a/1190000017394302">Golang Context 是好的設計嗎？</a></li>
 <li><a href="https://juejin.im/post/5a6873fef265da3e317e55b6">Golang Context深入理解</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang - Testing]]></title>
-    <link href="https://mgleon08.github.io/blog/2019/03/28/golang-testing/"/>
-    <updated>2019-03-28T18:24:12+08:00</updated>
-    <id>https://mgleon08.github.io/blog/2019/03/28/golang-testing</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<h1>Testing</h1>
-
-<ul>
-<li>檔案的結尾必須是，<code>測試檔案名稱</code> + <code>_test</code></li>
-<li>測試函式必須是 <code>Test</code> 開頭，且必須第一個字母大寫(public)</li>
-<li>測試函式 <code>TestXxx()</code> 的參數是 <code>testing.T</code>，我們可以使用該型別來記錄錯誤或者是測試狀態</li>
-<li>要使用 <code>testing</code> package</li>
-<li>測試案例會按照原始碼中寫的順序依次執行</li>
-<li>函式中透過呼叫 <code>testing.T</code> 的 <code>Error</code>, <code>Errorf</code>, <code>FailNow</code>, <code>Fatal</code>, <code>FatalIf</code> 方法，說明測試不透過，呼叫 <code>Log</code> 方法用來記錄測試的資訊。</li>
-</ul>
-
-
-<h3>main.go</h3>
-
-<pre><code class="go">// main.go
-package main
-
-import (
-    "errors"
-    "fmt"
-)
-
-func Division(a, b float64) (float64, error) {
-    if b == 0 {
-        return 0, errors.New("b can not be 0")
-    }
-    return a / b, nil
-}
-
-func main() {
-    fmt.Println(Division(60, 2))
-}
-</code></pre>
-
-<h3>main_test.go</h3>
-
-<pre><code class="go">// main_test.go
-package main
-
-import (
-    "testing"
-)
-
-func Test_division_1(t *testing.T) {
-    if i, e := Division(6, 2); i != 3 || e != nil {
-        t.Error("失敗")
-    } else {
-        t.Log("成功")
-    }
-}
-
-func Test_division_2(t *testing.T) {
-    t.Error("失敗")
-}
-
-func Test_division_table(t *testing.T) {
-    tables := []struct {
-        x float64
-        y float64
-    }{
-        {3, 1},
-        {6, 2},
-        {9, 3},
-        {8, 2},
-    }
-
-    for _, table := range tables {
-        if i, e := Division(table.x, table.y); i != 3 || e != nil {
-            t.Error("失敗")
-        } else {
-            t.Log("成功")
-        }
-    }
-}
-</code></pre>
-
-<h3>Run test</h3>
-
-<pre><code class="go">// go test -v -cover
-
-=== RUN   Test_Division_1
---- PASS: Test_Division_1 (0.00s)
-    main_test.go:11: 成功
-=== RUN   Test_Division_2
---- FAIL: Test_Division_2 (0.00s)
-    main_test.go:16: 失敗
-=== RUN   Test_Division_table
---- FAIL: Test_Division_table (0.00s)
-    main_test.go:34: 成功
-    main_test.go:34: 成功
-    main_test.go:34: 成功
-    main_test.go:32: 失敗
-FAIL
-coverage: 50.0% of statements
-exit status 1
-FAIL    github.com/mgleon08/packages/015.test   0.007s
-</code></pre>
-
-<h1>Benchmark testing</h1>
-
-<ul>
-<li>檔案的結尾必須是，<code>測試檔案名稱</code> + <code>_test</code></li>
-<li>測試函式必須是 <code>Benchmark</code> 開頭，且必須第一個字母大寫(public)</li>
-<li><code>for</code> 循環內要放置要測試的程式碼</li>
-<li><code>b.N</code> 是 go 語言內建提供的循環，根據一秒鐘的時間計算</li>
-<li>測試函式 <code>Benchmark_xxx()</code> 的參數是 <code>b *testing.B</code></li>
-</ul>
-
-
-<h3>webbench_test.go</h3>
-
-<pre><code class="go">// webbench_test.go
-
-package main
-
-import (
-    "testing"
-)
-
-func Benchmark_Division(b *testing.B) {
-    for i := 0; i &lt; b.N; i++ { //use b.N for looping
-        Division(4, 5)
-    }
-}
-
-func Benchmark_TimeConsumingFunction(b *testing.B) {
-    b.StopTimer() //呼叫該函式停止壓力測試的時間計數
-
-    //做一些初始化的工作，例如讀取檔案資料，資料庫連線之類別的,
-    //這樣這些時間不影響我們測試函式本身的效能
-
-    b.StartTimer() //重新開始時間
-    for i := 0; i &lt; b.N; i++ {
-        Division(4, 5)
-    }
-}
-</code></pre>
-
-<h3>Run benchmark test</h3>
-
-<p>跑測試 <code>go test -v -bench=. -run=none</code></p>
-
-<pre><code class="go">// go test -v -bench=. -run=none . -cover 
-
-goos: darwin
-goarch: amd64
-pkg: github.com/mgleon08/packages/015.test
-Benchmark_Division-4                    2000000000               0.43 ns/op
-Benchmark_TimeConsumingFunction-4       2000000000               0.42 ns/op
-PASS
-coverage: 50.0% of statements
-ok      github.com/mgleon08/packages/015.test   1.802s
-</code></pre>
-
-<ul>
-<li><code>-bench</code> - 要跑 Benchmark</li>
-<li><code>-run=none</code> - 不要跑一般的測試</li>
-<li><code>-4</code> - 目前的 CPU 核心數，也就是 GOMAXPROCS 的值</li>
-<li><code>-benchtime=2s</code> - 加上這個代表跑 2 秒</li>
-</ul>
-
-
-<h1>Example testing</h1>
-
-<ul>
-<li>檔案的結尾必須是，<code>測試檔案名稱</code> + <code>_test</code></li>
-<li>測試函式必須是 <code>Example</code> 開頭，且必須第一個字母大寫(public)</li>
-<li><code>Output:</code> 是固定格式</li>
-</ul>
-
-
-<pre><code class="go">package main
-
-import (
-    "fmt"
-)
-
-func ExampleDivision() {
-    i, _ := Division(6, 1)
-    fmt.Print(i)
-    // Output: 6
-}
-
-func ExampleDivision2() {
-    i, _ := Division(6, 2)
-    x, _ := Division(12, 3)
-    fmt.Println(i)
-    fmt.Println(x)
-    // Output:
-    // 3
-    // 4
-}
-</code></pre>
-
-<h1>Use assert package</h1>
-
-<pre><code class="go">// main.go
-package main
-
-import (
-    "errors"
-    "fmt"
-)
-
-type numbers struct {
-    A float64
-    B float64
-}
-
-func Division(number numbers) (float64, error) {
-    if number.B == 0 {
-        return 0, errors.New("b can not be 0")
-    }
-    return number.A / number.B, nil
-}
-
-func main() {
-    number := numbers{ 60, 2 }
-    fmt.Println(Division(number))
-}
-</code></pre>
-
-<pre><code class="go">// main_test.go
-package main
-
-import (
-    "testing"
-
-    "github.com/stretchr/testify/assert"
-)
-
-func Test_Division(t *testing.T) {
-    // Arrange
-    testCases := []struct {
-        name     string
-        p        numbers
-        expected float64
-    }{
-        {
-            name: "9/3 = 3",
-            p: numbers{
-                A: 9,
-                B: 3,
-            },
-            expected: 3,
-        },
-        {
-            name: "6/3 = 2",
-            p: numbers{
-                A: 6,
-                B: 3,
-            },
-            expected: 2,
-        },
-        {
-            name: "3/3 = 1",
-            p: numbers{
-                A: 3,
-                B: 3,
-            },
-            expected: 1,
-        },
-    }
-
-    for _, c := range testCases {
-        t.Run(c.name, func(t *testing.T) {
-            // Act
-            r, _ := Division(c.p)
-
-            // Assert
-            assert.Equal(t, r, c.expected)
-        })
-    }
-}
-</code></pre>
-
-<p>Reference</p>
-
-<ul>
-<li><a href="https://github.com/astaxie/build-web-application-with-golang/blob/master/zh-tw/11.3.md">11.3 Go 怎麼寫測試案例</a></li>
-<li><a href="https://blog.wu-boy.com/2018/05/how-to-write-testing-in-golang/">如何在 Go 專案內寫測試</a></li>
-<li><a href="https://blog.wu-boy.com/2018/06/how-to-write-benchmark-in-go/">如何在 Go 語言內寫效能測試</a></li>
-<li><a href="https://ithelp.ithome.com.tw/articles/10206088">Example 示例函式</a></li>
 </ul>
 
 ]]></content>

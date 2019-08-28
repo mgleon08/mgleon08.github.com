@@ -1,0 +1,192 @@
+<?xml version="1.0" encoding="utf-8"?>
+<feed xmlns="http://www.w3.org/2005/Atom">
+
+  <title><![CDATA[Category: Design_pattern | Leon's Blogging]]></title>
+  <link href="https://mgleon08.github.io/blog/categories/design-pattern/atom.xml" rel="self"/>
+  <link href="https://mgleon08.github.io/"/>
+  <updated>2019-08-29T00:37:57+08:00</updated>
+  <id>https://mgleon08.github.io/</id>
+  <author>
+    <name><![CDATA[LeonJi]]></name>
+    
+  </author>
+  <generator uri="http://octopress.org/">Octopress</generator>
+
+  
+  <entry>
+    <title type="html"><![CDATA[Functional Programming 函式程式設計]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/07/26/functional-programming/"/>
+    <updated>2019-07-26T14:57:55+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/07/26/functional-programming</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>之前一直沒有特別研究什麼事 <code>Function Programming</code>，這次就好好的來研究一下</p>
+
+<h1>介紹</h1>
+
+<p><code>函式式程式設計 Functional Programming (FP)</code> 是 <code>程式設計 programming paradigm</code> 的其中一種，是一類典型的程式設計風格，其他像是 <code>物件導向程式設計 Object-oriented programming (OOP)</code> 也是其中一種。</p>
+
+<p>不同的程式設計，有不同的設計概念，因此用來解決問題的<code>思考</code>方式也大不相同，所以必須先瞭解這些語言的理念，才有辦法對症下藥。</p>
+
+<p>必須符合以下的一項或多項重要概念(最重要的屬於前兩項)</p>
+
+<blockquote><p>函式就算定義為「高階函式」，也不一定就能稱為「函式程式設計」，符合函式程式設計有一定的要件，你還必須確保該函式要能「避免改變狀態」、「避免可變的資料」以及擁有「純函式」等特性。</p></blockquote>
+
+<h1>1. First-class 一等公民</h1>
+
+<p>對待函式(Function) 如同對待其他資料型別一樣，例如可以像變數一樣 <code>直接賦予值</code> 或是 <code>當作參數傳遞</code> (<code>javascript</code> 就屬於此特性)</p>
+
+<ul>
+<li>直接賦予值</li>
+</ul>
+
+
+<pre><code class="js">// variable
+var a = 1
+const a = 1
+
+// function
+var a = function(a,b) { return a+b; }
+add(1, 2); // 3
+</code></pre>
+
+<h1>2. higher-order functions 高階函式</h1>
+
+<p>至少會滿足下列其中一項條件</p>
+
+<ul>
+<li>可以將函式(至少一個)當成參數傳入另一個函式</li>
+</ul>
+
+
+<pre><code class="js">var add = function (a, b) { return a+b; }
+var calc = function (op, a, b) { return op(a, b) };
+
+// add 傳入 calc
+calc(add, 1, 2); // 3
+</code></pre>
+
+<ul>
+<li>可以將函式當成另一個函式的回傳值</li>
+</ul>
+
+
+<pre><code class="js">var add = function(x) {
+  return function(y) {
+    return x + y;
+  };
+};
+
+var addOne = add(1);
+addOne(2); // 3
+</code></pre>
+
+<h1>3. pure functions 純函式</h1>
+
+<p>意指將相同的傳入 (Input)丟入函式，永遠會回傳相同的 output 結果，而且在過程中完全沒有任何的副作用。</p>
+
+<p>意指函式在執行的時候，完全相同的參數傳入 (Input)，永遠會回傳相同的傳出 (Output)，而且在過程中<code>完全沒有任何副作用</code>，且函式程式設計更加強調「執行的結果」而非「執行的過程」，倡導利用幾個簡單的函式來計算結果，</p>
+
+<p>副作用包括像是</p>
+
+<ul>
+<li>狀態改變</li>
+<li>資料改變</li>
+<li>更改外部變數或者物件屬性(例如：全域變數、父類別範圍內的變數等)</li>
+<li>寫入console.log、檔案</li>
+<li>觸發外部流程</li>
+<li>呼叫任何有副作用的函式(Functions)</li>
+<li>&hellip;</li>
+</ul>
+
+
+<pre><code class="js">// slice: Pure Function
+var arr = [1, 2, 3, 4, 5, 6];
+arr.slice(0, 3); // output = [1, 2, 3], arr = [1, 2, 3, 4, 5, 6]
+arr.slice(0, 3); // output = [1, 2, 3], arr = [1, 2, 3, 4, 5, 6]
+
+// splice: not Pure Function
+var arr = [1, 2, 3, 4, 5, 6];
+arr.splice(0, 3); // output = [1, 2, 3], arr = [4, 5, 6]
+arr.splice(0, 3); // output = [4, 5, 6], arr = []
+</code></pre>
+
+<p>可以發現到，<code>slice()</code> 每次 output 都會是一樣，而 <code>splice()</code> 則會不同</p>
+
+<h1>Declarative vs Imperative</h1>
+
+<p><code>函式程式設計 Functional Programming</code> 屬於 <code>宣告式程式設計 Declarative Paradigm</code> 的一種</p>
+
+<ul>
+<li>指令式程式設計(Imperative Paradigm)
+
+<ul>
+<li>程式碼具體表達需要做什麼來達到目標。描述該做什麼(how to do)以及流程控制(flow control)。</li>
+<li>ex: C、JAVA</li>
+</ul>
+</li>
+</ul>
+
+
+<pre><code class="js">var words = ['spray', 'limit', 'elite', 'exuberant', 'destruction', 'present'];
+var result = [];
+
+for(i=0; i&lt;words.length; i++){
+    word = words[i];
+    if (word.length &gt; 6){
+        result.push(word);
+    }
+}
+
+console.log(result);
+// expected output: Array ["exuberant", "destruction", "present"]
+</code></pre>
+
+<ul>
+<li>宣告式程式設計(Declarative Paradigm)
+
+<ul>
+<li>較為抽象的程式碼，可以藉由自然語言直觀的理解該行程式碼想要達到什麼樣的結果。描述該在哪做什麼(what to do)以及資料流程(data flow)。</li>
+<li>ex: HTML、SQL</li>
+</ul>
+</li>
+</ul>
+
+
+<pre><code class="js">var words = ['spray', 'limit', 'elite', 'exuberant', 'destruction', 'present'];
+
+const result = words.filter(word =&gt; word.length &gt; 6);
+
+console.log(result);
+// expected output: Array ["exuberant", "destruction", "present"]
+</code></pre>
+
+<p>js 裡的 <code>fliter</code> <code>map</code> 和 <code>reduce</code> 屬於高階函式</p>
+
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/filter">Array.prototype.filter()
+</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/map">Array.prototype.map()</a></li>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array/reduce">Array.prototype.reduce()
+</a></li>
+</ul>
+
+
+<h1>結語</h1>
+
+<p>之前接觸的大多是 <code>Object-oriented programming (OOP)</code> 透過這次更加了解 <code>Functional Programming (FP)</code>，不然之前都以為 <code>javascript</code> == <code>Functional Programming</code>，原來指的不是語言，而是設計風格啊~</p>
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://en.wikipedia.org/wiki/Functional_programming">Functional programming Wiki</a></li>
+<li><a href="https://medium.com/@totoroLiu/javascript-functional-programming-%E5%87%BD%E5%BC%8F%E7%B7%A8%E7%A8%8B%E6%A6%82%E5%BF%B5-e8f4e778fc08">JavaScript: Functional Programming 函式程式設計概念</a></li>
+<li><a href="https://blog.miniasp.com/post/2016/12/10/Functional-Programming-in-JavaScript">前端工程研究：理解函式程式設計核心概念與如何進行 JavaScript 函式程式設計</a></li>
+<li><a href="http://reactivex.io/learnrx/">Functional Programming in Javascript 教學網頁</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+</feed>
