@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Javascript | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2019-08-29T00:37:57+08:00</updated>
+  <updated>2019-09-06T22:45:02+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -697,6 +697,52 @@ const pet3 = {
 console.log(pet3.getGreeting()) // Hello Hal!
 </code></pre>
 
+<pre><code class="js">var test = {
+  say: 'hi',
+  citys: ['a', 'b', 'c'],
+  getGreeting: function() {
+    this.citys.forEach(function(city) {
+        // 這裡的 this 會指向 window
+      console.log(this.say);
+    });
+  }
+};
+
+test.getGreeting(); // undefined
+
+var test = {
+  say: 'hi',
+  citys: ['a', 'b', 'c'],
+  getGreeting: function() {
+    that = this;
+    this.citys.forEach(function(city) {
+      console.log(that.say);
+    });
+  }
+};
+
+test.getGreeting(); // hi, hi, hi
+
+var test = {
+  say: 'hi',
+  citys: ['a', 'b', 'c'],
+  getGreeting: function() {
+    this.citys.forEach(city =&gt; console.log(this.say));
+  }
+};
+
+test.getGreeting(); // hi, hi, hi
+
+var test = {
+  say: 'hi',
+  citys: ['a', 'b', 'c'],
+  getGreeting() {
+    this.citys.forEach(city =&gt; console.log(this.say));
+  }
+};
+test.getGreeting(); // hi, hi, hi
+</code></pre>
+
 <ul>
 <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions">Arrow_functions</a></li>
 <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions#Shorter_functions">Shorter_functions</a></li>
@@ -910,11 +956,47 @@ new foo() // undefined
 <li><code>obj1.foo()</code> sets <code>this</code> to the <code>obj1</code> object.</li>
 </ul>
 </li>
-<li><p>預設繫結：當其他規則都不適用時，意即沒有使用 <code>call</code>、<code>apply</code>、<code>bind</code> 或不屬於任何物件的 method，就套用預設繫結，在非嚴格模式下，瀏覽器環境 <code>this</code> 的值就是預設值全域物件 window，而在嚴格模式下，<code>this</code> 的值就是 <code>undefined</code>。</p></li>
-<li><p><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this">this</a></p></li>
+<li>預設繫結：當其他規則都不適用時，意即沒有使用 <code>call</code>、<code>apply</code>、<code>bind</code> 或不屬於任何物件的 method，就套用預設繫結，在非嚴格模式下，瀏覽器環境 <code>this</code> 的值就是預設值全域物件 window，而在嚴格模式下，<code>this</code> 的值就是 <code>undefined</code>。</li>
+</ol>
+
+
+<h3>重點是誰呼叫它</h3>
+
+<pre><code class="js">function callName() {
+  console.log(this.name);
+}
+var name = 'global leon';
+var say = {
+  name: 'leon',
+  callName: callName  
+  // 這裡的 function 指向全域的 function，但不重要
+}
+callName()     // global leon
+say.callName() // leon
+</code></pre>
+
+<h3>透過 bind 綁定正確的 context</h3>
+
+<pre><code class="js">const obj = {
+  name: 'foobar',
+  getName() {
+    return this.name;
+  }
+};
+
+console.log(obj.getName()); // foobar
+const getName = obj.getName;
+console.log(getName()); // error
+const getNameWithBind = obj.getName.bind(obj);
+console.log(getNameWithBind()); // foobar
+</code></pre>
+
+<ul>
+<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this">this</a></li>
 <li><a href="https://cythilya.github.io/2018/10/10/intro-2/">你懂 JavaScript 嗎？#3 暖身 (๑•̀ㅂ•́)و✧ Part 2 - 變數、嚴格模式、IIFEs、閉包、模組、this、原型、Polyfill 與 Transpiler</a></li>
 <li><a href="https://github.com/getify/You-Dont-Know-JS/blob/master/up%20%26%20going/ch2.md#this-identifier">this-identifier</a></li>
-</ol>
+<li><a href="https://wcc723.github.io/javascript/2017/12/12/javascript-this/">鐵人賽：JavaScript 的 this 到底是誰？</a></li>
+</ul>
 
 
 <h1><span id="closures"> Closures 閉包 <span></h1>
