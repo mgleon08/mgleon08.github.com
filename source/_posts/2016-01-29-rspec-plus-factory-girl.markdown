@@ -11,21 +11,22 @@ categories: rails gem rspec
 
 <!-- more -->
 
-###目錄
+### 目錄
+
 * [Rspec](#rspec)
 * [Factory Girl](#factory_girl)
 * [Capybara](#capybara)
 * [CI Server](#ci)
 * [Other](#other)
 
-#<span id="rspec">RSpec</span>
+# <span id="rspec">RSpec</span>
 
 Ruby 的測試 DSL (Domain-specific language)
 
 - Semantic Code：⽐ Test::Unit 更好讀，寫的⼈ 更容易描述測試⺫的
 - Self-documenting：可執⾏的規格⽂件
 
-#測試種類
+# 測試種類
 
 * 單元測試(Unit test)
 針對每個程式各個最小單位進行測試，像是在 controller 就單單只測試 controller 裡面的 action，而裡面產生的 model,method，都用假的方式來取代，已確保有錯誤時，可以很快知道是哪邊有問題 。
@@ -34,13 +35,14 @@ Ruby 的測試 DSL (Domain-specific language)
 主要是用來測試，每個 class 的互動，像是 controller 裡面會 call 到 model ，也會 call 到 view ，並測試回傳的值是否正確。
 
 
-#寫測試的好處
+# 寫測試的好處
+
 * Instant Feedback 即時反饋（寫測試的時間 < debug的時間）
 * 回歸測試及重構 （重構時就不需要再重複的測試）
 * 幫助設計API（TDD = 先測試，在實作）
 * 一種程式文件（可以讓很快就知道之前api怎麼寫的）
 
-#慣例
+# 慣例
 
 * ⼀個 rb 檔案配⼀個同名的 _spec.rb 檔案 (非常重要，如果檔名後面沒加 _spec 就不會跑)
 * guard 等⼯具容易設定
@@ -50,13 +52,13 @@ Ruby 的測試 DSL (Domain-specific language)
 * describe “.name” 是 class method
 * 測試spec盡量比較簡單清楚，可以不用DRY，實作才會要DRY
 
-#輸出格式
+# 輸出格式
 
 * rspec filename.rb 預設不產⽣⽂件
 * rspec filename.rb -fd 輸出 specdoc ⽂件
 * rspec filename.rb -fh 輸出 html ⽂件
 
-#安裝
+# 安裝
 
 ```ruby
 group :development, :test do
@@ -74,9 +76,10 @@ rspec --init
 rails generate rspec:install
 ```
 
-#設定
+# 設定
 
 ### 顏色描述
+
 ```ruby
 #vim .rspec檔案輸入
 #Require spec_helper automatically in your *_spec.rb
@@ -88,7 +91,9 @@ rails generate rspec:install
 #顯示描述
 --format documentation 
 ```
-###將不需要的檔案關閉
+
+### 將不需要的檔案關閉
+
 generate 新的 controller 或是 model 時，rails 就會很聰明的順便新增 sepc 檔案，但有時候我們會希望用到的時候再去建立即可，所以需要關閉就輸入以下指令。
 
 `/config/application.rb`
@@ -103,7 +108,7 @@ config.generators do |g|
 end
 ```
 
-#語法介紹
+# 語法介紹
 
 - describe 或 context 用來描述你要測試的是什麼，可以用nested
 - it 每個 it 就是⼀⼩段測試（it, specify, example都是一樣的）
@@ -120,9 +125,10 @@ end
     - describe = context
     - it = specify = example
 
-#Rspec
+# Rspec
 
 ### model
+
 ```ruby
 require 'rails_helper' #必須載入才能使用裡面的方法
 
@@ -147,7 +153,8 @@ end
 * `describe` 和 `it` 前面加上 x 代表 pending，執行 rspec 就會先跳拓
 *  [其他方法](https://www.relishapp.com/rspec/rspec-expectations/v/3-4/docs/built-in-matchers/change-matcher)
 
-###Routing spec syntax
+### Routing spec syntax
+
 ```ruby
 RSpec.describe "posts", :type => :routing do
 
@@ -162,7 +169,7 @@ RSpec.describe "posts", :type => :routing do
 end
 ```
 
-###Controller spec syntax
+### Controller spec syntax
 
 `assigns` 可以直接取得 instance 去測試
 
@@ -175,7 +182,8 @@ RSpec.describe PostsController, type: :controller do
 end
 ```
 
-###View spec syntax
+### View spec syntax
+
 ```ruby
 RSpec.describe "posts/index.html.erb", type: :view do
   render
@@ -184,12 +192,14 @@ RSpec.describe "posts/index.html.erb", type: :view do
 end
 ```
 
-###Helper spec syntax
+### Helper spec syntax
+
 ```ruby
 expect(helper.your_method).to eq("")
 ```
 
 ### model spec
+
 ```ruby
 describe Material::Banner, type: :model do
 end
@@ -207,7 +217,8 @@ or
 expect(video).to be_invalid
 ```
 
-###request
+### request
+
 ```ruby
 RSpec.describe "Users", :type => :request do
   before do
@@ -257,13 +268,13 @@ let(:user){User.new(:name => "hello")}
 * let! 則是⾮ lazy 版本
 
 
-###預期會執行某一個class的methd
+### 預期會執行某一個 class 的 methd
 
 ```ruby
  expect(Clsss).to receive(:method).with(params)
 ```
 
-###測試 Pattern
+### 測試 Pattern
 
 Four-Phase Test
 
@@ -273,7 +284,8 @@ Four-Phase Test
 * Teardown （拆解測試）
 
 
-###double
+### double
+
 假物件，可用於 mock 中指定回傳的值  
 
 mock 主要是用來模擬「外部邏輯」，因此可以使用 mock objects，在 RSpec 裡面叫做 double（替身）。
@@ -292,7 +304,7 @@ RSpec.describe BooksCalculator do
 end
 ```
 
-###Stub
+### Stub
 
 `Stub:`
 For replacing a method with code that returns a specified result.  
@@ -331,7 +343,7 @@ describe Zombie do
 end
 ```
 
-###Mock
+### Mock
 
 `Mock:`
 A stub with an expectations that the method gets called.  
@@ -400,20 +412,23 @@ allow(HTTP).to receive_message_chain(:get, :parse).and_return({ 'data'=>[] })
 
 * [message-chains](https://relishapp.com/rspec/rspec-mocks/docs/working-with-legacy-code/message-chains)
 
-###Spies
+### Spies
+
 * 類似 mocks ，一樣製造假物件，一樣是對假物件斷言，但是透過測試工具的功能，而改善了測試程式碼的可讀性，流程更自然（準備、執行、斷言）
 
 [[RSpec] 進階測試系列概念 - Part 6 Mocking V.S. Spying](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-6)
 
 Stubs, Mocks and Spies，都是測試的技巧 or 手法!!
 
-[Stubs, Mocks and Spies in RSpec](https://about.futurelearn.com/blog/stubs-mocks-spies-rspec/)  
-[了解 Stubs, Mocks, and Spies](https://github.com/festime/stubs-mocks-spies-in-rspec)  
-[对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)  
-[[RSpec] subject , expect , context, is_expected, be_xxx](http://blog.xdite.net/posts/2016/06/10/rspec-subject-expect-context-is-expected-be)  
-[[RSpec] 進階測試系列概念](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-0)
+* [Stubs, Mocks and Spies in RSpec](https://about.futurelearn.com/blog/stubs-mocks-spies-rspec/)  
+* [了解 Stubs, Mocks, and Spies](https://github.com/festime/stubs-mocks-spies-in-rspec)  
+* [对 stub 和 mock 的理解](https://ruby-china.org/topics/10977)  
+* [[RSpec] subject , expect , context, is_expected, be_xxx](http://blog.xdite.net/posts/2016/06/10/rspec-subject-expect-context-is-expected-be)  
+* [[RSpec] 進階測試系列概念](http://blog.xdite.net/posts/2016/06/11/rspec-advanced-concept-part-0)
+* [Differences between RSpec doubles, spies and stubs \| Blog](http://gafur.me/2017/12/25/differences-between-rspec-doubles-spies-and-stubs.html)
+* [stubs-mocks-spies-rspec](https://github.com/festime/stubs-mocks-spies-in-rspec)
 
-###let & subject
+### let & subject
 
 ```ruby
 #subject 是主要要測的物件
@@ -441,14 +456,29 @@ describe User do
 end
 ```
 
-參考文件：  
-[subject](http://betterspecs.org/#subject)  
-[let](http://betterspecs.org/#let)  
-[RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)  
-[Difference between subject and let #6](https://github.com/reachlocal/rspec-style-guide/issues/6)  
-[Dry Up Your Rspec Files With Subject & Let Blocks](http://benscheirman.com/2011/05/dry-up-your-rspec-files-with-subject-let-blocks/)  
-[RSpec before vs let](https://www.launchacademy.com/codecabulary/learn-test-driven-development/rspec/before-vs-let)  
-[Rails - RSpec - Difference between “let” and “let!”](http://stackoverflow.com/questions/10173097/rails-rspec-difference-between-let-and-let)
+### subject One-liner syntax
+
+```ruby
+RSpec.describe Array do
+  describe "with 3 items" do
+    subject { [1,2,3] }
+    it { should_not be_empty }
+    # or
+    it { is_expected.not_to be_empty }
+  end
+end
+```
+
+參考文件：
+
+* [subject](http://betterspecs.org/#subject)  
+* [let](http://betterspecs.org/#let)  
+* [RSpec 中 let 和 subject 的区别是什么？](https://ruby-china.org/topics/9271)  
+* [Difference between subject and let #6](https://github.com/reachlocal/rspec-style-guide/issues/6)  
+* [Dry Up Your Rspec Files With Subject & Let Blocks](http://benscheirman.com/2011/05/dry-up-your-rspec-files-with-subject-let-blocks/)  
+* [RSpec before vs let](https://www.launchacademy.com/codecabulary/learn-test-driven-development/rspec/before-vs-let)  
+* [Rails - RSpec - Difference between “let” and “let!”](http://stackoverflow.com/questions/10173097/rails-rspec-difference-between-let-and-let)
+* [One-liner syntax](https://relishapp.com/rspec/rspec-core/v/3-8/docs/subject/one-liner-syntax)
 
 ###focus
 當想要只跑指定的測試時，可以加上 focus
@@ -696,11 +726,18 @@ FactoryGirl.define do
     end
 
     # 也可以設定多種條件
+    # 呼叫方式 create(:user, :child)
     trait :child do
       age 6
       #after(:create) {|user| user.add_role(:admin) }
       #after(:build)  {|user| user.add_role(:admin) }
       # 也可以設定 create 之後的設定
+    end
+    
+    # 可以再接著 user 去做更改，跟 trait 不一樣的是，trait 比較像是組合的概念一個一個加上去，factory 就是完整的
+    # 呼叫方式 create(:user_has_books)
+    factory :user_has_books do
+    	name :user_b
     end
   end
 end
@@ -713,6 +750,48 @@ before do
 	@child = create(:user, :child) #就只替換掉 age
 end
 ```
+
+### transient, evaluator
+
+允許傳入不存在 model 的 data，再透過 evaluator callback 去取得!
+
+```ruby
+FactoryBot.define do
+  factory :user do
+    name { 'leon' }
+
+    factory :user_with_book do
+      transient do
+        books { nil }
+      end
+
+      after(:create) do |user, evaluator|
+        user.update(variations: evaluator.books || [
+          books.new(name: 'This is book')
+        ])
+      end
+    end
+  end
+end
+```
+
+```ruby
+let(:user_with_book) do
+  create(:user_with_book, {
+    books: books
+  })
+end
+
+let(:books) do
+  [
+    create(:books, name: 'book 1'),
+    create(:books, name: 'book 2'),
+  ]
+end
+```
+
+* [What is the purpose of a transient do block in FactoryBot factories?](https://stackoverflow.com/questions/38573131/what-is-the-purpose-of-a-transient-do-block-in-factorybot-factories)
+* [Transient Attributes](https://github.com/thoughtbot/factory_bot/blob/master/GETTING_STARTED.md#transient-attributes)
 
 ### sequences
 

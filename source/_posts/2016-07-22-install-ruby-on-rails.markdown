@@ -671,13 +671,17 @@ Bracket Pair Colorizer
   "editor.wordWrap": "off", // 文字過長換行
   "files.trimTrailingWhitespace": true, // 檔案最後面留空格
   "breadcrumbs.enabled": true, // 顯示麵包屑
-  "prettier.semi": false, // 結束是否加分號
+  "prettier.semi": true, // 結束是否加分號
   "prettier.singleQuote": true, // 單引號
-  "prettier.trailingComma": "none",  // 屬性後新增逗號
-  "prettier.printWidth": 120, // 行寬
+  "prettier.trailingComma": "es5",  // 屬性後新增逗號
+  "prettier.printWidth": 80, // 行寬
   "vetur.format.defaultFormatter.html": "prettyhtml",
   "explorer.openEditors.visible": 1, // 設定已開啟的頁面是否顯示於左側
   "go.gopath": "/Users/leon/go", // 設定 gopath
+  // 接受的值: 'off'、'afterDelay、'onFocusChange' (編輯器失去焦點)
+  // 、'onWindowChange' (視窗失去焦點)。若設為 'afterDelay'，可以在 "files.autoSaveDelay" 中設定延遲。
+  "files.autoSave": "off",  // 控制已變更之檔案的自動儲存。
+  "typescript.check.npmIsInstalled": false, // 檢查是否已安裝 NPM，以取得自動鍵入
   "ruby.intellisense": "rubyLocate",
   "ruby.locate": {
     "exclude": "{**/@(test|spec|tmp|.*),**/@(test|spec|tmp|.*)/**,**/*_spec.rb}",
@@ -726,6 +730,7 @@ Bracket Pair Colorizer
 ```
 
 * [在 vscode 中統一 vue 編碼風格](http://www.52cik.com/2018/02/20/vscode-vue.html)
+* [prettier.io options](https://prettier.io/docs/en/options.html)
 
 ### command line
 

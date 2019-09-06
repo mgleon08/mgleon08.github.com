@@ -122,6 +122,53 @@ const pet3 = {
 console.log(pet3.getGreeting()) // Hello Hal!
 ```
 
+```js
+var test = {
+  say: 'hi',
+  citys: ['a', 'b', 'c'],
+  getGreeting: function() {
+    this.citys.forEach(function(city) {
+    	// 這裡的 this 會指向 window
+      console.log(this.say);
+    });
+  }
+};
+
+test.getGreeting(); // undefined
+
+var test = {
+  say: 'hi',
+  citys: ['a', 'b', 'c'],
+  getGreeting: function() {
+    that = this;
+    this.citys.forEach(function(city) {
+      console.log(that.say);
+    });
+  }
+};
+
+test.getGreeting(); // hi, hi, hi
+
+var test = {
+  say: 'hi',
+  citys: ['a', 'b', 'c'],
+  getGreeting: function() {
+    this.citys.forEach(city => console.log(this.say));
+  }
+};
+
+test.getGreeting(); // hi, hi, hi
+
+var test = {
+  say: 'hi',
+  citys: ['a', 'b', 'c'],
+  getGreeting() {
+    this.citys.forEach(city => console.log(this.say));
+  }
+};
+test.getGreeting(); // hi, hi, hi
+```
+
 * [Arrow_functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions)
 * [Shorter_functions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Arrow_functions#Shorter_functions)
 * [ES6 Method definitions](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/Method_definitions#Description)
@@ -308,10 +355,45 @@ new foo() // undefined
 	* `obj1.foo()` sets `this` to the `obj1` object.
 4. 預設繫結：當其他規則都不適用時，意即沒有使用 `call`、`apply`、`bind` 或不屬於任何物件的 method，就套用預設繫結，在非嚴格模式下，瀏覽器環境 `this` 的值就是預設值全域物件 window，而在嚴格模式下，`this` 的值就是 `undefined`。
 
+
+### 重點是誰呼叫它
+
+```js
+function callName() {
+  console.log(this.name);
+}
+var name = 'global leon';
+var say = {
+  name: 'leon',
+  callName: callName  
+  // 這裡的 function 指向全域的 function，但不重要
+}
+callName()     // global leon
+say.callName() // leon
+```
+
+### 透過 bind 綁定正確的 context
+
+```js
+const obj = {
+  name: 'foobar',
+  getName() {
+    return this.name;
+  }
+};
+
+console.log(obj.getName()); // foobar
+const getName = obj.getName;
+console.log(getName()); // error
+const getNameWithBind = obj.getName.bind(obj);
+console.log(getNameWithBind()); // foobar
+```
+
+
 * [this](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/this)
 * [你懂 JavaScript 嗎？#3 暖身 (๑•̀ㅂ•́)و✧ Part 2 - 變數、嚴格模式、IIFEs、閉包、模組、this、原型、Polyfill 與 Transpiler](https://cythilya.github.io/2018/10/10/intro-2/)
 * [this-identifier](https://github.com/getify/You-Dont-Know-JS/blob/master/up%20%26%20going/ch2.md#this-identifier)
-
+* [鐵人賽：JavaScript 的 this 到底是誰？](https://wcc723.github.io/javascript/2017/12/12/javascript-this/)
 
 # <span id="closures"> Closures 閉包 <span>
 
