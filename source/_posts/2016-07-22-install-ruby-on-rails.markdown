@@ -644,6 +644,7 @@ vscodeicon
 CSScomb
 Code Spell Checker
 Bracket Pair Colorizer
+Trailing Spaces
 // 其他可以看上面推薦的安裝
 ```
 
@@ -726,6 +727,33 @@ Bracket Pair Colorizer
         "serializer",
         "unscoped"
     ],
+}
+```
+
+### 其他 setting
+
+```js
+// .eslintrc
+
+{
+  "env": {
+    "browser": true
+  },
+  "extends": ["plugin:prettier/recommended"],
+  "rules": {
+    "prettier/prettier": "error"
+  },
+  "parser": "babel-eslint"
+}
+```
+
+```js
+// .prettierrc
+{
+  "printWidth": 80,
+  "singleQuote": true,
+  "trailingComma": "es5",
+  "semi": true
 }
 ```
 

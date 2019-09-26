@@ -596,14 +596,16 @@ end
 ```
 
 參考文件：  
-[DRY up your specs using RSpec's shared_examples_for](https://niallburkley.com/blog/rspecs-shared_examples_for/)  
-[Correct way to use shared_examples_for](http://stackoverflow.com/questions/11058502/correct-way-to-use-shared-examples-for)  
-[Shared context](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-context)  
-[Shared examples](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-examples)  
-[Shared example group](https://www.relishapp.com/rspec/rspec-core/v/2-0/docs/example-groups/shared-example-group)  
-[Relish](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-examples)   
-[betterspecs](http://betterspecs.org/#sharedexamples)  
-[Single Table Inheritance with Factory Girl in Rails](http://stackoverflow.com/questions/23470209/single-table-inheritance-with-factory-girl-in-rails)
+
+* [DRY up your specs using RSpec's shared_examples_for](https://niallburkley.com/blog/rspecs-shared_examples_for/)  
+* [Correct way to use shared_examples_for](http://stackoverflow.com/questions/11058502/correct-way-to-use-shared-examples-for)  
+* [Shared context](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-context)  
+* [Shared examples](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-examples)  
+* [Shared example group](https://www.relishapp.com/rspec/rspec-core/v/2-0/docs/example-groups/shared-example-group)  
+* [Relish](https://www.relishapp.com/rspec/rspec-core/docs/example-groups/shared-examples)   
+* [betterspecs](http://betterspecs.org/#sharedexamples)  
+* [Single Table Inheritance with Factory Girl in Rails](http://stackoverflow.com/questions/23470209/single-table-inheritance-with-factory-girl-in-rails)
+* [How to: Road to fast and stable test suite](https://devopsvoyage.com/2018/09/12/road-to-fast-and-stable-test-suite.html)
 
 ###custom matcher
 
@@ -841,6 +843,7 @@ end
 可搭配 	[Faker](https://github.com/stympy/faker) 用來產生假資料
 
 ## 其他設定
+
 `rails g model` 時，一併產生 factory_girl 的檔案在 `spc/factories `
 
 ```ruby
@@ -849,6 +852,10 @@ config.generators do |g|
   g.fixture_replacement :factory_girl, :dir => "spec/factories"
 end
 ```
+
+## Database Cleaner
+
+* [How to: Get most of the database cleaner](https://devopsvoyage.com/2018/09/26/get-most-of-the-database-cleaner.html)
 
 參考文件：
   

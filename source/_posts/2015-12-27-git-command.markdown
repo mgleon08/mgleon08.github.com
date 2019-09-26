@@ -505,6 +505,16 @@ cd ../hotfix
 git worktree prune
 ```
 
+### Reset 所有的 commit 的 author
+
+[How to change the commit author for one specific commit?](https://stackoverflow.com/questions/3042437/how-to-change-the-commit-author-for-one-specific-commit)
+
+```
+git rebase -i --root
+git commit --amend --reset-author --no-edit
+grb --continue
+```
+
 # alias
 
 自己設定的一些 alias
