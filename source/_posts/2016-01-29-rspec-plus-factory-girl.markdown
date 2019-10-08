@@ -768,7 +768,7 @@ FactoryBot.define do
       end
 
       after(:create) do |user, evaluator|
-        user.update(variations: evaluator.books || [
+        user.update(books: evaluator.books || [
           books.new(name: 'This is book')
         ])
       end

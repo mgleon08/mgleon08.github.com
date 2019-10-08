@@ -20,6 +20,7 @@ footer: true
 # <span id="mac_tool">Mac Tool</span>
 
 * [PostMan](https://www.getpostman.com/) - API test
+* [insomnia](https://insomnia.rest/) - 一款支援 REST API 及 GraphQL API 的測試工具
 * [Paw](https://paw.cloud/) - The most advanced API tool for Mac
 * [OmniDiskSweeper](https://www.omnigroup.com/more/) - 清除檔案
 * [f.lux](https://justgetflux.com/) - 眼睛保護

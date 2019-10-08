@@ -670,7 +670,8 @@ Trailing Spaces
   },
   "editor.renderIndentGuides": true, // 顯示縮排線
   "editor.wordWrap": "off", // 文字過長換行
-  "files.trimTrailingWhitespace": true, // 檔案最後面留空格
+  "files.trimTrailingWhitespace": true, // 每一行後面空白移除
+  "files.insertFinalNewline": true, // 檔案最後面留空格
   "breadcrumbs.enabled": true, // 顯示麵包屑
   "prettier.semi": true, // 結束是否加分號
   "prettier.singleQuote": true, // 單引號
