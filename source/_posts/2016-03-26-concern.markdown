@@ -27,15 +27,14 @@ categories: rails
 
 ```ruby
 # app/models/concerns/sample.rb
-
 module Sample
-  include Sample2
   # self.included 會在 Sample 被 include 時執行
   # base 傳入是誰哪個 Class include 了這個 module
   def self.included(base)
     base.class_eval do # 用 class_eval 在該 class 新增 Class method
       #scope :disabled, -> { where(disabled: true) } 可以定義 scope
       #has_many :post 可以定義關聯
+      puts("base is #{base}")
       def self.foo
           "這裡是 class 的 method"
       end
@@ -49,8 +48,8 @@ end
 ```
 ```ruby
 #app/models/test.rb
-class Test < ActiveRecord::Base
-  include Samples
+class Test
+  include Sample
 end
 
 Test.foo
