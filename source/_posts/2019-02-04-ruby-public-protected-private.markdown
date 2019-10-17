@@ -103,7 +103,35 @@ A.b # NoMethodError: private method `b' called for A:Class
 A.c # NoMethodError: private method `c' called for A:Class
 ```
 
+一般都只會用 `private`，而用 `protected` 的情況如以下
+
+```ruby
+class User
+  attr_reader :name
+
+  def initialize(name)
+    @name = name
+  end
+
+  def ==(other_user)
+    # 當兩個 instance 都要指名 receiver 時
+    self.secret == other_user.secret
+  end
+
+  protected
+
+  def secret
+    "#{name}.#{name.length}"
+  end
+end
+
+foo = User.new("Foo")
+bar = User.new("Bar")
+foo == bar # => false
+```
+
 參考文件
 
 * [類別（Class）與模組（Module）](https://railsbook.tw/chapters/08-ruby-basic-4.html)
 * [How to create a private class method?](https://stackoverflow.com/questions/4952980/how-to-create-a-private-class-method)
+* [Public, Private and Protected methods in Ruby](http://rubyblog.pro/2016/11/public-protected-private-in-ruby)

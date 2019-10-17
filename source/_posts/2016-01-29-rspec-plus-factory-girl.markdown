@@ -304,7 +304,9 @@ RSpec.describe BooksCalculator do
 end
 ```
 
-### Stub
+### Stub(舊有方式，現已改為 Allow Message)
+
+> [old-syntax/stub](https://relishapp.com/rspec/rspec-mocks/v/3-9/docs/old-syntax/stub)
 
 `Stub:`
 For replacing a method with code that returns a specified result.  
