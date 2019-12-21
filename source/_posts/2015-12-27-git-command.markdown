@@ -515,6 +515,10 @@ git commit --amend --reset-author --no-edit
 grb --continue
 ```
 
+### 找出某個 commit 什麼時候被 merge 和 branch 名稱
+
+* [git-when-merged](https://github.com/mhagger/git-when-merged)
+
 # alias
 
 自己設定的一些 alias
