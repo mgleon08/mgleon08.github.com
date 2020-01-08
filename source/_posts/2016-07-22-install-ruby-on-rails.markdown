@@ -236,10 +236,26 @@ ZSH_THEME="edvardm"
 
 #啟動 oh-my-zsh 內建的套件，要看有哪些套件可以去 ~/.oh-my-zsh 裡面的 plugins 看裡面的設定( 到 .zshrc 更改 plugins 參數 )
 plugins=(git ruby rbenv github gitignore rails rake python z)
-
 ```
+
+on-my-zsh
+
+```ruby
+# autojump
+brew install autojump
+
+# zsh-autosuggestions
+git clone https://github.com/zsh-users/zsh-autosuggestions ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-autosuggestions
+
+# zsh-syntax-highlighting
+git clone https://github.com/zsh-users/zsh-syntax-highlighting.git ${ZSH_CUSTOM:-~/.oh-my-zsh/custom}/plugins/zsh-syntax-highlighting
+
+plugins=(git autojump zsh-autosuggestions zsh-syntax-highlighting)
+```
+
 * [oh-my-zsh](https://github.com/robbyrussell/oh-my-zsh)
 * [bash 轉移 zsh (oh-my-zsh) 設定心得](http://icarus4.logdown.com/posts/177661-from-bash-to-zsh-setup-tips)
+* [Mac 安裝 oh-my-zsh + autojump + zsh-autosuggestions + zsh-syntax-highlighting + solarized 配色](https://learnku.com/articles/22304)
 
 
 # <span id="rvmorrbenv">rvm or rbenv</span>

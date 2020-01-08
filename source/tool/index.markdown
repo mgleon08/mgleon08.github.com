@@ -80,11 +80,6 @@ footer: true
 * [GIF Brewery 3 by Gfycat](https://apps.apple.com/cn/app/gif-brewery-3-video-to-gif/id1081413713?l=en&mt=12) - 影片轉成 gif
 * [headsetapp](https://headsetapp.co/) - youtube 音樂播放器
 
-
-
-
-
-
 # <span id="terminal_tool"> Terminal Tool </span>
 
 * [the_silver_searcher](https://github.com/ggreer/the_silver_searcher) - 快速搜尋檔案，比 grep 還快
@@ -97,6 +92,7 @@ footer: true
 * [peco](https://github.com/peco/peco) - 可以將一些指令變成互動式的指令 e.g. git checkout
 * [zsh-autosuggestions](https://github.com/zsh-users/zsh-autosuggestions) - 提示之前輸入的 command
 * [jq](https://github.com/stedolan/jq) - Command-line JSON processor
+* [zsh-syntax-highlighting](https://github.com/zsh-users/zsh-syntax-highlighting) - 顯示高亮語法
 
 # <span id="chorm_tool"> Chorm Tool </span>
 
@@ -106,6 +102,7 @@ footer: true
 * [Octotree](https://chrome.google.com/webstore/detail/octotree/bkhaagjahfmjljalopjnoealnfndnagc?hl=zh-TW) 
 * [Wappalyzer](https://chrome.google.com/webstore/detail/wappalyzer/gppongmhjkpfnbhagpmjfkannfbllamg?hl=zh-TW)
 * [JSON Formatter](https://chrome.google.com/webstore/detail/json-formatter/bcjindcccaagfpapjjmafapmmgkkhgoa?hl=zh-TW)
+* [emmet-review](https://chrome.google.com/webstore/detail/emmet-review/epejoicbhllgiimigokgjdoijnpaphdp?hl=zh-TW)
 
 
 # <span id="ui-framework"> UI Framework </span>
