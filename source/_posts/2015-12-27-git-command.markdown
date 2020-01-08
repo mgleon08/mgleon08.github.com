@@ -46,6 +46,8 @@ Git 博大精深，必須花很多時間去學習，從做中學會更快
 * `git config --global color.ui true`　設定輸出顏色
 * `git config --global apply.whitespace nowarn` 空白對有些語言是有影響的(像是Ruby)，因此我們會希望 Git 去忽略空白的變化
 * `git config --global alias.co checkout` 設定 alias
+* `git config --global pager.branch false` git branch 不開啟 edit mode
+* `git config --global push.default simple` git branch 不開啟 edit mode
 
 以上皆可直接 `vim ~/.gitconfig` 去做修正
 
