@@ -31,6 +31,7 @@ categories: linux other
 * [envsubst](#envsubst)
 * [getent](#getent)
 * [nohub](#nohub)
+* [grep](#grep)
 
 # <span id="permission"> permission - sudo, su, chown, chmod </span>
 
@@ -409,3 +410,61 @@ tail -f nohup.out
 ```
 
 * [nohub](https://blog.gtwang.org/linux/linux-nohup-command-tutorial/)
+
+# <span id="grep"> grep </span>
+
+find all files
+
+```ruby
+grep -rnw '/path/to/somewhere/' -e 'pattern'
+
+# -r or -R is recursive,
+# -n is line number, and
+# -w stands for match the whole word.
+# -l (lower-case L) can be added to just give the file name of matching files
+```
+
+* [How do I find all files containing specific text on Linux?](https://stackoverflow.com/questions/16956810/how-do-i-find-all-files-containing-specific-text-on-linux)
+
+# <span id="netstat"> netstat </span>
+
+列出所有 listening
+
+```ruby
+netstat -l
+
+# 包含 non listening
+netstat -a
+```
+
+列出 TCP, UDP
+
+```ruby
+# TCP
+netstat -at
+
+# UDP
+netstat -au
+```
+
+列出統計數據
+
+```ruby
+netstat -s
+```
+
+查出程式
+
+```ruby
+# 使用 TCP 的程式
+netstat -pt
+netstat -ap | grep xxx
+```
+
+不要解析 DNS
+
+```ruby
+netstat -an
+```
+
+* [使用 Netstat 指令檢測網路的技巧](https://blog.gtwang.org/linux/linux-netstat-command-examples/)
