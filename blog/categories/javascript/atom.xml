@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Javascript | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/javascript/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2020-03-12T23:19:01+08:00</updated>
+  <updated>2020-04-17T23:47:13+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,121 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Javascript 時區(timezone) & 夏令時間(Daylight Saving Time)]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/08/29/javascript-daylight-saving-time/"/>
+    <updated>2019-08-29T00:31:13+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/08/29/javascript-daylight-saving-time</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>前端的時間會根據 GMT 時間，減掉後再帶回後端，因此當前端選擇用 <code>/</code> 去 parse 時間，會出現時間不會加上時區的時間，因此在減掉時區的時間後，反而帶到後端的時間會變成前一天</p>
+
+<h3>new Date()</h3>
+
+<pre><code class="js">// 前端
+2020-04-17T03:11:29.686Z
+
+// 後端
+Fri Apr 17 2020 11:11:29 GMT+0800 (台北標準時間)
+</code></pre>
+
+<h3>new Date(&lsquo;1979-08-01&rsquo;)</h3>
+
+<pre><code class="js">// 前端
+Wed Aug 01 1979 09:00:00 GMT+0900 (台北夏令時間)
+
+// 後端
+1971-08-01T00:00:00.000Z
+</code></pre>
+
+<h3>new Date(&lsquo;1979/08/01&rsquo;)</h3>
+
+<pre><code class="js">// 前端
+Wed Aug 01 1979 00:00:00 GMT+0900 (台北夏令時間)
+
+// 後端
+1979-07-31T15:00:00.000Z
+</code></pre>
+
+<p>可以看到只有 <code>new Date('1979/08/01')</code> 帶到後端的時候變成 <code>1979-07-31T15:00:00.000Z</code>，後端存日期就會錯誤，因此如果前端用  <code>/</code> ，必須將 timezoneOffset 加回來</p>
+
+<p>可以使用套件</p>
+
+<ul>
+<li><a href="https://day.js.org/en/">Day.js</a></li>
+</ul>
+
+
+<pre><code class="js">dayjs.utc(date, 'YYYY/MM/DD').add(dayjs().utcOffset(), 'minute').toDate()
+</code></pre>
+
+<ul>
+<li><a href="https://momentjs.com/">momentjs.com</a></li>
+</ul>
+
+
+<pre><code class="js">moment(date).hours(new Date().getTimezoneOffset()/-60)._d;
+</code></pre>
+
+<h1>夏令時間</h1>
+
+<p>有發現上面的 <code>1979-08-01</code> 後面的時間會是 <code>+9</code>?? 台灣不是 <code>+8</code> 嗎??</p>
+
+<p>點連結發現其實台灣以前也有夏令時間，因此只要日期是那個時間內，就會是 <code>+9</code>，所以記得 <code>utcOffset()</code> and <code>getTimezoneOffset</code> 記得要用當下的時間去取得</p>
+
+<pre><code class="js">var d = new Date('1979/08/01')
+var offset = ((new Date().getTimezoneOffset())/-60)
+var now = moment(d).hours(offset)._d;
+
+Wed Aug 01 1979 00:00:00 GMT+0900 (台北夏令時間)
+ 8
+Wed Aug 01 1979 08:00:00 GMT+0900 (台北夏令時間)
+// 08:00 但 GMT 是 +0900，所以帶回後端，-9 就會變成 1979/7/31
+</code></pre>
+
+<p>所以正確應該是要</p>
+
+<ul>
+<li><a href="https://day.js.org/en/">Day.js</a></li>
+</ul>
+
+
+<pre><code class="js">// 帶 date 進去
+dayjs.utc(date, 'YYYY/MM/DD').add(dayjs(date).utcOffset(), 'minute').toDate()
+</code></pre>
+
+<ul>
+<li><a href="https://momentjs.com/">momentjs.com</a></li>
+</ul>
+
+
+<pre><code class="js">// 帶 date 進去
+moment(date).hours(new Date(date).getTimezoneOffset()/-60)._d;
+</code></pre>
+
+<p>或是後端吃 string 的話</p>
+
+<pre><code class="js">new Date(date).toDateString()
+</code></pre>
+
+<p>或是最好就是用標準時間</p>
+
+<pre><code class="js">YYYY-MM-DDTHH:mm:ss
+2019-08-14T00:00:00
+</code></pre>
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="http://www.freehoro.net/Name/Tutorial/DayLightSavingTime/ZhongHua.html">夏令時間</a></li>
+<li><a href="https://solomo.xinmedia.com/travel/15197-Daylightsavingtime">消失的神祕１小時！美國夏令日光節約（Daylight saving time）</a></li>
+<li><a href="/blog/2019/08/29/javascript-date/"> Javascript Date </a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Javascript Date]]></title>
@@ -1436,299 +1551,6 @@ console.log(citiesClone)
 <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Array">Array</a></li>
 <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Functions/rest_parameters">Rest parameters</a></li>
 <li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Spread_syntax">Spread syntax</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[JavaScript - Flow Control]]></title>
-    <link href="https://mgleon08.github.io/blog/2019/07/28/javascript-flow-control/"/>
-    <updated>2019-07-28T12:29:41+08:00</updated>
-    <id>https://mgleon08.github.io/blog/2019/07/28/javascript-flow-control</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<ul>
-<li><a href="#booleans">Booleans - Truthy &amp; Falsy</a></li>
-<li><a href="#comparison">Comparison Operators</a></li>
-<li><a href="#if">if&hellip;else</a></li>
-<li><a href="#switch">switch</a></li>
-<li><a href="#loop">loop</a></li>
-<li><a href="#logical">邏輯運算子 Logical operators</a></li>
-<li><a href="#bitwise">位元運算子 Bitwise operators</a></li>
-<li><a href="#catch_error">Catching and Throwing Errors</a></li>
-</ul>
-
-
-<h1><span id="booleans"> Booleans - Truthy &amp; Falsy <span></h1>
-
-<p>以下 6 個為 <code>Falsy</code> 其他都是 <code>Truthy</code></p>
-
-<pre><code class="js">// Falsy
-false
-0, -0
-""
-null
-undefined
-NaN
-</code></pre>
-
-<pre><code class="js">// Truthy
-'Hello World'
-8
-[], [1, 2, 3]
-{}, { name: 'leon' }
-function foo() {}
-true
-...
-</code></pre>
-
-<p>可以用 <code>!!</code> 來做確認</p>
-
-<pre><code class="js">!!""
-// false
-!![]
-// true
-!!0
-// false
-</code></pre>
-
-<ul>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Global_Objects/Boolean">Boolean</a></li>
-</ul>
-
-
-<h1><span id="comparison"> Comparison Operators <span></h1>
-
-<ul>
-<li><code>===</code>：不做轉型，因此型別對比較是有影響的。</li>
-<li><code>==</code>：會強制轉型
-
-<ul>
-<li>布林轉數字</li>
-<li>字串轉數字</li>
-<li>使用 <code>valueOf()</code> 或 <code>toString()</code> 將物件取得基本型別的值，再做比較</li>
-</ul>
-</li>
-</ul>
-
-
-<pre><code class="js">1 == 1.0          // true
-'1' == 1          // true
-'1' == 1.0        // true
-null == undefined // true
-NaN == NaN        // false
-{} == {}          // false
-[] == []          // false
-
-1 === 1.0          // true
-'1' === 1          // false
-'1' === 1.0        // false
-null === undefined // false
-NaN === NaN        // false
-{} === {}          // false
-[] === []          // false
-
-// reference same memory (object, array)
-a = {}
-b = a
-a == b // true
-a === b // true
-</code></pre>
-
-<pre><code class="js">// 字串以字典的字母順序為主
-'ab' &lt; 'cd' // true
-// 字串 '99' 被強制轉型為數字 99
-'99' &gt; 98 // true
-// 字串 'Hello World' 無法轉為數字，變成 NaN
-'Hello World' &gt; 1 // false
-</code></pre>
-
-<ul>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Comparison_Operators">Comparison operators</a></li>
-</ul>
-
-
-<h1><span id="if"> if&hellip;else <span></h1>
-
-<pre><code class="js">let age = 26
-let isChild = age &lt;= 7
-let isSenior = age &gt;= 65
-
-if (isChild) {
-  console.log('Welcome! You are free.')
-} else if (isSenior) {
-  console.log('Welcome! You get a discount.')
-} else {
-  console.log('Welcome!')
-}
-</code></pre>
-
-<h3>三元運算 Condition Ternary Operator</h3>
-
-<pre><code class="js">function getFee(isMember) {
-  return isMember ? '$2.00' : '$10.00'
-}
-
-console.log(getFee(true)) // "$2.00"
-console.log(getFee(false)) // "$10.00"
-console.log(getFee(1)) // "$2.00"
-</code></pre>
-
-<ul>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/if...else">if&hellip;else</a></li>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Conditional_Operator">Conditional Operator</a></li>
-</ul>
-
-
-<h1><span id="switch"> switch <span></h1>
-
-<ul>
-<li><code>break</code> - 如果不加的話會繼續執行下去</li>
-<li><code>default</code> - 如果上面都沒有執行，就會執行這行</li>
-</ul>
-
-
-<pre><code class="js">var expr = 'Papayas'
-switch (expr) {
-  case 'Oranges':
-    console.log('Oranges are $0.59 a pound.')
-    break
-  case 'Mangoes':
-  case 'Papayas':
-    console.log('Mangoes and papayas are $2.79 a pound.')
-    // expected output: "Mangoes and papayas are $2.79 a pound."
-    break
-  default:
-    console.log('Sorry, we are out of ' + expr + '.')
-}
-</code></pre>
-
-<ul>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/switch">switch</a></li>
-</ul>
-
-
-<h1><span id="loop"> loop <span></h1>
-
-<h3>for</h3>
-
-<pre><code class="js">let str = ''
-
-for (var i = 0; i &lt; 9; i++) {
-  str = str + i
-}
-
-console.log(str) // "012345678"
-</code></pre>
-
-<h3>for..in</h3>
-
-<pre><code class="js">var string1 = ''
-var object1 = { a: 1, b: 2, c: 3 }
-
-for (var property1 in object1) {
-  string1 += object1[property1]
-}
-
-console.log(string1) // "123"
-</code></pre>
-
-<h3>while</h3>
-
-<pre><code class="js">var n = 0
-
-while (n &lt; 3) {
-  n++
-}
-
-console.log(n) // 3
-</code></pre>
-
-<h3>do..while</h3>
-
-<pre><code class="js">var result = ''
-var i = 0
-
-do {
-  i = i + 1
-  result = result + i
-} while (i &lt; 5)
-
-console.log(result) // "12345"
-</code></pre>
-
-<ul>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for">for</a></li>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/for...in">for&hellip;in</a></li>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/while">while</a></li>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/do...while">do&hellip;while</a></li>
-</ul>
-
-
-<h1><span id="logical"> 邏輯運算子 Logical operators <span></h1>
-
-<pre><code class="js">var a = 3
-var b = -2
-
-console.log(a &gt; 0 &amp;&amp; b &gt; 0) // false
-console.log(a &gt; 0 || b &gt; 0) // true
-console.log(!(a &gt; 0 || b &gt; 0)) // false
-</code></pre>
-
-<ul>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Logical_Operators">Logical operators</a></li>
-</ul>
-
-
-<h1><span id="bitwise"> 位元運算子 Bitwise operators <span></h1>
-
-<p>將運算元轉乘 32 位元的 0 和 1，<code>&amp;</code> 兩個都是 1 就是 1，<code>|</code> 一個是 1 才是 1，最後在轉換成數字</p>
-
-<pre><code class="js">console.log(5 &amp; 13) // 0101 &amp; 1101 = 0101
-// 5
-
-console.log(parseInt('0101', 2) &amp; parseInt('1101', 2))
-// 5
-
-console.log(5 &amp; 13 &amp; 3) // 0101 &amp; 1101 &amp; 0011 = 0001
-// 1
-
-console.log(5 | 13) // 0101 | 1101 = 1101
-// 13
-</code></pre>
-
-<ul>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Operators/Bitwise_Operators">Bitwise operators</a></li>
-</ul>
-
-
-<h1><span id="catch_error"> Catching and Throwing Errors <span></h1>
-
-<ul>
-<li><code>try..catch</code>: 捕獲 <code>error</code>，嘗試做其他處理</li>
-<li><code>throw</code>: 拋出 <code>error</code></li>
-</ul>
-
-
-<pre><code class="js">const getTip = amount =&gt; {
-  if (typeof amount !== 'number') {
-    throw Error('Argument must be a number')
-  }
-  return amount * 0.25
-}
-
-try {
-  const result = getTip('12')
-  console.log(result)
-} catch (e) {
-  console.log(e.message) // Argument must be a number
-}
-</code></pre>
-
-<ul>
-<li><a href="https://developer.mozilla.org/en-US/docs/Web/JavaScript/Reference/Statements/try...catch">try&hellip;catch</a></li>
 </ul>
 
 ]]></content>

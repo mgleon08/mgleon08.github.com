@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2020-03-12T23:19:01+08:00</updated>
+  <updated>2020-04-17T23:47:13+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -156,6 +156,163 @@
 
 <ul>
 <li><a href="https://gist.github.com/bastman/5b57ddb3c11942094f8d0a97d461b430">docker cleanup guide: containers, images, volumes, networks · GitHub</a></li>
+</ul>
+
+]]></content>
+  </entry>
+  
+  <entry>
+    <title type="html"><![CDATA[Javascript 時區(timezone) & 夏令時間(Daylight Saving Time)]]></title>
+    <link href="https://mgleon08.github.io/blog/2019/08/29/javascript-daylight-saving-time/"/>
+    <updated>2019-08-29T00:31:13+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2019/08/29/javascript-daylight-saving-time</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>前端的時間會根據 GMT 時間，減掉後再帶回後端，因此當前端選擇用 <code>/</code> 去 parse 時間，會出現時間不會加上時區的時間，因此在減掉時區的時間後，反而帶到後端的時間會變成前一天</p>
+
+<h3>new Date()</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// 前端</span>
+</span><span class='line'><span class="mi">2020</span><span class="o">-</span><span class="mi">04</span><span class="o">-</span><span class="mi">17</span><span class="nx">T03</span><span class="o">:</span><span class="mi">11</span><span class="o">:</span><span class="mf">29.686</span><span class="nx">Z</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 後端</span>
+</span><span class='line'><span class="nx">Fri</span> <span class="nx">Apr</span> <span class="mi">17</span> <span class="mi">2020</span> <span class="mi">11</span><span class="o">:</span><span class="mi">11</span><span class="o">:</span><span class="mi">29</span> <span class="nx">GMT</span><span class="o">+</span><span class="mi">0800</span> <span class="p">(</span><span class="err">台北標準時間</span><span class="p">)</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>new Date(&lsquo;1979-08-01&rsquo;)</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// 前端</span>
+</span><span class='line'><span class="nx">Wed</span> <span class="nx">Aug</span> <span class="mi">01</span> <span class="mi">1979</span> <span class="mi">09</span><span class="o">:</span><span class="mi">00</span><span class="o">:</span><span class="mi">00</span> <span class="nx">GMT</span><span class="o">+</span><span class="mi">0900</span> <span class="p">(</span><span class="err">台北夏令時間</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 後端</span>
+</span><span class='line'><span class="mi">1971</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">01</span><span class="nx">T00</span><span class="o">:</span><span class="mi">00</span><span class="o">:</span><span class="mf">00.000</span><span class="nx">Z</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h3>new Date(&lsquo;1979/08/01&rsquo;)</h3>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// 前端</span>
+</span><span class='line'><span class="nx">Wed</span> <span class="nx">Aug</span> <span class="mi">01</span> <span class="mi">1979</span> <span class="mi">00</span><span class="o">:</span><span class="mi">00</span><span class="o">:</span><span class="mi">00</span> <span class="nx">GMT</span><span class="o">+</span><span class="mi">0900</span> <span class="p">(</span><span class="err">台北夏令時間</span><span class="p">)</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 後端</span>
+</span><span class='line'><span class="mi">1979</span><span class="o">-</span><span class="mi">07</span><span class="o">-</span><span class="mi">31</span><span class="nx">T15</span><span class="o">:</span><span class="mi">00</span><span class="o">:</span><span class="mf">00.000</span><span class="nx">Z</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>可以看到只有 <code>new Date('1979/08/01')</code> 帶到後端的時候變成 <code>1979-07-31T15:00:00.000Z</code>，後端存日期就會錯誤，因此如果前端用  <code>/</code> ，必須將 timezoneOffset 加回來</p>
+
+<p>可以使用套件</p>
+
+<ul>
+<li><a href="https://day.js.org/en/">Day.js</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">dayjs</span><span class="p">.</span><span class="nx">utc</span><span class="p">(</span><span class="nx">date</span><span class="p">,</span> <span class="s1">&#39;YYYY/MM/DD&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">dayjs</span><span class="p">().</span><span class="nx">utcOffset</span><span class="p">(),</span> <span class="s1">&#39;minute&#39;</span><span class="p">).</span><span class="nx">toDate</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://momentjs.com/">momentjs.com</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">moment</span><span class="p">(</span><span class="nx">date</span><span class="p">).</span><span class="nx">hours</span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">().</span><span class="nx">getTimezoneOffset</span><span class="p">()</span><span class="o">/-</span><span class="mi">60</span><span class="p">).</span><span class="nx">_d</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>夏令時間</h1>
+
+<p>有發現上面的 <code>1979-08-01</code> 後面的時間會是 <code>+9</code>?? 台灣不是 <code>+8</code> 嗎??</p>
+
+<p>點連結發現其實台灣以前也有夏令時間，因此只要日期是那個時間內，就會是 <code>+9</code>，所以記得 <code>utcOffset()</code> and <code>getTimezoneOffset</code> 記得要用當下的時間去取得</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="kd">var</span> <span class="nx">d</span> <span class="o">=</span> <span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="s1">&#39;1979/08/01&#39;</span><span class="p">)</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">offset</span> <span class="o">=</span> <span class="p">((</span><span class="k">new</span> <span class="nb">Date</span><span class="p">().</span><span class="nx">getTimezoneOffset</span><span class="p">())</span><span class="o">/-</span><span class="mi">60</span><span class="p">)</span>
+</span><span class='line'><span class="kd">var</span> <span class="nx">now</span> <span class="o">=</span> <span class="nx">moment</span><span class="p">(</span><span class="nx">d</span><span class="p">).</span><span class="nx">hours</span><span class="p">(</span><span class="nx">offset</span><span class="p">).</span><span class="nx">_d</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="nx">Wed</span> <span class="nx">Aug</span> <span class="mi">01</span> <span class="mi">1979</span> <span class="mi">00</span><span class="o">:</span><span class="mi">00</span><span class="o">:</span><span class="mi">00</span> <span class="nx">GMT</span><span class="o">+</span><span class="mi">0900</span> <span class="p">(</span><span class="err">台北夏令時間</span><span class="p">)</span>
+</span><span class='line'> <span class="mi">8</span>
+</span><span class='line'><span class="nx">Wed</span> <span class="nx">Aug</span> <span class="mi">01</span> <span class="mi">1979</span> <span class="mi">08</span><span class="o">:</span><span class="mi">00</span><span class="o">:</span><span class="mi">00</span> <span class="nx">GMT</span><span class="o">+</span><span class="mi">0900</span> <span class="p">(</span><span class="err">台北夏令時間</span><span class="p">)</span>
+</span><span class='line'><span class="c1">// 08:00 但 GMT 是 +0900，所以帶回後端，-9 就會變成 1979/7/31</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>所以正確應該是要</p>
+
+<ul>
+<li><a href="https://day.js.org/en/">Day.js</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// 帶 date 進去</span>
+</span><span class='line'><span class="nx">dayjs</span><span class="p">.</span><span class="nx">utc</span><span class="p">(</span><span class="nx">date</span><span class="p">,</span> <span class="s1">&#39;YYYY/MM/DD&#39;</span><span class="p">).</span><span class="nx">add</span><span class="p">(</span><span class="nx">dayjs</span><span class="p">(</span><span class="nx">date</span><span class="p">).</span><span class="nx">utcOffset</span><span class="p">(),</span> <span class="s1">&#39;minute&#39;</span><span class="p">).</span><span class="nx">toDate</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://momentjs.com/">momentjs.com</a></li>
+</ul>
+
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// 帶 date 進去</span>
+</span><span class='line'><span class="nx">moment</span><span class="p">(</span><span class="nx">date</span><span class="p">).</span><span class="nx">hours</span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="nx">date</span><span class="p">).</span><span class="nx">getTimezoneOffset</span><span class="p">()</span><span class="o">/-</span><span class="mi">60</span><span class="p">).</span><span class="nx">_d</span><span class="p">;</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是後端吃 string 的話</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="nx">date</span><span class="p">).</span><span class="nx">toDateString</span><span class="p">()</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<p>或是最好就是用標準時間</p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+</pre></td><td class='code'><pre><code class='js'><span class='line'><span class="nx">YYYY</span><span class="o">-</span><span class="nx">MM</span><span class="o">-</span><span class="nx">DDTHH</span><span class="o">:</span><span class="nx">mm</span><span class="o">:</span><span class="nx">ss</span>
+</span><span class='line'><span class="mi">2019</span><span class="o">-</span><span class="mi">08</span><span class="o">-</span><span class="mi">14</span><span class="nx">T00</span><span class="o">:</span><span class="mi">00</span><span class="o">:</span><span class="mi">00</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="http://www.freehoro.net/Name/Tutorial/DayLightSavingTime/ZhongHua.html">夏令時間</a></li>
+<li><a href="https://solomo.xinmedia.com/travel/15197-Daylightsavingtime">消失的神祕１小時！美國夏令日光節約（Daylight saving time）</a></li>
+<li><a href="https://mgleon08.github.io/blog/2019/08/29/javascript-date/"> Javascript Date </a></li>
 </ul>
 
 ]]></content>
@@ -10240,280 +10397,6 @@ for i:=0;i&lt;2 ;i++  {
 <li><a href="https://www.cnblogs.com/yjf512/p/4897294.html">elasticsearch 查詢（match和term）</a></li>
 <li><a href="https://www.youtube.com/watch?v=oPObRc8tHgQ">ElasticSearch in action - Thijs Feryn(video)</a></li>
 <li><a href="https://my.oschina.net/weiweiblog/blog/1574020">ElasticSearch各種查詢關鍵字的區別（重要）</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang - Simple RESTful]]></title>
-    <link href="https://mgleon08.github.io/blog/2019/04/11/golang-simple-restful/"/>
-    <updated>2019-04-11T16:27:10+08:00</updated>
-    <id>https://mgleon08.github.io/blog/2019/04/11/golang-simple-restful</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<p>Practice RESTful with golang</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">GetUsers</span>     <span class="nx">GET</span>     <span class="o">/</span><span class="nx">users</span>
-</span><span class='line'><span class="nx">GetUser</span>      <span class="nx">GET</span>     <span class="o">/</span><span class="nx">users</span><span class="o">/</span><span class="p">{</span><span class="nx">id</span><span class="p">}</span>
-</span><span class='line'><span class="nx">CreateUser</span>   <span class="nx">POST</span>    <span class="o">/</span><span class="nx">users</span>
-</span><span class='line'><span class="nx">UpdateUser</span>   <span class="nx">UPDATE</span>  <span class="o">/</span><span class="nx">users</span><span class="o">/</span><span class="p">{</span><span class="nx">id</span><span class="p">}</span>
-</span><span class='line'><span class="nx">DeleteUser</span>   <span class="nx">DELETE</span>  <span class="o">/</span><span class="nx">users</span><span class="o">/</span><span class="p">{</span><span class="nx">id</span><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Use <a href="https://github.com/gorilla/mux">gorilla/mux</a> package</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-<span class='line-number'>26</span>
-<span class='line-number'>27</span>
-<span class='line-number'>28</span>
-<span class='line-number'>29</span>
-<span class='line-number'>30</span>
-<span class='line-number'>31</span>
-<span class='line-number'>32</span>
-<span class='line-number'>33</span>
-<span class='line-number'>34</span>
-<span class='line-number'>35</span>
-<span class='line-number'>36</span>
-<span class='line-number'>37</span>
-<span class='line-number'>38</span>
-<span class='line-number'>39</span>
-<span class='line-number'>40</span>
-<span class='line-number'>41</span>
-<span class='line-number'>42</span>
-<span class='line-number'>43</span>
-<span class='line-number'>44</span>
-<span class='line-number'>45</span>
-<span class='line-number'>46</span>
-<span class='line-number'>47</span>
-<span class='line-number'>48</span>
-<span class='line-number'>49</span>
-<span class='line-number'>50</span>
-<span class='line-number'>51</span>
-<span class='line-number'>52</span>
-<span class='line-number'>53</span>
-<span class='line-number'>54</span>
-<span class='line-number'>55</span>
-<span class='line-number'>56</span>
-<span class='line-number'>57</span>
-<span class='line-number'>58</span>
-<span class='line-number'>59</span>
-<span class='line-number'>60</span>
-<span class='line-number'>61</span>
-<span class='line-number'>62</span>
-<span class='line-number'>63</span>
-<span class='line-number'>64</span>
-<span class='line-number'>65</span>
-<span class='line-number'>66</span>
-<span class='line-number'>67</span>
-<span class='line-number'>68</span>
-<span class='line-number'>69</span>
-<span class='line-number'>70</span>
-<span class='line-number'>71</span>
-<span class='line-number'>72</span>
-<span class='line-number'>73</span>
-<span class='line-number'>74</span>
-<span class='line-number'>75</span>
-<span class='line-number'>76</span>
-<span class='line-number'>77</span>
-<span class='line-number'>78</span>
-<span class='line-number'>79</span>
-<span class='line-number'>80</span>
-<span class='line-number'>81</span>
-<span class='line-number'>82</span>
-<span class='line-number'>83</span>
-<span class='line-number'>84</span>
-<span class='line-number'>85</span>
-<span class='line-number'>86</span>
-<span class='line-number'>87</span>
-<span class='line-number'>88</span>
-<span class='line-number'>89</span>
-<span class='line-number'>90</span>
-<span class='line-number'>91</span>
-<span class='line-number'>92</span>
-<span class='line-number'>93</span>
-<span class='line-number'>94</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;encoding/json&quot;</span>
-</span><span class='line'>  <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>  <span class="s">&quot;log&quot;</span>
-</span><span class='line'>  <span class="s">&quot;net/http&quot;</span>
-</span><span class='line'>  <span class="s">&quot;strconv&quot;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="s">&quot;github.com/gorilla/mux&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">type</span> <span class="nx">User</span> <span class="kd">struct</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">ID</span>        <span class="kt">int</span>    <span class="s">`json:&quot;id,omitempty&quot;`</span>
-</span><span class='line'>  <span class="nx">Firstname</span> <span class="kt">string</span> <span class="s">`json:&quot;firstname,omitempty&quot;`</span>
-</span><span class='line'>  <span class="nx">Lastname</span>  <span class="kt">string</span> <span class="s">`json:&quot;lastname,omitempty&quot;`</span>
-</span><span class='line'>  <span class="nx">Info</span>      <span class="s">`json:&quot;info,omitempty&quot;`</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'><span class="kd">type</span> <span class="nx">Info</span> <span class="kd">struct</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">City</span>  <span class="kt">string</span> <span class="s">`json:&quot;city,omitempty&quot;`</span>
-</span><span class='line'>  <span class="nx">Phone</span> <span class="kt">int</span>    <span class="s">`json:&quot;phone,omitempty&quot;`</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">var</span> <span class="nx">users</span> <span class="p">[]</span><span class="nx">User</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">GetUsers</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="nx">users</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">GetUser</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">id</span> <span class="o">:=</span> <span class="nx">convertParams</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">_</span><span class="p">,</span> <span class="nx">u</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">users</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span> <span class="nx">u</span><span class="p">.</span><span class="nx">ID</span> <span class="o">==</span> <span class="nx">id</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="nx">u</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">return</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="s">&quot;User not found&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">CreateUser</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">user</span> <span class="nx">User</span>
-</span><span class='line'>  <span class="nx">_</span> <span class="p">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">NewDecoder</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Body</span><span class="p">).</span><span class="nx">Decode</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">user</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">users</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">users</span><span class="p">,</span> <span class="nx">user</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="nx">user</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">UpdateUser</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">user</span> <span class="nx">User</span>
-</span><span class='line'>  <span class="nx">id</span> <span class="o">:=</span> <span class="nx">convertParams</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">_</span> <span class="p">=</span> <span class="nx">json</span><span class="p">.</span><span class="nx">NewDecoder</span><span class="p">(</span><span class="nx">r</span><span class="p">.</span><span class="nx">Body</span><span class="p">).</span><span class="nx">Decode</span><span class="p">(</span><span class="o">&amp;</span><span class="nx">user</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">u</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">users</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span> <span class="nx">u</span><span class="p">.</span><span class="nx">ID</span> <span class="o">==</span> <span class="nx">id</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nx">users</span><span class="p">[</span><span class="nx">i</span><span class="p">]</span> <span class="p">=</span> <span class="nx">user</span>
-</span><span class='line'>          <span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="nx">user</span><span class="p">)</span>
-</span><span class='line'>          <span class="k">break</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">DeleteUser</span><span class="p">(</span><span class="nx">w</span> <span class="nx">http</span><span class="p">.</span><span class="nx">ResponseWriter</span><span class="p">,</span> <span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">id</span> <span class="o">:=</span> <span class="nx">convertParams</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">for</span> <span class="nx">i</span><span class="p">,</span> <span class="nx">u</span> <span class="o">:=</span> <span class="k">range</span> <span class="nx">users</span> <span class="p">{</span>
-</span><span class='line'>      <span class="k">if</span> <span class="nx">u</span><span class="p">.</span><span class="nx">ID</span> <span class="o">==</span> <span class="nx">id</span> <span class="p">{</span>
-</span><span class='line'>          <span class="nb">copy</span><span class="p">(</span><span class="nx">users</span><span class="p">[</span><span class="nx">i</span><span class="p">:],</span> <span class="nx">users</span><span class="p">[</span><span class="nx">i</span><span class="o">+</span><span class="mi">1</span><span class="p">:])</span>
-</span><span class='line'>          <span class="nx">users</span> <span class="p">=</span> <span class="nx">users</span><span class="p">[:</span><span class="nb">len</span><span class="p">(</span><span class="nx">users</span><span class="p">)</span><span class="o">-</span><span class="mi">1</span><span class="p">]</span>
-</span><span class='line'>          <span class="k">break</span>
-</span><span class='line'>      <span class="p">}</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="nx">json</span><span class="p">.</span><span class="nx">NewEncoder</span><span class="p">(</span><span class="nx">w</span><span class="p">).</span><span class="nx">Encode</span><span class="p">(</span><span class="nx">users</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">convertParams</span><span class="p">(</span><span class="nx">r</span> <span class="o">*</span><span class="nx">http</span><span class="p">.</span><span class="nx">Request</span><span class="p">)</span> <span class="kt">int</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">params</span> <span class="o">:=</span> <span class="nx">mux</span><span class="p">.</span><span class="nx">Vars</span><span class="p">(</span><span class="nx">r</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">id</span><span class="p">,</span> <span class="nx">err</span> <span class="o">:=</span> <span class="nx">strconv</span><span class="p">.</span><span class="nx">Atoi</span><span class="p">(</span><span class="nx">params</span><span class="p">[</span><span class="s">&quot;id&quot;</span><span class="p">])</span>
-</span><span class='line'>  <span class="k">if</span> <span class="nx">err</span> <span class="o">!=</span> <span class="kc">nil</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">log</span><span class="p">.</span><span class="nx">Fatalf</span><span class="p">(</span><span class="s">&quot;err: %v&quot;</span><span class="p">,</span> <span class="nx">err</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">id</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">router</span> <span class="o">:=</span> <span class="nx">mux</span><span class="p">.</span><span class="nx">NewRouter</span><span class="p">()</span>
-</span><span class='line'>  <span class="nx">user1</span> <span class="o">:=</span> <span class="nx">User</span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span> <span class="mi">1</span><span class="p">,</span> <span class="nx">Firstname</span><span class="p">:</span> <span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="nx">Lastname</span><span class="p">:</span> <span class="s">&quot;World&quot;</span><span class="p">,</span> <span class="nx">Info</span><span class="p">:</span> <span class="nx">Info</span><span class="p">{</span><span class="nx">City</span><span class="p">:</span> <span class="s">&quot;Taipei&quot;</span><span class="p">,</span> <span class="nx">Phone</span><span class="p">:</span> <span class="mi">123</span><span class="p">}}</span>
-</span><span class='line'>  <span class="nx">user2</span> <span class="o">:=</span> <span class="nx">User</span><span class="p">{</span><span class="nx">ID</span><span class="p">:</span> <span class="mi">2</span><span class="p">,</span> <span class="nx">Firstname</span><span class="p">:</span> <span class="s">&quot;hello&quot;</span><span class="p">,</span> <span class="nx">Lastname</span><span class="p">:</span> <span class="s">&quot;World&quot;</span><span class="p">,</span> <span class="nx">Info</span><span class="p">:</span> <span class="nx">Info</span><span class="p">{</span><span class="nx">City</span><span class="p">:</span> <span class="s">&quot;Taipei&quot;</span><span class="p">,</span> <span class="nx">Phone</span><span class="p">:</span> <span class="mi">456</span><span class="p">}}</span>
-</span><span class='line'>  <span class="nx">users</span> <span class="p">=</span> <span class="nb">append</span><span class="p">(</span><span class="nx">users</span><span class="p">,</span> <span class="nx">user1</span><span class="p">,</span> <span class="nx">user2</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">router</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/users&quot;</span><span class="p">,</span> <span class="nx">GetUsers</span><span class="p">).</span><span class="nx">Methods</span><span class="p">(</span><span class="s">&quot;GET&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">router</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/users/{id}&quot;</span><span class="p">,</span> <span class="nx">GetUser</span><span class="p">).</span><span class="nx">Methods</span><span class="p">(</span><span class="s">&quot;GET&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">router</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/users&quot;</span><span class="p">,</span> <span class="nx">CreateUser</span><span class="p">).</span><span class="nx">Methods</span><span class="p">(</span><span class="s">&quot;POST&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">router</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/users/{id}&quot;</span><span class="p">,</span> <span class="nx">UpdateUser</span><span class="p">).</span><span class="nx">Methods</span><span class="p">(</span><span class="s">&quot;PUT&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">router</span><span class="p">.</span><span class="nx">HandleFunc</span><span class="p">(</span><span class="s">&quot;/users/{id}&quot;</span><span class="p">,</span> <span class="nx">DeleteUser</span><span class="p">).</span><span class="nx">Methods</span><span class="p">(</span><span class="s">&quot;DELETE&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="s">&quot;Starting server on port 3000...&quot;</span><span class="p">)</span>
-</span><span class='line'>  <span class="nx">log</span><span class="p">.</span><span class="nx">Fatal</span><span class="p">(</span><span class="nx">http</span><span class="p">.</span><span class="nx">ListenAndServe</span><span class="p">(</span><span class="s">&quot;:3000&quot;</span><span class="p">,</span> <span class="nx">router</span><span class="p">))</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>params</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
-</span><span class='line'>  <span class="s">&quot;id&quot;</span><span class="p">:</span> <span class="mi">3</span><span class="p">,</span>
-</span><span class='line'>  <span class="s">&quot;firstname&quot;</span><span class="p">:</span> <span class="s">&quot;hello&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s">&quot;lastname&quot;</span><span class="p">:</span> <span class="s">&quot;World&quot;</span><span class="p">,</span>
-</span><span class='line'>  <span class="s">&quot;info&quot;</span><span class="p">:</span> <span class="p">{</span>
-</span><span class='line'>    <span class="s">&quot;city&quot;</span><span class="p">:</span> <span class="s">&quot;Taipei&quot;</span><span class="p">,</span>
-</span><span class='line'>    <span class="s">&quot;phone&quot;</span><span class="p">:</span> <span class="mi">123</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>run</p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="k">go</span> <span class="nx">run</span> <span class="nx">main</span><span class="p">.</span><span class="k">go</span>
-</span><span class='line'><span class="c1">// http://localhost:3000/users</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h1>Code</h1>
-
-<ul>
-<li><a href="https://github.com/mgleon08/go-packages/blob/master/018.simple_restful/main.go">simple_restful</a></li>
-</ul>
-
-
-<h1>With mongodb</h1>
-
-<ul>
-<li><a href="https://github.com/mgleon08/go-packages/tree/master/019.restful_mongodb">restful_mongodb</a></li>
-</ul>
-
-
-<p>Reference</p>
-
-<ul>
-<li><a href="https://medium.com/@petrousov/how-to-build-a-restful-api-in-go-for-phonebook-app-d55f7234a10">How to build a RESTful API in Go for phonebook app</a></li>
-<li><a href="https://medium.com/@petrousov/implementing-crud-operations-with-go-and-mongodb-cf622f2379c4">Implementing CRUD operations with Go and MongoDB</a></li>
-<li><a href="https://github.com/gorilla/mux">gorilla/mux</a></li>
-<li><a href="https://yourbasic.org/golang/delete-element-slice/">2 ways to delete an element from a slice</a></li>
 </ul>
 
 ]]></content>
