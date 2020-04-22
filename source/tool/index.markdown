@@ -135,9 +135,10 @@ footer: true
 * [rack-mini-profiler](https://github.com/MiniProfiler/rack-mini-profiler) - profiling 每一頁花的時間
 * [rails_panel](https://github.com/dejan/rails_panel) + [RailsPanel Chrome](https://chrome.google.com/webstore/detail/railspanel/gjpfobpafnhjhbajcjgccbbdofdckggg/related) - 在chrome的developer tool加上rails的分析工具。
 * [rails_best_practices](https://github.com/flyerhzm/rails_best_practices) - 檢查rails專案中是否有違反 [rails best practices](https://rails-bestpractices.com/)。
+* [fasterer](https://github.com/DamirSvrtan/fasterer) - 找出更快的 ruby 語法
 
 
-# <span id="code-review"> Third Party Automated Code Review </span>
+# <span id="third-party"> Third Party </span>
 
 * [codacy](https://www.codacy.com/)
 * [codeclimate](https://codeclimate.com/)
@@ -145,6 +146,11 @@ footer: true
 * [houndci](https://houndci.com/)
 * [sider](https://sider.review/)
 * [sonarqube](https://www.sonarqube.org/) - 程式碼品質分析
+* [skylight](https://www.skylight.io/)
+* [newrelic](https://newrelic.com/)
+* [rollbar](https://rollbar.com/)
+* [sentry](https://sentry.io/welcome/)
+* [circleci](https://circleci.com/)
 
 # <span id="images"> Free Images </span>
 

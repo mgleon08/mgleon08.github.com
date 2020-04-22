@@ -21,6 +21,7 @@ categories: sql other
 * [Time](#Time)
 * [specify order](#specify_order)
 * [Table View](#table_view)
+* [Grant](#grant)
 
 tutorial
 
@@ -202,8 +203,23 @@ CREATE VIEW OR REPLACE "視觀表名"
 AS "SQL SELECT 語句";
 ```
 
+# <span id="grant"> Grant <span>
+
+SQL GRANT 授與資料庫使用權限
+
+```sql
+GRANT type_of_permission ON database_name.table_name TO 'username'@'hostname';
+```
+
+```sql
+GRANT ALL PRIVILEGES ON *.* TO 'mike'@'%';
+```
+
+# Reference
+
 * [MySQL 超新手入門（11）Views](http://www.codedata.com.tw/database/mysql-tutorial-11-views/)
 * [sql-create-view](https://www.1keydata.com/tw/sql/sql-create-view.html)
 * [sql-view](http://www.runoob.com/sql/sql-view.html)
+* [SQL GRANT 授與資料庫使用權限](https://www.fooish.com/sql/grant-privileges.html)
 
 
