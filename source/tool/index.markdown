@@ -151,6 +151,9 @@ footer: true
 * [rollbar](https://rollbar.com/)
 * [sentry](https://sentry.io/welcome/)
 * [circleci](https://circleci.com/)
+* [Quality Pricing](https://codeclimate.com/quality/pricing/)
+* [codefactor](https://www.codefactor.io/)
+* [SonarQube](https://www.sonarqube.org/)
 
 # <span id="images"> Free Images </span>
 
