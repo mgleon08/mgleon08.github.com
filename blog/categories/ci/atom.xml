@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ci | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/ci/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2020-04-23T22:29:33+08:00</updated>
+  <updated>2020-04-25T08:46:33+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,104 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Github Actions]]></title>
+    <link href="https://mgleon08.github.io/blog/2020/04/25/github-actions/"/>
+    <updated>2020-04-25T00:30:09+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2020/04/25/github-actions</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>除了常見的 <a href="https://travis-ci.org/">travis-ci</a> <a href="https://circleci.com/">circleci</a> github 也出了自己的 github actions，比較特別的是，針對這些 action 還出了一個 <a href="https://github.com/marketplace?type=actions">github action marketplace</a>，可以直接拿別人寫好的 action 就可以使用!蠻方便的</p>
+
+<p>以下為 rails + mysql rspec 範例</p>
+
+<h1>Example</h1>
+
+<pre><code class="yaml">name: Continuous Integration
+
+# 在什麼時機觸發跑這個 job，也可以針對不同 branch, tag 甚至設定 cronjob 之類的
+on: [push]
+
+# 設定環境的參數，記得密碼那些要跟專案一樣
+env:
+  RUBY_VERSION: 2.6.x
+  NODE_VERSION: 12.x
+  RAILS_ENV: test
+  MYSQL_ROOT_PASSWORD: password
+  MYSQL_PORT: 3306
+
+jobs:
+  rspec-test:
+    name: RSpec
+    # 跑在什麼系統 window, ubuntu, mac..
+    runs-on: ubuntu-latest
+
+    # 建立專案需要用到的其他 services e.g. mysql, redis ...
+    services:
+      mysql:
+        image: mysql:5.7.29
+        env:
+          MYSQL_ROOT_PASSWORD: $
+          MYSQL_PORT: $
+        ports:
+          - 3306:3306
+        options: &gt;-
+          --health-cmd "mysqladmin ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+
+    steps:
+      # checkout 到指定要跑的 branch 或 tag (一定要加)
+      - name: Check out code
+        uses: actions/checkout@v2
+
+      - name: Set up Ruby
+        uses: actions/setup-ruby@v1
+        with:
+          ruby-version: $
+
+      - name: Set up Node
+        uses: actions/setup-node@master
+        with:
+          node-version: $
+
+      - name: Install dependencies
+        run: |
+          gem install bundler -v 1.17.3
+          bundle install --jobs 4 --retry 3
+          yarn install
+
+      - name: Create database
+        env:
+          RAILS_ENV: $
+          MYSQL_PORT: $
+        run: |
+          bundle exec rails db:create
+          bundle exec rails db:migrate
+
+      - name: Run Rspec
+        run: bundle exec rspec
+       # 如果有加上 simplecov 就會產生一份報告，就可以透過這個別人寫的 action，將檔案產生，之後就可以在跑 action 的地方看到這份檔案
+      - name: Upload coverage results
+        uses: actions/upload-artifact@master
+        if: always()
+        with:
+          name: coverage-report
+          path: coverage
+</code></pre>
+
+<p>Reference:</p>
+
+<ul>
+<li><a href="https://github.com/features/actions">Git Actions</a></li>
+<li><a href="https://help.github.com/en/actions/reference/workflow-syntax-for-github-actions">Workflow syntax for GitHub Actions</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Drone]]></title>
