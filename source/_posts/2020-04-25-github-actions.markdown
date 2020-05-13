@@ -14,7 +14,7 @@ categories: CI
 
 # Example
 
-```yaml
+```ruby
 name: Continuous Integration
 
 # 在什麼時機觸發跑這個 job，也可以針對不同 branch, tag 甚至設定 cronjob 之類的
