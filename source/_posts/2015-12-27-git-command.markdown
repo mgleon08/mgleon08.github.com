@@ -568,10 +568,6 @@ alias gbd='git branch -d'
 alias gbr='git branch --remote'
 alias gba='git branch -a'
 
-# merged branch delete
-alias gbmd='git branch --merged | egrep -v "(^\*|master|dev)" | xargs git branch -d'
-alias gbrmd='git branch -r --merged | egrep -v "(^\*|master|dev)" | xargs git branch -r -d'
-
 # git push
 alias gp='git push'
 alias gpo='git push origin'
@@ -635,6 +631,17 @@ alias gcoi='git checkout $(git branch | cut -c 3- | peco)'
 alias gmi='git merge $(git branch | cut -c 3- | peco)'
 # interactive add
 alias gai='git add $(git status -s | cut -c 4- | peco)'
+
+# cleanup
+alias gbcup="git branch | egrep -v '(^\*|master|dev)'"
+alias gbcup!="git branch | egrep -v '(^\*|master|dev)' | xargs -n 1 git branch -D"
+alias gbrcup="git branch --remote | egrep -v '(^\*|origin/master|origin/dev)'"
+alias gbrcup!="git branch --remote | egrep -v '(^\*|origin/master|origin/dev)' | xargs -n 1 git branch --remote -D"
+
+alias gbmd="git branch --merged | egrep -v '(^\*|master|dev)'"
+alias gbmd!="git branch --merged | egrep -v '(^\*|master|dev)' | xargs git branch -d"
+alias gbrmd="git branch -r --merged | egrep -v '(^\*|origin/master|origin/dev)'"
+alias gbrmd!="git branch -r --merged | egrep -v '(^\*|origin/master|origin/dev)' | xargs git branch -r -d"
 ```
 
 官方文件：
@@ -669,3 +676,4 @@ alias gai='git add $(git status -s | cut -c 4- | peco)'
 * [The magical (and not harmful) rebase](http://jeffkreeftmeijer.com/2010/the-magical-and-not-harmful-rebase/)
 * [How to Write a Git Commit Message](http://chris.beams.io/posts/git-commit/#seven-rules)
 * [A guide to using Github Pages](https://www.thinkful.com/learn/a-guide-to-using-github-pages/)
+* [How can I delete all Git branches which have been merged?](https://stackoverflow.com/questions/6127328/how-can-i-delete-all-git-branches-which-have-been-merged)
