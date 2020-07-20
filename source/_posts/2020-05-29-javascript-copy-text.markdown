@@ -12,7 +12,7 @@ categories: javascript
  
 ```html
 <!-- 一定要是 input 才能夠複製 --> 
-<input type="hidden" id="copy-text" value="copy text">
+<input type="hidden" id="copy-text" value="copy text" readonly>
 ```
 
 ```js
@@ -28,3 +28,8 @@ function copy() {
   copy.setAttribute('type', 'hidden');
 }
 ```
+
+Reference:
+
+* [JavaScript HTML5 页面点击 input 禁止弹出手机默认键盘的几种解决办法](https://www.axihe.com/anbang/blog/javascript/html5prohibits-pop-up-phone-default-keyboard.html)
+
