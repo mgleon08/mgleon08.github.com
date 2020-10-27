@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2020-07-20T22:13:46+08:00</updated>
+  <updated>2020-10-27T22:58:13+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -247,6 +247,12 @@
 <span class='line-number'>167</span>
 <span class='line-number'>168</span>
 <span class='line-number'>169</span>
+<span class='line-number'>170</span>
+<span class='line-number'>171</span>
+<span class='line-number'>172</span>
+<span class='line-number'>173</span>
+<span class='line-number'>174</span>
+<span class='line-number'>175</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spreadsheet&#39;</span>
 </span><span class='line'><span class="nb">require</span> <span class="s1">&#39;pry&#39;</span>
 </span><span class='line'><span class="nb">require</span> <span class="s1">&#39;active_support/all&#39;</span>
@@ -366,10 +372,16 @@
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">custom_reformat_cell</span><span class="p">(</span><span class="n">worksheet</span><span class="p">,</span> <span class="n">cells_format</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">formats</span> <span class="o">=</span> <span class="n">cells_format</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">cell</span><span class="o">|</span> <span class="n">cell</span><span class="o">[</span><span class="ss">:format</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">uniq</span>
+</span><span class='line'>      <span class="n">formats_mapping</span> <span class="o">=</span> <span class="n">formats</span><span class="o">.</span><span class="n">each_with_object</span><span class="p">({})</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="p">,</span> <span class="nb">hash</span><span class="o">|</span>
+</span><span class='line'>                          <span class="nb">hash</span><span class="o">[</span><span class="nb">format</span><span class="o">]</span> <span class="o">=</span> <span class="no">Spreadsheet</span><span class="o">::</span><span class="no">Format</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">**</span><span class="vi">@default_format</span><span class="p">,</span> <span class="o">**</span><span class="nb">format</span><span class="p">)</span>
+</span><span class='line'>                        <span class="k">end</span>
+</span><span class='line'>
 </span><span class='line'>      <span class="n">cells_format</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">cell</span><span class="o">|</span>
-</span><span class='line'>        <span class="n">worksheet</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">cell</span><span class="o">[</span><span class="ss">:idy</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">update_format</span><span class="p">(</span><span class="n">cell</span><span class="o">[</span><span class="ss">:idx</span><span class="o">]</span><span class="p">,</span> <span class="n">cell</span><span class="o">[</span><span class="ss">:format</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">worksheet</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">cell</span><span class="o">[</span><span class="ss">:idy</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="n">cell</span><span class="o">[</span><span class="ss">:idx</span><span class="o">]</span><span class="p">,</span> <span class="n">formats_mapping</span><span class="o">[</span><span class="n">cell</span><span class="o">[</span><span class="ss">:format</span><span class="o">]]</span><span class="p">)</span>
 </span><span class='line'>      <span class="k">end</span>
 </span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">custom_reformat_specified</span><span class="p">(</span><span class="n">worksheet</span><span class="p">,</span> <span class="n">specified_format</span><span class="p">)</span>
 </span><span class='line'>      <span class="n">worksheet</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">row</span><span class="p">,</span> <span class="n">row_idx</span><span class="o">|</span>
@@ -1021,8 +1033,14 @@
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
 </pre></td><td class='code'><pre><code class='js'><span class='line'><span class="c1">// 帶 date 進去</span>
 </span><span class='line'><span class="nx">moment</span><span class="p">(</span><span class="nx">date</span><span class="p">).</span><span class="nx">hours</span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">(</span><span class="nx">date</span><span class="p">).</span><span class="nx">getTimezoneOffset</span><span class="p">()</span><span class="o">/-</span><span class="mi">60</span><span class="p">).</span><span class="nx">_d</span><span class="p">;</span>
+</span><span class='line'>
+</span><span class='line'><span class="c1">// 當遇到有時候會有時區有夏令時間時，可改用 minutes，因為用 hours 會因為有些 hour 會是 7.5 hours 後變成 7 導致有一小時的差距</span>
+</span><span class='line'><span class="nx">moment</span><span class="p">(</span><span class="nx">date</span><span class="p">).</span><span class="nx">minutes</span><span class="p">(</span><span class="k">new</span> <span class="nb">Date</span><span class="p">().</span><span class="nx">getTimezoneOffset</span><span class="p">()</span><span class="o">/-</span><span class="mi">1</span><span class="p">).</span><span class="nx">_d</span><span class="p">;</span>
 </span></code></pre></td></tr></table></div></figure>
 
 
@@ -1047,7 +1065,9 @@
 <ul>
 <li><a href="http://www.freehoro.net/Name/Tutorial/DayLightSavingTime/ZhongHua.html">夏令時間</a></li>
 <li><a href="https://solomo.xinmedia.com/travel/15197-Daylightsavingtime">消失的神祕１小時！美國夏令日光節約（Daylight saving time）</a></li>
-<li><a href="https://mgleon08.github.io/blog/2019/08/29/javascript-date/"> Javascript Date </a></li>
+<li><a href="https://mgleon08.github.io/blog/2019/08/29/javascript-date/"> Javascript Date </a>
+2020-04-17-javascript-daylight-saving-time.markdown
+2020-04-17-javascript-daylight-saving-time.markdown</li>
 </ul>
 
 ]]></content>

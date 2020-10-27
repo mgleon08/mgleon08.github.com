@@ -327,6 +327,12 @@
 <span class='line-number'>167</span>
 <span class='line-number'>168</span>
 <span class='line-number'>169</span>
+<span class='line-number'>170</span>
+<span class='line-number'>171</span>
+<span class='line-number'>172</span>
+<span class='line-number'>173</span>
+<span class='line-number'>174</span>
+<span class='line-number'>175</span>
 </pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="nb">require</span> <span class="s1">&#39;spreadsheet&#39;</span>
 </span><span class='line'><span class="nb">require</span> <span class="s1">&#39;pry&#39;</span>
 </span><span class='line'><span class="nb">require</span> <span class="s1">&#39;active_support/all&#39;</span>
@@ -446,10 +452,16 @@
 </span><span class='line'>    <span class="k">end</span>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">custom_reformat_cell</span><span class="p">(</span><span class="n">worksheet</span><span class="p">,</span> <span class="n">cells_format</span><span class="p">)</span>
+</span><span class='line'>      <span class="n">formats</span> <span class="o">=</span> <span class="n">cells_format</span><span class="o">.</span><span class="n">map</span> <span class="p">{</span> <span class="o">|</span><span class="n">cell</span><span class="o">|</span> <span class="n">cell</span><span class="o">[</span><span class="ss">:format</span><span class="o">]</span> <span class="p">}</span><span class="o">.</span><span class="n">uniq</span>
+</span><span class='line'>      <span class="n">formats_mapping</span> <span class="o">=</span> <span class="n">formats</span><span class="o">.</span><span class="n">each_with_object</span><span class="p">({})</span> <span class="k">do</span> <span class="o">|</span><span class="nb">format</span><span class="p">,</span> <span class="nb">hash</span><span class="o">|</span>
+</span><span class='line'>                          <span class="nb">hash</span><span class="o">[</span><span class="nb">format</span><span class="o">]</span> <span class="o">=</span> <span class="no">Spreadsheet</span><span class="o">::</span><span class="no">Format</span><span class="o">.</span><span class="n">new</span><span class="p">(</span><span class="o">**</span><span class="vi">@default_format</span><span class="p">,</span> <span class="o">**</span><span class="nb">format</span><span class="p">)</span>
+</span><span class='line'>                        <span class="k">end</span>
+</span><span class='line'>
 </span><span class='line'>      <span class="n">cells_format</span><span class="o">.</span><span class="n">each</span> <span class="k">do</span> <span class="o">|</span><span class="n">cell</span><span class="o">|</span>
-</span><span class='line'>        <span class="n">worksheet</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">cell</span><span class="o">[</span><span class="ss">:idy</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">update_format</span><span class="p">(</span><span class="n">cell</span><span class="o">[</span><span class="ss">:idx</span><span class="o">]</span><span class="p">,</span> <span class="n">cell</span><span class="o">[</span><span class="ss">:format</span><span class="o">]</span><span class="p">)</span>
+</span><span class='line'>        <span class="n">worksheet</span><span class="o">.</span><span class="n">row</span><span class="p">(</span><span class="n">cell</span><span class="o">[</span><span class="ss">:idy</span><span class="o">]</span><span class="p">)</span><span class="o">.</span><span class="n">set_format</span><span class="p">(</span><span class="n">cell</span><span class="o">[</span><span class="ss">:idx</span><span class="o">]</span><span class="p">,</span> <span class="n">formats_mapping</span><span class="o">[</span><span class="n">cell</span><span class="o">[</span><span class="ss">:format</span><span class="o">]]</span><span class="p">)</span>
 </span><span class='line'>      <span class="k">end</span>
 </span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>
 </span><span class='line'>
 </span><span class='line'>    <span class="k">def</span> <span class="nf">custom_reformat_specified</span><span class="p">(</span><span class="n">worksheet</span><span class="p">,</span> <span class="n">specified_format</span><span class="p">)</span>
 </span><span class='line'>      <span class="n">worksheet</span><span class="o">.</span><span class="n">each_with_index</span> <span class="k">do</span> <span class="o">|</span><span class="n">row</span><span class="p">,</span> <span class="n">row_idx</span><span class="o">|</span>
