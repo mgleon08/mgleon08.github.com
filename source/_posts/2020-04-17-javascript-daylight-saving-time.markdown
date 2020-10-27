@@ -87,6 +87,9 @@ dayjs.utc(date, 'YYYY/MM/DD').add(dayjs(date).utcOffset(), 'minute').toDate()
 ```js
 // 帶 date 進去
 moment(date).hours(new Date(date).getTimezoneOffset()/-60)._d;
+
+// 當遇到有時候會有時區有夏令時間時，可改用 minutes，因為用 hours 會因為有些 hour 會是 7.5 hours 後變成 7 導致有一小時的差距
+moment(date).minutes(new Date().getTimezoneOffset()/-1)._d;
 ```
 
 或是後端吃 string 的話
@@ -107,3 +110,5 @@ YYYY-MM-DDTHH:mm:ss
 * [夏令時間](http://www.freehoro.net/Name/Tutorial/DayLightSavingTime/ZhongHua.html)
 * [消失的神祕１小時！美國夏令日光節約（Daylight saving time）](https://solomo.xinmedia.com/travel/15197-Daylightsavingtime)
 * <a href="{{ root_url }}/blog/2019/08/29/javascript-date/"> Javascript Date </a>
+2020-04-17-javascript-daylight-saving-time.markdown
+2020-04-17-javascript-daylight-saving-time.markdown

@@ -132,10 +132,16 @@ module Reports
     end
 
     def custom_reformat_cell(worksheet, cells_format)
+      formats = cells_format.map { |cell| cell[:format] }.uniq
+      formats_mapping = formats.each_with_object({}) do |format, hash|
+                          hash[format] = Spreadsheet::Format.new(**@default_format, **format)
+                        end
+
       cells_format.each do |cell|
-        worksheet.row(cell[:idy]).update_format(cell[:idx], cell[:format])
+        worksheet.row(cell[:idy]).set_format(cell[:idx], formats_mapping[cell[:format]])
       end
     end
+
 
     def custom_reformat_specified(worksheet, specified_format)
       worksheet.each_with_index do |row, row_idx|
