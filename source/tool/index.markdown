@@ -26,6 +26,7 @@ footer: true
 * [Paw](https://paw.cloud/) - The most advanced API tool for Mac
 * [sizzy](https://sizzy.co/) - 顯示各種裝置畫面
 * [Sip](https://sipapp.io/) - color
+* [colorslurp](https://apps.apple.com/tw/app/colorslurp/id1287239339?mt=12) - color
 * [MacDown](http://macdown.uranusjr.com/) - markdown editor
 * [boostnote](https://boostnote.io/) - markdown 筆記
 * [notion](https://www.notion.so/) - 多功能筆記
