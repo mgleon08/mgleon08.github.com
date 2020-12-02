@@ -146,7 +146,14 @@ du -sh * | sort -nr | head
 find *.css *.gz *.js -mtime +30 | xargs rm -rf
 ```
 
+> 一次刪除多個檔案
+
+```ruby
+find . -type f -iname 'filename*' -delete
+```
+
 * [Unix/Linux 的 find 指令使用教學、技巧與範例整理](https://blog.gtwang.org/linux/unix-linux-find-command-examples/)
+* [Questions Tags Users Unanswered Jobs How to delete files with the same extension in one go using rm?](https://askubuntu.com/questions/721808/how-to-delete-files-with-the-same-extension-in-one-go-using-rm)
 
 # <span id="jobs"> jobs </span>
 
