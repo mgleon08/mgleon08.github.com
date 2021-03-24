@@ -4,7 +4,7 @@
   <title><![CDATA[Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2020-12-03T00:25:26+08:00</updated>
+  <updated>2021-03-24T23:09:11+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,61 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby - Mutex]]></title>
+    <link href="https://mgleon08.github.io/blog/2021/03/24/ruby-mutex/"/>
+    <updated>2021-03-24T23:06:27+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2021/03/24/ruby-mutex</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>有時候會希望一個 block 東西都執行完，在執行下一個，如果是 db 的話可以用 <a href="https://mgleon08.github.io/blog/2017/11/01/optimistic-locking-and-pessimistic-locking/">樂觀鎖 與 悲觀鎖 Optimistic Locking &amp; Pessimistic Locking</a>，避免搶資源問題</p>
+
+<p>但如果是像要發兩個 request 就可以使用 <code>Mutex</code> ，但要小心不要 deadlock (同時使用兩個，A 等待 B, B 等待 A)，可以搭配 <code>ConditionVariable</code>，讓它等待另一個 signal 之後再繼續執行</p>
+
+<blockquote><p>Mutex implements a simple semaphore that can be used to coordinate access to shared data from multiple concurrent threads.</p></blockquote>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+</pre></td><td class='code'><pre><code class='ruby'><span class='line'><span class="c1"># 必須一開始就宣告，如果直接用  Mutex.new.synchronize 會導致每個用的 lock 不一樣</span>
+</span><span class='line'><span class="n">lock</span> <span class="o">=</span> <span class="no">Mutex</span><span class="o">.</span><span class="n">new</span>
+</span><span class='line'>
+</span><span class='line'><span class="mi">100</span><span class="o">.</span><span class="n">times</span> <span class="k">do</span> <span class="o">|</span><span class="n">num</span><span class="o">|</span>
+</span><span class='line'>  <span class="no">Thread</span><span class="o">.</span><span class="n">new</span> <span class="k">do</span>
+</span><span class='line'>    <span class="n">lock</span><span class="o">.</span><span class="n">synchronize</span> <span class="k">do</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;1. </span><span class="si">#{</span><span class="n">num</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="nb">sleep</span> <span class="mi">3</span>
+</span><span class='line'>      <span class="nb">puts</span> <span class="s2">&quot;2. </span><span class="si">#{</span><span class="n">num</span><span class="si">}</span><span class="s2">&quot;</span>
+</span><span class='line'>      <span class="nb">sleep</span> <span class="mi">3</span>
+</span><span class='line'>    <span class="k">end</span>
+</span><span class='line'>  <span class="k">end</span>
+</span><span class='line'><span class="k">end</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6/Mutex.html">https://ruby-doc.org/core-2.6.3/Mutex.html</a></li>
+<li><a href="https://ruby-doc.org/core-2.6.3/ConditionVariable.html">https://ruby-doc.org/core-2.6.3/ConditionVariable.html</a></li>
+<li><a href="https://dev.to/enether/working-with-multithreaded-ruby-part-i-cj3">Working with Multithreaded Ruby Part I</a></li>
+<li><a href="https://dev.to/enether/working-with-multithreaded-ruby-part-ii-5e3">Working With Multithreaded Ruby Part II</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Javascript - Copy Text]]></title>
@@ -8311,190 +8366,6 @@ for i:=0;i&lt;2 ;i++  {
 <li><a href="https://eggerapps.at/postico/">Postico</a> - GUI client on mac</li>
 <li><a href="https://github.com/pressly/goose">goose</a> - Goose database migration tool</li>
 <li><a href="https://gist.github.com/Kartones/dd3ff5ec5ea238d4c546">postgres-cheatsheet</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Golang - Mock]]></title>
-    <link href="https://mgleon08.github.io/blog/2019/06/04/golang-mock/"/>
-    <updated>2019-06-04T18:53:23+08:00</updated>
-    <id>https://mgleon08.github.io/blog/2019/06/04/golang-mock</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<h3>Simple code use to test</h3>
-
-<p><code>string.go</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-<span class='line-number'>25</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="s">&quot;fmt&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">type</span> <span class="nx">Stringer</span> <span class="kd">interface</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">Name</span><span class="p">(</span><span class="nx">hi</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">type</span> <span class="nx">human</span> <span class="kd">struct</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">name</span> <span class="kt">string</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">h</span> <span class="o">*</span><span class="nx">human</span><span class="p">)</span> <span class="nx">Name</span><span class="p">(</span><span class="nx">hi</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">say</span> <span class="o">:=</span> <span class="nx">fmt</span><span class="p">.</span><span class="nx">Sprintf</span><span class="p">(</span><span class="s">&quot;%v %v&quot;</span><span class="p">,</span> <span class="nx">hi</span><span class="p">,</span> <span class="nx">h</span><span class="p">.</span><span class="nx">name</span><span class="p">)</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">say</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">main</span><span class="p">()</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">h</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">human</span><span class="p">{</span><span class="nx">name</span><span class="p">:</span> <span class="s">&quot;Leon&quot;</span><span class="p">}</span>
-</span><span class='line'>  <span class="nx">fmt</span><span class="p">.</span><span class="nx">Println</span><span class="p">(</span><span class="nx">SayName</span><span class="p">(</span><span class="nx">h</span><span class="p">))</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">SayName</span><span class="p">(</span><span class="nx">people</span> <span class="nx">Stringer</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">people</span><span class="p">.</span><span class="nx">Name</span><span class="p">(</span><span class="s">&quot;hi&quot;</span><span class="p">)</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>create mock data</h3>
-
-<p>default is <code>.</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="nx">mockery</span> <span class="o">-</span><span class="nx">name</span><span class="p">=</span><span class="nx">Stringer</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-<span class='line-number'>21</span>
-<span class='line-number'>22</span>
-<span class='line-number'>23</span>
-<span class='line-number'>24</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="c1">// Code generated by mockery v1.0.0. DO NOT EDIT.</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">package</span> <span class="nx">mocks</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="nx">mock</span> <span class="s">&quot;github.com/stretchr/testify/mock&quot;</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Stringer is an autogenerated mock type for the Stringer type</span>
-</span><span class='line'><span class="kd">type</span> <span class="nx">Stringer</span> <span class="kd">struct</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">mock</span><span class="p">.</span><span class="nx">Mock</span>
-</span><span class='line'><span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'><span class="c1">// Name provides a mock function with given fields: hi</span>
-</span><span class='line'><span class="kd">func</span> <span class="p">(</span><span class="nx">_m</span> <span class="o">*</span><span class="nx">Stringer</span><span class="p">)</span> <span class="nx">Name</span><span class="p">(</span><span class="nx">hi</span> <span class="kt">string</span><span class="p">)</span> <span class="kt">string</span> <span class="p">{</span>
-</span><span class='line'>  <span class="nx">ret</span> <span class="o">:=</span> <span class="nx">_m</span><span class="p">.</span><span class="nx">Called</span><span class="p">(</span><span class="nx">hi</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="kd">var</span> <span class="nx">r0</span> <span class="kt">string</span>
-</span><span class='line'>  <span class="k">if</span> <span class="nx">rf</span><span class="p">,</span> <span class="nx">ok</span> <span class="o">:=</span> <span class="nx">ret</span><span class="p">.</span><span class="nx">Get</span><span class="p">(</span><span class="mi">0</span><span class="p">).(</span><span class="kd">func</span><span class="p">(</span><span class="kt">string</span><span class="p">)</span> <span class="kt">string</span><span class="p">);</span> <span class="nx">ok</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">r0</span> <span class="p">=</span> <span class="nx">rf</span><span class="p">(</span><span class="nx">hi</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span> <span class="k">else</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">r0</span> <span class="p">=</span> <span class="nx">ret</span><span class="p">.</span><span class="nx">Get</span><span class="p">(</span><span class="mi">0</span><span class="p">).(</span><span class="kt">string</span><span class="p">)</span>
-</span><span class='line'>  <span class="p">}</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="k">return</span> <span class="nx">r0</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<h3>Write test with mock data</h3>
-
-<p><code>string_test.go</code></p>
-
-<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
-<span class='line-number'>2</span>
-<span class='line-number'>3</span>
-<span class='line-number'>4</span>
-<span class='line-number'>5</span>
-<span class='line-number'>6</span>
-<span class='line-number'>7</span>
-<span class='line-number'>8</span>
-<span class='line-number'>9</span>
-<span class='line-number'>10</span>
-<span class='line-number'>11</span>
-<span class='line-number'>12</span>
-<span class='line-number'>13</span>
-<span class='line-number'>14</span>
-<span class='line-number'>15</span>
-<span class='line-number'>16</span>
-<span class='line-number'>17</span>
-<span class='line-number'>18</span>
-<span class='line-number'>19</span>
-<span class='line-number'>20</span>
-</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="kn">package</span> <span class="nx">main</span>
-</span><span class='line'>
-</span><span class='line'><span class="kn">import</span> <span class="p">(</span>
-</span><span class='line'>  <span class="s">&quot;testing&quot;</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="s">&quot;github.com/mgleon08/mock/mocks&quot;</span>
-</span><span class='line'>  <span class="s">&quot;github.com/stretchr/testify/assert&quot;</span>
-</span><span class='line'>  <span class="s">&quot;github.com/stretchr/testify/mock&quot;</span>
-</span><span class='line'><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'><span class="kd">func</span> <span class="nx">Test_SayName</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>  <span class="c1">// mock interface</span>
-</span><span class='line'>  <span class="nx">mockStringer</span> <span class="o">:=</span> <span class="o">&amp;</span><span class="nx">mocks</span><span class="p">.</span><span class="nx">Stringer</span><span class="p">{}</span>
-</span><span class='line'>  <span class="c1">// mock function and expected return you want data</span>
-</span><span class='line'>  <span class="nx">mockStringer</span><span class="p">.</span><span class="nx">On</span><span class="p">(</span><span class="s">&quot;Name&quot;</span><span class="p">,</span> <span class="nx">mock</span><span class="p">.</span><span class="nx">Anything</span><span class="p">).</span><span class="nx">Return</span><span class="p">(</span><span class="s">&quot;hi, test&quot;</span><span class="p">)</span>
-</span><span class='line'>
-</span><span class='line'>  <span class="nx">t</span><span class="p">.</span><span class="nx">Run</span><span class="p">(</span><span class="s">&quot;test&quot;</span><span class="p">,</span> <span class="kd">func</span><span class="p">(</span><span class="nx">t</span> <span class="o">*</span><span class="nx">testing</span><span class="p">.</span><span class="nx">T</span><span class="p">)</span> <span class="p">{</span>
-</span><span class='line'>      <span class="nx">assert</span><span class="p">.</span><span class="nx">Equal</span><span class="p">(</span><span class="nx">t</span><span class="p">,</span> <span class="s">&quot;hi, test&quot;</span><span class="p">,</span> <span class="nx">SayName</span><span class="p">(</span><span class="nx">mockStringer</span><span class="p">))</span>
-</span><span class='line'>  <span class="p">})</span>
-</span><span class='line'><span class="p">}</span>
-</span></code></pre></td></tr></table></div></figure>
-
-
-<p>Reference:</p>
-
-<ul>
-<li><a href="https://github.com/vektra/mockery">mockery</a></li>
-<li><a href="https://github.com/stretchr/testify#mock-package">testify</a></li>
 </ul>
 
 ]]></content>

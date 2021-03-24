@@ -4,7 +4,7 @@
   <title><![CDATA[Category: Ruby | Leon's Blogging]]></title>
   <link href="https://mgleon08.github.io/blog/categories/ruby/atom.xml" rel="self"/>
   <link href="https://mgleon08.github.io/"/>
-  <updated>2020-12-03T00:25:26+08:00</updated>
+  <updated>2021-03-24T23:09:11+08:00</updated>
   <id>https://mgleon08.github.io/</id>
   <author>
     <name><![CDATA[LeonJi]]></name>
@@ -12,6 +12,47 @@
   </author>
   <generator uri="http://octopress.org/">Octopress</generator>
 
+  
+  <entry>
+    <title type="html"><![CDATA[Ruby - Mutex]]></title>
+    <link href="https://mgleon08.github.io/blog/2021/03/24/ruby-mutex/"/>
+    <updated>2021-03-24T23:06:27+08:00</updated>
+    <id>https://mgleon08.github.io/blog/2021/03/24/ruby-mutex</id>
+    <content type="html"><![CDATA[<!-- more -->
+
+
+<p>有時候會希望一個 block 東西都執行完，在執行下一個，如果是 db 的話可以用 <a href="https://mgleon08.github.io/blog/2017/11/01/optimistic-locking-and-pessimistic-locking/">樂觀鎖 與 悲觀鎖 Optimistic Locking &amp; Pessimistic Locking</a>，避免搶資源問題</p>
+
+<p>但如果是像要發兩個 request 就可以使用 <code>Mutex</code> ，但要小心不要 deadlock (同時使用兩個，A 等待 B, B 等待 A)，可以搭配 <code>ConditionVariable</code>，讓它等待另一個 signal 之後再繼續執行</p>
+
+<blockquote><p>Mutex implements a simple semaphore that can be used to coordinate access to shared data from multiple concurrent threads.</p></blockquote>
+
+<pre><code class="ruby"># 必須一開始就宣告，如果直接用  Mutex.new.synchronize 會導致每個用的 lock 不一樣
+lock = Mutex.new
+
+100.times do |num|
+  Thread.new do
+    lock.synchronize do
+      puts "1. #{num}"
+      sleep 3
+      puts "2. #{num}"
+      sleep 3
+    end
+  end
+end
+</code></pre>
+
+<h1>Reference</h1>
+
+<ul>
+<li><a href="https://ruby-doc.org/core-2.6/Mutex.html">https://ruby-doc.org/core-2.6.3/Mutex.html</a></li>
+<li><a href="https://ruby-doc.org/core-2.6.3/ConditionVariable.html">https://ruby-doc.org/core-2.6.3/ConditionVariable.html</a></li>
+<li><a href="https://dev.to/enether/working-with-multithreaded-ruby-part-i-cj3">Working with Multithreaded Ruby Part I</a></li>
+<li><a href="https://dev.to/enether/working-with-multithreaded-ruby-part-ii-5e3">Working With Multithreaded Ruby Part II</a></li>
+</ul>
+
+]]></content>
+  </entry>
   
   <entry>
     <title type="html"><![CDATA[Excel Report]]></title>
@@ -791,70 +832,6 @@ end
 <li><a href="https://nithinbekal.com/posts/ruby-2-6/">What&rsquo;s new in Ruby 2.6</a></li>
 <li><a href="https://medium.com/tailor-tech/whats-new-in-ruby-2-6-a4774f3631c1">What’s new in Ruby 2.6?</a></li>
 <li><a href="https://www.rubyguides.com/2018/11/ruby-2-6-new-features/">9 New Features in Ruby 2.6</a></li>
-</ul>
-
-]]></content>
-  </entry>
-  
-  <entry>
-    <title type="html"><![CDATA[Ruby - Super vs Super()]]></title>
-    <link href="https://mgleon08.github.io/blog/2019/02/04/ruby-super/"/>
-    <updated>2019-02-04T18:19:10+08:00</updated>
-    <id>https://mgleon08.github.io/blog/2019/02/04/ruby-super</id>
-    <content type="html"><![CDATA[<!-- more -->
-
-
-<p><code>super</code> 可以在同一個 method，呼叫上層的同個 method，但有沒有 <code>()</code> 行為上會有點不一樣</p>
-
-<h1>super</h1>
-
-<p>return <code>ArgumentError</code> 代表 <code>super</code> 會將 <code>Dog say</code> 的參數，帶到 <code>Animal say</code>，因此造成 <code>ArgumentError</code></p>
-
-<p>如果剛好 <code>Animal say</code> 也有帶參數，那就不會 error</p>
-
-<pre><code class="ruby">class Animal
-  def say
-    puts 'hi'
-  end
-end
-
-class Dog &lt; Animal
-  def say(text)
-    super
-
-    puts text
-  end
-end
-
-Dog.new.say('Woo')
-# =&gt; ArgumentError (wrong number of arguments (given 1, expected 0))
-</code></pre>
-
-<h1>super()</h1>
-
-<p>而 <code>super()</code> 代表不帶任何參數的呼叫 <code>Animal say</code></p>
-
-<pre><code class="ruby">class Animal
-  def say
-    'hi'
-  end
-end
-
-class Dog &lt; Animal
-  def say(text)
-    super()
-
-    text
-  end
-end
-
-Dog.new.say('Woo')
-</code></pre>
-
-<p>參考文件</p>
-
-<ul>
-<li><a href="https://stackoverflow.com/questions/4632224/super-keyword-in-ruby">Super keyword in Ruby</a></li>
 </ul>
 
 ]]></content>
