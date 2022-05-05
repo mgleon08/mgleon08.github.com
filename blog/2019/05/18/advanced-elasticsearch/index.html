@@ -145,7 +145,7 @@ should - 滿足任一匹配的字，將增加 _score ，否則，無任何影響
 
 <h2>Example 1:</h2>
 
-<p>user 必須是 kimchy，並且過濾出 tag 是 &ldquo;tech&rdquo; (匹配多寡並不影響 <em>score)，age 範圍排除 10 ~ 20，如果 tag 有 <code>wow</code> 或是 <code>elasticsearch</code> 則 </em>score 比較高，兩個都有則更高</p>
+<p>user 必須是 kimchy，並且過濾出 tag 是 &ldquo;tech&rdquo; (匹配多寡並不影響 _score)，age 範圍排除 10 ~ 20，如果 tag 有 <code>wow</code> 或是 <code>elasticsearch</code> 則 _score 比較高，兩個都有則更高</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -204,7 +204,7 @@ should - 滿足任一匹配的字，將增加 _score ，否則，無任何影響
 
 <blockquote><p>將 bool 帶入 filter 一樣可以不計算分數</p></blockquote>
 
-<p>查找 <code>title</code> 字段匹配 <code>how to make millions</code> 並且不被 <code>tag</code> 為 <code>spam</code> 的文件。那些被 <code>tag</code> 為 <code>starred</code> 或在2014之後的文件，將比另外那些文件擁有更高的排名。如果 <em>兩者</em> 都滿足，那麼它排名將更高，並過濾出 <code>price</code> 必須小於等於 29.99，且 <code>category</code> 不能是 <code>ebooks</code> 這兩個條件則不影響排名</p>
+<p>查找 <code>title</code> 字段匹配 <code>how to make millions</code> 並且不被 <code>tag</code> 為 <code>spam</code> 的文件。那些被 <code>tag</code> 為 <code>starred</code> 或在 2014 之後的文件，將比另外那些文件擁有更高的排名。如果 <em>兩者</em> 都滿足，那麼它排名將更高，並過濾出 <code>price</code> 必須小於等於 29.99，且 <code>category</code> 不能是 <code>ebooks</code> 這兩個條件則不影響排名</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
 <span class='line-number'>2</span>
@@ -574,6 +574,94 @@ should - 滿足任一匹配的字，將增加 _score ，否則，無任何影響
 
 <h1>Combining Filters</h1>
 
+<p>這邊要注意一下，如果 <code>should</code>，和 其他的一起合用，就必須加上 <code>minimum_should_match</code> 或是要包在同一個 array 裡面，再多一個 <code>bool</code>
+不然就不會是我們想要的 <code>a AND (B OR C)</code></p>
+
+<figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
+<span class='line-number'>2</span>
+<span class='line-number'>3</span>
+<span class='line-number'>4</span>
+<span class='line-number'>5</span>
+<span class='line-number'>6</span>
+<span class='line-number'>7</span>
+<span class='line-number'>8</span>
+<span class='line-number'>9</span>
+<span class='line-number'>10</span>
+<span class='line-number'>11</span>
+<span class='line-number'>12</span>
+<span class='line-number'>13</span>
+<span class='line-number'>14</span>
+<span class='line-number'>15</span>
+<span class='line-number'>16</span>
+<span class='line-number'>17</span>
+<span class='line-number'>18</span>
+<span class='line-number'>19</span>
+<span class='line-number'>20</span>
+<span class='line-number'>21</span>
+<span class='line-number'>22</span>
+<span class='line-number'>23</span>
+<span class='line-number'>24</span>
+<span class='line-number'>25</span>
+<span class='line-number'>26</span>
+<span class='line-number'>27</span>
+<span class='line-number'>28</span>
+<span class='line-number'>29</span>
+<span class='line-number'>30</span>
+<span class='line-number'>31</span>
+<span class='line-number'>32</span>
+<span class='line-number'>33</span>
+<span class='line-number'>34</span>
+<span class='line-number'>35</span>
+<span class='line-number'>36</span>
+<span class='line-number'>37</span>
+<span class='line-number'>38</span>
+</pre></td><td class='code'><pre><code class='go'><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;filter&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>      <span class="p">{</span> <span class="s">&quot;term&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;date_on&quot;</span><span class="p">:</span> <span class="s">&quot;2022-05-04&quot;</span> <span class="p">}</span> <span class="p">},</span>
+</span><span class='line'>      <span class="p">{</span> <span class="s">&quot;term&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;name.keyword&quot;</span><span class="p">:</span> <span class="s">&quot;測試&quot;</span> <span class="p">}</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">],</span>
+</span><span class='line'>  <span class="s">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;term&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;company&quot;</span><span class="p">:</span> <span class="s">&quot;公司&quot;</span> <span class="p">}</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;filter&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>          <span class="p">{</span> <span class="s">&quot;range&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;lt&quot;</span><span class="p">:</span> <span class="mi">0</span> <span class="p">}</span> <span class="p">}</span> <span class="p">},</span>
+</span><span class='line'>          <span class="p">{</span> <span class="s">&quot;range&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;lt&quot;</span><span class="p">:</span> <span class="mi">0</span> <span class="p">}</span> <span class="p">}</span> <span class="p">}</span>
+</span><span class='line'>        <span class="p">]</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">],</span>
+</span><span class='line'>  <span class="s">&quot;minimum_should_match&quot;</span><span class="p">:</span> <span class="mi">1</span>
+</span><span class='line'><span class="p">}</span>
+</span><span class='line'>
+</span><span class='line'><span class="p">{</span>
+</span><span class='line'>  <span class="s">&quot;filter&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;term&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;date_on&quot;</span><span class="p">:</span> <span class="s">&quot;2022-05-04&quot;</span> <span class="p">}</span> <span class="p">},</span>
+</span><span class='line'>    <span class="p">{</span> <span class="s">&quot;term&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;name.keyword&quot;</span><span class="p">:</span> <span class="s">&quot;測試&quot;</span> <span class="p">}</span> <span class="p">}</span>
+</span><span class='line'>    <span class="p">{</span>
+</span><span class='line'>      <span class="s">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>        <span class="s">&quot;should&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>          <span class="p">{</span> <span class="s">&quot;term&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;company&quot;</span><span class="p">:</span> <span class="s">&quot;公司&quot;</span> <span class="p">}</span> <span class="p">},</span>
+</span><span class='line'>          <span class="p">{</span> <span class="s">&quot;bool&quot;</span><span class="p">:</span> <span class="p">{</span>
+</span><span class='line'>              <span class="s">&quot;filter&quot;</span><span class="p">:</span> <span class="p">[</span>
+</span><span class='line'>                  <span class="p">{</span> <span class="s">&quot;range&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;gte&quot;</span><span class="p">:</span> <span class="mi">50</span> <span class="p">}</span> <span class="p">}</span> <span class="p">},</span>
+</span><span class='line'>                  <span class="p">{</span> <span class="s">&quot;range&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;age&quot;</span><span class="p">:</span> <span class="p">{</span> <span class="s">&quot;lte&quot;</span><span class="p">:</span> <span class="mi">20</span> <span class="p">}</span> <span class="p">}</span> <span class="p">}</span>
+</span><span class='line'>              <span class="p">]</span>
+</span><span class='line'>            <span class="p">}</span>
+</span><span class='line'>          <span class="p">}</span>
+</span><span class='line'>        <span class="p">]</span>
+</span><span class='line'>      <span class="p">}</span>
+</span><span class='line'>    <span class="p">}</span>
+</span><span class='line'>  <span class="p">]</span>
+</span><span class='line'><span class="p">}</span>
+</span></code></pre></td></tr></table></div></figure>
+
+
+<ul>
+<li><a href="https://blog.csdn.net/JineD/article/details/111997205">es bool 多條件查詢 should 和 must 同時使用</a></li>
+<li><a href="https://blog.csdn.net/qq_31748587/article/details/101449613">elasticsearch bool 中 should must 聯用問題</a></li>
+</ul>
+
+
 <p>Example1</p>
 
 <figure class='code'><figcaption><span></span></figcaption><div class="highlight"><table><tr><td class="gutter"><pre class="line-numbers"><span class='line-number'>1</span>
@@ -909,7 +997,7 @@ should - 滿足任一匹配的字，將增加 _score ，否則，無任何影響
 <h1>Function Score Query</h1>
 
 <ul>
-<li><a href="https://www.scienjus.com/elasticsearch-function-score-query/">透過Function Score Query優化Elasticsearch搜索結果</a></li>
+<li><a href="https://www.scienjus.com/elasticsearch-function-score-query/">透過 Function Score Query 優化 Elasticsearch 搜索結果</a></li>
 <li><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/cn/boosting-by-popularity.html">按受歡迎度提升權重</a></li>
 <li><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/cn/function-score-filters.html">過濾集提升權重</a></li>
 </ul>
@@ -919,7 +1007,7 @@ should - 滿足任一匹配的字，將增加 _score ，否則，無任何影響
 
 <ul>
 <li><a href="https://www.elastic.co/guide/cn/elasticsearch/guide/current/index.html">Elasticsearch: 權威指南 | Elastic</a></li>
-<li><a href="https://blog.csdn.net/dm_vincent/article/details/41743955">[Elasticsearch] 全文搜索 (三) - match查询和bool查询的关系，提升查询子句 - dm_vincent的专栏 - CSDN博客</a></li>
+<li><a href="https://blog.csdn.net/dm_vincent/article/details/41743955">[Elasticsearch] 全文搜索 (三) - match 查询和 bool 查询的关系，提升查询子句 - dm_vincent 的专栏 - CSDN 博客</a></li>
 <li><a href="https://cloud.tencent.com/developer/article/1113818">Elasticsearch DSL 常用語法介紹</a></li>
 </ul>
 
@@ -992,7 +1080,7 @@ should - 滿足任一匹配的字，將增加 _score ，否則，無任何影響
     </div>
   </div>
   <footer role="contentinfo"><p>
-  Copyright &copy; 2021 - LeonJi -
+  Copyright &copy; 2022 - LeonJi -
   <span class="credit">Powered by <a href="http://octopress.org">Octopress</a> | Themed with <a href="https://github.com/lucaslew/whitespace">Whitespace</a></span>
 </p>
 
