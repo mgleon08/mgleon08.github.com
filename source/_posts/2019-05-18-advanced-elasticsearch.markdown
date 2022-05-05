@@ -1,6 +1,6 @@
 ---
 layout: post
-title: "Advance ElasticSearch"
+title: 'Advance ElasticSearch'
 date: 2019-05-18 08:55:02 +0800
 comments: true
 categories: elasticsearch
@@ -8,19 +8,18 @@ categories: elasticsearch
 
 <!-- more -->
 
-# Bool Query 
+# Bool Query
 
-* `must` - 查詢必須匹配的字，並計算 `_score` (與 AND 等價)
-* `filter` - 查詢必須匹配的字，不計算 `_score` (代表對評分沒有任何貢獻，只是用來過濾)
-* `should` - 滿足任一匹配的字，將增加 `_score` ，否則，無任何影響，如果一個 query 中沒有 `must` 和 `filter` 則必須匹配一個或以上的 `should` (與 OR 等價)
-* `must_not` - 查詢排除的字 (與 NOT 等價)
-* `boost` - 權重
-* `minimum_should_match` - 設定 `should` 至少要匹配幾個句子
-
+- `must` - 查詢必須匹配的字，並計算 `_score` (與 AND 等價)
+- `filter` - 查詢必須匹配的字，不計算 `_score` (代表對評分沒有任何貢獻，只是用來過濾)
+- `should` - 滿足任一匹配的字，將增加 `_score` ，否則，無任何影響，如果一個 query 中沒有 `must` 和 `filter` 則必須匹配一個或以上的 `should` (與 OR 等價)
+- `must_not` - 查詢排除的字 (與 NOT 等價)
+- `boost` - 權重
+- `minimum_should_match` - 設定 `should` 至少要匹配幾個句子
 
 ## Example 1:
 
-user 必須是 kimchy，並且過濾出 tag 是 "tech" (匹配多寡並不影響 _score)，age 範圍排除 10 ~ 20，如果 tag 有 `wow` 或是 `elasticsearch` 則 _score 比較高，兩個都有則更高
+user 必須是 kimchy，並且過濾出 tag 是 "tech" (匹配多寡並不影響 \_score)，age 範圍排除 10 ~ 20，如果 tag 有 `wow` 或是 `elasticsearch` 則 \_score 比較高，兩個都有則更高
 
 ```go
 {
@@ -50,12 +49,11 @@ user 必須是 kimchy，並且過濾出 tag 是 "tech" (匹配多寡並不影響
 }
 ```
 
-
 ## Example 2:
 
 > 將 bool 帶入 filter 一樣可以不計算分數
 
-查找 `title` 字段匹配 `how to make millions` 並且不被 `tag` 為 `spam` 的文件。那些被 `tag` 為 `starred` 或在2014之後的文件，將比另外那些文件擁有更高的排名。如果 _兩者_ 都滿足，那麼它排名將更高，並過濾出 `price` 必須小於等於 29.99，且 `category` 不能是 `ebooks` 這兩個條件則不影響排名
+查找 `title` 字段匹配 `how to make millions` 並且不被 `tag` 為 `spam` 的文件。那些被 `tag` 為 `starred` 或在 2014 之後的文件，將比另外那些文件擁有更高的排名。如果 _兩者_ 都滿足，那麼它排名將更高，並過濾出 `price` 必須小於等於 29.99，且 `category` 不能是 `ebooks` 這兩個條件則不影響排名
 
 ```go
 {
@@ -67,7 +65,7 @@ user 必須是 kimchy，並且過濾出 tag 是 "tech" (匹配多寡並不影響
             { "range": { "date": { "gte": "2014-01-01" }}}
         ],
         "filter": {
-          "bool": { 
+          "bool": {
               "must": [
                   { "range": { "price": { "lte": 29.99 }}}
               ],
@@ -88,7 +86,7 @@ user 必須是 kimchy，並且過濾出 tag 是 "tech" (匹配多寡並不影響
 {
     "constant_score":   {
         "filter": {
-            "term": { "category": "ebooks" } 
+            "term": { "category": "ebooks" }
         }
     }
 }
@@ -103,7 +101,7 @@ user 必須是 kimchy，並且過濾出 tag 是 "tech" (匹配多寡並不影響
     "query": {
         "bool": {
             "must": {
-                "match": {  
+                "match": {
                     "content": {
                         "query":    "full text search",
                         "operator": "and"
@@ -114,13 +112,13 @@ user 必須是 kimchy，並且過濾出 tag 是 "tech" (匹配多寡並不影響
                 { "match": {
                     "content": {
                         "query": "Elasticsearch",
-                        "boost": 3 
+                        "boost": 3
                     }
                 }},
                 { "match": {
                     "content": {
                         "query": "Lucene",
-                        "boost": 2 
+                        "boost": 2
                     }
                 }}
             ]
@@ -201,11 +199,10 @@ user 必須是 kimchy，並且過濾出 tag 是 "tech" (匹配多寡並不影響
       { "term": { "title": "fox"   }},
       { "term": { "title": "quick" }}
     ],
-    "minimum_should_match": 2 
+    "minimum_should_match": 2
   }
 }
 ```
-
 
 # Exact Values Search
 
@@ -222,9 +219,9 @@ WHERE  price = 20
 ```go
 {
     "query" : {
-        "constant_score" : { 
+        "constant_score" : {
             "filter" : {
-                "term" : { 
+                "term" : {
                     "price" : 20
                 }
             }
@@ -267,7 +264,7 @@ GET /my_store/products/_search
             "properties" : {
                 "productID" : {
                     "type" : "string",
-                    "index" : "not_analyzed" 
+                    "index" : "not_analyzed"
                 }
             }
         }
@@ -277,6 +274,53 @@ GET /my_store/products/_search
 ```
 
 # Combining Filters
+
+這邊要注意一下，如果 `should`，和 其他的一起合用，就必須加上 `minimum_should_match` 或是要包在同一個 array 裡面，再多一個 `bool`
+不然就不會是我們想要的 `a AND (B OR C)`
+
+```go
+{
+  "filter": [
+      { "term": { "date_on": "2022-05-04" } },
+      { "term": { "name.keyword": "測試" } }
+    ],
+  "should": [
+    { "term": { "company": "公司" } },
+    { "bool": {
+        "filter": [
+          { "range": { "age": { "lt": 0 } } },
+          { "range": { "age": { "lt": 0 } } }
+        ]
+      }
+    }
+  ],
+  "minimum_should_match": 1
+}
+
+{
+  "filter": [
+    { "term": { "date_on": "2022-05-04" } },
+    { "term": { "name.keyword": "測試" } }
+    {
+      "bool": {
+        "should": [
+          { "term": { "company": "公司" } },
+          { "bool": {
+              "filter": [
+                  { "range": { "age": { "gte": 50 } } },
+                  { "range": { "age": { "lte": 20 } } }
+              ]
+            }
+          }
+        ]
+      }
+    }
+  ]
+}
+```
+
+- [es bool 多條件查詢 should 和 must 同時使用](https://blog.csdn.net/JineD/article/details/111997205)
+- [elasticsearch bool 中 should must 聯用問題](https://blog.csdn.net/qq_31748587/article/details/101449613)
 
 Example1
 
@@ -290,15 +334,15 @@ WHERE  (price = 20 OR productID = "XHDK-A-1293-#fJ3")
 ```go
 {
    "query" : {
-      "bool" : { 
+      "bool" : {
          "filter" : {
             "bool" : {
               "should" : [
-                 { "term" : {"price" : 20}}, 
-                 { "term" : {"productID" : "XHDK-A-1293-#fJ3"}} 
+                 { "term" : {"price" : 20}},
+                 { "term" : {"productID" : "XHDK-A-1293-#fJ3"}}
               ],
               "must_not" : {
-                 "term" : {"price" : 30} 
+                 "term" : {"price" : 30}
               }
            }
          }
@@ -324,11 +368,11 @@ WHERE  productID      = "KDKE-B-9947-#kL5"
          "filter" : {
             "bool" : {
               "should" : [
-                { "term" : {"productID" : "KDKE-B-9947-#kL5"}}, 
-                { "bool" : { 
+                { "term" : {"productID" : "KDKE-B-9947-#kL5"}},
+                { "bool" : {
                   "must" : [
-                    { "term" : {"productID" : "JODL-X-1937-#pV7"}}, 
-                    { "term" : {"price" : 30}} 
+                    { "term" : {"productID" : "JODL-X-1937-#pV7"}},
+                    { "term" : {"price" : 30}}
                   ]
                 }}
               ]
@@ -341,8 +385,8 @@ WHERE  productID      = "KDKE-B-9947-#kL5"
 
 Example3
 
-* 在收件箱中，且沒有被讀過的
-* 不在 收件箱中，但被標註重要的
+- 在收件箱中，且沒有被讀過的
+- 不在 收件箱中，但被標註重要的
 
 ```go
 {
@@ -353,13 +397,13 @@ Example3
                  "should": [
                     { "bool": {
                           "must": [
-                             { "term": { "folder": "inbox" }}, 
+                             { "term": { "folder": "inbox" }},
                              { "term": { "read": false }}
                           ]
                     }},
                     { "bool": {
                           "must_not": {
-                             "term": { "folder": "inbox" } 
+                             "term": { "folder": "inbox" }
                           },
                           "must": {
                              "term": { "important": true }
@@ -407,7 +451,6 @@ PUT /my_index/my_type/2
     }
 }
 ```
-
 
 ### dis_max
 
@@ -460,7 +503,7 @@ PUT /my_index/my_type/2
             "make": "ford"
         }
     },
-    "post_filter": {    
+    "post_filter": {
         "term" : {
             "color" : "green"
         }
@@ -475,12 +518,12 @@ PUT /my_index/my_type/2
 
 # Function Score Query
 
-* [透過Function Score Query優化Elasticsearch搜索結果](https://www.scienjus.com/elasticsearch-function-score-query/)
-* [按受歡迎度提升權重](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/boosting-by-popularity.html)
-* [過濾集提升權重](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/function-score-filters.html)
+- [透過 Function Score Query 優化 Elasticsearch 搜索結果](https://www.scienjus.com/elasticsearch-function-score-query/)
+- [按受歡迎度提升權重](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/boosting-by-popularity.html)
+- [過濾集提升權重](https://www.elastic.co/guide/cn/elasticsearch/guide/cn/function-score-filters.html)
 
 # Reference
 
-* [Elasticsearch: 權威指南 \| Elastic](https://www.elastic.co/guide/cn/elasticsearch/guide/current/index.html)
-* [[Elasticsearch] 全文搜索 (三) - match查询和bool查询的关系，提升查询子句 - dm_vincent的专栏 - CSDN博客](https://blog.csdn.net/dm_vincent/article/details/41743955)
-* [Elasticsearch DSL 常用語法介紹](https://cloud.tencent.com/developer/article/1113818)
+- [Elasticsearch: 權威指南 \| Elastic](https://www.elastic.co/guide/cn/elasticsearch/guide/current/index.html)
+- [[Elasticsearch] 全文搜索 (三) - match 查询和 bool 查询的关系，提升查询子句 - dm_vincent 的专栏 - CSDN 博客](https://blog.csdn.net/dm_vincent/article/details/41743955)
+- [Elasticsearch DSL 常用語法介紹](https://cloud.tencent.com/developer/article/1113818)
