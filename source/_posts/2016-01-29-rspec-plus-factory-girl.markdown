@@ -991,6 +991,7 @@ Gem：
 * [rspec_cheatsheet_attributed.pdf](https://www.anchor.com.au/wp-content/uploads/rspec_cheatsheet_attributed.pdf)
 * [rspec-expectations-cheat-sheet](https://www.rubypigeon.com/posts/rspec-expectations-cheat-sheet/)
 * [rspec_rails_cheetsheet.rb](https://gist.github.com/them0nk/2166525)
+* [Day 19 魁儡的 double object](https://ithelp.ithome.com.tw/articles/10276856)
 
 RailsPacific： 
  
